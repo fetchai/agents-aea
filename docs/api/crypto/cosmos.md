@@ -3,6 +3,130 @@
 
 Cosmos module wrapping the public and private key cryptography and ledger api.
 
+<a name="aea.crypto.cosmos.CosmosHelper"></a>
+## CosmosHelper Objects
+
+```python
+class CosmosHelper(Helper)
+```
+
+Helper class usable as Mixin for CosmosApi or as standalone class.
+
+<a name="aea.crypto.cosmos.CosmosHelper.is_transaction_settled"></a>
+#### is`_`transaction`_`settled
+
+```python
+ | @staticmethod
+ | is_transaction_settled(tx_receipt: Any) -> bool
+```
+
+Check whether a transaction is settled or not.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+True if the transaction has been settled, False o/w.
+
+<a name="aea.crypto.cosmos.CosmosHelper.is_transaction_valid"></a>
+#### is`_`transaction`_`valid
+
+```python
+ | @staticmethod
+ | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+```
+
+Check whether a transaction is valid or not.
+
+**Arguments**:
+
+- `tx`: the transaction.
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+- `tx_nonce`: the transaction nonce.
+- `amount`: the amount we expect to get from the transaction.
+
+**Returns**:
+
+True if the random_message is equals to tx['input']
+
+<a name="aea.crypto.cosmos.CosmosHelper.generate_tx_nonce"></a>
+#### generate`_`tx`_`nonce
+
+```python
+ | @staticmethod
+ | generate_tx_nonce(seller: Address, client: Address) -> str
+```
+
+Generate a unique hash to distinguish txs with the same terms.
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+
+**Returns**:
+
+return the hash in hex.
+
+<a name="aea.crypto.cosmos.CosmosHelper.get_address_from_public_key"></a>
+#### get`_`address`_`from`_`public`_`key
+
+```python
+ | @classmethod
+ | get_address_from_public_key(cls, public_key: str) -> str
+```
+
+Get the address from the public key.
+
+**Arguments**:
+
+- `public_key`: the public key
+
+**Returns**:
+
+str
+
+<a name="aea.crypto.cosmos.CosmosHelper.recover_message"></a>
+#### recover`_`message
+
+```python
+ | @classmethod
+ | recover_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+```
+
+Recover the addresses from the hash.
+
+**Arguments**:
+
+- `message`: the message we expect
+- `signature`: the transaction signature
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered addresses
+
+<a name="aea.crypto.cosmos.CosmosHelper.get_hash"></a>
+#### get`_`hash
+
+```python
+ | @staticmethod
+ | get_hash(message: bytes) -> str
+```
+
+Get the hash of a message.
+
+**Arguments**:
+
+- `message`: the message to be hashed.
+
+**Returns**:
+
+the hash of the message.
+
 <a name="aea.crypto.cosmos.CosmosCrypto"></a>
 ## CosmosCrypto Objects
 
@@ -111,7 +235,7 @@ signature of the message in string form
  | format_default_transaction(transaction: Any, signature: str, base64_pbk: str) -> Any
 ```
 
-Format default CosmosSDK transaction and add signature
+Format default CosmosSDK transaction and add signature.
 
 **Arguments**:
 
@@ -131,7 +255,7 @@ formatted transaction with signature
  | format_wasm_transaction(transaction: Any, signature: str, base64_pbk: str) -> Any
 ```
 
-Format CosmWasm transaction and add signature
+Format CosmWasm transaction and add signature.
 
 **Arguments**:
 
@@ -187,149 +311,25 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
-<a name="aea.crypto.cosmos.CosmosHelper"></a>
-## CosmosHelper Objects
+<a name="aea.crypto.cosmos._CosmosApi"></a>
+## `_`CosmosApi Objects
 
 ```python
-class CosmosHelper(Helper)
-```
-
-Helper class usable as Mixin for CosmosApi or as standalone class.
-
-<a name="aea.crypto.cosmos.CosmosHelper.is_transaction_settled"></a>
-#### is`_`transaction`_`settled
-
-```python
- | @staticmethod
- | is_transaction_settled(tx_receipt: Any) -> bool
-```
-
-Check whether a transaction is settled or not.
-
-**Arguments**:
-
-- `tx_digest`: the digest associated to the transaction.
-
-**Returns**:
-
-True if the transaction has been settled, False o/w.
-
-<a name="aea.crypto.cosmos.CosmosHelper.is_transaction_valid"></a>
-#### is`_`transaction`_`valid
-
-```python
- | @staticmethod
- | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
-```
-
-Check whether a transaction is valid or not.
-
-**Arguments**:
-
-- `tx`: the transaction.
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-- `tx_nonce`: the transaction nonce.
-- `amount`: the amount we expect to get from the transaction.
-
-**Returns**:
-
-True if the random_message is equals to tx['input']
-
-<a name="aea.crypto.cosmos.CosmosHelper.generate_tx_nonce"></a>
-#### generate`_`tx`_`nonce
-
-```python
- | @staticmethod
- | generate_tx_nonce(seller: Address, client: Address) -> str
-```
-
-Generate a unique hash to distinguish txs with the same terms.
-
-**Arguments**:
-
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-
-**Returns**:
-
-return the hash in hex.
-
-<a name="aea.crypto.cosmos.CosmosHelper.get_address_from_public_key"></a>
-#### get`_`address`_`from`_`public`_`key
-
-```python
- | @staticmethod
- | get_address_from_public_key(public_key: str) -> str
-```
-
-Get the address from the public key.
-
-**Arguments**:
-
-- `public_key`: the public key
-
-**Returns**:
-
-str
-
-<a name="aea.crypto.cosmos.CosmosHelper.recover_message"></a>
-#### recover`_`message
-
-```python
- | @staticmethod
- | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
-```
-
-Recover the addresses from the hash.
-
-**Arguments**:
-
-- `message`: the message we expect
-- `signature`: the transaction signature
-- `is_deprecated_mode`: if the deprecated signing was used
-
-**Returns**:
-
-the recovered addresses
-
-<a name="aea.crypto.cosmos.CosmosHelper.get_hash"></a>
-#### get`_`hash
-
-```python
- | @staticmethod
- | get_hash(message: bytes) -> str
-```
-
-Get the hash of a message.
-
-**Arguments**:
-
-- `message`: the message to be hashed.
-
-**Returns**:
-
-the hash of the message.
-
-<a name="aea.crypto.cosmos.CosmosApi"></a>
-## CosmosApi Objects
-
-```python
-class CosmosApi(LedgerApi,  CosmosHelper)
+class _CosmosApi(LedgerApi)
 ```
 
 Class to interact with the Cosmos SDK via a HTTP APIs.
 
-<a name="aea.crypto.cosmos.CosmosApi.__init__"></a>
+<a name="aea.crypto.cosmos._CosmosApi.__init__"></a>
 #### `__`init`__`
 
 ```python
  | __init__(**kwargs)
 ```
 
-Initialize the Ethereum ledger APIs.
+Initialize the Cosmos ledger APIs.
 
-<a name="aea.crypto.cosmos.CosmosApi.api"></a>
+<a name="aea.crypto.cosmos._CosmosApi.api"></a>
 #### api
 
 ```python
@@ -339,7 +339,7 @@ Initialize the Ethereum ledger APIs.
 
 Get the underlying API object.
 
-<a name="aea.crypto.cosmos.CosmosApi.get_balance"></a>
+<a name="aea.crypto.cosmos._CosmosApi.get_balance"></a>
 #### get`_`balance
 
 ```python
@@ -348,7 +348,7 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
-<a name="aea.crypto.cosmos.CosmosApi.get_deploy_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.get_deploy_transaction"></a>
 #### get`_`deploy`_`transaction
 
 ```python
@@ -369,7 +369,7 @@ Create a CosmWasm bytecode deployment transaction.
 
 the unsigned CosmWasm contract deploy message
 
-<a name="aea.crypto.cosmos.CosmosApi.get_init_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.get_init_transaction"></a>
 #### get`_`init`_`transaction
 
 ```python
@@ -394,7 +394,7 @@ Create a CosmWasm InitMsg transaction.
 
 the unsigned CosmWasm InitMsg
 
-<a name="aea.crypto.cosmos.CosmosApi.get_handle_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.get_handle_transaction"></a>
 #### get`_`handle`_`transaction
 
 ```python
@@ -416,7 +416,7 @@ Create a CosmWasm HandleMsg transaction.
 
 the unsigned CosmWasm HandleMsg
 
-<a name="aea.crypto.cosmos.CosmosApi.try_execute_wasm_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.try_execute_wasm_transaction"></a>
 #### try`_`execute`_`wasm`_`transaction
 
 ```python
@@ -438,7 +438,7 @@ Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
 
 the transaction digest
 
-<a name="aea.crypto.cosmos.CosmosApi.try_execute_wasm_query"></a>
+<a name="aea.crypto.cosmos._CosmosApi.try_execute_wasm_query"></a>
 #### try`_`execute`_`wasm`_`query
 
 ```python
@@ -461,7 +461,7 @@ Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
 
 the message receipt
 
-<a name="aea.crypto.cosmos.CosmosApi.get_transfer_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
@@ -486,7 +486,7 @@ Submit a transfer transaction to the ledger.
 
 the transfer transaction
 
-<a name="aea.crypto.cosmos.CosmosApi.send_signed_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
@@ -503,7 +503,7 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a name="aea.crypto.cosmos.CosmosApi.is_cosmwasm_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.is_cosmwasm_transaction"></a>
 #### is`_`cosmwasm`_`transaction
 
 ```python
@@ -513,7 +513,7 @@ tx_digest, if present
 
 Check whether it is a cosmwasm tx.
 
-<a name="aea.crypto.cosmos.CosmosApi.is_transfer_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.is_transfer_transaction"></a>
 #### is`_`transfer`_`transaction
 
 ```python
@@ -523,7 +523,7 @@ Check whether it is a cosmwasm tx.
 
 Check whether it is a transfer tx.
 
-<a name="aea.crypto.cosmos.CosmosApi.get_transaction_receipt"></a>
+<a name="aea.crypto.cosmos._CosmosApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
 ```python
@@ -540,7 +540,7 @@ Get the transaction receipt for a transaction digest.
 
 the tx receipt, if present
 
-<a name="aea.crypto.cosmos.CosmosApi.get_transaction"></a>
+<a name="aea.crypto.cosmos._CosmosApi.get_transaction"></a>
 #### get`_`transaction
 
 ```python
@@ -557,7 +557,7 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a name="aea.crypto.cosmos.CosmosApi.get_contract_instance"></a>
+<a name="aea.crypto.cosmos._CosmosApi.get_contract_instance"></a>
 #### get`_`contract`_`instance
 
 ```python
@@ -574,6 +574,45 @@ Get the instance of a contract.
 **Returns**:
 
 the contract instance
+
+<a name="aea.crypto.cosmos._CosmosApi.get_last_code_id"></a>
+#### get`_`last`_`code`_`id
+
+```python
+ | get_last_code_id() -> int
+```
+
+Get ID of latest deployed .wasm bytecode.
+
+**Returns**:
+
+code id of last deployed .wasm bytecode
+
+<a name="aea.crypto.cosmos._CosmosApi.get_contract_address"></a>
+#### get`_`contract`_`address
+
+```python
+ | get_contract_address(code_id: int) -> str
+```
+
+Get contract address of latest initialised contract by its ID.
+
+**Arguments**:
+
+- `code_id`: id of deployed CosmWasm bytecode
+
+**Returns**:
+
+contract address of last initialised contract
+
+<a name="aea.crypto.cosmos.CosmosApi"></a>
+## CosmosApi Objects
+
+```python
+class CosmosApi(_CosmosApi,  CosmosHelper)
+```
+
+Class to interact with the Cosmos SDK via a HTTP APIs.
 
 <a name="aea.crypto.cosmos.CosmWasmCLIWrapper"></a>
 ## CosmWasmCLIWrapper Objects
@@ -593,6 +632,15 @@ class CosmosFaucetApi(FaucetApi)
 
 Cosmos testnet faucet API.
 
+<a name="aea.crypto.cosmos.CosmosFaucetApi.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(poll_interval=None)
+```
+
+Initialize CosmosFaucetApi.
+
 <a name="aea.crypto.cosmos.CosmosFaucetApi.get_wealth"></a>
 #### get`_`wealth
 
@@ -609,4 +657,5 @@ Get wealth from the faucet for the provided address.
 **Returns**:
 
 None
+:raises: RuntimeError of explicit faucet failures
 

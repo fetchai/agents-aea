@@ -29,10 +29,13 @@ from pathlib import Path
 
 DOCS_DIR = "docs/"
 MODULES_TO_PATH = {
+    "aea.abstract_agent": "api/abstract_agent.md",
     "aea.aea": "api/aea.md",
     "aea.aea_builder": "api/aea_builder.md",
     "aea.agent": "api/agent.md",
     "aea.agent_loop": "api/agent_loop.md",
+    "aea.common": "api/common.md",
+    "aea.exceptions": "api/exceptions.md",
     "aea.launcher": "api/launcher.md",
     "aea.multiplexer": "api/multiplexer.md",
     "aea.runner": "api/runner.md",
@@ -42,6 +45,7 @@ MODULES_TO_PATH = {
     "aea.configurations.base": "api/configurations/base.md",
     "aea.configurations.constants": "api/configurations/constants.md",
     "aea.configurations.loader": "api/configurations/loader.md",
+    "aea.configurations.pypi": "api/configurations/pypi.md",
     "aea.connections.base": "api/connections/base.md",
     "aea.connections.stub.connection": "api/connections/stub/connection.md",
     "aea.context.base": "api/context/base.md",
@@ -57,6 +61,7 @@ MODULES_TO_PATH = {
     "aea.decision_maker.base": "api/decision_maker/base.md",
     "aea.decision_maker.default": "api/decision_maker/default.md",
     "aea.helpers.ipfs.base": "api/helpers/ipfs/base.md",
+    "aea.helpers.multiaddr.base": "api/helpers/multiaddr/base.md",
     "aea.helpers.preference_representations.base": "api/helpers/preference_representations/base.md",
     "aea.helpers.search.generic": "api/helpers/search/generic.md",
     "aea.helpers.search.models": "api/helpers/search/models.md",
@@ -70,7 +75,6 @@ MODULES_TO_PATH = {
     "aea.helpers.logging": "api/helpers/logging.md",
     "aea.helpers.multiple_executor": "api/helpers/multiple_executor.md",
     "aea.helpers.pipe": "api/helpers/pipe.md",
-    "aea.helpers.pypi": "api/helpers/pypi.md",
     "aea.helpers.win32": "api/helpers/win32.md",
     "aea.identity.base": "api/identity/base.md",
     "aea.mail.base": "api/mail/base.md",

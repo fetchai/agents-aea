@@ -25,10 +25,10 @@ from aea.crypto.cosmos import CosmosCrypto, CosmosFaucetApi, CosmosHelper, _Cosm
 _FETCHAI = "fetchai"
 _FETCH = "fetch"
 TESTNET_NAME = "testnet"
-FETCHAI_TESTNET_FAUCET_URL = "https://faucet-agent-land.sandbox.fetch-ai.com"
-DEFAULT_ADDRESS = "https://rest-agent-land.sandbox.fetch-ai.com"
+FETCHAI_TESTNET_FAUCET_URL = "https://faucet-agent-land.fetch.ai"
+DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
 DEFAULT_CURRENCY_DENOM = "atestfet"
-DEFAULT_CHAIN_ID = "sandbox-agent-land"
+DEFAULT_CHAIN_ID = "agent-land"
 
 
 class FetchAIHelper(CosmosHelper):

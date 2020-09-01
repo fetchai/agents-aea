@@ -53,9 +53,6 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_ADDRESS_ONE,
-    COSMOS_TESTNET_CONFIG,
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_PRIVATE_KEY_PATH,
@@ -73,7 +70,6 @@ ledger_ids = pytest.mark.parametrize(
     [
         (FETCHAI, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
         (ETHEREUM, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
-        (COSMOS, COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
     ],
 )
 

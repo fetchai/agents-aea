@@ -47,10 +47,10 @@ logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
 TESTNET_NAME = "testnet"
-DEFAULT_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com"
-DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
-DEFAULT_CURRENCY_DENOM = "atestfet"
-DEFAULT_CHAIN_ID = "agent-land"
+DEFAULT_FAUCET_URL = "INVALID_URL"
+DEFAULT_ADDRESS = "INVALID_URL"
+DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
+DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
 
 
 class CosmosHelper(Helper):
