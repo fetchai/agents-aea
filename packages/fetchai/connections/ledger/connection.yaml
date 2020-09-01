@@ -25,7 +25,7 @@ config:
       address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
       gas_price: 50
     fetchai:
-      network: testnet
+      address: https://rest-agent-land.sandbox.fetch-ai.com:443
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:0.3.0

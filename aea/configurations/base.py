@@ -1783,7 +1783,7 @@ class ContractConfig(ComponentConfiguration):
                 with open(full_path, "r") as interface_file_ethereum:
                     contract_interface = json.load(interface_file_ethereum)
                     contract_interfaces[identifier] = contract_interface
-            elif identifier == "cosmos":
+            elif identifier == "cosmos" or identifier == "fetchai":
                 with open(full_path, "rb") as interface_file_cosmos:
                     contract_interface = {
                         "wasm_byte_code": str(

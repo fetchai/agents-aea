@@ -32,12 +32,12 @@ from aea.crypto.registries import (
 )
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_TESTNET_CONFIG,
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
     ETHEREUM_TESTNET_CONFIG,
+    FETCHAI,
+    FETCHAI_TESTNET_CONFIG,
 )
 
 ledger = [
@@ -249,10 +249,10 @@ class TestCosmWasmContract:
     """Test the cosmwasm contract."""
 
     def setup(self):
-        self.ledger_api = ledger_apis_registry.make(COSMOS, **COSMOS_TESTNET_CONFIG)
-        self.faucet_api = faucet_apis_registry.make(COSMOS)
-        self.deployer_crypto = crypto_registry.make(COSMOS)
-        self.item_owner_crypto = crypto_registry.make(COSMOS)
+        self.ledger_api = ledger_apis_registry.make(FETCHAI, **FETCHAI_TESTNET_CONFIG)
+        self.faucet_api = faucet_apis_registry.make(FETCHAI)
+        self.deployer_crypto = crypto_registry.make(FETCHAI)
+        self.item_owner_crypto = crypto_registry.make(FETCHAI)
 
         # Test tokens IDs
         self.token_ids_a = [

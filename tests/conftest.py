@@ -63,8 +63,11 @@ from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.contracts.base import Contract, contract_registry
+from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import _COSMOS
+from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.ethereum import _ETHEREUM
+from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.fetchai import _FETCHAI
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.registries import make_crypto
@@ -188,12 +191,12 @@ PUBLIC_DHT_DELEGATE_URI_1 = "agents-p2p-dht.sandbox.fetch-ai.com:11000"
 PUBLIC_DHT_DELEGATE_URI_2 = "agents-p2p-dht.sandbox.fetch-ai.com:11001"
 
 # testnets
-COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
+COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
 ETHEREUM_TESTNET_CONFIG = {
-    "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
+    "address": ETHEREUM_DEFAULT_ADDRESS,
     "gas_price": 50,
 }
-FETCHAI_TESTNET_CONFIG = {"address": "https://rest-agent-land.sandbox.fetch-ai.com:443"}
+FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")

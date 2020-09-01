@@ -31,6 +31,7 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
 from aea.crypto.ethereum import EthereumApi
+from aea.crypto.fetchai import FetchAIApi
 
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
@@ -105,7 +106,7 @@ class ERC1155Contract(Contract):
             )
             tx = cls._try_estimate_gas(ledger_api, tx)
             return tx
-        if ledger_api.identifier == CosmosApi.identifier:
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             tokens = []
             for token_id in token_ids:
                 tokens.append({"id": str(token_id), "path": str(token_id)})
@@ -154,7 +155,7 @@ class ERC1155Contract(Contract):
             )
             tx = cls._try_estimate_gas(ledger_api, tx)
             return tx
-        if ledger_api.identifier == CosmosApi.identifier:
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             msg = {
                 "create_single": {
                     "item_owner": deployer_address,
@@ -209,7 +210,7 @@ class ERC1155Contract(Contract):
             )
             tx = cls._try_estimate_gas(ledger_api, tx)
             return tx
-        if ledger_api.identifier == CosmosApi.identifier:
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             tokens = []
             for token_id, quantity in zip(token_ids, mint_quantities):
                 tokens.append({"id": str(token_id), "value": str(quantity)})
@@ -302,7 +303,7 @@ class ERC1155Contract(Contract):
             )
             tx = cls._try_estimate_gas(ledger_api, tx)
             return tx
-        if ledger_api.identifier == CosmosApi.identifier:
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             msg = {
                 "mint_single": {
                     "to_address": recipient_address,
@@ -340,7 +341,7 @@ class ERC1155Contract(Contract):
             balance = instance.functions.balanceOf(agent_address, token_id).call()
             result = {token_id: balance}
             return {"balance": result}
-        if ledger_api.identifier == CosmosApi.identifier:
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             cosmos_api = cast(CosmosApi, ledger_api)
             msg = {"balance": {"address": str(agent_address), "id": str(token_id)}}
             query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
@@ -434,7 +435,7 @@ class ERC1155Contract(Contract):
             ).call()
             result = dict(zip(token_ids, balances))
             return {"balances": result}
-        if ledger_api.identifier == CosmosApi.identifier:
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             tokens = []
             for token_id in token_ids:
                 tokens.append({"address": agent_address, "id": str(token_id)})

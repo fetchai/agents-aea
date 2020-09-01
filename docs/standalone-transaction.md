@@ -70,7 +70,9 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
         tx_fee=1,
         tx_nonce=tx_nonce,
     )
-    signed_transaction = wallet_1.sign_transaction(FetchAICrypto.identifier, transaction)
+    signed_transaction = wallet_1.sign_transaction(
+        FetchAICrypto.identifier, transaction
+    )
     transaction_digest = LedgerApis.send_signed_transaction(
         FetchAICrypto.identifier, signed_transaction
     )
@@ -133,7 +135,9 @@ def run():
         tx_fee=1,
         tx_nonce=tx_nonce,
     )
-    signed_transaction = wallet_1.sign_transaction(FetchAICrypto.identifier, transaction)
+    signed_transaction = wallet_1.sign_transaction(
+        FetchAICrypto.identifier, transaction
+    )
     transaction_digest = LedgerApis.send_signed_transaction(
         FetchAICrypto.identifier, signed_transaction
     )
