@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.Default;
+package fetchai.aea.fetchai.default;
 
 message DefaultMessage{
 
