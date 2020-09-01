@@ -29,7 +29,7 @@ protocols:
 skills:
 - fetchai/error:0.5.0
 default_connection: fetchai/stub:0.9.0
-default_ledger: cosmos
+default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1

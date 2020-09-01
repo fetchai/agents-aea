@@ -1351,7 +1351,7 @@ models:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -2814,7 +2814,7 @@ models:
     args:
       currency_id: FET
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -2865,9 +2865,9 @@ and replace it with your IP (the IP of the machine that runs the <a href="../oef
 Create the private key for each AEA:
 
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Update the AEA configs
@@ -2884,7 +2884,7 @@ default_routing:
 Create some wealth for your buyer on the Fetch.ai testnet. (It takes a while).
 
 ``` bash
-aea generate-wealth cosmos --sync
+aea generate-wealth fetchai --sync
 ```
 
 ### Run seller AEA

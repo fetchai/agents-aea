@@ -151,7 +151,8 @@ class TestGetMultiAddressCommandNegativeMissingKey(AEATestCaseEmpty):
         """Run the test."""
         # this will cause exception because no key is added to the AEA project.
         with pytest.raises(
-            Exception, match="Cannot find 'cosmos'. Please check private_key_path."
+            Exception,
+            match="Cannot find '{}'. Please check private_key_path.".format(FETCHAI),
         ):
             self.run_cli_command(
                 "get-multiaddress", FETCHAI, cwd=self.current_agent_context
