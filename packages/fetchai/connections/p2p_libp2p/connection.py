@@ -340,7 +340,7 @@ class Libp2pNode:
                             self.log_file, f.read()
                         )
                     )
-            else:
+            else:  # pragma: nocover
                 self.logger.error(
                     "Please check log file {} for more details.".format(self.log_file)
                 )
@@ -419,7 +419,7 @@ class Libp2pNode:
         with open(self.log_file, "r") as f:
             lines = f.readlines()
 
-        for line in lines:
+        for line in lines:  # pragma: nocover
             if CRITICAL_ERROR in line:
                 parts = line.split(":", 1)
                 error_msg = parts[1].strip()
