@@ -29,12 +29,12 @@ import pytest
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     CUR_PATH,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     ROOT_DIR,
     wait_for_localhost_ports_to_close,
 )
@@ -72,14 +72,14 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         self.run_install()
 
         # add non-funded key
-        self.generate_private_key(COSMOS)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.generate_private_key(FETCHAI)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         # generate random location
         location = {

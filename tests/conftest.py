@@ -124,6 +124,7 @@ ETHEREUM = _ETHEREUM
 FETCHAI = _FETCHAI
 
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
+FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
 
 COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
 ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
@@ -152,6 +153,9 @@ FUNDED_ETH_PRIVATE_KEY_3 = (
 NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
     "81b0352f99a08a754b56e529dda965c4ce974edb6db7e90035e01ed193e1b7bc"
 )
+NON_FUNDED_FETCHAI_PRIVATE_KEY_1 = (
+    "b6ef49c3078f300efe2d4480e179362bd39f20cbb2087e970c8f345473661aa5"
+)
 
 # addresses with no value on testnet
 COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
@@ -163,6 +167,7 @@ FETCHAI_ADDRESS_TWO = "fetch19j4dc3e6fgle98pj06l5ehhj6zdejcddx7teac"
 
 # P2P addresses
 COSMOS_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"  # relates to NON_FUNDED_COSMOS_PRIVATE_KEY_1
+FETCHAI_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLBCAqHL8SuFosyDhAKYsLKXBZBWXBsB9oFw2qU4Kckun"  # relates to NON_FUNDED_FETCHAI_PRIVATE_KEY_1
 NON_GENESIS_CONFIG = {
     "delegate_uri": "127.0.0.1:11001",
     "entry_peers": [COSMOS_P2P_ADDRESS],
@@ -203,9 +208,9 @@ DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 
-MAX_FLAKY_RERUNS = 3
-MAX_FLAKY_RERUNS_ETH = 1
-MAX_FLAKY_RERUNS_INTEGRATION = 1
+MAX_FLAKY_RERUNS = 0  # 3
+MAX_FLAKY_RERUNS_ETH = 0  # 1
+MAX_FLAKY_RERUNS_INTEGRATION = 0  # 1
 
 FETCHAI_PREF = os.path.join(ROOT_DIR, "packages", "fetchai")
 PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")

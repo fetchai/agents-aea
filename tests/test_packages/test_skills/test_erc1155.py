@@ -26,10 +26,11 @@ from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
     COSMOS,
-    COSMOS_PRIVATE_KEY_FILE,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_FILE,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS_ETH,
@@ -89,9 +90,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(COSMOS)
+        self.generate_private_key(FETCHAI)
         self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
@@ -100,6 +101,8 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         )
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+        self.force_set_config(setting_path, COSMOS)
         self.run_install()
 
         # replace location
@@ -131,9 +134,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(COSMOS)
+        self.generate_private_key(FETCHAI)
         self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
@@ -141,6 +144,8 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+        self.force_set_config(setting_path, COSMOS)
         self.run_install()
 
         # replace location

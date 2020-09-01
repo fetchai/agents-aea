@@ -57,7 +57,7 @@ models:
   strategy:
     args:
       is_contract_tx: false
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

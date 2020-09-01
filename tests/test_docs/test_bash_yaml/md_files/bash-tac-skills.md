@@ -12,7 +12,7 @@ aea add connection fetchai/ledger:0.4.0
 aea add skill fetchai/tac_control:0.6.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_ledger cosmos
+aea config set agent.default_ledger fetchai
 ```
 ``` bash
 aea fetch fetchai/tac_participant:0.9.0 --alias tac_participant_one
@@ -33,7 +33,7 @@ aea add skill fetchai/tac_participation:0.7.0
 aea add skill fetchai/tac_negotiation:0.8.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_ledger cosmos
+aea config set agent.default_ledger fetchai
 ```
 ``` bash
 cd tac_participant_two
@@ -44,12 +44,12 @@ aea add skill fetchai/tac_participation:0.7.0
 aea add skill fetchai/tac_negotiation:0.8.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_ledger cosmos
+aea config set agent.default_ledger fetchai
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
 aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
