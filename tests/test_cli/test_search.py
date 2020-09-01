@@ -97,7 +97,9 @@ class TestSearchContractsLocal(TestCase):
         )
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
-    @mock.patch("aea.cli.search.request_api", return_value=["item1"])
+    @mock.patch("aea.cli.search.request_api", return_value={
+        "results": ["item1"], "count": 1
+    })
     def test_search_contracts_registry_positive(self, *mocks):
         """Test search contracts in registry command positive result."""
         result = self.runner.invoke(
@@ -247,7 +249,9 @@ class TestSearchAgentsLocal:
             pass
 
 
-@mock.patch("aea.cli.search.request_api", return_value=["correct", "results"])
+@mock.patch("aea.cli.search.request_api", return_value={
+    "results": ["correct", "results"], "count": 2
+})
 @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
 class RegistrySearchTestCase(TestCase):
     """Test case for search --registry CLI command."""

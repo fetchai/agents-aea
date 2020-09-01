@@ -121,7 +121,7 @@ def get_registered_items(item_type: str):
     ctx = Context(cwd=app_context.agents_dir)
     try:
         cli_setup_search_ctx(ctx, local=app_context.local)
-        result = cli_search_items(ctx, item_type, query="")
+        result, count = cli_search_items(ctx, item_type, query="")
     except ClickException:
         return {"detail": "Failed to search items."}, 400  # 400 Bad request
     else:
@@ -135,7 +135,7 @@ def search_registered_items(item_type: str, search_term: str):
     ctx = Context(cwd=app_context.agents_dir)
     try:
         cli_setup_search_ctx(ctx, local=app_context.local)
-        result = cli_search_items(ctx, item_type, query=search_term)
+        result, count = cli_search_items(ctx, item_type, query=search_term)
     except ClickException:
         return {"detail": "Failed to search items."}, 400  # 400 Bad request
     else:
