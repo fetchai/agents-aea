@@ -55,8 +55,8 @@ def read_envelope_from_file(file_path: str):
     with open(Path(file_path), "rb+") as f:
         lines.extend(f.readlines())
 
-    enforce(len(lines) == 2, "Did not find two lines.")
-    line = lines[0] + lines[1]
+    enforce(len(lines) == 3, "Did not find three lines.")
+    line = lines[0] + lines[1] + lines[2]
     to_b, sender_b, protocol_id_b, message, end = line.strip().split(b",", maxsplit=4)
     to = to_b.decode("utf-8")
     sender = sender_b.decode("utf-8")

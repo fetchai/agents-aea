@@ -248,8 +248,8 @@ class TestStubConnectionSending:
         with open(self.output_file_path, "rb+") as f:
             lines = f.readlines()
 
-        assert len(lines) == 2
-        line = lines[0] + lines[1]
+        assert len(lines) == 3
+        line = lines[0] + lines[1] + lines[2]
         to, sender, protocol_id, message, end = line.strip().split(
             "{}".format(SEPARATOR).encode("utf-8"), maxsplit=4
         )
