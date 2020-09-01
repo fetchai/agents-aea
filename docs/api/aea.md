@@ -16,7 +16,7 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, decision_maker_handler_class: Type[
+ | __init__(identity: Identity, wallet: Wallet, resources: Resources, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, decision_maker_handler_class: Type[
  |             DecisionMakerHandler
  |         ] = DefaultDecisionMakerHandler, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = "fetchai/soef:*", **kwargs, ,) -> None
 ```
@@ -29,7 +29,7 @@ Instantiate the agent.
 - `wallet`: the wallet of the agent.
 - `resources`: the resources (protocols and skills) of the agent.
 - `loop`: the event loop to run the connections.
-- `timeout`: the time in (fractions of) seconds to time out an agent between act and react
+- `period`: period to call agent's act
 - `exeution_timeout`: amount of time to limit single act/handle to execute.
 - `max_reactions`: the processing rate of envelopes per tick (i.e. single loop).
 - `decision_maker_handler_class`: the class implementing the decision maker handler to be used.
@@ -45,16 +45,6 @@ Instantiate the agent.
 **Returns**:
 
 None
-
-<a name="aea.aea.AEA.decision_maker"></a>
-#### decision`_`maker
-
-```python
- | @property
- | decision_maker() -> DecisionMaker
-```
-
-Get decision maker.
 
 <a name="aea.aea.AEA.context"></a>
 #### context
@@ -85,25 +75,6 @@ Get resources.
 ```
 
 Set resources.
-
-<a name="aea.aea.AEA.task_manager"></a>
-#### task`_`manager
-
-```python
- | @property
- | task_manager() -> TaskManager
-```
-
-Get the task manager.
-
-<a name="aea.aea.AEA.setup_multiplexer"></a>
-#### setup`_`multiplexer
-
-```python
- | setup_multiplexer() -> None
-```
-
-Set up the multiplexer.
 
 <a name="aea.aea.AEA.filter"></a>
 #### filter
@@ -137,8 +108,6 @@ Set up the agent.
 Performs the following:
 
 - loads the resources (unless in programmatic mode)
-- starts the task manager
-- starts the decision maker
 - calls setup() on the resources
 
 **Returns**:
@@ -160,17 +129,37 @@ Calls act() of each active behaviour.
 
 None
 
-<a name="aea.aea.AEA.react"></a>
-#### react
+<a name="aea.aea.AEA.active_connections"></a>
+#### active`_`connections
 
 ```python
- | react() -> None
+ | @property
+ | active_connections() -> List[Connection]
 ```
 
-React to incoming envelopes.
+Return list of active connections.
 
-Gets up to max_reactions number of envelopes from the inbox and
-handles each envelope, which entailes:
+<a name="aea.aea.AEA.get_multiplexer_setup_options"></a>
+#### get`_`multiplexer`_`setup`_`options
+
+```python
+ | get_multiplexer_setup_options() -> Optional[Dict]
+```
+
+Get options to pass to Multiplexer.setup.
+
+**Returns**:
+
+dict of kwargs
+
+<a name="aea.aea.AEA.handle_envelope"></a>
+#### handle`_`envelope
+
+```python
+ | handle_envelope(envelope: Envelope) -> None
+```
+
+Handle an envelope.
 
 - fetching the protocol referenced by the envelope, and
 - returning an envelope to sender if the protocol is unsupported, using the error handler, or
@@ -178,22 +167,57 @@ handles each envelope, which entailes:
 - returning an envelope to sender if no active handler is available for the specified protocol, using the error handler, or
 - handling the message recovered from the envelope with all active handlers for the specified protocol.
 
+**Arguments**:
+
+- `envelope`: the envelope to handle.
+
 **Returns**:
 
 None
 
-<a name="aea.aea.AEA.update"></a>
-#### update
+<a name="aea.aea.AEA.get_periodic_tasks"></a>
+#### get`_`periodic`_`tasks
 
 ```python
- | update() -> None
+ | get_periodic_tasks() -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
 ```
 
-Update the current state of the agent.
+Get all periodic tasks for agent.
 
-Handles the internal messages from the skills to the decision maker.
+**Returns**:
 
-:return None
+dict of callable with period specified
+
+<a name="aea.aea.AEA.get_message_handlers"></a>
+#### get`_`message`_`handlers
+
+```python
+ | get_message_handlers() -> List[Tuple[Callable[[Any], None], Callable]]
+```
+
+Get handlers with message getters.
+
+**Returns**:
+
+List of tuples of callables: handler and coroutine to get a message
+
+<a name="aea.aea.AEA.exception_handler"></a>
+#### exception`_`handler
+
+```python
+ | exception_handler(exception: Exception, function: Callable) -> bool
+```
+
+Handle exception raised during agent main loop execution.
+
+**Arguments**:
+
+- `exception`: exception raised
+- `function`: a callable exception raised in.
+
+**Returns**:
+
+bool, propagate exception if True otherwise skip it.
 
 <a name="aea.aea.AEA.teardown"></a>
 #### teardown
@@ -206,11 +230,42 @@ Tear down the agent.
 
 Performs the following:
 
-- stops the decision maker
-- stops the task manager
 - tears down the resources.
 
 **Returns**:
 
 None
+
+<a name="aea.aea.AEA.get_task_result"></a>
+#### get`_`task`_`result
+
+```python
+ | get_task_result(task_id: int) -> AsyncResult
+```
+
+Get the result from a task.
+
+**Returns**:
+
+async result for task_id
+
+<a name="aea.aea.AEA.enqueue_task"></a>
+#### enqueue`_`task
+
+```python
+ | enqueue_task(func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None) -> int
+```
+
+Enqueue a task with the task manager.
+
+**Arguments**:
+
+- `func`: the callable instance to be enqueued
+- `args`: the positional arguments to be passed to the function.
+- `kwds`: the keyword arguments to be passed to the function.
+:return the task id to get the the result.
+
+**Raises**:
+
+- `ValueError`: if the task manager is not running.
 

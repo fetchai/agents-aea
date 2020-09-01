@@ -95,6 +95,23 @@ Load an agent configuration file.
 the configuration object.
 :raises
 
+<a name="aea.configurations.loader.ConfigLoader.validate"></a>
+#### validate
+
+```python
+ | validate(json_data: Dict) -> None
+```
+
+Validate a JSON object.
+
+**Arguments**:
+
+- `json_data`: the JSON data.
+
+**Returns**:
+
+None.
+
 <a name="aea.configurations.loader.ConfigLoader.load"></a>
 #### load
 
@@ -102,7 +119,7 @@ the configuration object.
  | load(file_pointer: TextIO) -> T
 ```
 
-Load an agent configuration file.
+Load a configuration file.
 
 **Arguments**:
 
@@ -111,7 +128,6 @@ Load an agent configuration file.
 **Returns**:
 
 the configuration object.
-:raises
 
 <a name="aea.configurations.loader.ConfigLoader.dump"></a>
 #### dump
@@ -163,4 +179,23 @@ Get a config loader from the configuration type.
 **Arguments**:
 
 - `configuration_type`: the configuration type
+
+<a name="aea.configurations.loader.load_component_configuration"></a>
+#### load`_`component`_`configuration
+
+```python
+load_component_configuration(component_type: ComponentType, directory: Path, skip_consistency_check: bool = False) -> "ComponentConfiguration"
+```
+
+Load configuration and check that it is consistent against the directory.
+
+**Arguments**:
+
+- `component_type`: the component type.
+- `directory`: the root of the package
+- `skip_consistency_check`: if True, the consistency check are skipped.
+
+**Returns**:
+
+the configuration object.
 

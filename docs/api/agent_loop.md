@@ -16,13 +16,23 @@ Base abstract  agent loop class.
 #### `__`init`__`
 
 ```python
- | __init__(agent: "Agent", loop: Optional[AbstractEventLoop] = None) -> None
+ | __init__(agent: AbstractAgent, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Init loop.
 
 :params agent: Agent or AEA to run.
 :params loop: optional asyncio event loop. if not specified a new loop will be created.
+
+<a name="aea.agent_loop.BaseAgentLoop.agent"></a>
+#### agent
+
+```python
+ | @property
+ | agent() -> AbstractAgent
+```
+
+Get agent.
 
 <a name="aea.agent_loop.BaseAgentLoop.set_loop"></a>
 #### set`_`loop
@@ -41,6 +51,24 @@ Set event loop and all event loopp related objects.
 ```
 
 Start agent loop synchronously in own asyncio loop.
+
+<a name="aea.agent_loop.BaseAgentLoop.setup"></a>
+#### setup
+
+```python
+ | setup() -> None
+```
+
+Set up loop before started.
+
+<a name="aea.agent_loop.BaseAgentLoop.teardown"></a>
+#### teardown
+
+```python
+ | teardown()
+```
+
+Tear down loop on stop.
 
 <a name="aea.agent_loop.BaseAgentLoop.run_loop"></a>
 #### run`_`loop
@@ -110,30 +138,7 @@ Asyncio based agent loop suitable only for AEA.
 #### `__`init`__`
 
 ```python
- | __init__(agent: "AEA", loop: AbstractEventLoop = None)
-```
-
-Init agent loop.
-
-**Arguments**:
-
-- `agent`: AEA instance
-- `loop`: asyncio loop to use. optional
-
-<a name="aea.agent_loop.SyncAgentLoop"></a>
-## SyncAgentLoop Objects
-
-```python
-class SyncAgentLoop(BaseAgentLoop)
-```
-
-Synchronous agent loop.
-
-<a name="aea.agent_loop.SyncAgentLoop.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(agent: "Agent", loop: AbstractEventLoop = None)
+ | __init__(agent: AbstractAgent, loop: AbstractEventLoop = None)
 ```
 
 Init agent loop.

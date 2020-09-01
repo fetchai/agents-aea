@@ -106,60 +106,6 @@ Get address of receiver.
 
 Set address of receiver.
 
-<a name="aea.protocols.base.Message.has_counterparty"></a>
-#### has`_`counterparty
-
-```python
- | @property
- | has_counterparty() -> bool
-```
-
-Check if the counterparty is set.
-
-<a name="aea.protocols.base.Message.counterparty"></a>
-#### counterparty
-
-```python
- | @property
- | counterparty() -> Address
-```
-
-Get the counterparty of the message in Address form.
-
-:return the address
-
-<a name="aea.protocols.base.Message.counterparty"></a>
-#### counterparty
-
-```python
- | @counterparty.setter
- | counterparty(counterparty: Address) -> None
-```
-
-Set the counterparty of the message.
-
-<a name="aea.protocols.base.Message.is_incoming"></a>
-#### is`_`incoming
-
-```python
- | @property
- | is_incoming() -> bool
-```
-
-Get the is_incoming value of the message.
-
-:return whether the message is incoming or is out going
-
-<a name="aea.protocols.base.Message.is_incoming"></a>
-#### is`_`incoming
-
-```python
- | @is_incoming.setter
- | is_incoming(is_incoming: bool) -> None
-```
-
-Set the is_incoming of the message.
-
 <a name="aea.protocols.base.Message.body"></a>
 #### body
 
@@ -258,15 +204,6 @@ None
 ```
 
 Get value for key.
-
-<a name="aea.protocols.base.Message.unset"></a>
-#### unset
-
-```python
- | unset(key: str) -> None
-```
-
-Unset valye for key.
 
 <a name="aea.protocols.base.Message.is_set"></a>
 #### is`_`set
@@ -399,53 +336,6 @@ Encode a message into bytes using Protobuf.
 ```
 
 Decode bytes into a message using Protobuf.
-
-<a name="aea.protocols.base.JSONSerializer"></a>
-## JSONSerializer Objects
-
-```python
-class JSONSerializer(Serializer)
-```
-
-Default serialization in JSON for the Message object.
-
-It assumes that the Message contains a JSON-serializable body.
-
-<a name="aea.protocols.base.JSONSerializer.encode"></a>
-#### encode
-
-```python
- | @staticmethod
- | encode(msg: Message) -> bytes
-```
-
-Encode a message into bytes using JSON format.
-
-**Arguments**:
-
-- `msg`: the message to be encoded.
-
-**Returns**:
-
-the serialized message.
-
-<a name="aea.protocols.base.JSONSerializer.decode"></a>
-#### decode
-
-```python
- | @staticmethod
- | decode(obj: bytes) -> Message
-```
-
-Decode bytes into a message using JSON.
-
-**Arguments**:
-
-- `obj`: the serialized message.
-
-**Returns**:
-
-the decoded message.
 
 <a name="aea.protocols.base.Protocol"></a>
 ## Protocol Objects

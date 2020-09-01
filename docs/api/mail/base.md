@@ -180,7 +180,7 @@ Extra information for the handling of an envelope.
 #### `__`init`__`
 
 ```python
- | __init__(connection_id: Optional[PublicId] = None, uri: Optional[URI] = None)
+ | __init__(connection_id: Optional[PublicId] = None, skill_id: Optional[PublicId] = None, uri: Optional[URI] = None)
 ```
 
 Initialize the envelope context.
@@ -188,7 +188,28 @@ Initialize the envelope context.
 **Arguments**:
 
 - `connection_id`: the connection id used for routing the outgoing envelope in the multiplexer.
+- `skill_id`: the skill id used for routing the incoming envelope in the AEA.
 - `uri`: the URI sent with the envelope.
+
+<a name="aea.mail.base.EnvelopeContext.connection_id"></a>
+#### connection`_`id
+
+```python
+ | @property
+ | connection_id() -> Optional[PublicId]
+```
+
+Get the connection id.
+
+<a name="aea.mail.base.EnvelopeContext.skill_id"></a>
+#### skill`_`id
+
+```python
+ | @property
+ | skill_id() -> Optional[PublicId]
+```
+
+Get the skill id.
 
 <a name="aea.mail.base.EnvelopeContext.uri_raw"></a>
 #### uri`_`raw
@@ -437,7 +458,7 @@ Get the envelope context.
 
 ```python
  | @property
- | skill_id() -> Optional[SkillId]
+ | skill_id() -> Optional[PublicId]
 ```
 
 Get the skill id from an envelope context, if set.
@@ -445,6 +466,20 @@ Get the skill id from an envelope context, if set.
 **Returns**:
 
 skill id
+
+<a name="aea.mail.base.Envelope.connection_id"></a>
+#### connection`_`id
+
+```python
+ | @property
+ | connection_id() -> Optional[PublicId]
+```
+
+Get the connection id from an envelope context, if set.
+
+**Returns**:
+
+connection id
 
 <a name="aea.mail.base.Envelope.__eq__"></a>
 #### `__`eq`__`

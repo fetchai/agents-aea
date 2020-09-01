@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, **kwargs)
+ | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, **kwargs)
 ```
 
 Initialize an agent context.
@@ -90,7 +90,7 @@ Get the default address.
 
 ```python
  | @property
- | connection_status() -> ConnectionStatus
+ | connection_status() -> MultiplexerStatus
 ```
 
 Get connection status of the multiplexer.

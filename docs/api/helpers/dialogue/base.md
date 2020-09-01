@@ -7,6 +7,15 @@ This module contains the classes required for dialogue management.
 - Dialogue: The dialogue class maintains state of a dialogue and manages it.
 - Dialogues: The dialogues class keeps track of all dialogues.
 
+<a name="aea.protocols.dialogue.base.InvalidDialogueMessage"></a>
+## InvalidDialogueMessage Objects
+
+```python
+class InvalidDialogueMessage(Exception)
+```
+
+Exception for adding invalid message to a dialogue.
+
 <a name="aea.protocols.dialogue.base.DialogueLabel"></a>
 ## DialogueLabel Objects
 
@@ -287,7 +296,7 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
- | __init__(dialogue_label: DialogueLabel, message_class: Optional[Type[Message]] = None, agent_address: Optional[Address] = None, role: Optional[Role] = None, rules: Optional[Rules] = None) -> None
+ | __init__(dialogue_label: DialogueLabel, message_class: Type[Message], self_address: Address, role: Role) -> None
 ```
 
 Initialize a dialogue.
@@ -295,9 +304,8 @@ Initialize a dialogue.
 **Arguments**:
 
 - `dialogue_label`: the identifier of the dialogue
-- `agent_address`: the address of the agent for whom this dialogue is maintained
+- `self_address`: the address of the entity for whom this dialogue is maintained
 - `role`: the role of the agent this dialogue is maintained for
-- `rules`: the rules of the dialogue
 
 **Returns**:
 
@@ -345,31 +353,19 @@ Get the dialogue labels (incomplete and complete, if it exists)
 
 the dialogue labels
 
-<a name="aea.protocols.dialogue.base.Dialogue.agent_address"></a>
-#### agent`_`address
+<a name="aea.protocols.dialogue.base.Dialogue.self_address"></a>
+#### self`_`address
 
 ```python
  | @property
- | agent_address() -> Address
+ | self_address() -> Address
 ```
 
-Get the address of the agent for whom this dialogues is maintained.
+Get the address of the entity for whom this dialogues is maintained.
 
 **Returns**:
 
-the agent address
-
-<a name="aea.protocols.dialogue.base.Dialogue.agent_address"></a>
-#### agent`_`address
-
-```python
- | @agent_address.setter
- | agent_address(agent_address: Address) -> None
-```
-
-Set the address of the agent for whom this dialogues is maintained.
-
-:param: the agent address
+the address of this entity
 
 <a name="aea.protocols.dialogue.base.Dialogue.role"></a>
 #### role
@@ -384,24 +380,6 @@ Get the agent's role in the dialogue.
 **Returns**:
 
 the agent's role
-
-<a name="aea.protocols.dialogue.base.Dialogue.role"></a>
-#### role
-
-```python
- | @role.setter
- | role(role: "Role") -> None
-```
-
-Set the agent's role in the dialogue.
-
-**Arguments**:
-
-- `role`: the agent's role
-
-**Returns**:
-
-None
 
 <a name="aea.protocols.dialogue.base.Dialogue.rules"></a>
 #### rules
@@ -473,23 +451,6 @@ Get the last message.
 
 the last message if it exists, None otherwise
 
-<a name="aea.protocols.dialogue.base.Dialogue.get_message"></a>
-#### get`_`message
-
-```python
- | get_message(message_id_to_find: int) -> Optional[Message]
-```
-
-Get the message whose id is 'message_id'.
-
-**Arguments**:
-
-- `message_id_to_find`: the id of the message
-
-**Returns**:
-
-the message if it exists, None otherwise
-
 <a name="aea.protocols.dialogue.base.Dialogue.is_empty"></a>
 #### is`_`empty
 
@@ -504,65 +465,16 @@ Check whether the dialogue is empty.
 
 True if empty, False otherwise
 
-<a name="aea.protocols.dialogue.base.Dialogue.update"></a>
-#### update
-
-```python
- | update(message: Message) -> bool
-```
-
-Extend the list of incoming/outgoing messages with 'message', if 'message' belongs to dialogue and is valid.
-
-**Arguments**:
-
-- `message`: a message to be added
-
-**Returns**:
-
-True if message successfully added, false otherwise
-
-<a name="aea.protocols.dialogue.base.Dialogue.ensure_counterparty"></a>
-#### ensure`_`counterparty
-
-```python
- | ensure_counterparty(message: Message) -> None
-```
-
-Ensure the counterparty is set (set if not) correctly.
-
-**Arguments**:
-
-- `message`: a message
-
-**Returns**:
-
-None
-
-<a name="aea.protocols.dialogue.base.Dialogue.is_belonging_to_dialogue"></a>
-#### is`_`belonging`_`to`_`dialogue
-
-```python
- | is_belonging_to_dialogue(message: Message) -> bool
-```
-
-Check if the message is belonging to the dialogue.
-
-**Arguments**:
-
-- `message`: the message
-
-**Returns**:
-
-Ture if message is part of the dialogue, False otherwise
-
 <a name="aea.protocols.dialogue.base.Dialogue.reply"></a>
 #### reply
 
 ```python
- | reply(target_message: Message, performative, **kwargs) -> Message
+ | reply(performative: Message.Performative, target_message: Optional[Message] = None, **kwargs, ,) -> Message
 ```
 
 Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
+
+Note if no target_message is provided, the last message in the dialogue will be replied to.
 
 **Arguments**:
 
@@ -573,62 +485,6 @@ Reply to the 'target_message' in this dialogue with a message with 'performative
 **Returns**:
 
 the reply message if it was successfully added as a reply, None otherwise.
-
-<a name="aea.protocols.dialogue.base.Dialogue.is_valid_next_message"></a>
-#### is`_`valid`_`next`_`message
-
-```python
- | is_valid_next_message(message: Message) -> bool
-```
-
-Check whether 'message' is a valid next message in this dialogue.
-
-The evaluation of a message validity involves performing several categories of checks.
-Each category of checks resides in a separate method.
-
-Currently, basic rules are fundamental structural constraints,
-additional rules are applied for the time being, and more specific rules are captured in the is_valid method.
-
-**Arguments**:
-
-- `message`: the message to be validated
-
-**Returns**:
-
-True if yes, False otherwise.
-
-<a name="aea.protocols.dialogue.base.Dialogue.update_dialogue_label"></a>
-#### update`_`dialogue`_`label
-
-```python
- | update_dialogue_label(final_dialogue_label: DialogueLabel) -> None
-```
-
-Update the dialogue label of the dialogue.
-
-**Arguments**:
-
-- `final_dialogue_label`: the final dialogue label
-
-<a name="aea.protocols.dialogue.base.Dialogue.is_valid"></a>
-#### is`_`valid
-
-```python
- | @abstractmethod
- | is_valid(message: Message) -> bool
-```
-
-Check whether 'message' is a valid next message in the dialogue.
-
-These rules capture specific constraints designed for dialogues which are instance of a concrete sub-class of this class.
-
-**Arguments**:
-
-- `message`: the message to be validated
-
-**Returns**:
-
-True if valid, False otherwise.
 
 <a name="aea.protocols.dialogue.base.Dialogue.__str__"></a>
 #### `__`str`__`
@@ -716,14 +572,14 @@ The dialogues class keeps track of all dialogues for an agent.
 #### `__`init`__`
 
 ```python
- | __init__(agent_address: Address, end_states: FrozenSet[Dialogue.EndState], message_class: Optional[Type[Message]] = None, dialogue_class: Optional[Type[Dialogue]] = None, role_from_first_message: Optional[Callable[[Message], Dialogue.Role]] = None) -> None
+ | __init__(self_address: Address, end_states: FrozenSet[Dialogue.EndState], message_class: Type[Message], dialogue_class: Type[Dialogue], role_from_first_message: Callable[[Message, Address], Dialogue.Role]) -> None
 ```
 
 Initialize dialogues.
 
 **Arguments**:
 
-- `agent_address`: the address of the agent for whom dialogues are maintained
+- `self_address`: the address of the entity for whom dialogues are maintained
 - `end_states`: the list of dialogue endstates
 
 **Returns**:
@@ -740,12 +596,12 @@ None
 
 Get dictionary of dialogues in which the agent engages.
 
-<a name="aea.protocols.dialogue.base.Dialogues.agent_address"></a>
-#### agent`_`address
+<a name="aea.protocols.dialogue.base.Dialogues.self_address"></a>
+#### self`_`address
 
 ```python
  | @property
- | agent_address() -> Address
+ | self_address() -> Address
 ```
 
 Get the address of the agent for whom dialogues are maintained.
@@ -763,6 +619,23 @@ Get the dialogue statistics.
 **Returns**:
 
 dialogue stats object
+
+<a name="aea.protocols.dialogue.base.Dialogues.get_dialogues_with_counterparty"></a>
+#### get`_`dialogues`_`with`_`counterparty
+
+```python
+ | get_dialogues_with_counterparty(counterparty: Address) -> List[Dialogue]
+```
+
+Get the dialogues by address.
+
+**Arguments**:
+
+- `counterparty`: the counterparty
+
+**Returns**:
+
+The dialogues with the counterparty.
 
 <a name="aea.protocols.dialogue.base.Dialogues.new_self_initiated_dialogue_reference"></a>
 #### new`_`self`_`initiated`_`dialogue`_`reference
@@ -796,6 +669,24 @@ Create a dialogue with 'counterparty', with an initial message whose performativ
 
 the initial message and the dialogue.
 
+<a name="aea.protocols.dialogue.base.Dialogues.create_with_message"></a>
+#### create`_`with`_`message
+
+```python
+ | create_with_message(counterparty: Address, initial_message: Message) -> Dialogue
+```
+
+Create a dialogue with 'counterparty', with an initial message provided.
+
+**Arguments**:
+
+- `counterparty`: the counterparty of the dialogue.
+- `initial_message`: the initial_message.
+
+**Returns**:
+
+the initial message and the dialogue.
+
 <a name="aea.protocols.dialogue.base.Dialogues.update"></a>
 #### update
 
@@ -811,7 +702,7 @@ If there are any errors, e.g. the message dialogue reference does not exists or 
 
 **Arguments**:
 
-- `message`: a new message
+- `message`: a new incoming message
 
 **Returns**:
 
@@ -833,74 +724,4 @@ Retrieve the dialogue 'message' belongs to.
 **Returns**:
 
 the dialogue, or None in case such a dialogue does not exist
-
-<a name="aea.protocols.dialogue.base.Dialogues.get_latest_label"></a>
-#### get`_`latest`_`label
-
-```python
- | get_latest_label(dialogue_label: DialogueLabel) -> DialogueLabel
-```
-
-Retrieve the latest dialogue label if present otherwise return same label.
-
-**Arguments**:
-
-- `dialogue_label`: the dialogue label
-:return dialogue_label: the dialogue label
-
-<a name="aea.protocols.dialogue.base.Dialogues.get_dialogue_from_label"></a>
-#### get`_`dialogue`_`from`_`label
-
-```python
- | get_dialogue_from_label(dialogue_label: DialogueLabel) -> Optional[Dialogue]
-```
-
-Retrieve a dialogue based on its label.
-
-**Arguments**:
-
-- `dialogue_label`: the dialogue label
-
-**Returns**:
-
-the dialogue if present
-
-<a name="aea.protocols.dialogue.base.Dialogues.create_dialogue"></a>
-#### create`_`dialogue
-
-```python
- | @abstractmethod
- | create_dialogue(dialogue_label: DialogueLabel, role: Dialogue.Role) -> Dialogue
-```
-
-THIS METHOD IS DEPRECATED AND WILL BE REMOVED IN THE NEXT VERSION. USE THE NEW CONSTRUCTOR ARGUMENTS INSTEAD.
-
-Create a dialogue instance.
-
-**Arguments**:
-
-- `dialogue_label`: the identifier of the dialogue
-- `role`: the role of the agent this dialogue is maintained for
-
-**Returns**:
-
-the created dialogue
-
-<a name="aea.protocols.dialogue.base.Dialogues.role_from_first_message"></a>
-#### role`_`from`_`first`_`message
-
-```python
- | @staticmethod
- | role_from_first_message(message: Message) -> Dialogue.Role
-```
-
-Infer the role of the agent from an incoming or outgoing first message.
-
-**Arguments**:
-
-- `message`: an incoming/outgoing first message
-
-**Returns**:
-
-the agent's role
 

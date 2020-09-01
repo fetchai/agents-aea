@@ -16,7 +16,7 @@ Abstract class for an agent component.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False, **kwargs)
+ | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False, **kwargs, ,)
 ```
 
 Initialize a package.
@@ -105,4 +105,23 @@ Get the directory. Raise error if it has not been set yet.
 ```
 
 Set the directory. Raise error if already set.
+
+<a name="aea.components.base.load_aea_package"></a>
+#### load`_`aea`_`package
+
+```python
+load_aea_package(configuration: ComponentConfiguration) -> None
+```
+
+Load the AEA package.
+
+It adds all the __init__.py modules into `sys.modules`.
+
+**Arguments**:
+
+- `configuration`: the configuration object.
+
+**Returns**:
+
+None
 

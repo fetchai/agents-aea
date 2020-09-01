@@ -1,9 +1,9 @@
-<a name="aea.helpers.pypi"></a>
-# aea.helpers.pypi
+<a name="aea.configurations.pypi"></a>
+# aea.configurations.pypi
 
 This module contains a checker for PyPI version consistency.
 
-<a name="aea.helpers.pypi.and_"></a>
+<a name="aea.configurations.pypi.and_"></a>
 #### and`_`
 
 ```python
@@ -12,7 +12,7 @@ and_(s1: SpecifierSet, s2: SpecifierSet)
 
 Do the and between two specifier sets.
 
-<a name="aea.helpers.pypi.is_satisfiable"></a>
+<a name="aea.configurations.pypi.is_satisfiable"></a>
 #### is`_`satisfiable
 
 ```python
@@ -55,7 +55,7 @@ https://www.python.org/dev/peps/pep-0440
 
 False if the constraints are surely non-satisfiable, True if we don't know.
 
-<a name="aea.helpers.pypi.is_simple_dep"></a>
+<a name="aea.configurations.pypi.is_simple_dep"></a>
 #### is`_`simple`_`dep
 
 ```python
@@ -74,7 +74,7 @@ Namely, if it has no field specified, or only the 'version' field set.
 
 whether it is a simple dependency or not
 
-<a name="aea.helpers.pypi.to_set_specifier"></a>
+<a name="aea.configurations.pypi.to_set_specifier"></a>
 #### to`_`set`_`specifier
 
 ```python
@@ -83,7 +83,7 @@ to_set_specifier(dep: Dependency) -> SpecifierSet
 
 Get the set specifier. It assumes to be a simple dependency (see above).
 
-<a name="aea.helpers.pypi.merge_dependencies"></a>
+<a name="aea.configurations.pypi.merge_dependencies"></a>
 #### merge`_`dependencies
 
 ```python
