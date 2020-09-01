@@ -4,9 +4,9 @@ version: 0.5.0
 type: protocol
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmS1mydjkw38o6UyCKGVYCwQT9uucBSo4C5Y53VfGKM8Ps
+  README.md: Qmd81opGHdwvD7BRD4xsAt2vx1kyyNWaZACLgYWCYHe1S4
   __init__.py: QmRvTtynKcd7shmzgf8aZdcA5witjNL5cL2a7WPgscp7wq
   custom_types.py: QmR4TS6KhXpRtGqq78B8mXMiiFXcFe7JEkxB7jHvqPVkgD
   dialogues.py: QmaEdkD3tQWtDUAohHig58E4Crst6WDUpi5EZeXozBGqVW

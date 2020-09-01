@@ -4,9 +4,9 @@ version: 0.5.0
 type: protocol
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmTgSiLAMkxfjGRUvKWpX4NkQNKQDTe5q1VnUr8vKp1Gnr
+  README.md: QmTCkz4cEUcwuPZVtvrVr8Np5qn1SMwm6foGSY9Y68DhZT
   __init__.py: QmWBvruqGuU2BVCq8cuP1S3mgvuC78yrG4TdtSvKhCT8qX
   custom_types.py: QmfDaswopanUqsETQXMatKfwwDSSo7q2Edz9MXGimT5jbf
   dialogues.py: QmdCzcFfyPF43U2SoxwshG5p4hd6dK49m6GYKduDHbnNPo

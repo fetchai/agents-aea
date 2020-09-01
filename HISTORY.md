@@ -1,5 +1,32 @@
 # Release History
 
+## 0.6.0 (2020-09-01)
+
+- Makes FetchAICrypto default again
+- Bumps web3 dependencies
+- Introduces support for arbitrary protocol handling by DM
+- Removes custom fields in signing protocol
+- Refactors and updates dialogue and dialogues models
+- Moves dialogue module to protocols module
+- Introduces MultiplexerStatus to collect aggregate connection status
+- Moves Address types from mail to common
+- Updates FetchAICrypto to work with Agentland
+- Fixes circular dependencies in helpers and configurations
+- Unifies contract loading with loading mechanism of other packages
+- Adds get-multiaddress command to CLI
+- Updates helpers scripts
+- Introduces MultiInbox to unify internal message handling
+- Adds additional linters (eradicate, more pylint options)
+- Improves error reporting in libp2p connection
+- Replaces all assert statements with proper exceptions
+- Adds skill id to envelope context for improved routing
+- Refactors IPC pipes
+- Refactors core dependencies
+- Adds support for multi-page agent configurations
+- Adds type field to all package configurations
+- Multiple docs updates including additional explanations of contracts usage
+- Multiple additional tests and test stability fixes
+
 ## 0.5.4 (2020-08-13)
 
 - Adds support for Windows in p2p connections
