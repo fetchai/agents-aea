@@ -25,7 +25,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import COSMOS
+from tests.conftest import FETCHAI
 
 
 class TestGetMultiAddressCommandPositive(AEATestCaseEmpty):
@@ -33,11 +33,11 @@ class TestGetMultiAddressCommandPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=False)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=False)
 
         result = self.run_cli_command(
-            "get-multiaddress", COSMOS, cwd=self.current_agent_context
+            "get-multiaddress", FETCHAI, cwd=self.current_agent_context
         )
 
         assert result.exit_code == 0
@@ -50,11 +50,11 @@ class TestGetMultiAddressCommandConnectionPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         result = self.run_cli_command(
-            "get-multiaddress", COSMOS, "--connection", cwd=self.current_agent_context
+            "get-multiaddress", FETCHAI, "--connection", cwd=self.current_agent_context
         )
 
         assert result.exit_code == 0
@@ -67,8 +67,8 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
             "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
@@ -77,7 +77,7 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
 
         result = self.run_cli_command(
             "get-multiaddress",
-            COSMOS,
+            FETCHAI,
             "--connection",
             "--connection-id",
             "fetchai/stub:0.9.0",
@@ -101,8 +101,8 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
             "vendor.fetchai.connections.stub.config.public_uri", "127.0.0.1:10000"
@@ -110,7 +110,7 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
 
         result = self.run_cli_command(
             "get-multiaddress",
-            COSMOS,
+            FETCHAI,
             "--connection",
             "--connection-id",
             "fetchai/stub:0.9.0",
@@ -132,11 +132,11 @@ class TestGetMultiAddressCommandConnectionNegative(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         result = self.run_cli_command(
-            "get-multiaddress", COSMOS, "--connection", cwd=self.current_agent_context
+            "get-multiaddress", FETCHAI, "--connection", cwd=self.current_agent_context
         )
 
         assert result.exit_code == 0
@@ -154,7 +154,7 @@ class TestGetMultiAddressCommandNegativeMissingKey(AEATestCaseEmpty):
             Exception, match="Cannot find 'cosmos'. Please check private_key_path."
         ):
             self.run_cli_command(
-                "get-multiaddress", COSMOS, cwd=self.current_agent_context
+                "get-multiaddress", FETCHAI, cwd=self.current_agent_context
             )
 
 
@@ -167,13 +167,13 @@ class TestGetMultiAddressCommandNegativePeerId(AEATestCaseEmpty):
     )
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=False)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=False)
 
         # this will cause exception because no key is added to the AEA project.
         with pytest.raises(Exception, match="test error"):
             self.run_cli_command(
-                "get-multiaddress", COSMOS, cwd=self.current_agent_context
+                "get-multiaddress", FETCHAI, cwd=self.current_agent_context
             )
 
 
@@ -182,8 +182,8 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         # this will cause exception because no host configuration is in stub connection by default.
         with pytest.raises(
@@ -192,7 +192,7 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                COSMOS,
+                FETCHAI,
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",
@@ -209,8 +209,8 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
             "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
@@ -223,7 +223,7 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                COSMOS,
+                FETCHAI,
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",
@@ -240,8 +240,8 @@ class TestGetMultiAddressCommandNegativeBadConnectionId(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         # this will cause exception because a bad public id is provided.
         connection_id = "some_author/some_connection:0.1.0"
@@ -251,7 +251,7 @@ class TestGetMultiAddressCommandNegativeBadConnectionId(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                COSMOS,
+                FETCHAI,
                 "--connection",
                 "--connection-id",
                 connection_id,
@@ -268,8 +268,8 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
     )
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
             "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
@@ -283,7 +283,7 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                COSMOS,
+                FETCHAI,
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",
@@ -300,8 +300,8 @@ class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         # this will cause exception because only the host, and not the port, are specified.
         with pytest.raises(
@@ -310,7 +310,7 @@ class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                COSMOS,
+                FETCHAI,
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",
@@ -325,8 +325,8 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         # this will cause exception because only the host, and not the port, are specified.
         with pytest.raises(
@@ -335,7 +335,7 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                COSMOS,
+                FETCHAI,
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",
@@ -350,8 +350,8 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(COSMOS)
-        self.add_private_key(COSMOS, connection=True)
+        self.generate_private_key(FETCHAI)
+        self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
             "vendor.fetchai.connections.stub.config.some_uri", "some-unparsable_URI"
@@ -364,7 +364,7 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                COSMOS,
+                FETCHAI,
                 "--connection",
                 "--connection-id",
                 "fetchai/stub:0.9.0",

@@ -10,7 +10,7 @@ from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ProtocolId, SkillConfig
-from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -26,8 +26,8 @@ from aea.skills.base import Handler, Model, Skill, SkillContext
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
-COSMOS_PRIVATE_KEY_FILE_1 = "cosmos_private_key_1.txt"
-COSMOS_PRIVATE_KEY_FILE_2 = "cosmos_private_key_2.txt"
+FETCHAI_PRIVATE_KEY_FILE_1 = "fetchai_private_key_1.txt"
+FETCHAI_PRIVATE_KEY_FILE_2 = "fetchai_private_key_2.txt"
 ```
 
 ## Create a private key and an AEA
@@ -37,7 +37,7 @@ To have access to the decision-maker, which is responsible for signing transacti
 ``` python
     # Create a private key
     create_private_key(
-        CosmosCrypto.identifier, private_key_file=COSMOS_PRIVATE_KEY_FILE_1
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1
     )
 
     # Instantiate the builder and build the AEA
@@ -46,7 +46,7 @@ To have access to the decision-maker, which is responsible for signing transacti
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE_1)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_1)
 
     # Create our AEA
     my_aea = builder.build()
@@ -81,15 +81,15 @@ Add a simple skill with a signing handler and the signing dialogues.
 ## Create a second identity
 ``` python
     create_private_key(
-        CosmosCrypto.identifier, private_key_file=COSMOS_PRIVATE_KEY_FILE_2
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2
     )
 
-    counterparty_wallet = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE_2})
+    counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
 
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
-        default_address_key=CosmosCrypto.identifier,
+        default_address_key=FetchAICrypto.identifier,
     )
 ```
 
@@ -99,7 +99,7 @@ Next, we are creating the signing message and we send it to the decision-maker.
 ``` python
     # create signing message for decision maker to sign
     terms = Terms(
-        ledger_id=CosmosCrypto.identifier,
+        ledger_id=FetchAICrypto.identifier,
         sender_address=my_aea.identity.address,
         counterparty_address=counterparty_identity.address,
         amount_by_currency_id={"FET": -1},
@@ -119,7 +119,7 @@ Next, we are creating the signing message and we send it to the decision-maker.
     signing_msg = SigningMessage(
         performative=SigningMessage.Performative.SIGN_TRANSACTION,
         dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-        raw_transaction=RawTransaction(CosmosCrypto.identifier, stub_transaction),
+        raw_transaction=RawTransaction(FetchAICrypto.identifier, stub_transaction),
         terms=terms,
     )
     signing_dialogue = cast(
@@ -298,7 +298,7 @@ from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ProtocolId, SkillConfig
-from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -314,14 +314,14 @@ from aea.skills.base import Handler, Model, Skill, SkillContext
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
-COSMOS_PRIVATE_KEY_FILE_1 = "cosmos_private_key_1.txt"
-COSMOS_PRIVATE_KEY_FILE_2 = "cosmos_private_key_2.txt"
+FETCHAI_PRIVATE_KEY_FILE_1 = "fetchai_private_key_1.txt"
+FETCHAI_PRIVATE_KEY_FILE_2 = "fetchai_private_key_2.txt"
 
 
 def run():
     # Create a private key
     create_private_key(
-        CosmosCrypto.identifier, private_key_file=COSMOS_PRIVATE_KEY_FILE_1
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1
     )
 
     # Instantiate the builder and build the AEA
@@ -330,7 +330,7 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE_1)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_1)
 
     # Create our AEA
     my_aea = builder.build()
@@ -357,20 +357,20 @@ def run():
 
     # create a second identity
     create_private_key(
-        CosmosCrypto.identifier, private_key_file=COSMOS_PRIVATE_KEY_FILE_2
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2
     )
 
-    counterparty_wallet = Wallet({CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_FILE_2})
+    counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
 
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
-        default_address_key=CosmosCrypto.identifier,
+        default_address_key=FetchAICrypto.identifier,
     )
 
     # create signing message for decision maker to sign
     terms = Terms(
-        ledger_id=CosmosCrypto.identifier,
+        ledger_id=FetchAICrypto.identifier,
         sender_address=my_aea.identity.address,
         counterparty_address=counterparty_identity.address,
         amount_by_currency_id={"FET": -1},
@@ -390,7 +390,7 @@ def run():
     signing_msg = SigningMessage(
         performative=SigningMessage.Performative.SIGN_TRANSACTION,
         dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-        raw_transaction=RawTransaction(CosmosCrypto.identifier, stub_transaction),
+        raw_transaction=RawTransaction(FetchAICrypto.identifier, stub_transaction),
         terms=terms,
     )
     signing_dialogue = cast(
