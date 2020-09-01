@@ -43,7 +43,9 @@ from aea.helpers.base import (
     try_decorator,
     win_popen_kwargs,
     yaml_dump,
+    yaml_dump_all,
     yaml_load,
+    yaml_load_all,
 )
 
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -229,3 +231,13 @@ def test_send_control_c_windows():
             with patch("os.kill") as mock_kill:
                 send_control_c(process)
                 mock_kill.assert_called_with(pid, mock_signal.CTRL_C_EVENT)
+
+
+def test_yaml_dump_all_load_all():
+    """Test yaml_dump_all and yaml_load_all."""
+    f = io.StringIO()
+    data = [{"a": "12"}, {"b": "13"}]
+    yaml_dump_all(data, f)
+
+    f.seek(0)
+    assert yaml_load_all(f) == data

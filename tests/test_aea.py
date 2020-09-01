@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the tests for aea/aea.py."""
 import os
 import tempfile
@@ -43,6 +41,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
 
@@ -232,6 +231,8 @@ def test_handle():
         )
         msg.to = aea.identity.address
         msg.sender = aea.identity.address
+
+        encoded_msg = DefaultSerializer.encode(msg)
         envelope = Envelope(
             to=msg.to,
             sender=msg.sender,
@@ -279,6 +280,19 @@ def test_handle():
             aea.outbox.put(envelope)
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 3, timeout=2,
+            )
+
+            #   DECODING OK
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                protocol_id=DefaultMessage.protocol_id,
+                message=encoded_msg,
+            )
+            # send envelope via localnode back to agent/bypass `outbox` put consistency checks
+            aea.outbox._multiplexer.put(envelope)
+            wait_for_condition(
+                lambda: len(dummy_handler.handled_messages) == 4, timeout=1,
             )
             aea.stop()
 

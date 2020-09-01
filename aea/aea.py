@@ -16,10 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import datetime
 import logging
 from asyncio import AbstractEventLoop
+from multiprocessing.pool import AsyncResult
 from typing import (
     Any,
     Callable,
@@ -27,6 +29,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     cast,
@@ -380,3 +383,25 @@ class AEA(Agent, WithLogger):
         """
         self.logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.resources.teardown()
+
+    def get_task_result(self, task_id: int) -> AsyncResult:
+        """
+        Get the result from a task.
+
+        :return: async result for task_id
+        """
+        return self.runtime.task_manager.get_task_result(task_id)
+
+    def enqueue_task(
+        self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
+    ) -> int:
+        """
+        Enqueue a task with the task manager.
+
+        :param func: the callable instance to be enqueued
+        :param args: the positional arguments to be passed to the function.
+        :param kwds: the keyword arguments to be passed to the function.
+        :return the task id to get the the result.
+        :raises ValueError: if the task manager is not running.
+        """
+        return self.runtime.task_manager.enqueue_task(func, args, kwds)
