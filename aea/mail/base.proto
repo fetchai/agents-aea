@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package fetch.aea;
 
-import "google/protobuf/any.proto";
 import "google/protobuf/struct.proto";
 
 
@@ -11,7 +10,7 @@ message DialogueMessage {
     string dialogue_starter_reference = 2;
     string dialogue_responder_reference = 3;
     int32 target = 4;
-    google.protobuf.Any content = 5;
+    bytes content = 5;
 }
 
 message Message {

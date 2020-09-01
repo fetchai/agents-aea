@@ -69,7 +69,7 @@ class DefaultSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        dialogue_message_pb.content.Pack(default_msg)
+        dialogue_message_pb.content = default_msg.SerializeToString()
 
         message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
         message_bytes = message_pb.SerializeToString()
@@ -93,7 +93,7 @@ class DefaultSerializer(Serializer):
         )
         target = message_pb.dialogue_message.target
 
-        message_pb.dialogue_message.content.Unpack(default_pb)
+        default_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = default_pb.WhichOneof("performative")
         performative_id = DefaultMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

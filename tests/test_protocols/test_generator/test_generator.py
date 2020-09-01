@@ -1204,7 +1204,7 @@ class ProtocolGeneratorTestCase(TestCase):
                     print(proto_buff_schema_str)
                     expected = (
                         'syntax = "proto3";\n\n'
-                        "package fetch.aea.SomeName;\n\n"
+                        "package fetchai.aea.some_author.some_name;\n\n"
                         "message SomeNameMessage{\n\n"
                         "    // Custom Types\n"
                         "    message SomeCustomType{\n"

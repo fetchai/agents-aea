@@ -16,25 +16,25 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="t_protocol_no_ct.proto",
-    package="fetch.aea.TProtocolNoCt",
+    package="fetchai.aea.fetchai.t_protocol_no_ct",
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n\x16t_protocol_no_ct.proto\x12\x17\x66\x65tch.aea.TProtocolNoCt"\x81/\n\x14TProtocolNoCtMessage\x12}\n\x1bperformative_empty_contents\x18\x05 \x01(\x0b\x32V.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Empty_Contents_PerformativeH\x00\x12\x65\n\x0fperformative_mt\x18\x06 \x01(\x0b\x32J.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_PerformativeH\x00\x12\x63\n\x0eperformative_o\x18\x07 \x01(\x0b\x32I.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_PerformativeH\x00\x12g\n\x10performative_pct\x18\x08 \x01(\x0b\x32K.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_PerformativeH\x00\x12g\n\x10performative_pmt\x18\t \x01(\x0b\x32K.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_PerformativeH\x00\x12\x65\n\x0fperformative_pt\x18\n \x01(\x0b\x32J.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pt_PerformativeH\x00\x1a\x8c\x01\n\x1cPerformative_Pt_Performative\x12\x15\n\rcontent_bytes\x18\x01 \x01(\x0c\x12\x13\n\x0b\x63ontent_int\x18\x02 \x01(\x05\x12\x15\n\rcontent_float\x18\x03 \x01(\x02\x12\x14\n\x0c\x63ontent_bool\x18\x04 \x01(\x08\x12\x13\n\x0b\x63ontent_str\x18\x05 \x01(\t\x1a\xa8\x02\n\x1dPerformative_Pct_Performative\x12\x19\n\x11\x63ontent_set_bytes\x18\x01 \x03(\x0c\x12\x17\n\x0f\x63ontent_set_int\x18\x02 \x03(\x05\x12\x19\n\x11\x63ontent_set_float\x18\x03 \x03(\x02\x12\x18\n\x10\x63ontent_set_bool\x18\x04 \x03(\x08\x12\x17\n\x0f\x63ontent_set_str\x18\x05 \x03(\t\x12\x1a\n\x12\x63ontent_list_bytes\x18\x06 \x03(\x0c\x12\x18\n\x10\x63ontent_list_int\x18\x07 \x03(\x05\x12\x1a\n\x12\x63ontent_list_float\x18\x08 \x03(\x02\x12\x19\n\x11\x63ontent_list_bool\x18\t \x03(\x08\x12\x18\n\x10\x63ontent_list_str\x18\n \x03(\t\x1a\xee\x16\n\x1dPerformative_Pmt_Performative\x12\x84\x01\n\x16\x63ontent_dict_int_bytes\x18\x01 \x03(\x0b\x32\x64.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry\x12\x80\x01\n\x14\x63ontent_dict_int_int\x18\x02 \x03(\x0b\x32\x62.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry\x12\x84\x01\n\x16\x63ontent_dict_int_float\x18\x03 \x03(\x0b\x32\x64.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry\x12\x82\x01\n\x15\x63ontent_dict_int_bool\x18\x04 \x03(\x0b\x32\x63.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry\x12\x80\x01\n\x14\x63ontent_dict_int_str\x18\x05 \x03(\x0b\x32\x62.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry\x12\x86\x01\n\x17\x63ontent_dict_bool_bytes\x18\x06 \x03(\x0b\x32\x65.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry\x12\x82\x01\n\x15\x63ontent_dict_bool_int\x18\x07 \x03(\x0b\x32\x63.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry\x12\x86\x01\n\x17\x63ontent_dict_bool_float\x18\x08 \x03(\x0b\x32\x65.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry\x12\x84\x01\n\x16\x63ontent_dict_bool_bool\x18\t \x03(\x0b\x32\x64.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry\x12\x82\x01\n\x15\x63ontent_dict_bool_str\x18\n \x03(\x0b\x32\x63.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry\x12\x84\x01\n\x16\x63ontent_dict_str_bytes\x18\x0b \x03(\x0b\x32\x64.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry\x12\x80\x01\n\x14\x63ontent_dict_str_int\x18\x0c \x03(\x0b\x32\x62.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry\x12\x84\x01\n\x16\x63ontent_dict_str_float\x18\r \x03(\x0b\x32\x64.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry\x12\x82\x01\n\x15\x63ontent_dict_str_bool\x18\x0e \x03(\x0b\x32\x63.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry\x12\x80\x01\n\x14\x63ontent_dict_str_str\x18\x0f \x03(\x0b\x32\x62.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry\x1a:\n\x18\x43ontentDictIntBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictIntBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a:\n\x18\x43ontentDictBoolBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictStrBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xc0\x0b\n\x1cPerformative_Mt_Performative\x12"\n\x1a\x63ontent_union_1_type_bytes\x18\x01 \x01(\x0c\x12 \n\x18\x63ontent_union_1_type_int\x18\x02 \x01(\x05\x12"\n\x1a\x63ontent_union_1_type_float\x18\x03 \x01(\x02\x12!\n\x19\x63ontent_union_1_type_bool\x18\x04 \x01(\x08\x12 \n\x18\x63ontent_union_1_type_str\x18\x05 \x01(\t\x12\'\n\x1f\x63ontent_union_1_type_set_of_int\x18\x06 \x03(\x05\x12)\n!content_union_1_type_list_of_bool\x18\x07 \x03(\x08\x12\x9b\x01\n$content_union_1_type_dict_of_str_int\x18\x08 \x03(\x0b\x32m.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry\x12)\n!content_union_2_type_set_of_bytes\x18\t \x03(\x0c\x12\'\n\x1f\x63ontent_union_2_type_set_of_int\x18\n \x03(\x05\x12\'\n\x1f\x63ontent_union_2_type_set_of_str\x18\x0b \x03(\t\x12*\n"content_union_2_type_list_of_float\x18\x0c \x03(\x02\x12)\n!content_union_2_type_list_of_bool\x18\r \x03(\x08\x12*\n"content_union_2_type_list_of_bytes\x18\x0e \x03(\x0c\x12\x9b\x01\n$content_union_2_type_dict_of_str_int\x18\x0f \x03(\x0b\x32m.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry\x12\x9f\x01\n&content_union_2_type_dict_of_int_float\x18\x10 \x03(\x0b\x32o.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry\x12\xa1\x01\n\'content_union_2_type_dict_of_bool_bytes\x18\x11 \x03(\x0b\x32p.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry\x1a\x44\n"ContentUnion1TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x44\n"ContentUnion2TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x46\n$ContentUnion2TypeDictOfIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1aG\n%ContentUnion2TypeDictOfBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\xba\x03\n\x1bPerformative_O_Performative\x12\x16\n\x0e\x63ontent_o_bool\x18\x01 \x01(\x08\x12\x1d\n\x15\x63ontent_o_bool_is_set\x18\x02 \x01(\x08\x12\x19\n\x11\x63ontent_o_set_int\x18\x03 \x03(\x05\x12 \n\x18\x63ontent_o_set_int_is_set\x18\x04 \x01(\x08\x12\x1c\n\x14\x63ontent_o_list_bytes\x18\x05 \x03(\x0c\x12#\n\x1b\x63ontent_o_list_bytes_is_set\x18\x06 \x01(\x08\x12\x81\x01\n\x16\x63ontent_o_dict_str_int\x18\x07 \x03(\x0b\x32\x61.fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry\x12%\n\x1d\x63ontent_o_dict_str_int_is_set\x18\x08 \x01(\x08\x1a\x39\n\x17\x43ontentODictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a*\n(Performative_Empty_Contents_PerformativeB\x0e\n\x0cperformativeb\x06proto3'
+        '\n\x16t_protocol_no_ct.proto\x12$fetchai.aea.fetchai.t_protocol_no_ct"\xd4\x31\n\x14TProtocolNoCtMessage\x12\x8a\x01\n\x1bperformative_empty_contents\x18\x05 \x01(\x0b\x32\x63.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Empty_Contents_PerformativeH\x00\x12r\n\x0fperformative_mt\x18\x06 \x01(\x0b\x32W.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_PerformativeH\x00\x12p\n\x0eperformative_o\x18\x07 \x01(\x0b\x32V.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_PerformativeH\x00\x12t\n\x10performative_pct\x18\x08 \x01(\x0b\x32X.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_PerformativeH\x00\x12t\n\x10performative_pmt\x18\t \x01(\x0b\x32X.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_PerformativeH\x00\x12r\n\x0fperformative_pt\x18\n \x01(\x0b\x32W.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pt_PerformativeH\x00\x1a\x8c\x01\n\x1cPerformative_Pt_Performative\x12\x15\n\rcontent_bytes\x18\x01 \x01(\x0c\x12\x13\n\x0b\x63ontent_int\x18\x02 \x01(\x05\x12\x15\n\rcontent_float\x18\x03 \x01(\x02\x12\x14\n\x0c\x63ontent_bool\x18\x04 \x01(\x08\x12\x13\n\x0b\x63ontent_str\x18\x05 \x01(\t\x1a\xa8\x02\n\x1dPerformative_Pct_Performative\x12\x19\n\x11\x63ontent_set_bytes\x18\x01 \x03(\x0c\x12\x17\n\x0f\x63ontent_set_int\x18\x02 \x03(\x05\x12\x19\n\x11\x63ontent_set_float\x18\x03 \x03(\x02\x12\x18\n\x10\x63ontent_set_bool\x18\x04 \x03(\x08\x12\x17\n\x0f\x63ontent_set_str\x18\x05 \x03(\t\x12\x1a\n\x12\x63ontent_list_bytes\x18\x06 \x03(\x0c\x12\x18\n\x10\x63ontent_list_int\x18\x07 \x03(\x05\x12\x1a\n\x12\x63ontent_list_float\x18\x08 \x03(\x02\x12\x19\n\x11\x63ontent_list_bool\x18\t \x03(\x08\x12\x18\n\x10\x63ontent_list_str\x18\n \x03(\t\x1a\xb1\x18\n\x1dPerformative_Pmt_Performative\x12\x91\x01\n\x16\x63ontent_dict_int_bytes\x18\x01 \x03(\x0b\x32q.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry\x12\x8d\x01\n\x14\x63ontent_dict_int_int\x18\x02 \x03(\x0b\x32o.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry\x12\x91\x01\n\x16\x63ontent_dict_int_float\x18\x03 \x03(\x0b\x32q.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry\x12\x8f\x01\n\x15\x63ontent_dict_int_bool\x18\x04 \x03(\x0b\x32p.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry\x12\x8d\x01\n\x14\x63ontent_dict_int_str\x18\x05 \x03(\x0b\x32o.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry\x12\x93\x01\n\x17\x63ontent_dict_bool_bytes\x18\x06 \x03(\x0b\x32r.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry\x12\x8f\x01\n\x15\x63ontent_dict_bool_int\x18\x07 \x03(\x0b\x32p.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry\x12\x93\x01\n\x17\x63ontent_dict_bool_float\x18\x08 \x03(\x0b\x32r.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry\x12\x91\x01\n\x16\x63ontent_dict_bool_bool\x18\t \x03(\x0b\x32q.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry\x12\x8f\x01\n\x15\x63ontent_dict_bool_str\x18\n \x03(\x0b\x32p.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry\x12\x91\x01\n\x16\x63ontent_dict_str_bytes\x18\x0b \x03(\x0b\x32q.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry\x12\x8d\x01\n\x14\x63ontent_dict_str_int\x18\x0c \x03(\x0b\x32o.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry\x12\x91\x01\n\x16\x63ontent_dict_str_float\x18\r \x03(\x0b\x32q.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry\x12\x8f\x01\n\x15\x63ontent_dict_str_bool\x18\x0e \x03(\x0b\x32p.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry\x12\x8d\x01\n\x14\x63ontent_dict_str_str\x18\x0f \x03(\x0b\x32o.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry\x1a:\n\x18\x43ontentDictIntBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictIntBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a:\n\x18\x43ontentDictBoolBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictStrBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xf4\x0b\n\x1cPerformative_Mt_Performative\x12"\n\x1a\x63ontent_union_1_type_bytes\x18\x01 \x01(\x0c\x12 \n\x18\x63ontent_union_1_type_int\x18\x02 \x01(\x05\x12"\n\x1a\x63ontent_union_1_type_float\x18\x03 \x01(\x02\x12!\n\x19\x63ontent_union_1_type_bool\x18\x04 \x01(\x08\x12 \n\x18\x63ontent_union_1_type_str\x18\x05 \x01(\t\x12\'\n\x1f\x63ontent_union_1_type_set_of_int\x18\x06 \x03(\x05\x12)\n!content_union_1_type_list_of_bool\x18\x07 \x03(\x08\x12\xa8\x01\n$content_union_1_type_dict_of_str_int\x18\x08 \x03(\x0b\x32z.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry\x12)\n!content_union_2_type_set_of_bytes\x18\t \x03(\x0c\x12\'\n\x1f\x63ontent_union_2_type_set_of_int\x18\n \x03(\x05\x12\'\n\x1f\x63ontent_union_2_type_set_of_str\x18\x0b \x03(\t\x12*\n"content_union_2_type_list_of_float\x18\x0c \x03(\x02\x12)\n!content_union_2_type_list_of_bool\x18\r \x03(\x08\x12*\n"content_union_2_type_list_of_bytes\x18\x0e \x03(\x0c\x12\xa8\x01\n$content_union_2_type_dict_of_str_int\x18\x0f \x03(\x0b\x32z.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry\x12\xac\x01\n&content_union_2_type_dict_of_int_float\x18\x10 \x03(\x0b\x32|.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry\x12\xae\x01\n\'content_union_2_type_dict_of_bool_bytes\x18\x11 \x03(\x0b\x32}.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry\x1a\x44\n"ContentUnion1TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x44\n"ContentUnion2TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x46\n$ContentUnion2TypeDictOfIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1aG\n%ContentUnion2TypeDictOfBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\xc7\x03\n\x1bPerformative_O_Performative\x12\x16\n\x0e\x63ontent_o_bool\x18\x01 \x01(\x08\x12\x1d\n\x15\x63ontent_o_bool_is_set\x18\x02 \x01(\x08\x12\x19\n\x11\x63ontent_o_set_int\x18\x03 \x03(\x05\x12 \n\x18\x63ontent_o_set_int_is_set\x18\x04 \x01(\x08\x12\x1c\n\x14\x63ontent_o_list_bytes\x18\x05 \x03(\x0c\x12#\n\x1b\x63ontent_o_list_bytes_is_set\x18\x06 \x01(\x08\x12\x8e\x01\n\x16\x63ontent_o_dict_str_int\x18\x07 \x03(\x0b\x32n.fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry\x12%\n\x1d\x63ontent_o_dict_str_int_is_set\x18\x08 \x01(\x08\x1a\x39\n\x17\x43ontentODictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a*\n(Performative_Empty_Contents_PerformativeB\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
 
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
     name="Performative_Pt_Performative",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pt_Performative",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pt_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="content_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pt_Performative.content_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pt_Performative.content_bytes",
             index=0,
             number=1,
             type=12,
@@ -52,7 +52,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pt_Performative.content_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pt_Performative.content_int",
             index=1,
             number=2,
             type=5,
@@ -70,7 +70,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pt_Performative.content_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pt_Performative.content_float",
             index=2,
             number=3,
             type=2,
@@ -88,7 +88,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pt_Performative.content_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pt_Performative.content_bool",
             index=3,
             number=4,
             type=8,
@@ -106,7 +106,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_str",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pt_Performative.content_str",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pt_Performative.content_str",
             index=4,
             number=5,
             type=9,
@@ -131,20 +131,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=721,
-    serialized_end=861,
+    serialized_start=813,
+    serialized_end=953,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
     name="Performative_Pct_Performative",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="content_set_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_bytes",
             index=0,
             number=1,
             type=12,
@@ -162,7 +162,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_set_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_int",
             index=1,
             number=2,
             type=5,
@@ -180,7 +180,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_set_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_float",
             index=2,
             number=3,
             type=2,
@@ -198,7 +198,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_set_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_bool",
             index=3,
             number=4,
             type=8,
@@ -216,7 +216,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_set_str",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_str",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_set_str",
             index=4,
             number=5,
             type=9,
@@ -234,7 +234,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_list_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_bytes",
             index=5,
             number=6,
             type=12,
@@ -252,7 +252,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_list_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_int",
             index=6,
             number=7,
             type=5,
@@ -270,7 +270,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_list_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_float",
             index=7,
             number=8,
             type=2,
@@ -288,7 +288,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_list_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_bool",
             index=8,
             number=9,
             type=8,
@@ -306,7 +306,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_list_str",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_str",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative.content_list_str",
             index=9,
             number=10,
             type=9,
@@ -331,20 +331,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=864,
-    serialized_end=1160,
+    serialized_start=956,
+    serialized_end=1252,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY = _descriptor.Descriptor(
     name="ContentDictIntBytesEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry.key",
             index=0,
             number=1,
             type=5,
@@ -362,7 +362,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY = _
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry.value",
             index=1,
             number=2,
             type=12,
@@ -387,20 +387,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY = _
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3201,
-    serialized_end=3259,
+    serialized_start=3488,
+    serialized_end=3546,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY = _descriptor.Descriptor(
     name="ContentDictIntIntEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry.key",
             index=0,
             number=1,
             type=5,
@@ -418,7 +418,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY = _de
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry.value",
             index=1,
             number=2,
             type=5,
@@ -443,20 +443,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY = _de
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3261,
-    serialized_end=3317,
+    serialized_start=3548,
+    serialized_end=3604,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY = _descriptor.Descriptor(
     name="ContentDictIntFloatEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry.key",
             index=0,
             number=1,
             type=5,
@@ -474,7 +474,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY = _
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry.value",
             index=1,
             number=2,
             type=2,
@@ -499,20 +499,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY = _
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3319,
-    serialized_end=3377,
+    serialized_start=3606,
+    serialized_end=3664,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY = _descriptor.Descriptor(
     name="ContentDictIntBoolEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry.key",
             index=0,
             number=1,
             type=5,
@@ -530,7 +530,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY = _d
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry.value",
             index=1,
             number=2,
             type=8,
@@ -555,20 +555,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY = _d
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3379,
-    serialized_end=3436,
+    serialized_start=3666,
+    serialized_end=3723,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY = _descriptor.Descriptor(
     name="ContentDictIntStrEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry.key",
             index=0,
             number=1,
             type=5,
@@ -586,7 +586,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY = _de
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry.value",
             index=1,
             number=2,
             type=9,
@@ -611,20 +611,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY = _de
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3438,
-    serialized_end=3494,
+    serialized_start=3725,
+    serialized_end=3781,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY = _descriptor.Descriptor(
     name="ContentDictBoolBytesEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry.key",
             index=0,
             number=1,
             type=8,
@@ -642,7 +642,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY = 
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry.value",
             index=1,
             number=2,
             type=12,
@@ -667,20 +667,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY = 
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3496,
-    serialized_end=3555,
+    serialized_start=3783,
+    serialized_end=3842,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY = _descriptor.Descriptor(
     name="ContentDictBoolIntEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry.key",
             index=0,
             number=1,
             type=8,
@@ -698,7 +698,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY = _d
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry.value",
             index=1,
             number=2,
             type=5,
@@ -723,20 +723,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY = _d
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3557,
-    serialized_end=3614,
+    serialized_start=3844,
+    serialized_end=3901,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY = _descriptor.Descriptor(
     name="ContentDictBoolFloatEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry.key",
             index=0,
             number=1,
             type=8,
@@ -754,7 +754,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY = 
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry.value",
             index=1,
             number=2,
             type=2,
@@ -779,20 +779,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY = 
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3616,
-    serialized_end=3675,
+    serialized_start=3903,
+    serialized_end=3962,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY = _descriptor.Descriptor(
     name="ContentDictBoolBoolEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry.key",
             index=0,
             number=1,
             type=8,
@@ -810,7 +810,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY = _
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry.value",
             index=1,
             number=2,
             type=8,
@@ -835,20 +835,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY = _
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3677,
-    serialized_end=3735,
+    serialized_start=3964,
+    serialized_end=4022,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY = _descriptor.Descriptor(
     name="ContentDictBoolStrEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry.key",
             index=0,
             number=1,
             type=8,
@@ -866,7 +866,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY = _d
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry.value",
             index=1,
             number=2,
             type=9,
@@ -891,20 +891,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY = _d
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3737,
-    serialized_end=3794,
+    serialized_start=4024,
+    serialized_end=4081,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY = _descriptor.Descriptor(
     name="ContentDictStrBytesEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry.key",
             index=0,
             number=1,
             type=9,
@@ -922,7 +922,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY = _
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry.value",
             index=1,
             number=2,
             type=12,
@@ -947,20 +947,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY = _
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3796,
-    serialized_end=3854,
+    serialized_start=4083,
+    serialized_end=4141,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY = _descriptor.Descriptor(
     name="ContentDictStrIntEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry.key",
             index=0,
             number=1,
             type=9,
@@ -978,7 +978,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY = _de
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry.value",
             index=1,
             number=2,
             type=5,
@@ -1003,20 +1003,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY = _de
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3856,
-    serialized_end=3912,
+    serialized_start=4143,
+    serialized_end=4199,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY = _descriptor.Descriptor(
     name="ContentDictStrFloatEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry.key",
             index=0,
             number=1,
             type=9,
@@ -1034,7 +1034,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY = _
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry.value",
             index=1,
             number=2,
             type=2,
@@ -1059,20 +1059,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY = _
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3914,
-    serialized_end=3972,
+    serialized_start=4201,
+    serialized_end=4259,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY = _descriptor.Descriptor(
     name="ContentDictStrBoolEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry.key",
             index=0,
             number=1,
             type=9,
@@ -1090,7 +1090,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY = _d
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry.value",
             index=1,
             number=2,
             type=8,
@@ -1115,20 +1115,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY = _d
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3974,
-    serialized_end=4031,
+    serialized_start=4261,
+    serialized_end=4318,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY = _descriptor.Descriptor(
     name="ContentDictStrStrEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry.key",
             index=0,
             number=1,
             type=9,
@@ -1146,7 +1146,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY = _de
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry.value",
             index=1,
             number=2,
             type=9,
@@ -1171,20 +1171,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY = _de
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4033,
-    serialized_end=4089,
+    serialized_start=4320,
+    serialized_end=4376,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
     name="Performative_Pmt_Performative",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="content_dict_int_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_bytes",
             index=0,
             number=1,
             type=11,
@@ -1202,7 +1202,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_int_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_int",
             index=1,
             number=2,
             type=11,
@@ -1220,7 +1220,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_int_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_float",
             index=2,
             number=3,
             type=11,
@@ -1238,7 +1238,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_int_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_bool",
             index=3,
             number=4,
             type=11,
@@ -1256,7 +1256,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_int_str",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_str",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_int_str",
             index=4,
             number=5,
             type=11,
@@ -1274,7 +1274,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_bytes",
             index=5,
             number=6,
             type=11,
@@ -1292,7 +1292,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_int",
             index=6,
             number=7,
             type=11,
@@ -1310,7 +1310,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_float",
             index=7,
             number=8,
             type=11,
@@ -1328,7 +1328,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_bool",
             index=8,
             number=9,
             type=11,
@@ -1346,7 +1346,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_str",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_str",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_bool_str",
             index=9,
             number=10,
             type=11,
@@ -1364,7 +1364,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_bytes",
             index=10,
             number=11,
             type=11,
@@ -1382,7 +1382,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_int",
             index=11,
             number=12,
             type=11,
@@ -1400,7 +1400,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_float",
             index=12,
             number=13,
             type=11,
@@ -1418,7 +1418,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_bool",
             index=13,
             number=14,
             type=11,
@@ -1436,7 +1436,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_str",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_str",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.content_dict_str_str",
             index=14,
             number=15,
             type=11,
@@ -1477,20 +1477,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1163,
-    serialized_end=4089,
+    serialized_start=1255,
+    serialized_end=4376,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTRY = _descriptor.Descriptor(
     name="ContentUnion1TypeDictOfStrIntEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry.key",
             index=0,
             number=1,
             type=9,
@@ -1508,7 +1508,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINT
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry.value",
             index=1,
             number=2,
             type=5,
@@ -1533,20 +1533,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINT
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5281,
-    serialized_end=5349,
+    serialized_start=5620,
+    serialized_end=5688,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTRY = _descriptor.Descriptor(
     name="ContentUnion2TypeDictOfStrIntEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry.key",
             index=0,
             number=1,
             type=9,
@@ -1564,7 +1564,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINT
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry.value",
             index=1,
             number=2,
             type=5,
@@ -1589,20 +1589,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINT
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5351,
-    serialized_end=5419,
+    serialized_start=5690,
+    serialized_end=5758,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATENTRY = _descriptor.Descriptor(
     name="ContentUnion2TypeDictOfIntFloatEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry.key",
             index=0,
             number=1,
             type=5,
@@ -1620,7 +1620,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLO
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry.value",
             index=1,
             number=2,
             type=2,
@@ -1645,20 +1645,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLO
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5421,
-    serialized_end=5491,
+    serialized_start=5760,
+    serialized_end=5830,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESENTRY = _descriptor.Descriptor(
     name="ContentUnion2TypeDictOfBoolBytesEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry.key",
             index=0,
             number=1,
             type=8,
@@ -1676,7 +1676,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBY
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry.value",
             index=1,
             number=2,
             type=12,
@@ -1701,20 +1701,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBY
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5493,
-    serialized_end=5564,
+    serialized_start=5832,
+    serialized_end=5903,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
     name="Performative_Mt_Performative",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="content_union_1_type_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_bytes",
             index=0,
             number=1,
             type=12,
@@ -1732,7 +1732,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_int",
             index=1,
             number=2,
             type=5,
@@ -1750,7 +1750,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_float",
             index=2,
             number=3,
             type=2,
@@ -1768,7 +1768,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_bool",
             index=3,
             number=4,
             type=8,
@@ -1786,7 +1786,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_str",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_str",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_str",
             index=4,
             number=5,
             type=9,
@@ -1804,7 +1804,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_set_of_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_set_of_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_set_of_int",
             index=5,
             number=6,
             type=5,
@@ -1822,7 +1822,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_list_of_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_list_of_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_list_of_bool",
             index=6,
             number=7,
             type=8,
@@ -1840,7 +1840,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_dict_of_str_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_dict_of_str_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_1_type_dict_of_str_int",
             index=7,
             number=8,
             type=11,
@@ -1858,7 +1858,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_set_of_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_set_of_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_set_of_bytes",
             index=8,
             number=9,
             type=12,
@@ -1876,7 +1876,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_set_of_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_set_of_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_set_of_int",
             index=9,
             number=10,
             type=5,
@@ -1894,7 +1894,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_set_of_str",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_set_of_str",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_set_of_str",
             index=10,
             number=11,
             type=9,
@@ -1912,7 +1912,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_list_of_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_list_of_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_list_of_float",
             index=11,
             number=12,
             type=2,
@@ -1930,7 +1930,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_list_of_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_list_of_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_list_of_bool",
             index=12,
             number=13,
             type=8,
@@ -1948,7 +1948,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_list_of_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_list_of_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_list_of_bytes",
             index=13,
             number=14,
             type=12,
@@ -1966,7 +1966,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_dict_of_str_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_dict_of_str_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_dict_of_str_int",
             index=14,
             number=15,
             type=11,
@@ -1984,7 +1984,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_dict_of_int_float",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_dict_of_int_float",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_dict_of_int_float",
             index=15,
             number=16,
             type=11,
@@ -2002,7 +2002,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_dict_of_bool_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_dict_of_bool_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.content_union_2_type_dict_of_bool_bytes",
             index=16,
             number=17,
             type=11,
@@ -2032,20 +2032,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4092,
-    serialized_end=5564,
+    serialized_start=4379,
+    serialized_end=5903,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY = _descriptor.Descriptor(
     name="ContentODictStrIntEntry",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry.key",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry.key",
             index=0,
             number=1,
             type=9,
@@ -2063,7 +2063,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY = _des
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry.value",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry.value",
             index=1,
             number=2,
             type=5,
@@ -2088,20 +2088,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY = _des
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5952,
-    serialized_end=6009,
+    serialized_start=6304,
+    serialized_end=6361,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
     name="Performative_O_Performative",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="content_o_bool",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.content_o_bool",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.content_o_bool",
             index=0,
             number=1,
             type=8,
@@ -2119,7 +2119,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_o_bool_is_set",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.content_o_bool_is_set",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.content_o_bool_is_set",
             index=1,
             number=2,
             type=8,
@@ -2137,7 +2137,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_o_set_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.content_o_set_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.content_o_set_int",
             index=2,
             number=3,
             type=5,
@@ -2155,7 +2155,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_o_set_int_is_set",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.content_o_set_int_is_set",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.content_o_set_int_is_set",
             index=3,
             number=4,
             type=8,
@@ -2173,7 +2173,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_o_list_bytes",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.content_o_list_bytes",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.content_o_list_bytes",
             index=4,
             number=5,
             type=12,
@@ -2191,7 +2191,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_o_list_bytes_is_set",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.content_o_list_bytes_is_set",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.content_o_list_bytes_is_set",
             index=5,
             number=6,
             type=8,
@@ -2209,7 +2209,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_o_dict_str_int",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.content_o_dict_str_int",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.content_o_dict_str_int",
             index=6,
             number=7,
             type=11,
@@ -2227,7 +2227,7 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content_o_dict_str_int_is_set",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.content_o_dict_str_int_is_set",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.content_o_dict_str_int_is_set",
             index=7,
             number=8,
             type=8,
@@ -2254,13 +2254,13 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5567,
-    serialized_end=6009,
+    serialized_start=5906,
+    serialized_end=6361,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE = _descriptor.Descriptor(
     name="Performative_Empty_Contents_Performative",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Empty_Contents_Performative",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Empty_Contents_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
@@ -2273,20 +2273,20 @@ _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE = _descriptor.Des
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6011,
-    serialized_end=6053,
+    serialized_start=6363,
+    serialized_end=6405,
 )
 
 _TPROTOCOLNOCTMESSAGE = _descriptor.Descriptor(
     name="TProtocolNoCtMessage",
-    full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage",
+    full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="performative_empty_contents",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.performative_empty_contents",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.performative_empty_contents",
             index=0,
             number=5,
             type=11,
@@ -2304,7 +2304,7 @@ _TPROTOCOLNOCTMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="performative_mt",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.performative_mt",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.performative_mt",
             index=1,
             number=6,
             type=11,
@@ -2322,7 +2322,7 @@ _TPROTOCOLNOCTMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="performative_o",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.performative_o",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.performative_o",
             index=2,
             number=7,
             type=11,
@@ -2340,7 +2340,7 @@ _TPROTOCOLNOCTMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="performative_pct",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.performative_pct",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.performative_pct",
             index=3,
             number=8,
             type=11,
@@ -2358,7 +2358,7 @@ _TPROTOCOLNOCTMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="performative_pmt",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.performative_pmt",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.performative_pmt",
             index=4,
             number=9,
             type=11,
@@ -2376,7 +2376,7 @@ _TPROTOCOLNOCTMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="performative_pt",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.performative_pt",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.performative_pt",
             index=5,
             number=10,
             type=11,
@@ -2410,14 +2410,14 @@ _TPROTOCOLNOCTMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.performative",
+            full_name="fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
         ),
     ],
-    serialized_start=52,
-    serialized_end=6069,
+    serialized_start=65,
+    serialized_end=6421,
 )
 
 _TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PT_PERFORMATIVE.containing_type = (
@@ -2657,7 +2657,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PT_PERFORMATIVE,
                 __module__="t_protocol_no_ct_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pt_Performative)
+                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pt_Performative)
             ),
         ),
         Performative_Pct_Performative=_reflection.GeneratedProtocolMessageType(
@@ -2666,7 +2666,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE,
                 __module__="t_protocol_no_ct_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pct_Performative)
+                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pct_Performative)
             ),
         ),
         Performative_Pmt_Performative=_reflection.GeneratedProtocolMessageType(
@@ -2679,7 +2679,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry)
                     ),
                 ),
                 ContentDictIntIntEntry=_reflection.GeneratedProtocolMessageType(
@@ -2688,7 +2688,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntIntEntry)
                     ),
                 ),
                 ContentDictIntFloatEntry=_reflection.GeneratedProtocolMessageType(
@@ -2697,7 +2697,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry)
                     ),
                 ),
                 ContentDictIntBoolEntry=_reflection.GeneratedProtocolMessageType(
@@ -2706,7 +2706,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry)
                     ),
                 ),
                 ContentDictIntStrEntry=_reflection.GeneratedProtocolMessageType(
@@ -2715,7 +2715,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictIntStrEntry)
                     ),
                 ),
                 ContentDictBoolBytesEntry=_reflection.GeneratedProtocolMessageType(
@@ -2724,7 +2724,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry)
                     ),
                 ),
                 ContentDictBoolIntEntry=_reflection.GeneratedProtocolMessageType(
@@ -2733,7 +2733,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry)
                     ),
                 ),
                 ContentDictBoolFloatEntry=_reflection.GeneratedProtocolMessageType(
@@ -2742,7 +2742,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry)
                     ),
                 ),
                 ContentDictBoolBoolEntry=_reflection.GeneratedProtocolMessageType(
@@ -2751,7 +2751,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry)
                     ),
                 ),
                 ContentDictBoolStrEntry=_reflection.GeneratedProtocolMessageType(
@@ -2760,7 +2760,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry)
                     ),
                 ),
                 ContentDictStrBytesEntry=_reflection.GeneratedProtocolMessageType(
@@ -2769,7 +2769,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry)
                     ),
                 ),
                 ContentDictStrIntEntry=_reflection.GeneratedProtocolMessageType(
@@ -2778,7 +2778,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrIntEntry)
                     ),
                 ),
                 ContentDictStrFloatEntry=_reflection.GeneratedProtocolMessageType(
@@ -2787,7 +2787,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry)
                     ),
                 ),
                 ContentDictStrBoolEntry=_reflection.GeneratedProtocolMessageType(
@@ -2796,7 +2796,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry)
                     ),
                 ),
                 ContentDictStrStrEntry=_reflection.GeneratedProtocolMessageType(
@@ -2805,12 +2805,12 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative.ContentDictStrStrEntry)
                     ),
                 ),
                 DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE,
                 __module__="t_protocol_no_ct_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Pmt_Performative)
+                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Pmt_Performative)
             ),
         ),
         Performative_Mt_Performative=_reflection.GeneratedProtocolMessageType(
@@ -2823,7 +2823,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry)
                     ),
                 ),
                 ContentUnion2TypeDictOfStrIntEntry=_reflection.GeneratedProtocolMessageType(
@@ -2832,7 +2832,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry)
                     ),
                 ),
                 ContentUnion2TypeDictOfIntFloatEntry=_reflection.GeneratedProtocolMessageType(
@@ -2841,7 +2841,7 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry)
                     ),
                 ),
                 ContentUnion2TypeDictOfBoolBytesEntry=_reflection.GeneratedProtocolMessageType(
@@ -2850,12 +2850,12 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry)
                     ),
                 ),
                 DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_MT_PERFORMATIVE,
                 __module__="t_protocol_no_ct_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Mt_Performative)
+                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Mt_Performative)
             ),
         ),
         Performative_O_Performative=_reflection.GeneratedProtocolMessageType(
@@ -2868,12 +2868,12 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY,
                         __module__="t_protocol_no_ct_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry)
+                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative.ContentODictStrIntEntry)
                     ),
                 ),
                 DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_O_PERFORMATIVE,
                 __module__="t_protocol_no_ct_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_O_Performative)
+                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_O_Performative)
             ),
         ),
         Performative_Empty_Contents_Performative=_reflection.GeneratedProtocolMessageType(
@@ -2882,12 +2882,12 @@ TProtocolNoCtMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_TPROTOCOLNOCTMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE,
                 __module__="t_protocol_no_ct_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage.Performative_Empty_Contents_Performative)
+                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage.Performative_Empty_Contents_Performative)
             ),
         ),
         DESCRIPTOR=_TPROTOCOLNOCTMESSAGE,
         __module__="t_protocol_no_ct_pb2"
-        # @@protoc_insertion_point(class_scope:fetch.aea.TProtocolNoCt.TProtocolNoCtMessage)
+        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.t_protocol_no_ct.TProtocolNoCtMessage)
     ),
 )
 _sym_db.RegisterMessage(TProtocolNoCtMessage)

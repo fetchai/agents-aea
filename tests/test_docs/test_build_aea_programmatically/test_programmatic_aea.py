@@ -60,7 +60,7 @@ class TestProgrammaticAEA(BaseAEATestCase):
         assert os.path.exists(Path(self.t, DEFAULT_PRIVATE_KEY_FILE))
 
         message_text_1 = b"other_agent,my_aea,fetchai/default:0.5.0,"
-        message_text_2 = b"type.googleapis.com/fetch.aea.Default.DefaultMessage\x12\t*\x07\n\x05hello"
+        message_text_2 = b"\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello"
 
         path = os.path.join(self.t, "output_file")
         with open(path, "rb") as file:

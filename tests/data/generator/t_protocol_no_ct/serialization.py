@@ -262,7 +262,7 @@ class TProtocolNoCtSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        dialogue_message_pb.content.Pack(t_protocol_no_ct_msg)
+        dialogue_message_pb.content = t_protocol_no_ct_msg.SerializeToString()
 
         message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
         message_bytes = message_pb.SerializeToString()
@@ -286,7 +286,7 @@ class TProtocolNoCtSerializer(Serializer):
         )
         target = message_pb.dialogue_message.target
 
-        message_pb.dialogue_message.content.Unpack(t_protocol_no_ct_pb)
+        t_protocol_no_ct_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = t_protocol_no_ct_pb.WhichOneof("performative")
         performative_id = TProtocolNoCtMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

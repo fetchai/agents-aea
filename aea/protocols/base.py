@@ -295,7 +295,9 @@ class ProtobufSerializer(Serializer):
             body_json = Struct()
             body_json.update(new_body)  # pylint: disable=no-member
 
-            dialogue_message_pb.content.Pack(body_json)  # pylint: disable=no-member
+            dialogue_message_pb.content = (  # pylint: disable=no-member
+                body_json.SerializeToString()
+            )
             message_pb.dialogue_message.CopyFrom(  # pylint: disable=no-member
                 dialogue_message_pb
             )
@@ -332,7 +334,7 @@ class ProtobufSerializer(Serializer):
                 dialogue_message_pb.dialogue_responder_reference
             )
             body_json = Struct()
-            dialogue_message_pb.content.Unpack(body_json)
+            body_json.ParseFromString(dialogue_message_pb.content)
             body = dict(body_json)
             body["message_id"] = message_id
             body["target"] = target

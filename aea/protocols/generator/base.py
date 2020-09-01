@@ -1590,8 +1590,11 @@ class ProtocolGenerator:
         )
         self._change_indent(-1)
 
-        cls_str += self.indent + "dialogue_message_pb.content.Pack({}_msg)\n\n".format(
-            self.protocol_specification.name,
+        cls_str += (
+            self.indent
+            + "dialogue_message_pb.content = {}_msg.SerializeToString()\n\n".format(
+                self.protocol_specification.name,
+            )
         )
         cls_str += (
             self.indent + "message_pb.dialogue_message.CopyFrom(dialogue_message_pb)\n"
@@ -1628,7 +1631,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "target = message_pb.dialogue_message.target\n\n"
         cls_str += (
             self.indent
-            + "message_pb.dialogue_message.content.Unpack({}_pb)\n".format(
+            + "{}_pb.ParseFromString(message_pb.dialogue_message.content)\n".format(
                 self.protocol_specification.name
             )
         )

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.TProtocolNoCt;
+package fetchai.aea.fetchai.t_protocol_no_ct;
 
 message TProtocolNoCtMessage{
 

@@ -9,9 +9,9 @@ fingerprint:
   __init__.py: QmRGHGRoZHGCXQ29v3q93Nt6J5TuhggYvUvZoQfrM6c3yp
   dialogues.py: QmUjFTMYk2C69dcYfsKorTQWJbaUGEz8orCQnkZtFbR6Je
   message.py: Qma11dAGwWr3oYSWAmRrwLJj9mLvyLVD66svTyHwU3HVNB
-  serialization.py: QmdxfZeYT1zo1oUgomEJwuZ6ttFodRXdYhaWBfzFhMrgBN
-  t_protocol_no_ct.proto: QmcQtSHEVK25h5s1MN5RkCrRGhHqbRmMvTjhgZNMk9tdUe
-  t_protocol_no_ct_pb2.py: QmfU5AaVARTUi8gmhShNZk23LcA6Qp2AY2ysy39LM32eLq
+  serialization.py: QmUvPmEbmg34A4XKCba3H2QFSdviUzEWMsBUNdJg4pysKD
+  t_protocol_no_ct.proto: QmUsW7bFZ3Ru3p6VSkAQekEhdYKcH2cxiSez291YxZ2kQ9
+  t_protocol_no_ct_pb2.py: Qmb8Z6BoyZabtBkwdwKxCf9F5igPcp3faEirorkHDeis2g
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

@@ -14,7 +14,6 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
 from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 
@@ -24,12 +23,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n\nbase.proto\x12\tfetch.aea\x1a\x19google/protobuf/any.proto\x1a\x1cgoogle/protobuf/struct.proto"\xa6\x01\n\x0f\x44ialogueMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12%\n\x07\x63ontent\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any"u\n\x07Message\x12\'\n\x04\x62ody\x18\x01 \x01(\x0b\x32\x17.google.protobuf.StructH\x00\x12\x36\n\x10\x64ialogue_message\x18\x02 \x01(\x0b\x32\x1a.fetch.aea.DialogueMessageH\x00\x42\t\n\x07message"Y\n\x08\x45nvelope\x12\n\n\x02to\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\x12\x13\n\x0bprotocol_id\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\x0c\x12\x0b\n\x03uri\x18\x05 \x01(\tb\x06proto3'
+        '\n\nbase.proto\x12\tfetch.aea\x1a\x1cgoogle/protobuf/struct.proto"\x90\x01\n\x0f\x44ialogueMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x05 \x01(\x0c"u\n\x07Message\x12\'\n\x04\x62ody\x18\x01 \x01(\x0b\x32\x17.google.protobuf.StructH\x00\x12\x36\n\x10\x64ialogue_message\x18\x02 \x01(\x0b\x32\x1a.fetch.aea.DialogueMessageH\x00\x42\t\n\x07message"Y\n\x08\x45nvelope\x12\n\n\x02to\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\x12\x13\n\x0bprotocol_id\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\x0c\x12\x0b\n\x03uri\x18\x05 \x01(\tb\x06proto3'
     ),
-    dependencies=[
-        google_dot_protobuf_dot_any__pb2.DESCRIPTOR,
-        google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,
-    ],
+    dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,],
 )
 
 
@@ -117,11 +113,11 @@ _DIALOGUEMESSAGE = _descriptor.Descriptor(
             full_name="fetch.aea.DialogueMessage.content",
             index=4,
             number=5,
-            type=11,
-            cpp_type=10,
+            type=12,
+            cpp_type=9,
             label=1,
             has_default_value=False,
-            default_value=None,
+            default_value=_b(""),
             message_type=None,
             enum_type=None,
             containing_type=None,
@@ -139,8 +135,8 @@ _DIALOGUEMESSAGE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=83,
-    serialized_end=249,
+    serialized_start=56,
+    serialized_end=200,
 )
 
 
@@ -204,8 +200,8 @@ _MESSAGE = _descriptor.Descriptor(
             fields=[],
         ),
     ],
-    serialized_start=251,
-    serialized_end=368,
+    serialized_start=202,
+    serialized_end=319,
 )
 
 
@@ -315,13 +311,10 @@ _ENVELOPE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=370,
-    serialized_end=459,
+    serialized_start=321,
+    serialized_end=410,
 )
 
-_DIALOGUEMESSAGE.fields_by_name[
-    "content"
-].message_type = google_dot_protobuf_dot_any__pb2._ANY
 _MESSAGE.fields_by_name[
     "body"
 ].message_type = google_dot_protobuf_dot_struct__pb2._STRUCT
