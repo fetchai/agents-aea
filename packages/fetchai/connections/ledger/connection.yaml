@@ -19,13 +19,11 @@ protocols:
 class_name: LedgerConnection
 config:
   ledger_apis:
-    cosmos:
-      address: https://rest-agent-land.prod.fetch-ai.com:443
     ethereum:
       address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
       gas_price: 50
     fetchai:
-      address: https://rest-agent-land.sandbox.fetch-ai.com:443
+      address: https://rest-agent-land.fetch.ai:443
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:0.3.0
