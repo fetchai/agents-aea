@@ -19,11 +19,11 @@ from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="base.proto",
-    package="fetch.aea",
+    package="fetchai.aea",
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n\nbase.proto\x12\tfetch.aea\x1a\x1cgoogle/protobuf/struct.proto"\x90\x01\n\x0f\x44ialogueMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x05 \x01(\x0c"u\n\x07Message\x12\'\n\x04\x62ody\x18\x01 \x01(\x0b\x32\x17.google.protobuf.StructH\x00\x12\x36\n\x10\x64ialogue_message\x18\x02 \x01(\x0b\x32\x1a.fetch.aea.DialogueMessageH\x00\x42\t\n\x07message"Y\n\x08\x45nvelope\x12\n\n\x02to\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\x12\x13\n\x0bprotocol_id\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\x0c\x12\x0b\n\x03uri\x18\x05 \x01(\tb\x06proto3'
+        '\n\nbase.proto\x12\x0b\x66\x65tchai.aea\x1a\x1cgoogle/protobuf/struct.proto"\x90\x01\n\x0f\x44ialogueMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x05 \x01(\x0c"w\n\x07Message\x12\'\n\x04\x62ody\x18\x01 \x01(\x0b\x32\x17.google.protobuf.StructH\x00\x12\x38\n\x10\x64ialogue_message\x18\x02 \x01(\x0b\x32\x1c.fetchai.aea.DialogueMessageH\x00\x42\t\n\x07message"Y\n\x08\x45nvelope\x12\n\n\x02to\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\x12\x13\n\x0bprotocol_id\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\x0c\x12\x0b\n\x03uri\x18\x05 \x01(\tb\x06proto3'
     ),
     dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,],
 )
@@ -31,14 +31,14 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _DIALOGUEMESSAGE = _descriptor.Descriptor(
     name="DialogueMessage",
-    full_name="fetch.aea.DialogueMessage",
+    full_name="fetchai.aea.DialogueMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="message_id",
-            full_name="fetch.aea.DialogueMessage.message_id",
+            full_name="fetchai.aea.DialogueMessage.message_id",
             index=0,
             number=1,
             type=5,
@@ -56,7 +56,7 @@ _DIALOGUEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="dialogue_starter_reference",
-            full_name="fetch.aea.DialogueMessage.dialogue_starter_reference",
+            full_name="fetchai.aea.DialogueMessage.dialogue_starter_reference",
             index=1,
             number=2,
             type=9,
@@ -74,7 +74,7 @@ _DIALOGUEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="dialogue_responder_reference",
-            full_name="fetch.aea.DialogueMessage.dialogue_responder_reference",
+            full_name="fetchai.aea.DialogueMessage.dialogue_responder_reference",
             index=2,
             number=3,
             type=9,
@@ -92,7 +92,7 @@ _DIALOGUEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="target",
-            full_name="fetch.aea.DialogueMessage.target",
+            full_name="fetchai.aea.DialogueMessage.target",
             index=3,
             number=4,
             type=5,
@@ -110,7 +110,7 @@ _DIALOGUEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="content",
-            full_name="fetch.aea.DialogueMessage.content",
+            full_name="fetchai.aea.DialogueMessage.content",
             index=4,
             number=5,
             type=12,
@@ -135,21 +135,21 @@ _DIALOGUEMESSAGE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=56,
-    serialized_end=200,
+    serialized_start=58,
+    serialized_end=202,
 )
 
 
 _MESSAGE = _descriptor.Descriptor(
     name="Message",
-    full_name="fetch.aea.Message",
+    full_name="fetchai.aea.Message",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="body",
-            full_name="fetch.aea.Message.body",
+            full_name="fetchai.aea.Message.body",
             index=0,
             number=1,
             type=11,
@@ -167,7 +167,7 @@ _MESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="dialogue_message",
-            full_name="fetch.aea.Message.dialogue_message",
+            full_name="fetchai.aea.Message.dialogue_message",
             index=1,
             number=2,
             type=11,
@@ -194,27 +194,27 @@ _MESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="message",
-            full_name="fetch.aea.Message.message",
+            full_name="fetchai.aea.Message.message",
             index=0,
             containing_type=None,
             fields=[],
         ),
     ],
-    serialized_start=202,
-    serialized_end=319,
+    serialized_start=204,
+    serialized_end=323,
 )
 
 
 _ENVELOPE = _descriptor.Descriptor(
     name="Envelope",
-    full_name="fetch.aea.Envelope",
+    full_name="fetchai.aea.Envelope",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="to",
-            full_name="fetch.aea.Envelope.to",
+            full_name="fetchai.aea.Envelope.to",
             index=0,
             number=1,
             type=9,
@@ -232,7 +232,7 @@ _ENVELOPE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="sender",
-            full_name="fetch.aea.Envelope.sender",
+            full_name="fetchai.aea.Envelope.sender",
             index=1,
             number=2,
             type=9,
@@ -250,7 +250,7 @@ _ENVELOPE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="protocol_id",
-            full_name="fetch.aea.Envelope.protocol_id",
+            full_name="fetchai.aea.Envelope.protocol_id",
             index=2,
             number=3,
             type=9,
@@ -268,7 +268,7 @@ _ENVELOPE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="message",
-            full_name="fetch.aea.Envelope.message",
+            full_name="fetchai.aea.Envelope.message",
             index=3,
             number=4,
             type=12,
@@ -286,7 +286,7 @@ _ENVELOPE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="uri",
-            full_name="fetch.aea.Envelope.uri",
+            full_name="fetchai.aea.Envelope.uri",
             index=4,
             number=5,
             type=9,
@@ -311,8 +311,8 @@ _ENVELOPE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=321,
-    serialized_end=410,
+    serialized_start=325,
+    serialized_end=414,
 )
 
 _MESSAGE.fields_by_name[
@@ -338,7 +338,7 @@ DialogueMessage = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_DIALOGUEMESSAGE,
         __module__="base_pb2"
-        # @@protoc_insertion_point(class_scope:fetch.aea.DialogueMessage)
+        # @@protoc_insertion_point(class_scope:fetchai.aea.DialogueMessage)
     ),
 )
 _sym_db.RegisterMessage(DialogueMessage)
@@ -349,7 +349,7 @@ Message = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_MESSAGE,
         __module__="base_pb2"
-        # @@protoc_insertion_point(class_scope:fetch.aea.Message)
+        # @@protoc_insertion_point(class_scope:fetchai.aea.Message)
     ),
 )
 _sym_db.RegisterMessage(Message)
@@ -360,7 +360,7 @@ Envelope = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_ENVELOPE,
         __module__="base_pb2"
-        # @@protoc_insertion_point(class_scope:fetch.aea.Envelope)
+        # @@protoc_insertion_point(class_scope:fetchai.aea.Envelope)
     ),
 )
 _sym_db.RegisterMessage(Envelope)
