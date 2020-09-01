@@ -756,7 +756,7 @@ class ERC1155Contract(Contract):
 
         :return: code id of last deployed .wasm bytecode
         """
-        if ledger_api.identifier == CosmosApi.identifier:
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             cosmos_api = cast(CosmosApi, ledger_api)
             return cosmos_api.get_last_code_id()
         raise NotImplementedError
@@ -770,7 +770,7 @@ class ERC1155Contract(Contract):
 
         :return: contract address of last initialised contract
         """
-        if ledger_api.identifier == CosmosApi.identifier:
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             cosmos_api = cast(CosmosApi, ledger_api)
             return cosmos_api.get_contract_address(code_id)
         raise NotImplementedError
