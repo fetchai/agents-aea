@@ -12,9 +12,9 @@ fingerprint:
   custom_types.py: QmXQATfnvuCpt4FicF4QcqCcLj9PQNsSHjCBvVQknWpyaN
   dialogues.py: QmTxHrcGujP1RUYvfJygZyQoUwmDg2GBWfmbR3tWUSbyop
   message.py: QmfNdmYk3wssDJvHwMsMxXaiWCjm3fSH9Su4KmsYDZJoWg
-  serialization.py: QmfZMesx1EFVYx1pj5SBn3eF7A2fz5a8cnBKzhBmVha31U
-  tac.proto: QmdpPZNhUW593qVNVoSTWZgd9R69bmBbw6Y9xjzYpvuDvV
-  tac_pb2.py: QmUwW3kixKwD2o1RRdq4NoNoihPb5BXKKRngWXztq32fea
+  serialization.py: QmZYhkHa6wW5T4fSUSHar67C76ascfKLsevWEfkff3uVvU
+  tac.proto: QmdPn2Z4xiPuc16PPzd8NNsbRd95aEDbvfUm1FFjvZZcuy
+  tac_pb2.py: QmYDEdWMwpfDawJPf8rjwLnEwDjdT4KuyNwYS8kEC5swKy
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

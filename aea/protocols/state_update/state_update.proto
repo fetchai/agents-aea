@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.StateUpdate;
+package fetchai.aea.fetchai.state_update;
 
 message StateUpdateMessage{
 
@@ -18,11 +18,6 @@ message StateUpdateMessage{
     }
 
 
-    // Standard StateUpdateMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Apply_Performative apply = 5;
         Initialize_Performative initialize = 6;

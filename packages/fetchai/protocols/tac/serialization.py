@@ -21,6 +21,7 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
@@ -41,12 +42,15 @@ class TacSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(TacMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         tac_msg = tac_pb2.TacMessage()
-        tac_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        tac_msg.dialogue_starter_reference = dialogue_reference[0]
-        tac_msg.dialogue_responder_reference = dialogue_reference[1]
-        tac_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == TacMessage.Performative.REGISTER:
@@ -131,8 +135,11 @@ class TacSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        tac_bytes = tac_msg.SerializeToString()
-        return tac_bytes
+        dialogue_message_pb.content = tac_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -142,15 +149,17 @@ class TacSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'Tac' message.
         """
+        message_pb = ProtobufMessage()
         tac_pb = tac_pb2.TacMessage()
-        tac_pb.ParseFromString(obj)
-        message_id = tac_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            tac_pb.dialogue_starter_reference,
-            tac_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = tac_pb.target
+        target = message_pb.dialogue_message.target
 
+        tac_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = tac_pb.WhichOneof("performative")
         performative_id = TacMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

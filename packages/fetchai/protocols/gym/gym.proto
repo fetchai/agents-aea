@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.Gym;
+package fetchai.aea.fetchai.gym;
 
 message GymMessage{
 
@@ -33,11 +33,6 @@ message GymMessage{
     message Close_Performative{}
 
 
-    // Standard GymMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Act_Performative act = 5;
         Close_Performative close = 6;

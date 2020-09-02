@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.OefSearch;
+package fetchai.aea.fetchai.oef_search;
 
 message OefSearchMessage{
 
@@ -52,11 +52,6 @@ message OefSearchMessage{
     }
 
 
-    // Standard OefSearchMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Oef_Error_Performative oef_error = 5;
         Register_Service_Performative register_service = 6;

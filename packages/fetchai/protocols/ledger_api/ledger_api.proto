@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.LedgerApi;
+package fetchai.aea.fetchai.ledger_api;
 
 message LedgerApiMessage{
 
@@ -70,11 +70,6 @@ message LedgerApiMessage{
     }
 
 
-    // Standard LedgerApiMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Balance_Performative balance = 5;
         Error_Performative error = 6;

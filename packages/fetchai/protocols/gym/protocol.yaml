@@ -10,10 +10,10 @@ fingerprint:
   __init__.py: QmWBvruqGuU2BVCq8cuP1S3mgvuC78yrG4TdtSvKhCT8qX
   custom_types.py: QmfDaswopanUqsETQXMatKfwwDSSo7q2Edz9MXGimT5jbf
   dialogues.py: QmdCzcFfyPF43U2SoxwshG5p4hd6dK49m6GYKduDHbnNPo
-  gym.proto: QmQGF9Xz4Z93wmhdKoztzxjo5pS4SsAWe2TQdvZCLuzdGC
-  gym_pb2.py: QmSTz7xrL8ryqzR1Sgu1NpR6PmW7GUhBGnN2qYc8m8NCcN
+  gym.proto: QmeYNsnWj9yYLiMyJqTBFPw9o2TUVDBo8WfyaDcY8D87EF
+  gym_pb2.py: QmVW25q9Yhb1SG1HgpLMhWpYXBHkHsGq481gpR3gx8xcZG
   message.py: Qmc4wx56DVaSpLe6h7KSUBmxEWoHVFFAQQB4mpympggcTG
-  serialization.py: QmaZd7YMHrHZvbeMMb1JfnkUZRHk7zKy45M7kDvG5wbY9C
+  serialization.py: QmSxsJYMNbowsrCeY5s14FbT8J1XJf2LkPDaGv7ZP5ea4e
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

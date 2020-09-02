@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.Http;
+package fetchai.aea.fetchai.http;
 
 message HttpMessage{
 
@@ -22,11 +22,6 @@ message HttpMessage{
     }
 
 
-    // Standard HttpMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Request_Performative request = 5;
         Response_Performative response = 6;

@@ -8,12 +8,12 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmZv8BvQ1EqbbsF2QjgwSuAv1EDra5bAZzpSWrztm5Gn1s
   __init__.py: QmZodYjNqoMgGAGKfkCU4zU9t1Cx9MAownqSy4wyVdwaHF
-  contract_api.proto: QmNwngtcYFSuqL8yeTGVXmrHjfebCybdUa9BnTDKXn8odk
-  contract_api_pb2.py: QmVT6Fv53KyFhshNFEo38seHypd7Y62psBaF8NszV8iRHK
+  contract_api.proto: QmNMLYVPSUYhA8Aao92Rytk7Ftfc3JVXHCx1b28jXnJUds
+  contract_api_pb2.py: QmYUwtxum9CTZheibHguakuGYJCcZcu9Cphy9EwWXQBN2x
   custom_types.py: Qmd86SMkJeASh8xvpNV9GTq1rGKs7Qjbj97UfbENEbd5AM
   dialogues.py: QmTjXH8JUtziUFDawKsSTYE5dxn1n1FmMPeWexyxiPYd6k
   message.py: QmfVtxSae81BNSmhcd5qTH6o8BMaRjtYAqfG6sCAH7m1Cu
-  serialization.py: QmdJZ6GBrURgzJCfYSZzLhWirfm5bDJxumz7ieAELC9juw
+  serialization.py: QmUKAwH9Jw66JnbZLwm5HZ4gvV8hmtFg8s2tfPkiKSnLir
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
