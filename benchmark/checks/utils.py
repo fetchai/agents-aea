@@ -26,13 +26,13 @@ from pathlib import Path
 from typing import Optional
 from unittest.mock import MagicMock
 
+import psutil  # type: ignore
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
     DEFAULT_LEDGER,
-    DEFAULT_PRIVATE_KEY_FILE,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
@@ -58,12 +58,10 @@ def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout") -> Non
             raise TimeoutError(error_msg)
 
 
-def make_agent(runtime_mode="threaded") -> AEA:
+def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
     """Make AEA instance."""
-    agent_name = "my_agent"
-    private_key_path = os.path.join(ROOT_DIR, DEFAULT_PRIVATE_KEY_FILE)
-    wallet = Wallet({DEFAULT_LEDGER: private_key_path})
-    identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
+    wallet = Wallet({DEFAULT_LEDGER: None})
+    identity = Identity(agent_name, address=agent_name)
     resources = Resources()
     resources.add_skill(
         Skill.from_dir(
@@ -96,6 +94,7 @@ class GeneratorConnection(Connection):
     """Generates messages and count."""
 
     connection_id = PublicId("fetchai", "generator", "0.1.0")
+    ENABLED_WAIT_SLEEP = 0.00001
 
     def __init__(self, *args, **kwargs):
         """Init connection."""
@@ -127,7 +126,7 @@ class GeneratorConnection(Connection):
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Generate an envelope."""
         while not self._enabled:
-            await asyncio.sleep(0.0001)
+            await asyncio.sleep(self.ENABLED_WAIT_SLEEP)
 
         envelope = make_envelope(self.address, "echo_skill")
         self._count_out += 1
@@ -184,3 +183,8 @@ def make_skill(agent, handlers=None, behaviours=None) -> Skill:
         behaviour = behaviour_cls(name=name, skill_context=skill_context)
         skill.behaviours.update({behaviour.name: behaviour})
     return skill
+
+
+def get_mem_usage_in_mb() -> float:
+    """Get memory usage of the current process in megabytes."""
+    return 1.0 * psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2

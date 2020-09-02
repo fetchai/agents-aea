@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 #
 # ------------------------------------------------------------------------------
 """Memory usage check."""
-import os
 import time
 from threading import Thread
 
 from benchmark.checks.utils import (
     SyncedGeneratorConnection,
+    get_mem_usage_in_mb,
     make_agent,
     make_envelope,
     make_skill,
@@ -31,8 +31,6 @@ from benchmark.checks.utils import (
 )
 
 import click
-
-import psutil  # type: ignore
 
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -63,7 +61,7 @@ class TestHandler(Handler):
 def main(duration, runtime_mode):
     """Check memory usage."""
     click.echo(f"Start test for {duration} seconds in runtime mode: {runtime_mode}")
-    agent = make_agent(runtime_mode)
+    agent = make_agent(runtime_mode=runtime_mode)
     connection = SyncedGeneratorConnection.make()
     agent.resources.add_connection(connection)
     agent.resources.add_skill(make_skill(agent, handlers={"test": TestHandler}))
@@ -74,8 +72,7 @@ def main(duration, runtime_mode):
     connection.enable()
     time.sleep(duration)
     connection.disable()
-    process = psutil.Process(os.getpid())
-    mem_usage = 1.0 * process.memory_info().rss / 1024 ** 2
+    mem_usage = get_mem_usage_in_mb()
     agent.stop()
     t.join(5)
     rate = connection._count_in / duration
@@ -83,7 +80,7 @@ def main(duration, runtime_mode):
     click.echo(f" * envelopes received: {connection._count_in}")
     click.echo(f" * envelopes sent: {connection._count_out}")
     click.echo(f" * rate: {rate} envelopes/second")
-    click.echo(f" * memusage: {mem_usage} mb")
+    click.echo(f" * mem usage: {mem_usage} mb")
 
 
 if __name__ == "__main__":

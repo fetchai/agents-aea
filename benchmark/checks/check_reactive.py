@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ class TestHandler(Handler):
 def main(duration, runtime_mode):
     """Test memory usage."""
     click.echo(f"Start test for {duration} seconds in runtime mode: {runtime_mode}")
-    agent = make_agent(runtime_mode)
+    agent = make_agent(runtime_mode=runtime_mode)
     connection = TestConnection.make()
     agent.resources.add_connection(connection)
     agent.resources.add_skill(make_skill(agent, handlers={"test": TestHandler}))
