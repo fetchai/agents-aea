@@ -195,6 +195,7 @@ def replace_in_directory(name: str):
                 continue
             submodule.write_text(submodule.read_text().replace(to_replace, replacement))
             run_cli("isort", str(submodule))
+            run_cli("black", str(submodule))
 
 
 def _fix_generated_protocol(package_path: Path) -> None:
