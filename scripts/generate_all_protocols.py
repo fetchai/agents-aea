@@ -21,41 +21,276 @@
 """
 This script takes all the protocol specification (scraped from the protocol README)
 and calls the `aea generate protocol` command.
+
+Currently, it does a lot of assumptions, and might not be useful for
+all use cases. However, with not much work, can be customized to achieve
+the desired outcomes.
+
+It requires the `aea` package, `black` and `isort` tools.
 """
+import operator
+import os
+import pprint
+import re
+import shutil
 import subprocess  # nosec
 import sys
+import tempfile
+from io import StringIO
 from pathlib import Path
+from typing import Match, Optional, cast
 
+from aea.configurations.base import ComponentType, ProtocolSpecification
+from aea.configurations.loader import ConfigLoader, load_component_configuration
 
-PROTOCOL_PACKAGES_PATH = [
-    Path("aea", "protocols", "default"),
-    Path("aea", "protocols", "signing"),
-    Path("aea", "protocols", "state_update"),
-    Path("packages", "fetchai", "protocols", "contract_api"),
-    Path("packages", "fetchai", "protocols", "fipa"),
-    Path("packages", "fetchai", "protocols", "gym"),
-    Path("packages", "fetchai", "protocols", "http"),
-    Path("packages", "fetchai", "protocols", "ledger_api"),
-    Path("packages", "fetchai", "protocols", "ml_trade"),
-    Path("packages", "fetchai", "protocols", "oef_search"),
-    Path("packages", "fetchai", "protocols", "tac"),
-]
+SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
+CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
+README_FILENAME = "README.md"
 
-
-def install(package: str) -> int:
-    """
-    Install a PyPI package by calling pip.
-
-    :param package: the package name and version specifier.
-    :return: the return code.
-    """
-    return subprocess.check_call(  # nosec
-        [sys.executable, "-m", "aea", "generate", "protocol", package]
+PROTOCOL_PATHS = list(
+    map(
+        operator.methodcaller("absolute"),
+        [
+            Path("aea", "protocols", "default"),
+            Path("aea", "protocols", "signing"),
+            Path("aea", "protocols", "state_update"),
+            Path("packages", "fetchai", "protocols", "contract_api"),
+            Path("packages", "fetchai", "protocols", "fipa"),
+            Path("packages", "fetchai", "protocols", "gym"),
+            Path("packages", "fetchai", "protocols", "http"),
+            Path("packages", "fetchai", "protocols", "ledger_api"),
+            Path("packages", "fetchai", "protocols", "ml_trade"),
+            Path("packages", "fetchai", "protocols", "oef_search"),
+            Path("packages", "fetchai", "protocols", "tac"),
+        ],
     )
+)
+
+
+def enforce(condition, message=""):
+    """Custom assertion."""
+    if not condition:
+        raise AssertionError(message)
+
+
+def run_cli(*args, **kwargs):
+    """Run a CLI command."""
+    return_code = subprocess.check_call(args, **kwargs)  # nosec
+    enforce(
+        return_code == 0,
+        f"Return code of {pprint.pformat(args)} is {return_code} != 0.",
+    )
+
+
+def run_aea(*args, **kwargs) -> None:
+    """
+    Run an AEA command.
+
+    :param args: the AEA command
+    :param kwargs: keyword arguments to subprocess function
+    :return: None
+    """
+    run_cli(sys.executable, "-m", "aea.cli", *args, **kwargs)
+
+
+class AEAProject:
+    """A context manager class to create and delete an AEA project."""
+
+    old_cwd: str
+    temp_dir: str
+
+    def __init__(self, name: str = "my_aea", parent_dir: Optional[str] = None):
+        """
+        Initialize an AEA project.
+
+        :param name: the name of the AEA project.
+        """
+        self.name = name
+        self.parent_dir = parent_dir
+
+    def __enter__(self):
+        """Create and enter into the project."""
+        self.old_cwd = os.getcwd()
+        self.temp_dir = tempfile.mkdtemp(dir=self.parent_dir)
+        os.chdir(self.temp_dir)
+
+        run_aea("create", self.name)
+        os.chdir(self.name)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the context manager."""
+        os.chdir(self.old_cwd)
+        shutil.rmtree(self.temp_dir)
+
+
+def _load_protocol_specification_from_string(
+    specification_content: str,
+) -> ProtocolSpecification:
+    """Load a protocol specification from string."""
+    file = StringIO(initial_value=specification_content)
+    config_loader = ConfigLoader(
+        "protocol-specification_schema.json", ProtocolSpecification
+    )
+    protocol_spec = config_loader.load_protocol_specification(file)
+    return protocol_spec
+
+
+def _get_protocol_specification_from_readme(package_path: Path) -> str:
+    """Get the protocol specification from the package README."""
+    readme = package_path / "README.md"
+    readme_content = readme.read_text()
+    enforce(
+        "## Specification" in readme_content,
+        f"Cannot find specification section in {package_path}",
+    )
+
+    search_result = SPECIFICATION_REGEX.search(readme_content)
+    enforce(
+        search_result is not None,
+        f"Cannot find specification section in README of {package_path}",
+    )
+    specification_content = cast(Match, search_result).group(0)
+    # just for validation of the parsed string
+    _load_protocol_specification_from_string(specification_content)
+    return specification_content
+
+
+def _save_specification_in_temporary_file(name: str, specification_content: str):
+    """
+    Save the specification in a temporary file.
+
+    :param name: the name of the package.
+    :param specification_content: the specification content.
+    :return: None
+    """
+    # here, the cwd is the temporary AEA project
+    # hence, we are writing in a temporary directory
+    Path("..", name + ".yaml").write_text(specification_content)
+
+
+def _generate_protocol(package_path: Path) -> None:
+    """
+    Generate the protocol.
+
+    :param package_path: package to the path.
+    :return: None
+    """
+    run_aea("generate", "protocol", os.path.join("..", package_path.name) + ".yaml")
+
+
+def replace_in_directory(name: str):
+    """
+    Replace text in directory.
+
+    :param name: the protocol name.
+    :return: None
+    """
+    replace_replacement_pairs = [
+        (f"from packages.fetchai.protocols.{name}", f"from aea.protocols.{name}"),
+        (f"aea.packages.fetchai.protocols.{name}", f"aea.protocols.{name}"),
+    ]
+    for submodule in Path("protocols", name).rglob("*.py"):
+        for to_replace, replacement in replace_replacement_pairs:
+            if to_replace not in submodule.read_text():
+                continue
+            submodule.write_text(submodule.read_text().replace(to_replace, replacement))
+            run_cli("isort", str(submodule))
+
+
+def _fix_generated_protocol(package_path: Path) -> None:
+    """
+    Fix the generated protocol.
+
+    That means:
+    - replacing the prefix of import statements for default protocols;
+    - restore the original custom types, if any.
+    - copy the README, if any.
+
+    :param package_path: path to the protocol package.
+                         Used also to recover the protocol name.
+    :return: None
+    """
+    # restore original custom types.
+    custom_types_module = package_path / CUSTOM_TYPE_MODULE_NAME
+    if custom_types_module.exists():
+        file_to_replace = Path("protocols", package_path.name, CUSTOM_TYPE_MODULE_NAME)
+        file_to_replace.write_text(custom_types_module.read_text())
+
+    # if it is a library protocol, replace import prefixes.
+    if package_path.parents[1].name == "aea":
+        replace_in_directory(package_path.name)
+
+    # copy the README
+    package_readme_file = package_path / README_FILENAME
+    if package_readme_file.exists():
+        shutil.copyfile(
+            package_readme_file, Path("protocols", package_path.name, README_FILENAME)
+        )
+
+
+def _update_original_protocol(package_path: Path) -> None:
+    """
+    Update the original protocol.
+
+    :param package_path: the path to the original package.
+                         Used to recover the protocol name.
+    :return: None
+    """
+    shutil.rmtree(package_path)
+    shutil.copytree(Path("protocols", package_path.name), package_path)
+
+
+def _fingerprint_protocol(name: str):
+    """Fingerprint the generated (and modified) protocol."""
+    # recover public id.
+    protocol_config = load_component_configuration(
+        ComponentType.PROTOCOL, Path("protocols", name), skip_consistency_check=True
+    )
+    run_aea("fingerprint", "protocol", str(protocol_config.public_id))
+
+
+def _process_protocol(package_path: Path) -> None:
+    """
+    Process a protocol package.
+
+    It means:
+    - extract protocol specification from the README
+    - generate the protocol in the current AEA project
+    - fix the generated protocol (e.g. import prefixed, custom types, ...)
+    - update the original protocol with the newly generated one.
+
+    It assumes the working directory is an AEA project.
+
+    :param package_path: path to the package.
+    :return: None
+    """
+    specification_content = _get_protocol_specification_from_readme(package_path)
+    _save_specification_in_temporary_file(package_path.name, specification_content)
+    _generate_protocol(package_path)
+    _fix_generated_protocol(package_path)
+    _fingerprint_protocol(package_path.name)
+    _update_original_protocol(package_path)
+
+
+def _check_preliminaries():
+    """Check that the required software is in place."""
+    try:
+        import aea  # noqa: F401  # pylint: disable=import-outside-toplevel,unused-import
+    except ModuleNotFoundError:
+        enforce(False, "'aea' package not installed.")
+    enforce(shutil.which("black") is not None, "black command line tool not found.")
+    enforce(shutil.which("isort") is not None, "isort command line tool not found.")
 
 
 def main():
     """Run the script."""
+    _check_preliminaries()
+    with AEAProject():
+        # remove default protocol, since we are going to regenerate it
+        run_aea("remove", "protocol", "fetchai/default:0.5.0")
+
+        for package_path in PROTOCOL_PATHS:
+            _process_protocol(package_path)
 
 
 if __name__ == "__main__":
