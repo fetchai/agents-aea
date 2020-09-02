@@ -17,14 +17,17 @@
 #
 # ------------------------------------------------------------------------------
 """Performance checks utils."""
-
 import asyncio
 import inspect
 import os
 import time
+from multiprocessing import Pool
 from pathlib import Path
-from typing import Optional
+from statistics import mean
+from typing import Any, Callable, List, Optional, Tuple
 from unittest.mock import MagicMock
+
+import click
 
 import psutil  # type: ignore
 
@@ -188,3 +191,32 @@ def make_skill(agent, handlers=None, behaviours=None) -> Skill:
 def get_mem_usage_in_mb() -> float:
     """Get memory usage of the current process in megabytes."""
     return 1.0 * psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
+
+
+def print_results(result: List[Tuple[str, Any]]) -> None:
+    """Print result for multi_run response."""
+    click.echo("\nResults:")
+    for msg, value in result:
+        click.echo(" * " + msg.format(value))
+    click.echo(f"Test finished.")
+
+
+def multi_run(num_runs: int, fn: Callable, args: Tuple) -> List[Tuple[str, Any]]:
+    """
+    Perform multiple test runs.
+
+    :param num_runs: host many times to run
+    :param fn: callable  that returns list of tuples with result
+    :param args: args to pass to callable
+
+    :return: list of tuples of results
+    """
+    results = []
+    for _ in range(num_runs):
+        p = Pool(1)
+        results.append(p.apply(fn, tuple(args)))
+        p.terminate()
+        del p
+    mean_values = map(mean, zip(*(map(lambda x: x[1], i) for i in results)))
+
+    return list(zip(map(lambda x: x[0], results[0]), mean_values))

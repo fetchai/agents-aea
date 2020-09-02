@@ -28,6 +28,8 @@ from benchmark.checks.utils import (
     make_agent,
     make_envelope,
     make_skill,
+    multi_run,
+    print_results,
     wait_for_condition,
 )
 
@@ -76,14 +78,8 @@ class TestHandler(Handler):
         self.context.outbox.put(make_envelope(message.to, message.sender))
 
 
-@click.command()
-@click.option("--duration", default=3, help="Run time in seconds.")
-@click.option(
-    "--runtime_mode", default="async", help="Runtime mode: async or threaded."
-)
-def main(duration, runtime_mode):
+def run(duration, runtime_mode):
     """Test memory usage."""
-    click.echo(f"Start test for {duration} seconds in runtime mode: {runtime_mode}")
     agent = make_agent(runtime_mode=runtime_mode)
     connection = TestConnection.make()
     agent.resources.add_connection(connection)
@@ -103,11 +99,28 @@ def main(duration, runtime_mode):
     )
     total_amount = len(connection._recvs)
     rate = total_amount / duration
-    click.echo(f"Test finished:")
-    click.echo(f" * envelopes received: {len(connection._recvs)}")
-    click.echo(f" * envelopes sent: {len(connection._sends)}")
-    click.echo(f" * latency: {latency} second")
-    click.echo(f" * rate: {rate} envelopes/second")
+    return [
+        ("envelopes received: {}", len(connection._recvs)),
+        ("envelopes sent: {}", len(connection._sends)),
+        ("latency: {} second", latency),
+        ("rate: {} envelopes/second", rate),
+    ]
+
+
+@click.command()
+@click.option("--duration", default=1, help="Run time in seconds.")
+@click.option(
+    "--runtime_mode", default="async", help="Runtime mode: async or threaded."
+)
+@click.option("--number_of_runs", default=10, help="How many times run teste.")
+def main(duration, runtime_mode, number_of_runs):
+    """Run test."""
+    click.echo(f"Start test with options:")
+    click.echo(f"* Duration: {duration} seconds")
+    click.echo(f"* Runtime mode: {runtime_mode}")
+    click.echo(f"* Number of runs: {number_of_runs}")
+
+    print_results(multi_run(int(number_of_runs), run, (duration, runtime_mode),))
 
 
 if __name__ == "__main__":

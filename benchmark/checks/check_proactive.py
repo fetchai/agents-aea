@@ -21,7 +21,13 @@
 import time
 from threading import Thread
 
-from benchmark.checks.utils import SyncedGeneratorConnection, make_agent, make_envelope
+from benchmark.checks.utils import (
+    SyncedGeneratorConnection,
+    make_agent,
+    make_envelope,
+    multi_run,
+    print_results,
+)
 from benchmark.checks.utils import make_skill, wait_for_condition
 
 import click
@@ -52,14 +58,8 @@ class TestBehaviour(Behaviour):
             self._count += 1
 
 
-@click.command()
-@click.option("--duration", default=1, help="Run time in seconds.")
-@click.option(
-    "--runtime_mode", default="async", help="Runtime mode: async or threaded."
-)
-def main(duration, runtime_mode):
+def run(duration, runtime_mode):
     """Test act message generate performance."""
-    click.echo(f"Start test for {duration} seconds in runtime mode: {runtime_mode}")
     agent = make_agent(runtime_mode=runtime_mode)
     connection = SyncedGeneratorConnection.make()
     agent.resources.add_connection(connection)
@@ -74,10 +74,27 @@ def main(duration, runtime_mode):
     t.join(5)
 
     rate = connection._count_in / duration
-    click.echo(f"Test finished:")
-    click.echo(f' * envelopes sent: {skill.behaviours["test"]._count}')
-    click.echo(f" * envelopes received: {connection._count_in}")
-    click.echo(f" * rate: {rate} envelopes/second")
+    return [
+        ("envelopes sent: {}", skill.behaviours["test"]._count),
+        ("envelopes received: {}", connection._count_in),
+        ("rate: {} envelopes/second", rate),
+    ]
+
+
+@click.command()
+@click.option("--duration", default=3, help="Run time in seconds.")
+@click.option(
+    "--runtime_mode", default="async", help="Runtime mode: async or threaded."
+)
+@click.option("--number_of_runs", default=10, help="How many times run teste.")
+def main(duration, runtime_mode, number_of_runs):
+    """Run test."""
+    click.echo(f"Start test with options:")
+    click.echo(f"* Duration: {duration} seconds")
+    click.echo(f"* Runtime mode: {runtime_mode}")
+    click.echo(f"* Number of runs: {number_of_runs}")
+
+    print_results(multi_run(int(number_of_runs), run, (duration, runtime_mode),))
 
 
 if __name__ == "__main__":

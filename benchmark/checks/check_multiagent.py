@@ -22,7 +22,13 @@ import os
 import sys
 import time
 
-from benchmark.checks.utils import get_mem_usage_in_mb, make_agent, make_envelope
+from benchmark.checks.utils import (
+    get_mem_usage_in_mb,
+    make_agent,
+    make_envelope,
+    multi_run,
+    print_results,
+)
 from benchmark.checks.utils import make_skill, wait_for_condition
 
 import click
@@ -61,22 +67,8 @@ class TestHandler(Handler):
         self.context.outbox.put(make_envelope(message.to, message.sender))
 
 
-@click.command()
-@click.option("--duration", default=1, help="Run time in seconds.")
-@click.option(
-    "--runtime_mode", default="async", help="Runtime mode: async or threaded."
-)
-@click.option("--runner_mode", default="async", help="Runtime mode: async or threaded.")
-@click.option(
-    "--start_messages", default=100, help="Amount of messages to prepopulate."
-)
-def main(duration, runtime_mode, runner_mode, start_messages):
+def run(duration, runtime_mode, runner_mode, start_messages):
     """Test multiagent message exchange."""
-    click.echo(f"Start test with options:")
-    click.echo(f"* Duration: {duration} seconds")
-    click.echo(f"* Runtime mode: {runtime_mode}")
-    click.echo(f"* Runner mode: {runner_mode}")
-    click.echo(f"* Start messages: {start_messages}")
     local_node = LocalNode()
     agent1 = make_agent(agent_name="agent1", runtime_mode=runtime_mode)
 
@@ -104,14 +96,13 @@ def main(duration, runtime_mode, runner_mode, start_messages):
     runner = AEARunner([agent1, agent2], runner_mode)
     runner.start(threaded=True)
 
-    wait_for_condition(lambda: runner.is_running, timeout=5)
     wait_for_condition(lambda: agent2.is_running, timeout=5)
     wait_for_condition(lambda: agent1.is_running, timeout=5)
-
-    time.sleep(1)
+    wait_for_condition(lambda: runner.is_running, timeout=5)
 
     env1 = make_envelope(connection1.address, connection2.address)
     env2 = make_envelope(connection2.address, connection1.address)
+
     for _ in range(int(start_messages)):
         agent1.outbox.put(env1)
         agent2.outbox.put(env2)
@@ -120,18 +111,47 @@ def main(duration, runtime_mode, runner_mode, start_messages):
 
     mem_usage = get_mem_usage_in_mb()
 
-    runner.stop()
     local_node.stop()
+    runner.stop()
 
     total_messages = skill1.handlers["test"]._count + skill2.handlers["test"]._count
     rate = total_messages / duration
-    click.echo(f"\nResults:")
-    click.echo(f" * Total Messages handled1: {total_messages}")
-    click.echo(f" * Messages handled by agent1: {skill1.handlers['test']._count}")
-    click.echo(f" * Messages handled by agent2: {skill2.handlers['test']._count}")
-    click.echo(f" * Messages rate: {rate}")
-    click.echo(f" * mem usage: {mem_usage} mb")
-    click.echo(f"Test finished.")
+
+    return [
+        ("Total Messages handled1: {}", total_messages),
+        ("Messages handled by agent1: {}", skill1.handlers["test"]._count),
+        ("Messages handled by agent2: {}", skill2.handlers["test"]._count),
+        ("Messages rate: {}", rate),
+        ("Mem usage: {} mb", mem_usage),
+    ]
+
+
+@click.command()
+@click.option("--duration", default=1, help="Run time in seconds.")
+@click.option(
+    "--runtime_mode", default="async", help="Runtime mode: async or threaded."
+)
+@click.option("--runner_mode", default="async", help="Runtime mode: async or threaded.")
+@click.option(
+    "--start_messages", default=100, help="Amount of messages to prepopulate."
+)
+@click.option("--number_of_runs", default=10, help="How many times run teste.")
+def main(duration, runtime_mode, runner_mode, start_messages, number_of_runs):
+    """Run test."""
+    click.echo(f"Start test with options:")
+    click.echo(f"* Duration: {duration} seconds")
+    click.echo(f"* Runtime mode: {runtime_mode}")
+    click.echo(f"* Runner mode: {runner_mode}")
+    click.echo(f"* Start messages: {start_messages}")
+    click.echo(f"* Number of runs: {number_of_runs}")
+
+    print_results(
+        multi_run(
+            int(number_of_runs),
+            run,
+            (duration, runtime_mode, runner_mode, start_messages),
+        )
+    )
 
 
 if __name__ == "__main__":
