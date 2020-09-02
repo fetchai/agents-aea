@@ -218,7 +218,7 @@ class StubConnection(Connection):
         if self.in_queue is None:  # pragma: nocover
             raise ValueError("Input queue not initialized.")
 
-        logger.debug("Read messages!")
+        self.logger.debug("Read messages!")
         async for data in self._file_read_and_trunc(delay=self.read_delay):
             lines = self._split_messages(data)
             for line in lines:
@@ -227,7 +227,7 @@ class StubConnection(Connection):
                 if envelope is None:
                     continue
 
-                logger.debug(f"Add envelope {envelope}")
+                self.logger.debug(f"Add envelope {envelope}")
                 await self.in_queue.put(envelope)
 
     @classmethod
@@ -245,13 +245,13 @@ class StubConnection(Connection):
         """Receive an envelope."""
         self._ensure_connected()
         if self.in_queue is None:  # pragma: nocover
-            logger.error("Input queue not initialized.")
+            self.logger.error("Input queue not initialized.")
             return None
 
         try:
             return await self.in_queue.get()
         except Exception:  # pylint: disable=broad-except
-            logger.exception("Stub connection receive error:")
+            self.logger.exception("Stub connection receive error:")
             return None
 
     async def connect(self) -> None:
@@ -280,7 +280,7 @@ class StubConnection(Connection):
         except CancelledError:
             pass  # task was cancelled, that was expected
         except BaseException:  # pragma: nocover  # pylint: disable=broad-except
-            logger.exception(
+            self.logger.exception(
                 "during envelop read"
             )  # do not raise exception cause it's on task stop
 
