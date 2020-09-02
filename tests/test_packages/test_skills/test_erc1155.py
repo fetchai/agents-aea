@@ -26,10 +26,11 @@ from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
     COSMOS,
-    COSMOS_PRIVATE_KEY_FILE,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_FILE,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS_ETH,
@@ -55,9 +56,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
-            "fetchai/contract_api:0.2.0": "fetchai/ledger:0.3.0",
-            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
+            "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.4.0",
+            "fetchai/contract_api:0.3.0": "fetchai/ledger:0.4.0",
+            "fetchai/oef_search:0.5.0": "fetchai/soef:0.7.0",
         }
 
         # generate random location
@@ -68,17 +69,17 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
-        self.add_item("connection", "fetchai/ledger:0.3.0")
-        self.add_item("connection", "fetchai/soef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
+        self.add_item("connection", "fetchai/ledger:0.4.0")
+        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_deploy:0.11.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.12.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.11.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.12.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -89,9 +90,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(COSMOS)
+        self.generate_private_key(FETCHAI)
         self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
@@ -100,9 +101,8 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         )
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
-        # stdout = self.get_wealth(ETHEREUM)
-        # if int(stdout) < 100000000000000000:
-        #     pytest.skip("The agent needs more funds for the test to pass.")
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+        self.force_set_config(setting_path, COSMOS)
         self.run_install()
 
         # replace location
@@ -113,17 +113,17 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add packages for agent two
         self.set_agent_context(client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
-        self.add_item("connection", "fetchai/ledger:0.3.0")
-        self.add_item("connection", "fetchai/soef:0.6.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
+        self.add_item("connection", "fetchai/ledger:0.4.0")
+        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.10.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.11.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.11.0", client_aea_name
+            "fetchai/erc1155_client:0.12.0", client_aea_name
         )
         assert (
             diff == []
@@ -134,9 +134,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(COSMOS)
+        self.generate_private_key(FETCHAI)
         self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
@@ -144,9 +144,8 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        # stdout = self.get_wealth(ETHEREUM)
-        # if int(stdout) < 100000000000000000:
-        #     pytest.skip("The agent needs more funds for the test to pass.")
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+        self.force_set_config(setting_path, COSMOS)
         self.run_install()
 
         # replace location

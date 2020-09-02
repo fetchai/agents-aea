@@ -50,7 +50,8 @@ class TCPClientConnection(TCPConnection):
         """
         address = cast(str, configuration.config.get("address"))
         port = cast(int, configuration.config.get("port"))
-        assert address is not None and port is not None, "address and port must be set!"
+        if address is None or port is None:
+            raise ValueError("address and port must be set!")  # pragma: nocover
         super().__init__(address, port, configuration=configuration, **kwargs)
         self._reader, self._writer = (
             None,
@@ -83,13 +84,14 @@ class TCPClientConnection(TCPConnection):
         :return: the received envelope, or None if an error occurred.
         """
         try:
-            assert self._reader is not None
+            if self._reader is None:
+                raise ValueError("Reader not set.")  # pragma: nocover
             data = await self._recv(self._reader)
             if data is None:  # pragma: nocover
                 self.logger.debug("[{}] No data received.".format(self.address))
                 return None
             self.logger.debug("[{}] Message received: {!r}".format(self.address, data))
-            envelope = Envelope.decode(data)  # TODO handle decoding error
+            envelope = Envelope.decode(data)
             self.logger.debug(
                 "[{}] Decoded envelope: {}".format(self.address, envelope)
             )

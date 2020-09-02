@@ -52,6 +52,15 @@ Get the plural name.
 >>> PackageType.CONTRACT.to_plural()
 'contracts'
 
+<a name="aea.configurations.base.PackageType.configuration_class"></a>
+#### configuration`_`class
+
+```python
+ | configuration_class() -> Type["PackageConfiguration"]
+```
+
+Get the configuration class.
+
 <a name="aea.configurations.base.PackageType.__str__"></a>
 #### `__`str`__`
 
@@ -612,6 +621,51 @@ Get the version of the package.
 
 Get the package identifier without the version.
 
+<a name="aea.configurations.base.PackageId.from_uri_path"></a>
+#### from`_`uri`_`path
+
+```python
+ | @classmethod
+ | from_uri_path(cls, package_id_uri_path: str) -> "PackageId"
+```
+
+Initialize the public id from the string.
+
+>>> str(PackageId.from_uri_path("skill/author/package_name/0.1.0"))
+'(skill, author/package_name:0.1.0)'
+
+A bad formatted input raises value error:
+>>> PackageId.from_uri_path("very/bad/formatted:input")
+Traceback (most recent call last):
+...
+ValueError: Input 'very/bad/formatted:input' is not well formatted.
+
+**Arguments**:
+
+- `public_id_uri_path`: the public id in uri path string format.
+
+**Returns**:
+
+the public id object.
+
+**Raises**:
+
+- `ValueError`: if the string in input is not well formatted.
+
+<a name="aea.configurations.base.PackageId.to_uri_path"></a>
+#### to`_`uri`_`path
+
+```python
+ | @property
+ | to_uri_path() -> str
+```
+
+Turn the package id into a uri path string.
+
+**Returns**:
+
+uri path string
+
 <a name="aea.configurations.base.PackageId.__hash__"></a>
 #### `__`hash`__`
 
@@ -832,7 +886,6 @@ Get PyPI dependencies.
 
 ```python
  | @property
- | @abstractmethod
  | component_type() -> ComponentType
 ```
 
@@ -868,26 +921,6 @@ Get the prefix import path for this component.
 
 Check whether the component is abstract.
 
-<a name="aea.configurations.base.ComponentConfiguration.load"></a>
-#### load
-
-```python
- | @staticmethod
- | load(component_type: ComponentType, directory: Path, skip_consistency_check: bool = False) -> "ComponentConfiguration"
-```
-
-Load configuration and check that it is consistent against the directory.
-
-**Arguments**:
-
-- `component_type`: the component type.
-- `directory`: the root of the package
-- `skip_consistency_check`: if True, the consistency check are skipped.
-
-**Returns**:
-
-the configuration object.
-
 <a name="aea.configurations.base.ComponentConfiguration.check_fingerprint"></a>
 #### check`_`fingerprint
 
@@ -912,6 +945,23 @@ Check that the AEA version matches the specifier set.
 
 :raises ValueError if the version of the aea framework falls within a specifier.
 
+<a name="aea.configurations.base.ComponentConfiguration.update"></a>
+#### update
+
+```python
+ | update(data: Dict) -> None
+```
+
+Update configuration with other data.
+
+**Arguments**:
+
+- `data`: the data to replace.
+
+**Returns**:
+
+None
+
 <a name="aea.configurations.base.ConnectionConfig"></a>
 ## ConnectionConfig Objects
 
@@ -929,16 +979,6 @@ Handle connection configuration.
 ```
 
 Initialize a connection configuration object.
-
-<a name="aea.configurations.base.ConnectionConfig.component_type"></a>
-#### component`_`type
-
-```python
- | @property
- | component_type() -> ComponentType
-```
-
-Get the component type.
 
 <a name="aea.configurations.base.ConnectionConfig.package_dependencies"></a>
 #### package`_`dependencies
@@ -970,6 +1010,23 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
+<a name="aea.configurations.base.ConnectionConfig.update"></a>
+#### update
+
+```python
+ | update(data: Dict) -> None
+```
+
+Update configuration with other data.
+
+**Arguments**:
+
+- `data`: the data to replace.
+
+**Returns**:
+
+None
+
 <a name="aea.configurations.base.ProtocolConfig"></a>
 ## ProtocolConfig Objects
 
@@ -987,16 +1044,6 @@ Handle protocol configuration.
 ```
 
 Initialize a connection configuration object.
-
-<a name="aea.configurations.base.ProtocolConfig.component_type"></a>
-#### component`_`type
-
-```python
- | @property
- | component_type() -> ComponentType
-```
-
-Get the component type.
 
 <a name="aea.configurations.base.ProtocolConfig.json"></a>
 #### json
@@ -1080,16 +1127,6 @@ Class to represent a skill configuration file.
 
 Initialize a skill configuration.
 
-<a name="aea.configurations.base.SkillConfig.component_type"></a>
-#### component`_`type
-
-```python
- | @property
- | component_type() -> ComponentType
-```
-
-Get the component type.
-
 <a name="aea.configurations.base.SkillConfig.package_dependencies"></a>
 #### package`_`dependencies
 
@@ -1130,6 +1167,23 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
+<a name="aea.configurations.base.SkillConfig.update"></a>
+#### update
+
+```python
+ | update(data: Dict) -> None
+```
+
+Update configuration with other data.
+
+**Arguments**:
+
+- `data`: the data to replace.
+
+**Returns**:
+
+None
+
 <a name="aea.configurations.base.AgentConfig"></a>
 ## AgentConfig Objects
 
@@ -1143,10 +1197,30 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, timeout: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, default_routing: Optional[Dict] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None)
+ | __init__(agent_name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, default_routing: Optional[Dict] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None)
 ```
 
 Instantiate the agent configuration object.
+
+<a name="aea.configurations.base.AgentConfig.component_configurations"></a>
+#### component`_`configurations
+
+```python
+ | @property
+ | component_configurations() -> Dict[ComponentId, Dict]
+```
+
+Get the custom component configurations.
+
+<a name="aea.configurations.base.AgentConfig.component_configurations"></a>
+#### component`_`configurations
+
+```python
+ | @component_configurations.setter
+ | component_configurations(d: Dict[ComponentId, Dict]) -> None
+```
+
+Set the component configurations.
 
 <a name="aea.configurations.base.AgentConfig.package_dependencies"></a>
 #### package`_`dependencies
@@ -1233,6 +1307,15 @@ Set the default ledger.
 **Returns**:
 
 None
+
+<a name="aea.configurations.base.AgentConfig.component_configurations_json"></a>
+#### component`_`configurations`_`json
+
+```python
+ | component_configurations_json() -> List[OrderedDict]
+```
+
+Get the component configurations in JSON format.
 
 <a name="aea.configurations.base.AgentConfig.json"></a>
 #### json
@@ -1387,16 +1470,6 @@ Handle contract configuration.
 ```
 
 Initialize a protocol configuration object.
-
-<a name="aea.configurations.base.ContractConfig.component_type"></a>
-#### component`_`type
-
-```python
- | @property
- | component_type() -> ComponentType
-```
-
-Get the component type.
 
 <a name="aea.configurations.base.ContractConfig.contract_interfaces"></a>
 #### contract`_`interfaces

@@ -1,4 +1,4 @@
-The AEA framework supports flexible logging capabilities with the standard <a href="https://docs.python.org/3/library/logging.html" target=_blank>Python logging library</a>.
+The AEA framework supports flexible logging capabilities with the standard <a href="https://docs.python.org/3/library/logging.html" target="_blank">Python logging library</a>.
 
 In this tutorial, we configure logging for an AEA.
 
@@ -18,18 +18,18 @@ author: fetchai
 version: 0.1.0
 description: ''
 license: Apache-2.0
-aea_version: 0.5.4
+aea_version: 0.6.0
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.8.0
+- fetchai/stub:0.9.0
 contracts: []
 protocols:
-- fetchai/default:0.4.0
+- fetchai/default:0.5.0
 skills:
-- fetchai/error:0.4.0
-default_connection: fetchai/stub:0.8.0
-default_ledger: cosmos
+- fetchai/error:0.5.0
+default_connection: fetchai/stub:0.9.0
+default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -39,9 +39,9 @@ registry_path: ../packages
 
 By updating the `logging_config` section, you can configure the loggers of your application.
 
-The format of this section is specified in the <a href="https://docs.python.org/3/library/logging.config.html" target=_blank>`logging.config`</a> module.
+The format of this section is specified in the <a href="https://docs.python.org/3/library/logging.config.html" target="_blank">`logging.config`</a> module.
 
-At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target=_blank>this section</a>
+At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target="_blank">this section</a>
 you'll find the definition of the configuration dictionary schema.
 
 Below is an example of the `logging_config` value.

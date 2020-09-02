@@ -23,7 +23,7 @@ import asyncio
 import logging
 import random
 import struct
-from asyncio import AbstractEventLoop, CancelledError
+from asyncio import CancelledError
 from random import randint
 from typing import List, Optional, Union, cast
 
@@ -31,11 +31,12 @@ from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.registries import make_crypto
+from aea.exceptions import enforce
 from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.6.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -51,6 +52,7 @@ class Uri:
         host: Optional[str] = None,
         port: Optional[int] = None,
     ):
+        """Initialise Uri."""
         if uri is not None:
             split = uri.split(":", 1)
             self._host = split[0]
@@ -61,7 +63,6 @@ class Uri:
         else:
             self._host = "127.0.0.1"
             self._port = randint(5000, 10000)  # nosec
-            # raise ValueError("Either 'uri' or both 'host' and 'port' must be set")
 
     def __str__(self):
         return "{}:{}".format(self._host, self._port)
@@ -102,18 +103,19 @@ class P2PLibp2pClientConnection(Connection):
                     ledger_id, SUPPORTED_LEDGER_IDS
                 )
             )
-        # TODO: ensure ledger_id matches with provided key of p2p node.
 
         key_file = self.configuration.config.get("client_key_file")  # Optional[str]
         nodes = self.configuration.config.get("nodes")
 
-        assert nodes is not None, "At least one node should be provided"
+        if nodes is None:
+            raise ValueError("At least one node should be provided")
         nodes = list(cast(List, nodes))
 
         nodes_uris = [node["uri"] for node in nodes]
-        assert len(nodes_uris) == len(
-            nodes
-        ), "Delegate Uri should be provided for each node"
+        enforce(
+            len(nodes_uris) == len(nodes),
+            "Delegate Uri should be provided for each node",
+        )
 
         if (
             self.has_crypto_store
@@ -139,14 +141,12 @@ class P2PLibp2pClientConnection(Connection):
         # select a delegate
         index = random.randint(0, len(self.delegate_uris) - 1)  # nosec
         self.node_uri = self.delegate_uris[index]
-        # self.node_cert = self.delegate_certs[index]
         logger.debug("Node to use as delegate: {}".format(self.node_uri))
 
         # tcp connection
         self._reader = None  # type: Optional[asyncio.StreamReader]
         self._writer = None  # type: Optional[asyncio.StreamWriter]
 
-        self._loop = None  # type: Optional[AbstractEventLoop]
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._process_messages_task = None  # type: Union[asyncio.Future, None]
 
@@ -161,8 +161,6 @@ class P2PLibp2pClientConnection(Connection):
 
         self._state.set(ConnectionStates.connecting)
 
-        if self._loop is None:
-            self._loop = asyncio.get_event_loop()
         try:
             # connect libp2p client
 
@@ -170,7 +168,7 @@ class P2PLibp2pClientConnection(Connection):
             self._reader, self._writer = await asyncio.open_connection(
                 self.node_uri.host,
                 self.node_uri._port,  # pylint: disable=protected-access
-                loop=self._loop,
+                loop=self.loop,
             )
 
             # send agent address to node
@@ -183,7 +181,7 @@ class P2PLibp2pClientConnection(Connection):
             # start receiving msgs
             self._in_queue = asyncio.Queue()
             self._process_messages_task = asyncio.ensure_future(
-                self._process_messages(), loop=self._loop
+                self._process_messages(), loop=self.loop
             )
             self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:
@@ -202,20 +200,20 @@ class P2PLibp2pClientConnection(Connection):
         """
         if self.is_disconnected:  # pragma: nocover
             return
-        assert self._process_messages_task is not None
-        assert self._writer is not None
+        if self._process_messages_task is None:
+            raise ValueError("Message task is not set.")  # pragma: nocover
+        if self._writer is None:
+            raise ValueError("Writer is not set.")  # pragma: nocover
         self._state.set(ConnectionStates.disconnecting)
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
             # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
-            # self._process_messages_task = None
+            # self._process_messages_task = None # noqa: E800
 
         self.logger.debug("disconnecting libp2p client connection...")
         self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
-        # TOFIX(LR) requires python 3.7 minimum
-        # await self._writer.wait_closed()
 
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
@@ -230,11 +228,12 @@ class P2PLibp2pClientConnection(Connection):
         :return: the envelope received, or None.
         """
         try:
-            assert self._in_queue is not None, "Input queue not initialized."
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
-                if not self.is_disconnected:
+                if not self.is_disconnected:  # pragma: no cover
                     await self.disconnect()
                 return None
                 # TOFIX(LR) attempt restarting the node?
@@ -263,20 +262,23 @@ class P2PLibp2pClientConnection(Connection):
         """
         while True:
             data = await self._receive()
-            assert self._in_queue is not None, "Input queue not initialized."
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             self._in_queue.put_nowait(data)
             if data is None:
-                break
+                break  # pragma: no cover
 
     async def _send(self, data: bytes) -> None:
-        assert self._writer is not None
+        if self._writer is None:
+            raise ValueError("Writer is not set.")  # pragma: nocover
         size = struct.pack("!I", len(data))
         self._writer.write(size)
         self._writer.write(data)
         await self._writer.drain()
 
     async def _receive(self) -> Optional[bytes]:
-        assert self._reader is not None
+        if self._reader is None:
+            raise ValueError("Reader is not set.")  # pragma: nocover
         try:
             self.logger.debug("Waiting for messages...")
             buf = await self._reader.readexactly(4)
@@ -287,7 +289,7 @@ class P2PLibp2pClientConnection(Connection):
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:
+        except asyncio.streams.IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected

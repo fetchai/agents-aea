@@ -1,9 +1,10 @@
 name: thermometer
 author: fetchai
-version: 0.9.0
+version: 0.10.0
+type: skill
 description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
@@ -13,12 +14,12 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.4.0
-- fetchai/fipa:0.5.0
-- fetchai/ledger_api:0.2.0
-- fetchai/oef_search:0.4.0
+- fetchai/default:0.5.0
+- fetchai/fipa:0.6.0
+- fetchai/ledger_api:0.3.0
+- fetchai/oef_search:0.5.0
 skills:
-- fetchai/generic_seller:0.10.0
+- fetchai/generic_seller:0.11.0
 behaviours:
   service_registration:
     args:
@@ -54,7 +55,7 @@ models:
         temperature: 26
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

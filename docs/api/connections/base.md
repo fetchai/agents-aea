@@ -46,28 +46,10 @@ parameters are None: connection_id, excluded_protocols or restricted_to_protocol
 
 ```python
  | @property
- | loop() -> Optional[AbstractEventLoop]
+ | loop() -> asyncio.AbstractEventLoop
 ```
 
 Get the event loop.
-
-<a name="aea.connections.base.Connection.loop"></a>
-#### loop
-
-```python
- | @loop.setter
- | loop(loop: AbstractEventLoop) -> None
-```
-
-Set the event loop.
-
-**Arguments**:
-
-- `loop`: the event loop.
-
-**Returns**:
-
-None
 
 <a name="aea.connections.base.Connection.address"></a>
 #### address
@@ -250,6 +232,16 @@ an instance of the concrete connection class.
 ```
 
 Return is connected state.
+
+<a name="aea.connections.base.Connection.is_connecting"></a>
+#### is`_`connecting
+
+```python
+ | @property
+ | is_connecting() -> bool
+```
+
+Return is connecting state.
 
 <a name="aea.connections.base.Connection.is_disconnected"></a>
 #### is`_`disconnected

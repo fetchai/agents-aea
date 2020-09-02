@@ -1,15 +1,5 @@
 # Gym Protocol
 
-**Name:** gym
-
-**Author**: fetchai
-
-**Version**: 0.4.0
-
-**Short Description**: A protocol for interacting with a gym connection.
-
-**License**: Apache-2.0
-
 ## Description
 
 This is a protocol for interacting with a gym connection.
@@ -20,10 +10,10 @@ This is a protocol for interacting with a gym connection.
 ---
 name: gym
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 speech_acts:
   act:
     action: ct:AnyObject
@@ -59,4 +49,4 @@ end_states: [successful]
 
 ## Links
 
-* <a href="https://gym.openai.com" target=_blank>OpenAI Gym</a>
+* <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>

@@ -1,4 +1,4 @@
-The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://gym.openai.com" target=_blank>gym</a> library, may be embedded into an AEA skill and connection.
+The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://gym.openai.com" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
 
 ### Discussion
 
@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.8.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.9.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -36,13 +36,13 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.5.0
+aea add skill fetchai/gym:0.6.0
 ```
 
 ### Add a gym connection
 ``` bash
-aea add connection fetchai/gym:0.5.0
-aea config set agent.default_connection fetchai/gym:0.5.0
+aea add connection fetchai/gym:0.6.0
+aea config set agent.default_connection fetchai/gym:0.6.0
 ```
 
 ### Install the skill dependencies
@@ -118,7 +118,7 @@ In the `setup` method of the `GymHandler` the `GymTask` is initialized, as well 
 
 The `GymTask` is responsible for training the RL agent. In particular, `MyRLAgent` is initialized and trained against `ProxyEnv`. The `ProxyEnv` instantiates a `gym.Env` class and therefore implements its API. This means the proxy environment is compatible with any `gym` compatible RL agent. However, unlike other environments it only acts as a proxy and does not implement an environment of its own. It allows for the decoupling of the process environment of the `gym.env` from the process environment of the RL agent. The actual `gym.env` against which the agent is trained is wrapped by the `gym` connection. The proxy environment and gym connection communicate via a protocol, the `gym` protocol. Note, it would trivially be possible to implement the `gym` environment in another AEA; this way one AEA could provide `gym` environments as a service. Naturally, the overhead created by the introduction of the extra layers causes a higher latency when training the RL agent.
 
-In this particular skill, which chiefly serves for demonstration purposes, we implement a very basic RL agent. The agent trains a model of price of `n` goods: it aims to discover the most likely price of each good. To this end, the agent randomly selects one of the `n` goods on each training step and then chooses as an `action` the price which it deems is most likely accepted. Each good is represented by an id and the possible price range `[1,100]` divided into 100 integer bins. For each price bin, a `PriceBandit` is created which models the likelihood of this price. In particular, a price bandit maintains a <a href="https://en.wikipedia.org/wiki/Beta_distribution">beta distribution</a>. The beta distribution is initialized to the uniform distribution. Each time the price associated with a given `PriceBandit` is accepted or rejected the distribution maintained by the `PriceBandit` is updated. For each good, the agent can therefore over time learn which price is most likely.
+In this particular skill, which chiefly serves for demonstration purposes, we implement a very basic RL agent. The agent trains a model of price of `n` goods: it aims to discover the most likely price of each good. To this end, the agent randomly selects one of the `n` goods on each training step and then chooses as an `action` the price which it deems is most likely accepted. Each good is represented by an id and the possible price range `[1,100]` divided into 100 integer bins. For each price bin, a `PriceBandit` is created which models the likelihood of this price. In particular, a price bandit maintains a <a href="https://en.wikipedia.org/wiki/Beta_distribution" target="_blank">beta distribution</a>. The beta distribution is initialized to the uniform distribution. Each time the price associated with a given `PriceBandit` is accepted or rejected the distribution maintained by the `PriceBandit` is updated. For each good, the agent can therefore over time learn which price is most likely.
 
 <img src="../assets/gym-skill.png" alt="Gym skill illustration" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 

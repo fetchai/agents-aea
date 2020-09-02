@@ -80,7 +80,7 @@ class TestContractRegistry:
         cls.registry = AgentComponentRegistry()
         cls.registry.register(contract.component_id, cast(Contract, contract))
         cls.expected_contract_ids = {
-            PublicId.from_str("fetchai/erc1155:0.8.0"),
+            PublicId.from_str("fetchai/erc1155:0.9.0"),
         }
 
     def test_fetch_all(self):
@@ -91,14 +91,14 @@ class TestContractRegistry:
 
     def test_fetch(self):
         """Test that the `fetch` method works as expected."""
-        contract_id = PublicId.from_str("fetchai/erc1155:0.8.0")
+        contract_id = PublicId.from_str("fetchai/erc1155:0.9.0")
         contract = self.registry.fetch(ComponentId(ComponentType.CONTRACT, contract_id))
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.8.0")
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.9.0")
         component_id = ComponentId(ComponentType.CONTRACT, contract_id_removed)
         contract_removed = self.registry.fetch(component_id)
         self.registry.unregister(contract_removed.component_id)
@@ -153,7 +153,7 @@ class TestProtocolRegistry:
 
         cls.expected_protocol_ids = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/fipa:0.5.0"),
+            PublicId.from_str("fetchai/fipa:0.6.0"),
         }
 
     def test_fetch_all(self):
@@ -229,7 +229,6 @@ class TestResources:
         cls.resources.add_component(
             Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
         )
-        # cls.resources.add_component(Component.load_from_directory(ComponentType.PROTOCOL, Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")))
         cls.resources.add_component(
             Skill.from_dir(
                 Path(CUR_PATH, "data", "dummy_skill"), agent_context=MagicMock(),
@@ -244,7 +243,7 @@ class TestResources:
         cls.error_skill_public_id = DEFAULT_SKILL
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
-        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.8.0")
+        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.9.0")
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
@@ -517,15 +516,11 @@ class TestFilter:
         """Test that the internal messages are handled."""
         t = SigningMessage(
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
-            skill_callback_ids=(str(PublicId("dummy_author", "dummy", "0.1.0")),),
-            skill_callback_info={},
-            # crypto_id="ledger_id",
             signed_transaction=SignedTransaction("ledger_id", "tx"),
         )
-        t.counterparty = "skill"
+        t.to = str(PublicId("dummy_author", "dummy", "0.1.0"))
         t.sender = "decision_maker"
-        self.aea.decision_maker.message_out_queue.put(t)
-        self.aea._filter.handle_internal_messages()
+        self.aea._filter.handle_internal_message(t)
 
         internal_handlers_list = self.aea.resources.get_handlers(t.protocol_id)
         assert len(internal_handlers_list) == 1
@@ -544,6 +539,8 @@ class TestFilter:
 
 
 class TestAgentComponentRegistry:
+    """Test agent component registry."""
+
     def setup_class(self):
         """Set up the test."""
         self.registry = AgentComponentRegistry()

@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the decision maker class."""
 
-import copy
 import hashlib
 import logging
 import threading
@@ -159,7 +158,7 @@ class ProtectedQueue(Queue):
         super().__init__()
         self._access_code_hash = _hash(access_code)
 
-    def put(
+    def put(  # pylint: disable=arguments-differ
         self, internal_message: Optional[Message], block=True, timeout=None
     ) -> None:
         """
@@ -181,7 +180,9 @@ class ProtectedQueue(Queue):
             raise ValueError("Only messages are allowed!")
         super().put(internal_message, block=True, timeout=None)
 
-    def put_nowait(self, internal_message: Optional[Message]) -> None:
+    def put_nowait(  # pylint: disable=arguments-differ
+        self, internal_message: Optional[Message]
+    ) -> None:
         """
         Put an internal message on the queue.
 
@@ -377,10 +378,4 @@ class DecisionMaker:
         :param message: the internal message
         :return: None
         """
-        # TODO: remove next three lines
-        copy_message = copy.copy(message)
-        copy_message.counterparty = message.sender
-        copy_message.sender = message.sender
-        # copy_message.to = message.to
-        copy_message.is_incoming = True
-        self.decision_maker_handler.handle(copy_message)
+        self.decision_maker_handler.handle(message)

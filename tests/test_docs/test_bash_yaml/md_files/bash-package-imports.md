@@ -1,7 +1,7 @@
 ``` bash
 aea_name/
   aea-config.yaml       YAML configuration of the AEA
-  cosmos_private_key.txt   The private key file
+  fetchai_private_key.txt   The private key file
   connections/          Directory containing all the connections developed as part of the given project.
     connection_1/       First connection
     ...                 ...
@@ -29,5 +29,5 @@ aea_name/
 ```
 ``` yaml
 connections:
-- fetchai/stub:0.8.0
+- fetchai/stub:0.9.0
 ```

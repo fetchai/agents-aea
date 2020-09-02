@@ -25,13 +25,12 @@ from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
 from aea.exceptions import AEAException
-from aea.helpers.dialogue.base import (
+from aea.helpers.transaction.base import RawMessage, RawTransaction, State
+from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import (
     Dialogue as BaseDialogue,
-    DialogueLabel as BaseDialogueLabel,
     Dialogues as BaseDialogues,
 )
-from aea.helpers.transaction.base import RawMessage, RawTransaction, State
-from aea.protocols.base import Message
 
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID,
@@ -53,33 +52,25 @@ class ContractApiDialogues(BaseContractApiDialogues):
 
         :return: None
         """
-        BaseContractApiDialogues.__init__(self, str(CONNECTION_ID))
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming/outgoing first message.
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return ContractApiDialogue.Role.LEDGER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The ledger connection maintains the dialogue on behalf of the ledger
+            return ContractApiDialogue.Role.LEDGER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> ContractApiDialogue:
-        """
-        Create an instance of contract API dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = ContractApiDialogue(
-            dialogue_label=dialogue_label, agent_address=str(CONNECTION_ID), role=role,
+        BaseContractApiDialogues.__init__(
+            self,
+            self_address=str(CONNECTION_ID),
+            role_from_first_message=role_from_first_message,
+            **kwargs,
         )
-        return dialogue
 
 
 class ContractApiRequestDispatcher(RequestDispatcher):
@@ -102,9 +93,8 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 
     def get_ledger_id(self, message: Message) -> str:
         """Get the ledger id."""
-        assert isinstance(
-            message, ContractApiMessage
-        ), "argument is not a ContractApiMessage instance."
+        if not isinstance(message, ContractApiMessage):  # pragma: nocover
+            raise ValueError("argument is not a ContractApiMessage instance.")
         message = cast(ContractApiMessage, message)
         return message.ledger_id
 
@@ -119,17 +109,16 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param message: the request message.
         :return: an error message response.
         """
-        response = ContractApiMessage(
-            performative=ContractApiMessage.Performative.ERROR,
-            message_id=message.message_id + 1,
-            target=message.message_id,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            code=500,
-            message=str(e),
-            data=b"",
+        response = cast(
+            ContractApiMessage,
+            dialogue.reply(
+                performative=ContractApiMessage.Performative.ERROR,
+                target_message=message,
+                code=500,
+                message=str(e),
+                data=b"",
+            ),
         )
-        response.counterparty = message.counterparty
-        dialogue.update(response)
         return response
 
     def dispatch_request(
@@ -137,7 +126,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         ledger_api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
-        response_builder: Callable[[bytes], ContractApiMessage],
+        response_builder: Callable[[bytes, ContractApiDialogue], ContractApiMessage],
     ) -> ContractApiMessage:
         """
         Dispatch a request to a user-defined contract method.
@@ -151,9 +140,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         contract = self.contract_registry.make(message.contract_id)
         try:
             data = self._get_data(ledger_api, message, contract)
-            response = response_builder(data)
-            response.counterparty = message.counterparty
-            dialogue.update(response)
+            response = response_builder(data, dialogue)
         except AEAException as e:
             self.logger.error(str(e))
             response = self.get_error_message(e, ledger_api, message, dialogue)
@@ -179,13 +166,15 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :return: None
         """
 
-        def build_response(data: bytes) -> ContractApiMessage:
-            return ContractApiMessage(
-                performative=ContractApiMessage.Performative.STATE,
-                message_id=message.message_id + 1,
-                target=message.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                state=State(message.ledger_id, data),
+        def build_response(
+            data: bytes, dialogue: ContractApiDialogue
+        ) -> ContractApiMessage:
+            return cast(
+                ContractApiMessage,
+                dialogue.reply(
+                    performative=ContractApiMessage.Performative.STATE,
+                    state=State(message.ledger_id, data),
+                ),
             )
 
         return self.dispatch_request(ledger_api, message, dialogue, build_response)
@@ -205,13 +194,15 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :return: None
         """
 
-        def build_response(tx: bytes) -> ContractApiMessage:
-            return ContractApiMessage(
-                performative=ContractApiMessage.Performative.RAW_TRANSACTION,
-                message_id=message.message_id + 1,
-                target=message.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                raw_transaction=RawTransaction(message.ledger_id, tx),
+        def build_response(
+            tx: bytes, dialogue: ContractApiDialogue
+        ) -> ContractApiMessage:
+            return cast(
+                ContractApiMessage,
+                dialogue.reply(
+                    performative=ContractApiMessage.Performative.RAW_TRANSACTION,
+                    raw_transaction=RawTransaction(message.ledger_id, tx),
+                ),
             )
 
         return self.dispatch_request(ledger_api, message, dialogue, build_response)
@@ -231,13 +222,15 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :return: None
         """
 
-        def build_response(tx: bytes) -> ContractApiMessage:
-            return ContractApiMessage(
-                performative=ContractApiMessage.Performative.RAW_TRANSACTION,
-                message_id=message.message_id + 1,
-                target=message.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                raw_transaction=RawTransaction(message.ledger_id, tx),
+        def build_response(
+            tx: bytes, dialogue: ContractApiDialogue
+        ) -> ContractApiMessage:
+            return cast(
+                ContractApiMessage,
+                dialogue.reply(
+                    performative=ContractApiMessage.Performative.RAW_TRANSACTION,
+                    raw_transaction=RawTransaction(message.ledger_id, tx),
+                ),
             )
 
         return self.dispatch_request(ledger_api, message, dialogue, build_response)
@@ -257,13 +250,15 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :return: None
         """
 
-        def build_response(rm: bytes) -> ContractApiMessage:
-            return ContractApiMessage(
-                performative=ContractApiMessage.Performative.RAW_MESSAGE,
-                message_id=message.message_id + 1,
-                target=message.message_id,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                raw_message=RawMessage(message.ledger_id, rm),
+        def build_response(
+            rm: bytes, dialogue: ContractApiDialogue
+        ) -> ContractApiMessage:
+            return cast(
+                ContractApiMessage,
+                dialogue.reply(
+                    performative=ContractApiMessage.Performative.RAW_MESSAGE,
+                    raw_message=RawMessage(message.ledger_id, rm),
+                ),
             )
 
         return self.dispatch_request(ledger_api, message, dialogue, build_response)
@@ -346,7 +341,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                     f"Expected two or more positional arguments, got {len(full_args_spec.args)}"
                 )
             return method_to_call(api, message.contract_address, **message.kwargs.body)
-        elif message.performative in [
+        if message.performative in [
             ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         ]:
             if len(full_args_spec.args) < 1:
@@ -354,5 +349,6 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                     f"Expected one or more positional arguments, got {len(full_args_spec.args)}"
                 )
             return method_to_call(api, **message.kwargs.body)
-        else:  # pragma: nocover
-            raise AEAException(f"Unexpected performative: {message.performative}")
+        raise AEAException(  # pragma: nocover
+            f"Unexpected performative: {message.performative}"
+        )

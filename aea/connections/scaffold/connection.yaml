@@ -1,10 +1,11 @@
 name: scaffold
 author: fetchai
 version: 0.1.0
+type: connection
 description: The scaffold connection provides a scaffold for a connection to be implemented
   by the developer.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   connection.py: QmT7MNg8gkmWMzthN3k77i6UVhwXBeC2bGiNrUmXQcjWit

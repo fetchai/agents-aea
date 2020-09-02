@@ -16,21 +16,17 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains registries."""
 
-import copy
 import logging
-import queue
-from queue import Queue
-from typing import List, Optional, cast
+from typing import List, Optional
 
 from aea.configurations.base import (
     PublicId,
     SkillId,
 )
+from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.protocols.base import Message
-from aea.protocols.signing.message import SigningMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler
 
@@ -40,7 +36,9 @@ logger = logging.getLogger(__name__)
 class Filter:
     """This class implements the filter of an AEA."""
 
-    def __init__(self, resources: Resources, decision_maker_out_queue: Queue):
+    def __init__(
+        self, resources: Resources, decision_maker_out_queue: AsyncFriendlyQueue
+    ):
         """
         Instantiate the filter.
 
@@ -56,7 +54,7 @@ class Filter:
         return self._resources
 
     @property
-    def decision_maker_out_queue(self) -> Queue:
+    def decision_maker_out_queue(self) -> AsyncFriendlyQueue:
         """Get decision maker (out) queue."""
         return self._decision_maker_out_queue
 
@@ -94,40 +92,25 @@ class Filter:
         )
         return active_behaviour
 
-    def handle_internal_messages(self) -> None:
+    def handle_new_handlers_and_behaviours(self) -> None:
         """
         Handle the messages from the decision maker.
 
         :return: None
         """
-        self._handle_decision_maker_out_queue()
-        # get new behaviours and handlers from the agent skills
         self._handle_new_behaviours()
         self._handle_new_handlers()
 
-    def _handle_decision_maker_out_queue(self) -> None:
-        """Process descision maker's messages."""
-        while not self.decision_maker_out_queue.empty():
-            try:
-                internal_message = (
-                    self.decision_maker_out_queue.get_nowait()
-                )  # type: Optional[Message]
-                self._process_internal_message(internal_message)
-            except queue.Empty:
-                logger.warning("The decision maker out queue is unexpectedly empty.")
-                continue
+    async def get_internal_message(self) -> Optional[Message]:
+        """Get a message from decision_maker_out_queue."""
+        return await self.decision_maker_out_queue.async_get()
 
-    def _process_internal_message(self, internal_message: Optional[Message]) -> None:
+    def handle_internal_message(self, internal_message: Optional[Message]) -> None:
+        """Handlle internal message."""
         if internal_message is None:
             logger.warning("Got 'None' while processing internal messages.")
-        elif isinstance(
-            internal_message, SigningMessage
-        ):  # TODO: remove; all messages allowed
-            internal_message = cast(SigningMessage, internal_message)
-            self._handle_signing_message(internal_message)
-        else:
-            # TODO: is it expected unknown data type here?
-            logger.warning("Cannot handle a {} message.".format(type(internal_message)))
+            return
+        self._handle_internal_message(internal_message)
 
     def _handle_new_behaviours(self) -> None:
         """Register new behaviours added to skills."""
@@ -161,31 +144,22 @@ class Filter:
                         "Error when trying to add a new handler: {}".format(str(e))
                     )
 
-    def _handle_signing_message(self, signing_message: SigningMessage):
-        """Handle transaction message from the Decision Maker."""
-        skill_callback_ids = [
-            PublicId.from_str(skill_id)
-            for skill_id in signing_message.skill_callback_ids
-        ]
-        for skill_id in skill_callback_ids:
-            handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
-                signing_message.protocol_id,
-                skill_id,  # TODO: route based on component id specified on message
+    def _handle_internal_message(self, message: Message):
+        """Handle message from the Decision Maker."""
+        try:
+            skill_id = PublicId.from_str(message.to)
+        except ValueError:
+            logger.warning("Invalid public id as destination={}".format(message.to))
+            return
+        handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+            message.protocol_id, skill_id,
+        )
+        if handler is not None:
+            logger.debug(
+                "Calling handler {} of skill {}".format(type(handler), skill_id)
             )
-            if handler is not None:
-                logger.debug(
-                    "Calling handler {} of skill {}".format(type(handler), skill_id)
-                )
-                # TODO: remove next three lines
-                copy_signing_message = copy.copy(
-                    signing_message
-                )  # we do a shallow copy as we only need the message object to be copied; not its referenced objects
-                copy_signing_message.counterparty = signing_message.sender
-                copy_signing_message.sender = signing_message.sender
-                # copy_signing_message.to = signing_message.to
-                copy_signing_message.is_incoming = True
-                handler.handle(cast(Message, copy_signing_message))
-            else:
-                logger.warning(
-                    "No internal handler fetched for skill_id={}".format(skill_id)
-                )
+            handler.handle(message)
+        else:
+            logger.warning(
+                "No internal handler fetched for skill_id={}".format(skill_id)
+            )

@@ -22,6 +22,7 @@
 from enum import Enum
 
 from aea.configurations.base import ProtocolId
+from aea.exceptions import enforce
 from aea.protocols.base import Message
 from aea.protocols.scaffold.serialization import MyScaffoldSerializer
 
@@ -46,9 +47,9 @@ class MyScaffoldMessage(Message):
         :param performative: the type of message.
         """
         super().__init__(performative=performative, **kwargs)
-        assert (
-            self._is_consistent()
-        ), "MyScaffoldMessage initialization inconsistent."  # pragma: no cover
+        enforce(  # pragma: no cover
+            self._is_consistent(), "MyScaffoldMessage initialization inconsistent."
+        )
 
     def _is_consistent(self) -> bool:
         """Check that the data is consistent."""

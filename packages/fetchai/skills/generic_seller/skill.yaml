@@ -1,23 +1,24 @@
 name: generic_seller
 author: fetchai
-version: 0.10.0
+version: 0.11.0
+type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmPKPmNmmjXHxk2kVmREwNiAoVQjwdBqCHmpyaZ5n8Exap
-  dialogues.py: QmNf96REY7PiRdStRJrn97fuCRgqTAeQti5uf4sPzgMNau
-  handlers.py: QmbpmWTst15PTYMoPf2GBnTJvCMyHaToCV2qRtESyQhvWB
-  strategy.py: QmZvYLbemiZXEAmyNcgF3JcqH6cDXhvhtrmxtuJxNfpXPb
+  behaviours.py: QmaaKLWhEgYBzGexXkfTxxKPmJsBQxLjc5Jbr1pDnfNXEf
+  dialogues.py: QmRJCregJWVs8scTMjQptvztKa5NEHKUfeZECVxdU233C6
+  handlers.py: QmR1e2ajLt84fXtogtYDGemwrA2G89RHnhYveT1MhUPTQQ
+  strategy.py: QmX1mp7eZkz1P6iVyoDCATZDKZRgwe1EgMVmAyvtGDHvm3
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.4.0
-- fetchai/fipa:0.5.0
-- fetchai/ledger_api:0.2.0
-- fetchai/oef_search:0.4.0
+- fetchai/default:0.5.0
+- fetchai/fipa:0.6.0
+- fetchai/ledger_api:0.3.0
+- fetchai/oef_search:0.5.0
 skills: []
 behaviours:
   service_registration:
@@ -54,7 +55,7 @@ models:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

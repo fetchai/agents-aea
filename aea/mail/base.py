@@ -20,17 +20,16 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
-from aea.configurations.base import ProtocolId, PublicId, SkillId
+from aea.common import Address
+from aea.configurations.base import PackageId, ProtocolId, PublicId
+from aea.exceptions import enforce
 from aea.mail import base_pb2
 from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
-
-
-Address = str
 
 
 class AEAConnectionError(Exception):
@@ -141,33 +140,81 @@ class EnvelopeContext:
     """Extra information for the handling of an envelope."""
 
     def __init__(
-        self, connection_id: Optional[PublicId] = None, uri: Optional[URI] = None
+        self,
+        connection_id: Optional[PublicId] = None,
+        skill_id: Optional[PublicId] = None,
+        uri: Optional[URI] = None,
     ):
         """
         Initialize the envelope context.
 
         :param connection_id: the connection id used for routing the outgoing envelope in the multiplexer.
+        :param skill_id: the skill id used for routing the incoming envelope in the AEA.
         :param uri: the URI sent with the envelope.
         """
-        self.connection_id = connection_id
+        skill_id_from_uri, connection_id_from_uri = (
+            self._get_public_ids_from_uri(uri) if uri is not None else (None, None)
+        )
+        if connection_id_from_uri and connection_id:
+            raise ValueError("Cannot define connection_id explicitly and in URI.")
+        self._connection_id = connection_id or connection_id_from_uri
+        if skill_id_from_uri and skill_id:
+            raise ValueError("Cannot define skill_id explicitly and in URI.")
+        self._skill_id = skill_id or skill_id_from_uri
         self.uri = uri
+
+    @property
+    def connection_id(self) -> Optional[PublicId]:
+        """Get the connection id."""
+        return self._connection_id
+
+    @property
+    def skill_id(self) -> Optional[PublicId]:
+        """Get the skill id."""
+        return self._skill_id
 
     @property
     def uri_raw(self) -> str:
         """Get uri in string format."""
         return str(self.uri) if self.uri is not None else ""
 
+    @staticmethod
+    def _get_public_ids_from_uri(
+        uri: URI,
+    ) -> Tuple[Optional[PublicId], Optional[PublicId]]:
+        """
+        Try get skill and connection id from uri.
+
+        :param uri: the uri
+        :return: (skill_id if present in uri, connection if present in uri)
+        """
+        skill_id = None
+        connection_id = None
+        try:
+            package_id = PackageId.from_uri_path(uri.path)
+            package_type = str(package_id.package_type)
+            if package_type == "skill":
+                skill_id = package_id.public_id
+            elif package_type == "connection":
+                connection_id = package_id.public_id
+            else:
+                raise ValueError(
+                    f"Invalid package type {package_type} in uri for envelope context."
+                )
+        except ValueError as e:
+            logger.debug(f"URI - {uri.path} - not a valid package_id id. Error: {e}")
+        return (skill_id, connection_id)
+
     def __str__(self):
         """Get the string representation."""
-        return "EnvelopeContext(connection_id={connection_id}, uri_raw={uri_raw})".format(
-            connection_id=str(self.connection_id), uri_raw=str(self.uri),
-        )
+        return f"EnvelopeContext(connection_id={self.connection_id}, skill_id={self.skill_id}, uri_raw={self.uri_raw})"
 
     def __eq__(self, other):
         """Compare with another object."""
         return (
             isinstance(other, EnvelopeContext)
             and self.connection_id == other.connection_id
+            and self.skill_id == other.skill_id
             and self.uri == other.uri
         )
 
@@ -274,6 +321,8 @@ class Envelope:
         :param message: the protocol-specific message.
         :param context: the optional envelope context.
         """
+        if isinstance(message, Message):
+            message = self._check_consistency(message, to, sender)
         self._to = to
         self._sender = sender
         self._protocol_id = protocol_id
@@ -333,20 +382,46 @@ class Envelope:
         return self._context
 
     @property
-    def skill_id(self) -> Optional[SkillId]:
+    def skill_id(self) -> Optional[PublicId]:
         """
         Get the skill id from an envelope context, if set.
 
         :return: skill id
         """
         skill_id = None  # Optional[PublicId]
-        if self.context is not None and self.context.uri is not None:
-            uri_path = self.context.uri.path
-            try:
-                skill_id = PublicId.from_uri_path(uri_path)
-            except ValueError:
-                logger.debug("URI - {} - not a valid skill id.".format(uri_path))
+        if self.context is not None:
+            skill_id = self.context.skill_id
         return skill_id
+
+    @property
+    def connection_id(self) -> Optional[PublicId]:
+        """
+        Get the connection id from an envelope context, if set.
+
+        :return: connection id
+        """
+        connection_id = None  # Optional[PublicId]
+        if self.context is not None:
+            connection_id = self.context.connection_id
+        return connection_id
+
+    @staticmethod
+    def _check_consistency(message: Message, to: str, sender: str) -> Message:
+        """Check consistency of sender and to."""
+        if message.has_to:
+            enforce(
+                message.to == to, "To specified on message does not match envelope."
+            )
+        else:
+            message.to = to
+        if message.has_sender:
+            enforce(
+                message.sender == sender,
+                "Sender specified on message does not match envelope.",
+            )
+        else:
+            message.sender = sender
+        return message
 
     def __eq__(self, other):
         """Compare with another object."""

@@ -1,45 +1,45 @@
 ``` bash
-aea fetch fetchai/generic_seller:0.7.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.8.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/generic_seller:0.10.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/generic_seller:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.7.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.8.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/generic_buyer:0.9.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/generic_buyer:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
-aea generate-wealth cosmos
+aea generate-wealth fetchai
 ```
 ``` bash
 cd my_seller_aea
@@ -62,13 +62,13 @@ aea delete my_buyer_aea
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 ``` yaml
 models:
@@ -80,7 +80,7 @@ models:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -98,7 +98,7 @@ models:
     args:
       currency_id: FET
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

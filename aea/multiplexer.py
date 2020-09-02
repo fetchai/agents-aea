@@ -26,12 +26,12 @@ from typing import Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
-from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
+from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner, cancel_and_wait
 from aea.helpers.logging import WithLogger
 from aea.mail.base import (
     AEAConnectionError,
-    Address,
     Empty,
     Envelope,
     EnvelopeContext,
@@ -40,17 +40,34 @@ from aea.mail.base import (
 from aea.protocols.base import Message
 
 
-# TODO refactoring: this should be an enum
-#      but beware of backward-compatibility.
-
-
-class ConnectionStatus:
+class MultiplexerStatus(AsyncState):
     """The connection status class."""
 
     def __init__(self):
         """Initialize the connection status."""
-        self.is_connected = False  # type: bool
-        self.is_connecting = False  # type: bool
+        super().__init__(
+            initial_state=ConnectionStates.disconnected, states_enum=ConnectionStates
+        )
+
+    @property
+    def is_connected(self) -> bool:  # pragma: nocover
+        """Return is connected."""
+        return self.get() == ConnectionStates.connected
+
+    @property
+    def is_connecting(self) -> bool:  # pragma: nocover
+        """Return is connecting."""
+        return self.get() == ConnectionStates.connecting
+
+    @property
+    def is_disconnected(self) -> bool:  # pragma: nocover
+        """Return is disconnected."""
+        return self.get() == ConnectionStates.disconnected
+
+    @property
+    def is_disconnecting(self) -> bool:  # pragma: nocover
+        """Return is disconnected."""
+        return self.get() == ConnectionStates.disconnecting
 
 
 class AsyncMultiplexer(WithLogger):
@@ -78,7 +95,7 @@ class AsyncMultiplexer(WithLogger):
         self._default_connection: Optional[Connection] = None
         self._initialize_connections_if_any(connections, default_connection_index)
 
-        self._connection_status = ConnectionStatus()
+        self._connection_status = MultiplexerStatus()
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
@@ -108,9 +125,10 @@ class AsyncMultiplexer(WithLogger):
         self, connections: Optional[Sequence[Connection]], default_connection_index: int
     ):
         if connections is not None and len(connections) > 0:
-            assert (
-                0 <= default_connection_index <= len(connections) - 1
-            ), "Default connection index out of range."
+            enforce(
+                (0 <= default_connection_index <= len(connections) - 1),
+                "Default connection index out of range.",
+            )
             for idx, connection in enumerate(connections):
                 self.add_connection(connection, idx == default_connection_index)
 
@@ -137,13 +155,15 @@ class AsyncMultiplexer(WithLogger):
         Do some consistency checks on the multiplexer connections.
 
         :return: None
-        :raise AssertionError: if an inconsistency is found.
+        :raise AEAEnforceError: if an inconsistency is found.
         """
-        assert len(self.connections) > 0, "List of connections cannot be empty."
+        enforce(len(self.connections) > 0, "List of connections cannot be empty.")
 
-        assert len(set(c.connection_id for c in self.connections)) == len(
-            self.connections
-        ), "Connection names must be unique."
+        enforce(
+            len(set(c.connection_id for c in self.connections))
+            == len(self.connections),
+            "Connection names must be unique.",
+        )
 
     def _set_default_connection_if_none(self):
         """Set the default connection if it is none."""
@@ -158,9 +178,8 @@ class AsyncMultiplexer(WithLogger):
     @property
     def out_queue(self) -> asyncio.Queue:
         """Get the out queue."""
-        assert (
-            self._out_queue is not None
-        ), "Accessing out queue before loop is started."
+        if self._out_queue is None:  # pragma: nocover
+            raise ValueError("Accessing out queue before loop is started.")
         return self._out_queue
 
     @property
@@ -171,7 +190,7 @@ class AsyncMultiplexer(WithLogger):
     @property
     def is_connected(self) -> bool:
         """Check whether the multiplexer is processing envelopes."""
-        return all(c.is_connected for c in self._connections)
+        return self.connection_status.is_connected
 
     @property
     def default_routing(self) -> Dict[PublicId, PublicId]:
@@ -184,7 +203,7 @@ class AsyncMultiplexer(WithLogger):
         self._default_routing = default_routing
 
     @property
-    def connection_status(self) -> ConnectionStatus:
+    def connection_status(self) -> MultiplexerStatus:
         """Get the connection status."""
         return self._connection_status
 
@@ -199,15 +218,19 @@ class AsyncMultiplexer(WithLogger):
                 self.logger.debug("Multiplexer already connected.")
                 return
             try:
+                self.connection_status.set(ConnectionStates.connecting)
                 await self._connect_all()
-                assert self.is_connected, "At least one connection failed to connect!"
-                self._connection_status.is_connected = True
+
+                if all(c.is_connected for c in self._connections):
+                    self.connection_status.set(ConnectionStates.connected)
+                else:
+                    raise AEAConnectionError("Failed to connect the multiplexer.")
+
                 self._recv_loop_task = self._loop.create_task(self._receiving_loop())
                 self._send_loop_task = self._loop.create_task(self._send_loop())
                 self.logger.debug("Multiplexer connected and running.")
             except (CancelledError, Exception):
                 self.logger.exception("Exception on connect:")
-                self._connection_status.is_connected = False
                 await self._stop()
                 raise AEAConnectionError("Failed to connect the multiplexer.")
 
@@ -215,14 +238,14 @@ class AsyncMultiplexer(WithLogger):
         """Disconnect the multiplexer."""
         self.logger.debug("Multiplexer disconnecting...")
         async with self._lock:
-            if not self.connection_status.is_connected:
+            if self.connection_status.is_disconnected:
                 self.logger.debug("Multiplexer already disconnected.")
                 await asyncio.wait_for(self._stop(), timeout=60)
                 return
             try:
+                self.connection_status.set(ConnectionStates.disconnecting)
                 await asyncio.wait_for(self._disconnect_all(), timeout=60)
                 await asyncio.wait_for(self._stop(), timeout=60)
-                self._connection_status.is_connected = False
                 self.logger.debug("Multiplexer disconnected.")
             except (CancelledError, Exception):
                 self.logger.exception("Exception on disconnect:")
@@ -245,12 +268,13 @@ class AsyncMultiplexer(WithLogger):
             await cancel_and_wait(self._send_loop_task)
             self._send_loop_task = None
 
-        for connection in [
-            c
-            for c in self.connections
-            if c.state in (ConnectionStates.connecting, ConnectionStates.connected)
-        ]:
-            await connection.disconnect()
+        if all([c.is_disconnected for c in self.connections]):
+            self.connection_status.set(ConnectionStates.disconnected)
+        else:
+            raise AEAConnectionError(
+                "Failed to disconnect multiplexer, some connections are not disconnected!"
+            )
+
         self.logger.debug("Multiplexer stopped.")
 
     async def _connect_all(self) -> None:
@@ -286,7 +310,6 @@ class AsyncMultiplexer(WithLogger):
                 "Connection {} already established.".format(connection.connection_id)
             )
         else:
-            connection.loop = self._loop
             await connection.connect()
             self.logger.debug(
                 "Connection {} has been set up successfully.".format(
@@ -365,7 +388,6 @@ class AsyncMultiplexer(WithLogger):
 
         while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
-                # self.self.logger.debug("Waiting for incoming envelopes...")
                 done, _pending = await asyncio.wait(
                     task_to_connection.keys(), return_when=asyncio.FIRST_COMPLETED
                 )
@@ -420,6 +442,7 @@ class AsyncMultiplexer(WithLogger):
                 "No connection registered with id: {}.".format(connection_id)
             )
 
+        # third, if no other option route by default connection
         if connection_id is None:
             self.logger.debug(
                 "Using default connection: {}".format(self.default_connection)
@@ -582,7 +605,7 @@ class Multiplexer(AsyncMultiplexer):
     def setup(
         self,
         connections: Collection[Connection],
-        default_routing: Dict[PublicId, PublicId],
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
         default_connection: Optional[PublicId] = None,
     ) -> None:
         """
@@ -593,7 +616,7 @@ class Multiplexer(AsyncMultiplexer):
         :param default_connection: the default connection.
         :return: None.
         """
-        self.default_routing = default_routing
+        self.default_routing = default_routing or {}
         self._connections = []
         for c in connections:
             self.add_connection(c, c.public_id == default_connection)
@@ -689,16 +712,14 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: Multiplexer, default_address: Address):
+    def __init__(self, multiplexer: Multiplexer):
         """
         Initialize the outbox.
 
         :param multiplexer: the multiplexer
-        :param default_address: the default address of the agent
         """
         super().__init__()
         self._multiplexer = multiplexer
-        self._default_address = default_address
 
     def empty(self) -> bool:
         """
@@ -716,7 +737,7 @@ class OutBox:
         :return: None
         """
         self._multiplexer.logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'...".format(
+            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'.".format(
                 envelope.to,
                 envelope.sender,
                 envelope.protocol_id,
@@ -729,24 +750,19 @@ class OutBox:
                 "Only Message type allowed in envelope message field when putting into outbox."
             )
         message = cast(Message, envelope.message)
-        if not message.has_counterparty:  # pragma: nocover
-            raise ValueError("Provided message has message.counterparty not set.")
+        if not message.has_to:  # pragma: nocover
+            raise ValueError("Provided message has message.to not set.")
         if not message.has_sender:  # pragma: nocover
             raise ValueError("Provided message has message.sender not set.")
         self._multiplexer.put(envelope)
 
     def put_message(
-        self,
-        message: Message,
-        context: Optional[EnvelopeContext] = None,
-        sender: Optional[str] = None,
+        self, message: Message, context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
         Put a message in the outbox.
 
         This constructs an envelope with the input arguments.
-
-        "sender" is a deprecated kwarg and will be removed in the next version
 
         :param message: the message
         :param context: the envelope context
@@ -754,13 +770,13 @@ class OutBox:
         """
         if not isinstance(message, Message):
             raise ValueError("Provided message not of type Message.")
-        if not message.has_counterparty:
-            raise ValueError("Provided message has message.counterparty not set.")
-        if not message.has_sender and sender is None:
+        if not message.has_to:
+            raise ValueError("Provided message has message.to not set.")
+        if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
-            to=message.counterparty,
-            sender=sender or message.sender,  # TODO: remove "sender"
+            to=message.to,
+            sender=message.sender,
             protocol_id=message.protocol_id,
             message=message,
             context=context,

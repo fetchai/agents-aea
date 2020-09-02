@@ -59,7 +59,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.7.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.8.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
@@ -71,19 +71,19 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/generic_seller:0.10.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/generic_seller:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 In `my_seller_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 </p>
@@ -93,7 +93,7 @@ default_routing:
 
 Then, fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.7.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.8.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
@@ -105,19 +105,19 @@ The following steps create the buyer from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/generic_buyer:0.9.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/generic_buyer:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 </p>
@@ -128,9 +128,9 @@ default_routing:
 
 First, create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Add keys and generate wealth for the buyer AEA
@@ -139,14 +139,14 @@ The buyer needs to have some wealth to purchase the service from the seller.
 
 First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, create some wealth for your buyer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
 ``` bash
-aea generate-wealth cosmos
+aea generate-wealth fetchai
 ```
 
 ### Update the skill configs
@@ -164,7 +164,7 @@ models:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -186,7 +186,7 @@ models:
     args:
       currency_id: FET
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

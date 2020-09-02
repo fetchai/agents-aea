@@ -56,7 +56,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = PublicId.from_str("fetchai/gym:0.4.0")
+        cls.protocol_id = PublicId.from_str("fetchai/gym:0.5.0")
         cls.protocol_name = cls.protocol_id.name
         cls.protocol_author = cls.protocol_id.author
         cls.protocol_version = cls.protocol_id.version
@@ -104,21 +104,6 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         )
         assert self.result.exception.message == s
 
-    # @unittest.mock.patch("aea.cli.add.fetch_package")
-    # def test_add_protocol_from_registry_positive(self, fetch_package_mock):
-    #     """Test add from registry positive result."""
-    #     public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
-    #     obj_type = "protocol"
-    #     result = self.runner.invoke(
-    #         cli,
-    #         [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
-    #         standalone_mode=False,
-    #     )
-    #     assert result.exit_code == 0
-    #     fetch_package_mock.assert_called_once_with(
-    #         obj_type, public_id=public_id, cwd="."
-    #     )
-
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
@@ -139,7 +124,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = PublicId.from_str("fetchai/gym:0.4.0")
+        cls.protocol_id = PublicId.from_str("fetchai/gym:0.5.0")
         cls.protocol_name = cls.protocol_id.name
         cls.protocol_author = cls.protocol_id.author
         cls.protocol_version = cls.protocol_id.version
@@ -351,7 +336,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.4.0"
+        cls.protocol_id = "fetchai/gym:0.5.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -417,7 +402,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.4.0"
+        cls.protocol_id = "fetchai/gym:0.5.0"
         cls.protocol_name = "gym"
 
         # copy the 'packages' directory in the parent of the agent folder.

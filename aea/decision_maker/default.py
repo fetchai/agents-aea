@@ -22,21 +22,21 @@
 import copy
 import logging
 from enum import Enum
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
 from aea.decision_maker.base import OwnershipState as BaseOwnershipState
 from aea.decision_maker.base import Preferences as BasePreferences
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
+from aea.exceptions import enforce
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
 from aea.helpers.transaction.base import SignedMessage, SignedTransaction, Terms
 from aea.identity.base import Identity
-from aea.protocols.base import Message
+from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.signing.dialogues import SigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage
@@ -51,7 +51,6 @@ GoodHoldings = Dict[str, int]  # a map from identifier to quantity
 UtilityParams = Dict[str, float]  # a map from identifier to quantity
 ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
-SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
 
 logger = logging.getLogger(__name__)
@@ -67,32 +66,24 @@ class SigningDialogues(BaseSigningDialogues):
         :param agent_address: the address of the agent for whom dialogues are maintained
         :return: None
         """
-        BaseSigningDialogues.__init__(self, "decision_maker")
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return SigningDialogue.Role.DECISION_MAKER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return SigningDialogue.Role.DECISION_MAKER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> SigningDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = SigningDialogue(
-            dialogue_label=dialogue_label, agent_address="decision_maker", role=role
+        BaseSigningDialogues.__init__(
+            self,
+            self_address="decision_maker",
+            role_from_first_message=role_from_first_message,
+            **kwargs,
         )
-        return dialogue
 
 
 class StateUpdateDialogues(BaseStateUpdateDialogues):
@@ -105,32 +96,24 @@ class StateUpdateDialogues(BaseStateUpdateDialogues):
         :param agent_address: the address of the agent for whom dialogues are maintained
         :return: None
         """
-        BaseStateUpdateDialogues.__init__(self, "decision_maker")
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return StateUpdateDialogue.Role.DECISION_MAKER
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return StateUpdateDialogue.Role.DECISION_MAKER
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> StateUpdateDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = StateUpdateDialogue(
-            dialogue_label=dialogue_label, agent_address="decision_maker", role=role
+        BaseStateUpdateDialogues.__init__(
+            self,
+            self_address="decision_maker",
+            role_from_first_message=role_from_first_message,
+            **kwargs,
         )
-        return dialogue
 
 
 class GoalPursuitReadiness:
@@ -180,7 +163,7 @@ class OwnershipState(BaseOwnershipState):
         self._amount_by_currency_id = None  # type: Optional[CurrencyHoldings]
         self._quantities_by_good_id = None  # type: Optional[GoodHoldings]
 
-    def set(
+    def set(  # pylint: disable=arguments-differ
         self,
         amount_by_currency_id: CurrencyHoldings = None,
         quantities_by_good_id: GoodHoldings = None,
@@ -192,17 +175,19 @@ class OwnershipState(BaseOwnershipState):
         :param amount_by_currency_id: the currency endowment of the agent in this state.
         :param quantities_by_good_id: the good endowment of the agent in this state.
         """
-        assert (
-            amount_by_currency_id is not None and quantities_by_good_id is not None
-        ), "Must provide values."
-        assert (
-            not self.is_initialized
-        ), "Cannot apply state update, current state is already initialized!"
+        if amount_by_currency_id is None:  # pragma: nocover
+            raise ValueError("Must provide amount_by_currency_id.")
+        if quantities_by_good_id is None:  # pragma: nocover
+            raise ValueError("Must provide quantities_by_good_id.")
+        enforce(
+            not self.is_initialized,
+            "Cannot apply state update, current state is already initialized!",
+        )
 
         self._amount_by_currency_id = copy.copy(amount_by_currency_id)
         self._quantities_by_good_id = copy.copy(quantities_by_good_id)
 
-    def apply_delta(
+    def apply_delta(  # pylint: disable=arguments-differ
         self,
         delta_amount_by_currency_id: Dict[str, int] = None,
         delta_quantities_by_good_id: Dict[str, int] = None,
@@ -217,26 +202,32 @@ class OwnershipState(BaseOwnershipState):
         :param delta_quantities_by_good_id: the delta in the quantities by good
         :return: None
         """
-        assert (
-            delta_amount_by_currency_id is not None
-            and delta_quantities_by_good_id is not None
-        ), "Must provide values."
-        assert (
-            self._amount_by_currency_id is not None
-            and self._quantities_by_good_id is not None
-        ), "Cannot apply state update, current state is not initialized!"
-        assert all(
-            [
-                key in self._amount_by_currency_id
-                for key in delta_amount_by_currency_id.keys()
-            ]
-        ), "Invalid keys present in delta_amount_by_currency_id."
-        assert all(
-            [
-                key in self._quantities_by_good_id
-                for key in delta_quantities_by_good_id.keys()
-            ]
-        ), "Invalid keys present in delta_quantities_by_good_id."
+        if delta_amount_by_currency_id is None:  # pragma: nocover
+            raise ValueError("Must provide delta_amount_by_currency_id.")
+        if delta_quantities_by_good_id is None:  # pragma: nocover
+            raise ValueError("Must provide delta_quantities_by_good_id.")
+        if self._amount_by_currency_id is None or self._quantities_by_good_id is None:
+            raise ValueError(  # pragma: nocover
+                "Cannot apply state update, current state is not initialized!"
+            )
+        enforce(
+            all(
+                [
+                    key in self._amount_by_currency_id
+                    for key in delta_amount_by_currency_id.keys()
+                ]
+            ),
+            "Invalid keys present in delta_amount_by_currency_id.",
+        )
+        enforce(
+            all(
+                [
+                    key in self._quantities_by_good_id
+                    for key in delta_quantities_by_good_id.keys()
+                ]
+            ),
+            "Invalid keys present in delta_quantities_by_good_id.",
+        )
 
         for currency_id, amount_delta in delta_amount_by_currency_id.items():
             self._amount_by_currency_id[currency_id] += amount_delta
@@ -255,13 +246,15 @@ class OwnershipState(BaseOwnershipState):
     @property
     def amount_by_currency_id(self) -> CurrencyHoldings:
         """Get currency holdings in this state."""
-        assert self._amount_by_currency_id is not None, "CurrencyHoldings not set!"
+        if self._amount_by_currency_id is None:
+            raise ValueError("amount_by_currency_id is not set!")
         return copy.copy(self._amount_by_currency_id)
 
     @property
     def quantities_by_good_id(self) -> GoodHoldings:
         """Get good holdings in this state."""
-        assert self._quantities_by_good_id is not None, "GoodHoldings not set!"
+        if self._quantities_by_good_id is None:
+            raise ValueError("quantities_by_good_id is not set!")
         return copy.copy(self._quantities_by_good_id)
 
     def is_affordable_transaction(self, terms: Terms) -> bool:
@@ -322,10 +315,10 @@ class OwnershipState(BaseOwnershipState):
         :param terms: the transaction terms
         :return: None
         """
-        assert (
-            self._amount_by_currency_id is not None
-            and self._quantities_by_good_id is not None
-        ), "Cannot apply state update, current state is not initialized!"
+        if self._amount_by_currency_id is None or self._quantities_by_good_id is None:
+            raise ValueError(  # pragma: nocover
+                "Cannot apply state update, current state is not initialized!"
+            )
         for currency_id, amount_delta in terms.amount_by_currency_id.items():
             self._amount_by_currency_id[currency_id] += amount_delta
 
@@ -363,7 +356,7 @@ class Preferences(BasePreferences):
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
         self._quantity_shift = QUANTITY_SHIFT
 
-    def set(
+    def set(  # pylint: disable=arguments-differ
         self,
         exchange_params_by_currency_id: ExchangeParams = None,
         utility_params_by_good_id: UtilityParams = None,
@@ -375,13 +368,14 @@ class Preferences(BasePreferences):
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
         """
-        assert (
-            exchange_params_by_currency_id is not None
-            and utility_params_by_good_id is not None
-        ), "Must provide values."
-        assert (
-            not self.is_initialized
-        ), "Cannot apply preferences update, preferences already initialized!"
+        if exchange_params_by_currency_id is None:  # pragma: nocover
+            raise ValueError("Must provide exchange_params_by_currency_id.")
+        if utility_params_by_good_id is None:  # pragma: nocover
+            raise ValueError("Must provide utility_params_by_good_id.")
+        enforce(
+            not self.is_initialized,
+            "Cannot apply preferences update, preferences already initialized!",
+        )
 
         self._exchange_params_by_currency_id = copy.copy(exchange_params_by_currency_id)
         self._utility_params_by_good_id = copy.copy(utility_params_by_good_id)
@@ -400,15 +394,15 @@ class Preferences(BasePreferences):
     @property
     def exchange_params_by_currency_id(self) -> ExchangeParams:
         """Get exchange parameter for each currency."""
-        assert (
-            self._exchange_params_by_currency_id is not None
-        ), "ExchangeParams not set!"
+        if self._exchange_params_by_currency_id is None:
+            raise ValueError("ExchangeParams not set!")
         return self._exchange_params_by_currency_id
 
     @property
     def utility_params_by_good_id(self) -> UtilityParams:
         """Get utility parameter for each good."""
-        assert self._utility_params_by_good_id is not None, "UtilityParams not set!"
+        if self._utility_params_by_good_id is None:
+            raise ValueError("UtilityParams not set!")
         return self._utility_params_by_good_id
 
     def logarithmic_utility(self, quantities_by_good_id: GoodHoldings) -> float:
@@ -418,7 +412,7 @@ class Preferences(BasePreferences):
         :param quantities_by_good_id: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
         :return: utility value
         """
-        assert self.is_initialized, "Preferences params not set!"
+        enforce(self.is_initialized, "Preferences params not set!")
         result = logarithmic_utility(
             self.utility_params_by_good_id, quantities_by_good_id, self._quantity_shift
         )
@@ -431,7 +425,7 @@ class Preferences(BasePreferences):
         :param amount_by_currency_id: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
         :return: utility value
         """
-        assert self.is_initialized, "Preferences params not set!"
+        enforce(self.is_initialized, "Preferences params not set!")
         result = linear_utility(
             self.exchange_params_by_currency_id, amount_by_currency_id
         )
@@ -449,13 +443,13 @@ class Preferences(BasePreferences):
         :param amount_by_currency_id: the currency holdings
         :return: the utility value.
         """
-        assert self.is_initialized, "Preferences params not set!"
+        enforce(self.is_initialized, "Preferences params not set!")
         goods_score = self.logarithmic_utility(quantities_by_good_id)
         currency_score = self.linear_utility(amount_by_currency_id)
         score = goods_score + currency_score
         return score
 
-    def marginal_utility(
+    def marginal_utility(  # pylint: disable=arguments-differ
         self,
         ownership_state: BaseOwnershipState,
         delta_quantities_by_good_id: Optional[GoodHoldings] = None,
@@ -470,7 +464,7 @@ class Preferences(BasePreferences):
         :param delta_amount_by_currency_id: the change in money holdings
         :return: the marginal utility score
         """
-        assert self.is_initialized, "Preferences params not set!"
+        enforce(self.is_initialized, "Preferences params not set!")
         ownership_state = cast(OwnershipState, ownership_state)
         current_goods_score = self.logarithmic_utility(
             ownership_state.quantities_by_good_id
@@ -510,7 +504,7 @@ class Preferences(BasePreferences):
         :param terms: the transaction terms.
         :return: the score.
         """
-        assert self.is_initialized, "Preferences params not set!"
+        enforce(self.is_initialized, "Preferences params not set!")
         ownership_state = cast(OwnershipState, ownership_state)
         current_score = self.utility(
             quantities_by_good_id=ownership_state.quantities_by_good_id,
@@ -642,15 +636,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
-        signing_msg_response = SigningMessage(
-            performative=SigningMessage.Performative.ERROR,
-            dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
-            target=signing_msg.message_id,
-            message_id=signing_msg.message_id + 1,
-            skill_callback_ids=signing_msg.skill_callback_ids,
-            skill_callback_info=signing_msg.skill_callback_info,
-            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
-        )
+        performative = SigningMessage.Performative.ERROR
+        kwargs = {
+            "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+        }  # type: Dict[str, Any]
         if self._is_acceptable_for_signing(signing_msg):
             signed_message = self.wallet.sign_message(
                 signing_msg.raw_message.ledger_id,
@@ -658,21 +647,16 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 signing_msg.raw_message.is_deprecated_mode,
             )
             if signed_message is not None:
-                signing_msg_response = SigningMessage(
-                    performative=SigningMessage.Performative.SIGNED_MESSAGE,
-                    dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
-                    target=signing_msg.message_id,
-                    message_id=signing_msg.message_id + 1,
-                    skill_callback_ids=signing_msg.skill_callback_ids,
-                    skill_callback_info=signing_msg.skill_callback_info,
-                    signed_message=SignedMessage(
-                        signing_msg.raw_message.ledger_id,
-                        signed_message,
-                        signing_msg.raw_message.is_deprecated_mode,
-                    ),
+                performative = SigningMessage.Performative.SIGNED_MESSAGE
+                kwargs.pop("error_code")
+                kwargs["signed_message"] = SignedMessage(
+                    signing_msg.raw_message.ledger_id,
+                    signed_message,
+                    signing_msg.raw_message.is_deprecated_mode,
                 )
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_dialogue.update(signing_msg_response)
+        signing_msg_response = signing_dialogue.reply(
+            performative=performative, target_message=signing_msg, **kwargs,
+        )
         self.message_out_queue.put(signing_msg_response)
 
     def _handle_transaction_signing(
@@ -685,33 +669,23 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
-        signing_msg_response = SigningMessage(
-            performative=SigningMessage.Performative.ERROR,
-            dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
-            target=signing_msg.message_id,
-            message_id=signing_msg.message_id + 1,
-            skill_callback_ids=signing_msg.skill_callback_ids,
-            skill_callback_info=signing_msg.skill_callback_info,
-            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
-        )
+        performative = SigningMessage.Performative.ERROR
+        kwargs = {
+            "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
+        }  # type: Dict[str, Any]
         if self._is_acceptable_for_signing(signing_msg):
             signed_tx = self.wallet.sign_transaction(
                 signing_msg.raw_transaction.ledger_id, signing_msg.raw_transaction.body
             )
             if signed_tx is not None:
-                signing_msg_response = SigningMessage(
-                    performative=SigningMessage.Performative.SIGNED_TRANSACTION,
-                    dialogue_reference=signing_dialogue.dialogue_label.dialogue_reference,
-                    target=signing_msg.message_id,
-                    message_id=signing_msg.message_id + 1,
-                    skill_callback_ids=signing_msg.skill_callback_ids,
-                    skill_callback_info=signing_msg.skill_callback_info,
-                    signed_transaction=SignedTransaction(
-                        signing_msg.raw_transaction.ledger_id, signed_tx
-                    ),
+                performative = SigningMessage.Performative.SIGNED_TRANSACTION
+                kwargs.pop("error_code")
+                kwargs["signed_transaction"] = SignedTransaction(
+                    signing_msg.raw_transaction.ledger_id, signed_tx
                 )
-        signing_msg_response.counterparty = signing_msg.counterparty
-        signing_dialogue.update(signing_msg_response)
+        signing_msg_response = signing_dialogue.reply(
+            performative=performative, target_message=signing_msg, **kwargs,
+        )
         self.message_out_queue.put(signing_msg_response)
 
     def _is_acceptable_for_signing(self, signing_msg: SigningMessage) -> bool:

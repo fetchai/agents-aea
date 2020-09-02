@@ -28,7 +28,7 @@ from aea.connections.stub.connection import StubConnection, write_envelope
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.6.0")
 
 
 class P2PStubConnection(StubConnection):
@@ -53,7 +53,8 @@ class P2PStubConnection(StubConnection):
             Union[str, Path],
             configuration.config.get("namespace_dir", tempfile.mkdtemp()),
         )
-        assert namespace_dir_path is not None, "namespace_dir_path must be set!"
+        if namespace_dir_path is None:
+            raise ValueError("namespace_dir_path must be set!")  # pragma: nocover
         self.namespace = os.path.abspath(namespace_dir_path)
 
         input_file_path = os.path.join(self.namespace, "{}.in".format(identity.address))
@@ -70,7 +71,8 @@ class P2PStubConnection(StubConnection):
 
         :return: None
         """
-        assert self.loop is not None, "Loop not initialized."
+        if self.loop is None:
+            raise ValueError("Loop not initialized.")  # pragma: nocover
         target_file = Path(os.path.join(self.namespace, "{}.in".format(envelope.to)))
 
         with open(target_file, "ab") as file:
@@ -80,7 +82,8 @@ class P2PStubConnection(StubConnection):
 
     async def disconnect(self) -> None:
         """Disconnect the connection."""
-        assert self.loop is not None, "Loop not initialized."
+        if self.loop is None:
+            raise ValueError("Loop not initialized.")  # pragma: nocover
         await self.loop.run_in_executor(self._write_pool, self._cleanup)
         await super().disconnect()
 

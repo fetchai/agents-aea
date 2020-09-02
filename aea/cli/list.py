@@ -40,7 +40,7 @@ from aea.configurations.loader import ConfigLoader
 @click.group(name="list")
 @click.pass_context
 @check_aea_project
-def list_command(click_context):
+def list_command(click_context):  # pylint: disable=unused-argument
     """List the installed resources."""
 
 

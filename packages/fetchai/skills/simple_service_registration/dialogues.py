@@ -24,9 +24,8 @@ This module contains the classes required for dialogue management.
 - OefSearchDialogues: The dialogues class keeps track of all dialogues.
 """
 
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.protocols.base import Message
+from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -51,29 +50,20 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseOefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseOefSearchDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue

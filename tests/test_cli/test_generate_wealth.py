@@ -23,7 +23,7 @@ from unittest import TestCase, mock
 import pytest
 
 from aea.cli import cli
-from aea.cli.generate_wealth import _try_generate_wealth, _wait_funds_release
+from aea.cli.generate_wealth import _try_generate_wealth
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseMany
 
@@ -36,24 +36,12 @@ from tests.conftest import (
 from tests.test_cli.tools_for_testing import ContextMock
 
 
-@mock.patch("aea.cli.generate_wealth.try_get_balance", return_value=0)
-@mock.patch("aea.cli.generate_wealth.FUNDS_RELEASE_TIMEOUT", 0.5)
-class WaitFundsReleaseTestCase(TestCase):
-    """Test case for _wait_funds_release method."""
-
-    def test__wait_funds_release_positive(self, try_get_balance_mock):
-        """Test for _wait_funds_release method positive result."""
-        with pytest.raises(ValueError):
-            _wait_funds_release("agent_config", "wallet", "type_")
-
-
 class GenerateWealthTestCase(TestCase):
     """Test case for _generate_wealth method."""
 
     @mock.patch("aea.cli.generate_wealth.Wallet")
     @mock.patch("aea.cli.generate_wealth.click.echo")
     @mock.patch("aea.cli.generate_wealth.try_generate_testnet_wealth")
-    @mock.patch("aea.cli.generate_wealth._wait_funds_release")
     @mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys_ctx")
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""

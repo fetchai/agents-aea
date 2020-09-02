@@ -1,15 +1,5 @@
 # Signing Protocol
 
-**Name:** signing
-
-**Author**: fetchai
-
-**Version**: 0.2.0
-
-**Short Description**: A protocol for communication between skills and decision maker.
-
-**License**: Apache-2.0
-
 ## Description
 
 This is a protocol for communication between a skill and a decision maker.
@@ -20,32 +10,22 @@ This is a protocol for communication between a skill and a decision maker.
 ---
 name: signing
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 speech_acts:
   sign_transaction:
-    skill_callback_ids: pt:list[pt:str]
-    skill_callback_info: pt:dict[pt:str, pt:str]
     terms: ct:Terms
     raw_transaction: ct:RawTransaction
   sign_message:
-    skill_callback_ids: pt:list[pt:str]
-    skill_callback_info: pt:dict[pt:str, pt:str]
     terms: ct:Terms
     raw_message: ct:RawMessage
   signed_transaction:
-    skill_callback_ids: pt:list[pt:str]
-    skill_callback_info: pt:dict[pt:str, pt:str]
     signed_transaction: ct:SignedTransaction
   signed_message:
-    skill_callback_ids: pt:list[pt:str]
-    skill_callback_info: pt:dict[pt:str, pt:str]
     signed_message: ct:SignedMessage
   error:
-    skill_callback_ids: pt:list[pt:str]
-    skill_callback_info: pt:dict[pt:str, pt:str]
     error_code: ct:ErrorCode
 ...
 ---

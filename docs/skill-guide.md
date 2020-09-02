@@ -83,18 +83,16 @@ class MySearchBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        search_request = OefSearchMessage(
-            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            query=self.query,
-        )
         self.context.logger.info(
             "sending search request to OEF search node, search_count={}".format(
                 self.sent_search_count
             )
         )
-        search_request.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(search_request)
+        search_request, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=self.query,
+        )
         self.context.outbox.put_message(message=search_request)
 
     def teardown(self) -> None:
@@ -268,10 +266,9 @@ We place this code in `my_aea/skills/my_search/handlers.py`.
 We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> classes.
 
 ``` python
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.protocols.base import Message
-from aea.skills.base import Model
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.skills.base import Address, Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
@@ -295,32 +292,23 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseOefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseOefSearchDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
 ```
 
 We add this code in the file `my_aea/skills/my_search/my_model.py`, replacing its original content. We then renamce `my_aea/skills/my_search/my_model.py` to `my_aea/skills/my_search/dialogues.py`.
@@ -333,14 +321,15 @@ Based on our skill components above, we create the following config file.
 name: my_search
 author: fetchai
 version: 0.1.0
+type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.4.0
+- fetchai/oef_search:0.5.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -384,23 +373,23 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.4.0
+aea add protocol fetchai/oef_search:0.5.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 We also need to add the soef and p2p connections and install the AEA's dependencies:
 ``` bash
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/p2p_libp2p:0.7.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/p2p_libp2p:0.8.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 Finally, in the `aea-config.yaml` add the following lines:
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 This will ensure that search requests are processed by the correct connection.
@@ -409,16 +398,16 @@ This will ensure that search requests are processed by the correct connection.
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.10.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.11.0 && cd simple_service_registration
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
 
 We first create the private key for the service provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then we run the aea:
@@ -642,9 +631,9 @@ class Strategy(Model):
 We create a <a href="../api/skills/base#model-objects">`Model`</a> type dialogue class and place it in `dialogues.py`.
 
 ``` python
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -669,32 +658,24 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        BaseOefSearchDialogues.__init__(self, self.context.agent_address)
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return BaseOefSearchDialogue.Role.AGENT
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseOefSearchDialogue.Role.AGENT
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        BaseOefSearchDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
         )
-        return dialogue
+
 ```
 
 Finally, we have a handler, placed in `handlers.py`:
@@ -712,7 +693,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.4.0"
 
 
 class OefSearchHandler(Handler):
@@ -809,9 +790,10 @@ The associated `skill.yaml` is:
 name: simple_service_registration
 author: fetchai
 version: 0.4.0
+type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD
@@ -821,7 +803,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.4.0
+- fetchai/oef_search:0.5.0
 skills: []
 behaviours:
   service:
@@ -854,9 +836,9 @@ dependencies: {}
 
 First, create the private key for the search AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:

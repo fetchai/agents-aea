@@ -24,6 +24,7 @@ import numpy as np
 from tensorflow import keras
 
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -64,11 +65,12 @@ class Strategy(Model):
             "location": Location(location["longitude"], location["latitude"])
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        assert (
+        enforce(
             len(self._set_service_data) == 2
             and "key" in self._set_service_data
-            and "value" in self._set_service_data
-        ), "service_data must contain keys `key` and `value`"
+            and "value" in self._set_service_data,
+            "service_data must contain keys `key` and `value`",
+        )
         self._remove_service_data = {"key": self._set_service_data["key"]}
         self._simple_service_data = {
             self._set_service_data["key"]: self._set_service_data["value"]
@@ -76,7 +78,7 @@ class Strategy(Model):
 
         super().__init__(**kwargs)
         # loading ML dataset
-        # TODO this should be parametrized
+        # (this could be parametrized)
         (
             (self.train_x, self.train_y),
             (self.test_x, self.test_y),

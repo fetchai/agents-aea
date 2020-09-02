@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any, BinaryIO, Dict, Optional, Tuple, Union, cast
 
 from eth_account import Account
-from eth_account.datastructures import AttributeDict
+from eth_account.datastructures import SignedTransaction
 from eth_account.messages import encode_defunct
 
 from eth_keys import keys
@@ -35,11 +35,12 @@ from eth_keys import keys
 import requests
 
 from web3 import HTTPProvider, Web3
-from web3.contract import Contract as EthereumContract
+from web3.types import TxParams
 
+from aea.common import Address
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.exceptions import enforce
 from aea.helpers.base import try_decorator
-from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +139,7 @@ class EthereumCrypto(Crypto[Account]):
         :return: signed transaction
         """
         signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
-        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction
+        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction # noqa: E800
         return signed_transaction
 
     @classmethod
@@ -212,8 +213,8 @@ class EthereumHelper(Helper):
         )
         return aggregate_hash.hex()
 
-    @staticmethod
-    def get_address_from_public_key(public_key: str) -> str:
+    @classmethod
+    def get_address_from_public_key(cls, public_key: str) -> str:
         """
         Get the address from the public key.
 
@@ -225,9 +226,9 @@ class EthereumHelper(Helper):
         address = Web3.toChecksumAddress(raw_address)
         return address
 
-    @staticmethod
+    @classmethod
     def recover_message(
-        message: bytes, signature: str, is_deprecated_mode: bool = False
+        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[Address, ...]:
         """
         Recover the addresses from the hash.
@@ -238,7 +239,7 @@ class EthereumHelper(Helper):
         :return: the recovered addresses
         """
         if is_deprecated_mode:
-            assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
+            enforce(len(message) == 32, "Message must be hashed to exactly 32 bytes.")
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 address = Account.recoverHash(  # pylint: disable=no-value-for-parameter
@@ -378,7 +379,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        tx_signed = cast(AttributeDict, tx_signed)
+        tx_signed = cast(SignedTransaction, tx_signed)
         hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
             tx_signed.rawTransaction
         )
@@ -447,15 +448,15 @@ class EthereumApi(LedgerApi, EthereumHelper):
                 abi=contract_interface["abi"], bytecode=contract_interface["bytecode"],
             )
         else:
+            _contract_address = self.api.toChecksumAddress(contract_address)
             instance = self.api.eth.contract(
-                address=contract_address,
+                address=_contract_address,
                 abi=contract_interface["abi"],
                 bytecode=contract_interface["bytecode"],
             )
-        instance = cast(EthereumContract, instance)
         return instance
 
-    def get_deploy_transaction(
+    def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
@@ -473,14 +474,15 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :returns tx: the transaction dictionary.
         """
         # create the transaction dict
-        nonce = self.api.eth.getTransactionCount(deployer_address)
+        _deployer_address = self.api.toChecksumAddress(deployer_address)
+        nonce = self.api.eth.getTransactionCount(_deployer_address)
         instance = self.get_contract_instance(contract_interface)
-        data = instance.constructor().__dict__.get("data_in_transaction")
+        data = instance.constructor(**kwargs).buildTransaction().get("data", "0x")
         tx = {
             "from": deployer_address,  # only 'from' address, don't insert 'to' address!
             "value": value,  # transfer as part of deployment
             "gas": gas,
-            "gasPrice": self.api.eth.gasPrice,  # TODO: refine
+            "gasPrice": self.api.eth.gasPrice,
             "nonce": nonce,
             "data": data,
         }
@@ -496,7 +498,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         try:
             # try estimate the gas and update the transaction dict
-            gas_estimate = self.api.eth.estimateGas(transaction=tx)
+            _tx = cast(TxParams, tx)
+            gas_estimate = self.api.eth.estimateGas(transaction=_tx)
             logger.debug("gas estimate: {}".format(gas_estimate))
             tx["gas"] = gas_estimate
         except Exception as e:  # pylint: disable=broad-except # pragma: nocover

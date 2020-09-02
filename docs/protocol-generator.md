@@ -34,7 +34,7 @@ name: two_party_negotiation
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
@@ -116,7 +116,7 @@ An optional type for a content denotes that the content's existence is optional,
 | Multi types                | `<MT>`  | `pt:union[<PT>/<CT>/<PCT>/<PMT>, ..., <PT>/<CT>/<PCT>/<PMT>]` | `pt:union[ct:DataModel, pt:set[pt:str]]` | `Union[DataModel, FrozenSet[str]]` |
 | Optional types             | `<O>`   | `pt:optional[<MT>/<PMT>/<PCT>/<PT>/<CT>]`                                       | `pt:optional[pt:bool]`                   | `Optional[bool]`                   |
 
-*This is how variable length tuples containing elements of the same type are declared in Python*; see <a href="https://docs.python.org/3/library/typing.html#typing.Tuple" target=_blank>here</a>
+*This is how variable length tuples containing elements of the same type are declared in Python*; see <a href="https://docs.python.org/3/library/typing.html#typing.Tuple" target="_blank">here</a>
 
 ### Protocol Buffer Schema
 
@@ -159,7 +159,7 @@ If there is one role, then the two agents in a dialogue take the same role.
     * Once the generator is called, it produces a `custom_types` module containing stub implementations for every custom type in the specification. The user must then modify this module and add implementations for every custom type in the specification. This includes implementations of how an object of a custom type can be encoded and decoded using protocol buffer.
     * Note, currently the way custom types are dealt with in the generator is admittedly inconvenient. The reason is, the generator does not know the structure of custom types and how they may be serialised/deserialised. Although this approach works, it is only a temporary solution until further work on a programming language-independent type description language is finished (similar to how the generator is designed to be a programming language-independent protocol description language).
 2. Currently, the first element in `pt:dict` cannot be a `<CT>`, `pt:float` or  `pt:bytes`. This is because of a constraint in protocol buffer version 3 which is the framework's underlying serialisation mechanism. In a future version, we may address this limitation, in which case we will relax this constraint.
-3. In protocol buffer version 3, which is the version used by the generator, there is no way to check whether an optional field (i.e. contents of type `pt:optional[...]`) has been set or not (see discussion <a href="https://github.com/protocolbuffers/protobuf/issues/1606" target=_blank>here</a>). In proto3, all optional fields are assigned a default value (e.g. `0` for integers types, `false` for boolean types, etc). Therefore, given an optional field whose value is the default value, there is no way to know from the optional field itself, whether it is not set, or in fact is set but its value happens to be the default value. Because of this, in the generated protocol schema file (the `.proto` file), for every optional content there is a second field that declares whether this field is set or not. We will maintain this temporary solution until a cleaner alternative is found.
+3. In protocol buffer version 3, which is the version used by the generator, there is no way to check whether an optional field (i.e. contents of type `pt:optional[...]`) has been set or not (see discussion <a href="https://github.com/protocolbuffers/protobuf/issues/1606" target="_blank">here</a>). In proto3, all optional fields are assigned a default value (e.g. `0` for integers types, `false` for boolean types, etc). Therefore, given an optional field whose value is the default value, there is no way to know from the optional field itself, whether it is not set, or in fact is set but its value happens to be the default value. Because of this, in the generated protocol schema file (the `.proto` file), for every optional content there is a second field that declares whether this field is set or not. We will maintain this temporary solution until a cleaner alternative is found.
 4. Be aware that currently, using the generated protocols in python, there might be some rounding errors when serialising and then deserialising values of `pt:float` contents.
 
 

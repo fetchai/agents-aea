@@ -97,15 +97,13 @@ class MlTradeHandler(Handler):
             )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=ml_trade_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"ml_trade_message": ml_trade_msg.encode()},
         )
-        default_msg.counterparty = ml_trade_msg.counterparty
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_cft(
@@ -120,7 +118,7 @@ class MlTradeHandler(Handler):
         """
         query = ml_trade_msg.query
         self.context.logger.info(
-            "got a Call for Terms from {}.".format(ml_trade_msg.counterparty[-5:])
+            "got a Call for Terms from {}.".format(ml_trade_msg.sender[-5:])
         )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_matching_supply(query):
@@ -129,18 +127,14 @@ class MlTradeHandler(Handler):
         terms = strategy.generate_terms()
         self.context.logger.info(
             "sending to the address={} a Terms message: {}".format(
-                ml_trade_msg.counterparty[-5:], terms.values
+                ml_trade_msg.sender[-5:], terms.values
             )
         )
-        terms_msg = MlTradeMessage(
+        terms_msg = ml_trade_dialogue.reply(
             performative=MlTradeMessage.Performative.TERMS,
-            dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
-            message_id=ml_trade_msg.message_id + 1,
-            target=ml_trade_msg.message_id,
+            target_message=ml_trade_msg,
             terms=terms,
         )
-        terms_msg.counterparty = ml_trade_msg.counterparty
-        ml_trade_dialogue.update(terms_msg)
         self.context.outbox.put_message(message=terms_msg)
 
     def _handle_accept(
@@ -155,9 +149,7 @@ class MlTradeHandler(Handler):
         """
         terms = ml_trade_msg.terms
         self.context.logger.info(
-            "got an Accept from {}: {}".format(
-                ml_trade_msg.counterparty[-5:], terms.values
-            )
+            "got an Accept from {}: {}".format(ml_trade_msg.sender[-5:], terms.values)
         )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_valid_terms(terms):
@@ -166,20 +158,16 @@ class MlTradeHandler(Handler):
         data = strategy.sample_data(terms.values["batch_size"])
         self.context.logger.info(
             "sending to address={} a Data message: shape={}".format(
-                ml_trade_msg.counterparty[-5:], data[0].shape
+                ml_trade_msg.sender[-5:], data[0].shape
             )
         )
         payload = pickle.dumps(data)  # nosec
-        data_msg = MlTradeMessage(
+        data_msg = ml_trade_dialogue.reply(
             performative=MlTradeMessage.Performative.DATA,
-            dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
-            message_id=ml_trade_msg.message_id + 1,
-            target=ml_trade_msg.message_id,
+            target_message=ml_trade_msg,
             terms=terms,
             payload=payload,
         )
-        data_msg.counterparty = ml_trade_msg.counterparty
-        ml_trade_dialogue.update(data_msg)
         self.context.outbox.put_message(message=data_msg)
 
     def _handle_invalid(
@@ -230,7 +218,7 @@ class LedgerApiHandler(Handler):
 
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
-            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+            self._handle_balance(ledger_api_msg)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -256,14 +244,11 @@ class LedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 
         :param ledger_api_message: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(

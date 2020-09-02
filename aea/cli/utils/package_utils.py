@@ -168,8 +168,30 @@ def get_package_path(
         return os.path.join(
             ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name
         )
-    else:
-        return os.path.join(ctx.cwd, item_type_plural, public_id.name)
+    return os.path.join(ctx.cwd, item_type_plural, public_id.name)
+
+
+def get_package_path_unified(ctx: Context, item_type: str, public_id: PublicId) -> str:
+    """
+    Get a path for a package, either vendor or not.
+
+    That is:
+    - if the author in the public id is not the same of the AEA project author,
+      just look into vendor/
+    - Otherwise, first look into local packages, then into vendor/.
+
+    :param ctx: context.
+    :param item_type: item type.
+    :param public_id: item public ID.
+
+    :return: vendorized estenation path for package.
+    """
+    vendor_path = get_package_path(ctx, item_type, public_id, is_vendor=True)
+    if ctx.agent_config.author != public_id.author or not is_item_present(
+        ctx, item_type, public_id, is_vendor=False
+    ):
+        return vendor_path
+    return get_package_path(ctx, item_type, public_id, is_vendor=False)
 
 
 def copy_package_directory(src: Path, dst: str) -> Path:
@@ -244,7 +266,9 @@ def find_item_locally(ctx, item_type, item_public_id) -> Path:
     return package_path
 
 
-def find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
+def find_item_in_distribution(  # pylint: disable=unused-argument
+    ctx, item_type, item_public_id
+) -> Path:
     """
     Find an item in the AEA directory.
 
@@ -369,6 +393,28 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
     )
 
 
+def is_item_present_unified(ctx: Context, item_type: str, item_public_id: PublicId):
+    """
+    Check if item is present, either vendor or not.
+
+    That is:
+    - if the author in the public id is not the same of the AEA project author,
+      just look into vendor/
+    - Otherwise, first look into local packages, then into vendor/.
+
+    :param ctx: context object.
+    :param item_type: type of an item.
+    :param item_public_id: PublicId of an item.
+    :return: True if the item is present, False otherwise.
+    """
+    is_in_vendor = is_item_present(ctx, item_type, item_public_id, is_vendor=True)
+    if item_public_id.author != ctx.agent_config.author:
+        return is_in_vendor
+    return is_in_vendor or is_item_present(
+        ctx, item_type, item_public_id, is_vendor=False
+    )
+
+
 def is_item_present(
     ctx: Context, item_type: str, item_public_id: PublicId, is_vendor: bool = True
 ) -> bool:
@@ -393,7 +439,9 @@ def is_item_present(
     ).exists()
 
 
-def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> int:
+def try_get_balance(  # pylint: disable=unused-argument
+    agent_config: AgentConfig, wallet: Wallet, type_: str
+) -> int:
     """
     Try to get wallet balance.
 
@@ -411,5 +459,5 @@ def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> in
         if balance is None:  # pragma: no cover
             raise ValueError("No balance returned!")
         return balance
-    except (AssertionError, ValueError) as e:  # pragma: no cover
+    except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))

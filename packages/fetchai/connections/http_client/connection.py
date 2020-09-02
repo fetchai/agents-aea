@@ -20,7 +20,6 @@
 """HTTP client connection and channel."""
 
 import asyncio
-import copy
 import json
 import logging
 from asyncio import CancelledError
@@ -32,11 +31,15 @@ from typing import Any, Optional, Set, Tuple, Union, cast
 import aiohttp
 from aiohttp.client_reqrep import ClientResponse
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Address, Envelope, EnvelopeContext
+from aea.exceptions import enforce
+from aea.mail.base import Envelope, EnvelopeContext, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
-from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 
@@ -44,11 +47,41 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.8.0")
 
 logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
+
+
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The client connection maintains the dialogue on behalf of the server
+            return HttpDialogue.Role.SERVER
+
+        BaseHttpDialogues.__init__(
+            self,
+            self_address=str(HTTPClientConnection.connection_id),
+            role_from_first_message=role_from_first_message,
+            **kwargs,
+        )
 
 
 class HTTPClientAsyncChannel:
@@ -82,7 +115,7 @@ class HTTPClientAsyncChannel:
         self.port = port
         self.connection_id = connection_id
         self.restricted_to_protocols = restricted_to_protocols
-        self._dialogues = HttpDialogues(str(HTTPClientConnection.connection_id))
+        self._dialogues = HttpDialogues()
 
         self._in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self._loop = (
@@ -117,14 +150,7 @@ class HTTPClientAsyncChannel:
 
         :return: Tuple[MEssage, Optional[Dialogue]]
         """
-        orig_message = cast(HttpMessage, envelope.message)
-        message = copy.copy(
-            orig_message
-        )  # TODO: fix; need to copy atm to avoid overwriting "is_incoming"
-        message.is_incoming = True  # TODO: fix; should be done by framework
-        message.counterparty = (
-            orig_message.sender
-        )  # TODO: fix; should be done by framework
+        message = cast(HttpMessage, envelope.message)
         dialogue = cast(HttpDialogue, self._dialogues.update(message))
         return message, dialogue
 
@@ -233,9 +259,10 @@ class HTTPClientAsyncChannel:
             )
             raise ValueError("Cannot send message.")
 
-        assert isinstance(
-            request_envelope.message, HttpMessage
-        ), "Message not of type HttpMessage"
+        enforce(
+            isinstance(request_envelope.message, HttpMessage),
+            "Message not of type HttpMessage",
+        )
 
         request_http_message = cast(HttpMessage, request_envelope.message)
 
@@ -278,8 +305,8 @@ class HTTPClientAsyncChannel:
         except CancelledError:  # pragma: nocover
             return None
 
+    @staticmethod
     def to_envelope(
-        self,
         connection_id: PublicId,
         http_request_message: HttpMessage,
         status_code: int,
@@ -301,23 +328,19 @@ class HTTPClientAsyncChannel:
         :return: Envelope with http response data.
         """
         context = EnvelopeContext(connection_id=connection_id)
-        http_message = HttpMessage(
+        http_message = dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
+            target_message=http_request_message,
             status_code=status_code,
             headers=json.dumps(dict(headers.items())),
             status_text=status_text,
             bodyy=bodyy,
             version="",
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            target=http_request_message.message_id,
-            message_id=http_request_message.message_id + 1,
         )
-        http_message.counterparty = http_request_message.counterparty
-        assert dialogue.update(http_message)
         envelope = Envelope(
-            to=self.agent_address,
-            sender="HTTP Server",
-            protocol_id=PublicId.from_str("fetchai/http:0.4.0"),
+            to=http_message.to,
+            sender=http_message.sender,
+            protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
         )
@@ -357,7 +380,8 @@ class HTTPClientConnection(Connection):
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
-        assert host is not None and port is not None, "host and port must be set!"
+        if host is None or port is None:  # pragma: nocover
+            raise ValueError("host and port must be set!")
         self.channel = HTTPClientAsyncChannel(
             self.address,
             host,
@@ -372,12 +396,12 @@ class HTTPClientConnection(Connection):
 
         :return: None
         """
-        if self.is_connected:
-            return  # pragma: nocover
-        self._state.set(ConnectionStates.connecting)
-        self.channel.logger = self.logger
-        await self.channel.connect(self._loop)
-        self._state.set(ConnectionStates.connected)
+        if self.is_connected:  # pragma: nocover
+            return
+
+        with self._connect_context():
+            self.channel.logger = self.logger
+            await self.channel.connect(self.loop)
 
     async def disconnect(self) -> None:
         """
@@ -398,10 +422,7 @@ class HTTPClientConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+        self._ensure_connected()
         self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
@@ -410,10 +431,7 @@ class HTTPClientConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
+        self._ensure_connected()
         try:
             return await self.channel.get_message()
         except Exception:  # pragma: nocover # pylint: disable=broad-except

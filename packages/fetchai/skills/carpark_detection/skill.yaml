@@ -1,27 +1,28 @@
 name: carpark_detection
 author: fetchai
-version: 0.9.0
+version: 0.10.0
+type: skill
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
   behaviours.py: QmTNboU3YH8DehWnpZmoiDUCncpNmqoSVt1Yp4j7NsgY2S
-  database.py: QmZqLyAQiZUaNEhf5t34BGwoLzYVcszwwR69HeDDwqR9uV
+  database.py: QmQv79qDxNk8v9chNYq7AxxChAJVGs4B8Y9we35rjzaonP
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   handlers.py: QmbkmEP9K4Qu2MsRtnkdx3PGNbSW46qi48bCHVCUJHpcQF
-  strategy.py: Qmc4m4GuTZvW1oTLJZDLeUErgtMCf9eQhMp1gcvihWKZQD
+  strategy.py: QmTHW32BzzYrBF1YkmftAMuyx6cKKGrp554qeKiFBJieJJ
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
 protocols:
-- fetchai/default:0.4.0
-- fetchai/fipa:0.5.0
-- fetchai/ledger_api:0.2.0
-- fetchai/oef_search:0.4.0
+- fetchai/default:0.5.0
+- fetchai/fipa:0.6.0
+- fetchai/ledger_api:0.3.0
+- fetchai/oef_search:0.5.0
 skills:
-- fetchai/generic_seller:0.10.0
+- fetchai/generic_seller:0.11.0
 behaviours:
   service_registration:
     args:
@@ -57,7 +58,7 @@ models:
         free_spaces: 0
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: cosmos
+      ledger_id: fetchai
       location:
         latitude: 0.127
         longitude: 51.5194

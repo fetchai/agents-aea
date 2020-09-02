@@ -22,6 +22,7 @@ import datetime
 from abc import ABC, abstractmethod
 from typing import Callable, Dict, List, Optional, Set
 
+from aea.exceptions import enforce
 from aea.skills.base import Behaviour
 
 
@@ -61,6 +62,11 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
         """Initialize the cyclic behaviour."""
         super().__init__(**kwargs)
         self._number_of_executions = 0
+
+    @property
+    def number_of_executions(self) -> int:
+        """Get the number of executions."""
+        return self._number_of_executions
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
@@ -169,7 +175,7 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
         super().__init__(**kwargs)
 
         self._behaviour_sequence = behaviour_sequence
-        assert len(self._behaviour_sequence) > 0, "at least one behaviour."
+        enforce(len(self._behaviour_sequence) > 0, "at least one behaviour.")
         self._index = 0
 
     @property
@@ -352,10 +358,9 @@ class FSMBehaviour(CompositeBehaviour, ABC):
                 # we reached a final state - return.
                 self.current = None
                 return
-            else:
-                event = current_state.event
-                next_state = self.transitions.get(self.current, {}).get(event, None)
-                self.current = next_state
+            event = current_state.event
+            next_state = self.transitions.get(self.current, {}).get(event, None)
+            self.current = next_state
 
     def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""

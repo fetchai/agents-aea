@@ -23,6 +23,7 @@ from typing import Dict, List
 
 from aea.configurations.base import AgentConfig
 from aea.configurations.loader import ConfigLoader
+from aea.exceptions import enforce
 
 
 def format_items(items):
@@ -52,7 +53,7 @@ def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> D
     """Return description of a protocol, skill, connection."""
     config = loader.load(open(str(config_filepath)))
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
-    assert item_name == name, "Item names do not match!"
+    enforce(item_name == name, "Item names do not match!")
     return {
         "public_id": str(config.public_id),
         "name": item_name,

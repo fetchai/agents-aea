@@ -26,10 +26,11 @@ from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
     COSMOS,
-    COSMOS_PRIVATE_KEY_FILE,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_FILE,
     FUNDED_ETH_PRIVATE_KEY_1,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
@@ -60,41 +61,43 @@ class TestTacSkills(AEATestCaseMany):
         )
 
         default_routing = {
-            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
+            "fetchai/oef_search:0.5.0": "fetchai/soef:0.7.0",
         }
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
-        self.add_item("connection", "fetchai/soef:0.6.0")
-        self.add_item("skill", "fetchai/tac_control:0.5.0")
-        self.set_config("agent.default_ledger", COSMOS)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
+        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("skill", "fetchai/tac_control:0.6.0")
+        self.set_config("agent.default_ledger", FETCHAI)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.7.0", tac_controller_name
+            "fetchai/tac_controller:0.8.0", tac_controller_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(COSMOS)
+        self.generate_private_key(FETCHAI)
         self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+        self.force_set_config(setting_path, COSMOS)
 
         default_routing = {
-            "fetchai/ledger_api:0.2.0": "fetchai/ledger:0.3.0",
-            "fetchai/oef_search:0.4.0": "fetchai/soef:0.6.0",
+            "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.4.0",
+            "fetchai/oef_search:0.5.0": "fetchai/soef:0.7.0",
         }
 
         # prepare agents for test
@@ -103,18 +106,18 @@ class TestTacSkills(AEATestCaseMany):
             (tac_aea_two, NON_GENESIS_CONFIG_TWO),
         ):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
-            self.add_item("connection", "fetchai/soef:0.6.0")
-            self.add_item("connection", "fetchai/ledger:0.3.0")
-            self.add_item("skill", "fetchai/tac_participation:0.6.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.7.0")
-            self.set_config("agent.default_ledger", COSMOS)
+            self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
+            self.add_item("connection", "fetchai/soef:0.7.0")
+            self.add_item("connection", "fetchai/ledger:0.4.0")
+            self.add_item("skill", "fetchai/tac_participation:0.7.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.8.0")
+            self.set_config("agent.default_ledger", FETCHAI)
             setting_path = "agent.default_routing"
             self.force_set_config(setting_path, default_routing)
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.8.0", agent_name
+                "fetchai/tac_participant:0.9.0", agent_name
             )
             assert (
                 diff == []
@@ -123,9 +126,9 @@ class TestTacSkills(AEATestCaseMany):
             )
 
             # add keys
-            self.generate_private_key(COSMOS)
+            self.generate_private_key(FETCHAI)
             self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-            self.add_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE)
+            self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
             self.add_private_key(
                 COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
             )
@@ -133,6 +136,8 @@ class TestTacSkills(AEATestCaseMany):
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
             self.force_set_config(setting_path, config)
+            setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+            self.force_set_config(setting_path, COSMOS)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -230,7 +235,7 @@ class TestTacSkills(AEATestCaseMany):
             "message signed by decision maker.",
             "sending transaction to controller.",
             "sending match accept to",
-            # "Received transaction confirmation from the controller: transaction_id=",
+            # "Received transaction confirmation from the controller: transaction_id=", # noqa: E800
             "Applying state update!",
             "found potential buyers agents=",
             "sending CFP to agent=",
@@ -272,17 +277,14 @@ class TestTacSkillsContract(AEATestCaseMany):
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
-        self.add_item("skill", "fetchai/tac_control_contract:0.6.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
+        self.add_item("skill", "fetchai/tac_control_contract:0.7.0")
         self.set_config("agent.default_ledger", ETHEREUM)
-        # stdout = self.get_wealth(ETHEREUM)
-        # if int(stdout) < 100000000000000000:
-        #     pytest.skip("The agent needs more funds for the test to pass.")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.8.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.9.0", tac_controller_name
         )
         assert (
             diff == []
@@ -300,10 +302,10 @@ class TestTacSkillsContract(AEATestCaseMany):
             (FUNDED_ETH_PRIVATE_KEY_2, FUNDED_ETH_PRIVATE_KEY_3),
         ):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
-            self.add_item("skill", "fetchai/tac_participation:0.6.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.7.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
+            self.add_item("skill", "fetchai/tac_participation:0.7.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.8.0")
             self.set_config("agent.default_ledger", ETHEREUM)
             self.set_config(
                 "vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract",
@@ -317,7 +319,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.8.0", agent_name
+                "fetchai/tac_participant:0.9.0", agent_name
             )
             assert (
                 diff == []
@@ -337,7 +339,7 @@ class TestTacSkillsContract(AEATestCaseMany):
         setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time"
         self.set_config(setting_path, start_time)
         tac_controller_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.7.0"
+            "--connections", "fetchai/p2p_libp2p:0.8.0"
         )
 
         check_strings = (
@@ -357,12 +359,12 @@ class TestTacSkillsContract(AEATestCaseMany):
         # run two participants as well
         self.set_agent_context(tac_aea_one)
         tac_aea_one_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.7.0"
+            "--connections", "fetchai/p2p_libp2p:0.8.0"
         )
 
         self.set_agent_context(tac_aea_two)
         tac_aea_two_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.7.0"
+            "--connections", "fetchai/p2p_libp2p:0.8.0"
         )
 
         check_strings = (
@@ -418,7 +420,6 @@ class TestTacSkillsContract(AEATestCaseMany):
         self.terminate_agents(
             tac_controller_process, tac_aea_one_process, tac_aea_two_process
         )
-        # TODO; add in future when while loops removed in skills
-        # assert (
-        #     self.is_successfully_terminated()
-        # ), "Agents weren't successfully terminated."
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."

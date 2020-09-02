@@ -28,6 +28,7 @@ from aea.crypto.cosmos import CosmosApi
 from aea.crypto.ethereum import EthereumApi
 from aea.crypto.fetchai import FetchAIApi
 from aea.crypto.ledger_apis import LedgerApis
+from aea.exceptions import AEAEnforceError
 
 from tests.conftest import (
     COSMOS,
@@ -51,7 +52,7 @@ def test_initialisation():
     assert type(LedgerApis.get_api(EthereumApi.identifier)) == EthereumApi
     assert LedgerApis.has_ledger(CosmosApi.identifier)
     assert type(LedgerApis.get_api(CosmosApi.identifier)) == CosmosApi
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         ledger_apis.get_api("UNKNOWN")
 
 

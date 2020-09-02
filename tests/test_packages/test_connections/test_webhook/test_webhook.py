@@ -19,7 +19,6 @@
 """Tests for the webhook connection and channel."""
 
 import asyncio
-import copy
 import json
 import logging
 from traceback import print_exc
@@ -31,13 +30,16 @@ from aiohttp.client_reqrep import ClientResponse
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-
+from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue
 
 from packages.fetchai.connections.webhook.connection import WebhookConnection
-from packages.fetchai.protocols.http.dialogues import HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
@@ -47,6 +49,34 @@ from tests.conftest import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, self_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return HttpDialogue.Role.CLIENT
+
+        BaseHttpDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+        )
 
 
 @pytest.mark.asyncio
@@ -70,7 +100,6 @@ class TestWebhookConnection:
         self.webhook_connection = WebhookConnection(
             configuration=configuration, identity=self.identity,
         )
-        self.webhook_connection.loop = self.loop
         self.dialogues = HttpDialogues(self.identity.address)
 
     async def test_initialization(self):
@@ -111,10 +140,7 @@ class TestWebhookConnection:
 
         assert envelope
 
-        orig_message = cast(HttpMessage, envelope.message)
-        message = copy.copy(orig_message)
-        message.counterparty = orig_message.sender
-        message.is_incoming = True
+        message = cast(HttpMessage, envelope.message)
         dialogue = self.dialogues.update(message)
         assert dialogue is not None
         assert message.method.upper() == "POST"
@@ -141,7 +167,7 @@ class TestWebhookConnection:
         envelope = Envelope(
             to="addr",
             sender="my_id",
-            protocol_id=PublicId.from_str("fetchai/http:0.4.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.5.0"),
             message=http_message,
         )
         with patch.object(self.webhook_connection.logger, "warning") as mock_logger:

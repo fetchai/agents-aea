@@ -22,8 +22,10 @@
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
+from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -32,7 +34,6 @@ from aea.helpers.search.generic import (
 )
 from aea.helpers.search.models import Description, Location, Query
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
@@ -77,11 +78,12 @@ class GenericStrategy(Model):
             )
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        assert (
+        enforce(
             len(self._set_service_data) == 2
             and "key" in self._set_service_data
-            and "value" in self._set_service_data
-        ), "service_data must contain keys `key` and `value`"
+            and "value" in self._set_service_data,
+            "service_data must contain keys `key` and `value`",
+        )
         self._remove_service_data = {"key": self._set_service_data["key"]}
         self._simple_service_data = {
             self._set_service_data["key"]: self._set_service_data["value"]
@@ -94,9 +96,10 @@ class GenericStrategy(Model):
         }
 
         super().__init__(**kwargs)
-        assert (
-            self.context.agent_addresses.get(self._ledger_id, None) is not None
-        ), "Wallet does not contain cryptos for provided ledger id."
+        enforce(
+            self.context.agent_addresses.get(self._ledger_id, None) is not None,
+            "Wallet does not contain cryptos for provided ledger id.",
+        )
 
         if self._has_data_source:
             self._data_for_sale = self.collect_from_data_source()
@@ -167,7 +170,7 @@ class GenericStrategy(Model):
         """
         return query.check(self.get_service_description())
 
-    def generate_proposal_terms_and_data(
+    def generate_proposal_terms_and_data(  # pylint: disable=unused-argument
         self, query: Query, counterparty_address: Address
     ) -> Tuple[Description, Terms, Dict[str, str]]:
         """

@@ -20,13 +20,13 @@
 
 """This module contains the tests of the ledger API connection module."""
 import asyncio
-import copy
 import logging
 from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ProtocolId
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.ledger_apis import LedgerApis
@@ -39,19 +39,20 @@ from aea.helpers.transaction.base import (
     TransactionDigest,
     TransactionReceipt,
 )
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
-from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogues
+from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_ADDRESS_ONE,
-    COSMOS_TESTNET_CONFIG,
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_PRIVATE_KEY_PATH,
@@ -69,9 +70,36 @@ ledger_ids = pytest.mark.parametrize(
     [
         (FETCHAI, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
         (ETHEREUM, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
-        (COSMOS, COSMOS_ADDRESS_ONE, COSMOS_TESTNET_CONFIG),
     ],
 )
+
+
+class LedgerApiDialogues(BaseLedgerApiDialogues):
+    """The dialogues class keeps track of all ledger_api dialogues."""
+
+    def __init__(self, self_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return LedgerApiDialogue.Role.AGENT
+
+        BaseLedgerApiDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+        )
 
 
 @pytest.mark.integration
@@ -85,19 +113,15 @@ async def test_get_balance(
     import aea  # noqa # to load registries
 
     ledger_api_dialogues = LedgerApiDialogues(address)
-    request = LedgerApiMessage(
+    request, ledger_api_dialogue = ledger_api_dialogues.create(
+        counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_BALANCE,
-        dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
         ledger_id=ledger_id,
         address=address,
     )
-
-    request.counterparty = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue = ledger_api_dialogues.update(request)
-    assert ledger_api_dialogue is not None
     envelope = Envelope(
-        to=str(ledger_apis_connection.connection_id),
-        sender=address,
+        to=request.to,
+        sender=request.sender,
         protocol_id=request.protocol_id,
         message=request,
     )
@@ -108,10 +132,7 @@ async def test_get_balance(
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg_orig = cast(LedgerApiMessage, response.message)
-    response_msg = copy.copy(response_msg_orig)
-    response_msg.is_incoming = True
-    response_msg.counterparty = response_msg_orig.sender
+    response_msg = cast(LedgerApiMessage, response.message)
     response_dialogue = ledger_api_dialogues.update(response_msg)
     assert response_dialogue == ledger_api_dialogue
     assert response_msg.performative == LedgerApiMessage.Performative.BALANCE
@@ -134,9 +155,9 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     amount = 40000
     fee = 30000
 
-    request = LedgerApiMessage(
+    request, ledger_api_dialogue = ledger_api_dialogues.create(
+        counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-        dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
         terms=Terms(
             ledger_id=ETHEREUM,
             sender_address=crypto1.address,
@@ -149,12 +170,10 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
             chain_id=3,
         ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue = ledger_api_dialogues.update(request)
-    assert ledger_api_dialogue is not None
+    request = cast(LedgerApiMessage, request)
     envelope = Envelope(
-        to=str(ledger_apis_connection.connection_id),
-        sender=crypto1.address,
+        to=request.to,
+        sender=request.sender,
         protocol_id=request.protocol_id,
         message=request,
     )
@@ -164,10 +183,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg_orig = cast(LedgerApiMessage, response.message)
-    response_message = copy.copy(response_msg_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_msg_orig.sender
+    response_message = cast(LedgerApiMessage, response.message)
     assert (
         response_message.performative == LedgerApiMessage.Performative.RAW_TRANSACTION
     )
@@ -177,18 +193,17 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     assert response_message.raw_transaction.ledger_id == request.terms.ledger_id
 
     signed_transaction = crypto1.sign_transaction(response_message.raw_transaction.body)
-    request = LedgerApiMessage(
-        performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-        message_id=response_message.message_id + 1,
-        target=response_message.message_id,
-        dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-        signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
+    request = cast(
+        LedgerApiMessage,
+        ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+            target_message=response_message,
+            signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
+        ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue.update(request)
     envelope = Envelope(
-        to=str(ledger_apis_connection.connection_id),
-        sender=crypto1.address,
+        to=request.to,
+        sender=request.sender,
         protocol_id=request.protocol_id,
         message=request,
     )
@@ -198,10 +213,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg_orig = cast(LedgerApiMessage, response.message)
-    response_message = copy.copy(response_msg_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_msg_orig.sender
+    response_message = cast(LedgerApiMessage, response.message)
     assert (
         response_message.performative != LedgerApiMessage.Performative.ERROR
     ), f"Received error: {response_message.message}"
@@ -219,18 +231,17 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
     )
     assert type(response_message.transaction_digest.body.startswith("0x"))
 
-    request = LedgerApiMessage(
-        performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-        dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-        message_id=response_message.message_id + 1,
-        target=response_message.message_id,
-        transaction_digest=response_message.transaction_digest,
+    request = cast(
+        LedgerApiMessage,
+        ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target_message=response_message,
+            transaction_digest=response_message.transaction_digest,
+        ),
     )
-    request.counterparty = str(ledger_apis_connection.connection_id)
-    ledger_api_dialogue.update(request)
     envelope = Envelope(
-        to=str(ledger_apis_connection.connection_id),
-        sender=crypto1.address,
+        to=request.to,
+        sender=request.sender,
         protocol_id=request.protocol_id,
         message=request,
     )
@@ -240,10 +251,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
 
     assert response is not None
     assert type(response.message) == LedgerApiMessage
-    response_msg_orig = cast(LedgerApiMessage, response.message)
-    response_message = copy.copy(response_msg_orig)
-    response_message.is_incoming = True
-    response_message.counterparty = response_msg_orig.sender
+    response_message = cast(LedgerApiMessage, response.message)
     assert (
         response_message.performative
         == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
@@ -296,8 +304,10 @@ async def test_no_balance():
         ledger_id=ETHEREUM,
         address="test",
     )
-    message.counterparty = "test"
+    message.to = dispatcher.dialogues.self_address
+    message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
+    assert dialogue is not None
     mock_api.get_balance.return_value = None
     msg = dispatcher.get_balance(mock_api, message, dialogue)
 
@@ -324,8 +334,10 @@ async def test_no_raw_tx():
             chain_id=3,
         ),
     )
-    message.counterparty = "test"
+    message.to = dispatcher.dialogues.self_address
+    message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
+    assert dialogue is not None
     mock_api.get_transfer_transaction.return_value = None
     msg = dispatcher.get_raw_transaction(mock_api, message, dialogue)
 
@@ -342,7 +354,8 @@ async def test_attempts_get_transaction_receipt():
         dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         transaction_digest=TransactionDigest("asdad", "sdfdsf"),
     )
-    message.counterparty = "test"
+    message.to = dispatcher.dialogues.self_address
+    message.sender = "test"
     dialogue = dispatcher.dialogues.update(message)
     assert dialogue is not None
     mock_api.get_transaction.return_value = None

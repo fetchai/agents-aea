@@ -12,15 +12,6 @@ class ItemId(RegexConstrainedString)
 
 The identifier of an item class.
 
-<a name="aea.crypto.registries.base.ItemId.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(seq)
-```
-
-Initialize the item id.
-
 <a name="aea.crypto.registries.base.ItemId.name"></a>
 #### name
 

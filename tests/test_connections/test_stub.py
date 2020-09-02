@@ -57,7 +57,7 @@ def make_test_envelope() -> Envelope:
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg.counterparty = "any"
+    msg.to = "any"
     envelope = Envelope(
         to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
     )
@@ -92,9 +92,11 @@ class TestStubConnectionReception:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = "any"
         expected_envelope = Envelope(
-            to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
+            to="any",
+            sender="anys",
+            protocol_id=DefaultMessage.protocol_id,
+            message=msg,
         )
 
         with open(self.input_file_path, "ab+") as f:
@@ -105,7 +107,8 @@ class TestStubConnectionReception:
         assert expected_envelope.sender == actual_envelope.sender
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
-        msg.counterparty = actual_envelope.to
+        msg.to = actual_envelope.to
+        msg.sender = actual_envelope.sender
         assert expected_envelope.message == msg
 
     def test_reception_b(self):
@@ -136,11 +139,11 @@ class TestStubConnectionReception:
 
     def test_reception_c(self):
         """Test that the connection receives what has been enqueued in the input file."""
-        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.4.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
+        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.5.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
         expected_envelope = Envelope(
             to="0x5E22777dD831A459535AA4306AceC9cb22eC4cB5",
             sender="default_oef",
-            protocol_id=PublicId.from_str("fetchai/oef_search:0.4.0"),
+            protocol_id=PublicId.from_str("fetchai/oef_search:0.5.0"),
             message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
         )
         with open(self.input_file_path, "ab+") as f:
@@ -232,9 +235,11 @@ class TestStubConnectionSending:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = "any"
         expected_envelope = Envelope(
-            to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
+            to="any",
+            sender="anys",
+            protocol_id=DefaultMessage.protocol_id,
+            message=msg,
         )
 
         self.multiplexer.put(expected_envelope)
@@ -260,7 +265,8 @@ class TestStubConnectionSending:
         assert expected_envelope.sender == actual_envelope.sender
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
-        msg.counterparty = actual_envelope.to
+        msg.to = actual_envelope.to
+        msg.sender = actual_envelope.sender
         assert expected_envelope.message == msg
 
     @classmethod
@@ -338,6 +344,7 @@ async def test_multiple_envelopes():
 
     num_envelopes = 5
     await connection.connect()
+    assert connection.is_connected
 
     async def wait_num(num):
         for _ in range(num):

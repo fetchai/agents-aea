@@ -1,5 +1,66 @@
 This page provides some tipps of how to upgrade between versions.
 
+## v0.5.4 to v0.6.0
+
+### `Dialogue` and `Dialogues` API updates
+
+The dialogue and dialogues APIs have changed significantly. The constructor is different for both classes and there are now four primary methods for the developer:
+
+- Dialogues.create: this method is used to create a new dialogue and message:
+``` python
+cfp_msg, fipa_dialogue = fipa_dialogues.create(
+    counterparty=opponent_address,
+    performative=FipaMessage.Performative.CFP,
+    query=query,
+)
+```
+The method will raise if the provided arguments are inconsistent.
+
+- Dialogues.create_with_message: this method is used to create a new dialogue from a message:
+``` python
+fipa_dialogue = fipa_dialogues.create_with_message(
+    counterparty=opponent_address,
+    initial_message=cfp_msg
+)
+```
+The method will raise if the provided arguments are inconsistent.
+
+- Dialogues.update: this method is used to handle messages passed by the framework:
+``` python
+fipa_dialogue = fipa_dialogues.update(
+    message=cfp_msg
+)
+```
+The method will return a valid dialogue if it is a valid message, otherwise it will return `None`.
+
+- Dialogue.reply: this method is used to reply within a dialogue:
+``` python
+proposal_msg = fipa_dialogue.reply(
+    performative=FipaMessage.Performative.PROPOSE,
+    target_message=cfp_msg,
+    proposal=proposal,
+)
+```
+The method will raise if the provided arguments are inconsistent.
+
+The new methods significantly reduce the lines of code needed to maintain a dialogue. They also make it easier for the developer to construct valid dialogues and messages.
+
+### FetchAICrypto - default crypto
+
+The FetchAICrypto has been upgraded to the default crypto. Update your `default_ledger` to `fetchai`.
+
+### Private key file naming
+
+The private key files are now consistenly named with the `ledger_id` followed by `_private_key.txt` (e.g. `fetchai_private_key.txt`). Rename your existing files to match this pattern.
+
+### Type in package yaml
+
+The package yamls now contain a type field. This must be added for the loading mechanism to work properly.
+
+### Moved address type
+
+The address type has moved to `aea.common`. The import paths must be updated.
+
 ## v0.5.3 to v0.5.4
 
 The contract base class was slightly modified. If you have implemented your own contract package you need to update it accordingly.

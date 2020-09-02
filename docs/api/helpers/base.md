@@ -7,14 +7,25 @@ Miscellaneous helpers.
 #### yaml`_`load
 
 ```python
-yaml_load(stream: TextIO) -> Dict[str, str]
+@_ordered_loading
+yaml_load(*args, **kwargs) -> Dict[str, Any]
 ```
 
 Load a yaml from a file pointer in an ordered way.
 
-**Arguments**:
+**Returns**:
 
-- `stream`: the file pointer
+the yaml
+
+<a name="aea.helpers.base.yaml_load_all"></a>
+#### yaml`_`load`_`all
+
+```python
+@_ordered_loading
+yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]
+```
+
+Load a multi-paged yaml from a file pointer in an ordered way.
 
 **Returns**:
 
@@ -24,15 +35,25 @@ the yaml
 #### yaml`_`dump
 
 ```python
-yaml_dump(data, stream: TextIO) -> None
+@_ordered_dumping
+yaml_dump(*args, **kwargs) -> None
 ```
 
-Dump data to a yaml file in an ordered way.
+Dump multi-paged yaml data to a yaml file in an ordered way.
 
-**Arguments**:
+:return None
 
-- `data`: the data to be dumped
-- `stream`: the file pointer
+<a name="aea.helpers.base.yaml_dump_all"></a>
+#### yaml`_`dump`_`all
+
+```python
+@_ordered_dumping
+yaml_dump_all(*args, **kwargs) -> None
+```
+
+Dump multi-paged yaml data to a yaml file in an ordered way.
+
+:return None
 
 <a name="aea.helpers.base.locate"></a>
 #### locate
@@ -42,25 +63,6 @@ locate(path: str) -> Any
 ```
 
 Locate an object by name or dotted path, importing as necessary.
-
-<a name="aea.helpers.base.load_aea_package"></a>
-#### load`_`aea`_`package
-
-```python
-load_aea_package(configuration: ComponentConfiguration) -> None
-```
-
-Load the AEA package.
-
-It adds all the __init__.py modules into `sys.modules`.
-
-**Arguments**:
-
-- `configuration`: the configuration object.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.base.load_module"></a>
 #### load`_`module

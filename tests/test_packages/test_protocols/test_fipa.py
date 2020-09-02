@@ -20,16 +20,17 @@
 """This module contains the tests for the FIPA protocol."""
 
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Type
 from unittest import mock
 
 import pytest
 
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel
+from aea.common import Address
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -48,12 +49,9 @@ def test_fipa_cfp_serialization():
         performative=FipaMessage.Performative.CFP,
         query=query,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -65,7 +63,8 @@ def test_fipa_cfp_serialization():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -80,12 +79,9 @@ def test_fipa_cfp_serialization_bytes():
         performative=FipaMessage.Performative.CFP,
         query=query,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -97,7 +93,8 @@ def test_fipa_cfp_serialization_bytes():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -112,12 +109,9 @@ def test_fipa_propose_serialization():
         performative=FipaMessage.Performative.PROPOSE,
         proposal=proposal,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -129,7 +123,8 @@ def test_fipa_propose_serialization():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -142,12 +137,9 @@ def test_fipa_accept_serialization():
         target=0,
         performative=FipaMessage.Performative.ACCEPT,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -159,7 +151,8 @@ def test_fipa_accept_serialization():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -172,14 +165,10 @@ def test_performative_match_accept():
         target=0,
         performative=FipaMessage.Performative.MATCH_ACCEPT,
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
-    msg.counterparty = "receiver"
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -190,7 +179,8 @@ def test_performative_match_accept():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -204,12 +194,9 @@ def test_performative_accept_with_inform():
         performative=FipaMessage.Performative.ACCEPT_W_INFORM,
         info={"address": "dummy_address"},
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -221,7 +208,8 @@ def test_performative_accept_with_inform():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -235,12 +223,9 @@ def test_performative_match_accept_with_inform():
         performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
         info={"address": "dummy_address", "signature": "my_signature"},
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -252,7 +237,8 @@ def test_performative_match_accept_with_inform():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -266,12 +252,9 @@ def test_performative_inform():
         performative=FipaMessage.Performative.INFORM,
         info={"foo": "bar"},
     )
-    msg.counterparty = "receiver"
+    msg.to = "receiver"
     envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=FipaMessage.protocol_id,
-        message=msg,
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -283,21 +266,10 @@ def test_performative_inform():
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.counterparty = actual_envelope.to
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
-
-
-# def test_unknown_performative():
-#     """Test that we raise an exception when the performative is unknown during check_consistency."""
-#     msg = FipaMessage(
-#         message_id=1,
-#         dialogue_reference=(str(0), ""),
-#         target=0,
-#         performative=FipaMessage.Performative.ACCEPT,
-#     )
-#     with mock.patch.object(FipaMessage.Performative, "__eq__", return_value=False):
-#         assert not msg._is_consistent()
 
 
 def test_performative_string_value():
@@ -412,17 +384,11 @@ class TestDialogues:
         """Test an end to end scenario of client-seller dialogue."""
 
         # Create a message destined for the seller.
-        cfp_msg = FipaMessage(
-            message_id=1,
-            dialogue_reference=self.buyer_dialogues.new_self_initiated_dialogue_reference(),
-            target=0,
+        cfp_msg, buyer_dialogue = self.buyer_dialogues.create(
+            counterparty=self.seller_addr,
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_msg.counterparty = self.seller_addr
-
-        # Extends the outgoing list of messages.
-        buyer_dialogue = self.buyer_dialogues.update(cfp_msg)
 
         # Checking that I can retrieve the dialogue.
         retrieved_dialogue = self.buyer_dialogues.get_dialogue(cfp_msg)
@@ -436,10 +402,6 @@ class TestDialogues:
 
         # MESSAGE BEING SENT BETWEEN AGENTS
 
-        # change the incoming message field & counterparty
-        cfp_msg.is_incoming = True
-        cfp_msg.counterparty = self.buyer_addr
-
         # Creates a new dialogue for the seller side based on the income message.
         seller_dialogue = self.seller_dialogues.update(cfp_msg)
 
@@ -449,32 +411,13 @@ class TestDialogues:
 
         # Generate a proposal message to send to the buyer.
         proposal = Description({"foo1": 1, "bar1": 2})
-        message_id = cfp_msg.message_id + 1
-        target = cfp_msg.message_id
-        proposal_msg = FipaMessage(
-            message_id=message_id,
-            dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
-            target=target,
+        proposal_msg = seller_dialogue.reply(
+            target_message=cfp_msg,
             performative=FipaMessage.Performative.PROPOSE,
             proposal=proposal,
         )
-        proposal_msg.counterparty = self.buyer_addr
-
-        assert (
-            proposal_msg.dialogue_reference[0] != ""
-            and proposal_msg.dialogue_reference[1] != ""
-        ), "The dialogue_reference is not setup properly."
-
-        # Extends the outgoing list of messages.
-        seller_dialogue.update(proposal_msg)
 
         # MESSAGE BEING SENT BETWEEN AGENTS
-
-        # change the incoming message field
-        proposal_msg.is_incoming = True
-
-        # change message counterparty field
-        proposal_msg.counterparty = self.seller_addr
 
         # Client received the message and we extend the incoming messages list.
         buyer_dialogue = self.buyer_dialogues.update(proposal_msg)
@@ -488,27 +431,12 @@ class TestDialogues:
         assert retrieved_dialogue == buyer_dialogue, "Should have found dialogue"
 
         # Create an accept_w_inform message to send seller.
-        message_id = proposal_msg.message_id + 1
-        target = proposal_msg.message_id
-        accept_msg = FipaMessage(
-            message_id=message_id,
-            dialogue_reference=buyer_dialogue.dialogue_label.dialogue_reference,
-            target=target,
+        accept_msg = buyer_dialogue.reply(
+            target_message=proposal_msg,
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
             info={"address": "dummy_address"},
         )
-        accept_msg.counterparty = self.seller_addr
-
-        # Adds the message to the buyer outgoing list.
-        buyer_dialogue.update(accept_msg)
-
         # MESSAGE BEING SENT BETWEEN AGENTS
-
-        # change the incoming message field
-        accept_msg.is_incoming = True
-
-        # change message counterparty field
-        accept_msg.counterparty = self.buyer_addr
 
         # Adds the message to the seller incoming message list.
         seller_dialogue = self.seller_dialogues.update(accept_msg)
@@ -518,15 +446,11 @@ class TestDialogues:
 
     def test_update(self):
         """Test the `update` functionality."""
-        cfp_msg = FipaMessage(
-            message_id=1,
-            dialogue_reference=self.buyer_dialogues.new_self_initiated_dialogue_reference(),
-            target=0,
+        cfp_msg, buyer_dialogue = self.buyer_dialogues.create(
+            counterparty=self.seller_addr,
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_msg.counterparty = self.seller_addr
-        buyer_dialogue = self.buyer_dialogues.update(cfp_msg)
 
         assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing message."
         assert len(buyer_dialogue._incoming_messages) == 0, "Some incoming messages."
@@ -544,8 +468,6 @@ class TestDialogues:
         ]
 
         # message arrives at counterparty
-        cfp_msg.is_incoming = True
-        cfp_msg.counterparty = self.buyer_addr
         seller_dialogue = self.seller_dialogues.update(cfp_msg)
 
         assert len(seller_dialogue._outgoing_messages) == 0, "Some outgoing message."
@@ -561,16 +483,11 @@ class TestDialogues:
         ), "Dialogue reference incorrect."
 
         # seller creates response message
-        proposal_msg = FipaMessage(
-            message_id=cfp_msg.message_id + 1,
-            dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
-            target=cfp_msg.message_id,
+        proposal_msg = seller_dialogue.reply(
+            target_message=cfp_msg,
             performative=FipaMessage.Performative.PROPOSE,
             proposal=Description({"foo1": 1, "bar1": 2}),
         )
-        proposal_msg.counterparty = self.buyer_addr
-
-        self.seller_dialogues.update(proposal_msg)
 
         assert len(seller_dialogue._outgoing_messages) == 1, "No outgoing messages."
         assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
@@ -579,8 +496,6 @@ class TestDialogues:
         ), "Wrong outgoing message."
 
         # message arrives at counterparty
-        proposal_msg.counterparty = self.seller_addr
-        proposal_msg.is_incoming = True
         self.buyer_dialogues.update(proposal_msg)
 
         assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing messages."
@@ -609,58 +524,55 @@ class BuyerDialogue(FipaDialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[FipaMessage],
     ) -> None:
         """
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
         FipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
         )
 
 
 class BuyerDialogues(FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, agent_address) -> None:
+    def __init__(self, self_address: Address) -> None:
         """
         Initialize dialogues.
 
         :return: None
         """
-        FipaDialogues.__init__(self, agent_address)
 
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
-    ) -> BuyerDialogue:
-        """
-        Create an instance of fipa dialogue.
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return FipaDialogue.Role.BUYER
 
-        :return: the created dialogue
-        """
-        dialogue = BuyerDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        FipaDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=BuyerDialogue,
         )
-        return dialogue
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return FipaDialogue.Role.BUYER
 
 
 class SellerDialogue(FipaDialogue):
@@ -669,20 +581,25 @@ class SellerDialogue(FipaDialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address,
+        self_address: Address,
         role: BaseDialogue.Role,
+        message_class: Type[FipaMessage],
     ) -> None:
         """
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
         FipaDialogue.__init__(
-            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
         )
         self.some_object = None  # type: Optional[Any]
 
@@ -690,35 +607,27 @@ class SellerDialogue(FipaDialogue):
 class SellerDialogues(FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, agent_address) -> None:
+    def __init__(self, self_address: Address) -> None:
         """
         Initialize dialogues.
 
         :return: None
         """
-        FipaDialogues.__init__(self, agent_address)
 
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
-    ) -> SellerDialogue:
-        """
-        Create an instance of fipa dialogue.
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return FipaDialogue.Role.SELLER
 
-        :return: the created dialogue
-        """
-        dialogue = SellerDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        FipaDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=SellerDialogue,
         )
-        return dialogue
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return FipaDialogue.Role.SELLER

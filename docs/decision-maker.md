@@ -2,31 +2,31 @@ The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</
 
 ## Interaction with skills
 
-Skills communicate with the decision maker via <a href="../api/decision_maker/messages/base#internalmessage-objects">`InternalMessages`</a>. There exist two types of these:
+Skills communicate with the decision maker via <a href="../api/protocols/base#message-objects">`Messages`</a>. At present, the decision maker processes messages of two protocols:
 
-- <a href="../api/decision_maker/messages/transaction#transactionmessage-objects">`TransactionMessage`</a>: it is used by skills to propose a transaction to the decision-maker. It can be used either for settling the transaction on-chain or to sign a transaction to be used within a negotiation.
+- <a href="../api/protocols/signing/message#signingmessage-objects">`SigningMessage`</a>: it is used by skills to propose a transaction to the decision-maker for signing.
 
-- <a href="../api/decision_maker/messages/state_update#stateupdatemessage-objects">`StateUpdateMessage`</a>: it is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place off chain.
+- <a href="../api/protocols/state_update/message#stateupdatemessage-objects">`StateUpdateMessage`</a>: it is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place.
 
-An `InternalMessage`, say `tx_msg` is sent to the decision maker like so from any skill:
+A message, say `msg`, is sent to the decision maker like so from any skill:
 ```
-self.context.decision_maker_message_queue.put_nowait(tx_msg)
+self.context.decision_maker_message_queue.put_nowait(msg)
 ```
 
 The decision maker processes messages and can accept or reject them.
 
-To process `InternalMessages` from the decision maker in a given skill you need to create a `TransactionHandler` like so:
+To process `Messages` from the decision maker in a given skill you need to create a `Handler`, in particular a `SigningHandler` like so:
 
 ``` python
-class TransactionHandler(Handler):
+class SigningHandler(Handler):
 
-	protocol_id = InternalMessage.protocol_id
+	protocol_id = SigningMessage.protocol_id
 
 	def handle(self, message: Message):
 		"""
-		Handle an internal message.
+		Handle a signing message.
 
-		:param message: the internal message from the decision maker.
+		:param message: the signing message from the decision maker.
 		"""
 		# code to handle the message
 ```
@@ -39,7 +39,7 @@ The framework implements a default <a href="../api/decision_maker/default#decisi
 aea scaffold decision-maker-handler
 ```
 
-You can then implement your own custom logic to process `InternalMessages` and interact with the `Wallet`. 
+You can then implement your own custom logic to process messages and interact with the `Wallet`. 
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

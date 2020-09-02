@@ -5,7 +5,7 @@ The AEA car-park skills demonstrate an interaction between two AEAs.
 
 ## Discussion
 
-The full Fetch.ai car park AEA demo is documented in its own repo <a href="https://github.com/fetchai/carpark_agent">here</a>.
+The full Fetch.ai car park AEA demo is documented in its own repo <a href="https://github.com/fetchai/carpark_agent" target="_blank">here</a>.
 This demo allows you to test the AEA functionality of the car park AEA demo without the detection logic.
 
 It demonstrates how the AEAs trade car park information.
@@ -55,7 +55,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the car detector AEA:
 ``` bash
-aea fetch fetchai/car_detector:0.10.0
+aea fetch fetchai/car_detector:0.11.0
 cd car_detector
 aea install
 ```
@@ -67,19 +67,19 @@ The following steps create the car detector from scratch:
 ``` bash
 aea create car_detector
 cd car_detector
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/carpark_detection:0.9.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/carpark_detection:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 In `car_detector/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 </p>
@@ -89,7 +89,7 @@ default_routing:
 
 Then, fetch the car data client AEA:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.10.0
+aea fetch fetchai/car_data_buyer:0.11.0
 cd car_data_buyer
 aea install
 ```
@@ -101,19 +101,19 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/carpark_client:0.9.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/carpark_client:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 In `car_data_buyer/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 </p>
@@ -123,9 +123,9 @@ default_routing:
 
 First, create the private key for the car data seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Add keys and generate wealth for the car data buyer AEA
@@ -134,14 +134,14 @@ The buyer needs to have some wealth to purchase the service from the seller.
 
 First, create the private key for the car data buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, create some wealth for your car data buyer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
 ``` bash
-aea generate-wealth cosmos
+aea generate-wealth fetchai
 ```
 
 ## Run the AEAs

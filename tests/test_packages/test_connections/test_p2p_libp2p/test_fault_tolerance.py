@@ -113,7 +113,7 @@ class TestLibp2pConnectionRelayNodeRestart:
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
         assert delivered_envelope.protocol_id == envelope.protocol_id
-        assert delivered_envelope.message == envelope.message
+        assert delivered_envelope.message_bytes == envelope.message_bytes
 
         self.multiplexer_relay.disconnect()
 
@@ -150,7 +150,7 @@ class TestLibp2pConnectionRelayNodeRestart:
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
         assert delivered_envelope.protocol_id == envelope.protocol_id
-        assert delivered_envelope.message == envelope.message
+        assert delivered_envelope.message_bytes == envelope.message_bytes
 
     @classmethod
     def teardown_class(cls):

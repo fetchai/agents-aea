@@ -26,22 +26,56 @@ from typing import Optional, Union, cast
 
 from aiohttp import web  # type: ignore
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Address, Envelope, EnvelopeContext, URI
+from aea.mail.base import Envelope, EnvelopeContext, URI
+from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
-from packages.fetchai.protocols.http.dialogues import HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
 SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.6.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
 RequestId = str
+
+
+class HttpDialogues(BaseHttpDialogues):
+    """The dialogues class keeps track of all http dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The webhook connection maintains the dialogue on behalf of the server
+            return HttpDialogue.Role.SERVER
+
+        BaseHttpDialogues.__init__(
+            self,
+            self_address=str(WebhookConnection.connection_id),
+            role_from_first_message=role_from_first_message,
+            **kwargs,
+        )
 
 
 class WebhookChannel:
@@ -81,7 +115,7 @@ class WebhookChannel:
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self.logger = logger
         self.logger.info("Initialised a webhook channel")
-        self._dialogues = HttpDialogues(str(WebhookConnection.connection_id))
+        self._dialogues = HttpDialogues()
 
     async def connect(self) -> None:
         """
@@ -111,11 +145,10 @@ class WebhookChannel:
 
         :return: None
         """
-        assert (
-            self.webhook_site is not None
-            and self.runner is not None
-            and self.app is not None
-        ), "Application not connected, call connect first!"
+        if self.webhook_site is None or self.runner is None or self.app is None:
+            raise ValueError(
+                "Application not connected, call connect first!"
+            )  # pragma: nocover
 
         if not self.is_stopped:
             await self.webhook_site.stop()
@@ -164,20 +197,17 @@ class WebhookChannel:
         version = str(request.version[0]) + "." + str(request.version[1])
 
         context = EnvelopeContext(uri=URI("aea/mail/base.py"))
-        http_message = HttpMessage(
+        http_message, _ = self._dialogues.create(
+            counterparty=self.agent_address,
             performative=HttpMessage.Performative.REQUEST,
             method=request.method,
             url=str(request.url),
             version=version,
             headers=json.dumps(dict(request.headers)),
             bodyy=payload_bytes if payload_bytes is not None else b"",
-            dialogue_reference=self._dialogues.new_self_initiated_dialogue_reference(),
         )
-        http_message.counterparty = self.agent_address
-        http_dialogue = self._dialogues.update(http_message)
-        assert http_dialogue is not None, "Could not create dialogue."
         envelope = Envelope(
-            to=http_message.counterparty,
+            to=http_message.to,
             sender=http_message.sender,
             protocol_id=http_message.protocol_id,
             context=context,
@@ -197,11 +227,10 @@ class WebhookConnection(Connection):
         webhook_address = cast(str, self.configuration.config.get("webhook_address"))
         webhook_port = cast(int, self.configuration.config.get("webhook_port"))
         webhook_url_path = cast(str, self.configuration.config.get("webhook_url_path"))
-        assert (
-            webhook_address is not None
-            and webhook_port is not None
-            and webhook_url_path is not None
-        ), "webhook_address, webhook_port and webhook_url_path must be set!"
+        if webhook_address is None or webhook_port is None or webhook_url_path is None:
+            raise ValueError(  # pragma: nocover
+                "webhook_address, webhook_port and webhook_url_path must be set!"
+            )
         self.channel = WebhookChannel(
             agent_address=self.address,
             webhook_address=webhook_address,
@@ -220,11 +249,10 @@ class WebhookConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.connecting)
-        self.channel.logger = self.logger
-        self.channel.in_queue = asyncio.Queue()
-        await self.channel.connect()
-        self._state.set(ConnectionStates.connected)
+        with self._connect_context():
+            self.channel.logger = self.logger
+            self.channel.in_queue = asyncio.Queue()
+            await self.channel.connect()
 
     async def disconnect(self) -> None:
         """
@@ -246,11 +274,9 @@ class WebhookConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
-        assert self.channel.in_queue is not None
+        self._ensure_connected()
+        if self.channel.in_queue is None:
+            raise ValueError("Channel in queue not set.")  # pragma: nocover
         await self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
@@ -259,11 +285,9 @@ class WebhookConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
-        assert self.channel.in_queue is not None
+        self._ensure_connected()
+        if self.channel.in_queue is None:
+            raise ValueError("Channel in queue not set.")  # pragma: nocover
         try:
             envelope = await self.channel.in_queue.get()
             if envelope is None:

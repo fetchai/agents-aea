@@ -1,15 +1,5 @@
 # OEF Search Protocol
 
-**Name:** oef_search
-
-**Author**: fetchai
-
-**Version**: 0.4.0
-
-**Short Description**: A protocol for interacting with an OEF search service.
-
-**License**: Apache-2.0
-
 ## Description
 
 This is a protocol for interacting with an OEF search service. 
@@ -21,10 +11,10 @@ It allows for registering of agents and services, and searching of agents and se
 ---
 name: oef_search
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 speech_acts:
   register_service:
     service_description: ct:Description
@@ -63,7 +53,6 @@ reply:
   register_service: [oef_error]
   unregister_service: [oef_error]
   search_services: [search_result, oef_error]
-  success: []
   search_result: []
   oef_error: []
 termination: [oef_error, search_result]

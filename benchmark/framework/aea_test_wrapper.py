@@ -53,7 +53,9 @@ class AEATestWrapper:
         self.aea = self.make_aea(self.name, self.components)
         self._thread = None  # type: Optional[Thread]
 
-    def make_aea(self, name: str = "my_aea", components: List[Component] = None) -> AEA:
+    def make_aea(
+        self, name: Optional[str] = None, components: List[Component] = None
+    ) -> AEA:
         """
         Create AEA from name and already loaded components.
 
@@ -65,7 +67,7 @@ class AEATestWrapper:
         components = components or []
         builder = AEABuilder()
 
-        builder.set_name(self.name)
+        builder.set_name(name or self.name)
 
         builder.add_private_key(FetchAICrypto.identifier, private_key_path=None)
 
@@ -160,7 +162,7 @@ class AEATestWrapper:
             message=DefaultSerializer().encode(message),
         )
 
-    def set_loop_timeout(self, timeout: float) -> None:
+    def set_loop_timeout(self, period: float) -> None:
         """
         Set agent's loop timeout.
 
@@ -168,7 +170,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea._timeout = timeout  # pylint: disable=protected-access
+        self.aea._period = period  # pylint: disable=protected-access
 
     def setup(self) -> None:
         """
@@ -176,7 +178,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea.start_setup()
+        self.aea.setup()
 
     def stop(self) -> None:
         """
@@ -194,7 +196,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        self.aea.multiplexer.in_queue.put(envelope)
+        self.aea.runtime.multiplexer.in_queue.put(envelope)
 
     def is_inbox_empty(self) -> bool:
         """
@@ -202,15 +204,7 @@ class AEATestWrapper:
 
         :return: None
         """
-        return self.aea.multiplexer.in_queue.empty()
-
-    def react(self) -> None:
-        """
-        One time process of react for incoming message.
-
-        :return: None
-        """
-        self.aea.react()
+        return self.aea.runtime.multiplexer.in_queue.empty()
 
     def __enter__(self) -> None:
         """Contenxt manager enter."""
@@ -238,7 +232,8 @@ class AEATestWrapper:
 
     def stop_loop(self) -> None:
         """Stop agents loop in dedicated thread, close thread."""
-        assert self._thread is not None, "Thread not set, call start_loop first."
+        if self._thread is None:
+            raise ValueError("Thread not set, call start_loop first.")
         self.aea.stop()
         self._thread.join()
 

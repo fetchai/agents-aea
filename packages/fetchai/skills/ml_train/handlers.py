@@ -48,7 +48,7 @@ from packages.fetchai.skills.ml_train.strategy import Strategy
 
 
 DUMMY_DIGEST = "dummy_digest"
-LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.4.0"
 
 
 class MlTradeHandler(Handler):
@@ -86,7 +86,7 @@ class MlTradeHandler(Handler):
         if ml_trade_msg.performative == MlTradeMessage.Performative.TERMS:
             self._handle_terms(ml_trade_msg, ml_trade_dialogue)
         elif ml_trade_msg.performative == MlTradeMessage.Performative.DATA:
-            self._handle_data(ml_trade_msg, ml_trade_dialogue)
+            self._handle_data(ml_trade_msg)
         else:
             self._handle_invalid(ml_trade_msg, ml_trade_dialogue)
 
@@ -110,15 +110,13 @@ class MlTradeHandler(Handler):
             )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=ml_trade_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"ml_trade_message": ml_trade_msg.encode()},
         )
-        default_msg.counterparty = ml_trade_msg.counterparty
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_terms(
@@ -134,7 +132,7 @@ class MlTradeHandler(Handler):
         terms = ml_trade_msg.terms
         self.context.logger.info(
             "received terms message from {}: terms={}".format(
-                ml_trade_msg.counterparty[-5:], terms.values
+                ml_trade_msg.sender[-5:], terms.values
             )
         )
 
@@ -152,9 +150,9 @@ class MlTradeHandler(Handler):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg = LedgerApiMessage(
+            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                dialogue_reference=ledger_api_dialogues.new_self_initiated_dialogue_reference(),
                 terms=Terms(
                     ledger_id=terms.values["ledger_id"],
                     sender_address=self.context.agent_addresses[
@@ -170,13 +168,7 @@ class MlTradeHandler(Handler):
                     fee_by_currency_id={terms.values["currency_id"]: 1},
                 ),
             )
-            ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-            ledger_api_dialogue = cast(
-                Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
-            )
-            assert (
-                ledger_api_dialogue is not None
-            ), "Error when creating ledger api dialogue."
+            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_ml_trade_dialogue = ml_trade_dialogue
             self.context.outbox.put_message(message=ledger_api_msg)
             self.context.logger.info(
@@ -184,27 +176,20 @@ class MlTradeHandler(Handler):
             )
         else:
             # accept directly with a dummy transaction digest, no settlement
-            ml_accept = MlTradeMessage(
+            ml_accept = ml_trade_dialogue.reply(
                 performative=MlTradeMessage.Performative.ACCEPT,
-                dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
-                message_id=ml_trade_msg.message_id + 1,
-                target=ml_trade_msg.message_id,
+                target_message=ml_trade_msg,
                 tx_digest=DUMMY_DIGEST,
                 terms=terms,
             )
-            ml_accept.counterparty = ml_trade_msg.counterparty
-            ml_trade_dialogue.update(ml_accept)
             self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info("sending dummy transaction digest ...")
 
-    def _handle_data(
-        self, ml_trade_msg: MlTradeMessage, ml_trade_dialogue: MlTradeDialogue
-    ) -> None:
+    def _handle_data(self, ml_trade_msg: MlTradeMessage) -> None:
         """
         Handle the data.
 
         :param ml_trade_msg: the ml trade message
-        :param ml_trade_dialogue: the dialogue object
         :return: None
         """
         terms = ml_trade_msg.terms
@@ -213,17 +198,15 @@ class MlTradeHandler(Handler):
         if data is None:
             self.context.logger.info(
                 "received data message with no data from {}".format(
-                    ml_trade_msg.counterparty[-5:]
+                    ml_trade_msg.sender[-5:]
                 )
             )
         else:
             self.context.logger.info(
                 "received data message from {}: data shape={}, terms={}".format(
-                    ml_trade_msg.counterparty[-5:], data[0].shape, terms.values
+                    ml_trade_msg.sender[-5:], data[0].shape, terms.values
                 )
             )
-            # training_task = MLTrainTask(data, self.context.ml_model)
-            # self.context.task_manager.enqueue_task(training_task)
             self.context.ml_model.update(data[0], data[1], 5)
             self.context.strategy.is_searching = True
 
@@ -327,7 +310,11 @@ class OEFSearchHandler(Handler):
         :return: None
         """
         if len(oef_search_msg.agents) == 0:
-            self.context.logger.info("found no agents, continue searching.")
+            self.context.logger.info(
+                "found no agents in dialogue={}, continue searching.".format(
+                    oef_search_dialogue
+                )
+            )
             return
 
         self.context.logger.info(
@@ -345,13 +332,11 @@ class OEFSearchHandler(Handler):
             self.context.logger.info(
                 "sending CFT to agent={}".format(opponent_address[-5:])
             )
-            cft_msg = MlTradeMessage(
+            cft_msg, _ = ml_trade_dialogues.create(
+                counterparty=opponent_address,
                 performative=MlTradeMessage.Performative.CFP,
-                dialogue_reference=ml_trade_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
-            cft_msg.counterparty = opponent_address
-            ml_trade_dialogues.update(cft_msg)
             self.context.outbox.put_message(message=cft_msg)
 
     def _handle_invalid(
@@ -402,7 +387,7 @@ class LedgerApiHandler(Handler):
 
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
-            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+            self._handle_balance(ledger_api_msg)
         elif (
             ledger_api_msg.performative is LedgerApiMessage.Performative.RAW_TRANSACTION
         ):
@@ -437,9 +422,7 @@ class LedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 
@@ -473,20 +456,15 @@ class LedgerApiHandler(Handler):
         self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         last_msg = cast(LedgerApiMessage, ledger_api_dialogue.last_outgoing_message)
-        assert last_msg is not None, "Could not retrive last outgoing ledger_api_msg."
-        signing_msg = SigningMessage(
+        if last_msg is None:
+            raise ValueError("Could not retrive last outgoing ledger_api_msg.")
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(self.context.skill_id),),
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=last_msg.terms,
-            skill_callback_info={},
         )
-        signing_msg.counterparty = "decision_maker"
-        signing_dialogue = cast(
-            Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-        )
-        assert signing_dialogue is not None, "Error when creating signing dialogue"
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
         signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
@@ -511,21 +489,18 @@ class LedgerApiHandler(Handler):
         ml_trade_msg = cast(
             Optional[MlTradeMessage], ml_trade_dialogue.last_incoming_message
         )
-        assert ml_trade_msg is not None, "Could not retrieve ml_trade message"
-        ml_accept = MlTradeMessage(
+        if ml_trade_msg is None:
+            raise ValueError("Could not retrieve ml_trade message")
+        ml_accept = ml_trade_dialogue.reply(
             performative=MlTradeMessage.Performative.ACCEPT,
-            message_id=ml_trade_msg.message_id + 1,
-            dialogue_reference=ml_trade_dialogue.dialogue_label.dialogue_reference,
-            target=ml_trade_msg.message_id,
+            target_message=ml_trade_msg,
             tx_digest=ledger_api_msg.transaction_digest.body,
             terms=ml_trade_msg.terms,
         )
-        ml_accept.counterparty = ml_trade_msg.counterparty
-        ml_trade_dialogue.update(ml_accept)
         self.context.outbox.put_message(message=ml_accept)
         self.context.logger.info(
             "informing counterparty={} of transaction digest={}.".format(
-                ml_trade_msg.counterparty[-5:], ledger_api_msg.transaction_digest,
+                ml_trade_msg.sender[-5:], ledger_api_msg.transaction_digest,
             )
         )
 
@@ -630,18 +605,13 @@ class SigningHandler(Handler):
         last_ledger_api_msg = cast(
             Optional[LedgerApiMessage], ledger_api_dialogue.last_incoming_message
         )
-        assert (
-            last_ledger_api_msg is not None
-        ), "Could not retrieve last message in ledger api dialogue"
-        ledger_api_msg = LedgerApiMessage(
+        if last_ledger_api_msg is None:
+            raise ValueError("Could not retrieve last message in ledger api dialogue")
+        ledger_api_msg = ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-            dialogue_reference=ledger_api_dialogue.dialogue_label.dialogue_reference,
-            target=last_ledger_api_msg.message_id,
-            message_id=last_ledger_api_msg.message_id + 1,
+            target_message=last_ledger_api_msg,
             signed_transaction=signing_msg.signed_transaction,
         )
-        ledger_api_msg.counterparty = LEDGER_API_ADDRESS
-        ledger_api_dialogue.update(ledger_api_msg)
         self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info("sending transaction to ledger.")
 

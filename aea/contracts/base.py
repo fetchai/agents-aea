@@ -24,16 +24,20 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ContractConfig,
     ContractId,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.crypto.base import LedgerApi
-from aea.helpers.base import load_aea_package, load_module
+from aea.crypto.registries import Registry
+from aea.exceptions import AEAException, enforce
+from aea.helpers.base import load_module
 
+
+contract_registry: Registry["Contract"] = Registry["Contract"]()
 logger = logging.getLogger(__name__)
 
 
@@ -58,7 +62,8 @@ class Contract(Component):
     @property
     def configuration(self) -> ContractConfig:
         """Get the configuration."""
-        assert self._configuration is not None, "Configuration not set."
+        if self._configuration is None:  # pragma: nocover
+            raise ValueError("Configuration not set.")
         return cast(ContractConfig, super().configuration)
 
     @classmethod
@@ -88,7 +93,7 @@ class Contract(Component):
         """
         configuration = cast(
             ContractConfig,
-            ComponentConfiguration.load(ComponentType.CONTRACT, Path(directory)),
+            load_component_configuration(ComponentType.CONTRACT, Path(directory)),
         )
         configuration.directory = Path(directory)
         return Contract.from_config(configuration, **kwargs)
@@ -101,9 +106,8 @@ class Contract(Component):
         :param configuration: the contract configuration.
         :return: the contract object.
         """
-        assert (
-            configuration.directory is not None
-        ), "Configuration must be associated with a directory."
+        if configuration.directory is None:  # pragma: nocover
+            raise ValueError("Configuration must be associated with a directory.")
         directory = configuration.directory
         load_aea_package(configuration)
         contract_module = load_module("contracts", directory / "contract.py")
@@ -113,16 +117,16 @@ class Contract(Component):
             filter(lambda x: re.match(contract_class_name, x[0]), classes)
         )
         name_to_class = dict(contract_classes)
-        logger.debug("Processing contract {}".format(contract_class_name))
+        logger.debug(f"Processing contract {contract_class_name}")
         contract_class = name_to_class.get(contract_class_name, None)
-        assert contract_class_name is not None, "Contract class '{}' not found.".format(
-            contract_class_name
+        enforce(
+            contract_class is not None,
+            f"Contract class '{contract_class_name}' not found.",
         )
 
-        # TODO: load interfaces here
-        # contract_interface = configuration.contract_interfaces
-
-        return contract_class(configuration, **kwargs)
+        _try_to_register_contract(configuration)
+        contract = contract_registry.make(str(configuration.public_id), **kwargs)
+        return contract
 
     @classmethod
     def get_deploy_transaction(
@@ -192,3 +196,25 @@ class Contract(Component):
         :return: the tx
         """
         raise NotImplementedError
+
+
+def _try_to_register_contract(configuration: ContractConfig):
+    """Register a contract to the registry."""
+    if str(configuration.public_id) in contract_registry.specs:  # pragma: nocover
+        logger.warning(
+            f"Skipping registration of contract {configuration.public_id} since already registered."
+        )
+        return
+    logger.debug(f"Registering contract {configuration.public_id}")  # pragma: nocover
+    try:  # pragma: nocover
+        contract_registry.register(
+            id_=str(configuration.public_id),
+            entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
+            class_kwargs={"contract_interface": configuration.contract_interfaces},
+            contract_config=configuration,
+        )
+    except AEAException as e:  # pragma: nocover
+        if "Cannot re-register id:" in str(e):
+            logger.warning("Already registered: {}".format(configuration.class_name))
+        else:
+            raise e

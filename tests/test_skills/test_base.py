@@ -35,7 +35,7 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAException
 from aea.identity.base import Identity
-from aea.multiplexer import ConnectionStatus
+from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
 from aea.registries.resources import Resources
 from aea.skills.base import (
@@ -50,10 +50,10 @@ from aea.skills.base import (
 )
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_PATH,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
 )
@@ -66,11 +66,11 @@ class TestSkillContext:
     def setup_class(cls):
         """Test the initialisation of the AEA."""
         cls.wallet = Wallet(
-            {COSMOS: COSMOS_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
+            {FETCHAI: FETCHAI_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
         )
         cls.connection = _make_dummy_connection()
         cls.identity = Identity(
-            "name", addresses=cls.wallet.addresses, default_address_key=COSMOS,
+            "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI,
         )
         cls.my_aea = AEA(cls.identity, cls.wallet, resources=Resources())
         cls.my_aea.resources.add_connection(cls.connection)
@@ -92,7 +92,7 @@ class TestSkillContext:
 
     def test_connection_status(self):
         """Test the default agent's connection status."""
-        assert isinstance(self.skill_context.connection_status, ConnectionStatus)
+        assert isinstance(self.skill_context.connection_status, MultiplexerStatus)
 
     def test_decision_maker_message_queue(self):
         """Test the decision maker's queue."""
@@ -197,7 +197,7 @@ class SkillContextTestCase(TestCase):
         agent_context = mock.Mock()
         agent_context.task_manager = "task_manager"
         obj = SkillContext(agent_context)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             obj.task_manager
         obj._skill = mock.Mock()
         obj.task_manager
@@ -206,7 +206,7 @@ class SkillContextTestCase(TestCase):
     def test_handlers_positive(self, *mocks):
         """Test handlers property positive result"""
         obj = SkillContext("agent_context")
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             obj.handlers
         obj._skill = mock.Mock()
         obj._skill.handlers = {}
@@ -216,7 +216,7 @@ class SkillContextTestCase(TestCase):
     def test_behaviours_positive(self, *mocks):
         """Test behaviours property positive result"""
         obj = SkillContext("agent_context")
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             obj.behaviours
         obj._skill = mock.Mock()
         obj._skill.behaviours = {}
@@ -256,9 +256,9 @@ class SkillComponentTestCase(TestCase):
     def test_init_no_ctx(self):
         """Test init method no context provided."""
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             self.TestComponent(name="some_name", skill_context=None)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             self.TestComponent(name=None, skill_context="skill_context")
 
     def test_skill_id_positive(self):
@@ -320,7 +320,7 @@ def test_behaviour():
 
 
 def test_behaviour_parse_module_without_configs():
-    """call Behaviour.parse_module without configurations."""
+    """Call Behaviour.parse_module without configurations."""
     assert Behaviour.parse_module(MagicMock(), {}, MagicMock()) == {}
 
 
@@ -350,7 +350,7 @@ def test_behaviour_parse_module_missing_class():
 
 
 def test_handler_parse_module_without_configs():
-    """call Handler.parse_module without configurations."""
+    """Call Handler.parse_module without configurations."""
     assert Handler.parse_module(MagicMock(), {}, MagicMock()) == {}
 
 
@@ -378,7 +378,7 @@ def test_handler_parse_module_missing_class():
 
 
 def test_model_parse_module_without_configs():
-    """call Model.parse_module without configurations."""
+    """Call Model.parse_module without configurations."""
     assert Model.parse_module(MagicMock(), {}, MagicMock()) == {}
 
 

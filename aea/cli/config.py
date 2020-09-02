@@ -37,7 +37,7 @@ from aea.configurations.loader import ConfigLoader
 @click.group()
 @click.pass_context
 @check_aea_project
-def config(click_context):
+def config(click_context):  # pylint: disable=unused-argument
     """Read or modify a configuration."""
 
 
@@ -112,7 +112,7 @@ def _set_config(ctx: Context, json_path: List[str], value: str, type_str: str) -
         configuration_obj = config_loader.configuration_class.from_json(
             configuration_object
         )
-        config_loader.validator.validate(instance=configuration_obj.json)
+        config_loader.validate(configuration_obj.json)
         config_loader.dump(configuration_obj, open(configuration_file_path, "w"))
     except Exception:
         raise click.ClickException("Attribute or value not valid.")

@@ -73,7 +73,7 @@ class TACBehaviour(SimpleBehaviour):
         else:
             self._deploy_contract(ledger_api, contract)
 
-    def _set_game(
+    def _set_game(  # pylint: disable=unused-argument
         self, parameters: Parameters, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Set the contract and configuration based on provided parameters."""
@@ -88,21 +88,21 @@ class TACBehaviour(SimpleBehaviour):
         configuration.contract_address = parameters.contract_address
         game.conf = configuration
 
-    def _deploy_contract(
+    def _deploy_contract(  # pylint: disable=unused-argument
         self, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Send deploy contract tx msg to decision maker."""
         game = cast(Game, self.context.game)
         game.phase = Phase.CONTRACT_DEPLOYMENT_PROPOSAL
         self.context.logger.info("sending deploy transaction to decision maker.")
-        # request deploy tx
-        # contract.set_instance(ledger_api)
-        # transaction_message = contract.get_deploy_transaction_msg(
-        #     deployer_address=self.context.agent_address,
-        #     ledger_api=ledger_api,
-        #     skill_callback_id=self.context.skill_id,
-        # )
-        # self.context.decision_maker_message_queue.put_nowait(transaction_message)
+        # request deploy tx # noqa: E800
+        # contract.set_instance(ledger_api) # noqa: E800
+        # transaction_message = contract.get_deploy_transaction_msg( # noqa: E800
+        #     deployer_address=self.context.agent_address, # noqa: E800
+        #     ledger_api=ledger_api, # noqa: E800
+        #     skill_callback_id=self.context.skill_id, # noqa: E800
+        # ) # noqa: E800
+        # self.context.decision_maker_message_queue.put_nowait(transaction_message) # noqa: E800
 
     def act(self) -> None:
         """
@@ -188,7 +188,7 @@ class TACBehaviour(SimpleBehaviour):
             dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=desc,
         )
-        oef_msg.counterparty = self.context.search_service_address
+        oef_msg.to = self.context.search_service_address
         self.context.outbox.put_message(message=oef_msg)
         self._registered_desc = desc
         self.context.logger.info(
@@ -211,7 +211,7 @@ class TACBehaviour(SimpleBehaviour):
                 dialogue_reference=(str(self._oef_msg_id), ""),
                 service_description=self._registered_desc,
             )
-            oef_msg.counterparty = self.context.search_service_address
+            oef_msg.to = self.context.search_service_address
             self.context.outbox.put_message(message=oef_msg)
             self._registered_desc = None
 
@@ -263,7 +263,7 @@ class TACBehaviour(SimpleBehaviour):
                 "sending game data to '{}'.".format(agent_address)
             )
             self.context.logger.debug("game data={}".format(str(tac_msg)))
-            tac_msg.counterparty = agent_address
+            tac_msg.to = agent_address
             self.context.outbox.put_message(message=tac_msg)
 
     def _end_tac(self, game: Game, reason: str) -> None:
@@ -271,7 +271,7 @@ class TACBehaviour(SimpleBehaviour):
         self.context.logger.info("notifying agents that TAC is {}.".format(reason))
         for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
-            tac_msg.counterparty = agent_addr
+            tac_msg.to = agent_addr
             self.context.outbox.put_message(message=tac_msg)
 
     def _game_finished_summary(self, game: Game) -> None:
@@ -283,27 +283,27 @@ class TACBehaviour(SimpleBehaviour):
             "computed equilibrium:\n{}".format(game.equilibrium_summary)
         )
 
-    def _get_create_items_tx_msg(  # pylint: disable=no-self-use
+    def _get_create_items_tx_msg(  # pylint: disable=no-self-use,unused-argument
         self,
         configuration: Configuration,
         ledger_api: LedgerApi,
         contract: ERC1155Contract,
     ) -> SigningMessage:
-        # request tx
-        # token_ids = [
-        #     int(good_id) for good_id in configuration.good_id_to_name.keys()
-        # ] + [
-        #     int(currency_id) for currency_id in configuration.currency_id_to_name.keys()
-        # ]
-        # tx_msg = contract.get_create_batch_transaction_msg(
-        #     deployer_address=self.context.agent_address,
-        #     ledger_api=ledger_api,
-        #     skill_callback_id=self.context.skill_id,
-        #     token_ids=token_ids,
-        # )
+        # request tx # noqa: E800
+        # token_ids = [ # noqa: E800
+        #     int(good_id) for good_id in configuration.good_id_to_name.keys() # noqa: E800
+        # ] + [ # noqa: E800
+        #     int(currency_id) for currency_id in configuration.currency_id_to_name.keys() # noqa: E800
+        # ] # noqa: E800
+        # tx_msg = contract.get_create_batch_transaction_msg( # noqa: E800
+        #     deployer_address=self.context.agent_address, # noqa: E800
+        #     ledger_api=ledger_api, # noqa: E800
+        #     skill_callback_id=self.context.skill_id, # noqa: E800
+        #     token_ids=token_ids, # noqa: E800
+        # ) # noqa: E800
         return None  # type: ignore
 
-    def _get_mint_goods_and_currency_tx_msg(  # pylint: disable=no-self-use,useless-return
+    def _get_mint_goods_and_currency_tx_msg(  # pylint: disable=no-self-use,useless-return,unused-argument
         self, agent_state: AgentState, ledger_api: LedgerApi, contract: ERC1155Contract,
     ) -> SigningMessage:
         token_ids = []  # type: List[int]
@@ -314,14 +314,14 @@ class TACBehaviour(SimpleBehaviour):
         for currency_id, amount in agent_state.amount_by_currency_id.items():
             token_ids.append(int(currency_id))
             mint_quantities.append(amount)
-        # tx_msg = contract.get_mint_batch_transaction_msg(
-        #     deployer_address=self.context.agent_address,
-        #     recipient_address=agent_state.agent_address,
-        #     mint_quantities=mint_quantities,
-        #     ledger_api=ledger_api,
-        #     skill_callback_id=self.context.skill_id,
-        #     token_ids=token_ids,
-        # )
+        # tx_msg = contract.get_mint_batch_transaction_msg( # noqa: E800
+        #     deployer_address=self.context.agent_address, # noqa: E800
+        #     recipient_address=agent_state.agent_address, # noqa: E800
+        #     mint_quantities=mint_quantities, # noqa: E800
+        #     ledger_api=ledger_api, # noqa: E800
+        #     skill_callback_id=self.context.skill_id, # noqa: E800
+        #     token_ids=token_ids, # noqa: E800
+        # ) # noqa: E800
         return None  # type: ignore
 
 

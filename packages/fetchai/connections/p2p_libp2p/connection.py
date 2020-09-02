@@ -30,6 +30,7 @@ from pathlib import Path
 from random import randint
 from typing import IO, List, Optional, Sequence, cast
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
@@ -37,8 +38,8 @@ from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import AwaitableProc
-from aea.helpers.pipe import LocalPortablePipe, make_pipe
-from aea.mail.base import Address, Envelope
+from aea.helpers.pipe import IPCChannel, make_ipc_channel
+from aea.mail.base import Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
@@ -59,7 +60,7 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.8.0")
 
 MultiAddr = str
 
@@ -148,6 +149,7 @@ class Uri:
         host: Optional[str] = None,
         port: Optional[int] = None,
     ):
+        """Initialise Uri."""
         if uri is not None:
             split = uri.split(":", 1)
             self._host = split[0]
@@ -158,7 +160,6 @@ class Uri:
         else:
             self._host = "127.0.0.1"
             self._port = randint(5000, 10000)  # nosec
-            # raise ValueError("Either 'uri' or both 'host' and 'port' must be set")
 
     def __str__(self):
         return "{}:{}".format(self._host, self._port)
@@ -246,12 +247,13 @@ class Libp2pNode:
         self.env_file = os.path.join(os.path.abspath(os.getcwd()), self.env_file)
 
         # named pipes (fifos)
-        self.pipe = None  # type: Optional[LocalPortablePipe]
+        self.pipe = None  # type: Optional[IPCChannel]
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self.proc = None  # type: Optional[subprocess.Popen]
         self._log_file_desc = None  # type: Optional[IO[str]]
 
+        self._config = ""
         self.logger = logger
         self._connection_timeout = PIPE_CONN_TIMEOUT
 
@@ -268,58 +270,50 @@ class Libp2pNode:
         self._log_file_desc = open(self.log_file, "a", 1)
 
         # build the node
-        # TOFIX(LR) fix async version
         self.logger.info("Downloading golang dependencies. This may take a while...")
         returncode = await _golang_module_build_async(
             self.source, self._log_file_desc, logger=self.logger
         )
-        with open(self.log_file, "r") as f:
-            self.logger.debug(f.read())
         node_log = ""
         with open(self.log_file, "r") as f:
             node_log = f.read()
         if returncode != 0:
             raise Exception(
-                "Error while downloading golang dependencies and building it: {}, {}".format(
+                "Error while downloading golang dependencies and building it: {},\n{}".format(
                     returncode, node_log
                 )
             )
         self.logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
-        self.pipe = make_pipe(logger=self.logger)
+        self.pipe = make_ipc_channel(logger=self.logger)
 
         # setup config
         if os.path.exists(self.env_file):
             os.remove(self.env_file)
+        self._config = ""
         with open(self.env_file, "a") as env_file:
-            env_file.write("AEA_AGENT_ADDR={}\n".format(self.address))
-            env_file.write("AEA_P2P_ID={}\n".format(self.key))
-            env_file.write("AEA_P2P_URI={}\n".format(str(self.uri)))
-            env_file.write(
-                "AEA_P2P_ENTRY_URIS={}\n".format(
-                    ",".join(
-                        [
-                            str(maddr)
-                            for maddr in self.entry_peers
-                            if str(maddr)
-                            != str(self.uri)  # TOFIX(LR) won't exclude self
-                        ]
-                    )
+            self._config += "AEA_AGENT_ADDR={}\n".format(self.address)
+            self._config += "AEA_P2P_ID={}\n".format(self.key)
+            self._config += "AEA_P2P_URI={}\n".format(str(self.uri))
+            self._config += "AEA_P2P_ENTRY_URIS={}\n".format(
+                ",".join(
+                    [
+                        str(maddr)
+                        for maddr in self.entry_peers
+                        if str(maddr) != str(self.uri)  # TOFIX(LR) won't exclude self
+                    ]
                 )
             )
-            env_file.write("NODE_TO_AEA={}\n".format(self.pipe.in_path))
-            env_file.write("AEA_TO_NODE={}\n".format(self.pipe.out_path))
-            env_file.write(
-                "AEA_P2P_URI_PUBLIC={}\n".format(
-                    str(self.public_uri) if self.public_uri is not None else ""
-                )
+            self._config += "NODE_TO_AEA={}\n".format(self.pipe.in_path)
+            self._config += "AEA_TO_NODE={}\n".format(self.pipe.out_path)
+            self._config += "AEA_P2P_URI_PUBLIC={}\n".format(
+                str(self.public_uri) if self.public_uri is not None else ""
             )
-            env_file.write(
-                "AEA_P2P_DELEGATE_URI={}\n".format(
-                    str(self.delegate_uri) if self.delegate_uri is not None else ""
-                )
+            self._config += "AEA_P2P_DELEGATE_URI={}\n".format(
+                str(self.delegate_uri) if self.delegate_uri is not None else ""
             )
+            env_file.write(self._config)
 
         # run node
         self.logger.info("Starting libp2p node...")
@@ -332,11 +326,25 @@ class Libp2pNode:
         try:
             connected = await self.pipe.connect(timeout=self._connection_timeout)
             if not connected:
-                raise Exception("Couldn't connect to libp2p p2p process within timeout")
+                raise Exception("Couldn't connect to libp2p process within timeout")
         except Exception as e:
-            with open(self.log_file, "r") as f:
-                self.logger.error("Couldn't connect to libp2p p2p process, logs:")
-                self.logger.error(f.read())
+            err_msg = self.get_libp2p_node_error()
+            self.logger.error("Couldn't connect to libp2p process: {}".format(err_msg))
+            self.logger.error(
+                "Libp2p process configuration:\n{}".format(self._config.strip())
+            )
+            if err_msg == "":
+                with open(self.log_file, "r") as f:
+                    self.logger.error(
+                        "Libp2p process log file {}:\n{}".format(
+                            self.log_file, f.read()
+                        )
+                    )
+            else:  # pragma: nocover
+                self.logger.error(
+                    "Please check log file {} for more details.".format(self.log_file)
+                )
+
             self.stop()
             raise e
 
@@ -350,7 +358,8 @@ class Libp2pNode:
 
         :param data: data to write to stream
         """
-        assert self.pipe is not None
+        if self.pipe is None:
+            raise ValueError("pipe is not set.")  # pragma: nocover
         await self.pipe.write(data)
 
     async def read(self) -> Optional[bytes]:
@@ -359,7 +368,8 @@ class Libp2pNode:
 
         :return: bytes
         """
-        assert self.pipe is not None
+        if self.pipe is None:
+            raise ValueError("pipe is not set.")  # pragma: nocover
         return await self.pipe.read()
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
@@ -392,6 +402,33 @@ class Libp2pNode:
                     found = False
         return multiaddrs
 
+    def get_libp2p_node_error(self) -> str:
+        """
+        Parses libp2p node logs for critical errors
+
+        :return: error message if any, empty string otherwise
+        """
+
+        CRITICAL_ERROR = "LIBP2P_NODE_PANIC_ERROR"
+        PANIC_ERROR = "panic:"
+
+        error_msg = ""
+        panic_msg = ""
+
+        lines = []
+        with open(self.log_file, "r") as f:
+            lines = f.readlines()
+
+        for line in lines:  # pragma: nocover
+            if CRITICAL_ERROR in line:
+                parts = line.split(":", 1)
+                error_msg = parts[1].strip()
+            if PANIC_ERROR in line:
+                parts = line.split(":", 1)
+                panic_msg = parts[1].strip()
+
+        return error_msg if error_msg != "" else panic_msg
+
     def stop(self) -> None:
         """
         Stop the node.
@@ -406,7 +443,8 @@ class Libp2pNode:
                 "Waiting for node process {} to terminate...".format(self.proc.pid)
             )
             self.proc.wait()
-            assert self._log_file_desc is not None
+            if self._log_file_desc is None:
+                raise ValueError("log file descriptor is not set.")  # pragma: nocover
             self._log_file_desc.close()
         else:
             self.logger.debug("Called stop when process not set!")  # pragma: no cover
@@ -544,7 +582,7 @@ class P2PLibp2pConnection(Connection):
             # starting receiving msgs
             self._in_queue = asyncio.Queue()
             self._receive_from_node_task = asyncio.ensure_future(
-                self._receive_from_node(), loop=self._loop
+                self._receive_from_node(), loop=self.loop
             )
             self._state.set(ConnectionStates.connected)
         except (CancelledError, Exception) as e:
@@ -581,7 +619,8 @@ class P2PLibp2pConnection(Connection):
         :return: the envelope received, or None.
         """
         try:
-            assert self._in_queue is not None, "Input queue not initialized."
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
@@ -614,7 +653,8 @@ class P2PLibp2pConnection(Connection):
         """
         while True:
             data = await self.node.read()
-            assert self._in_queue is not None, "Input queue not initialized."
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
             self._in_queue.put_nowait(data)
             if data is None:
                 break
@@ -625,6 +665,7 @@ class P2PLibp2pConnection(Connection):
         res = shutil.which("go")
         if res is None:
             raise AEAException(  # pragma: nocover
-                "Please install go before running the `fetchai/p2p_libp2p:0.1.0` connection. "
-                "Go is available for download here: https://golang.org/doc/install"
+                "Please install go before running the `{} connection. Go is available for download here: https://golang.org/doc/install".format(
+                    PUBLIC_ID
+                )
             )

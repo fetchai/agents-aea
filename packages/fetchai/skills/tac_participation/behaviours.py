@@ -21,6 +21,7 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -72,14 +73,15 @@ class TacSearchBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg = OefSearchMessage(
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        oef_search_msg.counterparty = self.context.search_service_address
-        oef_search_dialogues.update(oef_search_msg)
-        self.context.outbox.put_message(message=oef_search_msg)
+        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
+        self.context.outbox.put_message(
+            message=oef_search_msg, context=envelope_context
+        )
         self.context.logger.info(
             "searching for TAC, search_id={}".format(oef_search_msg.dialogue_reference)
         )
@@ -131,17 +133,17 @@ class TransactionProcessBehaviour(TickerBehaviour):
                 "sending transaction {} to controller.".format(tx_id)
             )
             last_msg = tac_dialogue.last_message
-            assert last_msg is not None, "No last message available."
+            if last_msg is None:
+                raise ValueError("No last message available.")
             tx_content = transactions.pop(tx_id, None)
-            assert tx_content is not None, "Tx for id={} not found.".format(tx_id)
+            if tx_content is None:
+                raise ValueError("Tx for id={} not found.".format(tx_id))
             terms = tx_content["terms"]
             sender_signature = tx_content["sender_signature"]
             counterparty_signature = tx_content["counterparty_signature"]
-            msg = TacMessage(
+            msg = tac_dialogue.reply(
                 performative=TacMessage.Performative.TRANSACTION,
-                dialogue_reference=tac_dialogue.dialogue_label.dialogue_reference,
-                message_id=last_msg.message_id + 1,
-                target=last_msg.message_id,
+                target_message=last_msg,
                 transaction_id=tx_id,
                 ledger_id=terms.ledger_id,
                 sender_address=terms.sender_address,
@@ -153,6 +155,4 @@ class TransactionProcessBehaviour(TickerBehaviour):
                 counterparty_signature=counterparty_signature,
                 nonce=terms.nonce,
             )
-            msg.counterparty = game.conf.controller_addr
-            tac_dialogue.update(msg)
             self.context.outbox.put_message(message=msg)

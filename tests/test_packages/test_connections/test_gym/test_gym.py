@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the gym connection module."""
 import asyncio
-import copy
 import logging
 import os
 from typing import cast
@@ -28,18 +27,49 @@ import gym
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 
 from packages.fetchai.connections.gym.connection import GymConnection
-from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
+from packages.fetchai.protocols.gym.dialogues import GymDialogue
+from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 
 from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
 
 logger = logging.getLogger(__name__)
+
+
+class GymDialogues(BaseGymDialogues):
+    """The dialogues class keeps track of all gym dialogues."""
+
+    def __init__(self, self_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return GymDialogue.Role.AGENT
+
+        BaseGymDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+        )
 
 
 class TestGymConnection:
@@ -56,7 +86,7 @@ class TestGymConnection:
         )
         self.loop = asyncio.get_event_loop()
         self.gym_address = str(GymConnection.connection_id)
-        self.dialogues = GymDialogues(self.gym_address)
+        self.dialogues = GymDialogues(self.agent_address)
 
     def teardown(self):
         """Clean up after tests."""
@@ -86,18 +116,11 @@ class TestGymConnection:
     @pytest.mark.asyncio
     async def test_send_connection_error(self):
         """Test send connection error."""
-        msg = GymMessage(
-            performative=GymMessage.Performative.RESET,
-            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
+        msg, sending_dialogue = self.dialogues.create(
+            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
         )
-        msg.counterparty = self.gym_address
-        sending_dialogue = self.dialogues.update(msg)
-        assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
 
         with pytest.raises(ConnectionError):
@@ -107,23 +130,14 @@ class TestGymConnection:
     async def test_send_act(self):
         """Test send act message."""
         sending_dialogue = await self.send_reset()
-        last_message = sending_dialogue.last_message
-        assert last_message is not None
-        msg = GymMessage(
+        assert sending_dialogue.last_message is not None
+        msg = sending_dialogue.reply(
             performative=GymMessage.Performative.ACT,
             action=GymMessage.AnyObject("any_action"),
             step_id=1,
-            dialogue_reference=sending_dialogue.dialogue_label.dialogue_reference,
-            message_id=last_message.message_id + 1,
-            target=last_message.message_id,
         )
-        msg.counterparty = self.gym_address
-        assert sending_dialogue.update(msg)
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         await self.gym_con.connect()
 
@@ -138,10 +152,7 @@ class TestGymConnection:
             mock.assert_called()
 
         response = await asyncio.wait_for(self.gym_con.receive(), timeout=3)
-        response_msg_orig = cast(GymMessage, response.message)
-        response_msg = copy.copy(response_msg_orig)
-        response_msg.is_incoming = True
-        response_msg.counterparty = response_msg_orig.sender
+        response_msg = cast(GymMessage, response.message)
         response_dialogue = self.dialogues.update(response_msg)
 
         assert response_msg.performative == GymMessage.Performative.PERCEPT
@@ -161,21 +172,10 @@ class TestGymConnection:
     async def test_send_close(self):
         """Test send close message."""
         sending_dialogue = await self.send_reset()
-        last_message = sending_dialogue.last_message
-        assert last_message is not None
-        msg = GymMessage(
-            performative=GymMessage.Performative.CLOSE,
-            dialogue_reference=sending_dialogue.dialogue_label.dialogue_reference,
-            message_id=last_message.message_id + 1,
-            target=last_message.message_id,
-        )
-        msg.counterparty = self.gym_address
-        assert sending_dialogue.update(msg)
+        assert sending_dialogue.last_message is not None
+        msg = sending_dialogue.reply(performative=GymMessage.Performative.CLOSE,)
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         await self.gym_con.connect()
 
@@ -186,40 +186,37 @@ class TestGymConnection:
     @pytest.mark.asyncio
     async def test_send_close_negative(self):
         """Test send close message with invalid reference and message id and target."""
-        msg = GymMessage(
+        incorrect_msg = GymMessage(
             performative=GymMessage.Performative.CLOSE,
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
         )
-        msg.counterparty = self.gym_address
-        dialogue = self.dialogues.update(msg)
-        assert dialogue is None
-        msg.sender = self.agent_address
+        incorrect_msg.to = self.gym_address
+        incorrect_msg.sender = self.agent_address
+
+        # the incorrect message cannot be sent into a dialogue, so this is omitted.
+
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=incorrect_msg.to,
+            sender=incorrect_msg.sender,
+            protocol_id=incorrect_msg.protocol_id,
+            message=incorrect_msg,
         )
         await self.gym_con.connect()
 
         with patch.object(self.gym_con.channel.logger, "warning") as mock_logger:
             await self.gym_con.send(envelope)
-            mock_logger.assert_any_call(f"Could not create dialogue from message={msg}")
+            mock_logger.assert_any_call(
+                f"Could not create dialogue from message={incorrect_msg}"
+            )
 
     async def send_reset(self) -> GymDialogue:
         """Send a reset."""
-        msg = GymMessage(
-            performative=GymMessage.Performative.RESET,
-            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
+        msg, sending_dialogue = self.dialogues.create(
+            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
         )
-        msg.counterparty = self.gym_address
-        sending_dialogue = self.dialogues.update(msg)
         assert sending_dialogue is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
         await self.gym_con.connect()
 
@@ -228,10 +225,7 @@ class TestGymConnection:
             mock.assert_called()
 
         response = await asyncio.wait_for(self.gym_con.receive(), timeout=3)
-        response_msg_orig = cast(GymMessage, response.message)
-        response_msg = copy.copy(response_msg_orig)
-        response_msg.is_incoming = True
-        response_msg.counterparty = response_msg_orig.sender
+        response_msg = cast(GymMessage, response.message)
         response_dialogue = self.dialogues.update(response_msg)
 
         assert response_msg.performative == GymMessage.Performative.STATUS

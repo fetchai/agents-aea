@@ -22,7 +22,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar
 
-from aea.mail.base import Address
+from aea.common import Address
 
 
 EntityClass = TypeVar("EntityClass")
@@ -178,9 +178,9 @@ class Helper(ABC):
         :return: return the hash in hex.
         """
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_address_from_public_key(public_key: str) -> str:
+    def get_address_from_public_key(cls, public_key: str) -> str:
         """
         Get the address from the public key.
 
@@ -188,10 +188,10 @@ class Helper(ABC):
         :return: str
         """
 
-    @staticmethod
+    @classmethod
     @abstractmethod
     def recover_message(
-        message: bytes, signature: str, is_deprecated_mode: bool = False
+        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[Address, ...]:
         """
         Recover the addresses from the hash.

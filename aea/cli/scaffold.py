@@ -44,7 +44,7 @@ from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-im
 @click.group()
 @click.pass_context
 @check_aea_project
-def scaffold(click_context):
+def scaffold(click_context):  # pylint: disable=unused-argument
     """Scaffold a resource for the agent."""
 
 
@@ -146,18 +146,19 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
             "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
         )
         existing_ids.add(PublicId(author_name, item_name, DEFAULT_VERSION))
-        ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-        )
+        with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+            ctx.agent_loader.dump(ctx.agent_config, fp)
 
         # ensure the name in the yaml and the name of the folder are the same
         config_filepath = Path(
             ctx.cwd, item_type_plural, item_name, default_config_filename
         )
-        config = loader.load(config_filepath.open())
+        with config_filepath.open() as fp:
+            config = loader.load(fp)
         config.name = item_name
         config.author = author_name
-        loader.dump(config, open(config_filepath, "w"))
+        with config_filepath.open("w") as fp:
+            loader.dump(config, fp)
 
     except ValidationError:
         raise click.ClickException(
@@ -169,7 +170,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
 def _scaffold_dm_handler(ctx: Context):
     """Add a scaffolded decision maker handler to the project and configuration."""
-    existing_dm_handler = getattr(ctx.agent_config, "decision_maker_handler")
+    existing_dm_handler = ctx.agent_config.decision_maker_handler
 
     # check if we already have a decision maker in the project
     if existing_dm_handler != {}:

@@ -31,6 +31,8 @@ DIRECTORIES = ["packages", "examples"]
 
 
 class TestGymExt:
+    """Test the gym example."""
+
     @classmethod
     def setup_class(cls):
         """Set up the test class."""

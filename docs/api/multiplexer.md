@@ -3,16 +3,16 @@
 
 Module for the multiplexer class and related classes.
 
-<a name="aea.multiplexer.ConnectionStatus"></a>
-## ConnectionStatus Objects
+<a name="aea.multiplexer.MultiplexerStatus"></a>
+## MultiplexerStatus Objects
 
 ```python
-class ConnectionStatus()
+class MultiplexerStatus(AsyncState)
 ```
 
 The connection status class.
 
-<a name="aea.multiplexer.ConnectionStatus.__init__"></a>
+<a name="aea.multiplexer.MultiplexerStatus.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -20,6 +20,46 @@ The connection status class.
 ```
 
 Initialize the connection status.
+
+<a name="aea.multiplexer.MultiplexerStatus.is_connected"></a>
+#### is`_`connected
+
+```python
+ | @property
+ | is_connected() -> bool
+```
+
+Return is connected.
+
+<a name="aea.multiplexer.MultiplexerStatus.is_connecting"></a>
+#### is`_`connecting
+
+```python
+ | @property
+ | is_connecting() -> bool
+```
+
+Return is connecting.
+
+<a name="aea.multiplexer.MultiplexerStatus.is_disconnected"></a>
+#### is`_`disconnected
+
+```python
+ | @property
+ | is_disconnected() -> bool
+```
+
+Return is disconnected.
+
+<a name="aea.multiplexer.MultiplexerStatus.is_disconnecting"></a>
+#### is`_`disconnecting
+
+```python
+ | @property
+ | is_disconnecting() -> bool
+```
+
+Return is disconnected.
 
 <a name="aea.multiplexer.AsyncMultiplexer"></a>
 ## AsyncMultiplexer Objects
@@ -158,7 +198,7 @@ Set the default routing.
 
 ```python
  | @property
- | connection_status() -> ConnectionStatus
+ | connection_status() -> MultiplexerStatus
 ```
 
 Get the connection status.
@@ -334,7 +374,7 @@ None
 #### setup
 
 ```python
- | setup(connections: Collection[Connection], default_routing: Dict[PublicId, PublicId], default_connection: Optional[PublicId] = None) -> None
+ | setup(connections: Collection[Connection], default_routing: Optional[Dict[PublicId, PublicId]] = None, default_connection: Optional[PublicId] = None) -> None
 ```
 
 Set up the multiplexer.
@@ -458,7 +498,7 @@ A queue from where you can only enqueue envelopes.
 #### `__`init`__`
 
 ```python
- | __init__(multiplexer: Multiplexer, default_address: Address)
+ | __init__(multiplexer: Multiplexer)
 ```
 
 Initialize the outbox.
@@ -466,7 +506,6 @@ Initialize the outbox.
 **Arguments**:
 
 - `multiplexer`: the multiplexer
-- `default_address`: the default address of the agent
 
 <a name="aea.multiplexer.OutBox.empty"></a>
 #### empty
@@ -502,14 +541,12 @@ None
 #### put`_`message
 
 ```python
- | put_message(message: Message, context: Optional[EnvelopeContext] = None, sender: Optional[str] = None) -> None
+ | put_message(message: Message, context: Optional[EnvelopeContext] = None) -> None
 ```
 
 Put a message in the outbox.
 
 This constructs an envelope with the input arguments.
-
-"sender" is a deprecated kwarg and will be removed in the next version
 
 **Arguments**:
 

@@ -27,6 +27,8 @@ from click import BadParameter, ClickException
 
 from jsonschema import ValidationError
 
+import pytest
+
 from yaml import YAMLError
 
 from aea.cli.utils.click_utils import AEAJsonPathType, PublicIdParameter
@@ -42,7 +44,9 @@ from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
+    get_package_path_unified,
     is_fingerprint_correct,
+    is_item_present_unified,
     try_get_balance,
     try_get_item_source_path,
     try_get_item_target_path,
@@ -278,7 +282,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.6.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -292,7 +296,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.6.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -311,7 +315,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.6.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -320,7 +324,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.6.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -334,7 +338,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.5.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.6.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -424,3 +428,29 @@ class IsReadmePresentTestCase(TestCase):
     def test_is_readme_present_positive(self, *mocks):
         """Test is_readme_present for positive result."""
         self.assertTrue(is_readme_present("readme/path"))
+
+
+@mock.patch("aea.cli.utils.package_utils.get_package_path", return_value="some_path")
+@mock.patch("aea.cli.utils.package_utils.is_item_present")
+@pytest.mark.parametrize("vendor", [True, False])
+def test_get_package_path_unified(mock_present, mock_path, vendor):
+    """Test 'get_package_path_unified'."""
+    contex_mock = mock.MagicMock()
+    contex_mock.agent_config.author = "some_author" if vendor else "another_author"
+    mock_present.return_value = vendor
+    public_id_mock = mock.MagicMock(author="some_author")
+    result = get_package_path_unified(
+        contex_mock, "some_component_type", public_id_mock
+    )
+    assert result == "some_path"
+
+
+@mock.patch("aea.cli.utils.package_utils.is_item_present", return_value=False)
+@pytest.mark.parametrize("vendor", [True, False])
+def test_is_item_present_unified(mock_, vendor):
+    """Test 'is_item_present_unified'."""
+    contex_mock = mock.MagicMock()
+    contex_mock.agent_config.author = "some_author" if vendor else "another_author"
+    public_id_mock = mock.MagicMock(author="some_author")
+    result = is_item_present_unified(contex_mock, "some_component_type", public_id_mock)
+    assert not result

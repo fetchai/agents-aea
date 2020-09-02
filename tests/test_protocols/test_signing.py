@@ -22,7 +22,6 @@ from unittest.mock import patch
 
 import pytest
 
-from aea.configurations.base import PublicId
 from aea.helpers.transaction.base import (
     RawMessage,
     RawTransaction,
@@ -51,15 +50,11 @@ class TestSigningMessage:
             is_sender_payable_tx_fee=True,
             nonce="transaction nonce",
         )
-        cls.skill_callback_ids = (str(PublicId("author", "a_skill", "0.1.0")),)
-        cls.skill_callback_info = {"some_string": "some_string"}
 
     def test_sign_transaction(self):
         """Test for an error for a sign transaction message."""
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            skill_callback_ids=self.skill_callback_ids,
-            skill_callback_info=self.skill_callback_info,
             terms=self.terms,
             raw_transaction=RawTransaction(self.ledger_id, "transaction"),
         )
@@ -72,8 +67,6 @@ class TestSigningMessage:
         """Test for an error for a sign transaction message."""
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
-            skill_callback_ids=self.skill_callback_ids,
-            skill_callback_info=self.skill_callback_info,
             terms=self.terms,
             raw_message=RawMessage(self.ledger_id, "message"),
         )
@@ -88,8 +81,6 @@ class TestSigningMessage:
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
             message_id=2,
             target=1,
-            skill_callback_ids=self.skill_callback_ids,
-            skill_callback_info=self.skill_callback_info,
             signed_transaction=SignedTransaction(self.ledger_id, "signature"),
         )
         assert tx_msg._is_consistent()
@@ -103,8 +94,6 @@ class TestSigningMessage:
             performative=SigningMessage.Performative.SIGNED_MESSAGE,
             message_id=2,
             target=1,
-            skill_callback_ids=self.skill_callback_ids,
-            skill_callback_info=self.skill_callback_info,
             signed_message=SignedMessage(self.ledger_id, "message"),
         )
         assert tx_msg._is_consistent()
@@ -118,8 +107,6 @@ class TestSigningMessage:
             performative=SigningMessage.Performative.ERROR,
             message_id=2,
             target=1,
-            skill_callback_ids=self.skill_callback_ids,
-            skill_callback_info=self.skill_callback_info,
             error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         )
         assert tx_msg._is_consistent()
@@ -138,14 +125,10 @@ def test_consistency_check_negative():
 
 def test_serialization_negative():
     """Test serialization when performative is not recognized."""
-    skill_callback_ids = (str(PublicId("author", "a_skill", "0.1.0")),)
-    skill_callback_info = {"some_string": "some_string"}
     tx_msg = SigningMessage(
         performative=SigningMessage.Performative.ERROR,
         message_id=2,
         target=1,
-        skill_callback_ids=skill_callback_ids,
-        skill_callback_info=skill_callback_info,
         error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
     )
 

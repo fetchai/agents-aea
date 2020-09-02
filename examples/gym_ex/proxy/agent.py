@@ -21,7 +21,6 @@
 
 import sys
 from queue import Queue
-from typing import Optional
 
 import gym
 
@@ -58,7 +57,7 @@ class ProxyAgent(Agent):
         super().__init__(
             identity,
             [GymConnection(gym_env, identity=identity, configuration=configuration)],
-            timeout=0,
+            period=0.01,
         )
         self.proxy_env_queue = proxy_env_queue
 
@@ -78,23 +77,9 @@ class ProxyAgent(Agent):
         """
         pass
 
-    def react(self) -> None:
-        """
-        React to incoming events.
-
-        :return: None
-        """
-        while not self.inbox.empty():
-            envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            if envelope is not None:
-                self.proxy_env_queue.put(envelope)
-
-    def update(self) -> None:
-        """Update the current state of the agent.
-
-        :return None
-        """
-        pass
+    def handle_envelope(self, envelope: Envelope) -> None:
+        if envelope is not None:
+            self.proxy_env_queue.put(envelope)
 
     def teardown(self) -> None:
         """

@@ -47,7 +47,7 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
     AgentConfig,
@@ -69,8 +69,8 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
-from aea.configurations.loader import ConfigLoader
-from aea.contracts import contract_registry
+from aea.configurations.loader import ConfigLoader, load_component_configuration
+from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
@@ -78,11 +78,9 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter
-from aea.helpers.pypi import is_satisfiable
-from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 
@@ -282,7 +280,7 @@ class AEABuilder:
 
     """
 
-    DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+    DEFAULT_AGENT_ACT_PERIOD = 0.05  # seconds
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
     DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
@@ -326,25 +324,28 @@ class AEABuilder:
         :param is_full_reset: whether it is a full reset or not.
         :return: None.
         """
-        self._name = None  # type: Optional[str]
-        self._private_key_paths = {}  # type: Dict[str, Optional[str]]
-        self._connection_private_key_paths = {}  # type: Dict[str, Optional[str]]
+        self._name: Optional[str] = None
+        self._private_key_paths: Dict[str, Optional[str]] = {}
+        self._connection_private_key_paths: Dict[str, Optional[str]] = {}
         if not is_full_reset:
             self._remove_components_from_dependency_manager()
-        self._component_instances = {
+        self._component_instances: Dict[
+            ComponentType, Dict[ComponentConfiguration, Component]
+        ] = {
             ComponentType.CONNECTION: {},
             ComponentType.CONTRACT: {},
             ComponentType.PROTOCOL: {},
             ComponentType.SKILL: {},
-        }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
+        }
+        self._custom_component_configurations: Dict[ComponentId, Dict] = {}
         self._to_reset: bool = False
         self._build_called: bool = False
         if not is_full_reset:
             return
         self._default_ledger = DEFAULT_LEDGER
         self._default_connection: PublicId = DEFAULT_CONNECTION
-        self._context_namespace = {}  # type: Dict[str, Any]
-        self._timeout: Optional[float] = None
+        self._context_namespace: Dict[str, Any] = {}
+        self._period: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
@@ -366,15 +367,15 @@ class AEABuilder:
                     component_config.component_id
                 )
 
-    def set_timeout(self, timeout: Optional[float]) -> "AEABuilder":
+    def set_period(self, period: Optional[float]) -> "AEABuilder":
         """
-        Set agent loop idle timeout in seconds.
+        Set agent act period.
 
-        :param timeout: timeout in seconds
+        :param period: period in seconds
 
         :return: self
         """
-        self._timeout = timeout
+        self._period = period
         return self
 
     def set_execution_timeout(self, execution_timeout: Optional[float]) -> "AEABuilder":
@@ -627,7 +628,7 @@ class AEABuilder:
         :return: the AEABuilder
         """
         directory = Path(directory)
-        configuration = ComponentConfiguration.load(
+        configuration = load_component_configuration(
             component_type, directory, skip_consistency_check
         )
         self._check_can_add(configuration)
@@ -765,10 +766,11 @@ class AEABuilder:
         :param wallet: the wallet
         :return: the identity
         """
-        assert self._name is not None, "You must set the name of the agent."
+        if self._name is None:  # pragma: nocover
+            raise ValueError("You must set the name of the agent.")
 
         if not wallet.addresses:
-            raise ValueError("wallet has no addresses")
+            raise ValueError("Wallet has no addresses.")
 
         if len(wallet.addresses) > 1:
             identity = Identity(
@@ -869,7 +871,7 @@ class AEABuilder:
             wallet,
             resources,
             loop=None,
-            timeout=self._get_agent_loop_timeout(),
+            period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
             is_debug=False,
             max_reactions=self._get_max_reactions(),
@@ -887,20 +889,15 @@ class AEABuilder:
             ComponentType.SKILL, resources, identity.name, agent_context=aea.context
         )
         self._build_called = True
-        self._populate_contract_registry()
         return aea
 
-    def _get_agent_loop_timeout(self) -> float:
+    def _get_agent_act_period(self) -> float:
         """
-        Return agent loop idle timeout.
+        Return agent act period.
 
-        :return: timeout in seconds if set else default value.
+        :return: period in seconds if set else default value.
         """
-        return (
-            self._timeout
-            if self._timeout is not None
-            else self.DEFAULT_AGENT_LOOP_TIMEOUT
-        )
+        return self._period or self.DEFAULT_AGENT_ACT_PERIOD
 
     def _get_execution_timeout(self) -> float:
         """
@@ -1131,7 +1128,7 @@ class AEABuilder:
         self.set_default_connection(
             PublicId.from_str(agent_configuration.default_connection)
         )
-        self.set_timeout(agent_configuration.timeout)
+        self.set_period(agent_configuration.period)
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
         if agent_configuration.decision_maker_handler != {}:
@@ -1216,6 +1213,9 @@ class AEABuilder:
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+        self._custom_component_configurations = (
+            agent_configuration.component_configurations
+        )
 
     def _find_import_order(
         self,
@@ -1244,7 +1244,7 @@ class AEABuilder:
             )
             configuration = cast(
                 SkillConfig,
-                ComponentConfiguration.load(
+                load_component_configuration(
                     skill_id.component_type, component_path, skip_consistency_check
                 ),
             )
@@ -1268,9 +1268,7 @@ class AEABuilder:
         while len(queue) > 0:
             current = queue.pop()
             order.append(current)
-            for node in supports[
-                current
-            ]:  # pragma: nocover # TODO: extract method and test properly
+            for node in supports[current]:  # pragma: nocover
                 depends_on[node].discard(current)
                 if len(depends_on[node]) == 0:
                     queue.append(node)
@@ -1304,9 +1302,6 @@ class AEABuilder:
             aea_project_path=aea_project_path, exit_on_error=False
         )
         builder = AEABuilder(with_default_packages=False)
-
-        # TODO isolate environment
-        # load_env_file(str(aea_config_path / ".env"))
 
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
@@ -1350,43 +1345,17 @@ class AEABuilder:
                     )
             else:
                 configuration = deepcopy(configuration)
+                configuration.update(
+                    self._custom_component_configurations.get(
+                        configuration.component_id, {}
+                    )
+                )
                 _logger = make_logger(configuration, agent_name)
                 component = load_component_from_config(
                     configuration, logger=_logger, **kwargs
                 )
 
             resources.add_component(component)
-
-    def _populate_contract_registry(self):
-        """Populate contract registry."""
-        for configuration in self._package_dependency_manager.get_components_by_type(
-            ComponentType.CONTRACT
-        ).values():
-            configuration = cast(ContractConfig, configuration)
-            if str(configuration.public_id) in contract_registry.specs:
-                logger.warning(
-                    f"Skipping registration of contract {configuration.public_id} since already registered."
-                )
-                continue
-            logger.debug(  # pragma: nocover
-                f"Registering contract {configuration.public_id}"
-            )
-            try:  # pragma: nocover
-                contract_registry.register(
-                    id_=str(configuration.public_id),
-                    entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-                    class_kwargs={
-                        "contract_interface": configuration.contract_interfaces
-                    },
-                    contract_config=configuration,  # TODO: resolve configuration being applied globally
-                )
-            except AEAException as e:  # pragma: nocover
-                if "Cannot re-register id:" in str(e):
-                    logger.warning(
-                        "Already registered: {}".format(configuration.class_name)
-                    )
-                else:
-                    raise e
 
     def _check_we_can_build(self):
         if self._build_called and self._to_reset:

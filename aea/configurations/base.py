@@ -26,6 +26,7 @@ import pprint
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from copy import deepcopy
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -50,7 +51,8 @@ from packaging.version import Version
 
 import semver
 
-import aea
+from aea.__version__ import __version__ as __aea_version__
+from aea.exceptions import enforce
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 T = TypeVar("T")
@@ -76,7 +78,6 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "contract.yaml",
 ]
 
-# TODO implement a proper class to represent this type.
 Dependency = dict
 """
 A dependency is a dictionary with the following (optional) keys:
@@ -128,6 +129,17 @@ class PackageType(Enum):
         """
         return self.value + "s"
 
+    def configuration_class(self) -> Type["PackageConfiguration"]:
+        """Get the configuration class."""
+        d: Dict[PackageType, Type["PackageConfiguration"]] = {
+            PackageType.AGENT: AgentConfig,
+            PackageType.PROTOCOL: ProtocolConfig,
+            PackageType.CONNECTION: ConnectionConfig,
+            PackageType.CONTRACT: ContractConfig,
+            PackageType.SKILL: SkillConfig,
+        }
+        return d[self]
+
     def __str__(self):
         """Convert to string."""
         return str(self.value)
@@ -140,18 +152,17 @@ def _get_default_configuration_file_name_from_type(
     item_type = PackageType(item_type)
     if item_type == PackageType.AGENT:
         return DEFAULT_AEA_CONFIG_FILE
-    elif item_type == PackageType.PROTOCOL:
+    if item_type == PackageType.PROTOCOL:
         return DEFAULT_PROTOCOL_CONFIG_FILE
-    elif item_type == PackageType.CONNECTION:
+    if item_type == PackageType.CONNECTION:
         return DEFAULT_CONNECTION_CONFIG_FILE
-    elif item_type == PackageType.SKILL:
+    if item_type == PackageType.SKILL:
         return DEFAULT_SKILL_CONFIG_FILE
-    elif item_type == PackageType.CONTRACT:
+    if item_type == PackageType.CONTRACT:
         return DEFAULT_CONTRACT_CONFIG_FILE
-    else:
-        raise ValueError(
-            "Item type not valid: {}".format(str(item_type))
-        )  # pragma: no cover
+    raise ValueError(  # pragma: no cover
+        "Item type not valid: {}".format(str(item_type))
+    )
 
 
 class ComponentType(Enum):
@@ -238,7 +249,7 @@ class Configuration(JSONSerializable, ABC):
         # parse all the known keys. This might ignore some keys in the dictionary.
         seen_keys = set()
         for key in self._key_order:
-            assert key not in result, "Key in results!"
+            enforce(key not in result, "Key in results!")
             value = data.get(key)
             if value is not None:
                 result[key] = value
@@ -269,8 +280,7 @@ class CRUDCollection(Generic[T]):
         """
         if item_id in self._items_by_id:
             raise ValueError("Item with name {} already present!".format(item_id))
-        else:
-            self._items_by_id[item_id] = item
+        self._items_by_id[item_id] = item
 
     def read(self, item_id: str) -> Optional[T]:
         """
@@ -344,10 +354,9 @@ class PublicId(JSONSerializable):
     def _process_version(version_like: PackageVersionLike) -> Tuple[Any, Any]:
         if isinstance(version_like, str):
             return version_like, semver.VersionInfo.parse(version_like)
-        elif isinstance(version_like, semver.VersionInfo):
+        if isinstance(version_like, semver.VersionInfo):
             return str(version_like), version_like
-        else:
-            raise ValueError("Version type not valid.")
+        raise ValueError("Version type not valid.")
 
     @property
     def author(self) -> str:
@@ -396,11 +405,10 @@ class PublicId(JSONSerializable):
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_string)
             )
-        else:
-            username, package_name, version = re.findall(
-                cls.PUBLIC_ID_REGEX, public_id_string
-            )[0][:3]
-            return PublicId(username, package_name, version)
+        username, package_name, version = re.findall(
+            cls.PUBLIC_ID_REGEX, public_id_string
+        )[0][:3]
+        return PublicId(username, package_name, version)
 
     @classmethod
     def from_uri_path(cls, public_id_uri_path: str) -> "PublicId":
@@ -424,11 +432,10 @@ class PublicId(JSONSerializable):
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_uri_path)
             )
-        else:
-            username, package_name, version = re.findall(
-                cls.PUBLIC_ID_URI_REGEX, public_id_uri_path
-            )[0][:3]
-            return PublicId(username, package_name, version)
+        username, package_name, version = re.findall(
+            cls.PUBLIC_ID_URI_REGEX, public_id_uri_path
+        )[0][:3]
+        return PublicId(username, package_name, version)
 
     @property
     def to_uri_path(self) -> str:
@@ -498,16 +505,26 @@ class PublicId(JSONSerializable):
             and self.name == other.name
         ):
             return self.version_info < other.version_info
-        else:
-            raise ValueError(
-                "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
-                    self, other
-                )
+        raise ValueError(
+            "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
+                self, other
             )
+        )
 
 
 class PackageId:
     """A package identifier."""
+
+    PACKAGE_TYPE_REGEX = r"({}|{}|{}|{}|{})".format(
+        PackageType.AGENT,
+        PackageType.PROTOCOL,
+        PackageType.SKILL,
+        PackageType.CONNECTION,
+        PackageType.CONTRACT,
+    )
+    PACKAGE_ID_URI_REGEX = r"{}/{}".format(
+        PACKAGE_TYPE_REGEX, PublicId.PUBLIC_ID_URI_REGEX[1:-1]
+    )
 
     def __init__(self, package_type: Union[PackageType, str], public_id: PublicId):
         """
@@ -548,6 +565,44 @@ class PackageId:
     def package_prefix(self) -> Tuple[PackageType, str, str]:
         """Get the package identifier without the version."""
         return self.package_type, self.author, self.name
+
+    @classmethod
+    def from_uri_path(cls, package_id_uri_path: str) -> "PackageId":
+        """
+        Initialize the public id from the string.
+
+        >>> str(PackageId.from_uri_path("skill/author/package_name/0.1.0"))
+        '(skill, author/package_name:0.1.0)'
+
+        A bad formatted input raises value error:
+        >>> PackageId.from_uri_path("very/bad/formatted:input")
+        Traceback (most recent call last):
+        ...
+        ValueError: Input 'very/bad/formatted:input' is not well formatted.
+
+        :param public_id_uri_path: the public id in uri path string format.
+        :return: the public id object.
+        :raises ValueError: if the string in input is not well formatted.
+        """
+        if not re.match(cls.PACKAGE_ID_URI_REGEX, package_id_uri_path):
+            raise ValueError(
+                "Input '{}' is not well formatted.".format(package_id_uri_path)
+            )
+        package_type_str, username, package_name, version = re.findall(
+            cls.PACKAGE_ID_URI_REGEX, package_id_uri_path
+        )[0][:4]
+        package_type = PackageType(package_type_str)
+        public_id = PublicId(username, package_name, version)
+        return PackageId(package_type, public_id)
+
+    @property
+    def to_uri_path(self) -> str:
+        """
+        Turn the package id into a uri path string.
+
+        :return: uri path string
+        """
+        return f"{str(self.package_type)}/{self.author}/{self.name}/{self.version}"
 
     def __hash__(self):
         """Get the hash."""
@@ -636,6 +691,8 @@ class PackageConfiguration(Configuration, ABC):
     """
 
     default_configuration_filename: str
+    package_type: PackageType
+    configurable_fields: Set[str] = set()
 
     def __init__(
         self,
@@ -662,9 +719,8 @@ class PackageConfiguration(Configuration, ABC):
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         """
         super().__init__()
-        assert (
-            name is not None and author is not None
-        ), "Name and author must be set on the configuration!"
+        if name is None or author is None:  # pragma: nocover
+            raise ValueError("Name and author must be set on the configuration!")
         self.name = name
         self.author = author
         self.version = version if version != "" else DEFAULT_VERSION
@@ -675,7 +731,7 @@ class PackageConfiguration(Configuration, ABC):
             if fingerprint_ignore_patterns is not None
             else []
         )
-        self.aea_version = aea_version if aea_version != "" else aea.__version__
+        self.aea_version = aea_version if aea_version != "" else __aea_version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
         self._directory = None  # type: Optional[Path]
@@ -688,7 +744,8 @@ class PackageConfiguration(Configuration, ABC):
     @directory.setter
     def directory(self, directory: Path) -> None:
         """Set directory if not already set."""
-        assert self._directory is None, "Directory already set"
+        if self._directory is not None:  # pragma: nocover
+            raise ValueError("Directory already set")
         self._directory = directory
 
     @staticmethod
@@ -719,6 +776,8 @@ class PackageConfiguration(Configuration, ABC):
 class ComponentConfiguration(PackageConfiguration, ABC):
     """Class to represent an agent component configuration."""
 
+    package_type: PackageType
+
     def __init__(
         self,
         name: str,
@@ -748,9 +807,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         return self._pypi_dependencies
 
     @property
-    @abstractmethod
     def component_type(self) -> ComponentType:
         """Get the component type."""
+        return ComponentType(self.package_type.value)
 
     @property
     def component_id(self) -> ComponentId:
@@ -768,63 +827,6 @@ class ComponentConfiguration(PackageConfiguration, ABC):
     def is_abstract_component(self) -> bool:
         """Check whether the component is abstract."""
         return False
-
-    @staticmethod
-    def load(
-        component_type: ComponentType,
-        directory: Path,
-        skip_consistency_check: bool = False,
-    ) -> "ComponentConfiguration":
-        """
-        Load configuration and check that it is consistent against the directory.
-
-        :param component_type: the component type.
-        :param directory: the root of the package
-        :param skip_consistency_check: if True, the consistency check are skipped.
-        :return: the configuration object.
-        """
-        configuration_object = ComponentConfiguration._load_configuration_object(
-            component_type, directory
-        )
-        if not skip_consistency_check:
-            configuration_object._check_configuration_consistency(  # pylint: disable=protected-access
-                directory
-            )
-        return configuration_object
-
-    @staticmethod
-    def _load_configuration_object(
-        component_type: ComponentType, directory: Path
-    ) -> "ComponentConfiguration":
-        """
-        Load the configuration object, without consistency checks.
-
-        :param component_type: the component type.
-        :param directory: the directory of the configuration.
-        :return: the configuration object.
-        :raises FileNotFoundError: if the configuration file is not found.
-        """
-        from aea.configurations.loader import (  # pylint: disable=import-outside-toplevel
-            ConfigLoader,
-        )
-
-        configuration_loader = ConfigLoader.from_configuration_type(
-            component_type.to_configuration_type()
-        )
-        configuration_filename = (
-            configuration_loader.configuration_class.default_configuration_filename
-        )
-        configuration_filepath = directory / configuration_filename
-        try:
-            fp = open(configuration_filepath)
-            configuration_object = configuration_loader.load(fp)
-        except FileNotFoundError:
-            raise FileNotFoundError(
-                "{} configuration not found: {}".format(
-                    component_type.value.capitalize(), configuration_filepath
-                )
-            )
-        return configuration_object
 
     def _check_configuration_consistency(self, directory: Path):
         """Check that the configuration file is consistent against a directory."""
@@ -853,11 +855,21 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """
         _check_aea_version(self)
 
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+
 
 class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
 
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
+    package_type = PackageType.CONNECTION
+    configurable_fields = {"config"}
 
     def __init__(
         self,
@@ -879,24 +891,24 @@ class ConnectionConfig(ComponentConfiguration):
     ):
         """Initialize a connection configuration object."""
         if connection_id is None:
-            assert name != "", "Name or connection_id must be set."
-            assert author != "", "Author or connection_id must be set."
-            assert version != "", "Version or connection_id must be set."
+            enforce(name != "", "Name or connection_id must be set.")
+            enforce(author != "", "Author or connection_id must be set.")
+            enforce(version != "", "Version or connection_id must be set.")
         else:
-            assert name in (
-                "",
-                connection_id.name,
-            ), "Non matching name in ConnectionConfig name and public id."
+            enforce(
+                name in ("", connection_id.name,),
+                "Non matching name in ConnectionConfig name and public id.",
+            )
             name = connection_id.name
-            assert author in (
-                "",
-                connection_id.author,
-            ), "Non matching author in ConnectionConfig author and public id."
+            enforce(
+                author in ("", connection_id.author,),
+                "Non matching author in ConnectionConfig author and public id.",
+            )
             author = connection_id.author
-            assert version in (
-                "",
-                connection_id.version,
-            ), "Non matching version in ConnectionConfig version and public id."
+            enforce(
+                version in ("", connection_id.version,),
+                "Non matching version in ConnectionConfig version and public id.",
+            )
             version = connection_id.version
         super().__init__(
             name,
@@ -918,12 +930,7 @@ class ConnectionConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.config = config
-
-    @property
-    def component_type(self) -> ComponentType:
-        """Get the component type."""
-        return ComponentType.CONNECTION
+        self.config = config if len(config) > 0 else {}
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -941,6 +948,7 @@ class ConnectionConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -984,14 +992,24 @@ class ConnectionConfig(ComponentConfiguration):
             excluded_protocols=cast(Set[PublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
-            **cast(dict, obj.get("config")),
+            **cast(dict, obj.get("config", {})),
         )
+
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        self.config = data.get("config", self.config)
 
 
 class ProtocolConfig(ComponentConfiguration):
     """Handle protocol configuration."""
 
     default_configuration_filename = DEFAULT_PROTOCOL_CONFIG_FILE
+    package_type = PackageType.PROTOCOL
 
     def __init__(
         self,
@@ -1020,11 +1038,6 @@ class ProtocolConfig(ComponentConfiguration):
         self.description = description
 
     @property
-    def component_type(self) -> ComponentType:
-        """Get the component type."""
-        return ComponentType.PROTOCOL
-
-    @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         return OrderedDict(
@@ -1032,6 +1045,7 @@ class ProtocolConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1090,6 +1104,8 @@ class SkillConfig(ComponentConfiguration):
     """Class to represent a skill configuration file."""
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
+    package_type = PackageType.SKILL
+    configurable_fields = {"handlers", "behaviours", "models"}
 
     def __init__(
         self,
@@ -1123,16 +1139,11 @@ class SkillConfig(ComponentConfiguration):
         self.skills: List[PublicId] = (skills if skills is not None else [])
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.handlers = CRUDCollection[SkillComponentConfiguration]()
-        self.behaviours = CRUDCollection[SkillComponentConfiguration]()
-        self.models = CRUDCollection[SkillComponentConfiguration]()
+        self.handlers: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
+        self.behaviours: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
+        self.models: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
 
         self.is_abstract = is_abstract
-
-    @property
-    def component_type(self) -> ComponentType:
-        """Get the component type."""
-        return ComponentType.SKILL
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1166,6 +1177,7 @@ class SkillConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1241,11 +1253,31 @@ class SkillConfig(ComponentConfiguration):
 
         return skill_config
 
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
+            behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
+            self.behaviours.update(behaviour_id, behaviour_config)
+
+        for handler_id, handler_data in data.get("handlers", {}).items():
+            handler_config = SkillComponentConfiguration.from_json(handler_data)
+            self.handlers.update(handler_id, handler_config)
+
+        for model_id, model_data in data.get("models", {}).items():
+            model_config = SkillComponentConfiguration.from_json(model_data)
+            self.models.update(model_id, model_config)
+
 
 class AgentConfig(PackageConfiguration):
     """Class to represent the agent configuration file."""
 
     default_configuration_filename = DEFAULT_AEA_CONFIG_FILE
+    package_type = PackageType.AGENT
 
     def __init__(
         self,
@@ -1259,7 +1291,7 @@ class AgentConfig(PackageConfiguration):
         registry_path: str = DEFAULT_REGISTRY_PATH,
         description: str = "",
         logging_config: Optional[Dict] = None,
-        timeout: Optional[float] = None,
+        period: Optional[float] = None,
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
         decision_maker_handler: Optional[Dict] = None,
@@ -1267,6 +1299,7 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        component_configurations: Optional[Dict[ComponentId, Dict]] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1296,7 +1329,7 @@ class AgentConfig(PackageConfiguration):
             self.logging_config["version"] = 1
             self.logging_config["disable_existing_loggers"] = False
 
-        self.timeout: Optional[float] = timeout
+        self.period: Optional[float] = period
         self.execution_timeout: Optional[float] = execution_timeout
         self.max_reactions: Optional[int] = max_reactions
         self.skill_exception_policy: Optional[str] = skill_exception_policy
@@ -1315,6 +1348,32 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        self._component_configurations: Dict[ComponentId, Dict] = {}
+        self.component_configurations = (
+            component_configurations if component_configurations is not None else {}
+        )
+
+    @property
+    def component_configurations(self) -> Dict[ComponentId, Dict]:
+        """Get the custom component configurations."""
+        return self._component_configurations
+
+    @component_configurations.setter
+    def component_configurations(self, d: Dict[ComponentId, Dict]) -> None:
+        """Set the component configurations."""
+        package_type_to_set = {
+            PackageType.PROTOCOL: self.protocols,
+            PackageType.CONNECTION: self.connections,
+            PackageType.CONTRACT: self.contracts,
+            PackageType.SKILL: self.skills,
+        }
+        for component_id, _ in d.items():
+            enforce(
+                component_id.public_id
+                in package_type_to_set[component_id.package_type],
+                f"Component {component_id} not declared in the agent configuration.",
+            )
+        self._component_configurations = d
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1355,7 +1414,8 @@ class AgentConfig(PackageConfiguration):
     @property
     def default_connection(self) -> str:
         """Get the default connection."""
-        assert self._default_connection is not None, "Default connection not set yet."
+        if self._default_connection is None:  # pragma: nocover
+            raise ValueError("Default connection not set yet.")
         return str(self._default_connection)
 
     @default_connection.setter
@@ -1376,7 +1436,8 @@ class AgentConfig(PackageConfiguration):
     @property
     def default_ledger(self) -> str:
         """Get the default ledger."""
-        assert self._default_ledger is not None, "Default ledger not set yet."
+        if self._default_ledger is None:  # pragma: nocover
+            raise ValueError("Default ledger not set yet.")
         return self._default_ledger
 
     @default_ledger.setter
@@ -1388,6 +1449,19 @@ class AgentConfig(PackageConfiguration):
         :return: None
         """
         self._default_ledger = ledger_id
+
+    def component_configurations_json(self) -> List[OrderedDict]:
+        """Get the component configurations in JSON format."""
+        return [
+            OrderedDict(
+                name=component_id.name,
+                author=component_id.author,
+                version=component_id.version,
+                type=component_id.component_type.value,
+                **obj,
+            )
+            for component_id, obj in self.component_configurations.items()
+        ]
 
     @property
     def json(self) -> Dict:
@@ -1411,6 +1485,7 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
                 "registry_path": self.registry_path,
+                "component_configurations": self.component_configurations_json(),
             }
         )  # type: Dict[str, Any]
 
@@ -1419,8 +1494,8 @@ class AgentConfig(PackageConfiguration):
                 "connection_private_key_paths"
             ] = self.connection_private_key_paths_dict
 
-        if self.timeout is not None:
-            config["timeout"] = self.timeout
+        if self.period is not None:
+            config["period"] = self.period
         if self.execution_timeout is not None:
             config["execution_timeout"] = self.execution_timeout
         if self.max_reactions is not None:
@@ -1457,7 +1532,7 @@ class AgentConfig(PackageConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             logging_config=cast(Dict, obj.get("logging_config", {})),
-            timeout=cast(float, obj.get("timeout")),
+            period=cast(float, obj.get("period")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
             decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),
@@ -1465,6 +1540,7 @@ class AgentConfig(PackageConfiguration):
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
+            component_configurations=None,
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():
@@ -1474,40 +1550,31 @@ class AgentConfig(PackageConfiguration):
             agent_config.connection_private_key_paths.create(crypto_id, path)
 
         # parse connection public ids
-        connections = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("connections", []),
-            )
+        agent_config.connections = set(
+            map(PublicId.from_str, obj.get("connections", []),)
         )
-        agent_config.connections = cast(Set[PublicId], connections)
 
         # parse contracts public ids
-        contracts = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("contracts", []),
-            )
-        )
-        agent_config.contracts = cast(Set[PublicId], contracts)
+        agent_config.contracts = set(map(PublicId.from_str, obj.get("contracts", []),))
 
         # parse protocol public ids
-        protocols = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("protocols", []),
-            )
-        )
-        agent_config.protocols = cast(Set[PublicId], protocols)
+        agent_config.protocols = set(map(PublicId.from_str, obj.get("protocols", []),))
 
         # parse skills public ids
-        skills = set(
-            map(
-                lambda x: PublicId.from_str(x),  # pylint: disable=unnecessary-lambda
-                obj.get("skills", []),
+        agent_config.skills = set(map(PublicId.from_str, obj.get("skills", []),))
+
+        component_configurations = {}
+        for config in obj.get("component_configurations", []):
+            tmp = deepcopy(config)
+            name = tmp.pop("name")
+            author = tmp.pop("author")
+            version = tmp.pop("version")
+            type_ = tmp.pop("type")
+            component_id = ComponentId(
+                ComponentType(type_), PublicId(author, name, version)
             )
-        )
-        agent_config.skills = cast(Set[PublicId], skills)
+            component_configurations[component_id] = tmp
+        agent_config.component_configurations = component_configurations
 
         # set default connection
         default_connection_name = obj.get("default_connection", None)
@@ -1666,6 +1733,7 @@ class ContractConfig(ComponentConfiguration):
     """Handle contract configuration."""
 
     default_configuration_filename = DEFAULT_CONTRACT_CONFIG_FILE
+    package_type = PackageType.CONTRACT
 
     def __init__(
         self,
@@ -1700,18 +1768,14 @@ class ContractConfig(ComponentConfiguration):
         self.class_name = class_name
 
     @property
-    def component_type(self) -> ComponentType:
-        """Get the component type."""
-        return ComponentType.CONTRACT
-
-    @property
     def contract_interfaces(self) -> Dict[str, str]:
         """Get the contract interfaces."""
         return self._get_contract_interfaces()
 
     def _get_contract_interfaces(self) -> Dict[str, str]:
         """Get the contract interfaces."""
-        assert self.directory is not None, "Set directory before calling."
+        if self.directory is None:  # pragma: nocover
+            raise ValueError("Set directory before calling.")
         contract_interfaces = {}  # type: Dict[str, str]
         for identifier, path in self.contract_interface_paths.items():
             full_path = Path(self.directory, path)
@@ -1719,7 +1783,7 @@ class ContractConfig(ComponentConfiguration):
                 with open(full_path, "r") as interface_file_ethereum:
                     contract_interface = json.load(interface_file_ethereum)
                     contract_interfaces[identifier] = contract_interface
-            elif identifier == "cosmos":
+            elif identifier in ["cosmos", "fetchai"]:
                 with open(full_path, "rb") as interface_file_cosmos:
                     contract_interface = {
                         "wasm_byte_code": str(
@@ -1730,7 +1794,7 @@ class ContractConfig(ComponentConfiguration):
                     }
                     contract_interfaces[identifier] = contract_interface
             else:
-                ValueError(  # pragma: nocover
+                raise ValueError(  # pragma: nocover
                     "Identifier {} is not supported for contracts."
                 )
         return contract_interfaces
@@ -1743,6 +1807,7 @@ class ContractConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
@@ -1800,7 +1865,7 @@ def _compute_fingerprint(
     for file in all_files:
         file_hash = hasher.get(str(file))
         key = str(file.relative_to(package_directory))
-        assert key not in fingerprints, "Key in fingerprints!"  # nosec
+        enforce(key not in fingerprints, "Key in fingerprints!")  # nosec
         # use '/' as path separator
         normalized_path = Path(key).as_posix()
         fingerprints[normalized_path] = file_hash
@@ -1841,24 +1906,23 @@ def _compare_fingerprints(
                     package_configuration.public_id,
                 )
             )
-        else:
-            raise ValueError(
-                (
-                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
-                    "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
-                ).format(
-                    package_directory,
-                    pprint.pformat(expected_fingerprints),
-                    pprint.pformat(actual_fingerprints),
-                    str(item_type),
-                    package_configuration.public_id,
-                )
+        raise ValueError(
+            (
+                "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
+            ).format(
+                package_directory,
+                pprint.pformat(expected_fingerprints),
+                pprint.pformat(actual_fingerprints),
+                str(item_type),
+                package_configuration.public_id,
             )
+        )
 
 
 def _check_aea_version(package_configuration: PackageConfiguration):
     """Check the package configuration version against the version of the framework."""
-    current_aea_version = Version(aea.__version__)
+    current_aea_version = Version(__aea_version__)
     version_specifiers = package_configuration.aea_version_specifiers
     if current_aea_version not in version_specifiers:
         raise ValueError(

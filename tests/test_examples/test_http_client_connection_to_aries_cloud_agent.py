@@ -125,7 +125,7 @@ class TestAEAToACA:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = "ACA"
+        request_http_message.to = "ACA"
         request_envelope = Envelope(
             to="ACA",
             sender="AEA",
@@ -219,7 +219,7 @@ class TestAEAToACA:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = "ACA"
+        request_http_message.to = "ACA"
         request_envelope = Envelope(
             to="ACA",
             sender="AEA",

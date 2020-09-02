@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests for the Multiplexer."""
 
 import asyncio
@@ -33,6 +34,8 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
+from aea.connections.base import ConnectionStates
+from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
@@ -57,10 +60,10 @@ async def test_receiving_loop_terminated():
     multiplexer.connect()
 
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        multiplexer.connection_status.is_connected = False
+        multiplexer.connection_status.set(ConnectionStates.disconnected)
         await multiplexer._receiving_loop()
         mock_logger_debug.assert_called_with("Receiving loop terminated.")
-        multiplexer.connection_status.is_connected = True
+        multiplexer.connection_status.set(ConnectionStates.connected)
         multiplexer.disconnect()
 
 
@@ -208,9 +211,9 @@ def test_multiplexer_disconnect_all_raises_error():
             multiplexer.disconnect()
 
     # # do the true disconnection - for clean the test up
-    assert multiplexer.connection_status.is_connected
+    assert multiplexer.connection_status.is_disconnecting
     multiplexer.disconnect()
-    assert not multiplexer.connection_status.is_connected
+    assert multiplexer.connection_status.is_disconnected
 
 
 @pytest.mark.asyncio
@@ -358,56 +361,6 @@ def test_get_from_multiplexer_when_empty():
         multiplexer.get()
 
 
-# TODO: fix test; doesn't make sense to use same multiplexer for different agents
-# def test_multiple_connection():
-#     """Test that we can send a message with two different connections."""
-#     with LocalNode() as node:
-#         identity_1 = Identity("", address="address_1")
-#         identity_2 = Identity("", address="address_2")
-
-#         connection_1 = _make_local_connection(identity_1.address, node)
-
-#         connection_2 = _make_dummy_connection()
-
-#         multiplexer = Multiplexer([connection_1, connection_2])
-
-#         assert not connection_1.is_connected
-#         assert not connection_2.is_connected
-
-#         multiplexer.connect()
-
-#         assert connection_1.is_connected
-#         assert connection_2.is_connected
-#         message = DefaultMessage(
-#             dialogue_reference=("", ""),
-#             message_id=1,
-#             target=0,
-#             performative=DefaultMessage.Performative.BYTES,
-#             content=b"hello",
-#         )
-#         envelope_from_1_to_2 = Envelope(
-#             to=identity_2.address,
-#             sender=identity_1.address,
-#             protocol_id=DefaultMessage.protocol_id,
-#             message=DefaultSerializer().encode(message),
-#             context=EnvelopeContext(connection_id=connection_1.connection_id),
-#         )
-#         multiplexer.put(envelope_from_1_to_2)
-#         actual_envelope = multiplexer.get(block=True, timeout=2.0)
-#         assert envelope_from_1_to_2 == actual_envelope
-#         envelope_from_2_to_1 = Envelope(
-#             to=identity_1.address,
-#             sender=identity_2.address,
-#             protocol_id=DefaultMessage.protocol_id,
-#             message=DefaultSerializer().encode(message),
-#             context=EnvelopeContext(connection_id=connection_2.connection_id),
-#         )
-#         multiplexer.put(envelope_from_2_to_1)
-#         actual_envelope = multiplexer.get(block=True, timeout=2.0)
-#         assert envelope_from_2_to_1 == actual_envelope
-#         multiplexer.disconnect()
-
-
 def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
@@ -490,7 +443,7 @@ async def test_inbox_outbox():
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
     msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
-    msg.counterparty = "to"
+    msg.to = "to"
     msg.sender = "sender"
     context = EnvelopeContext(connection_id=connection_1.connection_id)
     envelope = Envelope(
@@ -503,7 +456,7 @@ async def test_inbox_outbox():
     try:
         await multiplexer.connect()
         inbox = InBox(multiplexer)
-        outbox = OutBox(multiplexer, "default_address")
+        outbox = OutBox(multiplexer)
 
         assert inbox.empty()
         assert outbox.empty()
@@ -542,7 +495,7 @@ async def test_outbox_negative():
 
     try:
         await multiplexer.connect()
-        outbox = OutBox(multiplexer, "default_address")
+        outbox = OutBox(multiplexer)
 
         assert outbox.empty()
 
@@ -563,12 +516,10 @@ async def test_outbox_negative():
 
         with pytest.raises(ValueError) as execinfo:
             outbox.put_message(msg)
-        assert (
-            str(execinfo.value) == "Provided message has message.counterparty not set."
-        )
+        assert str(execinfo.value) == "Provided message has message.to not set."
 
         assert outbox.empty()
-        msg.counterparty = "to"
+        msg.to = "to"
 
         with pytest.raises(ValueError) as execinfo:
             outbox.put_message(msg)
@@ -604,7 +555,6 @@ async def test_default_route_applied(caplog):
 
             assert inbox.empty()
             assert outbox.empty()
-
             multiplexer.put(envelope)
             await outbox.async_get()
         finally:
@@ -627,7 +577,7 @@ def test_multiplexer_setup():
     connection_3 = _make_dummy_connection()
     connections = [connection_1, connection_2, connection_3]
     multiplexer = Multiplexer([])
-    with pytest.raises(AssertionError):
+    with pytest.raises(AEAEnforceError):
         multiplexer._connection_consistency_checks()
     multiplexer.setup(connections, default_routing=None)
     multiplexer._connection_consistency_checks()

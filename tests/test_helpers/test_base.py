@@ -31,12 +31,10 @@ from unittest.mock import patch
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig
 from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
     exception_log_and_reraise,
-    load_aea_package,
     load_env_file,
     load_module,
     locate,
@@ -45,7 +43,9 @@ from aea.helpers.base import (
     try_decorator,
     win_popen_kwargs,
     yaml_dump,
+    yaml_dump_all,
     yaml_load,
+    yaml_load_all,
 )
 
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -117,13 +117,6 @@ def test_yaml_dump_load():
     stream.seek(0)
     loaded_data = yaml_load(stream)
     assert loaded_data == data
-
-
-def test_load_aea_package():
-    """Test aea package load."""
-    config = ConnectionConfig("http_client", "fetchai", "0.5.0")
-    config.directory = Path(ROOT_DIR) / "packages"
-    load_aea_package(config)
 
 
 def test_load_module():
@@ -238,3 +231,13 @@ def test_send_control_c_windows():
             with patch("os.kill") as mock_kill:
                 send_control_c(process)
                 mock_kill.assert_called_with(pid, mock_signal.CTRL_C_EVENT)
+
+
+def test_yaml_dump_all_load_all():
+    """Test yaml_dump_all and yaml_load_all."""
+    f = io.StringIO()
+    data = [{"a": "12"}, {"b": "13"}]
+    yaml_dump_all(data, f)
+
+    f.seek(0)
+    assert yaml_load_all(f) == data

@@ -58,8 +58,8 @@ class TestAsyncRuntime:
 
     def test_double_start(self):
         """Test runtime double start do nothing."""
-        with patch.object(self.runtime, "_start", side_effect=AssertionError("oops")):
-            with pytest.raises(AssertionError, match="oops"):
+        with patch.object(self.runtime, "_start", side_effect=ValueError("oops")):
+            with pytest.raises(ValueError, match="oops"):
                 self.runtime.start()
 
             self.runtime._state.set(RuntimeStates.running)
@@ -67,9 +67,9 @@ class TestAsyncRuntime:
 
     def test_double_stop(self):
         """Test runtime double stop do nothing."""
-        with patch.object(self.runtime, "_stop", side_effect=AssertionError("oops")):
+        with patch.object(self.runtime, "_stop", side_effect=ValueError("oops")):
             self.runtime._state.set(RuntimeStates.running)
-            with pytest.raises(AssertionError, match="oops"):
+            with pytest.raises(ValueError, match="oops"):
                 self.runtime.stop()
 
             self.runtime._state.set(RuntimeStates.stopped)
@@ -78,9 +78,9 @@ class TestAsyncRuntime:
     def test_error_state(self):
         """Test runtime fails on start."""
         with patch.object(
-            self.runtime, "_start_agent_loop", side_effect=AssertionError("oops")
+            self.runtime, "_start_agent_loop", side_effect=ValueError("oops")
         ):
-            with pytest.raises(AssertionError, match="oops"):
+            with pytest.raises(ValueError, match="oops"):
                 self.runtime.start()
 
         assert self.runtime.state == RuntimeStates.error
@@ -94,9 +94,9 @@ class TestThreadedRuntime(TestAsyncRuntime):
     def test_error_state(self):
         """Test runtime fails on start."""
         with patch.object(
-            self.runtime._agent.main_loop, "start", side_effect=AssertionError("oops")
+            self.runtime.main_loop, "start", side_effect=ValueError("oops")
         ):
-            with pytest.raises(AssertionError, match="oops"):
+            with pytest.raises(ValueError, match="oops"):
                 self.runtime.start()
 
         assert self.runtime.state == RuntimeStates.error

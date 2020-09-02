@@ -16,5 +16,20 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""This module contains tests for aea exceptions."""
 
-"""Peer to Peer connection and channel."""
+import pytest
+
+from aea.exceptions import AEAEnforceError, enforce
+
+
+def test_enforce_no_exception():
+    """Test enforce does not throw exception if condition is True."""
+    enforce(True, "Error message")
+
+
+def test_enforce_exception():
+    """Test enforce does throw exception if condition is False."""
+    error_msg = "Error message"
+    with pytest.raises(AEAEnforceError, match=error_msg):
+        enforce(False, error_msg)

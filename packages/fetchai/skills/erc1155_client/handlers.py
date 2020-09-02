@@ -47,7 +47,7 @@ from packages.fetchai.skills.erc1155_client.dialogues import (
 )
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.3.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.4.0"
 
 
 class FipaHandler(Handler):
@@ -106,15 +106,13 @@ class FipaHandler(Handler):
             "unidentified dialogue for message={}.".format(fipa_msg)
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-        default_msg = DefaultMessage(
+        default_msg, _ = default_dialogues.create(
+            counterparty=fipa_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": fipa_msg.encode()},
         )
-        default_msg.counterparty = fipa_msg.counterparty
-        default_dialogues.update(default_msg)
         self.context.outbox.put_message(message=default_msg)
 
     def _handle_propose(
@@ -144,23 +142,23 @@ class FipaHandler(Handler):
             # accept any proposal with the correct keys
             self.context.logger.info(
                 "received valid PROPOSE from sender={}: proposal={}".format(
-                    fipa_msg.counterparty[-5:], fipa_msg.proposal.values,
+                    fipa_msg.sender[-5:], fipa_msg.proposal.values,
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
             contract_api_dialogues = cast(
                 ContractApiDialogues, self.context.contract_api_dialogues
             )
-            contract_api_msg = ContractApiMessage(
+            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
                 performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
-                dialogue_reference=contract_api_dialogues.new_self_initiated_dialogue_reference(),
                 ledger_id=strategy.ledger_id,
-                contract_id="fetchai/erc1155:0.8.0",
+                contract_id="fetchai/erc1155:0.9.0",
                 contract_address=fipa_msg.proposal.values["contract_address"],
                 callable="get_hash_single",
                 kwargs=ContractApiMessage.Kwargs(
                     {
-                        "from_address": fipa_msg.counterparty,
+                        "from_address": fipa_msg.sender,
                         "to_address": self.context.agent_address,
                         "token_id": int(fipa_msg.proposal.values["token_id"]),
                         "from_supply": int(fipa_msg.proposal.values["from_supply"]),
@@ -173,7 +171,7 @@ class FipaHandler(Handler):
             terms = Terms(
                 ledger_id=strategy.ledger_id,
                 sender_address=self.context.agent_address,
-                counterparty_address=fipa_msg.counterparty,
+                counterparty_address=fipa_msg.sender,
                 amount_by_currency_id={},
                 quantities_by_good_id={
                     str(fipa_msg.proposal.values["token_id"]): int(
@@ -184,14 +182,7 @@ class FipaHandler(Handler):
                 is_sender_payable_tx_fee=False,
                 nonce=str(fipa_msg.proposal.values["trade_nonce"]),
             )
-            contract_api_msg.counterparty = LEDGER_API_ADDRESS
-            contract_api_dialogue = cast(
-                Optional[ContractApiDialogue],
-                contract_api_dialogues.update(contract_api_msg),
-            )
-            assert (
-                contract_api_dialogue is not None
-            ), "Error when creating contract api dialogue."
+            contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
             contract_api_dialogue.terms = terms
             contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             self.context.outbox.put_message(message=contract_api_msg)
@@ -201,7 +192,7 @@ class FipaHandler(Handler):
         else:
             self.context.logger.info(
                 "received invalid PROPOSE from sender={}: proposal={}".format(
-                    fipa_msg.counterparty[-5:], fipa_msg.proposal.values,
+                    fipa_msg.sender[-5:], fipa_msg.proposal.values,
                 )
             )
 
@@ -305,7 +296,11 @@ class OefSearchHandler(Handler):
         :return: None
         """
         if len(oef_search_msg.agents) == 0:
-            self.context.logger.info("found no agents, continue searching.")
+            self.context.logger.info(
+                "found no agents in dialogue={}, continue searching.".format(
+                    oef_search_dialogue
+                )
+            )
             return
 
         self.context.logger.info(
@@ -318,13 +313,11 @@ class OefSearchHandler(Handler):
         query = strategy.get_service_query()
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
         for opponent_address in oef_search_msg.agents:
-            cfp_msg = FipaMessage(
-                dialogue_reference=fipa_dialogues.new_self_initiated_dialogue_reference(),
+            cfp_msg, _ = fipa_dialogues.create(
+                counterparty=opponent_address,
                 performative=FipaMessage.Performative.CFP,
                 query=query,
             )
-            cfp_msg.counterparty = opponent_address
-            fipa_dialogues.update(cfp_msg)
             self.context.logger.info(
                 "sending CFP to agent={}".format(opponent_address[-5:])
             )
@@ -420,23 +413,17 @@ class ContractApiHandler(Handler):
         """
         self.context.logger.info("received raw message={}".format(contract_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        signing_msg = SigningMessage(
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty="decision_maker",
             performative=SigningMessage.Performative.SIGN_MESSAGE,
-            dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-            skill_callback_ids=(str(self.context.skill_id),),
             raw_message=RawMessage(
                 contract_api_msg.raw_message.ledger_id,
                 contract_api_msg.raw_message.body,
                 is_deprecated_mode=True,
             ),
             terms=contract_api_dialogue.terms,
-            skill_callback_info={},
         )
-        signing_msg.counterparty = "decision_maker"
-        signing_dialogue = cast(
-            Optional[SigningDialogue], signing_dialogues.update(signing_msg)
-        )
-        assert signing_dialogue is not None, "Error when creating signing dialogue."
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
         signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
@@ -547,21 +534,18 @@ class SigningHandler(Handler):
             signing_dialogue.associated_contract_api_dialogue.associated_fipa_dialogue
         )
         last_fipa_msg = fipa_dialogue.last_incoming_message
-        assert last_fipa_msg is not None, "Could not retrieve last fipa message."
-        inform_msg = FipaMessage(
-            message_id=last_fipa_msg.message_id + 1,
-            dialogue_reference=fipa_dialogue.dialogue_label.dialogue_reference,
-            target=last_fipa_msg.message_id,
+        if last_fipa_msg is None:
+            raise ValueError("Could not retrieve last fipa message.")
+        inform_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
+            target_message=last_fipa_msg,
             info={"tx_signature": signing_msg.signed_message.body},
         )
-        inform_msg.counterparty = last_fipa_msg.counterparty
         self.context.logger.info(
             "sending ACCEPT_W_INFORM to agent={}: tx_signature={}".format(
-                last_fipa_msg.counterparty[-5:], signing_msg.signed_message,
+                last_fipa_msg.sender[-5:], signing_msg.signed_message,
             )
         )
-        assert fipa_dialogue.update(inform_msg), "Failure during update."
         self.context.outbox.put_message(message=inform_msg)
 
     def _handle_error(
@@ -628,7 +612,7 @@ class LedgerApiHandler(Handler):
 
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.BALANCE:
-            self._handle_balance(ledger_api_msg, ledger_api_dialogue)
+            self._handle_balance(ledger_api_msg)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -654,14 +638,11 @@ class LedgerApiHandler(Handler):
             )
         )
 
-    def _handle_balance(
-        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
-    ) -> None:
+    def _handle_balance(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle a message of balance performative.
 
         :param ledger_api_message: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(

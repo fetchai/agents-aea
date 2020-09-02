@@ -63,10 +63,7 @@ def _is_valid_regex(regex_pattern: str, text: str) -> bool:
     :return: Boolean result
     """
     match = re.match(regex_pattern, text)
-    if match is not None:
-        return True
-    else:
-        return False
+    return match is not None
 
 
 def _has_brackets(content_type: str) -> bool:
@@ -81,11 +78,7 @@ def _has_brackets(content_type: str) -> bool:
             content_type = content_type[len(compositional_type) :]
             if len(content_type) < 2:
                 return False
-            else:
-                return (
-                    content_type[0] == "["
-                    and content_type[len(content_type) - 1] == "]"
-                )
+            return content_type[0] == "[" and content_type[len(content_type) - 1] == "]"
     raise SyntaxError("Content type must be a compositional type!")
 
 

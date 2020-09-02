@@ -87,7 +87,8 @@ class BanditEnv(gym.Env):
         :param action: the id of the bandit chosen
         :return: a Tuple containing the Feedback of Observation, Reward, Done and Info
         """
-        assert self.action_space.contains(action), "This is not a valid action."
+        if not self.action_space.contains(action):
+            raise ValueError("This is not a valid action.")
 
         bandit = action[0]
         offered_price = action[1]
@@ -108,7 +109,9 @@ class BanditEnv(gym.Env):
 
         return observation, reward, done, info
 
-    def render(self, mode: str = "human", close: int = False) -> None:
+    def render(  # pylint: disable=arguments-differ
+        self, mode: str = "human", close: int = False
+    ) -> None:
         """
         Render the environment to the screen.
 

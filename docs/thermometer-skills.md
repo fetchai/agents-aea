@@ -62,7 +62,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.8.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.9.0 --alias my_thermometer_aea
 cd thermometer_aea
 aea install
 ```
@@ -74,19 +74,19 @@ The following steps create the thermometer AEA from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/thermometer:0.9.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/thermometer:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 </p>
@@ -96,7 +96,7 @@ default_routing:
 
 Then, fetch the thermometer client AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.8.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.9.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -108,19 +108,19 @@ The following steps create the thermometer client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/thermometer_client:0.8.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/thermometer_client:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 </p>
@@ -130,9 +130,9 @@ default_routing:
 
 First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Add keys and generate wealth for the thermometer client AEA
@@ -141,14 +141,14 @@ The thermometer client needs to have some wealth to purchase the thermometer inf
 
 First, create the private key for the thermometer client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, create some wealth for your thermometer client based on the network you want to transact with. On the Fetch.ai `testnet` network:
 ``` bash
-aea generate-key cosmos
+aea generate-key fetchai
 ```
 
 ### Run both AEAs

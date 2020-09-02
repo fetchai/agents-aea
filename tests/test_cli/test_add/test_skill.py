@@ -62,7 +62,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/error:0.4.0")
+        cls.skill_id = PublicId.from_str("fetchai/error:0.5.0")
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -144,7 +144,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/echo:0.5.0")
+        cls.skill_id = PublicId.from_str("fetchai/echo:0.6.0")
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -207,21 +207,6 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
             self.skill_author + "/" + self.skill_name
         )
         assert self.result.exception.message == s
-
-    # @mock.patch("aea.cli.add.fetch_package")
-    # def test_add_skill_from_registry_positive(self, fetch_package_mock):
-    #     """Test add from registry positive result."""
-    #     public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
-    #     obj_type = "skill"
-    #     result = self.runner.invoke(
-    #         cli,
-    #         [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
-    #         standalone_mode=False,
-    #     )
-    #     assert result.exit_code == 0
-    #     fetch_package_mock.assert_called_once_with(
-    #         obj_type, public_id=public_id, cwd="."
-    #     )
 
     @classmethod
     def teardown_class(cls):
@@ -354,7 +339,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.5.0"
+        cls.skill_id = "fetchai/echo:0.6.0"
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -426,7 +411,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.5.0"
+        cls.skill_id = "fetchai/echo:0.6.0"
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -488,7 +473,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.10.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.11.0")
 
         contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)
@@ -504,7 +489,7 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""
         self.run_cli_command(
-            *["remove", "protocol", "fetchai/default:0.4.0"], cwd=self._get_cwd()
+            *["remove", "protocol", "fetchai/default:0.5.0"], cwd=self._get_cwd()
         )
         self.add_item("skill", "fetchai/echo:0.3.0", local=False)
 

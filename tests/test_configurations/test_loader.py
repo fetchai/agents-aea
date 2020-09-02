@@ -52,7 +52,7 @@ def test_config_loader_get_required_fields():
     config_loader.required_fields
 
 
-def test_config_loader_dump():
+def test_config_loader_dump_component():
     """Test ConfigLoader.dump"""
     config_loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
     configuration = MagicMock()
@@ -60,6 +60,30 @@ def test_config_loader_dump():
         "jsonschema.Draft4Validator.validate"
     ), mock.patch("builtins.open"):
         config_loader.dump(configuration, open("foo"))
+
+
+def test_config_loader_dump_agent_config():
+    """Test ConfigLoader.dump"""
+    config_loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+    configuration = MagicMock(ordered_json={"component_configurations": []})
+    with mock.patch.object(aea.configurations.loader, "yaml_dump_all"), mock.patch(
+        "jsonschema.Draft4Validator.validate"
+    ), mock.patch("builtins.open"):
+        config_loader.dump(configuration, open("foo"))
+
+
+@mock.patch.object(
+    aea.configurations.loader, "yaml_load", return_value=dict(type="connection")
+)
+def test_load_wrong_type(_):
+    """Test the case when the loaded configuration file has the wrong 'type' field value."""
+    loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
+    with mock.patch.object(loader.validator, "validate", side_effect=None):
+        with pytest.raises(
+            ValueError,
+            match="The field type is not correct: expected protocol, found connection.",
+        ):
+            loader.load(MagicMock())
 
 
 @pytest.mark.parametrize("spec_file_path", protocol_specification_files)

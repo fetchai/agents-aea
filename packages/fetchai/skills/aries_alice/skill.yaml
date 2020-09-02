@@ -1,21 +1,22 @@
 name: aries_alice
 author: fetchai
-version: 0.5.0
+version: 0.6.0
+type: skill
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
-  behaviours.py: QmPgXB6ebzAUkLaCoPgibqpZrJCUHjHv4N9wbnHfiR8Ggz
-  dialogues.py: QmdPR5nNYj4JJdR9Stfis97M8XfP2pi2KqsVsApUzhD9hH
+  behaviours.py: QmZafoGe1KJ6ZfQhAkgVQFUAbDfackh8YHRjxVdCLm2TQE
+  dialogues.py: QmRbbuYSXuNzMVK3gkHVFhwqH8k6oPo4ThGvVPrrn9N3Yq
   handlers.py: QmTtqM5oWBEAZcHdTuwuPtbiZZGWontMNEtmDxcccS2u2Y
-  strategy.py: QmUJ8Bv7Zs5WLjWiy915ReZQucbYxWPMwz48oEVADcywbt
+  strategy.py: QmZ2jhWFQZipk6wAquS1gWxX94iAmhN9Vrh7tcPU9bgpzF
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.4.0
-- fetchai/http:0.4.0
+- fetchai/default:0.5.0
+- fetchai/http:0.5.0
 skills: []
 behaviours:
   alice:

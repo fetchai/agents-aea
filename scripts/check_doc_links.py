@@ -19,9 +19,9 @@
 # ------------------------------------------------------------------------------
 
 """Script to check that all internal doc links are valid."""
-
 import re
 import sys
+import xml.etree.ElementTree as ET  # nosec
 from pathlib import Path
 from typing import Pattern, Set
 
@@ -52,13 +52,12 @@ def is_url_reachable(url: str) -> bool:
     if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
         return True
     try:
-        response = requests.head(url)
+        response = requests.head(url, timeout=3)
         if response.status_code == 200:
             return True
-        elif response.status_code in [403, 405]:
+        if response.status_code in [403, 405]:
             return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405]
-        else:
-            return False
+        return False
     except Exception as e:  # pylint: disable=broad-except
         print(e)
         return False
@@ -85,7 +84,7 @@ def validate_internal_url(file: Path, url: str, all_files: Set[Path]) -> None:
 
     :param file: the file path
     :param url: the url to check
-    :param regex: the regex to check for in the file.
+    :param all_files: all the docs files.
     :return: None
     """
     is_index_file = file == INDEX_FILE_PATH
@@ -125,12 +124,33 @@ def _checks_all_html(file: Path, regex: Pattern = LINK_PATTERN_MD) -> None:
     Checks a file for matches to a pattern.
 
     :param file: the file path
-    :param all_files: all the doc file paths
     :param regex: the regex to check for in the file.
     """
     matches = regex.finditer(file.read_text())
     for _ in matches:
         raise ValueError("Markdown link found in file={}!".format(str(file)))
+
+
+def is_external_url(url: str) -> bool:
+    """
+    Check if an URL is an external URL.
+
+    :param url: the URL
+    :return: true if it is external, false otherwise.
+    """
+    return url.startswith("https://") or url.startswith("http://")
+
+
+def validate_external_url(url, file):
+    """
+    Validate external URL.
+
+    :param url: the URL.
+    :param file: the file where the URL is found.
+    :return: None
+    """
+    if not is_url_reachable(url):
+        raise ValueError("Could not reach url={} in file={}!".format(url, str(file)))
 
 
 def _checks_link(
@@ -146,11 +166,8 @@ def _checks_link(
     matches = regex.finditer(file.read_text())
     for match in matches:
         result = match.group()
-        if result.startswith("https") or result.startswith("http"):
-            if not is_url_reachable(result):
-                raise ValueError(
-                    "Could not reach url={} in file={}!".format(result, str(file))
-                )
+        if is_external_url(result):
+            validate_external_url(result, file)
         else:
             validate_internal_url(file, result, all_files)
 
@@ -163,6 +180,8 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
     :param all_files: all the doc file paths
     :param regex: the regex to check for in the file.
     """
+    if file == Path("docs/version.md"):
+        return
     matches = regex.finditer(file.read_text())
     for match in matches:
         result = match.group(1)
@@ -175,13 +194,30 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
                     "Image path={} in file={} not found!".format(img_path, str(file))
                 )
             return
-        elif result.startswith("https") or result.startswith("http"):
+        if result.startswith("https") or result.startswith("http"):
             if not is_url_reachable(result):
                 raise ValueError(
                     "Could not reach url={} in file={}!".format(result, str(file))
                 )
-        else:
-            raise ValueError("Image path={} in file={} not `.png`!")
+        raise ValueError("Image path={} in file={} not `.png`!")
+
+
+def _checks_target_blank(file: Path):
+    """
+    Check target blank.
+
+    :param file: the file.
+    :return: None
+    """
+    matches = re.finditer("<a.*?>(.+?)</a>", file.read_text())
+    for match in matches:
+        tag = ET.fromstring(match.group())  # nosec
+        href = tag.attrib.get("href")
+        target = tag.attrib.get("target")
+        if href is not None and is_external_url(href) and target != "_blank":
+            raise ValueError(
+                f"Anchor tag with href={href} and target={target} in file {str(file)} is not valid."
+            )
 
 
 def check_file(file: Path, all_files: Set[Path]) -> None:
@@ -194,6 +230,7 @@ def check_file(file: Path, all_files: Set[Path]) -> None:
     """
     _checks_all_html(file)
     _checks_link(file, all_files)
+    _checks_target_blank(file)
     _checks_image(file)
 
 
@@ -212,9 +249,9 @@ if __name__ == "__main__":
     docs_files = Path("docs").glob("*.md")
 
     try:
-        for file in docs_files:
-            print("Processing " + str(file))
-            check_file(file, all_docs_files)
+        for file_ in docs_files:
+            print("Processing " + str(file_))
+            check_file(file_, all_docs_files)
     except Exception as e:  # pylint: disable=broad-except
         print(e)
         sys.exit(1)

@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a model."""
 
+from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -47,11 +48,12 @@ class Strategy(Model):
             )
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        assert (
+        enforce(
             len(self._set_service_data) == 2
             and "key" in self._set_service_data
-            and "value" in self._set_service_data
-        ), "service_data must contain keys `key` and `value`"
+            and "value" in self._set_service_data,
+            "service_data must contain keys `key` and `value`",
+        )
         self._remove_service_data = {"key": self._set_service_data["key"]}
         super().__init__(**kwargs)
 

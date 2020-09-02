@@ -24,8 +24,9 @@ import logging
 from asyncio import AbstractServer, Future, StreamReader, StreamWriter
 from typing import Dict, Optional, Tuple, cast
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
 
@@ -45,7 +46,8 @@ class TCPServerConnection(TCPConnection):
         """
         address = cast(str, configuration.config.get("address"))
         port = cast(int, configuration.config.get("port"))
-        assert address is not None and port is not None, "address and port must be set!"
+        if address is None or port is None:
+            raise ValueError("address and port must be set!")  # pragma: nocover
         super().__init__(address, port, configuration=configuration, **kwargs)
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
@@ -67,7 +69,7 @@ class TCPServerConnection(TCPConnection):
             address = address_bytes.decode("utf-8")
             self.logger.debug("Public key of the client: {}".format(address))
             self.connections[address] = (reader, writer)
-            read_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
+            read_task = asyncio.ensure_future(self._recv(reader), loop=self.loop)
             self._read_tasks_to_address[read_task] = address
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
@@ -95,7 +97,7 @@ class TCPServerConnection(TCPConnection):
             envelope = Envelope.decode(envelope_bytes)
             address = self._read_tasks_to_address.pop(task)
             reader = self.connections[address][0]
-            new_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
+            new_task = asyncio.ensure_future(self._recv(reader), loop=self.loop)
             self._read_tasks_to_address[new_task] = address
             return envelope
         except asyncio.CancelledError:

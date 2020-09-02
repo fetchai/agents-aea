@@ -37,7 +37,7 @@ This class defines the end states of a default dialogue.
 #### `__`init`__`
 
 ```python
- | __init__(dialogue_label: DialogueLabel, agent_address: Optional[Address] = None, role: Optional[Dialogue.Role] = None) -> None
+ | __init__(dialogue_label: DialogueLabel, self_address: Address, role: Dialogue.Role, message_class: Type[DefaultMessage] = DefaultMessage) -> None
 ```
 
 Initialize a dialogue.
@@ -45,32 +45,12 @@ Initialize a dialogue.
 **Arguments**:
 
 - `dialogue_label`: the identifier of the dialogue
-- `agent_address`: the address of the agent for whom this dialogue is maintained
+- `self_address`: the address of the entity for whom this dialogue is maintained
 - `role`: the role of the agent this dialogue is maintained for
 
 **Returns**:
 
 None
-
-<a name="aea.protocols.default.dialogues.DefaultDialogue.is_valid"></a>
-#### is`_`valid
-
-```python
- | is_valid(message: Message) -> bool
-```
-
-Check whether 'message' is a valid next message in the dialogue.
-
-These rules capture specific constraints designed for dialogues which are instances of a concrete sub-class of this class.
-Override this method with your additional dialogue rules.
-
-**Arguments**:
-
-- `message`: the message to be validated
-
-**Returns**:
-
-True if valid, False otherwise
 
 <a name="aea.protocols.default.dialogues.DefaultDialogues"></a>
 ## DefaultDialogues Objects
@@ -85,34 +65,16 @@ This class keeps track of all default dialogues.
 #### `__`init`__`
 
 ```python
- | __init__(agent_address: Address) -> None
+ | __init__(self_address: Address, role_from_first_message: Callable[[Message, Address], Dialogue.Role], dialogue_class: Type[DefaultDialogue] = DefaultDialogue) -> None
 ```
 
 Initialize dialogues.
 
 **Arguments**:
 
-- `agent_address`: the address of the agent for whom dialogues are maintained
+- `self_address`: the address of the entity for whom dialogues are maintained
 
 **Returns**:
 
 None
-
-<a name="aea.protocols.default.dialogues.DefaultDialogues.create_dialogue"></a>
-#### create`_`dialogue
-
-```python
- | create_dialogue(dialogue_label: DialogueLabel, role: Dialogue.Role) -> DefaultDialogue
-```
-
-Create an instance of default dialogue.
-
-**Arguments**:
-
-- `dialogue_label`: the identifier of the dialogue
-- `role`: the role of the agent this dialogue is maintained for
-
-**Returns**:
-
-the created dialogue
 

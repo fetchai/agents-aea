@@ -1,9 +1,10 @@
 name: dummy
 author: fetchai
 version: 0.1.0
+type: contract
 description: A test contract
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmWbNjFh6E5V4n2qBwyZyXZdmmHvcZSVnwKrcM34MAE56S
   build/some.json: Qma5n7au2NDCg1nLwYfYnmFNwWChFuXtu65w5DV7wAZRvw
@@ -14,4 +15,5 @@ class_name: DummyContract
 contract_interface_paths:
   cosmos: build/some.wasm
   ethereum: build/some.json
+  fetchai: build/some.wasm
 dependencies: {}

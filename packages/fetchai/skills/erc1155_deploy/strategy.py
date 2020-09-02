@@ -23,6 +23,7 @@ import random  # nosec
 from typing import List
 
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -56,21 +57,25 @@ class Strategy(Model):
         """Initialize the strategy of the agent."""
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._token_type = kwargs.pop("token_type", DEFAULT_TOKEN_TYPE)
-        assert self._token_type in [1, 2], "Token type must be 1 (NFT) or 2 (FT)"
+        enforce(self._token_type in [1, 2], "Token type must be 1 (NFT) or 2 (FT)")
         self._nb_tokens = kwargs.pop("nb_tokens", DEFAULT_NB_TOKENS)
         self._token_ids = kwargs.pop("token_ids", None)
         self._mint_quantities = kwargs.pop("mint_quantities", DEFAULT_MINT_QUANTITIES)
-        assert (
-            len(self._mint_quantities) == self._nb_tokens
-        ), "Number of tokens must match mint quantities array size."
+        enforce(
+            len(self._mint_quantities) == self._nb_tokens,
+            "Number of tokens must match mint quantities array size.",
+        )
         if self._token_type == 1:
-            assert all(
-                quantity == 1 for quantity in self._mint_quantities
-            ), "NFTs must have a quantity of 1"
+            enforce(
+                all(quantity == 1 for quantity in self._mint_quantities),
+                "NFTs must have a quantity of 1",
+            )
         self._contract_address = kwargs.pop("contract_address", None)
-        assert (self._token_ids is None and self._contract_address is None) or (
-            self._token_ids is not None and self._contract_address is not None
-        ), "Either provide contract address and token ids or provide neither."
+        enforce(
+            (self._token_ids is None and self._contract_address is None)
+            or (self._token_ids is not None and self._contract_address is not None),
+            "Either provide contract address and token ids or provide neither.",
+        )
 
         self.from_supply = kwargs.pop("from_supply", DEFAULT_FROM_SUPPLY)
         self.to_supply = kwargs.pop("to_supply", DEFAULT_TO_SUPPLY)
@@ -81,11 +86,12 @@ class Strategy(Model):
             "location": Location(location["longitude"], location["latitude"])
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        assert (
+        enforce(
             len(self._set_service_data) == 2
             and "key" in self._set_service_data
-            and "value" in self._set_service_data
-        ), "service_data must contain keys `key` and `value`"
+            and "value" in self._set_service_data,
+            "service_data must contain keys `key` and `value`",
+        )
         self._remove_service_data = {"key": self._set_service_data["key"]}
         self._simple_service_data = {
             self._set_service_data["key"]: self._set_service_data["value"]
@@ -115,19 +121,21 @@ class Strategy(Model):
     @property
     def token_ids(self) -> List[int]:
         """Get the token ids."""
-        assert self._token_ids is not None, "Token ids not set."
+        if self._token_ids is None:
+            raise ValueError("Token ids not set.")
         return self._token_ids
 
     @property
     def contract_address(self) -> str:
         """Get the contract address."""
-        assert self._contract_address is not None, "Contract address not set!"
+        if self._contract_address is None:
+            raise ValueError("Contract address not set!")
         return self._contract_address
 
     @contract_address.setter
     def contract_address(self, contract_address: str) -> None:
         """Set the contract address."""
-        assert self._contract_address is None, "Contract address already set!"
+        enforce(self._contract_address is None, "Contract address already set!")
         self._contract_address = contract_address
 
     @property
@@ -138,9 +146,10 @@ class Strategy(Model):
     @is_contract_deployed.setter
     def is_contract_deployed(self, is_contract_deployed: bool) -> None:
         """Set contract deploy status."""
-        assert (
-            not self._is_contract_deployed and is_contract_deployed
-        ), "Only allowed to switch to true."
+        enforce(
+            not self._is_contract_deployed and is_contract_deployed,
+            "Only allowed to switch to true.",
+        )
         self._is_contract_deployed = is_contract_deployed
 
     @property
@@ -151,9 +160,10 @@ class Strategy(Model):
     @is_tokens_created.setter
     def is_tokens_created(self, is_tokens_created: bool) -> None:
         """Set token created status."""
-        assert (
-            not self._is_tokens_created and is_tokens_created
-        ), "Only allowed to switch to true."
+        enforce(
+            not self._is_tokens_created and is_tokens_created,
+            "Only allowed to switch to true.",
+        )
         self._is_tokens_created = is_tokens_created
 
     @property
@@ -164,9 +174,10 @@ class Strategy(Model):
     @is_tokens_minted.setter
     def is_tokens_minted(self, is_tokens_minted: bool) -> None:
         """Set token minted status."""
-        assert (
-            not self._is_tokens_minted and is_tokens_minted
-        ), "Only allowed to switch to true."
+        enforce(
+            not self._is_tokens_minted and is_tokens_minted,
+            "Only allowed to switch to true.",
+        )
         self._is_tokens_minted = is_tokens_minted
 
     def get_location_description(self) -> Description:

@@ -3,16 +3,16 @@
 
 Portable pipe implementation for Linux, MacOS, and Windows.
 
-<a name="aea.helpers.pipe.LocalPortablePipe"></a>
-## LocalPortablePipe Objects
+<a name="aea.helpers.pipe.IPCChannelClient"></a>
+## IPCChannelClient Objects
 
 ```python
-class LocalPortablePipe(ABC)
+class IPCChannelClient(ABC)
 ```
 
-Multi-platform interprocess communication channel
+Multi-platform interprocess communication channel for the client side
 
-<a name="aea.helpers.pipe.LocalPortablePipe.connect"></a>
+<a name="aea.helpers.pipe.IPCChannelClient.connect"></a>
 #### connect
 
 ```python
@@ -20,9 +20,13 @@ Multi-platform interprocess communication channel
  | async connect(timeout=PIPE_CONN_TIMEOUT) -> bool
 ```
 
-Setup the communication channel with the other process
+Connect to communication channel
 
-<a name="aea.helpers.pipe.LocalPortablePipe.write"></a>
+**Arguments**:
+
+- `timeout`: timeout for other end to connect
+
+<a name="aea.helpers.pipe.IPCChannelClient.write"></a>
 #### write
 
 ```python
@@ -33,7 +37,11 @@ Setup the communication channel with the other process
 Write `data` bytes to the other end of the channel
 Will first write the size than the actual data
 
-<a name="aea.helpers.pipe.LocalPortablePipe.read"></a>
+**Arguments**:
+
+- `data`: bytes to write
+
+<a name="aea.helpers.pipe.IPCChannelClient.read"></a>
 #### read
 
 ```python
@@ -44,7 +52,11 @@ Will first write the size than the actual data
 Read bytes from the other end of the channel
 Will first read the size than the actual data
 
-<a name="aea.helpers.pipe.LocalPortablePipe.close"></a>
+**Returns**:
+
+read bytes
+
+<a name="aea.helpers.pipe.IPCChannelClient.close"></a>
 #### close
 
 ```python
@@ -54,7 +66,16 @@ Will first read the size than the actual data
 
 Close the communication channel
 
-<a name="aea.helpers.pipe.LocalPortablePipe.in_path"></a>
+<a name="aea.helpers.pipe.IPCChannel"></a>
+## IPCChannel Objects
+
+```python
+class IPCChannel(IPCChannelClient)
+```
+
+Multi-platform interprocess communication channel
+
+<a name="aea.helpers.pipe.IPCChannel.in_path"></a>
 #### in`_`path
 
 ```python
@@ -63,9 +84,9 @@ Close the communication channel
  | in_path() -> str
 ```
 
-Returns the rendezvous point for incoming communication
+Rendezvous point for incoming communication
 
-<a name="aea.helpers.pipe.LocalPortablePipe.out_path"></a>
+<a name="aea.helpers.pipe.IPCChannel.out_path"></a>
 #### out`_`path
 
 ```python
@@ -74,58 +95,475 @@ Returns the rendezvous point for incoming communication
  | out_path() -> str
 ```
 
-Returns the rendezvous point for outgoing communication
+Rendezvous point for outgoing communication
 
-<a name="aea.helpers.pipe.TCPSocketPipe"></a>
-## TCPSocketPipe Objects
-
-```python
-class TCPSocketPipe(LocalPortablePipe)
-```
-
-Interprocess communication implementation using tcp sockets
-
-<a name="aea.helpers.pipe.PosixNamedPipe"></a>
-## PosixNamedPipe Objects
+<a name="aea.helpers.pipe.PosixNamedPipeProtocol"></a>
+## PosixNamedPipeProtocol Objects
 
 ```python
-class PosixNamedPipe(LocalPortablePipe)
+class PosixNamedPipeProtocol()
 ```
 
-Interprocess communication implementation using Posix named pipes
+Posix named pipes async wrapper communication protocol
 
-<a name="aea.helpers.pipe.PosixNamedPipe.write"></a>
+<a name="aea.helpers.pipe.PosixNamedPipeProtocol.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
+```
+
+Initialize a new posix named pipe
+
+**Arguments**:
+
+- `in_path`: rendezvous point for incoming data
+- `out_path`: rendezvous point for outgoing daa
+
+<a name="aea.helpers.pipe.PosixNamedPipeProtocol.connect"></a>
+#### connect
+
+```python
+ | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
+```
+
+Connect to the other end of the pipe
+
+**Arguments**:
+
+- `timeout`: timeout before failing
+
+**Returns**:
+
+connection success
+
+<a name="aea.helpers.pipe.PosixNamedPipeProtocol.write"></a>
 #### write
 
 ```python
  | async write(data: bytes) -> None
 ```
 
-Write to the writer stream.
+Write to pipe.
 
 **Arguments**:
 
-- `data`: data to write to stream
+- `data`: bytes to write to pipe
 
-<a name="aea.helpers.pipe.PosixNamedPipe.read"></a>
+<a name="aea.helpers.pipe.PosixNamedPipeProtocol.read"></a>
 #### read
 
 ```python
  | async read() -> Optional[bytes]
 ```
 
-Read from the reader stream.
+Read from pipe.
 
 **Returns**:
 
-bytes
+read bytes
 
-<a name="aea.helpers.pipe.make_pipe"></a>
-#### make`_`pipe
+<a name="aea.helpers.pipe.PosixNamedPipeProtocol.close"></a>
+#### close
 
 ```python
-make_pipe(logger: logging.Logger = _default_logger) -> LocalPortablePipe
+ | async close() -> None
 ```
 
-Build a portable bidirectional Interprocess Communication Channel
+Disconnect pipe
+
+<a name="aea.helpers.pipe.TCPSocketProtocol"></a>
+## TCPSocketProtocol Objects
+
+```python
+class TCPSocketProtocol()
+```
+
+TCP socket communication protocol
+
+<a name="aea.helpers.pipe.TCPSocketProtocol.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(reader: asyncio.StreamReader, writer: asyncio.StreamWriter, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
+```
+
+Initialize the tcp socket protocol
+
+**Arguments**:
+
+- `reader`: established asyncio reader
+- `writer`: established asyncio writer
+
+<a name="aea.helpers.pipe.TCPSocketProtocol.write"></a>
+#### write
+
+```python
+ | async write(data: bytes) -> None
+```
+
+Write to socket.
+
+**Arguments**:
+
+- `data`: bytes to write
+
+<a name="aea.helpers.pipe.TCPSocketProtocol.read"></a>
+#### read
+
+```python
+ | async read() -> Optional[bytes]
+```
+
+Read from socket.
+
+**Returns**:
+
+read bytes
+
+<a name="aea.helpers.pipe.TCPSocketProtocol.close"></a>
+#### close
+
+```python
+ | async close() -> None
+```
+
+Disconnect socket
+
+<a name="aea.helpers.pipe.TCPSocketChannel"></a>
+## TCPSocketChannel Objects
+
+```python
+class TCPSocketChannel(IPCChannel)
+```
+
+Interprocess communication channel implementation using tcp sockets
+
+<a name="aea.helpers.pipe.TCPSocketChannel.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
+```
+
+Initialize tcp socket interprocess communication channel
+
+<a name="aea.helpers.pipe.TCPSocketChannel.connect"></a>
+#### connect
+
+```python
+ | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
+```
+
+Setup communication channel and wait for other end to connect
+
+**Arguments**:
+
+- `timeout`: timeout for the connection to be established
+
+<a name="aea.helpers.pipe.TCPSocketChannel.write"></a>
+#### write
+
+```python
+ | async write(data: bytes) -> None
+```
+
+Write to channel.
+
+**Arguments**:
+
+- `data`: bytes to write
+
+<a name="aea.helpers.pipe.TCPSocketChannel.read"></a>
+#### read
+
+```python
+ | async read() -> Optional[bytes]
+```
+
+Read from channel.
+
+**Arguments**:
+
+- `data`: read bytes
+
+<a name="aea.helpers.pipe.TCPSocketChannel.close"></a>
+#### close
+
+```python
+ | async close() -> None
+```
+
+Disconnect from channel and clean it up
+
+<a name="aea.helpers.pipe.TCPSocketChannel.in_path"></a>
+#### in`_`path
+
+```python
+ | @property
+ | in_path() -> str
+```
+
+Rendezvous point for incoming communication
+
+<a name="aea.helpers.pipe.TCPSocketChannel.out_path"></a>
+#### out`_`path
+
+```python
+ | @property
+ | out_path() -> str
+```
+
+Rendezvous point for outgoing communication
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannel"></a>
+## PosixNamedPipeChannel Objects
+
+```python
+class PosixNamedPipeChannel(IPCChannel)
+```
+
+Interprocess communication channel implementation using Posix named pipes
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannel.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
+```
+
+Initialize posix named pipe interprocess communication channel
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannel.connect"></a>
+#### connect
+
+```python
+ | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
+```
+
+Setup communication channel and wait for other end to connect
+
+**Arguments**:
+
+- `timeout`: timeout for connection to be established
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannel.write"></a>
+#### write
+
+```python
+ | async write(data: bytes) -> None
+```
+
+Write to the channel.
+
+**Arguments**:
+
+- `data`: data to write to channel
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannel.read"></a>
+#### read
+
+```python
+ | async read() -> Optional[bytes]
+```
+
+Read from the channel.
+
+**Returns**:
+
+read bytes
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannel.close"></a>
+#### close
+
+```python
+ | async close() -> None
+```
+
+Close the channel and clean it up
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannel.in_path"></a>
+#### in`_`path
+
+```python
+ | @property
+ | in_path() -> str
+```
+
+Rendezvous point for incoming communication
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannel.out_path"></a>
+#### out`_`path
+
+```python
+ | @property
+ | out_path() -> str
+```
+
+Rendezvous point for outgoing communication
+
+<a name="aea.helpers.pipe.TCPSocketChannelClient"></a>
+## TCPSocketChannelClient Objects
+
+```python
+class TCPSocketChannelClient(IPCChannelClient)
+```
+
+Interprocess communication channel client using tcp sockets
+
+<a name="aea.helpers.pipe.TCPSocketChannelClient.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
+```
+
+Initialize a tcp socket communication channel client
+
+**Arguments**:
+
+- `in_path`: rendezvous point for incoming data
+- `out_path`: rendezvous point for outgoing data
+
+<a name="aea.helpers.pipe.TCPSocketChannelClient.connect"></a>
+#### connect
+
+```python
+ | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
+```
+
+Connect to the other end of the communication channel
+
+**Arguments**:
+
+- `timeout`: timeout for connection to be established
+
+<a name="aea.helpers.pipe.TCPSocketChannelClient.write"></a>
+#### write
+
+```python
+ | async write(data: bytes) -> None
+```
+
+Write data to channel
+
+**Arguments**:
+
+- `data`: bytes to write
+
+<a name="aea.helpers.pipe.TCPSocketChannelClient.read"></a>
+#### read
+
+```python
+ | async read() -> Optional[bytes]
+```
+
+Read data from channel
+
+**Returns**:
+
+read bytes
+
+<a name="aea.helpers.pipe.TCPSocketChannelClient.close"></a>
+#### close
+
+```python
+ | async close() -> None
+```
+
+Disconnect from communication channel
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannelClient"></a>
+## PosixNamedPipeChannelClient Objects
+
+```python
+class PosixNamedPipeChannelClient(IPCChannelClient)
+```
+
+Interprocess communication channel client using Posix named pipes
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannelClient.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
+```
+
+Initialize a posix named pipe communication channel client
+
+**Arguments**:
+
+- `in_path`: rendezvous point for incoming data
+- `out_path`: rendezvous point for outgoing data
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannelClient.connect"></a>
+#### connect
+
+```python
+ | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
+```
+
+Connect to the other end of the communication channel
+
+**Arguments**:
+
+- `timeout`: timeout for connection to be established
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannelClient.write"></a>
+#### write
+
+```python
+ | async write(data: bytes) -> None
+```
+
+Write data to channel
+
+**Arguments**:
+
+- `data`: bytes to write
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannelClient.read"></a>
+#### read
+
+```python
+ | async read() -> Optional[bytes]
+```
+
+Read data from channel
+
+**Returns**:
+
+read bytes
+
+<a name="aea.helpers.pipe.PosixNamedPipeChannelClient.close"></a>
+#### close
+
+```python
+ | async close() -> None
+```
+
+Disconnect from communication channel
+
+<a name="aea.helpers.pipe.make_ipc_channel"></a>
+#### make`_`ipc`_`channel
+
+```python
+make_ipc_channel(logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> IPCChannel
+```
+
+Build a portable bidirectional InterProcess Communication channel
+
+<a name="aea.helpers.pipe.make_ipc_channel_client"></a>
+#### make`_`ipc`_`channel`_`client
+
+```python
+make_ipc_channel_client(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> IPCChannelClient
+```
+
+Build a portable bidirectional InterProcess Communication client channel
+
+**Arguments**:
+
+- `in_path`: rendezvous point for incoming communication
+- `out_path`: rendezvous point for outgoing outgoing
 

@@ -25,7 +25,10 @@ from aea.skills.tasks import Task, TaskManager
 
 
 class MyTask(Task):
+    """Test class for a task."""
+
     def __init__(self, return_value):
+        """Initialise test task."""
         super().__init__()
         self.setup_called = False
         self.teardown_called = False

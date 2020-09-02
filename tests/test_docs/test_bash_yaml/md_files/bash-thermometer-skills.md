@@ -1,45 +1,45 @@
 ``` bash 
-aea fetch fetchai/thermometer_aea:0.8.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.9.0 --alias my_thermometer_aea
 cd thermometer_aea
 aea install
 ```
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/thermometer:0.9.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/thermometer:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 ``` bash
-aea fetch fetchai/thermometer_client:0.8.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.9.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/thermometer_client:0.8.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/thermometer_client:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
-aea generate-wealth cosmos
+aea generate-wealth fetchai
 ```
 ``` bash
 aea run
@@ -54,13 +54,13 @@ aea delete my_thermometer_client
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 ``` yaml
 config:

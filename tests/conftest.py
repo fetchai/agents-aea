@@ -46,8 +46,8 @@ import pytest
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
+from aea.common import Address
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ConnectionConfig,
     ContractConfig,
@@ -59,29 +59,25 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
+from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
-from aea.contracts import Contract, contract_registry
+from aea.contracts.base import Contract, contract_registry
+from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import _COSMOS
+from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.ethereum import _ETHEREUM
+from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.fetchai import _FETCHAI
-from aea.crypto.helpers import (
-    COSMOS_PRIVATE_KEY_FILE,
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-)
+from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
-from aea.mail.base import Address
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
-from packages.fetchai.connections.p2p_client.connection import (
-    PeerToPeerClientConnection,
-)
 from packages.fetchai.connections.p2p_libp2p.connection import (
     MultiAddr,
     P2PLibp2pConnection,
@@ -131,6 +127,11 @@ ETHEREUM = _ETHEREUM
 FETCHAI = _FETCHAI
 
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
+FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
+
+COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
+ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
 
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
@@ -155,17 +156,21 @@ FUNDED_ETH_PRIVATE_KEY_3 = (
 NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
     "81b0352f99a08a754b56e529dda965c4ce974edb6db7e90035e01ed193e1b7bc"
 )
+NON_FUNDED_FETCHAI_PRIVATE_KEY_1 = (
+    "b6ef49c3078f300efe2d4480e179362bd39f20cbb2087e970c8f345473661aa5"
+)
 
 # addresses with no value on testnet
 COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
 COSMOS_ADDRESS_TWO = "cosmos1gssy8pmjdx8v4reg7lswvfktsaucp0w95nk78m"
 ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
 ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
-FETCHAI_ADDRESS_ONE = "Vu6aENcVSYYH9GhY1k3CsL7shWH9gKKBAWcc4ckLk5w4Ltynx"
-FETCHAI_ADDRESS_TWO = "2LnTTHvGxWvKK1WfEAXnZvu81RPcMRDVQW8CJF3Gsh7Z3axDfP"
+FETCHAI_ADDRESS_ONE = "fetch1paqxtqnfh7da7z9c05l3y3lahe8rhd0nm0jk98"
+FETCHAI_ADDRESS_TWO = "fetch19j4dc3e6fgle98pj06l5ehhj6zdejcddx7teac"
 
 # P2P addresses
 COSMOS_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"  # relates to NON_FUNDED_COSMOS_PRIVATE_KEY_1
+FETCHAI_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLBCAqHL8SuFosyDhAKYsLKXBZBWXBsB9oFw2qU4Kckun"  # relates to NON_FUNDED_FETCHAI_PRIVATE_KEY_1
 NON_GENESIS_CONFIG = {
     "delegate_uri": "127.0.0.1:11001",
     "entry_peers": [COSMOS_P2P_ADDRESS],
@@ -186,13 +191,12 @@ PUBLIC_DHT_DELEGATE_URI_1 = "agents-p2p-dht.sandbox.fetch-ai.com:11000"
 PUBLIC_DHT_DELEGATE_URI_2 = "agents-p2p-dht.sandbox.fetch-ai.com:11001"
 
 # testnets
-COSMOS_TESTNET_CONFIG = {"address": "https://rest-agent-land.prod.fetch-ai.com:443"}
+COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
 ETHEREUM_TESTNET_CONFIG = {
-    "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
+    "address": ETHEREUM_DEFAULT_ADDRESS,
     "gas_price": 50,
 }
-FETCHAI_TESTNET_CONFIG = {"network": "testnet"}
-ALT_FETCHAI_CONFIG = {"host": "127.0.0.1", "port": 80}
+FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
@@ -200,7 +204,7 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.7.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.8.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -216,6 +220,7 @@ PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specificati
 PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
 contract_config_files = [
+    os.path.join(FETCHAI_PREF, "contracts", "erc1155", CONTRACT_YAML),
     os.path.join(ROOT_DIR, "tests", "data", "dummy_contract", CONTRACT_YAML),
 ]
 
@@ -243,7 +248,6 @@ connection_config_files = [
     os.path.join(FETCHAI_PREF, "connections", "ledger", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "oef", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "p2p_stub", CONNECTION_YAML),
@@ -291,6 +295,7 @@ agent_config_files = [
     os.path.join(CUR_PATH, "data", "dummy_aea", AGENT_YAML),
     os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
     os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml"),
+    os.path.join(CUR_PATH, "data", "aea-config.example_multipage.yaml"),
     os.path.join(FETCHAI_PREF, "agents", "aries_alice", AGENT_YAML),
     os.path.join(FETCHAI_PREF, "agents", "aries_faber", AGENT_YAML),
     os.path.join(FETCHAI_PREF, "agents", "car_data_buyer", AGENT_YAML),
@@ -769,20 +774,6 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
     return tcp_connection
 
 
-def _make_p2p_client_connection(
-    address: Address, provider_addr: str, provider_port: int
-):
-    configuration = ConnectionConfig(
-        addr=provider_addr,
-        port=provider_port,
-        connection_id=PeerToPeerClientConnection.connection_id,
-    )
-    p2p_client_connection = PeerToPeerClientConnection(
-        configuration=configuration, identity=Identity("", address),
-    )
-    return p2p_client_connection
-
-
 def _make_stub_connection(input_file_path: str, output_file_path: str):
     configuration = ConnectionConfig(
         input_file=input_file_path,
@@ -1020,19 +1011,13 @@ def erc1155_contract():
     As a side effect, register it to the registry, if not already registered.
     """
     directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
-    configuration = ComponentConfiguration.load(ComponentType.CONTRACT, directory)
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
     configuration._directory = directory
     configuration = cast(ContractConfig, configuration)
 
     if str(configuration.public_id) not in contract_registry.specs:
         # load contract into sys modules
         Contract.from_config(configuration)
-        contract_registry.register(
-            id_=str(configuration.public_id),
-            entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-            class_kwargs={"contract_interface": configuration.contract_interfaces},
-            contract_config=configuration,
-        )
 
     contract = contract_registry.make(str(configuration.public_id))
     yield contract

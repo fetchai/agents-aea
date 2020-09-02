@@ -1,15 +1,5 @@
 # Ledger API Protocol
 
-**Name:** ledger_api
-
-**Author**: fetchai
-
-**Version**: 0.2.0
-
-**Short Description**: A protocol for ledger APIs' requests and responses.
-
-**License**: Apache-2.0
-
 ## Description
 
 This is a protocol for interacting with ledger APIs.
@@ -20,10 +10,10 @@ This is a protocol for interacting with ledger APIs.
 ---
 name: ledger_api
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 speech_acts:
   get_balance:
     ledger_id: pt:str
@@ -63,7 +53,7 @@ ct:TransactionReceipt: |
 ---
 initiation: [get_balance, get_raw_transaction, send_signed_transaction, get_transaction_receipt]
 reply:
-  get_balance: [balance]
+  get_balance: [balance, error]
   balance: []
   get_raw_transaction: [raw_transaction, error]
   raw_transaction: [send_signed_transaction]

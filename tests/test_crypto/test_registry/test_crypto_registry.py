@@ -169,14 +169,6 @@ class TestRegisterWithMalformedId:
                 "malformed_id" + special_character, "path.to.module:CryptoClass"
             )
 
-    # @pytest.mark.parametrize("digit", string.digits)
-    # def test_beginning_digit(self, digit):
-    #     """Digits in the beginning are not allowed."""
-    #     with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-    #         aea.crypto.registries.register_crypto(
-    #             digit + "malformed_id", "path.to.module:CryptoClass"
-    #         )
-
 
 class TestRegisterWithMalformedEntryPoint:
     """Test the error message when we try to register a crypto with a wrong entry point."""
@@ -210,11 +202,3 @@ class TestRegisterWithMalformedEntryPoint:
             aea.crypto.registries.register_crypto(
                 "crypto_id", "path" + special_character + ".to.module:CryptoClass"
             )
-
-    # @pytest.mark.parametrize("digit", string.digits)
-    # def test_beginning_digit(self, digit):
-    #     """Digits in the beginning are not allowed."""
-    #     with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
-    #         aea.crypto.registries.register_crypto(
-    #             "crypto_id", "path." + digit + "to.module:CryptoClass"
-    #         )

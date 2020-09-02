@@ -14,7 +14,12 @@ Verify or create private keys.
 
 **Arguments**:
 
-- `ctx`: Context
+- `aea_project_path`: path to an AEA project.
+- `exit_on_error`: whether we should exit the program on error.
+
+**Returns**:
+
+the agent configuration.
 
 <a name="aea.crypto.helpers.try_validate_private_key_path"></a>
 #### try`_`validate`_`private`_`key`_`path
@@ -58,7 +63,7 @@ None
 #### try`_`generate`_`testnet`_`wealth
 
 ```python
-try_generate_testnet_wealth(identifier: str, address: str) -> None
+try_generate_testnet_wealth(identifier: str, address: str, _sync: bool = True) -> None
 ```
 
 Try generate wealth on a testnet.
@@ -67,6 +72,7 @@ Try generate wealth on a testnet.
 
 - `identifier`: the identifier of the ledger
 - `address`: the address to check for
+- `_sync`: whether to wait to sync or not; currently unused
 
 **Returns**:
 

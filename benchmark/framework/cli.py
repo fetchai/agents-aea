@@ -109,14 +109,15 @@ class TestCli:
         self.func_details = BenchmarkFuncDetails(func)
         self.func_details.check()
         self.func = func
-        self.executor_class = Executor
+        self.executor_class = executor_class
         self.report_printer_class = report_printer_class
         self._report_printer = None  # type: Optional[ReportPrinter]
 
     @property
     def report_printer(self) -> ReportPrinter:
         """Get report printer."""
-        assert self._report_printer is not None, "report printer not set!"
+        if self._report_printer is None:
+            raise ValueError("report printer not set!")
         return self._report_printer
 
     def _make_command(self) -> Command:

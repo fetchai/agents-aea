@@ -22,7 +22,6 @@ import logging
 import os
 import random
 import shutil
-import signal  # pylint: disable=unused-import
 import string
 import subprocess  # nosec
 import sys
@@ -48,6 +47,7 @@ from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
 )
+from aea.exceptions import enforce
 from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
@@ -64,7 +64,6 @@ from tests.conftest import ROOT_DIR
 logger = logging.getLogger(__name__)
 
 CLI_LOG_OPTION = ["-v", "OFF"]
-PROJECT_ROOT_DIR = "."
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
@@ -293,8 +292,7 @@ class BaseAEATestCase(ABC):
             )
             if result:
                 return result, {}, {}
-            else:
-                return result, content1, content2
+            return result, content1, content2
 
         path_to_manually_created_aea = os.path.join(cls.t, agent_name)
         new_cwd = os.path.join(cls.t, "fetch_dir")
@@ -381,10 +379,7 @@ class BaseAEATestCase(ABC):
 
     @classmethod
     def terminate_agents(
-        cls,
-        *subprocesses: subprocess.Popen,
-        signal: signal.Signals = signal.SIGINT,
-        timeout: int = 10,
+        cls, *subprocesses: subprocess.Popen, timeout: int = 10,
     ) -> None:
         """
         Terminate agent subprocesses.
@@ -392,7 +387,6 @@ class BaseAEATestCase(ABC):
         Run from agent's directory.
 
         :param subprocesses: the subprocesses running the agents
-        :param signal: the signal for interruption
         :param timeout: the timeout for interruption
         """
         if not subprocesses:
@@ -541,10 +535,9 @@ class BaseAEATestCase(ABC):
                 "--connection",
                 cwd=cls._get_cwd(),
             )
-        else:
-            return cls.run_cli_command(
-                "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
-            )
+        return cls.run_cli_command(
+            "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
+        )
 
     @classmethod
     def replace_private_key_in_file(
@@ -590,7 +583,8 @@ class BaseAEATestCase(ABC):
         :return: command line output
         """
         cls.run_cli_command("get-wealth", ledger_api_id, cwd=cls._get_cwd())
-        assert cls.last_cli_runner_result is not None, "Runner result not set!"
+        if cls.last_cli_runner_result is None:
+            raise ValueError("Runner result not set!")  # pragma: nocover
         return str(cls.last_cli_runner_result.stdout_bytes, "utf-8")
 
     @classmethod
@@ -602,7 +596,9 @@ class BaseAEATestCase(ABC):
         :param dest: the destination file.
         :return: None
         """
-        assert src.is_file() and dest.is_file(), "Source or destination is not a file."
+        enforce(
+            src.is_file() and dest.is_file(), "Source or destination is not a file."
+        )
         dest.write_text(src.read_text())
 
     @classmethod
@@ -687,8 +683,8 @@ class BaseAEATestCase(ABC):
         """Send an envelope to an agent, using the stub connection."""
         # check added cause sometimes fails on win with permission error
         dir_path = Path(cls.t / agent)
-        assert dir_path.exists()
-        assert dir_path.is_dir()
+        enforce(dir_path.exists(), "Dir path does not exist.")
+        enforce(dir_path.is_dir(), "Dir path is not a directory.")
         write_envelope_to_file(envelope, str(cls.t / agent / DEFAULT_INPUT_FILE_NAME))
 
     @classmethod
@@ -858,7 +854,6 @@ class AEATestCase(BaseAEATestCase):
         """Set up the test class."""
         # make paths absolute
         cls.path_to_aea = cls.path_to_aea.absolute()
-        # TODO: decide whether to keep optionally: cls.packages_dir_path = cls.packages_dir_path.absolute()
         # load agent configuration
         with Path(cls.path_to_aea, DEFAULT_AEA_CONFIG_FILE).open(
             mode="r", encoding="utf-8"
@@ -869,7 +864,6 @@ class AEATestCase(BaseAEATestCase):
         cls.agent_name = agent_configuration.agent_name
 
         # this will create a temporary directory and move into it
-        # TODO: decide whether to keep optionally:  BaseAEATestCase.packages_dir_path = cls.packages_dir_path
         cls.use_packages_dir = False
         super(AEATestCase, cls).setup_class()
 
@@ -881,6 +875,5 @@ class AEATestCase(BaseAEATestCase):
     def teardown_class(cls):
         """Teardown the test class."""
         cls.path_to_aea = Path(".")
-        # TODO: decide whether to keep optionally:  cls.packages_dir_path = Path("..", "packages")
         cls.agent_configuration = None
         super(AEATestCase, cls).teardown_class()

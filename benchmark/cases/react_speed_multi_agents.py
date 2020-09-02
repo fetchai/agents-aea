@@ -45,7 +45,7 @@ def _make_custom_config(name: str = "dummy_agent", skills_num: int = 1) -> dict:
         )
 
     return {
-        "name": "dummy_a",
+        "name": name,
         "components": [_make_skill(i) for i in range(skills_num)],
     }
 

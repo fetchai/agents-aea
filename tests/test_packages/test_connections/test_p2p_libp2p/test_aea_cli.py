@@ -35,17 +35,23 @@ LIBP2P_LAUNCH_TIMEOUT = 660  # may downloads up to ~66Mb
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).setup_class()
+        cls.log_files = []
+
     @libp2p_log_on_failure
     def test_agent(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.7.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
 
         # for logging
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
-        self.log_files = [log_file]
+        TestP2PLibp2pConnectionAEARunningDefaultConfigNode.log_files.append(log_file)
 
         process = self.run_agent()
         is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
@@ -73,9 +79,15 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
 class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        super(TestP2PLibp2pConnectionAEARunningFullNode, cls).setup_class()
+        cls.log_files = []
+
     @libp2p_log_on_failure
     def test_agent(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.7.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
 
         # setup a full node: with public uri, relay service, and delegate service
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -94,7 +106,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
-        self.log_files = [log_file]
+        TestP2PLibp2pConnectionAEARunningFullNode.log_files.append(log_file)
 
         process = self.run_agent()
 

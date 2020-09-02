@@ -72,8 +72,7 @@ def request_api(
                 "Unable to read authentication config. "
                 'Please sign in with "aea login" command.'
             )
-        else:
-            headers.update({"Authorization": "Token {}".format(token)})
+        headers.update({"Authorization": "Token {}".format(token)})
 
     request_kwargs = dict(
         method=method,
@@ -116,8 +115,7 @@ def request_api(
         )
     if return_code:
         return resp_json, resp.status_code
-    else:
-        return resp_json
+    return resp_json
 
 
 def download_file(url: str, cwd: str) -> str:

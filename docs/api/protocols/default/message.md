@@ -16,7 +16,7 @@ A protocol for exchanging any bytes message.
 ## Performative Objects
 
 ```python
-class Performative(Enum)
+class Performative(Message.Performative)
 ```
 
 Performatives for the default protocol.

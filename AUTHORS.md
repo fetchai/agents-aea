@@ -12,3 +12,4 @@ This is the official list of Fetch.AI authors for copyright purposes.
 * Yuri Turchenkov <yuri.turchenkov@fetch.ai> [solarw](https://github.com/solarw)
 * Lokman Rahmani <lokman.rahmani@fetch.ai> [lrahmani](https://github.com/lrahmani)
 * Jiří Vestfál <jiri.vestfal@fetch.ai> [MissingNO57](https://github.com/MissingNO57)
+* Ed Fitzgerald <ed.fitzgerald@fetch.ai> [ejfitzgerald](https://github.com/ejfitzgerald)

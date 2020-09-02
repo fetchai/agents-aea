@@ -31,21 +31,21 @@ from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
 
-from aea.components.base import Component
+from aea.common import Address
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ProtocolId,
     PublicId,
     SkillComponentConfiguration,
     SkillConfig,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
-from aea.exceptions import AEAException
-from aea.helpers.base import load_aea_package, load_module
+from aea.exceptions import AEAException, enforce
+from aea.helpers.base import load_module
 from aea.helpers.logging import AgentLoggerAdapter
-from aea.mail.base import Address
-from aea.multiplexer import ConnectionStatus, OutBox
+from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
@@ -84,12 +84,13 @@ class SkillContext:
 
     @logger.setter
     def logger(self, logger_: Logger) -> None:
-        assert self._logger is None, "Logger already set."
+        """Set the logger."""
         self._logger = logger_
 
     def _get_agent_context(self) -> AgentContext:
         """Get the agent context."""
-        assert self._agent_context is not None, "Agent context not set yet."
+        if self._agent_context is None:  # pragma: nocover
+            raise ValueError("Agent context not set yet.")
         return self._agent_context
 
     def set_agent_context(self, agent_context: AgentContext) -> None:
@@ -109,7 +110,8 @@ class SkillContext:
     @property
     def skill_id(self) -> PublicId:
         """Get the skill id of the skill context."""
-        assert self._skill is not None, "Skill not set yet."
+        if self._skill is None:
+            raise ValueError("Skill not set yet.")  # pragma: nocover
         return self._skill.configuration.public_id
 
     @property
@@ -162,7 +164,7 @@ class SkillContext:
         return self._get_agent_context().address
 
     @property
-    def connection_status(self) -> ConnectionStatus:
+    def connection_status(self) -> MultiplexerStatus:
         """Get connection status."""
         return self._get_agent_context().connection_status
 
@@ -191,7 +193,8 @@ class SkillContext:
     @property
     def task_manager(self) -> TaskManager:
         """Get behaviours of the skill."""
-        assert self._skill is not None, "Skill not initialized."
+        if self._skill is None:
+            raise ValueError("Skill not initialized.")
         return self._get_agent_context().task_manager
 
     @property
@@ -202,13 +205,15 @@ class SkillContext:
     @property
     def handlers(self) -> SimpleNamespace:
         """Get handlers of the skill."""
-        assert self._skill is not None, "Skill not initialized."
+        if self._skill is None:
+            raise ValueError("Skill not initialized.")
         return SimpleNamespace(**self._skill.handlers)
 
     @property
     def behaviours(self) -> SimpleNamespace:
         """Get behaviours of the skill."""
-        assert self._skill is not None, "Skill not initialized."
+        if self._skill is None:
+            raise ValueError("Skill not initialized.")
         return SimpleNamespace(**self._skill.behaviours)
 
     @property
@@ -238,8 +243,10 @@ class SkillComponent(ABC):
         :param configuration: the configuration for the component.
         :param skill_context: the skill context.
         """
-        assert name is not None, "SkillComponent name is not provided."
-        assert skill_context is not None, "SkillConext is not provided"
+        if name is None:
+            raise ValueError("SkillComponent name is not provided.")
+        if skill_context is None:
+            raise ValueError("SkillConext is not provided")
         if configuration is None:
             class_name = type(self).__name__
             configuration = SkillComponentConfiguration(class_name=class_name, **kwargs)
@@ -259,7 +266,6 @@ class SkillComponent(ABC):
     @property
     def context(self) -> SkillContext:
         """Get the context of the skill component."""
-        assert self._context is not None, "Skill context not set yet."
         return self._context
 
     @property
@@ -270,10 +276,10 @@ class SkillComponent(ABC):
     @property
     def configuration(self) -> SkillComponentConfiguration:
         """Get the skill component configuration."""
-        assert self._configuration is not None, "Configuration not set."
+        if self._configuration is None:
+            raise ValueError("Configuration not set.")  # pragma: nocover
         return self._configuration
 
-    # TODO consider rename this property
     @property
     def config(self) -> Dict[Any, Any]:
         """Get the config of the skill component."""
@@ -348,7 +354,7 @@ class Behaviour(AbstractBehaviour, ABC):
         self.act()
 
     @classmethod
-    def parse_module(
+    def parse_module(  # pylint: disable=arguments-differ
         cls,
         path: str,
         behaviour_configs: Dict[str, SkillComponentConfiguration],
@@ -401,9 +407,10 @@ class Behaviour(AbstractBehaviour, ABC):
             skill_context.logger.debug(
                 "Processing behaviour {}".format(behaviour_class_name)
             )
-            assert (
-                behaviour_id.isidentifier()
-            ), "'{}' is not a valid identifier.".format(behaviour_id)
+            enforce(
+                behaviour_id.isidentifier(),
+                "'{}' is not a valid identifier.".format(behaviour_id),
+            )
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
                 skill_context.logger.warning(
@@ -436,7 +443,7 @@ class Handler(SkillComponent, ABC):
         """
 
     @classmethod
-    def parse_module(
+    def parse_module(  # pylint: disable=arguments-differ
         cls,
         path: str,
         handler_configs: Dict[str, SkillComponentConfiguration],
@@ -481,8 +488,9 @@ class Handler(SkillComponent, ABC):
             skill_context.logger.debug(
                 "Processing handler {}".format(handler_class_name)
             )
-            assert handler_id.isidentifier(), "'{}' is not a valid identifier.".format(
-                handler_id
+            enforce(
+                handler_id.isidentifier(),
+                "'{}' is not a valid identifier.".format(handler_id),
             )
             handler_class = name_to_class.get(handler_class_name, None)
             if handler_class is None:
@@ -511,7 +519,7 @@ class Model(SkillComponent, ABC):
         """Tear the class down."""
 
     @classmethod
-    def parse_module(
+    def parse_module(  # pylint: disable=arguments-differ
         cls,
         path: str,
         model_configs: Dict[str, SkillComponentConfiguration],
@@ -577,8 +585,9 @@ class Model(SkillComponent, ABC):
             skill_context.logger.debug(
                 "Processing model id={}, class={}".format(model_id, model_class_name)
             )
-            assert model_id.isidentifier(), "'{}' is not a valid identifier.".format(
-                model_id
+            enforce(
+                model_id.isidentifier(),
+                "'{}' is not a valid identifier.".format(model_id),
             )
             model = name_to_class.get(model_class_name, None)
             if model is None:
@@ -626,6 +635,7 @@ class Skill(Component):
         handlers: Optional[Dict[str, Handler]] = None,
         behaviours: Optional[Dict[str, Behaviour]] = None,
         models: Optional[Dict[str, Model]] = None,
+        **kwargs,
     ):
         """
         Initialize a skill.
@@ -636,6 +646,8 @@ class Skill(Component):
         :param behaviours: dictionary of behaviours.
         :param models: dictionary of models.
         """
+        if kwargs is not None:
+            pass
         super().__init__(configuration)
         self.config = configuration
         self._skill_context = (
@@ -662,7 +674,8 @@ class Skill(Component):
     @property
     def skill_context(self) -> SkillContext:
         """Get the skill context."""
-        assert self._skill_context is not None, "Skill context not set."
+        if self._skill_context is None:
+            raise ValueError("Skill context not set.")  # pragma: nocover
         return self._skill_context
 
     @property
@@ -691,10 +704,10 @@ class Skill(Component):
         """
         configuration = cast(
             SkillConfig,
-            ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
+            load_component_configuration(ComponentType.SKILL, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Skill.from_config(configuration, agent_context)
+        return Skill.from_config(configuration, agent_context, **kwargs)
 
     @property
     def logger(self) -> Logger:
@@ -722,9 +735,8 @@ class Skill(Component):
         :param agent_context: the agent context.
         :return: the skill.
         """
-        assert (
-            configuration.directory is not None
-        ), "Configuration must be associated with a directory."
+        if configuration.directory is None:  # pragma: nocover
+            raise ValueError("Configuration must be associated with a directory.")
 
         # we put the initialization here because some skill components
         # might need some info from the skill
@@ -737,7 +749,7 @@ class Skill(Component):
         )
         skill_context.logger = cast(Logger, _logger)
 
-        skill = Skill(configuration, skill_context)
+        skill = Skill(configuration, skill_context, **kwargs)
 
         directory = configuration.directory
         load_aea_package(configuration)

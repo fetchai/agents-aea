@@ -16,7 +16,7 @@ This class implements the filter of an AEA.
 #### `__`init`__`
 
 ```python
- | __init__(resources: Resources, decision_maker_out_queue: Queue)
+ | __init__(resources: Resources, decision_maker_out_queue: AsyncFriendlyQueue)
 ```
 
 Instantiate the filter.
@@ -41,7 +41,7 @@ Get resources.
 
 ```python
  | @property
- | decision_maker_out_queue() -> Queue
+ | decision_maker_out_queue() -> AsyncFriendlyQueue
 ```
 
 Get decision maker (out) queue.
@@ -77,11 +77,11 @@ Get the active behaviours.
 
 the list of behaviours currently active
 
-<a name="aea.registries.filter.Filter.handle_internal_messages"></a>
-#### handle`_`internal`_`messages
+<a name="aea.registries.filter.Filter.handle_new_handlers_and_behaviours"></a>
+#### handle`_`new`_`handlers`_`and`_`behaviours
 
 ```python
- | handle_internal_messages() -> None
+ | handle_new_handlers_and_behaviours() -> None
 ```
 
 Handle the messages from the decision maker.
@@ -89,4 +89,22 @@ Handle the messages from the decision maker.
 **Returns**:
 
 None
+
+<a name="aea.registries.filter.Filter.get_internal_message"></a>
+#### get`_`internal`_`message
+
+```python
+ | async get_internal_message() -> Optional[Message]
+```
+
+Get a message from decision_maker_out_queue.
+
+<a name="aea.registries.filter.Filter.handle_internal_message"></a>
+#### handle`_`internal`_`message
+
+```python
+ | handle_internal_message(internal_message: Optional[Message]) -> None
+```
+
+Handlle internal message.
 

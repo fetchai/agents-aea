@@ -25,11 +25,11 @@ This module contains the classes required for ledger_api dialogue management.
 """
 
 from abc import ABC
-from typing import Dict, FrozenSet, Optional, cast
+from typing import Callable, FrozenSet, Type, cast
 
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
-from aea.mail.base import Address
+from aea.common import Address
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
@@ -55,7 +55,7 @@ class LedgerApiDialogue(Dialogue):
         LedgerApiMessage.Performative.BALANCE: frozenset(),
         LedgerApiMessage.Performative.ERROR: frozenset(),
         LedgerApiMessage.Performative.GET_BALANCE: frozenset(
-            {LedgerApiMessage.Performative.BALANCE}
+            {LedgerApiMessage.Performative.BALANCE, LedgerApiMessage.Performative.ERROR}
         ),
         LedgerApiMessage.Performative.GET_RAW_TRANSACTION: frozenset(
             {
@@ -98,43 +98,25 @@ class LedgerApiDialogue(Dialogue):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Optional[Address] = None,
-        role: Optional[Dialogue.Role] = None,
+        self_address: Address,
+        role: Dialogue.Role,
+        message_class: Type[LedgerApiMessage] = LedgerApiMessage,
     ) -> None:
         """
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :return: None
         """
         Dialogue.__init__(
             self,
             dialogue_label=dialogue_label,
-            agent_address=agent_address,
+            message_class=message_class,
+            self_address=self_address,
             role=role,
-            rules=Dialogue.Rules(
-                cast(FrozenSet[Message.Performative], self.INITIAL_PERFORMATIVES),
-                cast(FrozenSet[Message.Performative], self.TERMINAL_PERFORMATIVES),
-                cast(
-                    Dict[Message.Performative, FrozenSet[Message.Performative]],
-                    self.VALID_REPLIES,
-                ),
-            ),
         )
-
-    def is_valid(self, message: Message) -> bool:
-        """
-        Check whether 'message' is a valid next message in the dialogue.
-
-        These rules capture specific constraints designed for dialogues which are instances of a concrete sub-class of this class.
-        Override this method with your additional dialogue rules.
-
-        :param message: the message to be validated
-        :return: True if valid, False otherwise
-        """
-        return True
 
 
 class LedgerApiDialogues(Dialogues, ABC):
@@ -142,31 +124,23 @@ class LedgerApiDialogues(Dialogues, ABC):
 
     END_STATES = frozenset({LedgerApiDialogue.EndState.SUCCESSFUL})
 
-    def __init__(self, agent_address: Address) -> None:
+    def __init__(
+        self,
+        self_address: Address,
+        role_from_first_message: Callable[[Message, Address], Dialogue.Role],
+        dialogue_class: Type[LedgerApiDialogue] = LedgerApiDialogue,
+    ) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
         Dialogues.__init__(
             self,
-            agent_address=agent_address,
+            self_address=self_address,
             end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),
+            message_class=LedgerApiMessage,
+            dialogue_class=dialogue_class,
+            role_from_first_message=role_from_first_message,
         )
-
-    def create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    ) -> LedgerApiDialogue:
-        """
-        Create an instance of ledger_api dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = LedgerApiDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
-        return dialogue

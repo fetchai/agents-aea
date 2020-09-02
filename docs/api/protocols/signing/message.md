@@ -16,7 +16,7 @@ A protocol for communication between skills and decision maker.
 ## Performative Objects
 
 ```python
-class Performative(Enum)
+class Performative(Message.Performative)
 ```
 
 Performatives for the signing protocol.
@@ -145,26 +145,6 @@ Get the 'signed_message' content from the message.
 ```
 
 Get the 'signed_transaction' content from the message.
-
-<a name="aea.protocols.signing.message.SigningMessage.skill_callback_ids"></a>
-#### skill`_`callback`_`ids
-
-```python
- | @property
- | skill_callback_ids() -> Tuple[str, ...]
-```
-
-Get the 'skill_callback_ids' content from the message.
-
-<a name="aea.protocols.signing.message.SigningMessage.skill_callback_info"></a>
-#### skill`_`callback`_`info
-
-```python
- | @property
- | skill_callback_info() -> Dict[str, str]
-```
-
-Get the 'skill_callback_info' content from the message.
 
 <a name="aea.protocols.signing.message.SigningMessage.terms"></a>
 #### terms

@@ -37,6 +37,7 @@ from aea.cli.generate import generate
 from aea.cli.generate_key import generate_key
 from aea.cli.generate_wealth import generate_wealth
 from aea.cli.get_address import get_address
+from aea.cli.get_multiaddress import get_multiaddress
 from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
@@ -85,7 +86,9 @@ def cli(click_context, skip_consistency_check: bool) -> None:
 @click.option("-p", "--port", default=8080)
 @click.option("--local", is_flag=True, help="For using local folder.")
 @click.pass_context
-def gui(click_context, port, local):  # pragma: no cover
+def gui(  # pylint: disable=unused-argument
+    click_context, port, local
+):  # pragma: no cover
     """Run the CLI GUI."""
     _init_gui()
     import aea.cli_gui  # pylint: disable=import-outside-toplevel,redefined-outer-name
@@ -101,8 +104,8 @@ def _init_gui() -> None:
     :return: None
     :raisees: ClickException if author is not set up.
     """
-    config = get_or_create_cli_config()
-    author = config.get(AUTHOR_KEY, None)
+    config_ = get_or_create_cli_config()
+    author = config_.get(AUTHOR_KEY, None)
     if author is None:
         raise click.ClickException(
             "Author is not set up. Please run 'aea init' and then restart."
@@ -123,6 +126,7 @@ cli.add_command(generate_key)
 cli.add_command(generate_wealth)
 cli.add_command(generate)
 cli.add_command(get_address)
+cli.add_command(get_multiaddress)
 cli.add_command(get_wealth)
 cli.add_command(init)
 cli.add_command(install)

@@ -83,7 +83,7 @@ class AeaTool:
 
     def setup(self) -> "AeaTool":
         """Call AEA._start_setup."""
-        self.aea.start_setup()
+        self.aea.setup()
         return self
 
     def teardown(self) -> "AeaTool":
@@ -121,13 +121,13 @@ class AeaTool:
                 raise Exception("timeout")
         return self
 
-    def react_one(self) -> "AeaTool":
+    def handle_envelope(self, envelope) -> "AeaTool":
         """
         Run AEA.react once to process inbox messages.
 
         :return: AeaTool
         """
-        self.aea._react_one()
+        self.aea.handle_envelope(envelope)
         return self
 
     def act_one(self) -> "AeaTool":
@@ -178,16 +178,17 @@ class AeaTool:
         :return: Envelope
         """
         message = message or cls.dummy_default_message()
-        message.counterparty = to
+        message.sender = sender
+        message.to = to
         return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
 
     def put_inbox(self, envelope: Envelope) -> None:
         """Add an envelope to agent's inbox."""
-        self.aea._multiplexer.in_queue.put(envelope)
+        self.aea.runtime.multiplexer.in_queue.put(envelope)
 
     def is_inbox_empty(self) -> bool:
         """Check there is no messages in inbox."""
-        return self.aea._multiplexer.in_queue.empty()
+        return self.aea.runtime.multiplexer.in_queue.empty()
 
     def set_execution_timeout(self, timeout: float) -> None:
         """Set act/handle exeution timeout for AEE.
@@ -207,7 +208,7 @@ def make_handler_cls_from_funcion(func: Callable) -> Type[Handler]:
     :param func: function or callable to be called from Handler.handle method
     :return: Handler class
     """
-    # pydocstyle: ignore # case conflicts with black
+    # pydocstyle: ignore # case conflicts with black # noqa: E800
     class TestHandler(Handler):
         SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
 
@@ -229,7 +230,7 @@ def make_behaviour_cls_from_funcion(func: Callable) -> Type[Behaviour]:
     :param func: function or callable to be called from Behaviour.act method
     :return: Behaviour class
     """
-    # pydocstyle: ignore # case conflicts with black
+    # pydocstyle: ignore # case conflicts with black # noqa: E800
     class TestBehaviour(Behaviour):
         def act(self) -> None:
             func(self)
@@ -253,7 +254,7 @@ def run_in_root_dir(fn) -> Callable:
 
     :return: wrapped function
     """
-    # pydocstyle: ignore # case conflicts with black
+    # pydocstyle: ignore # case conflicts with black # noqa: E800
     @wraps(fn)
     def wrap(*args, **kwargs) -> Any:
         """Do a chdir."""

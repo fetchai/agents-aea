@@ -21,6 +21,7 @@
 
 from typing import Any, Dict, List
 
+from aea.exceptions import enforce
 from aea.helpers.search.models import Attribute, DataModel, Location
 
 SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
@@ -33,13 +34,15 @@ class GenericDataModel(DataModel):
         """Initialise the dataModel."""
         self.attributes = []  # type: List[Attribute]
         for values in data_model_attributes.values():
-            assert (
-                values["type"] in SUPPORTED_TYPES.keys()
-            ), "Type is not supported. Use str, int, float or bool"
-            assert isinstance(values["name"], str), "Name must be a string!"
-            assert isinstance(
-                values["is_required"], bool
-            ), "Wrong type for is_required. Must be bool!"
+            enforce(
+                values["type"] in SUPPORTED_TYPES.keys(),
+                "Type is not supported. Use str, int, float or bool",
+            )
+            enforce(isinstance(values["name"], str), "Name must be a string!")
+            enforce(
+                isinstance(values["is_required"], bool),
+                "Wrong type for is_required. Must be bool!",
+            )
             self.attributes.append(
                 Attribute(
                     name=values["name"],  # type: ignore

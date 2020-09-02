@@ -68,13 +68,13 @@ class ConnectionsOption(click.Option):
 class PublicIdParameter(click.ParamType):
     """Define a public id parameter for Click applications."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # pylint: disable=useless-super-delegation
         """
         Initialize the Public Id parameter.
 
         Just forwards arguments to parent constructor.
         """
-        super().__init__(*args, **kwargs)  # pylint: disable=useless-super-delegation
+        super().__init__(*args, **kwargs)
 
     def get_metavar(self, param):
         """Return the metavar default for this param if it provides one."""

@@ -56,13 +56,13 @@ class Strategy(GenericStrategy):
         """
         fetched_data = self.db.get_data_for_specific_dates(
             self._date_one, self._date_two
-        )  # TODO: fetch real data
+        )
         weather_data = {}  # type: Dict[str, str]
         row_data = {}  # type: Dict[int, Dict[str, Any]]
         counter = 0
         for items in fetched_data:
             if counter > 10:
-                break  # TODO: fix OEF so more data can be sent
+                break  # so not too much data is sent
             counter += 1
             dict_of_data = {
                 "abs_pressure": items[0],

@@ -25,12 +25,13 @@ import pprint
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
+from aea.common import Address
+from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
 from aea.helpers.transaction.base import Terms
-from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TacMessage
@@ -108,49 +109,53 @@ class Configuration:
     @property
     def contract_address(self) -> str:
         """Get the contract address for the game."""
-        assert self._contract_address is not None, "Contract_address not set yet!"
+        if self._contract_address is None:
+            raise AEAEnforceError("Contract_address not set yet!")
         return self._contract_address
 
     @contract_address.setter
     def contract_address(self, contract_address: str) -> None:
         """Set the contract address for the game."""
-        assert self._contract_address is None, "Contract_address already set!"
+        enforce(self._contract_address is None, "Contract_address already set!")
         self._contract_address = contract_address
 
     @property
     def agent_addr_to_name(self) -> Dict[Address, str]:
         """Return the map agent addresses to names."""
-        assert self._agent_addr_to_name is not None, "Agent_addr_to_name not set yet!"
+        if self._agent_addr_to_name is None:
+            raise AEAEnforceError("Agent_addr_to_name not set yet!")
         return self._agent_addr_to_name
 
     @agent_addr_to_name.setter
     def agent_addr_to_name(self, agent_addr_to_name: Dict[Address, str]) -> None:
         """Set map of agent addresses to names"""
-        assert self._agent_addr_to_name is None, "Agent_addr_to_name already set!"
+        enforce(self._agent_addr_to_name is None, "Agent_addr_to_name already set!")
         self._agent_addr_to_name = agent_addr_to_name
 
     @property
     def good_id_to_name(self) -> Dict[str, str]:
         """Map good ids to names."""
-        assert self._good_id_to_name is not None, "Good_id_to_name not set yet!"
+        if self._good_id_to_name is None:
+            raise AEAEnforceError("Good_id_to_name not set yet!")
         return self._good_id_to_name
 
     @good_id_to_name.setter
     def good_id_to_name(self, good_id_to_name: Dict[str, str]) -> None:
         """Set map of goods ids to names."""
-        assert self._good_id_to_name is None, "Good_id_to_name already set!"
+        enforce(self._good_id_to_name is None, "Good_id_to_name already set!")
         self._good_id_to_name = good_id_to_name
 
     @property
     def currency_id_to_name(self) -> Dict[str, str]:
         """Map currency id to name."""
-        assert self._currency_id_to_name is not None, "Currency_id_to_name not set yet!"
+        if self._currency_id_to_name is None:
+            raise AEAEnforceError("Currency_id_to_name not set yet!")
         return self._currency_id_to_name
 
     @currency_id_to_name.setter
     def currency_id_to_name(self, currency_id_to_name: Dict[str, str]) -> None:
         """Set map of currency id to name."""
-        assert self._currency_id_to_name is None, "Currency_id_to_name already set!"
+        enforce(self._currency_id_to_name is None, "Currency_id_to_name already set!")
         self._currency_id_to_name = currency_id_to_name
 
     def check_consistency(self):
@@ -158,13 +163,13 @@ class Configuration:
         Check the consistency of the game configuration.
 
         :return: None
-        :raises: AssertionError: if some constraint is not satisfied.
+        :raises: AEAEnforceError: if some constraint is not satisfied.
         """
-        assert self.version_id is not None, "A version id must be set."
-        assert self.tx_fee >= 0, "Tx fee must be non-negative."
-        assert len(self.agent_addr_to_name) >= 2, "Must have at least two agents."
-        assert len(self.good_id_to_name) >= 2, "Must have at least two goods."
-        assert len(self.currency_id_to_name) == 1, "Must have exactly one currency."
+        enforce(self.version_id is not None, "A version id must be set.")
+        enforce(self.tx_fee >= 0, "Tx fee must be non-negative.")
+        enforce(len(self.agent_addr_to_name) >= 2, "Must have at least two agents.")
+        enforce(len(self.good_id_to_name) >= 2, "Must have at least two goods.")
+        enforce(len(self.currency_id_to_name) == 1, "Must have exactly one currency.")
 
 
 class Initialization:
@@ -244,49 +249,76 @@ class Initialization:
         Check the consistency of the game configuration.
 
         :return: None
-        :raises: AssertionError: if some constraint is not satisfied.
+        :raises: AEAEnforceError: if some constraint is not satisfied.
         """
-        assert all(
-            c_e >= 0
-            for currency_endowments in self.agent_addr_to_currency_endowments.values()
-            for c_e in currency_endowments.values()
-        ), "Currency endowments must be non-negative."
-        assert all(
-            p > 0
-            for params in self.agent_addr_to_exchange_params.values()
-            for p in params.values()
-        ), "ExchangeParams must be strictly positive."
-        assert all(
-            g_e > 0
-            for good_endowments in self.agent_addr_to_good_endowments.values()
-            for g_e in good_endowments.values()
-        ), "Good endowments must be strictly positive."
-        assert all(
-            p > 0
-            for params in self.agent_addr_to_utility_params.values()
-            for p in params.values()
-        ), "UtilityParams must be strictly positive."
-        assert len(self.agent_addr_to_good_endowments.keys()) == len(
-            self.agent_addr_to_currency_endowments.keys()
-        ), "Length of endowments must be the same."
-        assert len(self.agent_addr_to_exchange_params.keys()) == len(
-            self.agent_addr_to_utility_params.keys()
-        ), "Length of params must be the same."
-        assert all(
-            len(self.good_id_to_eq_prices.values()) == len(eq_good_holdings)
-            for eq_good_holdings in self.agent_addr_to_eq_good_holdings.values()
-        ), "Length of eq_prices and an element of eq_good_holdings must be the same."
-        assert len(self.agent_addr_to_eq_good_holdings.values()) == len(
-            self.agent_addr_to_eq_currency_holdings.values()
-        ), "Length of eq_good_holdings and eq_currency_holdings must be the same."
-        assert all(
-            len(self.agent_addr_to_exchange_params[agent_addr]) == len(endowments)
-            for agent_addr, endowments in self.agent_addr_to_currency_endowments.items()
-        ), "Dimensions for exchange_params and currency_endowments rows must be the same."
-        assert all(
-            len(self.agent_addr_to_utility_params[agent_addr]) == len(endowments)
-            for agent_addr, endowments in self.agent_addr_to_good_endowments.items()
-        ), "Dimensions for utility_params and good_endowments rows must be the same."
+        enforce(
+            all(
+                c_e >= 0
+                for currency_endowments in self.agent_addr_to_currency_endowments.values()
+                for c_e in currency_endowments.values()
+            ),
+            "Currency endowments must be non-negative.",
+        )
+        enforce(
+            all(
+                p > 0
+                for params in self.agent_addr_to_exchange_params.values()
+                for p in params.values()
+            ),
+            "ExchangeParams must be strictly positive.",
+        )
+        enforce(
+            all(
+                g_e > 0
+                for good_endowments in self.agent_addr_to_good_endowments.values()
+                for g_e in good_endowments.values()
+            ),
+            "Good endowments must be strictly positive.",
+        )
+        enforce(
+            all(
+                p > 0
+                for params in self.agent_addr_to_utility_params.values()
+                for p in params.values()
+            ),
+            "UtilityParams must be strictly positive.",
+        )
+        enforce(
+            len(self.agent_addr_to_good_endowments.keys())
+            == len(self.agent_addr_to_currency_endowments.keys()),
+            "Length of endowments must be the same.",
+        )
+        enforce(
+            len(self.agent_addr_to_exchange_params.keys())
+            == len(self.agent_addr_to_utility_params.keys()),
+            "Length of params must be the same.",
+        )
+        enforce(
+            all(
+                len(self.good_id_to_eq_prices.values()) == len(eq_good_holdings)
+                for eq_good_holdings in self.agent_addr_to_eq_good_holdings.values()
+            ),
+            "Length of eq_prices and an element of eq_good_holdings must be the same.",
+        )
+        enforce(
+            len(self.agent_addr_to_eq_good_holdings.values())
+            == len(self.agent_addr_to_eq_currency_holdings.values()),
+            "Length of eq_good_holdings and eq_currency_holdings must be the same.",
+        )
+        enforce(
+            all(
+                len(self.agent_addr_to_exchange_params[agent_addr]) == len(endowments)
+                for agent_addr, endowments in self.agent_addr_to_currency_endowments.items()
+            ),
+            "Dimensions for exchange_params and currency_endowments rows must be the same.",
+        )
+        enforce(
+            all(
+                len(self.agent_addr_to_utility_params[agent_addr]) == len(endowments)
+                for agent_addr, endowments in self.agent_addr_to_good_endowments.items()
+            ),
+            "Dimensions for utility_params and good_endowments rows must be the same.",
+        )
 
 
 class Transaction(Terms):
@@ -352,9 +384,10 @@ class Transaction(Terms):
         :param message: the message
         :return: Transaction
         """
-        assert (
-            message.performative == TacMessage.Performative.TRANSACTION
-        ), "Wrong performative"
+        enforce(
+            message.performative == TacMessage.Performative.TRANSACTION,
+            "Wrong performative",
+        )
         transaction = Transaction(
             ledger_id=message.ledger_id,
             sender_address=message.sender_address,
@@ -362,14 +395,15 @@ class Transaction(Terms):
             amount_by_currency_id=message.amount_by_currency_id,
             fee_by_currency_id=message.fee_by_currency_id,
             quantities_by_good_id=message.quantities_by_good_id,
-            is_sender_payable_tx_fee=True,  # TODO: check
+            is_sender_payable_tx_fee=True,
             nonce=str(message.nonce),
             sender_signature=message.sender_signature,
             counterparty_signature=message.counterparty_signature,
         )
-        assert (
-            transaction.id == message.transaction_id
-        ), "Transaction content does not match hash."
+        enforce(
+            transaction.id == message.transaction_id,
+            "Transaction content does not match hash.",
+        )
         return transaction
 
     def __eq__(self, other):
@@ -402,11 +436,14 @@ class AgentState:
         :param quantities_by_good_id: the quantities for each good.
         :param utility_params_by_good_id: the utility params for every good.
         """
-        assert len(amount_by_currency_id.keys()) == len(
-            exchange_params_by_currency_id.keys()
+        enforce(
+            len(amount_by_currency_id.keys())
+            == len(exchange_params_by_currency_id.keys()),
+            "Different number of elements in amount_by_currency_id and exchange_params_by_currency_id.",
         )
-        assert len(quantities_by_good_id.keys()) == len(
-            utility_params_by_good_id.keys()
+        enforce(
+            len(quantities_by_good_id.keys()) == len(utility_params_by_good_id.keys()),
+            "Different number of elements in quantities_by_good_id and utility_params_by_good_id.",
         )
         self._agent_address = agent_address
         self._amount_by_currency_id = copy.copy(amount_by_currency_id)
@@ -530,7 +567,7 @@ class AgentState:
         :param tx: the transaction.
         :return: None
         """
-        assert self.is_consistent_transaction(tx), "Inconsistent transaction."
+        enforce(self.is_consistent_transaction(tx), "Inconsistent transaction.")
 
         new_amount_by_currency_id = self.amount_by_currency_id
         if self.agent_address == tx.sender_address:
@@ -678,29 +715,30 @@ class ContractManager:
     @property
     def deploy_tx_digest(self) -> str:
         """Get the contract deployment tx digest."""
-        assert self._deploy_tx_digest is not None, "Deploy_tx_digest is not set yet!"
+        if self._deploy_tx_digest is None:
+            raise AEAEnforceError("Deploy_tx_digest is not set yet!")
         return self._deploy_tx_digest
 
     @deploy_tx_digest.setter
     def deploy_tx_digest(self, deploy_tx_digest: str) -> None:
         """Set the contract deployment tx digest."""
-        assert self._deploy_tx_digest is None, "Deploy_tx_digest already set!"
+        enforce(self._deploy_tx_digest is None, "Deploy_tx_digest already set!")
         self._deploy_tx_digest = deploy_tx_digest
 
     @property
     def create_tokens_tx_digest(self) -> str:
         """Get the contract deployment tx digest."""
-        assert (
-            self._create_tokens_tx_digest is not None
-        ), "Create_tokens_tx_digest is not set yet!"
+        if self._create_tokens_tx_digest is None:
+            raise AEAEnforceError("Create_tokens_tx_digest is not set yet!")
         return self._create_tokens_tx_digest
 
     @create_tokens_tx_digest.setter
     def create_tokens_tx_digest(self, create_tokens_tx_digest: str) -> None:
         """Set the contract deployment tx digest."""
-        assert (
-            self._create_tokens_tx_digest is None
-        ), "Create_tokens_tx_digest already set!"
+        enforce(
+            self._create_tokens_tx_digest is None,
+            "Create_tokens_tx_digest already set!",
+        )
         self._create_tokens_tx_digest = create_tokens_tx_digest
 
     @property
@@ -715,7 +753,9 @@ class ContractManager:
         :param agent_addr: the agent addresss
         :param tx_digest: the transaction digest
         """
-        assert agent_addr not in self._mint_tokens_tx_digests, "Tx digest already set."
+        enforce(
+            agent_addr not in self._mint_tokens_tx_digests, "Tx digest already set."
+        )
         self._mint_tokens_tx_digests[agent_addr] = tx_digest
 
     @property
@@ -729,9 +769,10 @@ class ContractManager:
 
         :param agent_addr: the agent address
         """
-        assert (
-            agent_addr not in self.confirmed_mint_tokens_agents
-        ), "Agent already in list."
+        enforce(
+            agent_addr not in self.confirmed_mint_tokens_agents,
+            "Agent already in list.",
+        )
         self._confirmed_mint_tokens_agents.append(agent_addr)
 
 
@@ -774,37 +815,35 @@ class Game(Model):
     @property
     def conf(self) -> Configuration:
         """Get game configuration."""
-        assert self._conf is not None, "Call create before calling configuration."
+        if self._conf is None:
+            raise AEAEnforceError("Call create before calling configuration.")
         return self._conf
 
     @conf.setter
     def conf(self, configuration: Configuration):
         """Set the configuration."""
-        assert self._conf is None, "Configuration already set!."
+        enforce(self._conf is None, "Configuration already set!.")
         self._conf = configuration
 
     @property
     def initialization(self) -> Initialization:
         """Get game initialization."""
-        assert (
-            self._initialization is not None
-        ), "Call create before calling initialization."
+        if self._initialization is None:
+            raise AEAEnforceError("Call create before calling initialization.")
         return self._initialization
 
     @property
     def initial_agent_states(self) -> Dict[str, AgentState]:
         """Get initial state of each agent."""
-        assert (
-            self._initial_agent_states is not None
-        ), "Call create before calling initial_agent_states."
+        if self._initial_agent_states is None:
+            raise AEAEnforceError("Call create before calling initial_agent_states.")
         return self._initial_agent_states
 
     @property
     def current_agent_states(self) -> Dict[str, AgentState]:
         """Get current state of each agent."""
-        assert (
-            self._current_agent_states is not None
-        ), "Call create before calling current_agent_states."
+        if self._current_agent_states is None:
+            raise AEAEnforceError("Call create before calling current_agent_states.")
         return self._current_agent_states
 
     @property
@@ -814,7 +853,7 @@ class Game(Model):
 
     def create(self):
         """Create a game."""
-        assert self.phase.value == Phase.GAME_SETUP.value, "Wrong game phase."
+        enforce(self.phase.value == Phase.GAME_SETUP.value, "Wrong game phase.")
         self.context.logger.info("setting Up the TAC game.")
         self._generate()
 

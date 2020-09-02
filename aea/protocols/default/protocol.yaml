@@ -1,17 +1,18 @@
 name: default
 author: fetchai
-version: 0.4.0
+version: 0.5.0
+type: protocol
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
-aea_version: '>=0.5.0, <0.6.0'
+aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmfMJ6iNNLWJLqHwjvypw5pyjWXwjDH9rnrrhQizLxDYKZ
+  README.md: QmP3q9463opixzdv17QXkCSQvgR8KJXgLAVkfUPpdHJzPv
   __init__.py: QmPMtKUrzVJp594VqNuapJzCesWLQ6Awjqv2ufG3wKNRmH
   custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
   default.proto: QmNzMUvXkBm5bbitR5Yi49ADiwNn1FhCvXqSKKoqAPZyXv
   default_pb2.py: QmSRFi1s3jcqnPuk4yopJeNuC6o58RL7dvEdt85uns3B3N
-  dialogues.py: QmS3gaDAaoTD9s3YLGvXVxv9RV864TNN8Q87xQ5CALkMBm
-  message.py: QmbC95LcUY1pwbWtgx9no88Tuh8j2TfNQfvU9x4DjACmBR
+  dialogues.py: Qmc991snbS7DwFxo1cKcq1rQ2uj7y8ukp14kfe2zve387C
+  message.py: QmeaadvKib9QqpjZgd7NiDUqGRpC2eZPVpgq1dY3PYacht
   serialization.py: QmRnajc9BNCftjGkYTKCP9LnD3rq197jM3Re1GDVJTHh2y
 fingerprint_ignore_patterns: []
 dependencies:

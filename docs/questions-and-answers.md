@@ -72,7 +72,7 @@ You can find more details about the CLI commands <a href="../cli-commands/">here
 </details>
 
 <details><summary>When a new AEA is created, is the `vendor` folder populated with some default packages?</summary>
-All AEA projects by default hold the `fetchai/stub:0.8.0` connection, the `fetchai/default:0.4.0` protocol and the `fetchai/error:0.4.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
+All AEA projects by default hold the `fetchai/stub:0.9.0` connection, the `fetchai/default:0.5.0` protocol and the `fetchai/error:0.5.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
 <br><br>
 You can find more details about the file structure <a href="../package-imports/">here</a>
 </details>
@@ -88,5 +88,5 @@ The `URI` in the `EnvelopeContext` can be used to route envelopes of a given pro
 </details>
 
 <details><summary>Why does the AEA framework use its own package registry?</summary>
-AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library and therefore not suitable for distribution via <a href='https://pypi.org/'>PyPI</a>.
+AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library and therefore not suitable for distribution via <a href='https://pypi.org/' target="_blank">PyPI</a>.
 </details>

@@ -28,15 +28,14 @@ import semver
 
 import yaml
 
-import aea
 from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
-    ComponentConfiguration,
     ComponentId,
     ComponentType,
     ConnectionConfig,
     ContractConfig,
+    DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
     ProtocolConfig,
@@ -50,9 +49,11 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.loader import ConfigLoaders, load_component_configuration
 
 from tests.conftest import (
     AUTHOR,
+    ROOT_DIR,
     agent_config_files,
     connection_config_files,
     contract_config_files,
@@ -198,6 +199,27 @@ class TestSkillConfig:
         actual_json = actual_config.json
         assert expected_json == actual_json
 
+    def test_update_method(self):
+        """Test the update method."""
+        skill_config_path = Path(
+            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+        )
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+        skill_config = loader.load(skill_config_path.open())
+        new_configurations = {
+            "behaviours": {"new_behaviour": {"args": {}, "class_name": "SomeClass"}},
+            "handlers": {"new_handler": {"args": {}, "class_name": "SomeClass"}},
+            "models": {"new_model": {"args": {}, "class_name": "SomeClass"}},
+        }
+        skill_config.update(new_configurations)
+
+        new_behaviour = skill_config.behaviours.read("new_behaviour")
+        assert new_behaviour.json == new_configurations["behaviours"]["new_behaviour"]
+        new_handler = skill_config.handlers.read("new_handler")
+        assert new_handler.json == new_configurations["handlers"]["new_handler"]
+        new_model = skill_config.models.read("new_model")
+        assert new_model.json == new_configurations["models"]["new_model"]
+
 
 class TestAgentConfig:
     """Test the agent configuration class."""
@@ -206,7 +228,10 @@ class TestAgentConfig:
     def test_from_json_and_to_json(self, agent_path):
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(agent_path)
-        original_json = yaml.safe_load(f)
+        original_jsons = list(yaml.safe_load_all(f))
+        components = original_jsons[1:]
+        original_json = original_jsons[0]
+        original_json["component_configurations"] = components
 
         expected_config = AgentConfig.from_json(original_json)
         assert isinstance(expected_config, AgentConfig)
@@ -473,6 +498,30 @@ def test_package_id_lt():
     assert package_id_1 < package_id_2
 
 
+def test_package_id_from_uri_path():
+    """Test PackageId.from_uri_path"""
+    result = PackageId.from_uri_path("skill/author/package_name/0.1.0")
+    assert str(result.package_type) == "skill"
+    assert result.public_id.name == "package_name"
+    assert result.public_id.author == "author"
+    assert result.public_id.version == "0.1.0"
+
+
+def test_package_id_to_uri_path():
+    """Test PackageId.to_uri_path"""
+    package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    assert package_id.to_uri_path == "protocol/author/name/0.1.0"
+
+
+def test_package_id_from_uri_path_negative():
+    """Test PackageId.from_uri_path with invalid type"""
+    with pytest.raises(
+        ValueError,
+        match="Input 'not_a_valid_type/author/package_name/0.1.0' is not well formatted.",
+    ):
+        PackageId.from_uri_path("not_a_valid_type/author/package_name/0.1.0")
+
+
 def test_component_id_prefix_import_path():
     """Test ComponentId.prefix_import_path"""
     component_id = ComponentId(
@@ -485,7 +534,7 @@ def test_component_configuration_load_file_not_found():
     """Test Component.load when a file is not found."""
     with mock.patch("builtins.open", side_effect=FileNotFoundError):
         with pytest.raises(FileNotFoundError):
-            ComponentConfiguration.load(
+            load_component_configuration(
                 ComponentType.PROTOCOL, mock.MagicMock(spec=Path)
             )
 
@@ -532,7 +581,7 @@ def test_component_configuration_check_fingerprint_different_fingerprints_no_ven
 def test_check_aea_version_when_it_fails():
     """Test the check for the AEA version when it fails."""
     config = ProtocolConfig("name", "author", "0.1.0", aea_version=">0.1.0")
-    with mock.patch.object(aea, "__version__", "0.1.0"):
+    with mock.patch("aea.configurations.base.__aea_version__", "0.1.0"):
         with pytest.raises(
             ValueError,
             match="The CLI version is 0.1.0, but package author/name:0.1.0 requires version >0.1.0",
@@ -569,7 +618,7 @@ def test_agent_config_to_json_with_optional_configurations():
     agent_config = AgentConfig(
         "name",
         "author",
-        timeout=0.1,
+        period=0.1,
         execution_timeout=1.0,
         max_reactions=100,
         decision_maker_handler=dict(dotted_path="", file_path=""),

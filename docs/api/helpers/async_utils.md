@@ -85,6 +85,26 @@ Wait state to be set.
 
 tuple of previous state and new state.
 
+<a name="aea.helpers.async_utils.AsyncState.transit"></a>
+#### transit
+
+```python
+ | @contextmanager
+ | transit(initial: Any = not_set, success: Any = not_set, fail: Any = not_set) -> Generator
+```
+
+Change state context according to success or not.
+
+**Arguments**:
+
+- `initial`: set state on context enter, not_set by default
+- `success`: set state on context block done, not_set by default
+- `fail`: set state on context block raises exception, not_set by default
+
+**Returns**:
+
+None
+
 <a name="aea.helpers.async_utils.PeriodicCaller"></a>
 ## PeriodicCaller Objects
 
@@ -135,7 +155,7 @@ Remove from schedule.
 #### ensure`_`loop
 
 ```python
-ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop
+ensure_loop(loop: Optional[AbstractEventLoop] = None) -> AbstractEventLoop
 ```
 
 Use loop provided or create new if not provided or closed.
@@ -286,6 +306,15 @@ class AwaitableProc()
 
 Async-friendly subprocess.Popen
 
+<a name="aea.helpers.async_utils.AwaitableProc.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(*args, **kwargs)
+```
+
+Initialise awaitable proc.
+
 <a name="aea.helpers.async_utils.AwaitableProc.start"></a>
 #### start
 
@@ -294,4 +323,57 @@ Async-friendly subprocess.Popen
 ```
 
 Start the subprocess
+
+<a name="aea.helpers.async_utils.ItemGetter"></a>
+## ItemGetter Objects
+
+```python
+class ItemGetter()
+```
+
+Virtual queue like object to get items from getters function.
+
+<a name="aea.helpers.async_utils.ItemGetter.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(getters: List[Callable]) -> None
+```
+
+Init ItemGetter.
+
+**Arguments**:
+
+- `getters`: List of couroutines to be awaited.
+
+<a name="aea.helpers.async_utils.ItemGetter.get"></a>
+#### get
+
+```python
+ | async get() -> Any
+```
+
+Get item.
+
+<a name="aea.helpers.async_utils.HandlerItemGetter"></a>
+## HandlerItemGetter Objects
+
+```python
+class HandlerItemGetter(ItemGetter)
+```
+
+ItemGetter with handler passed.
+
+<a name="aea.helpers.async_utils.HandlerItemGetter.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(getters: List[Tuple[Callable[[Any], None], Callable]])
+```
+
+Init HandlerItemGetter.
+
+**Arguments**:
+
+- `getters`: List of tuples of handler and couroutine to be awaiteed for an item.
 

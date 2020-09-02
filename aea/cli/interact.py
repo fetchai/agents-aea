@@ -27,6 +27,7 @@ import click
 
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
+from aea.common import Address
 from aea.configurations.base import (
     ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -39,16 +40,17 @@ from aea.connections.stub.connection import (
     StubConnection,
 )
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
-from aea.protocols.default.dialogues import DefaultDialogues
+from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 
 @click.command()
 @click.pass_context
 @check_aea_project
-def interact(click_context: click.core.Context):
+def interact(click_context: click.core.Context):  # pylint: disable=unused-argument
     """Interact with a running AEA via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
@@ -71,13 +73,25 @@ def _run_interaction_channel():
     )
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)
-    outbox = OutBox(multiplexer, default_address=identity_stub.address)
-    dialogues = DefaultDialogues(identity_stub.name)
+    outbox = OutBox(multiplexer)
+
+    def role_from_first_message(  # pylint: disable=unused-argument
+        message: Message, receiver_address: Address
+    ) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :param receiver_address: the address of the receiving agent
+        :return: The role of the agent
+        """
+        return DefaultDialogue.Role.AGENT
+
+    dialogues = DefaultDialogues(identity_stub.name, role_from_first_message)
 
     try:
         multiplexer.connect()
         while True:  # pragma: no cover
-            _process_envelopes(agent_name, identity_stub, inbox, outbox, dialogues)
+            _process_envelopes(agent_name, inbox, outbox, dialogues)
 
     except KeyboardInterrupt:
         click.echo("Interaction interrupted!")
@@ -88,37 +102,37 @@ def _run_interaction_channel():
 
 
 def _process_envelopes(
-    agent_name: str,
-    identity_stub: Identity,
-    inbox: InBox,
-    outbox: OutBox,
-    dialogues: DefaultDialogues,
+    agent_name: str, inbox: InBox, outbox: OutBox, dialogues: DefaultDialogues,
 ) -> None:
     """
     Process envelopes.
 
     :param agent_name: name of an agent.
-    :param identity_stub: stub identity.
     :param inbox: an inbox object.
     :param outbox: an outbox object.
     :param dialogues: the dialogues object.
 
     :return: None.
     """
-    envelope = _try_construct_envelope(agent_name, identity_stub.name, dialogues)
+    envelope = _try_construct_envelope(agent_name, dialogues)
     if envelope is None:
-        if not inbox.empty():
-            envelope = inbox.get_nowait()
-            assert envelope is not None, "Could not recover envelope from inbox."
-            click.echo(_construct_message("received", envelope))
-        else:
-            click.echo("Received no new envelope!")
+        _check_for_incoming_envelope(inbox)
     else:
         outbox.put(envelope)
         click.echo(_construct_message("sending", envelope))
 
 
-def _construct_message(action_name, envelope):
+def _check_for_incoming_envelope(inbox: InBox):
+    if not inbox.empty():
+        envelope = inbox.get_nowait()
+        if envelope is None:
+            raise ValueError("Could not recover envelope from inbox.")
+        click.echo(_construct_message("received", envelope))
+    else:
+        click.echo("Received no new envelope!")
+
+
+def _construct_message(action_name: str, envelope: Envelope):
     action_name = action_name.title()
     msg = (
         DefaultMessage.serializer.decode(envelope.message)
@@ -135,7 +149,7 @@ def _construct_message(action_name, envelope):
 
 
 def _try_construct_envelope(
-    agent_name: str, sender: str, dialogues: DefaultDialogues
+    agent_name: str, dialogues: DefaultDialogues
 ) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
     envelope = None  # type: Optional[Envelope]
@@ -143,7 +157,7 @@ def _try_construct_envelope(
         performative_str = "bytes"
         performative = DefaultMessage.Performative(performative_str)
         click.echo(
-            "Provide message of protocol fetchai/default:0.4.0 for performative {}:".format(
+            "Provide message of protocol fetchai/default:0.5.0 for performative {}:".format(
                 performative_str
             )
         )
@@ -158,20 +172,11 @@ def _try_construct_envelope(
             message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
         else:
             message = message_escaped  # pragma: no cover
-        dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
-        msg = DefaultMessage(
-            performative=performative,
-            dialogue_reference=dialogue_reference,
-            content=message,
+        msg, _ = dialogues.create(
+            counterparty=agent_name, performative=performative, content=message,
         )
-        msg.counterparty = agent_name
-        msg.sender = sender
-        assert dialogues.update(msg) is not None
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")

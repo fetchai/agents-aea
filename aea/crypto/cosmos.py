@@ -27,8 +27,9 @@ import os
 import subprocess  # nosec
 import tempfile
 import time
+from collections import namedtuple
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Tuple
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
 from bech32 import bech32_encode, convertbits
 
@@ -37,202 +38,25 @@ from ecdsa.util import sigencode_string_canonize
 
 import requests
 
+from aea.common import Address
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
-from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
-COSMOS_TESTNET_FAUCET_URL = "https://faucet-agent-land.prod.fetch-ai.com:443/claim"
 TESTNET_NAME = "testnet"
-DEFAULT_ADDRESS = "https://rest-agent-land.prod.fetch-ai.com:443"
-DEFAULT_CURRENCY_DENOM = "atestfet"
-DEFAULT_CHAIN_ID = "agent-land"
-
-
-class CosmosCrypto(Crypto[SigningKey]):
-    """Class wrapping the Account Generation from Ethereum ledger."""
-
-    identifier = _COSMOS
-
-    def __init__(self, private_key_path: Optional[str] = None):
-        """
-        Instantiate an ethereum crypto object.
-
-        :param private_key_path: the private key path of the agent
-        """
-        super().__init__(private_key_path=private_key_path)
-        self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
-        self._address = CosmosHelper.get_address_from_public_key(self.public_key)
-
-    @property
-    def private_key(self) -> str:
-        """
-        Return a private key.
-
-        :return: a private key string
-        """
-        return self.entity.to_string().hex()
-
-    @property
-    def public_key(self) -> str:
-        """
-        Return a public key in hex format.
-
-        :return: a public key string in hex format
-        """
-        return self._public_key
-
-    @property
-    def address(self) -> str:
-        """
-        Return the address for the key pair.
-
-        :return: a display_address str
-        """
-        return self._address
-
-    @classmethod
-    def load_private_key_from_path(cls, file_name) -> SigningKey:
-        """
-        Load a private key in hex format from a file.
-
-        :param file_name: the path to the hex file.
-        :return: the Entity.
-        """
-        path = Path(file_name)
-        with open(path, "r") as key:
-            data = key.read()
-            signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
-        return signing_key
-
-    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
-        """
-        Sign a message in bytes string form.
-
-        :param message: the message to be signed
-        :param is_deprecated_mode: if the deprecated signing is used
-        :return: signature of the message in string form
-        """
-        signature_compact = self.entity.sign_deterministic(
-            message, hashfunc=hashlib.sha256, sigencode=sigencode_string_canonize,
-        )
-        signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
-        return signature_base64_str
-
-    @staticmethod
-    def format_default_transaction(
-        transaction: Any, signature: str, base64_pbk: str
-    ) -> Any:
-        """
-        Format default CosmosSDK transaction and add signature
-
-        :param transaction: the transaction to be formatted
-        :param signature: the transaction signature
-        :param base64_pbk: the base64 formatted public key
-
-        :return: formatted transaction with signature
-        """
-        pushable_tx = {
-            "tx": {
-                "msg": transaction["msgs"],
-                "fee": transaction["fee"],
-                "memo": transaction["memo"],
-                "signatures": [
-                    {
-                        "signature": signature,
-                        "pub_key": {
-                            "type": "tendermint/PubKeySecp256k1",
-                            "value": base64_pbk,
-                        },
-                        "account_number": transaction["account_number"],
-                        "sequence": transaction["sequence"],
-                    }
-                ],
-            },
-            "mode": "async",
-        }
-        return pushable_tx
-
-    @staticmethod
-    def format_wasm_transaction(
-        transaction: Any, signature: str, base64_pbk: str
-    ) -> Any:
-        """
-        Format CosmWasm transaction and add signature
-
-        :param transaction: the transaction to be formatted
-        :param signature: the transaction signature
-        :param base64_pbk: the base64 formatted public key
-
-        :return: formatted transaction with signature
-        """
-
-        pushable_tx = {
-            "type": "cosmos-sdk/StdTx",
-            "value": {
-                "msg": transaction["msgs"],
-                "fee": transaction["fee"],
-                "signatures": [
-                    {
-                        "pub_key": {
-                            "type": "tendermint/PubKeySecp256k1",
-                            "value": base64_pbk,
-                        },
-                        "signature": signature,
-                    }
-                ],
-                "memo": transaction["memo"],
-            },
-        }
-        return pushable_tx
-
-    def sign_transaction(self, transaction: Any) -> Any:
-        """
-        Sign a transaction in bytes string form.
-
-        :param transaction: the transaction to be signed
-        :return: signed transaction
-        """
-
-        transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
-        transaction_bytes = transaction_str.encode("utf-8")
-        signed_transaction = self.sign_message(transaction_bytes)
-        base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
-
-        if (
-            "msgs" in transaction
-            and len(transaction["msgs"]) == 1
-            and "type" in transaction["msgs"][0]
-            and "wasm" in transaction["msgs"][0]["type"]
-        ):
-            return self.format_wasm_transaction(
-                transaction, signed_transaction, base64_pbk
-            )
-        else:
-            return self.format_default_transaction(
-                transaction, signed_transaction, base64_pbk
-            )
-
-    @classmethod
-    def generate_private_key(cls) -> SigningKey:
-        """Generate a key pair for cosmos network."""
-        signing_key = SigningKey.generate(curve=SECP256k1)
-        return signing_key
-
-    def dump(self, fp: BinaryIO) -> None:
-        """
-        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
-
-        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
-        :return: None
-        """
-        fp.write(self.private_key.encode("utf-8"))
+DEFAULT_FAUCET_URL = "INVALID_URL"
+DEFAULT_ADDRESS = "INVALID_URL"
+DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
+DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
 
 
 class CosmosHelper(Helper):
     """Helper class usable as Mixin for CosmosApi or as standalone class."""
+
+    address_prefix = _COSMOS
 
     @staticmethod
     def is_transaction_settled(tx_receipt: Any) -> bool:
@@ -244,7 +68,6 @@ class CosmosHelper(Helper):
         """
         is_successful = False
         if tx_receipt is not None:
-            # TODO: quick fix only, not sure this is reliable
             is_successful = True
         return is_successful
 
@@ -292,8 +115,8 @@ class CosmosHelper(Helper):
         )
         return aggregate_hash.hexdigest()
 
-    @staticmethod
-    def get_address_from_public_key(public_key: str) -> str:
+    @classmethod
+    def get_address_from_public_key(cls, public_key: str) -> str:
         """
         Get the address from the public key.
 
@@ -304,13 +127,14 @@ class CosmosHelper(Helper):
         s = hashlib.new("sha256", public_key_bytes).digest()
         r = hashlib.new("ripemd160", s).digest()
         five_bit_r = convertbits(r, 8, 5)
-        assert five_bit_r is not None, "Unsuccessful bech32.convertbits call"
-        address = bech32_encode(_COSMOS, five_bit_r)
+        if five_bit_r is None:  # pragma: nocover
+            raise AEAEnforceError("Unsuccessful bech32.convertbits call")
+        address = bech32_encode(cls.address_prefix, five_bit_r)
         return address
 
-    @staticmethod
+    @classmethod
     def recover_message(
-        message: bytes, signature: str, is_deprecated_mode: bool = False
+        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[Address, ...]:
         """
         Recover the addresses from the hash.
@@ -329,8 +153,7 @@ class CosmosHelper(Helper):
             for verifying_key in verifying_keys
         ]
         addresses = [
-            CosmosHelper.get_address_from_public_key(public_key)
-            for public_key in public_keys
+            cls.get_address_from_public_key(public_key) for public_key in public_keys
         ]
         return tuple(addresses)
 
@@ -346,14 +169,194 @@ class CosmosHelper(Helper):
         return digest
 
 
-class CosmosApi(LedgerApi, CosmosHelper):
+class CosmosCrypto(Crypto[SigningKey]):
+    """Class wrapping the Account Generation from Ethereum ledger."""
+
+    identifier = _COSMOS
+    helper = CosmosHelper
+
+    def __init__(self, private_key_path: Optional[str] = None):
+        """
+        Instantiate an ethereum crypto object.
+
+        :param private_key_path: the private key path of the agent
+        """
+        super().__init__(private_key_path=private_key_path)
+        self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
+        self._address = self.helper.get_address_from_public_key(self.public_key)
+
+    @property
+    def private_key(self) -> str:
+        """
+        Return a private key.
+
+        :return: a private key string
+        """
+        return self.entity.to_string().hex()
+
+    @property
+    def public_key(self) -> str:
+        """
+        Return a public key in hex format.
+
+        :return: a public key string in hex format
+        """
+        return self._public_key
+
+    @property
+    def address(self) -> str:
+        """
+        Return the address for the key pair.
+
+        :return: a display_address str
+        """
+        return self._address
+
+    @classmethod
+    def load_private_key_from_path(cls, file_name) -> SigningKey:
+        """
+        Load a private key in hex format from a file.
+
+        :param file_name: the path to the hex file.
+        :return: the Entity.
+        """
+        path = Path(file_name)
+        with open(path, "r") as key:
+            data = key.read()
+            signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
+        return signing_key
+
+    def sign_message(  # pylint: disable=unused-argument
+        self, message: bytes, is_deprecated_mode: bool = False
+    ) -> str:
+        """
+        Sign a message in bytes string form.
+
+        :param message: the message to be signed
+        :param is_deprecated_mode: if the deprecated signing is used
+        :return: signature of the message in string form
+        """
+        signature_compact = self.entity.sign_deterministic(
+            message, hashfunc=hashlib.sha256, sigencode=sigencode_string_canonize,
+        )
+        signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
+        return signature_base64_str
+
+    @staticmethod
+    def format_default_transaction(
+        transaction: Any, signature: str, base64_pbk: str
+    ) -> Any:
+        """
+        Format default CosmosSDK transaction and add signature.
+
+        :param transaction: the transaction to be formatted
+        :param signature: the transaction signature
+        :param base64_pbk: the base64 formatted public key
+
+        :return: formatted transaction with signature
+        """
+        pushable_tx = {
+            "tx": {
+                "msg": transaction["msgs"],
+                "fee": transaction["fee"],
+                "memo": transaction["memo"],
+                "signatures": [
+                    {
+                        "signature": signature,
+                        "pub_key": {
+                            "type": "tendermint/PubKeySecp256k1",
+                            "value": base64_pbk,
+                        },
+                        "account_number": transaction["account_number"],
+                        "sequence": transaction["sequence"],
+                    }
+                ],
+            },
+            "mode": "async",
+        }
+        return pushable_tx
+
+    @staticmethod
+    def format_wasm_transaction(
+        transaction: Any, signature: str, base64_pbk: str
+    ) -> Any:
+        """
+        Format CosmWasm transaction and add signature.
+
+        :param transaction: the transaction to be formatted
+        :param signature: the transaction signature
+        :param base64_pbk: the base64 formatted public key
+
+        :return: formatted transaction with signature
+        """
+        pushable_tx = {
+            "type": "cosmos-sdk/StdTx",
+            "value": {
+                "msg": transaction["msgs"],
+                "fee": transaction["fee"],
+                "signatures": [
+                    {
+                        "pub_key": {
+                            "type": "tendermint/PubKeySecp256k1",
+                            "value": base64_pbk,
+                        },
+                        "signature": signature,
+                    }
+                ],
+                "memo": transaction["memo"],
+            },
+        }
+        return pushable_tx
+
+    def sign_transaction(self, transaction: Any) -> Any:
+        """
+        Sign a transaction in bytes string form.
+
+        :param transaction: the transaction to be signed
+        :return: signed transaction
+        """
+        transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
+        transaction_bytes = transaction_str.encode("utf-8")
+        signed_transaction = self.sign_message(transaction_bytes)
+        base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
+
+        if (
+            "msgs" in transaction
+            and len(transaction["msgs"]) == 1
+            and "type" in transaction["msgs"][0]
+            and "wasm" in transaction["msgs"][0]["type"]
+        ):
+            return self.format_wasm_transaction(
+                transaction, signed_transaction, base64_pbk
+            )
+        return self.format_default_transaction(
+            transaction, signed_transaction, base64_pbk
+        )
+
+    @classmethod
+    def generate_private_key(cls) -> SigningKey:
+        """Generate a key pair for cosmos network."""
+        signing_key = SigningKey.generate(curve=SECP256k1)
+        return signing_key
+
+    def dump(self, fp: BinaryIO) -> None:
+        """
+        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+
+        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
+        :return: None
+        """
+        fp.write(self.private_key.encode("utf-8"))
+
+
+class _CosmosApi(LedgerApi):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""
 
     identifier = _COSMOS
 
     def __init__(self, **kwargs):
         """
-        Initialize the Ethereum ledger APIs.
+        Initialize the Cosmos ledger APIs.
         """
         self._api = None
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
@@ -387,7 +390,7 @@ class CosmosApi(LedgerApi, CosmosHelper):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_deploy_transaction(
+    def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
@@ -820,16 +823,85 @@ class CosmosApi(LedgerApi, CosmosHelper):
         # Instance object not available for cosmwasm
         return None
 
+    @staticmethod
+    def _execute_shell_command(command: List[str]) -> List[Dict[str, str]]:
+        """
+        Execute command using subprocess and get result as JSON dict.
+
+        :param command: the shell command to be executed
+        :return: the stdout result converted to JSON dict
+        """
+        stdout, _ = subprocess.Popen(  # nosec
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ).communicate()
+
+        return json.loads(stdout.decode("ascii"))
+
+    def get_last_code_id(self) -> int:
+        """
+        Get ID of latest deployed .wasm bytecode.
+
+        :return: code id of last deployed .wasm bytecode
+        """
+
+        command = ["wasmcli", "query", "wasm", "list-code"]
+        res = self._execute_shell_command(command)
+
+        return int(res[-1]["id"])
+
+    def get_contract_address(self, code_id: int) -> str:
+        """
+        Get contract address of latest initialised contract by its ID.
+
+        :param code_id: id of deployed CosmWasm bytecode
+        :return: contract address of last initialised contract
+        """
+
+        command = ["wasmcli", "query", "wasm", "list-contract-by-code", str(code_id)]
+        res = self._execute_shell_command(command)
+
+        return res[-1]["address"]
+
+
+class CosmosApi(_CosmosApi, CosmosHelper):
+    """Class to interact with the Cosmos SDK via a HTTP APIs."""
+
 
 class CosmWasmCLIWrapper:
     """Wrapper of the CosmWasm CLI."""
 
 
+""" Equivalent to:
+
+@dataclass
+class CosmosFaucetStatus:
+    tx_digest: Optional[str]
+    status: str
+    status_code: int
+"""
+CosmosFaucetStatus = namedtuple(
+    "CosmosFaucetStatus", ["tx_digest", "status", "status_code"]
+)
+
+
 class CosmosFaucetApi(FaucetApi):
     """Cosmos testnet faucet API."""
 
+    FAUCET_STATUS_PENDING = 1  # noqa: F841
+    FAUCET_STATUS_PROCESSING = 2  # noqa: F841
+    FAUCET_STATUS_COMPLETED = 20  # noqa: F841
+    FAUCET_STATUS_FAILED = 21  # noqa: F841
+    FAUCET_STATUS_TIMED_OUT = 22  # noqa: F841
+    FAUCET_STATUS_RATE_LIMITED = 23  # noqa: F841
+    FAUCET_STATUS_RATE_UNAVAILABLE = 99  # noqa: F841
+
     identifier = _COSMOS
+    testnet_faucet_url = DEFAULT_FAUCET_URL
     testnet_name = TESTNET_NAME
+
+    def __init__(self, poll_interval=None):
+        """Initialize CosmosFaucetApi."""
+        self._poll_interval = float(poll_interval or 1)
 
     def get_wealth(self, address: Address) -> None:
         """
@@ -837,28 +909,98 @@ class CosmosFaucetApi(FaucetApi):
 
         :param address: the address.
         :return: None
+        :raises: RuntimeError of explicit faucet failures
         """
-        self._try_get_wealth(address)
+        uid = self._try_create_faucet_claim(address)
+        if uid is None:  # pragma: nocover
+            raise RuntimeError("Unable to create faucet claim")
 
-    @staticmethod
+        while True:
+
+            # lookup status form the claim uid
+            status = self._try_check_faucet_claim(uid)
+            if status is None:  # pragma: nocover
+                raise RuntimeError("Failed to check faucet claim status")
+
+            # if the status is complete
+            if status.status_code == self.FAUCET_STATUS_COMPLETED:
+                break
+
+            # if the status is failure
+            if status.status_code > self.FAUCET_STATUS_COMPLETED:  # pragma: nocover
+                raise RuntimeError(f"Failed to get wealth for {address}")
+
+            # if the status is incomplete
+            time.sleep(self._poll_interval)
+
+    @classmethod
     @try_decorator(
-        "An error occured while attempting to generate wealth:\n{}",
+        "An error occured while attempting to request a faucet request:\n{}",
         logger_method=logger.error,
     )
-    def _try_get_wealth(address: Address) -> None:
+    def _try_create_faucet_claim(cls, address: Address) -> Optional[str]:
         """
-        Get wealth from the faucet for the provided address.
+        Create a token faucet claim request
 
-        :param address: the address.
-        :return: None
+        :param address: the address to request funds
+        :return: None on failure, otherwise the request uid
         """
         response = requests.post(
-            url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
+            url=cls._faucet_request_uri(), data={"Address": address}
         )
+
+        uid = None
         if response.status_code == 200:
-            tx_hash = response.text
-            logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
+            data = response.json()
+            uid = data["uid"]
+
+            logger.info("Wealth claim generated, uid: {}".format(uid))
         else:  # pragma: no cover
             logger.warning(
                 "Response: {}, Text: {}".format(response.status_code, response.text)
             )
+
+        return uid
+
+    @classmethod
+    @try_decorator(
+        "An error occured while attempting to request a faucet request:\n{}",
+        logger_method=logger.error,
+    )
+    def _try_check_faucet_claim(cls, uid: str) -> Optional[CosmosFaucetStatus]:
+        """
+        Check the status of a faucet request
+
+        :param uid: The request uid to be checked
+        :return: None on failure otherwise a CosmosFaucetStatus for the specified uid
+        """
+        response = requests.get(cls._faucet_status_uri(uid))
+        if response.status_code != 200:  # pragma: nocover
+            logger.warning(
+                "Response: {}, Text: {}".format(response.status_code, response.text)
+            )
+            return None
+
+        # parse the response
+        data = response.json()
+        return CosmosFaucetStatus(
+            tx_digest=data.get("txDigest"),
+            status=data["status"],
+            status_code=data["statusCode"],
+        )
+
+    @classmethod
+    def _faucet_request_uri(cls) -> str:
+        """
+        Generates the request URI derived from `cls.faucet_base_url`
+        """
+        if cls.testnet_faucet_url is None:  # pragma: nocover
+            raise ValueError("Testnet faucet url not set.")
+        return f"{cls.testnet_faucet_url}/claim/requests"
+
+    @classmethod
+    def _faucet_status_uri(cls, uid: str) -> str:
+        """
+        Generates the status URI derived from `cls.faucet_base_url`
+        """
+        return f"{cls._faucet_request_uri()}/{uid}"

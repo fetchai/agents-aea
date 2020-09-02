@@ -32,9 +32,9 @@ from tests.conftest import ETHEREUM
 def test_preferences_properties():
     """Test the properties of the preferences class."""
     preferences = Preferences()
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         preferences.exchange_params_by_currency_id
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         preferences.utility_params_by_good_id
 
 

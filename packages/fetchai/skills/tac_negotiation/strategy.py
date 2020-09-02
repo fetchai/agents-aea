@@ -135,38 +135,6 @@ class Strategy(Model):
             result.append((False, "buyers"))
         return result
 
-    # @property
-    # def is_registering_as_seller(self) -> bool:
-    #     """Check if the agent registers as a seller on the OEF service directory."""
-    #     return (
-    #         self._register_as == Strategy.RegisterAs.SELLER
-    #         or self._register_as == Strategy.RegisterAs.BUYER
-    #     )
-
-    # @property
-    # def is_searching_for_sellers(self) -> bool:
-    #     """Check if the agent searches for sellers on the OEF service directory."""
-    #     return (
-    #         self._search_for == Strategy.SearchFor.SELLERS
-    #         or self._search_for == Strategy.SearchFor.BOTH
-    #     )
-
-    # @property
-    # def is_registering_as_buyer(self) -> bool:
-    #     """Check if the agent registers as a buyer on the OEF service directory."""
-    #     return (
-    #         self._register_as == Strategy.RegisterAs.BUYER
-    #         or self._register_as == Strategy.RegisterAs.BOTH
-    #     )
-
-    # @property
-    # def is_searching_for_buyers(self) -> bool:
-    #     """Check if the agent searches for buyers on the OEF service directory."""
-    #     return (
-    #         self._search_for == Strategy.SearchFor.BUYERS
-    #         or self._search_for == Strategy.SearchFor.BOTH
-    #     )
-
     @property
     def is_contract_tx(self) -> bool:
         """Check if tx are made against the ERC1155 or not."""
@@ -335,8 +303,7 @@ class Strategy(Model):
             proposals.append(proposal)
         if not proposals:
             return None
-        else:
-            return random.choice(proposals)  # nosec
+        return random.choice(proposals)  # nosec
 
     def get_proposal_for_query(
         self, query: Query, role: FipaDialogue.Role
@@ -355,15 +322,12 @@ class Strategy(Model):
         if not query.check(own_service_description):
             self.context.logger.debug("current holdings do not satisfy CFP query.")
             return None
-        else:
-            proposal_description = self._get_proposal_for_query(
-                query, is_seller=is_seller
+        proposal_description = self._get_proposal_for_query(query, is_seller=is_seller)
+        if proposal_description is None:
+            self.context.logger.debug(
+                "current strategy does not generate proposal that satisfies CFP query."
             )
-            if proposal_description is None:
-                self.context.logger.debug(
-                    "current strategy does not generate proposal that satisfies CFP query."
-                )
-            return proposal_description
+        return proposal_description
 
     def _generate_candidate_proposals(self, is_seller: bool):
         """
@@ -465,7 +429,4 @@ class Strategy(Model):
         proposal_delta_score = preferences.utility_diff_from_transaction(
             ownership_state_after_locks, signing_msg.terms
         )
-        if proposal_delta_score >= 0:
-            return True
-        else:
-            return False
+        return proposal_delta_score >= 0

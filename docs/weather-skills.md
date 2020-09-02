@@ -61,7 +61,7 @@ trusts the seller AEA to send the data upon successful payment.
 
 First, fetch the AEA that will provide weather measurements:
 ``` bash
-aea fetch fetchai/weather_station:0.10.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.11.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -73,19 +73,19 @@ The following steps create the weather station from scratch:
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/weather_station:0.9.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/weather_station:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 In `weather_station/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 </p>
@@ -96,7 +96,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.10.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.11.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```
@@ -108,19 +108,19 @@ The following steps create the weather client from scratch:
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/p2p_libp2p:0.7.0
-aea add connection fetchai/soef:0.6.0
-aea add connection fetchai/ledger:0.3.0
-aea add skill fetchai/weather_client:0.8.0
+aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/ledger:0.4.0
+aea add skill fetchai/weather_client:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.7.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 
 In `my_weather_client/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.2.0: fetchai/ledger:0.3.0
-  fetchai/oef_search:0.4.0: fetchai/soef:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
 ```
 
 </p>
@@ -131,9 +131,9 @@ default_routing:
 
 First, create the private key for the weather station AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Add keys and generate wealth for the weather client AEA
@@ -142,14 +142,14 @@ The weather client needs to have some wealth to purchase the service from the we
 
 First, create the private key for the weather client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, create some wealth for your weather client based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
 ``` bash
-aea generate-wealth cosmos
+aea generate-wealth fetchai
 ```
 
 ### Run the AEAs

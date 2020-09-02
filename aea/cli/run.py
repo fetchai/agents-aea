@@ -91,7 +91,9 @@ def run_aea(
     aea = _build_aea(connection_ids, skip_consistency_check)
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
-    click.echo("Starting AEA '{}' in '{}' mode...".format(aea.name, aea.loop_mode))
+    click.echo(
+        "Starting AEA '{}' in '{}' mode...".format(aea.name, aea.runtime.loop_mode)
+    )
     try:
         aea.start()
     except KeyboardInterrupt:  # pragma: no cover
@@ -130,6 +132,4 @@ def _build_aea(
     except AEAPackageLoadingError as e:  # pragma: nocover
         raise click.ClickException("Package loading error: {}".format(str(e)))
     except Exception as e:
-        # TODO use an ad-hoc exception class for predictable errors
-        #      all the other exceptions should be logged with ClickException
         raise click.ClickException(str(e))

@@ -22,33 +22,37 @@
 import os
 import re
 from pathlib import Path
+from textwrap import dedent, indent
 from typing import Collection
 from unittest.mock import Mock, patch
 
 import pytest
 
+import yaml
+
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder, _DependenciesManager
 from aea.components.base import Component
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentId,
     ComponentType,
     ConnectionConfig,
+    DEFAULT_AEA_CONFIG_FILE,
     ProtocolConfig,
     PublicId,
     SkillConfig,
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
+from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
-from aea.exceptions import AEAException
+from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.protocols.base import Protocol
 from aea.protocols.default import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 
 from tests.conftest import (
     CUR_PATH,
@@ -70,15 +74,15 @@ def test_default_timeout_for_agent():
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
 
     aea = builder.build()
-    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
+    assert aea._period == builder.DEFAULT_AGENT_ACT_PERIOD
 
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
-    builder.set_timeout(100)
+    builder.set_period(100)
 
     aea = builder.build()
-    assert aea._timeout == 100
+    assert aea.period == 100
 
 
 def test_add_package_already_existing():
@@ -92,7 +96,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.5.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.6.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -102,12 +106,12 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.7.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/oef_search:0.4.0)']"
+        "Package 'fetchai/oef:0.8.0' of type 'connection' cannot be added. "
+        "Missing dependencies: ['(protocol, fetchai/oef_search:0.5.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef:0.1.0" requires
-        # "fetchai/oef_search:0.4.0" and "fetchai/fipa:0.5.0" protocols.
+        # connection "fetchai/oef:0.8.0" requires
+        # "fetchai/oef_search:0.5.0" and "fetchai/fipa:0.6.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
@@ -156,7 +160,9 @@ class TestReentrancy:
 
     @staticmethod
     def are_components_different(
-        components_a: Collection[Component], components_b: Collection[Component]
+        components_a: Collection[Component],
+        components_b: Collection[Component],
+        is_including_config: bool = True,
     ) -> None:
         """
         Compare collections of component instances.
@@ -174,9 +180,10 @@ class TestReentrancy:
         d2 = {c.component_id: c for c in components_b}
         assert all(d1[k] is not d2[k] for k in d1.keys())
 
-        c1 = {c.component_id: c.configuration for c in components_a}
-        c2 = {c.component_id: c.configuration for c in components_b}
-        assert all(c1[k] is not c2[k] for k in c1.keys())
+        if is_including_config:
+            c1 = {c.component_id: c.configuration for c in components_a}
+            c2 = {c.component_id: c.configuration for c in components_b}
+            assert all(c1[k] is not c2[k] for k in c1.keys())
 
     def test_skills_instances_are_different(self):
         """Test that skill instances are different."""
@@ -194,12 +201,14 @@ class TestReentrancy:
         """Test that contract instances are different."""
         aea1_contracts = self.aea1.resources.get_all_contracts()
         aea2_contracts = self.aea2.resources.get_all_contracts()
-        self.are_components_different(aea1_contracts, aea2_contracts)
+        self.are_components_different(
+            aea1_contracts, aea2_contracts, is_including_config=False
+        )
 
     def test_connections_instances_are_different(self):
         """Test that connection instances are different."""
-        aea1_connections = self.aea1.multiplexer.connections
-        aea2_connections = self.aea2.multiplexer.connections
+        aea1_connections = self.aea1.runtime.multiplexer.connections
+        aea2_connections = self.aea2.runtime.multiplexer.connections
         self.are_components_different(aea1_connections, aea2_connections)
 
 
@@ -494,14 +503,14 @@ def test_find_import_order():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
-    _old_load = ComponentConfiguration.load
+    _old_load = load_component_configuration
 
     def _new_load(*args, **kwargs):
         skill_config = _old_load(*args, **kwargs)
         skill_config.skills = [Mock()]
         return skill_config
 
-    with patch.object(ComponentConfiguration, "load", _new_load):
+    with patch("aea.aea_builder.load_component_configuration", _new_load):
         with pytest.raises(
             AEAException, match=r"Cannot load skills, there is a cyclic dependency."
         ):
@@ -543,3 +552,136 @@ class TestFromAEAProject(AEATestCaseEmpty):
         with cd(self._get_cwd()):
             aea = builder.build()
         assert aea.name == self.agent_name
+
+
+class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
+    """Test builder set from project dir with custom connection config."""
+
+    def _add_stub_connection_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        configuration += dedent(
+            f"""
+        ---
+        name: stub
+        author: fetchai
+        version: 0.9.0
+        type: connection
+        config:
+            input_file: "{self.expected_input_file}"
+            output_file: "{self.expected_output_file}"
+        ...
+        """
+        )
+        aea_config_file.write_text(configuration)
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        self.expected_input_file = "custom_input_file"
+        self.expected_output_file = "custom_output_file"
+        self._add_stub_connection_config()
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self._get_cwd()):
+            aea = builder.build()
+        assert aea.name == self.agent_name
+        stub_connection = aea.resources.get_connection(
+            PublicId.from_str("fetchai/stub:0.9.0")
+        )
+        assert stub_connection.configuration.config == dict(
+            input_file=self.expected_input_file, output_file=self.expected_output_file
+        )
+
+
+class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
+    """Test builder set from project dir with custom skill config."""
+
+    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+
+    def _add_dummy_skill_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        # here we change all the dummy skill configurations
+        configuration += dedent(
+            f"""
+        ---
+        name: dummy
+        author: dummy_author
+        version: 0.1.0
+        type: skill
+        behaviours:
+          dummy:
+            args:
+            {indent(yaml.dump(self.expected_behaviour_args), "  ")}
+            class_name: DummyBehaviour
+        handlers:
+          dummy:
+            args:
+            {indent(yaml.dump(self.expected_handler_args), "  ")}
+            class_name: DummyHandler
+        models:
+          dummy:
+            args:
+            {indent(yaml.dump(self.expected_model_args), "  ")}
+            class_name: DummyModel
+        ...
+        """
+        )
+        aea_config_file.write_text(configuration)
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        self.expected_behaviour_args = {"behaviour_arg_1": 42}
+        self.expected_handler_args = {"handler_arg_1": 42}
+        self.expected_model_args = {"model_arg_1": 42}
+        self._add_dummy_skill_config()
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self._get_cwd()):
+            aea = builder.build()
+
+        dummy_skill = aea.resources.get_skill(
+            PublicId("dummy_author", "dummy", "0.1.0")
+        )
+        dummy_behaviour = dummy_skill.behaviours["dummy"]
+        assert dummy_behaviour.config == self.expected_behaviour_args
+        dummy_handler = dummy_skill.handlers["dummy"]
+        assert dummy_handler.config == self.expected_handler_args
+        dummy_model = dummy_skill.models["dummy"]
+        assert dummy_model.config == self.expected_model_args
+
+
+class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmpty):
+    """Test builder set from project dir with custom component config fails
+    when the component is not declared in the agent configuration."""
+
+    def _add_stub_connection_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        configuration += dedent(
+            """
+        ---
+        name: non_existing_package
+        author: some_author
+        version: 0.1.0
+        type: protocol
+        ...
+        """
+        )
+        aea_config_file.write_text(configuration)
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        self.expected_input_file = "custom_input_file"
+        self.expected_output_file = "custom_output_file"
+        self._add_stub_connection_config()
+        with pytest.raises(
+            AEAEnforceError,
+            match=r"Component \(protocol, some_author/non_existing_package:0.1.0\) not declared in the agent configuration.",
+        ):
+            with cd(self._get_cwd()):
+                AEABuilder.from_aea_project(Path(self._get_cwd()))

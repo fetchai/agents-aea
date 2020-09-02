@@ -1,3 +1,3 @@
-The current version of the Python based Autonomous Economic Agent framework is <a href="https://img.shields.io/pypi/v/aea"><img alt="PyPI" src="https://img.shields.io/pypi/v/aea"></a>. The framework is under rapid development with frequent breaking changes.
+The current version of the Python based Autonomous Economic Agent framework is <a href="https://img.shields.io/pypi/v/aea" target="_blank"><img alt="PyPI" src="https://img.shields.io/pypi/v/aea" /></a>. The framework is under rapid development with frequent breaking changes in the run-up to `v1` due in Q4 2020.
 
 The Python based AEA framework is in principle compatible with any AEA framework, independent of the language it is implemented in. The <a href="../language-agnostic-definition/">language agnostic definition</a> provides details on the aspects an implementation has to satisfy to qualify as an AEA framework.

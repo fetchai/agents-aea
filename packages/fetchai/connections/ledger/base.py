@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains base classes for the ledger API connection."""
 import asyncio
-import copy
 import logging
 from abc import ABC, abstractmethod
 from asyncio import Task
@@ -30,12 +29,12 @@ from aea.configurations.base import PublicId
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry, ledger_apis_registry
 from aea.helpers.async_utils import AsyncState
-from aea.helpers.dialogue.base import Dialogue, Dialogues
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue, Dialogues
 
 
-CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.3.0")
+CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.4.0")
 
 
 class RequestDispatcher(ABC):
@@ -106,15 +105,16 @@ class RequestDispatcher(ABC):
         :param envelope: the envelope.
         :return: an awaitable.
         """
-        assert isinstance(envelope.message, Message)
-        message_original = envelope.message
-        message = copy.copy(message_original)
+        if not isinstance(envelope.message, Message):  # pragma: nocover
+            raise ValueError("Ledger connection expects non-serialized messages.")
+        message = envelope.message
         ledger_id = self.get_ledger_id(message)
         api = self.ledger_api_registry.make(ledger_id, **self.api_config(ledger_id))
-        message.is_incoming = True
-        message.counterparty = message_original.sender
         dialogue = self.dialogues.update(message)
-        assert dialogue is not None, "No dialogue created."
+        if dialogue is None:
+            raise ValueError(  # pragma: nocover
+                "No dialogue created. Message={} not valid.".format(message)
+            )
         performative = message.performative
         handler = self.get_handler(performative)
         return self.loop.create_task(self.run_async(handler, api, message, dialogue))

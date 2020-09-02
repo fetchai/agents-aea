@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """This contains the proxy gym environment."""
 
-import copy
 import sys
 import time
 from queue import Queue
@@ -27,10 +26,11 @@ from typing import Any, Optional, Tuple, cast
 
 import gym
 
+from aea.common import Address
 from aea.helpers.base import locate
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
@@ -62,17 +62,16 @@ GymDialogue = BaseGymDialogue
 GymDialogues = BaseGymDialogues
 
 
-@staticmethod
-def role_from_first_message(message: Message) -> BaseDialogue.Role:
+def role_from_first_message(  # pylint: disable=unused-argument
+    message: Message, receiver_address: Address
+) -> BaseDialogue.Role:
     """Infer the role of the agent from an incoming/outgoing first message
 
     :param message: an incoming/outgoing first message
+    :param receiver_address: the address of the receiving agent
     :return: The role of the agent
     """
     return BaseGymDialogue.Role.AGENT
-
-
-GymDialogues.role_from_first_message = role_from_first_message
 
 
 class ProxyEnv(gym.Env):
@@ -88,7 +87,7 @@ class ProxyEnv(gym.Env):
         super().__init__()
         self._queue: Queue = Queue()
         self._action_counter: int = 0
-        self.gym_address = "fetchai/gym:0.5.0"
+        self.gym_address = "fetchai/gym:0.6.0"
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
@@ -96,7 +95,7 @@ class ProxyEnv(gym.Env):
         self._agent_thread = Thread(target=self._agent.start)
         self._active_dialogue = None  # type: Optional[GymDialogue]
         self.agent_address = "proxy"
-        self.gym_dialogues = GymDialogues(self.agent_address)
+        self.gym_dialogues = GymDialogues(self.agent_address, role_from_first_message)
 
     @property
     def active_dialogue(self) -> GymDialogue:
@@ -138,10 +137,7 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        # TODO: adapt this line to the new APIs. We no longer have a mailbox.
-        self._agent.mailbox._connection.channel.gym_env.render(  # pylint: disable=protected-access,no-member
-            mode
-        )
+        self._agent.runtime.multiplexer.default_connection.channel.gym_env.render(mode)
 
     def reset(self) -> None:
         """
@@ -149,15 +145,12 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        if not self._agent.multiplexer.is_connected:
+        if not self._agent.runtime.multiplexer.is_connected:
             self._connect()
-        gym_msg = GymMessage(
-            dialogue_reference=self.gym_dialogues.new_self_initiated_dialogue_reference(),
-            performative=GymMessage.Performative.RESET,
+        gym_msg, gym_dialogue = self.gym_dialogues.create(
+            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
         )
-        gym_msg.counterparty = self.gym_address
-        gym_dialogue = cast(Optional[GymDialogue], self.gym_dialogues.update(gym_msg))
-        assert gym_dialogue is not None
+        gym_dialogue = cast(GymDialogue, gym_dialogue)
         self._active_dialogue = gym_dialogue
         self._agent.outbox.put_message(message=gym_msg)
 
@@ -173,15 +166,11 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         last_msg = self.active_dialogue.last_message
-        assert last_msg is not None, "Cannot retrieve last message."
-        gym_msg = GymMessage(
-            dialogue_reference=self.active_dialogue.dialogue_label.dialogue_reference,
-            performative=GymMessage.Performative.CLOSE,
-            message_id=last_msg.message_id + 1,
-            target=last_msg.message_id,
+        if last_msg is None:
+            raise ValueError("Cannot retrieve last message.")
+        gym_msg = self.active_dialogue.reply(
+            performative=GymMessage.Performative.CLOSE, target_message=last_msg,
         )
-        gym_msg.counterparty = self.gym_address
-        assert self.active_dialogue.update(gym_msg)
         self._agent.outbox.put_message(message=gym_msg)
 
         self._disconnect()
@@ -192,10 +181,12 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        assert not self._agent_thread.is_alive(), "Agent already running."
+        if self._agent_thread.is_alive():
+            raise ValueError("Agent already running.")
         self._agent_thread.start()
-        while not self._agent.multiplexer.is_connected:
-            time.sleep(0.1)
+
+        while not self._agent.runtime.is_running:  # check agent completely running
+            time.sleep(0.01)
 
     def _disconnect(self):
         """
@@ -216,17 +207,14 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         last_msg = self.active_dialogue.last_message
-        assert last_msg is not None, "Cannot retrieve last message."
-        gym_msg = GymMessage(
-            dialogue_reference=self.active_dialogue.dialogue_label.dialogue_reference,
+        if last_msg is None:
+            raise ValueError("Cannot retrieve last message.")
+        gym_msg = self.active_dialogue.reply(
             performative=GymMessage.Performative.ACT,
+            target_message=last_msg,
             action=GymMessage.AnyObject(action),
             step_id=step_id,
-            message_id=last_msg.message_id + 1,
-            target=last_msg.message_id,
         )
-        gym_msg.counterparty = self.gym_address
-        assert self.active_dialogue.update(gym_msg)
         # Send the message via the proxy agent and to the environment
         self._agent.outbox.put_message(message=gym_msg)
 
@@ -242,27 +230,24 @@ class ProxyEnv(gym.Env):
         """
         if envelope is not None:
             if envelope.protocol_id == GymMessage.protocol_id:
-                orig_gym_msg = cast(GymMessage, envelope.message)
-                gym_msg = copy.copy(orig_gym_msg)
-                gym_msg.counterparty = orig_gym_msg.sender
-                gym_msg.is_incoming = True
-                if not self.active_dialogue.update(gym_msg):
+                gym_msg = cast(GymMessage, envelope.message)
+                gym_dialogue = self.gym_dialogues.update(gym_msg)
+                if not gym_dialogue:
                     raise ValueError("Could not udpate dialogue.")
+                if not gym_dialogue == self.active_dialogue:
+                    raise ValueError("Dialogue does not match.")
                 if (
                     gym_msg.performative == GymMessage.Performative.PERCEPT
                     and gym_msg.step_id == expected_step_id
                 ):
                     return gym_msg
-                else:
-                    raise ValueError(
-                        "Unexpected performative or no step_id: {}".format(
-                            gym_msg.performative
-                        )
+                raise ValueError(
+                    "Unexpected performative or no step_id: {}".format(
+                        gym_msg.performative
                     )
-            else:
-                raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
-        else:
-            raise ValueError("Missing envelope.")
+                )
+            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        raise ValueError("Missing envelope.")
 
     def _decode_status(self, envelope: Envelope) -> None:
 
@@ -275,28 +260,25 @@ class ProxyEnv(gym.Env):
         """
         if envelope is not None:
             if envelope.protocol_id == GymMessage.protocol_id:
-                orig_gym_msg = cast(GymMessage, envelope.message)
-                gym_msg = copy.copy(orig_gym_msg)
-                gym_msg.counterparty = orig_gym_msg.sender
-                gym_msg.is_incoming = True
-                if not self.active_dialogue.update(gym_msg):
+                gym_msg = cast(GymMessage, envelope.message)
+                gym_dialogue = self.gym_dialogues.update(gym_msg)
+                if not gym_dialogue:
                     raise ValueError("Could not udpate dialogue.")
+                if not gym_dialogue == self.active_dialogue:
+                    raise ValueError("Dialogue does not match.")
                 if (
                     gym_msg.performative == GymMessage.Performative.STATUS
                     and gym_msg.content.get("reset", "failure") == "success"
                 ):
 
                     return None
-                else:
-                    raise ValueError(
-                        "Unexpected performative or no step_id: {}".format(
-                            gym_msg.performative
-                        )
+                raise ValueError(
+                    "Unexpected performative or no step_id: {}".format(
+                        gym_msg.performative
                     )
-            else:
-                raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
-        else:
-            raise ValueError("Missing envelope.")
+                )
+            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        raise ValueError("Missing envelope.")
 
     @staticmethod
     def _message_to_percept(message: GymMessage) -> Feedback:

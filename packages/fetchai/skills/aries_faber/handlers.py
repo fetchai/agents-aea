@@ -66,7 +66,6 @@ class FaberHTTPHandler(Handler):
         # ACA stuff
         self.faber_identity = FABER_ACA_IDENTITY
         rand_name = str(random.randint(100_000, 999_999))  # nosec
-        # my_name = "137001"
         # use my_name to manually use the same seed in this demo and when starting up the accompanying ACA
         # use rand_name to not use any seed when starting up the accompanying ACA
         self.seed = ("my_seed_000000000000000000000000" + rand_name)[-32:]
@@ -93,19 +92,11 @@ class FaberHTTPHandler(Handler):
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
 
         # default message
-        message = DefaultMessage(
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
+        message, _ = default_dialogues.create(
+            counterparty=strategy.alice_aea_address,
             performative=DefaultMessage.Performative.BYTES,
             content=json.dumps(content).encode("utf-8"),
         )
-        message.counterparty = strategy.alice_aea_address
-
-        # default dialogue
-        default_dialogue = default_dialogues.update(message)
-        assert (
-            default_dialogue is not None
-        ), "faber -> http_handler -> _send_default_message(): something went wrong when sending a default message."
-
         # send
         context = EnvelopeContext(connection_id=P2P_CONNECTION_PUBLIC_ID)
         self.context.outbox.put_message(message=message, context=context)
@@ -142,7 +133,6 @@ class FaberHTTPHandler(Handler):
             "attributes": schema_attrs,
         }
         self.context.logger.info("Registering schema " + str(schema_body))
-        # ToDo debug point
         # The following call isn't responded to. This is most probably because of missing options when running the accompanying ACA.
         # THe accompanying ACA is not properly connected to the von network ledger (missing pointer to genesis file/wallet type)
         self.context.behaviours.faber.send_http_request_message(

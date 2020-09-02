@@ -22,6 +22,7 @@
 import pickle  # nosec
 from typing import Any, Dict
 
+from aea.exceptions import enforce
 from aea.helpers.transaction.base import RawMessage as BaseRawMessage
 from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
 from aea.helpers.transaction.base import State as BaseState
@@ -43,9 +44,12 @@ class Kwargs:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        assert self._body is not None, "body must not be None"
-        assert isinstance(self._body, dict) and all(
-            [isinstance(key, str) for key in self._body.keys()]
+        if self._body is None:
+            raise ValueError("body must not be None")
+        enforce(
+            isinstance(self._body, dict)
+            and all([isinstance(key, str) for key in self._body.keys()]),
+            "Body must be dict and keys must be str.",
         )
 
     @property

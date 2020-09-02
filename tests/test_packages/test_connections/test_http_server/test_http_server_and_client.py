@@ -16,21 +16,23 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """Tests for the HTTP Client and Server connections together."""
 import asyncio
 import logging
+import urllib
 from typing import cast
 
 import pytest
 
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
+from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
@@ -55,7 +57,7 @@ class TestClientServer:
         self.host = get_host()
         self.port = get_unused_tcp_port()
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.4.0")
+        self.protocol_id = PublicId.from_str("fetchai/http:0.5.0")
 
         self.configuration = ConnectionConfig(
             host=self.host,
@@ -69,8 +71,22 @@ class TestClientServer:
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.server.connect())
+
         # skill side dialogues
-        self._server_dialogues = HttpDialogues(self.server_agent_address)
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return HttpDialogue.Role.SERVER
+
+        self._server_dialogues = HttpDialogues(
+            self.server_agent_address, role_from_first_message=role_from_first_message
+        )
 
     def setup_client(self):
         """Set up client connection."""
@@ -86,10 +102,23 @@ class TestClientServer:
         self.client = HTTPClientConnection(
             configuration=configuration, identity=self.client_agent_identity
         )
-        self.client.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.client.connect())
+
         # skill side dialogues
-        self._client_dialogues = HttpDialogues(self.client_agent_address)
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return HttpDialogue.Role.CLIENT
+
+        self._client_dialogues = HttpDialogues(
+            self.client_agent_address, role_from_first_message=role_from_first_message
+        )
 
     def setup(self):
         """Set up test case."""
@@ -100,10 +129,8 @@ class TestClientServer:
         self, path: str, method: str = "get", headers: str = "", bodyy: bytes = b""
     ) -> Envelope:
         """Make request envelope."""
-        request_http_message = HttpMessage(
-            dialogue_reference=self._client_dialogues.new_self_initiated_dialogue_reference(),
-            target=0,
-            message_id=1,
+        request_http_message, _ = self._client_dialogues.create(
+            counterparty=str(HTTPClientConnection.connection_id),
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=f"http://{self.host}:{self.port}{path}",
@@ -111,10 +138,8 @@ class TestClientServer:
             version="",
             bodyy=b"",
         )
-        request_http_message.counterparty = str(HTTPClientConnection.connection_id)
-        assert self._client_dialogues.update(request_http_message) is not None
         request_envelope = Envelope(
-            to=request_http_message.counterparty,
+            to=request_http_message.to,
             sender=request_http_message.sender,
             protocol_id=request_http_message.protocol_id,
             message=request_http_message,
@@ -126,25 +151,19 @@ class TestClientServer:
     ) -> Envelope:
         """Make response envelope."""
         incoming_message = cast(HttpMessage, request_envelope.message)
-        incoming_message.is_incoming = True
-        incoming_message.counterparty = str(HTTPServerConnection.connection_id)
         dialogue = self._server_dialogues.update(incoming_message)
         assert dialogue is not None
-        message = HttpMessage(
+        message = dialogue.reply(
+            target_message=incoming_message,
             performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            target=incoming_message.message_id,
-            message_id=incoming_message.message_id + 1,
             version=incoming_message.version,
             headers=incoming_message.headers,
             status_code=status_code,
             status_text=status_text,
             bodyy=incoming_message.bodyy,
         )
-        message.counterparty = incoming_message.counterparty
-        assert dialogue.update(message) is not None
         response_envelope = Envelope(
-            to=message.counterparty,
+            to=message.to,
             sender=message.sender,
             protocol_id=message.protocol_id,
             context=request_envelope.context,
@@ -166,6 +185,31 @@ class TestClientServer:
             cast(HttpMessage, initial_request.message).bodyy
             == cast(HttpMessage, response.message).bodyy
         )
+        assert (
+            initial_request.message.dialogue_reference[0]
+            == response.message.dialogue_reference[0]
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_with_query(self):
+        """Test client and server with url query."""
+        query = {"key": "value"}
+        path = "/test?{}".format(urllib.parse.urlencode(query))
+        initial_request = self._make_request(path, "GET")
+        await self.client.send(initial_request)
+        request = await asyncio.wait_for(self.server.receive(), timeout=5)
+        # this is "inside" the server agent
+
+        parsed_query = dict(
+            urllib.parse.parse_qsl(
+                urllib.parse.splitquery(cast(HttpMessage, request.message).url)[1]
+            )
+        )
+        assert parsed_query == query
+        initial_response = self._make_response(request)
+        await self.server.send(initial_response)
+        response = await asyncio.wait_for(self.client.receive(), timeout=5)
+
         assert (
             initial_request.message.dialogue_reference[0]
             == response.message.dialogue_reference[0]

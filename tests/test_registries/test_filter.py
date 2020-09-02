@@ -17,12 +17,15 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/registries/filter.py."""
-import queue
 import unittest.mock
 from unittest.mock import MagicMock
 
+import pytest
+
+
 import aea
 from aea.configurations.base import PublicId, SkillConfig
+from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.protocols.signing import SigningMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
@@ -33,12 +36,22 @@ from tests.data.dummy_skill.handlers import DummyHandler
 
 
 class TestFilter:
+    """Test class for filter."""
+
     @classmethod
     def setup_class(cls):
         """Set the tests up."""
         cls.resources = Resources()
-        cls.decision_make_queue = queue.Queue()
+        cls.decision_make_queue = AsyncFriendlyQueue()
         cls.filter = Filter(cls.resources, cls.decision_make_queue)
+
+    @pytest.mark.asyncio
+    async def test_get_internal_message(self):
+        """Test get internal message."""
+        msg = MagicMock()
+        self.decision_make_queue.put(msg)
+        _msg = await self.filter.get_internal_message()
+        assert msg == _msg, "Should get message"
 
     def test_get_active_handlers_skill_id_none(self):
         """Test get active handlers with skill id None."""
@@ -60,40 +73,39 @@ class TestFilter:
         active_behaviours = self.filter.get_active_behaviours()
         assert len(active_behaviours) == 0
 
-    def test_handle_internal_messages_when_empty(self):
-        """Test handle internal messages when queue is empty."""
-        with unittest.mock.patch.object(
-            self.decision_make_queue, "empty", side_effect=[False, True]
-        ):
-            with unittest.mock.patch.object(
-                aea.registries.filter.logger, "warning"
-            ) as mock_logger_warning:
-                self.filter.handle_internal_messages()
-                mock_logger_warning.assert_called_with(
-                    "The decision maker out queue is unexpectedly empty."
-                )
-
     def test_handle_internal_message_when_none(self):
         """Test handle internal message when the received message is None."""
-        self.decision_make_queue.put(None)
         with unittest.mock.patch.object(
             aea.registries.filter.logger, "warning"
         ) as mock_logger_warning:
-            self.filter.handle_internal_messages()
+            self.filter.handle_internal_message(None)
             mock_logger_warning.assert_called_with(
                 "Got 'None' while processing internal messages."
             )
 
-    def test_handle_internal_message_when_unknown_data_type(self):
-        """Test handle internal message when the received message is of unknown data type."""
+    def test_handle_internal_message_when_no_handler(self):
+        """Test handle internal message when the message has no matching handler."""
         msg = MagicMock()
-        self.decision_make_queue.put(msg)
+        msg.to = "author/name:0.1.0"
         with unittest.mock.patch.object(
             aea.registries.filter.logger, "warning"
         ) as mock_logger_warning:
-            self.filter.handle_internal_messages()
+            self.filter.handle_internal_message(msg)
             mock_logger_warning.assert_called_with(
-                "Cannot handle a {} message.".format(type(msg))
+                "No internal handler fetched for skill_id={}".format(msg.to)
+            )
+        assert self.decision_make_queue.empty()
+
+    def test_handle_internal_message_when_invalid_to(self):
+        """Test handle internal message when the message has an invalid to."""
+        msg = MagicMock()
+        msg.to = "author/name"
+        with unittest.mock.patch.object(
+            aea.registries.filter.logger, "warning"
+        ) as mock_logger_warning:
+            self.filter.handle_internal_message(msg)
+            mock_logger_warning.assert_called_with(
+                "Invalid public id as destination={}".format(msg.to)
             )
         assert self.decision_make_queue.empty()
 
@@ -108,7 +120,7 @@ class TestFilter:
         self.resources.add_skill(skill)
         new_behaviour = DummyBehaviour(name="dummy2", skill_context=skill.skill_context)
         skill.skill_context.new_behaviours.put(new_behaviour)
-        self.filter.handle_internal_messages()
+        self.filter.handle_new_handlers_and_behaviours()
 
         assert self.decision_make_queue.empty()
         assert len(self.resources.behaviour_registry.fetch_all()) == 1
@@ -133,7 +145,7 @@ class TestFilter:
                 aea.registries.filter.logger, "warning"
             ) as mock_logger_warning:
                 skill.skill_context.new_behaviours.put(new_behaviour)
-                self.filter.handle_internal_messages()
+                self.filter.handle_new_handlers_and_behaviours()
 
         mock_logger_warning.assert_called_with(
             "Error when trying to add a new behaviour: "
@@ -154,7 +166,7 @@ class TestFilter:
         self.resources.add_skill(skill)
         new_handler = DummyHandler(name="dummy2", skill_context=skill.skill_context)
         skill.skill_context.new_handlers.put(new_handler)
-        self.filter.handle_internal_messages()
+        self.filter.handle_new_handlers_and_behaviours()
 
         assert self.decision_make_queue.empty()
         assert len(self.resources.handler_registry.fetch_all()) == 1
@@ -179,7 +191,7 @@ class TestFilter:
                 aea.registries.filter.logger, "warning"
             ) as mock_logger_warning:
                 skill.skill_context.new_handlers.put(new_handler)
-                self.filter.handle_internal_messages()
+                self.filter.handle_new_handlers_and_behaviours()
 
         mock_logger_warning.assert_called_with(
             "Error when trying to add a new handler: "
@@ -194,15 +206,13 @@ class TestFilter:
         public_id = "author/non_existing_skill:0.1.0"
         message = SigningMessage(
             SigningMessage.Performative.ERROR,
-            skill_callback_ids=(public_id,),
-            skill_callback_info={},
             error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         )
-        self.decision_make_queue.put(message)
+        message.to = public_id
         with unittest.mock.patch.object(
             aea.registries.filter.logger, "warning"
         ) as mock_logger_warning:
-            self.filter.handle_internal_messages()
+            self.filter.handle_internal_message(message)
             mock_logger_warning.assert_called_with(
                 f"No internal handler fetched for skill_id={public_id}"
             )

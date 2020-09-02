@@ -106,8 +106,7 @@ class TestThreadLauncherMode:
         """Tear the test down."""
         os.chdir(cls.cwd)
         try:
-            # shutil.rmtree(cls.t)
-            pass
+            shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
 

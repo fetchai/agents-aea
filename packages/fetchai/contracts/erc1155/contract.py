@@ -19,15 +19,19 @@
 
 """This module contains the erc1155 contract definition."""
 
+import json
 import logging
 import random
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from vyper.utils import keccak256
 
+from aea.common import Address
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-from aea.mail.base import Address
+from aea.crypto.cosmos import CosmosApi
+from aea.crypto.ethereum import EthereumApi
+from aea.crypto.fetchai import FetchAIApi
 
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
@@ -68,7 +72,7 @@ class ERC1155Contract(Contract):
         return token_id
 
     @classmethod
-    def get_create_batch_transaction(
+    def get_create_batch_transaction(  # pylint: disable=unused-argument
         cls,
         ledger_api: LedgerApi,
         contract_address: Address,
@@ -88,20 +92,34 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: the transaction object
         """
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
-        tx = instance.functions.createBatch(
-            deployer_address, token_ids
-        ).buildTransaction(
-            {
-                "gas": gas,
-                "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+        if ledger_api.identifier == EthereumApi.identifier:
+            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            instance = cls.get_instance(ledger_api, contract_address)
+            tx = instance.functions.createBatch(
+                deployer_address, token_ids
+            ).buildTransaction(
+                {
+                    "gas": gas,
+                    "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "nonce": nonce,
+                }
+            )
+            tx = cls._try_estimate_gas(ledger_api, tx)
+            return tx
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            tokens = []
+            for token_id in token_ids:
+                tokens.append({"id": str(token_id), "path": str(token_id)})
+
+            msg = {
+                "create_batch": {"item_owner": str(deployer_address), "tokens": tokens}
             }
-        )
-        tx = cls._try_estimate_gas(ledger_api, tx)
-        return tx
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
+                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
+            return tx
+        raise NotImplementedError
 
     @classmethod
     def get_create_single_transaction(
@@ -115,7 +133,6 @@ class ERC1155Contract(Contract):
     ) -> Dict[str, Any]:
         """
         Get the transaction to create a single token.
-
         :param ledger_api: the ledger API
         :param contract_address: the address of the contract
         :param deployer_address: the address of the deployer
@@ -124,20 +141,34 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: the transaction object
         """
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
-        tx = instance.functions.createSingle(
-            deployer_address, token_id, data
-        ).buildTransaction(
-            {
-                "gas": gas,
-                "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+        if ledger_api.identifier == EthereumApi.identifier:
+            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            instance = cls.get_instance(ledger_api, contract_address)
+            tx = instance.functions.createSingle(
+                deployer_address, token_id, data
+            ).buildTransaction(
+                {
+                    "gas": gas,
+                    "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "nonce": nonce,
+                }
+            )
+            tx = cls._try_estimate_gas(ledger_api, tx)
+            return tx
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            msg = {
+                "create_single": {
+                    "item_owner": deployer_address,
+                    "id": str(token_id),
+                    "path": str(data),
+                }
             }
-        )
-        tx = cls._try_estimate_gas(ledger_api, tx)
-        return tx
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
+                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
+            return tx
+        raise NotImplementedError
 
     @classmethod
     def get_mint_batch_transaction(
@@ -165,20 +196,38 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         cls.validate_mint_quantities(token_ids, mint_quantities)
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
-        tx = instance.functions.mintBatch(
-            recipient_address, token_ids, mint_quantities, data
-        ).buildTransaction(
-            {
-                "gas": gas,
-                "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+        if ledger_api.identifier == EthereumApi.identifier:
+            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            instance = cls.get_instance(ledger_api, contract_address)
+            tx = instance.functions.mintBatch(
+                recipient_address, token_ids, mint_quantities, data
+            ).buildTransaction(
+                {
+                    "gas": gas,
+                    "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "nonce": nonce,
+                }
+            )
+            tx = cls._try_estimate_gas(ledger_api, tx)
+            return tx
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            tokens = []
+            for token_id, quantity in zip(token_ids, mint_quantities):
+                tokens.append({"id": str(token_id), "value": str(quantity)})
+
+            msg = {
+                "mint_batch": {
+                    "to_address": recipient_address,
+                    "data": str(data),
+                    "tokens": tokens,
+                }
             }
-        )
-        tx = cls._try_estimate_gas(ledger_api, tx)
-        return tx
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
+                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
+            return tx
+        raise NotImplementedError
 
     @classmethod
     def validate_mint_quantities(
@@ -187,18 +236,22 @@ class ERC1155Contract(Contract):
         """Validate the mint quantities."""
         for token_id, mint_quantity in zip(token_ids, mint_quantities):
             decoded_type = cls.decode_id(token_id)
-            assert decoded_type in [
+            if decoded_type not in [
                 1,
                 2,
-            ], "The token type must be 1 or 2. Found type={} for token_id={}".format(
-                decoded_type, token_id
-            )
-            if decoded_type == 1:
-                assert (
-                    mint_quantity == 1
-                ), "Cannot mint NFT (token_id={}) with mint_quantity more than 1 (found={})".format(
-                    token_id, mint_quantity
+            ]:
+                raise ValueError(
+                    "The token type must be 1 or 2. Found type={} for token_id={}".format(
+                        decoded_type, token_id
+                    )
                 )
+            if decoded_type == 1:
+                if mint_quantity != 1:
+                    raise ValueError(
+                        "Cannot mint NFT (token_id={}) with mint_quantity more than 1 (found={})".format(
+                            token_id, mint_quantity
+                        )
+                    )
 
     @staticmethod
     def decode_id(token_id: int) -> int:
@@ -236,20 +289,35 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: the transaction object
         """
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        instance = cls.get_instance(ledger_api, contract_address)
-        tx = instance.functions.mint(
-            recipient_address, token_id, mint_quantity, data
-        ).buildTransaction(
-            {
-                "gas": gas,
-                "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+        if ledger_api.identifier == EthereumApi.identifier:
+            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            instance = cls.get_instance(ledger_api, contract_address)
+            tx = instance.functions.mint(
+                recipient_address, token_id, mint_quantity, data
+            ).buildTransaction(
+                {
+                    "gas": gas,
+                    "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "nonce": nonce,
+                }
+            )
+            tx = cls._try_estimate_gas(ledger_api, tx)
+            return tx
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            msg = {
+                "mint_single": {
+                    "to_address": recipient_address,
+                    "id": str(token_id),
+                    "supply": str(mint_quantity),
+                    "data": str(data),
+                }
             }
-        )
-        tx = cls._try_estimate_gas(ledger_api, tx)
-        return tx
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
+                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
+            return tx
+        raise NotImplementedError
 
     @classmethod
     def get_balance(
@@ -266,12 +334,22 @@ class ERC1155Contract(Contract):
         :param contract_address: the address of the contract
         :param agent_address: the address
         :param token_id: the token id
-        :return: the balance in a dictionary
+        :return: the balance in a dictionary - {"balance": {token_id: int, balance: int}}
         """
-        instance = cls.get_instance(ledger_api, contract_address)
-        balance = instance.functions.balanceOf(agent_address, token_id).call()
-        result = {token_id: balance}
-        return {"balance": result}
+        if ledger_api.identifier == EthereumApi.identifier:
+            instance = cls.get_instance(ledger_api, contract_address)
+            balance = instance.functions.balanceOf(agent_address, token_id).call()
+            result = {token_id: balance}
+            return {"balance": result}
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            cosmos_api = cast(CosmosApi, ledger_api)
+            msg = {"balance": {"address": str(agent_address), "id": str(token_id)}}
+            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
+            query_json_res = json.loads(query_res)
+            # Convert {"balance": balance: str} balances to Dict[token_id: int, balance: int]
+            result = {token_id: int(query_json_res["balance"])}
+            return {"balance": result}
+        raise NotImplementedError
 
     @classmethod
     def get_atomic_swap_single_transaction(
@@ -306,31 +384,32 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: a ledger transaction object
         """
-        # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(from_address)
-        instance = cls.get_instance(ledger_api, contract_address)
-        value_eth_wei = ledger_api.api.toWei(value, "ether")
-        tx = instance.functions.trade(
-            from_address,
-            to_address,
-            token_id,
-            from_supply,
-            to_supply,
-            value_eth_wei,
-            trade_nonce,
-            signature,
-            data,
-        ).buildTransaction(
-            {
-                "gas": gas,
-                "from": from_address,
-                "value": value_eth_wei,
-                "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
-            }
-        )
-        tx = cls._try_estimate_gas(ledger_api, tx)
-        return tx
+        if ledger_api.identifier == EthereumApi.identifier:
+            nonce = ledger_api.api.eth.getTransactionCount(from_address)
+            instance = cls.get_instance(ledger_api, contract_address)
+            value_eth_wei = ledger_api.api.toWei(value, "ether")
+            tx = instance.functions.trade(
+                from_address,
+                to_address,
+                token_id,
+                from_supply,
+                to_supply,
+                value_eth_wei,
+                trade_nonce,
+                signature,
+                data,
+            ).buildTransaction(
+                {
+                    "gas": gas,
+                    "from": from_address,
+                    "value": value_eth_wei,
+                    "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "nonce": nonce,
+                }
+            )
+            tx = cls._try_estimate_gas(ledger_api, tx)
+            return tx
+        raise NotImplementedError
 
     @classmethod
     def get_balances(
@@ -346,15 +425,33 @@ class ERC1155Contract(Contract):
         :param ledger_api: the ledger API
         :param contract_address: the address of the contract
         :param agent_address: the address
-        :param token_id: the token id
-        :return: the balances
+        :param token_ids: the token id
+        :return: the balances in dictionary - {"balances": {id: int, balance: int}}
         """
-        instance = cls.get_instance(ledger_api, contract_address)
-        balances = instance.functions.balanceOfBatch(
-            [agent_address] * 10, token_ids
-        ).call()
-        result = dict(zip(token_ids, balances))
-        return {"balances": result}
+        if ledger_api.identifier == EthereumApi.identifier:
+            instance = cls.get_instance(ledger_api, contract_address)
+            balances = instance.functions.balanceOfBatch(
+                [agent_address] * 10, token_ids
+            ).call()
+            result = dict(zip(token_ids, balances))
+            return {"balances": result}
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            tokens = []
+            for token_id in token_ids:
+                tokens.append({"address": agent_address, "id": str(token_id)})
+
+            msg = {"balance_batch": {"addresses": tokens}}
+
+            cosmos_api = cast(CosmosApi, ledger_api)
+            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
+            query_json_res = json.loads(query_res)
+            # Convert List[balances: str] balances to Dict[token_id: int, balance: int]
+            result = {
+                token_id: int(balance)
+                for token_id, balance in zip(token_ids, query_json_res["balances"])
+            }
+            return {"balances": result}
+        raise NotImplementedError
 
     @classmethod
     def get_atomic_swap_batch_transaction(
@@ -389,29 +486,31 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: a ledger transaction object
         """
-        nonce = ledger_api.api.eth.getTransactionCount(from_address)
-        instance = cls.get_instance(ledger_api, contract_address)
-        value_eth_wei = ledger_api.api.toWei(value, "ether")
-        tx = instance.functions.tradeBatch(
-            from_address,
-            to_address,
-            token_ids,
-            from_supplies,
-            to_supplies,
-            value_eth_wei,
-            trade_nonce,
-            signature,
-            data,
-        ).buildTransaction(
-            {
-                "gas": gas,
-                "from": from_address,
-                "value": value_eth_wei,
-                "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
-            }
-        )
-        return tx
+        if ledger_api.identifier == EthereumApi.identifier:
+            nonce = ledger_api.api.eth.getTransactionCount(from_address)
+            instance = cls.get_instance(ledger_api, contract_address)
+            value_eth_wei = ledger_api.api.toWei(value, "ether")
+            tx = instance.functions.tradeBatch(
+                from_address,
+                to_address,
+                token_ids,
+                from_supplies,
+                to_supplies,
+                value_eth_wei,
+                trade_nonce,
+                signature,
+                data,
+            ).buildTransaction(
+                {
+                    "gas": gas,
+                    "from": from_address,
+                    "value": value_eth_wei,
+                    "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "nonce": nonce,
+                }
+            )
+            return tx
+        raise NotImplementedError
 
     @classmethod
     def get_hash_single(
@@ -453,9 +552,9 @@ class ERC1155Contract(Contract):
             _value_eth_wei=value_eth_wei,
             _nonce=trade_nonce,
         )
-        assert (
+        if (
             tx_hash
-            == instance.functions.getSingleHash(
+            != instance.functions.getSingleHash(
                 from_address,
                 to_address,
                 token_id,
@@ -464,7 +563,8 @@ class ERC1155Contract(Contract):
                 value_eth_wei,
                 trade_nonce,
             ).call()
-        )
+        ):
+            raise ValueError("On-chain and off-chain hash computation do not agree!")
         return tx_hash
 
     @staticmethod
@@ -543,9 +643,9 @@ class ERC1155Contract(Contract):
             _value_eth_wei=value_eth_wei,
             _nonce=trade_nonce,
         )
-        assert (
+        if (
             tx_hash
-            == instance.functions.getHash(
+            != instance.functions.getHash(
                 from_address,
                 to_address,
                 token_ids,
@@ -554,7 +654,8 @@ class ERC1155Contract(Contract):
                 value_eth_wei,
                 trade_nonce,
             ).call()
-        )
+        ):
+            raise ValueError("On-chain and off-chain hash computation do not agree!")
         return tx_hash
 
     @staticmethod
@@ -646,3 +747,30 @@ class ERC1155Contract(Contract):
                 "[ERC1155Contract]: Error when trying to estimate gas: {}".format(e)
             )
         return tx
+
+    @staticmethod
+    def get_last_code_id(ledger_api: LedgerApi) -> int:
+        """
+        Uses wasmcli to get ID of latest deployed .wasm bytecode
+        :param ledger_api: the ledger API
+
+        :return: code id of last deployed .wasm bytecode
+        """
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            cosmos_api = cast(CosmosApi, ledger_api)
+            return cosmos_api.get_last_code_id()
+        raise NotImplementedError
+
+    @staticmethod
+    def get_contract_address(ledger_api: LedgerApi, code_id: int) -> str:
+        """
+        Uses wasmcli to get contract address of latest initialised contract by its ID
+        :param ledger_api: the ledger API
+        :param code_id: the ID of stored contract CosmWasm
+
+        :return: contract address of last initialised contract
+        """
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            cosmos_api = cast(CosmosApi, ledger_api)
+            return cosmos_api.get_contract_address(code_id)
+        raise NotImplementedError

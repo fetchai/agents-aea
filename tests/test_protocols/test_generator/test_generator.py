@@ -19,6 +19,7 @@
 """This module contains miscellaneous tests for the protocol generator."""
 import logging
 import os
+import pprint
 import shutil
 import tempfile
 from pathlib import Path
@@ -51,7 +52,13 @@ logging.basicConfig(level=logging.INFO)
 def _match_files(fname1: str, fname2: str) -> bool:
     """Simple match file function."""
     with open(fname1, "r") as f1, open(fname2, "r") as f2:
-        return f1.read() == f2.read()
+        file1_content = f1.read()
+        file2_content = f2.read()
+        result = file1_content == file2_content
+        if not result:
+            pprint.pprint(file1_content)
+            pprint.pprint(file2_content)
+        return result
 
 
 class TestCompareLatestGeneratorOutputWithTestProtocol:
@@ -119,15 +126,15 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         )
         assert _match_files(proto_file_generated, proto_file_original)
 
-        # compare _pb2.py
-        # ToDo Fails in CI. Investigate!
-        # pb2_file_generated = Path(
-        #     self.t, T_PROTOCOL_NAME, "{}_pb2.py".format(T_PROTOCOL_NAME)
-        # )
-        # pb2_file_original = Path(
-        #     PATH_TO_T_PROTOCOL, "{}_pb2.py".format(T_PROTOCOL_NAME),
-        # )
-        # assert filecmp.cmp(pb2_file_generated, pb2_file_original)
+        # compare _pb2.py # noqa: E800
+        # ToDo this part fails in CI. Investigate why?
+        # pb2_file_generated = Path( # noqa: E800
+        #     self.t, T_PROTOCOL_NAME, "{}_pb2.py".format(T_PROTOCOL_NAME) # noqa: E800
+        # ) # noqa: E800
+        # pb2_file_original = Path( # noqa: E800
+        #     PATH_TO_T_PROTOCOL, "{}_pb2.py".format(T_PROTOCOL_NAME), # noqa: E800
+        # ) # noqa: E800
+        # assert _match_files(pb2_file_generated, pb2_file_original) # noqa: E800
 
     @classmethod
     def teardown_class(cls):
@@ -210,15 +217,13 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         proto_file_original = Path(path_to_protocol, "{}.proto".format(protocol_name),)
         assert _match_files(proto_file_generated, proto_file_original)
 
-        # compare _pb2.py
-        # ToDo Fails in CI. Investigate!
-        # pb2_file_generated = Path(
-        #     self.t, protocol_name, "{}_pb2.py".format(protocol_name)
-        # )
-        # pb2_file_original = Path(
-        #     path_to_protocol, "{}_pb2.py".format(protocol_name),
-        # )
-        # assert filecmp.cmp(pb2_file_generated, pb2_file_original)
+        # compare _pb2.py # noqa: E800
+        # ToDo this part fails in CI. Investigate why? # noqa: E800
+        # pb2_file_generated = Path( # noqa: E800
+        #     self.t, protocol_name, "{}_pb2.py".format(protocol_name) # noqa: E800
+        # ) # noqa: E800
+        # pb2_file_original = Path(path_to_protocol, "{}_pb2.py".format(protocol_name),) # noqa: E800
+        # assert _match_files(pb2_file_generated, pb2_file_original) # noqa: E800
 
     @classmethod
     def teardown_class(cls):
@@ -301,7 +306,7 @@ class TestSerialisations:
         assert decoded_message.performative == message.performative
         assert decoded_message.content_bytes == message.content_bytes
         assert decoded_message.content_int == message.content_int
-        # assert decoded_message.content_float == message.content_float
+        # assert decoded_message.content_float == message.content_float # noqa: E800
         assert decoded_message.content_bool == message.content_bool
         assert decoded_message.content_str == message.content_str
 
@@ -338,12 +343,12 @@ class TestSerialisations:
         assert decoded_message.performative == message.performative
         assert decoded_message.content_set_bytes == message.content_set_bytes
         assert decoded_message.content_set_int == message.content_set_int
-        # assert decoded_message.content_set_float == message.content_set_float
+        # assert decoded_message.content_set_float == message.content_set_float # noqa: E800
         assert decoded_message.content_set_bool == message.content_set_bool
         assert decoded_message.content_set_str == message.content_set_str
         assert decoded_message.content_list_bytes == message.content_list_bytes
         assert decoded_message.content_list_int == message.content_list_int
-        # assert decoded_message.content_list_float == message.content_list_float
+        # assert decoded_message.content_list_float == message.content_list_float # noqa: E800
         assert decoded_message.content_list_bool == message.content_list_bool
         assert decoded_message.content_list_str == message.content_list_str
 
@@ -393,19 +398,19 @@ class TestSerialisations:
         assert decoded_message.performative == message.performative
         assert decoded_message.content_dict_int_bytes == message.content_dict_int_bytes
         assert decoded_message.content_dict_int_int == message.content_dict_int_int
-        # assert decoded_message.content_dict_int_float == message.content_dict_int_float
+        # assert decoded_message.content_dict_int_float == message.content_dict_int_float # noqa: E800
         assert decoded_message.content_dict_int_bool == message.content_dict_int_bool
         assert decoded_message.content_dict_int_str == message.content_dict_int_str
         assert (
             decoded_message.content_dict_bool_bytes == message.content_dict_bool_bytes
         )
         assert decoded_message.content_dict_bool_int == message.content_dict_bool_int
-        # assert decoded_message.content_dict_bool_float == message.content_dict_bool_float
+        # assert decoded_message.content_dict_bool_float == message.content_dict_bool_float # noqa: E800
         assert decoded_message.content_dict_bool_bool == message.content_dict_bool_bool
         assert decoded_message.content_dict_bool_str == message.content_dict_bool_str
         assert decoded_message.content_dict_str_bytes == message.content_dict_str_bytes
         assert decoded_message.content_dict_str_int == message.content_dict_str_int
-        # assert decoded_message.content_dict_str_float == message.content_dict_str_float
+        # assert decoded_message.content_dict_str_float == message.content_dict_str_float # noqa: E800
         assert decoded_message.content_dict_str_bool == message.content_dict_str_bool
         assert decoded_message.content_dict_str_str == message.content_dict_str_str
 

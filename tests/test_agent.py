@@ -16,11 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the tests of the agent module."""
 import asyncio
 from threading import Thread
+from unittest.mock import Mock
 
 import pytest
 
@@ -60,6 +59,10 @@ class DummyAgent(Agent):
     def teardown(self) -> None:
         """Tear down the agent."""
         pass
+
+    @property
+    def resources(self):
+        return Mock()
 
 
 def test_run_agent():
@@ -109,9 +112,7 @@ def test_runtime_modes():
     with pytest.raises(ValueError):
         agent._get_runtime_class()
 
-    agent._loop_mode = "not exists"
-
     with pytest.raises(ValueError):
-        agent._get_main_loop_class()
+        agent.runtime._get_main_loop_class("not exists")
 
-    assert agent._loop_mode == agent.loop_mode
+    assert agent.runtime.loop_mode == agent.runtime.DEFAULT_RUN_LOOP

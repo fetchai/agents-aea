@@ -19,28 +19,31 @@
 """Extension to the OEF Python SDK."""
 
 import asyncio
-import copy
 import logging
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import cycle
-from typing import Dict, List, Optional, Set, cast
+from typing import Dict, List, Optional, Set, Type, cast
 
 import oef
 from oef.agents import OEFAgent
 from oef.core import AsyncioCore
 from oef.messages import CFP_TYPES, PROPOSE_TYPES
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.mail.base import Address, Envelope
+from aea.exceptions import enforce
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.connections.oef.object_translator import OEFObjectTranslator
-from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogue as BaseOefSearchDialogue,
+)
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
@@ -56,47 +59,73 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.8.0")
+
+
+class OefSearchDialogue(BaseOefSearchDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[OefSearchMessage] = OefSearchMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseOefSearchDialogue.__init__(
+            self, dialogue_label=dialogue_label, self_address=self_address, role=role
+        )
+        self._envelope_context = None  # type: Optional[EnvelopeContext]
+
+    @property
+    def envelope_context(self) -> Optional[EnvelopeContext]:
+        """Get envelope_context."""
+        return self._envelope_context
+
+    @envelope_context.setter
+    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
+        """Set envelope_context."""
+        enforce(self._envelope_context is None, "envelope_context already set!")
+        self._envelope_context = envelope_context
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self) -> None:
         """
         Initialize dialogues.
 
         :return: None
         """
-        BaseOefSearchDialogues.__init__(self, str(OEFConnection.connection_id))
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """
-        Infer the role of the agent from an incoming/outgoing first message.
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return OefSearchDialogue.Role.OEF_NODE
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            # The oef connection maintains the dialogue on behalf of the node
+            return OefSearchDialogue.Role.OEF_NODE
 
-    def create_dialogue(
-        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
-    ) -> OefSearchDialogue:
-        """
-        Create an instance of fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
-        """
-        dialogue = OefSearchDialogue(
-            dialogue_label=dialogue_label,
-            agent_address=str(OEFConnection.connection_id),
-            role=role,
+        BaseOefSearchDialogues.__init__(
+            self,
+            self_address=str(OEFConnection.connection_id),
+            role_from_first_message=role_from_first_message,
+            dialogue_class=OefSearchDialogue,
         )
-        return dialogue
 
 
 class OEFChannel(OEFAgent):
@@ -159,7 +188,7 @@ class OEFChannel(OEFAgent):
             raise ValueError("Channel not connected!")
         return self._loop
 
-    def on_message(
+    def on_message(  # pylint: disable=unused-argument
         self, msg_id: int, dialogue_id: int, origin: Address, content: bytes
     ) -> None:
         """
@@ -202,7 +231,7 @@ class OEFChannel(OEFAgent):
             )
         )
 
-    def on_propose(
+    def on_propose(  # pylint: disable=unused-argument
         self,
         msg_id: int,
         dialogue_id: int,
@@ -284,20 +313,17 @@ class OEFChannel(OEFAgent):
         if last_msg is None:
             self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
-        msg = OefSearchMessage(
+        msg = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
-            target=last_msg.message_id,
-            message_id=last_msg.message_id + 1,
+            target_message=last_msg,
             agents=tuple(agents),
         )
-        msg.counterparty = last_msg.counterparty
-        oef_search_dialogue.update(msg)
         envelope = Envelope(
-            to=self.address,
-            sender=DEFAULT_OEF,
-            protocol_id=OefSearchMessage.protocol_id,
+            to=msg.to,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
+            context=oef_search_dialogue.envelope_context,
         )
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
@@ -326,24 +352,21 @@ class OEFChannel(OEFAgent):
         if last_msg is None:
             self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
-        msg = OefSearchMessage(
+        msg = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.OEF_ERROR,
-            dialogue_reference=oef_search_dialogue.dialogue_label.dialogue_reference,
-            target=last_msg.message_id,
-            message_id=last_msg.message_id + 1,
+            target_message=last_msg,
             oef_error_operation=operation,
         )
-        msg.counterparty = last_msg.counterparty
-        oef_search_dialogue.update(msg)
         envelope = Envelope(
-            to=self.address,
-            sender=DEFAULT_OEF,
-            protocol_id=OefSearchMessage.protocol_id,
+            to=msg.to,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
             message=msg,
+            context=oef_search_dialogue.envelope_context,
         )
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
-    def on_dialogue_error(
+    def on_dialogue_error(  # pylint: disable=unused-argument
         self, answer_id: int, dialogue_id: int, origin: Address
     ) -> None:
         """
@@ -388,7 +411,7 @@ class OEFChannel(OEFAgent):
                 )
                 raise ValueError("Cannot send message.")
 
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.4.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.5.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)
@@ -406,13 +429,11 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        assert isinstance(
-            envelope.message, OefSearchMessage
-        ), "Message not of type OefSearchMessage"
-        oef_message_original = cast(OefSearchMessage, envelope.message)
-        oef_message = copy.copy(oef_message_original)
-        oef_message.counterparty = oef_message_original.sender
-        oef_message.is_incoming = True  # TODO: fix
+        enforce(
+            isinstance(envelope.message, OefSearchMessage),
+            "Message not of type OefSearchMessage",
+        )
+        oef_message = cast(OefSearchMessage, envelope.message)
         oef_search_dialogue = cast(
             OefSearchDialogue, self.oef_search_dialogues.update(oef_message)
         )
@@ -421,6 +442,7 @@ class OEFChannel(OEFAgent):
                 "Could not create dialogue for message={}".format(oef_message)
             )  # pragma: nocover
             return  # pragma: nocover
+        oef_search_dialogue.envelope_context = envelope.context
         self.oef_msg_id += 1
         self.oef_msg_id_to_dialogue[self.oef_msg_id] = oef_search_dialogue
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
@@ -444,7 +466,7 @@ class OEFChannel(OEFAgent):
         else:
             raise ValueError("OEF request not recognized.")  # pragma: nocover
 
-    def handle_failure(  # pylint: disable=no-self-use
+    def handle_failure(  # pylint: disable=no-self-use,unused-argument
         self, exception: Exception, conn
     ) -> None:
         """Handle failure."""
@@ -459,10 +481,12 @@ class OEFChannel(OEFAgent):
         self._in_queue = None
 
     def _check_loop_and_queue(self):
-        assert self.in_queue is not None
-        assert self.loop is not None
+        enforce(self.in_queue is not None, "In queue is not set!")
+        enforce(self.loop is not None, "Loop is not set!")
 
-    async def connect(self) -> None:  # pylint: disable=invalid-overridden-method
+    async def connect(  # pylint: disable=invalid-overridden-method,arguments-differ
+        self,
+    ) -> None:
         """Connect channel."""
         await self._set_loop_and_queue()
         self.core.__init__(loop=self._loop, logger=logger)
@@ -528,12 +552,12 @@ class OEFConnection(Connection):
         super().__init__(**kwargs)
         addr = cast(str, self.configuration.config.get("addr"))
         port = cast(int, self.configuration.config.get("port"))
-        assert addr is not None and port is not None, "addr and port must be set!"
+        if addr is None or port is None:
+            raise ValueError("addr and port must be set!")  # pragma: nocover
         self.oef_addr = addr
         self.oef_port = port
         self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port)  # type: ignore
         self._connection_check_task = None  # type: Optional[asyncio.Future]
-        self._loop: Optional[AbstractEventLoop] = None
 
     async def connect(self) -> None:
         """
@@ -544,18 +568,13 @@ class OEFConnection(Connection):
         """
         if self.is_connected:
             return
-        self._state.set(ConnectionStates.connecting)
-        try:
+
+        with self._connect_context():
             self.channel.aea_logger = self.logger
-            self._loop = asyncio.get_event_loop()
             await self.channel.connect()
-            self._connection_check_task = self._loop.create_task(
+            self._connection_check_task = self.loop.create_task(
                 self._connection_check()
             )
-            self._state.set(ConnectionStates.connected)
-        except (CancelledError, Exception) as e:  # pragma: no cover
-            self._state.set(ConnectionStates.disconnected)
-            raise e
 
     async def _connection_check(self) -> None:
         """

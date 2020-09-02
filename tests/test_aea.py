@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the tests for aea/aea.py."""
 import os
 import tempfile
@@ -43,6 +41,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
 
@@ -59,9 +58,9 @@ from tests.common.utils import (
 )
 
 from .conftest import (
-    COSMOS_PRIVATE_KEY_PATH,
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
+    FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_local_connection,
@@ -162,10 +161,10 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.6.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.7.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.6.0")])
+        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.7.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = agent.resources.get_connection(local_connection_id)
@@ -178,13 +177,10 @@ def test_react():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = agent.identity.address
+        msg.to = agent.identity.address
         msg.sender = agent.identity.address
         envelope = Envelope(
-            to=msg.counterparty,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
         )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
@@ -217,10 +213,10 @@ def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.6.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.7.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.6.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.7.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = aea.resources.get_connection(local_connection_id)
@@ -233,10 +229,12 @@ def test_handle():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = aea.identity.address
+        msg.to = aea.identity.address
         msg.sender = aea.identity.address
+
+        encoded_msg = DefaultSerializer.encode(msg)
         envelope = Envelope(
-            to=msg.counterparty,
+            to=msg.to,
             sender=msg.sender,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=msg,
@@ -273,18 +271,28 @@ def test_handle():
                 dialogue_reference=(str(0), ""),
                 target=0,
             )
-            msg.counterparty = aea.identity.address
+            msg.to = aea.identity.address
             msg.sender = aea.identity.address
             envelope = Envelope(
-                to=msg.counterparty,
-                sender=msg.sender,
-                protocol_id=msg.protocol_id,
-                message=msg,
+                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
             )
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 3, timeout=2,
+            )
+
+            #   DECODING OK
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                protocol_id=DefaultMessage.protocol_id,
+                message=encoded_msg,
+            )
+            # send envelope via localnode back to agent/bypass `outbox` put consistency checks
+            aea.outbox._multiplexer.put(envelope)
+            wait_for_condition(
+                lambda: len(dummy_handler.handled_messages) == 4, timeout=1,
             )
             aea.stop()
 
@@ -303,10 +311,10 @@ def test_initialize_aea_programmatically():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.6.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.7.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.6.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.7.0")])
         local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
@@ -317,10 +325,10 @@ def test_initialize_aea_programmatically():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        expected_message.counterparty = aea.identity.address
+        expected_message.to = aea.identity.address
         expected_message.sender = aea.identity.address
         envelope = Envelope(
-            to=expected_message.counterparty,
+            to=expected_message.to,
             sender=expected_message.sender,
             protocol_id=expected_message.protocol_id,
             message=expected_message,
@@ -341,8 +349,8 @@ def test_initialize_aea_programmatically():
             # TODO the previous code caused an error:
             #      _pickle.PicklingError: Can't pickle <class 'tasks.DummyTask'>: import of module 'tasks' failed
             dummy_task = DummyTask()
-            task_id = aea.task_manager.enqueue_task(dummy_task)
-            async_result = aea.task_manager.get_task_result(task_id)
+            task_id = aea.enqueue_task(dummy_task)
+            async_result = aea.get_task_result(task_id)
             expected_dummy_task = async_result.get(10.0)
             wait_for_condition(
                 lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
@@ -408,7 +416,7 @@ def test_initialize_aea_programmatically_build_resources():
                 performative=DefaultMessage.Performative.BYTES,
                 content=b"hello",
             )
-            expected_message.counterparty = agent_name
+            expected_message.to = agent_name
             expected_message.sender = agent_name
 
             with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
@@ -433,8 +441,8 @@ def test_initialize_aea_programmatically_build_resources():
                 )
 
                 dummy_task = DummyTask()
-                task_id = aea.task_manager.enqueue_task(dummy_task)
-                async_result = aea.task_manager.get_task_result(task_id)
+                task_id = aea.enqueue_task(dummy_task)
+                async_result = aea.get_task_result(task_id)
                 expected_dummy_task = async_result.get(10.0)
                 wait_for_condition(
                     lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
@@ -515,7 +523,7 @@ def test_error_handler_is_not_set():
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    msg.counterparty = agent.identity.address
+    msg.to = agent.identity.address
     envelope = Envelope(
         to=agent.identity.address,
         sender=agent.identity.address,
@@ -524,7 +532,7 @@ def test_error_handler_is_not_set():
     )
 
     with patch.object(agent, "stop") as mocked_stop:
-        agent._handle(envelope)
+        agent.handle_envelope(envelope)
 
     mocked_stop.assert_called()
 
@@ -536,8 +544,6 @@ def test_no_handlers_registered():
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
-    # local_connection_id = PublicId.from_str("fetchai/stub:0.4.0")
-    # builder.set_default_connection(local_connection_id)
     aea = builder.build()
 
     with patch.object(
@@ -550,7 +556,7 @@ def test_no_handlers_registered():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.counterparty = aea.identity.address
+        msg.to = aea.identity.address
         envelope = Envelope(
             to=aea.identity.address,
             sender=aea.identity.address,
@@ -558,7 +564,7 @@ def test_no_handlers_registered():
             message=msg,
         )
         with patch.object(aea.filter, "get_active_handlers", return_value=[]):
-            aea._handle(envelope)
+            aea.handle_envelope(envelope)
             mock_logger.assert_any_call(
                 f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'."
             )
@@ -649,7 +655,7 @@ class TestAeaExceptionPolicy:
 
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(DEFAULT_LEDGER, COSMOS_PRIVATE_KEY_PATH)
+        builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
 
         self.handler_called = 0
 
@@ -747,7 +753,7 @@ class TestAeaExceptionPolicy:
         self.aea._skills_exception_policy = ExceptionPolicyEnum.just_log
         self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
 
-        with patch.object(self.aea._logger, "exception") as patched:
+        with patch.object(self.aea.logger, "exception") as patched:
             t = Thread(target=self.aea.start)
             t.start()
 
@@ -797,6 +803,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
+        self.aea_tool.aea.runtime.main_loop.teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -808,7 +815,7 @@ class BaseTimeExecutionCase(TestCase):
 
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(DEFAULT_LEDGER, COSMOS_PRIVATE_KEY_PATH)
+        builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
 
         self.function_finished = False
 
@@ -820,25 +827,22 @@ class BaseTimeExecutionCase(TestCase):
         handler_cls = make_handler_cls_from_funcion(handler_func)
 
         behaviour_cls = make_behaviour_cls_from_funcion(handler_func)
-
+        self.behaviour = behaviour_cls(name="behaviour1", skill_context=skill_context)
         test_skill = Skill(
             SkillConfig(name="test_skill", author="fetchai"),
             skill_context=skill_context,
             handlers={
                 "handler1": handler_cls(name="handler1", skill_context=skill_context)
             },
-            behaviours={
-                "behaviour1": behaviour_cls(
-                    name="behaviour1", skill_context=skill_context
-                )
-            },
+            behaviours={"behaviour1": self.behaviour},
         )
         skill_context._skill = test_skill  # weird hack
 
         builder.add_component_instance(test_skill)
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
-        self.aea_tool.put_inbox(AeaTool.dummy_envelope())
+        self.envelope = AeaTool.dummy_envelope()
+        self.aea_tool.aea.runtime.main_loop.setup()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""
@@ -850,7 +854,6 @@ class BaseTimeExecutionCase(TestCase):
 
         self.prepare(lambda: sleep_a_bit(sleep_time, num_sleeps))
         self.aea_tool.set_execution_timeout(execution_timeout)
-        self.aea_tool.setup()
 
         with timeit_context() as timeit:
             self.aea_action()
@@ -896,11 +899,13 @@ class BaseTimeExecutionCase(TestCase):
 
 
 class HandleTimeoutExecutionCase(BaseTimeExecutionCase):
-    """Test react timeout."""
+    """Test handle envelope timeout."""
 
     def aea_action(self):
         """Spin react on AEA."""
-        self.aea_tool.react_one()
+        self.aea_tool.aea.runtime.main_loop._execution_control(
+            self.aea_tool.handle_envelope, [self.envelope]
+        )
 
 
 class ActTimeoutExecutionCase(BaseTimeExecutionCase):
@@ -908,4 +913,6 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin act on AEA."""
-        self.aea_tool.act_one()
+        self.aea_tool.aea.runtime.main_loop._execution_control(
+            self.behaviour.act_wrapper
+        )

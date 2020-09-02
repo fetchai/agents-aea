@@ -16,26 +16,29 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """The base connection package."""
+import asyncio
 import inspect
 import logging
 import re
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop
+from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Set, TYPE_CHECKING, cast
+from typing import Generator, Optional, Set, TYPE_CHECKING, cast
 
-from aea.components.base import Component
+from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ConnectionConfig,
     PublicId,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
+from aea.exceptions import enforce
 from aea.helpers.async_utils import AsyncState
-from aea.helpers.base import load_aea_package, load_module
+from aea.helpers.base import load_module
 from aea.identity.base import Identity
 
 
@@ -81,12 +84,12 @@ class Connection(Component, ABC):
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        assert configuration is not None, "The configuration must be provided."
+        enforce(configuration is not None, "The configuration must be provided.")
         super().__init__(configuration, **kwargs)
-        assert (
-            super().public_id == self.connection_id
-        ), "Connection ids in configuration and class not matching."
-        self._loop: Optional[AbstractEventLoop] = None
+        enforce(
+            super().public_id == self.connection_id,
+            "Connection ids in configuration and class not matching.",
+        )
         self._state = AsyncState(ConnectionStates.disconnected)
 
         self._identity = identity
@@ -100,35 +103,40 @@ class Connection(Component, ABC):
         )
 
     @property
-    def loop(self) -> Optional[AbstractEventLoop]:
+    def loop(self) -> asyncio.AbstractEventLoop:
         """Get the event loop."""
-        return self._loop
+        enforce(asyncio.get_event_loop().is_running(), "Event loop is not running.")
+        return asyncio.get_event_loop()
 
-    @loop.setter
-    def loop(self, loop: AbstractEventLoop) -> None:
-        """
-        Set the event loop.
+    def _ensure_connected(self) -> None:  # pragma: nocover
+        """Raise exception if connection is not connected."""
+        if not self.is_connected:
+            raise ConnectionError("Connection is not connected! Connect first!")
 
-        :param loop: the event loop.
-        :return: None
-        """
-        assert (
-            self._loop is None or not self._loop.is_running()
-        ), "Cannot set the loop while it is running."
-        self._loop = loop
+    @contextmanager
+    def _connect_context(self) -> Generator:
+        """Set state connecting, disconnecteing, dicsconnected during connect method."""
+        with self._state.transit(
+            initial=ConnectionStates.connecting,
+            success=ConnectionStates.connected,
+            fail=ConnectionStates.disconnected,
+        ):
+            yield
 
     @property
     def address(self) -> "Address":  # pragma: nocover
         """Get the address."""
-        assert (
-            self._identity is not None
-        ), "You must provide the identity in order to retrieve the address."
+        if self._identity is None:
+            raise ValueError(
+                "You must provide the identity in order to retrieve the address."
+            )
         return self._identity.address
 
     @property
     def crypto_store(self) -> CryptoStore:  # pragma: nocover
         """Get the crypto store."""
-        assert self._crypto_store is not None, "CryptoStore not available."
+        if self._crypto_store is None:
+            raise ValueError("CryptoStore not available.")
         return self._crypto_store
 
     @property
@@ -144,7 +152,8 @@ class Connection(Component, ABC):
     @property
     def configuration(self) -> ConnectionConfig:
         """Get the connection configuration."""
-        assert self._configuration is not None, "Configuration not set."
+        if self._configuration is None:  # pragma: nocover
+            raise ValueError("Configuration not set.")
         return cast(ConnectionConfig, super().configuration)
 
     @property
@@ -152,16 +161,14 @@ class Connection(Component, ABC):
         """Get the ids of the protocols this connection is restricted to."""
         if self._configuration is None:
             return self._restricted_to_protocols
-        else:
-            return self.configuration.restricted_to_protocols
+        return self.configuration.restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:  # pragma: nocover
         """Get the ids of the excluded protocols for this connection."""
         if self._configuration is None:
             return self._excluded_protocols
-        else:
-            return self.configuration.excluded_protocols
+        return self.configuration.excluded_protocols
 
     @property
     def state(self) -> ConnectionStates:
@@ -207,7 +214,7 @@ class Connection(Component, ABC):
         """
         configuration = cast(
             ConnectionConfig,
-            ComponentConfiguration.load(ComponentType.CONNECTION, Path(directory)),
+            load_component_configuration(ComponentType.CONNECTION, Path(directory)),
         )
         configuration.directory = Path(directory)
         return Connection.from_config(configuration, identity, crypto_store, **kwargs)
@@ -232,9 +239,10 @@ class Connection(Component, ABC):
         directory = cast(Path, configuration.directory)
         load_aea_package(configuration)
         connection_module_path = directory / "connection.py"
-        assert (
-            connection_module_path.exists() and connection_module_path.is_file()
-        ), "Connection module '{}' not found.".format(connection_module_path)
+        enforce(
+            connection_module_path.exists() and connection_module_path.is_file(),
+            "Connection module '{}' not found.".format(connection_module_path),
+        )
         connection_module = load_module(
             "connection_module", directory / "connection.py"
         )
@@ -246,8 +254,9 @@ class Connection(Component, ABC):
         name_to_class = dict(connection_classes)
         logger.debug("Processing connection {}".format(connection_class_name))
         connection_class = name_to_class.get(connection_class_name, None)
-        assert connection_class is not None, "Connection class '{}' not found.".format(
-            connection_class_name
+        enforce(
+            connection_class is not None,
+            "Connection class '{}' not found.".format(connection_class_name),
         )
         return connection_class(
             configuration=configuration,
@@ -257,11 +266,16 @@ class Connection(Component, ABC):
         )
 
     @property
-    def is_connected(self) -> bool:
+    def is_connected(self) -> bool:  # pragma: nocover
         """Return is connected state."""
         return self.state == ConnectionStates.connected
 
     @property
-    def is_disconnected(self) -> bool:
+    def is_connecting(self) -> bool:  # pragma: nocover
+        """Return is connecting state."""
+        return self.state == ConnectionStates.connecting
+
+    @property
+    def is_disconnected(self) -> bool:  # pragma: nocover
         """Return is disconnected state."""
         return self.state == ConnectionStates.disconnected
