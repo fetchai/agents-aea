@@ -74,10 +74,10 @@ def run(duration, runtime_mode):
     rate = connection.count_in / duration
 
     return [
-        ("envelopes received: {}", connection.count_in),
-        ("envelopes sent: {}", connection.count_out),
-        ("rate: {} envelopes/second", rate),
-        ("mem usage: {} mb", mem_usage),
+        ("envelopes received", connection.count_in),
+        ("envelopes sent", connection.count_out),
+        ("rate (envelopes/second)", rate),
+        ("mem usage (Mb)", mem_usage),
     ]
 
 

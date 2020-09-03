@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Envelopes generation speed for Behaviour act test."""
+import itertools
 import os
 import sys
 import time
@@ -66,45 +67,41 @@ class TestHandler(Handler):
         self.context.outbox.put(make_envelope(message.to, message.sender))
 
 
-def run(duration, runtime_mode, runner_mode, start_messages):
+def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     """Test multiagent message exchange."""
     local_node = LocalNode()
-    agent1 = make_agent(agent_name="agent1", runtime_mode=runtime_mode)
 
-    connection1 = OEFLocalConnection(
-        local_node,
-        configuration=ConnectionConfig(connection_id=OEFLocalConnection.connection_id,),
-        identity=agent1.identity,
-    )
-    agent1.resources.add_connection(connection1)
-    skill1 = make_skill(agent1, handlers={"test": TestHandler})
-    agent1.resources.add_skill(skill1)
+    agents = []
+    skills = []
 
-    agent2 = make_agent(agent_name="agent2", runtime_mode=runtime_mode)
-    connection2 = OEFLocalConnection(
-        local_node,
-        configuration=ConnectionConfig(connection_id=OEFLocalConnection.connection_id,),
-        identity=agent2.identity,
-    )
-    agent2.resources.add_connection(connection2)
-    skill2 = make_skill(agent2, handlers={"test": TestHandler})
-    agent2.resources.add_skill(skill2)
-
+    for i in range(num_of_agents):
+        agent = make_agent(agent_name=f"agent{i}", runtime_mode=runtime_mode)
+        connection = OEFLocalConnection(
+            local_node,
+            configuration=ConnectionConfig(
+                connection_id=OEFLocalConnection.connection_id,
+            ),
+            identity=agent.identity,
+        )
+        agent.resources.add_connection(connection)
+        skill = make_skill(agent, handlers={"test": TestHandler})
+        agent.resources.add_skill(skill)
+        agents.append(agent)
+        skills.append(skill)
     local_node.start()
 
-    runner = AEARunner([agent1, agent2], runner_mode)
+    runner = AEARunner(agents, runner_mode)
     runner.start(threaded=True)
 
-    wait_for_condition(lambda: agent2.is_running, timeout=5)
-    wait_for_condition(lambda: agent1.is_running, timeout=5)
+    for agent in agents:
+        wait_for_condition(lambda: agent.is_running, timeout=5)
     wait_for_condition(lambda: runner.is_running, timeout=5)
 
-    env1 = make_envelope(connection1.address, connection2.address)
-    env2 = make_envelope(connection2.address, connection1.address)
+    for agent1, agent2 in itertools.permutations(agents, 2):
+        env = make_envelope(agent1.identity.address, agent2.identity.address)
 
-    for _ in range(int(start_messages)):
-        agent1.outbox.put(env1)
-        agent2.outbox.put(env2)
+        for _ in range(int(start_messages)):
+            agent1.outbox.put(env)
 
     time.sleep(duration)
 
@@ -113,15 +110,13 @@ def run(duration, runtime_mode, runner_mode, start_messages):
     local_node.stop()
     runner.stop()
 
-    total_messages = skill1.handlers["test"].count + skill2.handlers["test"].count
+    total_messages = sum([skill.handlers["test"].count for skill in skills])
     rate = total_messages / duration
 
     return [
-        ("Total Messages handled1: {}", total_messages),
-        ("Messages handled by agent1: {}", skill1.handlers["test"].count),
-        ("Messages handled by agent2: {}", skill2.handlers["test"].count),
-        ("Messages rate: {}", rate),
-        ("Mem usage: {} mb", mem_usage),
+        ("Total Messages handled", total_messages),
+        ("Messages rate(envelopes/second)", rate),
+        ("Mem usage(Mb)", mem_usage),
     ]
 
 
@@ -134,21 +129,25 @@ def run(duration, runtime_mode, runner_mode, start_messages):
 @click.option(
     "--start_messages", default=100, help="Amount of messages to prepopulate."
 )
+@click.option("--num_of_agents", default=2, help="Amount of agents to run.")
 @click.option("--number_of_runs", default=10, help="How many times run teste.")
-def main(duration, runtime_mode, runner_mode, start_messages, number_of_runs):
+def main(
+    duration, runtime_mode, runner_mode, start_messages, num_of_agents, number_of_runs
+):
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")
     click.echo(f"* Runtime mode: {runtime_mode}")
     click.echo(f"* Runner mode: {runner_mode}")
     click.echo(f"* Start messages: {start_messages}")
+    click.echo(f"* Number of agents: {num_of_agents}")
     click.echo(f"* Number of runs: {number_of_runs}")
 
     print_results(
         multi_run(
             int(number_of_runs),
             run,
-            (duration, runtime_mode, runner_mode, start_messages),
+            (duration, runtime_mode, runner_mode, start_messages, num_of_agents),
         )
     )
 

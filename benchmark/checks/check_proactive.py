@@ -75,9 +75,9 @@ def run(duration, runtime_mode):
 
     rate = connection.count_in / duration
     return [
-        ("envelopes sent: {}", skill.behaviours["test"].count),
-        ("envelopes received: {}", connection.count_in),
-        ("rate: {} envelopes/second", rate),
+        ("envelopes sent", skill.behaviours["test"].count),
+        ("envelopes received", connection.count_in),
+        ("rate(envelopes/second)", rate),
     ]
 
 

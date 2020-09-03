@@ -31,6 +31,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
 from benchmark.checks.utils import (  # noqa: I100
+    GeneratorConnection,
     SyncedGeneratorConnection,
     make_agent,
     make_envelope,
@@ -41,7 +42,7 @@ from benchmark.checks.utils import (  # noqa: I100
 )
 
 
-class TestConnection(SyncedGeneratorConnection):
+class TestConnectionMixIn:
     """Test connection with messages timing."""
 
     def __init__(self, *args, **kwargs):
@@ -53,13 +54,16 @@ class TestConnection(SyncedGeneratorConnection):
     async def send(self, envelope: Envelope) -> None:
         """Handle incoming envelope."""
         self.recvs.append(time.time())
-        return await super().send(envelope)
+        return await super().send(envelope)  # type: ignore
 
     async def receive(self, *args, **kwargs) -> Optional[Envelope]:
         """Generate outgoing envelope."""
-        envelope = await super().receive(*args, **kwargs)
+        envelope = await super().receive(*args, **kwargs)  # type: ignore
         self.sends.append(time.time())
         return envelope
+
+
+CONNECTION_MODES = {"sync": SyncedGeneratorConnection, "nonsync": GeneratorConnection}
 
 
 class TestHandler(Handler):
@@ -78,10 +82,19 @@ class TestHandler(Handler):
         self.context.outbox.put(make_envelope(message.to, message.sender))
 
 
-def run(duration, runtime_mode):
+def run(duration, runtime_mode, connection_mode):
     """Test memory usage."""
     agent = make_agent(runtime_mode=runtime_mode)
-    connection = TestConnection.make()
+
+    if connection_mode not in CONNECTION_MODES:
+        raise ValueError(
+            f"bad connection mode {connection_mode}. valid is one of {list(CONNECTION_MODES.keys())}"
+        )
+
+    base_cls = CONNECTION_MODES[connection_mode]
+
+    conn_cls = type("conn_cls", (TestConnectionMixIn, base_cls), {})
+    connection = conn_cls.make()  # pylint: disable=no-member
     agent.resources.add_connection(connection)
     agent.resources.add_skill(make_skill(agent, handlers={"test": TestHandler}))
     t = Thread(target=agent.start, daemon=True)
@@ -98,10 +111,10 @@ def run(duration, runtime_mode):
     total_amount = len(connection.recvs)
     rate = total_amount / duration
     return [
-        ("envelopes received: {}", len(connection.recvs)),
-        ("envelopes sent: {}", len(connection.sends)),
-        ("latency: {} second", latency),
-        ("rate: {} envelopes/second", rate),
+        ("envelopes received", len(connection.recvs)),
+        ("envelopes sent", len(connection.sends)),
+        ("latency(seconds)", latency),
+        ("rate(envelopes/second)", rate),
     ]
 
 
@@ -110,15 +123,21 @@ def run(duration, runtime_mode):
 @click.option(
     "--runtime_mode", default="async", help="Runtime mode: async or threaded."
 )
+@click.option(
+    "--connection_mode", default="sync", help="Connection mode: sync or nonsync."
+)
 @click.option("--number_of_runs", default=10, help="How many times run teste.")
-def main(duration, runtime_mode, number_of_runs):
+def main(duration, runtime_mode, connection_mode, number_of_runs):
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")
     click.echo(f"* Runtime mode: {runtime_mode}")
+    click.echo(f"* Connection mode: {connection_mode}")
     click.echo(f"* Number of runs: {number_of_runs}")
 
-    print_results(multi_run(int(number_of_runs), run, (duration, runtime_mode),))
+    print_results(
+        multi_run(int(number_of_runs), run, (duration, runtime_mode, connection_mode),)
+    )
 
 
 if __name__ == "__main__":

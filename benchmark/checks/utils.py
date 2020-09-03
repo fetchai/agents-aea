@@ -24,7 +24,7 @@ import os
 import time
 from multiprocessing import Pool
 from pathlib import Path
-from statistics import mean
+from statistics import mean, stdev, variance
 from typing import Any, Callable, List, Optional, Tuple
 from unittest.mock import MagicMock
 
@@ -194,15 +194,17 @@ def get_mem_usage_in_mb() -> float:
     return 1.0 * psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
 
 
-def print_results(result: List[Tuple[str, Any]]) -> None:
+def print_results(result: List[Tuple[str, Any, Any, Any]]) -> None:
     """Print result for multi_run response."""
     click.echo("\nResults:")
-    for msg, value in result:
-        click.echo(" * " + msg.format(value))
+    for msg, mean_, stdev_, variance_ in result:
+        click.echo(f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} ")
     click.echo("Test finished.")
 
 
-def multi_run(num_runs: int, fn: Callable, args: Tuple) -> List[Tuple[str, Any]]:
+def multi_run(
+    num_runs: int, fn: Callable, args: Tuple
+) -> List[Tuple[str, Any, Any, Any]]:
     """
     Perform multiple test runs.
 
@@ -219,6 +221,10 @@ def multi_run(num_runs: int, fn: Callable, args: Tuple) -> List[Tuple[str, Any]]
         results.append(p.apply(fn, tuple(args)))
         p.terminate()
         del p
-    mean_values = map(mean, zip(*(map(lambda x: x[1], i) for i in results)))
 
-    return list(zip(map(lambda x: x[0], results[0]), mean_values))
+    mean_values = map(mean, zip(*(map(lambda x: x[1], i) for i in results)))
+    stdev_values = map(stdev, zip(*(map(lambda x: x[1], i) for i in results)))
+    variance_values = map(variance, zip(*(map(lambda x: x[1], i) for i in results)))
+    return list(
+        zip(map(lambda x: x[0], results[0]), mean_values, stdev_values, variance_values)
+    )
