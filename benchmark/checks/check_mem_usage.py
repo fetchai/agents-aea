@@ -21,7 +21,13 @@
 import time
 from threading import Thread
 
-from benchmark.checks.utils import (
+import click
+
+from aea.protocols.base import Message
+from aea.protocols.default.message import DefaultMessage
+from aea.skills.base import Handler
+
+from benchmark.checks.utils import (  # noqa: I100
     SyncedGeneratorConnection,
     get_mem_usage_in_mb,
     make_agent,
@@ -31,12 +37,6 @@ from benchmark.checks.utils import (
     print_results,
     wait_for_condition,
 )
-
-import click
-
-from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.skills.base import Handler
 
 
 class TestHandler(Handler):
@@ -71,11 +71,11 @@ def run(duration, runtime_mode):
     mem_usage = get_mem_usage_in_mb()
     agent.stop()
     t.join(5)
-    rate = connection._count_in / duration
+    rate = connection.count_in / duration
 
     return [
-        ("envelopes received: {}", connection._count_in),
-        ("envelopes sent: {}", connection._count_out),
+        ("envelopes received: {}", connection.count_in),
+        ("envelopes sent: {}", connection.count_out),
         ("rate: {} envelopes/second", rate),
         ("mem usage: {} mb", mem_usage),
     ]
@@ -89,7 +89,7 @@ def run(duration, runtime_mode):
 @click.option("--number_of_runs", default=10, help="How many times run teste.")
 def main(duration, runtime_mode, number_of_runs):
     """Run test."""
-    click.echo(f"Start test with options:")
+    click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")
     click.echo(f"* Runtime mode: {runtime_mode}")
     click.echo(f"* Number of runs: {number_of_runs}")
@@ -98,4 +98,4 @@ def main(duration, runtime_mode, number_of_runs):
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter

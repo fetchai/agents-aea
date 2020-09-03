@@ -22,15 +22,6 @@ import os
 import sys
 import time
 
-from benchmark.checks.utils import (
-    get_mem_usage_in_mb,
-    make_agent,
-    make_envelope,
-    multi_run,
-    print_results,
-)
-from benchmark.checks.utils import make_skill, wait_for_condition
-
 import click
 
 from aea.configurations.base import ConnectionConfig
@@ -39,11 +30,19 @@ from aea.protocols.default.message import DefaultMessage
 from aea.runner import AEARunner
 from aea.skills.base import Handler
 
+from benchmark.checks.utils import (  # noqa: I100
+    get_mem_usage_in_mb,
+    make_agent,
+    make_envelope,
+    multi_run,
+    print_results,
+)
+from benchmark.checks.utils import make_skill, wait_for_condition
 
 ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")
 sys.path.append(ROOT_PATH)
 
-from packages.fetchai.connections.local.connection import (
+from packages.fetchai.connections.local.connection import (  # pylint: disable=C0413
     LocalNode,
     OEFLocalConnection,
 )  # noqa:  E402
@@ -56,14 +55,14 @@ class TestHandler(Handler):
 
     def setup(self) -> None:
         """Noop setup."""
-        self._count = 0
+        self.count = 0  # pylint: disable=attribute-defined-outside-init
 
     def teardown(self) -> None:
         """Noop teardown."""
 
     def handle(self, message: Message) -> None:
         """Handle incoming message."""
-        self._count += 1
+        self.count += 1
         self.context.outbox.put(make_envelope(message.to, message.sender))
 
 
@@ -114,13 +113,13 @@ def run(duration, runtime_mode, runner_mode, start_messages):
     local_node.stop()
     runner.stop()
 
-    total_messages = skill1.handlers["test"]._count + skill2.handlers["test"]._count
+    total_messages = skill1.handlers["test"].count + skill2.handlers["test"].count
     rate = total_messages / duration
 
     return [
         ("Total Messages handled1: {}", total_messages),
-        ("Messages handled by agent1: {}", skill1.handlers["test"]._count),
-        ("Messages handled by agent2: {}", skill2.handlers["test"]._count),
+        ("Messages handled by agent1: {}", skill1.handlers["test"].count),
+        ("Messages handled by agent2: {}", skill2.handlers["test"].count),
         ("Messages rate: {}", rate),
         ("Mem usage: {} mb", mem_usage),
     ]
@@ -138,7 +137,7 @@ def run(duration, runtime_mode, runner_mode, start_messages):
 @click.option("--number_of_runs", default=10, help="How many times run teste.")
 def main(duration, runtime_mode, runner_mode, start_messages, number_of_runs):
     """Run test."""
-    click.echo(f"Start test with options:")
+    click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")
     click.echo(f"* Runtime mode: {runtime_mode}")
     click.echo(f"* Runner mode: {runner_mode}")
@@ -155,4 +154,4 @@ def main(duration, runtime_mode, runner_mode, start_messages, number_of_runs):
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter

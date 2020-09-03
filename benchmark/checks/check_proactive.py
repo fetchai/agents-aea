@@ -21,7 +21,12 @@
 import time
 from threading import Thread
 
-from benchmark.checks.utils import (
+import click
+
+from aea.protocols.default.message import DefaultMessage
+from aea.skills.base import Behaviour
+
+from benchmark.checks.utils import (  # noqa: I100
     SyncedGeneratorConnection,
     make_agent,
     make_envelope,
@@ -29,11 +34,6 @@ from benchmark.checks.utils import (
     print_results,
 )
 from benchmark.checks.utils import make_skill, wait_for_condition
-
-import click
-
-from aea.protocols.default.message import DefaultMessage
-from aea.skills.base import Behaviour
 
 
 class TestBehaviour(Behaviour):
@@ -45,7 +45,7 @@ class TestBehaviour(Behaviour):
 
     def setup(self) -> None:
         """Set up behaviour."""
-        self._count = 0
+        self.count = 0  # pylint: disable=attribute-defined-outside-init
 
     def teardown(self) -> None:
         """Tear up behaviour."""
@@ -55,7 +55,7 @@ class TestBehaviour(Behaviour):
         s = time.time()
         while time.time() - s < self.tick_interval:
             self.context.outbox.put(make_envelope("1", "2"))
-            self._count += 1
+            self.count += 1
 
 
 def run(duration, runtime_mode):
@@ -73,10 +73,10 @@ def run(duration, runtime_mode):
     agent.stop()
     t.join(5)
 
-    rate = connection._count_in / duration
+    rate = connection.count_in / duration
     return [
-        ("envelopes sent: {}", skill.behaviours["test"]._count),
-        ("envelopes received: {}", connection._count_in),
+        ("envelopes sent: {}", skill.behaviours["test"].count),
+        ("envelopes received: {}", connection.count_in),
         ("rate: {} envelopes/second", rate),
     ]
 
@@ -89,7 +89,7 @@ def run(duration, runtime_mode):
 @click.option("--number_of_runs", default=10, help="How many times run teste.")
 def main(duration, runtime_mode, number_of_runs):
     """Run test."""
-    click.echo(f"Start test with options:")
+    click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")
     click.echo(f"* Runtime mode: {runtime_mode}")
     click.echo(f"* Number of runs: {number_of_runs}")
@@ -98,4 +98,4 @@ def main(duration, runtime_mode, number_of_runs):
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter

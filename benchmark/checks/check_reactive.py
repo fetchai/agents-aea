@@ -23,7 +23,14 @@ from statistics import mean
 from threading import Thread
 from typing import Optional
 
-from benchmark.checks.utils import (
+import click
+
+from aea.mail.base import Envelope
+from aea.protocols.base import Message
+from aea.protocols.default.message import DefaultMessage
+from aea.skills.base import Handler
+
+from benchmark.checks.utils import (  # noqa: I100
     SyncedGeneratorConnection,
     make_agent,
     make_envelope,
@@ -33,13 +40,6 @@ from benchmark.checks.utils import (
     wait_for_condition,
 )
 
-import click
-
-from aea.mail.base import Envelope
-from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.skills.base import Handler
-
 
 class TestConnection(SyncedGeneratorConnection):
     """Test connection with messages timing."""
@@ -47,18 +47,18 @@ class TestConnection(SyncedGeneratorConnection):
     def __init__(self, *args, **kwargs):
         """Init connection."""
         super().__init__(*args, **kwargs)
-        self._sends = list()
-        self._recvs = list()
+        self.sends = list()
+        self.recvs = list()
 
-    async def send(self, envelope: "Envelope") -> None:
+    async def send(self, envelope: Envelope) -> None:
         """Handle incoming envelope."""
-        self._recvs.append(time.time())
+        self.recvs.append(time.time())
         return await super().send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args, **kwargs) -> Optional[Envelope]:
         """Generate outgoing envelope."""
         envelope = await super().receive(*args, **kwargs)
-        self._sends.append(time.time())
+        self.sends.append(time.time())
         return envelope
 
 
@@ -94,14 +94,12 @@ def run(duration, runtime_mode):
     agent.stop()
     t.join(5)
 
-    latency = mean(
-        map(lambda x: x[1] - x[0], zip(connection._sends, connection._recvs,))
-    )
-    total_amount = len(connection._recvs)
+    latency = mean(map(lambda x: x[1] - x[0], zip(connection.sends, connection.recvs,)))
+    total_amount = len(connection.recvs)
     rate = total_amount / duration
     return [
-        ("envelopes received: {}", len(connection._recvs)),
-        ("envelopes sent: {}", len(connection._sends)),
+        ("envelopes received: {}", len(connection.recvs)),
+        ("envelopes sent: {}", len(connection.sends)),
         ("latency: {} second", latency),
         ("rate: {} envelopes/second", rate),
     ]
@@ -115,7 +113,7 @@ def run(duration, runtime_mode):
 @click.option("--number_of_runs", default=10, help="How many times run teste.")
 def main(duration, runtime_mode, number_of_runs):
     """Run test."""
-    click.echo(f"Start test with options:")
+    click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")
     click.echo(f"* Runtime mode: {runtime_mode}")
     click.echo(f"* Number of runs: {number_of_runs}")
@@ -124,4 +122,4 @@ def main(duration, runtime_mode, number_of_runs):
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter

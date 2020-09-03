@@ -19,6 +19,7 @@
 """Performance checks utils."""
 import asyncio
 import inspect
+import multiprocessing
 import os
 import time
 from multiprocessing import Pool
@@ -103,8 +104,8 @@ class GeneratorConnection(Connection):
         """Init connection."""
         super().__init__(*args, **kwargs)
         self._enabled = False
-        self._count_in = 0
-        self._count_out = 0
+        self.count_in = 0
+        self.count_out = 0
 
     def enable(self) -> None:
         """Enable message generation."""
@@ -124,7 +125,7 @@ class GeneratorConnection(Connection):
 
     async def send(self, envelope: "Envelope") -> None:
         """Handle incoming envelope."""
-        self._count_in += 1
+        self.count_in += 1
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Generate an envelope."""
@@ -132,7 +133,7 @@ class GeneratorConnection(Connection):
             await asyncio.sleep(self.ENABLED_WAIT_SLEEP)
 
         envelope = make_envelope(self.address, "echo_skill")
-        self._count_out += 1
+        self.count_out += 1
         return envelope
 
     @classmethod
@@ -198,7 +199,7 @@ def print_results(result: List[Tuple[str, Any]]) -> None:
     click.echo("\nResults:")
     for msg, value in result:
         click.echo(" * " + msg.format(value))
-    click.echo(f"Test finished.")
+    click.echo("Test finished.")
 
 
 def multi_run(num_runs: int, fn: Callable, args: Tuple) -> List[Tuple[str, Any]]:
@@ -211,6 +212,7 @@ def multi_run(num_runs: int, fn: Callable, args: Tuple) -> List[Tuple[str, Any]]
 
     :return: list of tuples of results
     """
+    multiprocessing.set_start_method("spawn")
     results = []
     for _ in range(num_runs):
         p = Pool(1)
