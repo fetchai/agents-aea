@@ -25,7 +25,7 @@ spec:
       - name: python
         image: python:3.8-buster
         # command: ['sh', '-c', 'echo "this stuff works!" | tee /data/index.html']
-        command: ['sh', '-c', 'python /app/run_benchmark.sh | tee /data/index.html ; sleep 300']
+        command: ['sh', '-c', 'bash /app/run_benchmark.sh | tee /data/index.html ; sleep 300']
         volumeMounts:
         - name: benchmark-data
           mountPath: /data

@@ -1,7 +1,7 @@
 #!/bin/bash
-REPO="https://github.com/fetchai/agents-aea.git"
+REPO=https://github.com/fetchai/agents-aea.git
 BRANCH=feature/benchmarks
-TMP_DIR="$(mktemp -d -t bench-XXXXXXXXXX)"
+TMP_DIR=$(mktemp -d -t bench-XXXXXXXXXX)
 git clone --branch $BRANCH $REPO $TMP_DIR
 
 CURDIR=`pwd`
@@ -13,7 +13,7 @@ pip install -r requirements.txt
 
 
 DATE=`LC_ALL=C date +"%d.%m.%Y %H:%M"`
-RESULT_FILE="$CURDIR\$DATE.txt"
+RESULT_FILE=$CURDIR\$DATE.txt
 echo "Performance report for $DATE" | tee --append "$RESULT_FILE"
 echo -e "-----------------------------\n" | tee --append "$RESULT_FILE"
 
