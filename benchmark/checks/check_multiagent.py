@@ -70,6 +70,7 @@ class TestHandler(Handler):
 def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     """Test multiagent message exchange."""
     local_node = LocalNode()
+    local_node.start()
 
     agents = []
     skills = []
@@ -88,7 +89,6 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
         agent.resources.add_skill(skill)
         agents.append(agent)
         skills.append(skill)
-    local_node.start()
 
     runner = AEARunner(agents, runner_mode)
     runner.start(threaded=True)
@@ -96,6 +96,7 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     for agent in agents:
         wait_for_condition(lambda: agent.is_running, timeout=5)
     wait_for_condition(lambda: runner.is_running, timeout=5)
+    time.sleep(1)
 
     for agent1, agent2 in itertools.permutations(agents, 2):
         env = make_envelope(agent1.identity.address, agent2.identity.address)

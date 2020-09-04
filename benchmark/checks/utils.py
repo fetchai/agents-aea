@@ -197,7 +197,8 @@ def get_mem_usage_in_mb() -> float:
 def print_results(result: List[Tuple[str, Any, Any, Any]]) -> None:
     """Print result for multi_run response."""
     click.echo("\nResults:")
-    for msg, mean_, stdev_, variance_ in result:
+    for msg, *values_set in result:
+        mean_, stdev_, variance_ = map(lambda x: round(x, 6), values_set)
         click.echo(f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} ")
     click.echo("Test finished.")
 

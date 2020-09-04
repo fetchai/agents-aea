@@ -113,7 +113,7 @@ def run(duration, runtime_mode, connection_mode):
     return [
         ("envelopes received", len(connection.recvs)),
         ("envelopes sent", len(connection.sends)),
-        ("latency(seconds)", latency),
+        ("latency(ms)", 10 ** 6 * latency),
         ("rate(envelopes/second)", rate),
     ]
 
