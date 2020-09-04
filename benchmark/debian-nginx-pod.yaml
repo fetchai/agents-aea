@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: benchmark
+  namespace: aea-research
+spec:
+  tolerations:
+  - key: dedicated
+    operator: Equal
+    value: agent
+    effect: NoSchedule
+  nodeSelector:
+    type: agent-test
+  containers:
+  - name: debian
+    image: nginx:1.18.0
+
+  initContainers:
+  - name: python
+    image: python:3.8-buster
+    command: ['sh', '-c', 'echo "this stuff works!"']

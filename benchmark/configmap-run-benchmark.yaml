@@ -1,0 +1,43 @@
+apiVersion: v1
+data:
+  run_benchmark.sh: "#!/bin/bash\nREPO=https://github.com/fetchai/agents-aea.git\nBRANCH=feature/benchmarks\nTMP_DIR=$(mktemp
+    -d -t bench-XXXXXXXXXX)\ngit clone --branch $BRANCH $REPO $TMP_DIR\n\nCURDIR=`pwd`\ncd
+    $TMP_DIR\npip install --upgrade aea\npipenv lock --requirements > requirements.txt\npip
+    install -r requirements.txt\n\n\n\nDATE=`LC_ALL=C date +\"%d.%m.%Y %H:%M\"`\nRESULT_FILE=$CURDIR\\$DATE.txt\necho
+    \"Performance report for $DATE\" | tee --append \"$RESULT_FILE\"\necho -e \"-----------------------------\\n\"
+    | tee --append \"$RESULT_FILE\"\n\n\nDURATION=10\nNUM_RUNS=100\n\n\necho \"Reactive:
+    number of runs: $NUM_RUNS, duration: $DURATION\" | tee --append \"$RESULT_FILE\"\necho
+    \"----------------------------------------------------\" | tee --append \"$RESULT_FILE\"\necho
+    \"runtime mode        value          mean        stdev\" | tee --append \"$RESULT_FILE\"\necho
+    \"----------------------------------------------------\" | tee --append \"$RESULT_FILE\"\nfor
+    mode in threaded async;\ndo\n\tdata=`./benchmark/checks/check_reactive.py --duration=$DURATION
+    --number_of_runs=$NUM_RUNS --runtime_mode=$mode 2>/dev/null`\n\tlatency=`echo
+    \"$data\"|grep latency|awk '{print $4 \"    \" $6}'`\n\trate=`echo \"$data\"|grep
+    rate|awk '{print $4 \"    \" $6}'`\n\techo -e \"$mode    latency     ${latency}\"
+    | tee --append \"$RESULT_FILE\"\n\techo -e \"$mode    rate     ${rate}\" | tee
+    --append \"$RESULT_FILE\"\n\ndone\n\n\necho -e \"\\nProactive: number of runs:
+    $NUM_RUNS, duration: $DURATION\" | tee --append \"$RESULT_FILE\"\necho \"----------------------------------------------------\"
+    | tee --append \"$RESULT_FILE\"\necho \"runtime mode        value          mean
+    \       stdev\" | tee --append \"$RESULT_FILE\"\necho \"----------------------------------------------------\"
+    | tee --append \"$RESULT_FILE\"\nfor mode in threaded async;\ndo\n\tdata=`./benchmark/checks/check_proactive.py
+    --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode 2>/dev/null`\n\tlatency=`echo
+    \"$data\"|grep latency|awk '{print $4 \"    \" $6}'`\n\trate=`echo \"$data\"|grep
+    rate|awk '{print $4 \"    \" $6}'`\n\techo -e \"$mode    rate     ${rate}\" |
+    tee --append \"$RESULT_FILE\"\n\ndone\n\nMESSAGES=100\necho -e \"\\nMultiAgent:
+    number of runs: $NUM_RUNS, duration: $DURATION, messages: $MESSAGES\"\necho \"------------------------------------------------------------------\"\necho
+    \"runtime mode     num_agents       value          mean        stdev\"\necho \"------------------------------------------------------------------\"\nfor
+    mode in threaded async;\ndo\n\tfor agent in 2 4 8 16;\n\tdo\n\t\tdata=`./benchmark/checks/check_multiagent.py
+    --num_of_agents=$agent --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode
+    --start_messages=$MESSAGES --runner_mode=threaded 2>/dev/null`\n\t\trate=`echo
+    \"$data\"|grep rate|awk '{print $5 \"    \" $7}'`\n\t\tmem=`echo \"$data\"|grep
+    Mem|awk '{print $5 \"    \" $7}'`\n\t\techo -e \"$mode     $agent    rate     ${rate}\"
+    | tee --append \"$RESULT_FILE\"\n\t\techo -e \"$mode     $agent    mem     ${mem}\"
+    | tee --append \"$RESULT_FILE\"\n\tdone\ndone\n\nrm -fr $TMPDIR\ncd $CURDIR\n"
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2020-09-04T15:15:52Z"
+  name: run-benchmark
+  namespace: aea-research
+  resourceVersion: "96803459"
+  selfLink: /api/v1/namespaces/aea-research/configmaps/run-benchmark
+  uid: 85446e61-eec1-11ea-acb1-42010a7f610b
