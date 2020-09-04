@@ -18,8 +18,8 @@ echo "Performance report for $DATE" | tee -a "$RESULT_FILE"
 echo -e "-----------------------------\n" | tee -a "$RESULT_FILE"
 
 
-DURATION=1
-NUM_RUNS=2
+DURATION=10
+NUM_RUNS=100
 
 
 echo "Reactive: number of runs: $NUM_RUNS, duration: $DURATION" | tee -a "$RESULT_FILE"
@@ -33,7 +33,6 @@ do
 	rate=`echo "$data"|grep rate|awk '{print $4 "    " $6}'`
 	echo -e "$mode    latency     ${latency}" | tee -a "$RESULT_FILE"
 	echo -e "$mode    rate     ${rate}" | tee -a "$RESULT_FILE"
-
 done
 
 
@@ -47,7 +46,6 @@ do
 	latency=`echo "$data"|grep latency|awk '{print $4 "    " $6}'`
 	rate=`echo "$data"|grep rate|awk '{print $4 "    " $6}'`
 	echo -e "$mode    rate     ${rate}" | tee -a "$RESULT_FILE"
-
 done
 
 MESSAGES=100
