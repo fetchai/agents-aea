@@ -1,21 +1,56 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1beta2
+kind: Deployment
 metadata:
   name: benchmark
-  namespace: aea-research
 spec:
-  tolerations:
-  - key: dedicated
-    operator: Equal
-    value: agent
-    effect: NoSchedule
-  nodeSelector:
-    type: agent-test
-  containers:
-  - name: debian
-    image: nginx:1.18.0
+  selector:
+    matchLabels:
+      app: benchmark
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: benchmark
+      namespace: aea-research
+    spec:
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: agent
+        effect: NoSchedule
+      # nodeSelector:
+      #   type: agent-test
 
-  initContainers:
-  - name: python
-    image: python:3.8-buster
-    command: ['sh', '-c', 'echo "this stuff works!"']
+      initContainers:
+      - name: python
+        image: python:3.8-buster
+        command: ['sh', '-c', 'echo "this stuff works!" > /data/index.html']
+        # command: ['sh', '-c', 'echo "this stuff works!"']
+        volumeMounts:
+        - mountPath: /data
+          name: benchmark-data
+
+      containers:
+      - name: benchmark
+        image: nginx:1.18.0
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: benchmark-data
+      
+      volumes:
+      - name: benchmark-data
+        persistentVolumeClaim:
+          claimName: benchmark-vol
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: benchmark-vol
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
