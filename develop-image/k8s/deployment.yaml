@@ -13,6 +13,13 @@ spec:
       labels:
         app: aea-develop-image
     spec:
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: agent
+        effect: NoSchedule
+      nodeSelector:
+        type: agent-test
       containers:
       - image: gcr.io/fetch-ai-sandbox/aea-develop-image
         name: aea-develop-image
@@ -40,6 +47,13 @@ spec:
       labels:
         app: aea-deploy-image
     spec:
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: agent
+        effect: NoSchedule
+      nodeSelector:
+        type: agent-test
       containers:
       - image: gcr.io/fetch-ai-sandbox/aea-deploy-image
         name: aea-deploy-image

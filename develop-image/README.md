@@ -82,3 +82,13 @@ SSH into a new image:
 ```
 kubectl run --generator=run-pod/v1 -it debian --image=debian -- bash
 ```
+
+# Dedicated node pool for benchmarking agents
+To create the node pool
+```
+gcloud container node-pools create agent-test-pool --cluster sandbox --project fetch-ai-sandbox --node-taints dedicated=agent:NoSchedule --machine-type=n1-standard-4 --num-nodes=1 --enable-autoscaling --node-labels=type=agent-test --max-nodes=1  --min-nodes=0
+```
+To remove the node pool 
+```
+gcloud container node-pools delete agent-test-pool --cluster sandbox --project fetch-ai-sandbox
+```
