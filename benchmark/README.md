@@ -45,6 +45,12 @@ To deploy:
 kubectl apply -f benchmark-deployment.yaml
 ```
 
+List pods:
+
+``` bash
+kubectl get pod -o wide
+```
+
 To access nginx (wait for status: ` `):
 ``` bash
 kubectl port-forward NODE_NAME 8000:80
