@@ -57,5 +57,5 @@ kubectl port-forward NODE_NAME 8000:80
 ```
 then
 ``` bash
-curl localhost:8000
+curl localhost:8000 | tee results.txt
 ```
