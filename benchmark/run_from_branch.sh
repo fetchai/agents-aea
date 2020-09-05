@@ -13,10 +13,6 @@ pipenv install --dev
 # this is to install the AEA in the Pipenv virtual env
 pipenv run pip install --upgrade aea[all]=="0.6.0"
 
-
-DATE=`LC_ALL=C date +"%d.%m.%Y_%H:%M"`
-RESULT_FILE=$CURDIR/$DATE.txt
-
 chmod +x benchmark/checks/run_benchmark.sh
 # we need to add the current directory to PYTHONPATH so we can import from local dirs
 PYTHONPATH=${PYTHONPATH}:. pipenv run ./benchmark/checks/run_benchmark.sh
