@@ -6,7 +6,7 @@ git clone --branch $BRANCH $REPO $TMP_DIR
 
 CURDIR=`pwd`
 cd $TMP_DIR
-pip install --upgrade aea
+pip install --upgrade aea[all]=="0.6.0"
 # pipenv lock --requirements > requirements.txt
 # pip install -r requirements.txt
 
@@ -15,8 +15,9 @@ pip install --upgrade aea
 DATE=`LC_ALL=C date +"%d.%m.%Y_%H:%M"`
 RESULT_FILE=$CURDIR/$DATE.txt
 
-data=`./benchmark/checks/run_benchmark.sh $DATE`
-echo $data | tee -a "$RESULT_FILE"
+chmod +x benchmark/checks/run_benchmark.sh
+data=`./benchmark/checks/run_benchmark.sh`
+echo "$data" | tee -a "$RESULT_FILE"
 
 # DATE=`LC_ALL=C date +"%d.%m.%Y_%H:%M"`
 # RESULT_FILE=$CURDIR/$DATE.txt

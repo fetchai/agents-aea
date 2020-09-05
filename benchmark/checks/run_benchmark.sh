@@ -1,11 +1,14 @@
 #!/bin/bash
-DATE=$1
+DATE=`LC_ALL=C date +"%d.%m.%Y_%H:%M"`
 echo "Performance report for $DATE"
 echo -e "-----------------------------\n"
 
 
 DURATION=1
+# 10
 NUM_RUNS=2
+# 100
+MESSAGES=100
 
 
 chmod +x benchmark/checks/check_reactive.py
@@ -39,7 +42,6 @@ done
 # ~ 10 * 2 * 100 sec = 33.3 min
 
 chmod +x benchmark/checks/check_multiagent.py
-MESSAGES=100
 echo -e "\nMultiAgent: number of runs: $NUM_RUNS, duration: $DURATION, messages: $MESSAGES"
 echo "------------------------------------------------------------------"
 echo "runtime mode     num_agents       value          mean        stdev"
