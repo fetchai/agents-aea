@@ -7,6 +7,12 @@ kubectl delete configmap run-benchmark
 kubectl create configmap run-benchmark --from-file=run_benchmark.sh
 ```
 
+To remove old nodes (auto-restarts new node):
+
+``` bash
+kubectl delete pod NODE_NAME
+```
+
 To access nginx you will need something like:
 ``` bash
 kubectl port-forward NODE_NAME 8000:80
