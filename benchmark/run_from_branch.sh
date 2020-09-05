@@ -6,18 +6,20 @@ git clone --branch $BRANCH $REPO $TMP_DIR
 
 CURDIR=`pwd`
 cd $TMP_DIR
-pip install --upgrade aea[all]=="0.6.0"
-# pipenv lock --requirements > requirements.txt
-# pip install -r requirements.txt
 
+pip install pipenv
+# this is to install benchmark dependencies
+pipenv install --dev
+# this is to install the AEA in the Pipenv virtual env
+pipenv run pip install --upgrade aea[all]=="0.6.0"
 
 
 DATE=`LC_ALL=C date +"%d.%m.%Y_%H:%M"`
 RESULT_FILE=$CURDIR/$DATE.txt
 
 chmod +x benchmark/checks/run_benchmark.sh
-data=`./benchmark/checks/run_benchmark.sh`
-echo "$data" | tee -a "$RESULT_FILE"
+# we need to add the current directory to PYTHONPATH so we can import from local dirs
+PYTHONPATH=${PYTHONPATH}:. pipenv run ./benchmark/checks/run_benchmark.sh
 
 # DATE=`LC_ALL=C date +"%d.%m.%Y_%H:%M"`
 # RESULT_FILE=$CURDIR/$DATE.txt

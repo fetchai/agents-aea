@@ -24,7 +24,7 @@ spec:
       initContainers:
       - name: python
         image: python:3.8-buster
-        command: ['sh', '-c', 'bash /app/run_from_branch.sh | tee /data/index.html']
+        command: ['sh', '-c', 'bash /app/run_from_branch.sh 2>&1 | tee /data/index.html']
         volumeMounts:
         - name: benchmark-data
           mountPath: /data
