@@ -1245,7 +1245,7 @@ class TestDialoguesBase:
         assert len(self.own_dialogues.dialogues) == 0
 
     def test_update_negative_no_matching_to(self):
-        """Negative test for the 'update' method: the 'sender' field of the input message is not set."""
+        """Negative test for the 'update' method: the 'to' field of the input message does not match self address."""
         invalid_message_1_by_other = DefaultMessage(
             dialogue_reference=(str(1), ""),
             performative=DefaultMessage.Performative.BYTES,
