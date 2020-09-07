@@ -5,7 +5,8 @@ echo -e "-----------------------------\n"
 
 
 DURATION=10
-NUM_RUNS=100
+#NUM_RUNS=100
+NUM_RUNS=5
 MESSAGES=100
 
 
