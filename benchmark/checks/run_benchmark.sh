@@ -4,9 +4,10 @@ echo "Performance report for $DATE"
 echo -e "-----------------------------\n"
 
 
-DURATION=10
+#DURATION=10
 #NUM_RUNS=100
-NUM_RUNS=5
+DURATION=3
+NUM_RUNS=3
 MESSAGES=100
 
 
