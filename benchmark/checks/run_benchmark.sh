@@ -23,8 +23,8 @@ MESSAGES=100
 # 	echo -e "$mode    rate     ${rate}"
 # done
 # # ~ 10 * 2 * 100 sec = 33.3 min
-# 
-# 
+#
+#
 # chmod +x benchmark/checks/check_proactive.py
 # echo -e "\nProactive: number of runs: $NUM_RUNS, duration: $DURATION"
 # echo "----------------------------------------------------"
@@ -51,8 +51,12 @@ do
 		data=`./benchmark/checks/check_multiagent.py --num_of_agents=$agent --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode --start_messages=$MESSAGES --runner_mode=threaded`
 		rate=`echo "$data"|grep rate|awk '{print $5 "    " $7}'`
 		mem=`echo "$data"|grep Mem|awk '{print $5 "    " $7}'`
+		latency_mean=`echo "$data"|grep 'Latency.mean'|awk '{print $7 "    " $9}'`
+		latency_total=`echo "$data"|grep 'Latency.total'|awk '{print $5 "    " $7}'`
 		echo -e "$mode     $agent    rate     ${rate}"
 		echo -e "$mode     $agent    mem     ${mem}"
+		echo -e "$mode     $agent    latency agents     ${latency_mean}"
+		echo -e "$mode     $agent    latency total     ${latency_total}"
 	done
 done
 # ~ 10 * 2 * 4 * 100 sec = 133.3 min

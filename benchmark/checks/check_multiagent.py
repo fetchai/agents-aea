@@ -20,8 +20,12 @@
 """Envelopes generation speed for Behaviour act test."""
 import itertools
 import os
+import struct
 import sys
 import time
+from statistics import mean
+from typing import cast
+
 
 import click
 
@@ -56,15 +60,47 @@ class TestHandler(Handler):
 
     def setup(self) -> None:
         """Noop setup."""
-        self.count = 0  # pylint: disable=attribute-defined-outside-init
+        self.count: int = 0  # pylint: disable=attribute-defined-outside-init
+        self.cummulative_time: float = 0.0  # pylint: disable=attribute-defined-outside-init
+        self.messages_counted: int = 0  # pylint: disable=attribute-defined-outside-init
 
     def teardown(self) -> None:
         """Noop teardown."""
 
+    def latency(self) -> float:
+        """Get latency for messages processed."""
+        if self.messages_counted:
+            return self.cummulative_time / self.messages_counted
+        return 0
+
     def handle(self, message: Message) -> None:
         """Handle incoming message."""
         self.count += 1
-        self.context.outbox.put(make_envelope(message.to, message.sender))
+
+        if message.dialogue_reference[0] == self.context.agent_address:
+            self.cummulative_time += time.time() - cast(
+                float, struct.unpack("d", message.content)[0]  # type: ignore
+            )
+            self.messages_counted += 1
+
+        if message.dialogue_reference[0] in ["", self.context.agent_address]:
+            response_msg = DefaultMessage(
+                dialogue_reference=(self.context.agent_address, ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=struct.pack("d", time.time()),
+            )
+        else:
+            response_msg = DefaultMessage(
+                dialogue_reference=message.dialogue_reference,
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=message.content,  # type: ignore
+            )
+
+        self.context.outbox.put(make_envelope(message.to, message.sender, response_msg))
 
 
 def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
@@ -112,12 +148,18 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     runner.stop()
 
     total_messages = sum([skill.handlers["test"].count for skill in skills])
+    avg_latency = mean([skill.handlers["test"].latency() for skill in skills])
     rate = total_messages / duration
-
+    total = sum([skill.handlers["test"].cummulative_time for skill in skills])
+    count = sum([skill.handlers["test"].messages_counted for skill in skills])
+    if count == 0:
+        count = -1
     return [
         ("Total Messages handled", total_messages),
         ("Messages rate(envelopes/second)", rate),
         ("Mem usage(Mb)", mem_usage),
+        ("Latency(mean of agents) (ms)", avg_latency),
+        ("Latency(total/count) (ms)", total / count),
     ]
 
 

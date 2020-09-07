@@ -78,15 +78,18 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
     return AEA(identity, wallet, resources, runtime_mode=runtime_mode)
 
 
-def make_envelope(sender: str, to: str) -> Envelope:
+def make_envelope(
+    sender: str, to: str, message: Optional[DefaultMessage] = None
+) -> Envelope:
     """Make an envelope."""
-    message = DefaultMessage(
-        dialogue_reference=("", ""),
-        message_id=1,
-        target=0,
-        performative=DefaultMessage.Performative.BYTES,
-        content=b"content",
-    )
+    if message is None:
+        message = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"content",
+        )
     message.sender = sender
     message.to = to
     return Envelope(
