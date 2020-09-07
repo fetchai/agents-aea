@@ -51,12 +51,12 @@ do
 		data=`./benchmark/checks/check_multiagent.py --num_of_agents=$agent --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode --start_messages=$MESSAGES --runner_mode=threaded`
 		rate=`echo "$data"|grep rate|awk '{print $5 "    " $7}'`
 		mem=`echo "$data"|grep Mem|awk '{print $5 "    " $7}'`
-		latency_mean=`echo "$data"|grep 'Latency.mean'|awk '{print $7 "    " $9}'`
-		latency_total=`echo "$data"|grep 'Latency.total'|awk '{print $5 "    " $7}'`
+		rtt_latency=`echo "$data"|grep 'RTT'|awk '{print $5 "    " $7}'`
+		latency=`echo "$data"|grep 'Latency'|awk '{print $5 "    " $7}'`
 		echo -e "$mode     $agent    rate     ${rate}"
 		echo -e "$mode     $agent    mem     ${mem}"
-		echo -e "$mode     $agent    latency agents     ${latency_mean}"
-		echo -e "$mode     $agent    latency total     ${latency_total}"
+		echo -e "$mode     $agent    RTT     ${rtt_latency}"
+		echo -e "$mode     $agent    latency     ${latency}"
 	done
 done
 # ~ 10 * 2 * 4 * 100 sec = 133.3 min
