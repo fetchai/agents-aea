@@ -9,35 +9,35 @@ NUM_RUNS=100
 MESSAGES=100
 
 
-chmod +x benchmark/checks/check_reactive.py
-echo "Reactive: number of runs: $NUM_RUNS, duration: $DURATION"
-echo "----------------------------------------------------"
-echo "runtime mode        value          mean        stdev"
-echo "----------------------------------------------------"
-for mode in threaded async;
-do
-	data=`./benchmark/checks/check_reactive.py --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode`
-	latency=`echo "$data"|grep latency|awk '{print $4 "    " $6}'`
-	rate=`echo "$data"|grep rate|awk '{print $4 "    " $6}'`
-	echo -e "$mode    latency     ${latency}"
-	echo -e "$mode    rate     ${rate}"
-done
-# ~ 10 * 2 * 100 sec = 33.3 min
-
-
-chmod +x benchmark/checks/check_proactive.py
-echo -e "\nProactive: number of runs: $NUM_RUNS, duration: $DURATION"
-echo "----------------------------------------------------"
-echo "runtime mode        value          mean        stdev"
-echo "----------------------------------------------------"
-for mode in threaded async;
-do
-	data=`./benchmark/checks/check_proactive.py --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode`
-	latency=`echo "$data"|grep latency|awk '{print $4 "    " $6}'`
-	rate=`echo "$data"|grep rate|awk '{print $4 "    " $6}'`
-	echo -e "$mode    rate     ${rate}"
-done
-# ~ 10 * 2 * 100 sec = 33.3 min
+# chmod +x benchmark/checks/check_reactive.py
+# echo "Reactive: number of runs: $NUM_RUNS, duration: $DURATION"
+# echo "----------------------------------------------------"
+# echo "runtime mode        value          mean        stdev"
+# echo "----------------------------------------------------"
+# for mode in threaded async;
+# do
+# 	data=`./benchmark/checks/check_reactive.py --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode`
+# 	latency=`echo "$data"|grep latency|awk '{print $4 "    " $6}'`
+# 	rate=`echo "$data"|grep rate|awk '{print $4 "    " $6}'`
+# 	echo -e "$mode    latency     ${latency}"
+# 	echo -e "$mode    rate     ${rate}"
+# done
+# # ~ 10 * 2 * 100 sec = 33.3 min
+# 
+# 
+# chmod +x benchmark/checks/check_proactive.py
+# echo -e "\nProactive: number of runs: $NUM_RUNS, duration: $DURATION"
+# echo "----------------------------------------------------"
+# echo "runtime mode        value          mean        stdev"
+# echo "----------------------------------------------------"
+# for mode in threaded async;
+# do
+# 	data=`./benchmark/checks/check_proactive.py --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode`
+# 	latency=`echo "$data"|grep latency|awk '{print $4 "    " $6}'`
+# 	rate=`echo "$data"|grep rate|awk '{print $4 "    " $6}'`
+# 	echo -e "$mode    rate     ${rate}"
+# done
+# # ~ 10 * 2 * 100 sec = 33.3 min
 
 chmod +x benchmark/checks/check_multiagent.py
 echo -e "\nMultiAgent: number of runs: $NUM_RUNS, duration: $DURATION, messages: $MESSAGES"
