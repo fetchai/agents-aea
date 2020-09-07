@@ -1139,6 +1139,10 @@ class Dialogues(ABC):
         enforce(
             message.has_to, "The message's 'to' field is not set {}".format(message)
         )
+        enforce(
+            message.to == self.self_address,
+            "Message to and dialogue self address do not match.",
+        )
 
         dialogue_reference = message.dialogue_reference
 
