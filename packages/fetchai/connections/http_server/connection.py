@@ -226,7 +226,9 @@ class Response(web.Response):
         if http_message.performative == HttpMessage.Performative.RESPONSE:
 
             if http_message.is_set("headers") and http_message.headers:
-                headers = dict(email.message_from_string(http_message.headers))  # type: ignore
+                headers: Optional[dict] = dict(
+                    email.message_from_string(http_message.headers).items()
+                )
             else:
                 headers = None
 
