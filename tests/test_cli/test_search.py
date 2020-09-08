@@ -275,7 +275,7 @@ class RegistrySearchTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
-            "GET", "/connections", params={"search": "some"}
+            "GET", "/connections", params={"search": "some", "page": 1}
         )
         format_items_mock.assert_called_once_with(["correct", "results"])
 
@@ -293,7 +293,7 @@ class RegistrySearchTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
-            "GET", "/agents", params={"search": "some"}
+            "GET", "/agents", params={"search": "some", "page": 1}
         )
         format_items_mock.assert_called_once_with(["correct", "results"])
 
@@ -311,7 +311,7 @@ class RegistrySearchTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
-            "GET", "/protocols", params={"search": "some"}
+            "GET", "/protocols", params={"search": "some", "page": 1}
         )
         format_items_mock.assert_called_once_with(["correct", "results"])
 
@@ -329,7 +329,7 @@ class RegistrySearchTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
-            "GET", "/skills", params={"search": "some"}
+            "GET", "/skills", params={"search": "some", "page": 1}
         )
         format_items_mock.assert_called_once_with(["correct", "results"])
 
