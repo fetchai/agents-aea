@@ -224,10 +224,17 @@ class Response(web.Response):
         :return: the response
         """
         if http_message.performative == HttpMessage.Performative.RESPONSE:
+
+            if http_message.is_set("headers") and http_message.headers:
+                headers = dict(email.message_from_string(http_message.headers))  # type: ignore
+            else:
+                headers = None
+
             response = cls(
                 status=http_message.status_code,
                 reason=http_message.status_text,
                 body=http_message.bodyy,
+                headers=headers,
             )
         else:  # pragma: nocover
             response = cls(status=SERVER_ERROR, text="Server error")

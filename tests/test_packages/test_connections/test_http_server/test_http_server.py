@@ -162,7 +162,6 @@ class TestHTTPServer:
             target_message=incoming_message,
             performative=HttpMessage.Performative.RESPONSE,
             version=incoming_message.version,
-            headers=incoming_message.headers,
             status_code=200,
             status_text="Success",
             bodyy=b"Response body",
@@ -183,6 +182,40 @@ class TestHTTPServer:
             and response.reason == "Success"
             and await response.text() == "Response body"
         )
+
+    @pytest.mark.asyncio
+    async def test_header_content_type(self):
+        """Test send get request w/ 200 response."""
+        content_type = "something/unique"
+        request_task = self.loop.create_task(self.request("get", "/pets"))
+        envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
+        assert envelope
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
+        message = dialogue.reply(
+            target_message=incoming_message,
+            performative=HttpMessage.Performative.RESPONSE,
+            version=incoming_message.version,
+            headers=f"Content-Type: {content_type}",
+            status_code=200,
+            status_text="Success",
+            bodyy=b"Response body",
+        )
+        response_envelope = Envelope(
+            to=envelope.sender,
+            sender=envelope.to,
+            protocol_id=envelope.protocol_id,
+            context=envelope.context,
+            message=message,
+        )
+        await self.http_connection.send(response_envelope)
+
+        response = await asyncio.wait_for(request_task, timeout=20,)
+        assert (
+            response.status == 200
+            and response.reason == "Success"
+            and await response.text() == "Response body"
+        )
+        assert response.headers["Content-Type"] == content_type
 
     @pytest.mark.asyncio
     async def test_bad_performative_get_timeout_error(self):
@@ -280,7 +313,6 @@ class TestHTTPServer:
             target_message=incoming_message,
             performative=HttpMessage.Performative.RESPONSE,
             version=incoming_message.version,
-            headers=incoming_message.headers,
             status_code=201,
             status_text="Created",
             bodyy=b"Response body",
