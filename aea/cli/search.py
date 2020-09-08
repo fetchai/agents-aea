@@ -203,7 +203,9 @@ def _search_items_locally(ctx, item_type_plural):
     return sorted(result, key=lambda k: k["name"])
 
 
-def search_items(ctx: Context, item_type: str, query: str, page: int) -> Tuple[List, int]:
+def search_items(
+    ctx: Context, item_type: str, query: str, page: int
+) -> Tuple[List, int]:
     """
     Search items by query and click.echo results.
 
@@ -220,14 +222,18 @@ def search_items(ctx: Context, item_type: str, query: str, page: int) -> Tuple[L
         count = len(results)
     else:
         resp = request_api(
-            "GET", "/{}".format(item_type_plural), params={"search": query, "page": page}
+            "GET",
+            "/{}".format(item_type_plural),
+            params={"search": query, "page": page},
         )
         results = resp["results"]
         count = resp["count"]
     return results, count
 
 
-def _output_search_results(item_type: str, results: List[Dict], count: int, page: int) -> None:
+def _output_search_results(
+    item_type: str, results: List[Dict], count: int, page: int
+) -> None:
     """
     Output search results.
 
@@ -244,5 +250,8 @@ def _output_search_results(item_type: str, results: List[Dict], count: int, page
         click.echo("{} found:\n".format(item_type_plural.title()))
         click.echo(format_items(results))
         if count > len_results:
-            offset = len_results * page
-            click.echo("{} {} out of {}.\nPage {}".format(len_results, item_type_plural, count, page))
+            click.echo(
+                "{} {} out of {}.\nPage {}".format(
+                    len_results, item_type_plural, count, page
+                )
+            )
