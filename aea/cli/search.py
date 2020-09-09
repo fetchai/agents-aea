@@ -254,4 +254,4 @@ def _output_search_results(
                 "{} {} out of {}.\nPage {}".format(
                     len_results, item_type_plural, count, page
                 )
-            )
+            )  # pragma: no cover
