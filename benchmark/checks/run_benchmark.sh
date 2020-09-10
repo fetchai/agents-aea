@@ -46,7 +46,8 @@ echo "runtime mode     num_agents       value          mean        stdev"
 echo "------------------------------------------------------------------"
 for mode in threaded async;
 do
-	for agent in 2 4 8 16;
+	# for agent in 2 4 8 16;
+	for agent in 32 64 128;
 	do
 		data=`./benchmark/checks/check_multiagent.py --num_of_agents=$agent --duration=$DURATION --number_of_runs=$NUM_RUNS --runtime_mode=$mode --start_messages=$MESSAGES --runner_mode=threaded`
 		rate=`echo "$data"|grep rate|awk '{print $5 "    " $7}'`
