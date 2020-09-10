@@ -138,7 +138,6 @@ def test_double_start():
     with run_in_thread(agent.start, timeout=20):
         try:
             wait_for_condition(lambda: agent.is_running, timeout=20)
-            print(111, "started!")
             t = Thread(target=agent.start)
             t.start()
             time.sleep(1)
@@ -185,13 +184,17 @@ def test_react():
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
             wait_for_condition(lambda: agent.is_running, timeout=20)
+            time.sleep(1)
             agent.outbox.put(envelope)
+            print("111 msg put", flush=True)
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
             handler = agent.resources.get_handler(
                 default_protocol_public_id, dummy_skill_public_id
             )
+
             assert handler is not None, "Handler is not set."
+
             wait_for_condition(
                 lambda: len(handler.handled_messages) > 0,
                 timeout=20,

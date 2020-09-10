@@ -276,11 +276,11 @@ class AsyncRuntime(BaseRuntime):
         """
         self.main_loop.stop()
         with suppress(StopRuntime):
-            await self.main_loop.wait()
+            await self.main_loop.wait_completed()
         self._teardown()
 
         self.multiplexer.stop()
-        await self.multiplexer.wait()
+        await self.multiplexer.wait_completed()
         logger.debug("Runtime loop stopped!")
 
     async def run_runtime(self) -> None:
@@ -293,7 +293,7 @@ class AsyncRuntime(BaseRuntime):
         self.setup_multiplexer()
         self.multiplexer.set_loop(self._loop)
         self.multiplexer.start()
-        await self.multiplexer.wait()
+        await self.multiplexer.wait_completed()
 
     async def _start_agent_loop(self) -> None:
         """Start agent main loop asynchronous way."""
@@ -310,12 +310,16 @@ class AsyncRuntime(BaseRuntime):
         self.main_loop.start()
         self._state.set(RuntimeStates.running)
         try:
-            await self.main_loop.wait()
+            await self.main_loop.wait_completed()
         except asyncio.CancelledError:
             self.main_loop.stop()
-            await self.main_loop.wait()
+            await self.main_loop.wait_completed()
             raise
 
 
 class ThreadedRuntime(AsyncRuntime):
     """Run agent and multiplexer in different threads with own asyncio loops."""
+
+    def _get_multiplexer_instance(self) -> AsyncMultiplexer:
+        """Create multiplexer instance."""
+        return AsyncMultiplexer(self._agent.connections, threaded=True)

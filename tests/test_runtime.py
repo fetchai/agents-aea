@@ -50,15 +50,16 @@ class TestAsyncRuntime:
         self.runtime = self.RUNTIME(self.agent, threaded=True)
 
     def teardown(self):
+        """Tear down."""
         self.runtime.stop()
-        self.runtime.wait(sync=True)
+        self.runtime.wait_completed(sync=True)
 
     def test_start_stop(self):
         """Test runtime tart/stop."""
         self.runtime.start()
         wait_for_condition(lambda: self.runtime.is_running, timeout=20)
         self.runtime.stop()
-        self.runtime.wait(sync=True)
+        self.runtime.wait_completed(sync=True)
 
     def test_double_start(self):
         """Test runtime double start do nothing."""
@@ -71,11 +72,11 @@ class TestAsyncRuntime:
         self.runtime.start()
         wait_for_condition(lambda: self.runtime.is_running, timeout=20)
         self.runtime.stop()
-        self.runtime.wait(sync=True)
+        self.runtime.wait_completed(sync=True)
         assert self.runtime.is_stopped
 
         self.runtime.stop()
-        self.runtime.wait(sync=True)
+        self.runtime.wait_completed(sync=True)
         assert self.runtime.is_stopped
 
     def test_error_state(self):
@@ -84,7 +85,7 @@ class TestAsyncRuntime:
             self.runtime, "_start_agent_loop", side_effect=ValueError("oops")
         ):
             with pytest.raises(ValueError, match="oops"):
-                self.runtime.start_and_wait(sync=True)
+                self.runtime.start_and_wait_completed(sync=True)
 
         assert self.runtime.state == RuntimeStates.error, self.runtime.state
 
@@ -100,6 +101,6 @@ class TestThreadedRuntime(TestAsyncRuntime):
             self.runtime.main_loop, "start", side_effect=ValueError("oops")
         ):
             with pytest.raises(ValueError, match="oops"):
-                self.runtime.start_and_wait(sync=True)
+                self.runtime.start_and_wait_completed(sync=True)
 
         assert self.runtime.state == RuntimeStates.error, self.runtime.state

@@ -205,7 +205,7 @@ class TestAsyncAgentLoop:
         agent_loop.start()
         wait_for_condition(lambda: agent_loop.is_running, timeout=10)
         agent_loop.stop()
-        agent_loop.wait(sync=True)
+        agent_loop.wait_completed(sync=True)
         assert not agent_loop.is_running, agent_loop.state
 
     def test_handle_envelope(self):
@@ -220,7 +220,7 @@ class TestAsyncAgentLoop:
         agent.put_inbox("msg")
         wait_for_condition(lambda: handler.counter == 1, timeout=2)
         agent_loop.stop()
-        agent_loop.wait(sync=True)
+        agent_loop.wait_completed(sync=True)
 
     def test_behaviour_act(self):
         """Test behaviour act called by schedule."""
@@ -236,7 +236,7 @@ class TestAsyncAgentLoop:
 
         wait_for_condition(lambda: behaviour.counter >= 1, timeout=tick_interval * 2)
         agent_loop.stop()
-        agent_loop.wait(sync=True)
+        agent_loop.wait_completed(sync=True)
 
     def test_internal_messages(self):
         """Test internal meesages are processed."""
@@ -250,7 +250,7 @@ class TestAsyncAgentLoop:
             lambda: agent.filter.handle_internal_message.called is True, timeout=5,
         )
         agent_loop.stop()
-        agent_loop.wait(sync=True)
+        agent_loop.wait_completed(sync=True)
 
     def test_new_behaviours(self):
         """Test new behaviours are added."""
@@ -265,7 +265,7 @@ class TestAsyncAgentLoop:
             timeout=agent_loop.NEW_BEHAVIOURS_PROCESS_SLEEP * 3,
         )
         agent_loop.stop()
-        agent_loop.wait(sync=True)
+        agent_loop.wait_completed(sync=True)
 
     @pytest.mark.asyncio
     async def test_behaviour_exception(self):
@@ -278,7 +278,7 @@ class TestAsyncAgentLoop:
         agent._skills_exception_policy = ExceptionPolicyEnum.propagate
         with pytest.raises(ValueError, match="expected!"):
             agent_loop.start()
-            agent_loop.wait(sync=True)
+            agent_loop.wait_completed(sync=True)
 
     @pytest.mark.asyncio
     async def test_stop(self):

@@ -373,7 +373,7 @@ class AwaitableProc:
         self.future = None
 
     async def start(self):
-        """Start the subprocess"""
+        """Start the subprocess."""
         self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
         self.loop = asyncio.get_event_loop()
         self.future = asyncio.futures.Future()
@@ -388,6 +388,7 @@ class AwaitableProc:
             self._thread.join()
 
     def _in_thread(self):
+        """Run in dedicated thread."""
         self.proc.wait()
         self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)
 
@@ -485,6 +486,8 @@ class Runnable(ABC):
         self._thread: Optional[Thread] = None
         self._completed_event: Optional[asyncio.Event] = None
         self._got_result = False
+        self._was_cancelled = False
+        self._is_running: bool = False
 
     def start(self) -> bool:
         """
@@ -495,10 +498,11 @@ class Runnable(ABC):
         if self._task and not self._task.done():
             logger.debug("already running")
             return False
-
+        self._is_running = False
         self._got_result = False
         self._set_loop()
         self._completed_event = asyncio.Event(loop=self._loop)
+        self._was_cancelled = False
         self._set_task()
 
         if self._threaded:
@@ -528,21 +532,27 @@ class Runnable(ABC):
         """Wrap run() method."""
         if not self._completed_event:
             raise ValueError("Start was not called!")
+
         try:
             with suppress(asyncio.CancelledError):
                 return await self.run()
         finally:
             self._loop.call_soon_threadsafe(self._completed_event.set)
 
+    @property
+    def is_running(self) -> bool:
+        """Get running state."""
+        return self._is_running
+
     @abstractmethod
     async def run(self) -> Any:
         """Implement run logic respectfull to CancelError on termination."""
 
-    def wait(
+    def wait_completed(
         self, sync: bool = False, timeout: float = None, force_result: bool = False
     ) -> Awaitable:
         """
-        Wait task to complete.
+        Wait runnable execution completed.
 
         :param sync: bool. blocking wait
         :param timeout: float seconds
@@ -559,44 +569,53 @@ class Runnable(ABC):
             return ready_future
 
         if self._task.done():
-            return ready_future
-
-        coro = self._wait()
-        if timeout is not None:
-            coro = asyncio.wait_for(self._wait(), timeout=timeout)  # type: ignore
+            self._got_result = True
+            return self._task
 
         if sync:
-            if self._loop.is_running():
-                start_time = time.time()
-                while not self._task.done():
-                    time.sleep(0.01)
-                    if timeout is not None and time.time() - start_time > timeout:
-                        raise asyncio.TimeoutError()
-                self._got_result = True
-                if self._task.exception():
-                    raise self._task.exception()
-            else:
-                self._loop.run_until_complete(coro)
+            self._wait_sync(timeout)
             return ready_future
 
-        if self._threaded:
-            loop = asyncio.get_event_loop()
-            fut = loop.create_future()
+        if not self._threaded:
+            return asyncio.wait_for(self._wait(), timeout=timeout)
 
-            def done(task):
+        # for threaded mode create a future and bind it to task
+        loop = asyncio.get_event_loop()
+        fut = loop.create_future()
+
+        def done(task):
+            try:
                 if fut.done():  # pragma: nocover
                     return
                 if task.exception():
                     fut.set_exception(task.exception())
                 else:  # pragma: nocover
                     fut.set_result(None)
+            finally:
+                self._got_result = True
 
-            self._task.add_done_callback(
-                lambda task: loop.call_soon_threadsafe(lambda: done(task))
+        self._task.add_done_callback(
+            lambda task: loop.call_soon_threadsafe(lambda: done(task))
+        )
+        return fut
+
+    def _wait_sync(self, timeout: Optional[float] = None) -> None:
+        """Wait task completed in sync manner."""
+        if self._task is None:
+            raise ValueError("task is not set!")
+        if self._loop.is_running():
+            start_time = time.time()
+            while not self._task.done():
+                time.sleep(0.01)
+                if timeout is not None and time.time() - start_time > timeout:
+                    raise asyncio.TimeoutError()
+            self._got_result = True
+            if self._task.exception():
+                raise self._task.exception()
+        else:
+            self._loop.run_until_complete(
+                asyncio.wait_for(self._wait(), timeout=timeout)
             )
-            return fut
-
-        return coro
 
     async def _wait(self) -> None:
         """Wait internal method."""
@@ -610,7 +629,7 @@ class Runnable(ABC):
         finally:
             self._got_result = True
 
-    def stop(self) -> None:
+    def stop(self, force: bool = False) -> None:
         """Stop runnable."""
         logger.debug(f"{self} is going to be stopped {self._task}")
         if not self._task:
@@ -619,9 +638,20 @@ class Runnable(ABC):
         if self._task.done():
             logger.debug("already completed")
             return
-        self._loop.call_soon_threadsafe(self._task.cancel)
+        self._loop.call_soon_threadsafe(self._task_cancel, force)
 
-    def start_and_wait(self, sync=False):
+    def _task_cancel(self, force: bool = False) -> None:
+        """Cancel task internal method."""
+        if self._task is None:
+            return
+
+        if self._was_cancelled and not force:
+            return
+
+        self._was_cancelled = True
+        self._task.cancel()
+
+    def start_and_wait_completed(self, *args, **kwargs) -> Awaitable:
         """Alias for start and wait methods."""
         self.start()
-        return self.wait(sync=sync)
+        return self.wait_completed(*args, **kwargs)

@@ -188,7 +188,6 @@ class TestSkillError:
         msg = envelope.message
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL
-        print("\n1111111, STOP in TEST\n", flush=True)
 
     def test_error_unsupported_skill_when_skill_id_is_none(self):
         """Test the 'send_unsupported_skill' when the skill id in the envelope is None."""

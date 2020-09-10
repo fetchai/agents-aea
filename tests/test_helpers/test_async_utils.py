@@ -266,7 +266,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_runnable_async(self):
         """Test runnable async methods."""
-
+        # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
                 while True:
@@ -275,42 +275,42 @@ class TestRunnable:
         run = TestRun()
         run.start()
         run.stop()
-        await run.wait()
+        await run.wait_completed()
 
         run = TestRun(threaded=True)
         run.start()
         run.stop()
-        run.wait(sync=True)
+        run.wait_completed(sync=True)
 
         run = RunAndExit()
-        await run.start_and_wait()
+        await run.start_and_wait_completed()
 
     def test_runnable_sync(self):
         """Test runnable sync methods."""
         run = RunAndExit()
-        run.start_and_wait(sync=True)
+        run.start_and_wait_completed(sync=True)
 
     @pytest.mark.asyncio
     async def test_double_start(self):
         """Test runnable async methods."""
-
+        # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
                 while True:
                     await asyncio.sleep(1)
 
         run = TestRun()
-        await run.wait()
+        await run.wait_completed()
         assert run.start()
         assert not run.start()
         run.stop()
-        await run.wait()
-        await run.wait()
+        await run.wait_completed()
+        await run.wait_completed()
 
     @pytest.mark.asyncio
     async def test_run_in_thread(self):
         """Test runnable async methods."""
-
+        # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
                 while True:
@@ -325,7 +325,7 @@ class TestRunnable:
     @pytest.mark.asyncio
     async def test_timeout(self):
         """Test runnable async methods."""
-
+        # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
                 while True:
@@ -333,23 +333,24 @@ class TestRunnable:
 
         run = TestRun(threaded=True)
         run.start()
+        await asyncio.sleep(0.5)
         with pytest.raises(asyncio.TimeoutError):
-            run.wait(sync=True, timeout=0.1)
+            run.wait_completed(sync=True, timeout=1)
 
         run.stop()
-        run.wait(sync=True)
+        run.wait_completed(sync=True)
 
         run = TestRun()
         run.start()
         with pytest.raises(asyncio.TimeoutError):
-            await run.wait(timeout=0.1)
+            await run.wait_completed(timeout=1)
         run.stop()
-        await run.wait()
+        await run.wait_completed()
 
     @pytest.mark.asyncio
     async def test_exception(self):
         """Test runnable async methods."""
-
+        # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
                 raise Exception("awaited")
@@ -357,31 +358,34 @@ class TestRunnable:
         run = TestRun(threaded=True)
         run.start()
         with pytest.raises(Exception, match="awaited"):
-            run.wait(sync=True, timeout=0.1)
+            run.wait_completed(sync=True, timeout=1)
 
         run.stop()
-        run.wait(sync=True)
+        run.wait_completed(sync=True)
 
         run = TestRun()
         run.start()
         with pytest.raises(Exception, match="awaited"):
-            await run.wait(timeout=0.1)
+            await run.wait_completed(timeout=1)
 
         run.stop()
-        await run.wait()
+        await run.wait_completed()
 
     @pytest.mark.asyncio
     async def test_wait_async_threaded(self):
         """Test runnable async methods."""
-
+        # for pydocstyle
         class TestRun(Runnable):
             async def run(self):
                 raise Exception("awaited")
 
         run = TestRun(threaded=True)
         run.start()
+        await asyncio.sleep(1)
+        assert run._task
+
         with pytest.raises(Exception, match="awaited"):
-            await run.wait(timeout=0.2)
+            await run.wait_completed(timeout=1)
 
         run.stop()
-        await run.wait()
+        await run.wait_completed()

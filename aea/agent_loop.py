@@ -55,6 +55,7 @@ class AgentLoopStates(Enum):
 
     initial = None
     started = "started"
+    starting = "starting"
     stopped = "stopped"
     stopping = "stopping"
     error = "error"
@@ -104,6 +105,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
     async def run(self) -> None:
         """Run agent loop."""
         self.logger.debug("agent loop started")
+        self._state.set(AgentLoopStates.starting)
         self.setup()
         self._set_tasks()
         try:
@@ -111,13 +113,17 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         except (CancelledError, KeyboardInterrupt):
             pass
         finally:
-            self.teardown()
-            self._stop_tasks()
-            for t in self._tasks:
-                with suppress(BaseException):
-                    await t
-            self._state.set(AgentLoopStates.stopped)
-            logger.debug("agent loop stopped")
+            await self._stop()
+
+    async def _stop(self) -> None:
+        """Stop and cleanup."""
+        self.teardown()
+        self._stop_tasks()
+        for t in self._tasks:
+            with suppress(BaseException):
+                await t
+        self._state.set(AgentLoopStates.stopped)
+        logger.debug("agent loop stopped")
 
     async def _gather_tasks(self) -> None:
         """Wait till first task exception."""

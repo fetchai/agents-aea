@@ -251,6 +251,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self._connection_consistency_checks()
         self._set_default_connection_if_none()
         self._out_queue = asyncio.Queue()
+
         async with self._lock:
             if self.connection_status.is_connected:
                 self.logger.debug("Multiplexer already connected.")
@@ -377,9 +378,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self.logger.debug("Tear the multiplexer connections down.")
         for connection_id, connection in self._id_to_connection.items():
             try:
-                await self._disconnect_one(connection_id)
+                await asyncio.wait_for(self._disconnect_one(connection_id), timeout=5)
             except Exception as e:  # pylint: disable=broad-except
-                self.logger.error(
+                self.logger.exception(
                     "Error while disconnecting {}: {}".format(
                         str(type(connection)), str(e)
                     )
@@ -423,6 +424,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                         "Received empty envelope. Quitting the sending loop..."
                     )
                     return None
+
                 self.logger.debug("Sending envelope {}".format(str(envelope)))
                 await self._send(envelope)
             except asyncio.CancelledError:
@@ -578,7 +580,10 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param envelope: the envelope to be sent.
         :return: None
         """
-        self.out_queue.put_nowait(envelope)
+        if self._threaded:
+            self._loop.call_soon_threadsafe(self.out_queue.put_nowait, envelope)
+        else:
+            self.out_queue.put_nowait(envelope)
 
     def setup(
         self,

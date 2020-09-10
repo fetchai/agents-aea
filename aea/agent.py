@@ -191,8 +191,12 @@ class Agent(AbstractAgent):
 
         :return: None
         """
-        if self.runtime.start():
-            self.runtime.wait(sync=True)
+        was_started = self.runtime.start()
+
+        if was_started:
+            self.runtime.wait_completed(sync=True)
+        else:
+            raise ValueError("Failed to start runtime! Ws it already started?")
 
     def stop(self) -> None:
         """
@@ -207,7 +211,7 @@ class Agent(AbstractAgent):
         :return: None
         """
         self.runtime.stop()
-        self.runtime.wait(sync=True)
+        self.runtime.wait_completed(sync=True)
 
     @property
     def state(self) -> RuntimeStates:

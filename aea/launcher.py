@@ -89,8 +89,10 @@ def _run_agent(
     _set_logger(log_level=log_level)
 
     agent = load_agent(agent_dir)
+    on_stop = False
 
     def stop_event_thread():
+        nonlocal on_stop
         try:
             stop_event.wait()
         except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:  # pragma: nocover
@@ -98,7 +100,10 @@ def _run_agent(
                 f"Exception raised in stop_event_thread {e} {type(e)}. Skip it, looks process is closed."
             )
         finally:
-            agent.stop()
+            if not on_stop:
+                logger.debug("_run_agent: stop event raised. call agent.stop")
+                on_stop = True
+                agent.stop()
 
     Thread(target=stop_event_thread, daemon=True).start()
     try:
@@ -111,7 +116,10 @@ def _run_agent(
         exc.__traceback__ = e.__traceback__
         raise exc
     finally:
-        agent.stop()
+        if not on_stop:
+            logger.debug("_run_agent: call agent.stop")
+            on_stop = True
+            agent.stop()
 
 
 class AEADirTask(AbstractExecutorTask):
@@ -144,7 +152,7 @@ class AEADirTask(AbstractExecutorTask):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(self._agent.runtime.start_and_wait())
+        return loop.create_task(self._agent.runtime.start_and_wait_completed())
 
     @property
     def id(self) -> Union[PathLike, str]:
