@@ -22,7 +22,9 @@ import queue
 import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
-from typing import Collection, Dict, List, Optional, Sequence, Tuple, cast
+from enum import Enum
+from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
+
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
@@ -70,6 +72,13 @@ class MultiplexerStatus(AsyncState):
         return self.get() == ConnectionStates.disconnecting
 
 
+class MultplexerExceptionPolicy(Enum):
+    """Enum of supported exception handling policies for multiplexer."""
+
+    reraise = "reraise"
+    log_only = "log_only"
+
+
 class AsyncMultiplexer(WithLogger):
     """This class can handle multiple connections at once."""
 
@@ -78,6 +87,7 @@ class AsyncMultiplexer(WithLogger):
         connections: Optional[Sequence[Connection]] = None,
         default_connection_index: int = 0,
         loop: Optional[AbstractEventLoop] = None,
+        exception_policy: MultplexerExceptionPolicy = MultplexerExceptionPolicy.log_only,
     ):
         """
         Initialize the connection multiplexer.
@@ -90,6 +100,7 @@ class AsyncMultiplexer(WithLogger):
         :param agent_name: the name of the agent that owns the multiplexer, for logging purposes.
         """
         super().__init__(default_logger)
+        self._exception_policy: MultplexerExceptionPolicy = exception_policy
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
@@ -131,6 +142,22 @@ class AsyncMultiplexer(WithLogger):
             )
             for idx, connection in enumerate(connections):
                 self.add_connection(connection, idx == default_connection_index)
+
+    def _handle_exception(self, fn: Callable, exc: Exception) -> None:
+        """
+        Handle exception raised.
+
+        :param fn: a method where it raised .send .connect etc
+        :param exc:  exception
+
+        :return: None.
+        """
+        if self._exception_policy == MultplexerExceptionPolicy.log_only:
+            self.logger.exception(f"Exception raised in {fn}")
+        elif self._exception_policy == MultplexerExceptionPolicy.reraise:
+            raise exc
+        else:  # pragma: nocover
+            raise ValueError(f"Unknown exception policy: {self._exception_policy}")
 
     def add_connection(self, connection: Connection, is_default: bool = False) -> None:
         """
@@ -377,7 +404,7 @@ class AsyncMultiplexer(WithLogger):
                 self.logger.error(str(e))
             except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.error("Error in the sending loop: {}".format(str(e)))
-                return
+                raise
 
     async def _receiving_loop(self) -> None:
         """Process incoming envelopes."""
@@ -404,11 +431,10 @@ class AsyncMultiplexer(WithLogger):
                         new_task = asyncio.ensure_future(connection.receive())
                         task_to_connection[new_task] = connection
 
-            except asyncio.CancelledError:
+            except asyncio.CancelledError:  # pragma: nocover
                 self.logger.debug("Receiving loop cancelled.")
                 break
             except Exception as e:  # pylint: disable=broad-except
-                self.logger.error("Error in the receiving loop: {}".format(str(e)))
                 self.logger.exception("Error in the receiving loop: {}".format(str(e)))
                 break
 
@@ -465,8 +491,8 @@ class AsyncMultiplexer(WithLogger):
 
         try:
             await connection.send(envelope)
-        except Exception as e:  # pragma: no cover
-            raise e
+        except Exception as e:  # pylint: disable=broad-except
+            self._handle_exception(self._send, e)
 
     def get(
         self, block: bool = False, timeout: Optional[float] = None

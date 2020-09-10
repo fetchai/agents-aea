@@ -38,7 +38,13 @@ from aea.connections.base import ConnectionStates
 from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
-from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
+from aea.multiplexer import (
+    AsyncMultiplexer,
+    InBox,
+    Multiplexer,
+    MultplexerExceptionPolicy,
+    OutBox,
+)
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
@@ -581,3 +587,31 @@ def test_multiplexer_setup():
         multiplexer._connection_consistency_checks()
     multiplexer.setup(connections, default_routing=None)
     multiplexer._connection_consistency_checks()
+
+
+def test_exception_handling():
+    """Test the case when the multiplexer raises an exception while disconnecting."""
+    connection = _make_dummy_connection()
+    multiplexer = Multiplexer([connection])
+    multiplexer.connect()
+
+    envelope = Envelope(
+        to="",
+        sender="",
+        protocol_id=DefaultMessage.protocol_id,
+        message=b"",
+        context=EnvelopeContext(connection_id=connection.connection_id),
+    )
+    exception = ValueError("expected")
+    with patch.object(connection, "send", side_effect=exception):
+        multiplexer.put(envelope)
+        time.sleep(1)
+        assert not multiplexer._send_loop_task.done()
+
+        multiplexer._exception_policy = MultplexerExceptionPolicy.reraise
+        multiplexer.put(envelope)
+        time.sleep(2)
+        assert multiplexer._send_loop_task.done()
+        assert multiplexer._send_loop_task.exception() == exception
+
+    multiplexer.disconnect()
