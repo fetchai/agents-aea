@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This module contains the implementation of runtime for economic agent (AEA)."""
 
 import asyncio
@@ -30,6 +32,7 @@ from aea.abstract_agent import AbstractAgent
 from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.helpers.async_utils import ensure_loop
+from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.multiplexer import AsyncMultiplexer, Multiplexer
 from aea.skills.tasks import TaskManager
 
@@ -110,7 +113,12 @@ class BaseRuntime(ABC):
 
     def _get_multiplexer_instance(self) -> Multiplexer:
         """Create multiplexer instance."""
-        return Multiplexer(self._agent.connections, loop=self.loop)
+        exception_policy = getattr(
+            self._agent, "_connection_exception_policy", ExceptionPolicyEnum.just_log
+        )
+        return Multiplexer(
+            self._agent.connections, loop=self.loop, exception_policy=exception_policy
+        )
 
     def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
         """

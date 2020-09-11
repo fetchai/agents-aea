@@ -81,6 +81,7 @@ class AEA(Agent, WithLogger):
             DecisionMakerHandler
         ] = DefaultDecisionMakerHandler,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
+        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.just_log,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         default_connection: Optional[PublicId] = None,
@@ -111,6 +112,10 @@ class AEA(Agent, WithLogger):
 
         :return: None
         """
+
+        self._skills_exception_policy = skill_exception_policy
+        self._connection_exception_policy = connection_exception_policy
+
         super().__init__(
             identity=identity,
             connections=[],
@@ -119,6 +124,7 @@ class AEA(Agent, WithLogger):
             loop_mode=loop_mode,
             runtime_mode=runtime_mode,
         )
+
         aea_logger = AgentLoggerAdapter(
             logger=logging.getLogger(__name__), agent_name=identity.name
         )
@@ -148,8 +154,6 @@ class AEA(Agent, WithLogger):
         self._filter = Filter(
             self.resources, self.runtime.decision_maker.message_out_queue
         )
-
-        self._skills_exception_policy = skill_exception_policy
 
         self._setup_loggers()
 

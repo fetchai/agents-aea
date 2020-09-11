@@ -16,13 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Module for the multiplexer class and related classes."""
 import asyncio
 import queue
 import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
-from enum import Enum
 from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 
@@ -31,6 +31,7 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner, cancel_and_wait
+from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger
 from aea.mail.base import (
     AEAConnectionError,
@@ -72,13 +73,6 @@ class MultiplexerStatus(AsyncState):
         return self.get() == ConnectionStates.disconnecting
 
 
-class MultplexerExceptionPolicy(Enum):
-    """Enum of supported exception handling policies for multiplexer."""
-
-    reraise = "reraise"
-    log_only = "log_only"
-
-
 class AsyncMultiplexer(WithLogger):
     """This class can handle multiple connections at once."""
 
@@ -87,7 +81,7 @@ class AsyncMultiplexer(WithLogger):
         connections: Optional[Sequence[Connection]] = None,
         default_connection_index: int = 0,
         loop: Optional[AbstractEventLoop] = None,
-        exception_policy: MultplexerExceptionPolicy = MultplexerExceptionPolicy.log_only,
+        exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.just_log,
     ):
         """
         Initialize the connection multiplexer.
@@ -100,7 +94,7 @@ class AsyncMultiplexer(WithLogger):
         :param agent_name: the name of the agent that owns the multiplexer, for logging purposes.
         """
         super().__init__(default_logger)
-        self._exception_policy: MultplexerExceptionPolicy = exception_policy
+        self._exception_policy: ExceptionPolicyEnum = exception_policy
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
@@ -152,10 +146,12 @@ class AsyncMultiplexer(WithLogger):
 
         :return: None.
         """
-        if self._exception_policy == MultplexerExceptionPolicy.log_only:
+        if self._exception_policy == ExceptionPolicyEnum.just_log:
             self.logger.exception(f"Exception raised in {fn}")
-        elif self._exception_policy == MultplexerExceptionPolicy.reraise:
+        elif self._exception_policy == ExceptionPolicyEnum.propagate:
             raise exc
+        elif self._exception_policy == ExceptionPolicyEnum.stop_and_exit:
+            self._loop.create_task(AsyncMultiplexer.disconnect(self))
         else:  # pragma: nocover
             raise ValueError(f"Unknown exception policy: {self._exception_policy}")
 

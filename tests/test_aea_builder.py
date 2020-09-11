@@ -471,6 +471,7 @@ def test_set_from_config():
         "file_path": ROOT_DIR + "/aea/decision_maker/default.py",
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
+    agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
     agent_configuration._default_connection = None
     agent_configuration.connection_private_key_paths_dict = {"fetchai": None}
     agent_configuration.ledger_apis_dict = {"fetchai": None}
