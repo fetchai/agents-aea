@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package fetch.aea.Negotiation;
+
+message NegotiationMessage{
+
+    // Custom Types
+    message Resources{
+        bytes resouces = 1;
+    }
+
+
+    // Performatives and contents
+    message Cfp_Performative{
+        Resources e = 1;
+    }
+
+    message Propose_Performative{
+        Resources e = 1;
+        int32 p = 2;
+    }
+
+    message Accept_Performative{}
+
+    message Decline_Performative{}
+
+
+    // Standard NegotiationMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Accept_Performative accept = 5;
+        Cfp_Performative cfp = 6;
+        Decline_Performative decline = 7;
+        Propose_Performative propose = 8;
+    }
+}

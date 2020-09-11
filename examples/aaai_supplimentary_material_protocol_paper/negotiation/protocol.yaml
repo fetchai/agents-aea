@@ -1,0 +1,18 @@
+name: negotiation
+author: AAAI_paper_authors
+version: 0.1.0
+type: protocol
+description: A bilateral negotiation protocol, for AAAI-21 submission.
+license: Apache-2.0
+aea_version: '>=0.6.0, <0.7.0'
+fingerprint:
+  __init__.py: QmU4R4U9bYRakLh1JUbytE4Ebz5bdjiMGYBD671tPoi7VS
+  custom_types.py: QmUGbTBxY9pe2B2UiXhLsJR4h486yTtuaQCiT8DnZsADNz
+  dialogues.py: QmUBwHEz4HY1r6LBj6d1BkpXE6q2bcsBVZX2PKFBNfW8Q7
+  message.py: QmQC7PTtbyNwCNJrDPJVSK4WC7FUbSkLpVHB8T8ssXNtmd
+  negotiation.proto: QmUi7W6QuJVDgWpdr563WU2N5Vk4MhF4r6Q4zZVqbP4Sfh
+  negotiation_pb2.py: QmaJemdCG68kCZtjXiR1oSoMf8VNmB6jneDRbbypq3yHnE
+  serialization.py: QmdyTUCtHCoJdXs8FZ2UU9kfhfkiDbiyKHFQ2WWYp8z1B3
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

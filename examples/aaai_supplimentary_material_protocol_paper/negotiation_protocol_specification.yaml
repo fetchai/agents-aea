@@ -1,0 +1,30 @@
+---
+name: negotiation
+author: AAAI_paper_authors
+version: 0.1.0
+license: Apache-2.0
+description: 'A bilateral negotiation protocol, for AAAI-21 submission.'
+speech_acts:
+  cfp:
+    e: ct:Resources
+  propose:
+    e: ct:Resources
+    p: pt:int
+  accept: {}
+  decline: {}
+...
+---
+ct:Resources: |
+  bytes resouces = 1;
+...
+---
+initiation: [cfp]
+reply:
+  cfp: [propose, decline]
+  propose: [propose, accept, decline]
+  accept: []
+  decline: []
+termination: [accept, decline]
+roles: {buyer, seller}
+end_states: [agreement_reached, agreement_not_reached]
+...
