@@ -346,7 +346,7 @@ class TacHandler(Handler):
             StateUpdateDialogues, self.context.state_update_dialogues
         )
         state_update_msg, state_update_dialogue = state_update_dialogues.create(
-            counterparty="decision_maker",
+            counterparty=self.context.decision_maker_address,
             performative=StateUpdateMessage.Performative.INITIALIZE,
             amount_by_currency_id=tac_msg.amount_by_currency_id,
             quantities_by_good_id=tac_msg.quantities_by_good_id,

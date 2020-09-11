@@ -140,6 +140,7 @@ class AEA(Agent, WithLogger):
             default_connection,
             default_routing if default_routing is not None else {},
             search_service_address,
+            decision_maker_handler.self_address,
             **kwargs,
         )
         self._execution_timeout = execution_timeout
