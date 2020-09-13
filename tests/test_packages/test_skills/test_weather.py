@@ -51,7 +51,7 @@ class TestWeatherSkills(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.4.0",
-            "fetchai/oef_search:0.5.0": "fetchai/soef:0.7.0",
+            "fetchai/oef_search:0.6.0": "fetchai/soef:0.8.0",
         }
 
         # generate random location
@@ -63,7 +63,7 @@ class TestWeatherSkills(AEATestCaseMany):
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
-        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
         self.add_item("skill", "fetchai/weather_station:0.10.0")
@@ -98,7 +98,7 @@ class TestWeatherSkills(AEATestCaseMany):
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
-        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
         self.add_item("skill", "fetchai/weather_client:0.9.0")
@@ -223,7 +223,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.4.0",
-            "fetchai/oef_search:0.5.0": "fetchai/soef:0.7.0",
+            "fetchai/oef_search:0.6.0": "fetchai/soef:0.8.0",
         }
 
         # generate random location
@@ -235,7 +235,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
-        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
         self.add_item("skill", "fetchai/weather_station:0.10.0")
@@ -272,7 +272,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
-        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
         self.add_item("skill", "fetchai/weather_client:0.9.0")

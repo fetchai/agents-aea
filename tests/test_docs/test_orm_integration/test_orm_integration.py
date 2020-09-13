@@ -128,7 +128,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.4.0",
-            "fetchai/oef_search:0.5.0": "fetchai/soef:0.7.0",
+            "fetchai/oef_search:0.6.0": "fetchai/soef:0.8.0",
         }
 
         # generate random location
@@ -140,7 +140,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         # Setup seller
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
-        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
         self.add_item("skill", "fetchai/thermometer:0.10.0")
@@ -186,7 +186,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
-        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
         self.add_item("skill", "fetchai/thermometer_client:0.9.0")

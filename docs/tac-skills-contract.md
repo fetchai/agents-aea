@@ -114,7 +114,7 @@ The following steps create the controller from scratch:
 aea create tac_controller_contract
 cd tac_controller_contract
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add skill fetchai/tac_control_contract:0.7.0
 aea install
@@ -179,7 +179,7 @@ Build participant one:
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add skill fetchai/tac_participation:0.7.0
 aea add skill fetchai/tac_negotiation:0.8.0
@@ -194,7 +194,7 @@ Then, build participant two:
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add skill fetchai/tac_participation:0.7.0
 aea add skill fetchai/tac_negotiation:0.8.0
