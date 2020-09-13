@@ -24,6 +24,8 @@ speech_acts:
     query: ct:Query
   search_result:
     agents: pt:list[pt:str]
+    agents_info: ct:AgentsInfo
+  success: {}
   oef_error:
     oef_error_operation: ct:OefErrorOperation
 ...
@@ -38,6 +40,8 @@ ct:Query: |
   }
 ct:Description: |
   bytes description = 1;
+ct:AgentsInfo: |
+  bytes agents_info = 1;
 ct:OefErrorOperation: |
   enum OefErrorEnum {
         REGISTER_SERVICE = 0;
@@ -50,12 +54,13 @@ ct:OefErrorOperation: |
 ---
 initiation: [register_service, unregister_service, search_services]
 reply:
-  register_service: [oef_error]
-  unregister_service: [oef_error]
+  register_service: [success, oef_error]
+  unregister_service: [success, oef_error]
   search_services: [search_result, oef_error]
   search_result: []
   oef_error: []
-termination: [oef_error, search_result]
+  success: []
+termination: [oef_error, search_result, success]
 roles: {agent, oef_node}
 end_states: [successful, failed]
 ...

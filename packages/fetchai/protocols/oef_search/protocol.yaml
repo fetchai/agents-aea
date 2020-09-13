@@ -6,14 +6,14 @@ description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: Qmd81opGHdwvD7BRD4xsAt2vx1kyyNWaZACLgYWCYHe1S4
+  README.md: QmeFCzsmPKZHR4kdaada7JY6hCrp8cs3Xih3v5ET8CCKFZ
   __init__.py: QmRvTtynKcd7shmzgf8aZdcA5witjNL5cL2a7WPgscp7wq
-  custom_types.py: QmR4TS6KhXpRtGqq78B8mXMiiFXcFe7JEkxB7jHvqPVkgD
-  dialogues.py: QmaEdkD3tQWtDUAohHig58E4Crst6WDUpi5EZeXozBGqVW
-  message.py: QmQbBvRf8kswtsZS2D3jVeVeQ2wnbk5pa6VX5ousHU2BL2
-  oef_search.proto: QmRg28H6bNo1PcyJiKLYjHe6FCwtE6nJ43DeJ4RFTcHm68
-  oef_search_pb2.py: Qmd6S94v2GuZ2ffDupTa5ESBx4exF9dgoV8KcYtJVL6KhN
-  serialization.py: QmfXX9HJsQvNfeffGxPeUBw7cMznSjojDYe6TZ6jHpphQ4
+  custom_types.py: QmPhg3DBpLYzjEuzjC9w9rZQnNwcmXG3k5ACmtdgmiUgwu
+  dialogues.py: QmQPLnW3jAs6tLLmhkX4C7texGRHM9bfdjs83dUH5TkJ4v
+  message.py: QmWSiEMfJQziwoy11CTaNJgaozJLmtUgZwKSJye2R7T8oB
+  oef_search.proto: QmfZrvXMHWTNp7QV4Vpm3TwU2h34PRHM8KkEWUVJWc7ihS
+  oef_search_pb2.py: QmWUYB2StNy6BqPzJjyc2WrA7y1dWFxF81m8BwRBBThDMC
+  serialization.py: QmdCFKKquz26fFRa3qguLgFa1GrGmCWgfLbmNmgtTSePAH
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
