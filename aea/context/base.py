@@ -44,6 +44,7 @@ class AgentContext:
         default_connection: Optional[PublicId],
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
+        decision_maker_address: Address,
         **kwargs
     ):
         """
@@ -55,6 +56,10 @@ class AgentContext:
         :param decision_maker_message_queue: the (in) queue of the decision maker
         :param decision_maker_handler_context: the decision maker's name space
         :param task_manager: the task manager
+        :param default_connection: the default connection
+        :param default_routing: the default routing
+        :param search_service_address: the address of the search service
+        :param decision_maker_address: the address of the decision maker
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
         self._shared_state = {}  # type: Dict[str, Any]
@@ -65,6 +70,7 @@ class AgentContext:
         self._decision_maker_handler_context = decision_maker_handler_context
         self._task_manager = task_manager
         self._search_service_address = search_service_address
+        self._decision_maker_address = decision_maker_address
         self._default_connection = default_connection
         self._default_routing = default_routing
         self._namespace = SimpleNamespace(**kwargs)
@@ -129,6 +135,11 @@ class AgentContext:
     def search_service_address(self) -> Address:
         """Get the address of the search service."""
         return self._search_service_address
+
+    @property
+    def decision_maker_address(self) -> Address:
+        """Get the address of the decision maker."""
+        return self._decision_maker_address
 
     @property
     def default_connection(self) -> Optional[PublicId]:

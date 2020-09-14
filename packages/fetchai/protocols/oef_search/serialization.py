@@ -25,6 +25,7 @@ from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
 from packages.fetchai.protocols.oef_search import oef_search_pb2
+from packages.fetchai.protocols.oef_search.custom_types import AgentsInfo
 from packages.fetchai.protocols.oef_search.custom_types import Description
 from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef_search.custom_types import Query
@@ -70,7 +71,12 @@ class OefSearchSerializer(Serializer):
             performative = oef_search_pb2.OefSearchMessage.Search_Result_Performative()  # type: ignore
             agents = msg.agents
             performative.agents.extend(agents)
+            agents_info = msg.agents_info
+            AgentsInfo.encode(performative.agents_info, agents_info)
             oef_search_msg.search_result.CopyFrom(performative)
+        elif performative_id == OefSearchMessage.Performative.SUCCESS:
+            performative = oef_search_pb2.OefSearchMessage.Success_Performative()  # type: ignore
+            oef_search_msg.success.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
             performative = oef_search_pb2.OefSearchMessage.Oef_Error_Performative()  # type: ignore
             oef_error_operation = msg.oef_error_operation
@@ -122,6 +128,11 @@ class OefSearchSerializer(Serializer):
             agents = oef_search_pb.search_result.agents
             agents_tuple = tuple(agents)
             performative_content["agents"] = agents_tuple
+            pb2_agents_info = oef_search_pb.search_result.agents_info
+            agents_info = AgentsInfo.decode(pb2_agents_info)
+            performative_content["agents_info"] = agents_info
+        elif performative_id == OefSearchMessage.Performative.SUCCESS:
+            pass
         elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
             pb2_oef_error_operation = oef_search_pb.oef_error.oef_error_operation
             oef_error_operation = OefErrorOperation.decode(pb2_oef_error_operation)

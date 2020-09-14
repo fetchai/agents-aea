@@ -139,7 +139,7 @@ class Transactions(Model):
             ledger_id=ledger_id, body=terms.sender_hash.encode("utf-8")
         )
         signing_msg, signing_dialogue = signing_dialogues.create(
-            counterparty="decision_maker",
+            counterparty=self.context.decision_maker_address,
             performative=performative,
             terms=terms,
             raw_message=raw_message,

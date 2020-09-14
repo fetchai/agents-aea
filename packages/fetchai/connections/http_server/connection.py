@@ -72,7 +72,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.8.0")
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -224,10 +224,19 @@ class Response(web.Response):
         :return: the response
         """
         if http_message.performative == HttpMessage.Performative.RESPONSE:
+
+            if http_message.is_set("headers") and http_message.headers:
+                headers: Optional[dict] = dict(
+                    email.message_from_string(http_message.headers).items()
+                )
+            else:
+                headers = None
+
             response = cls(
                 status=http_message.status_code,
                 reason=http_message.status_text,
                 body=http_message.bodyy,
+                headers=headers,
             )
         else:  # pragma: nocover
             response = cls(status=SERVER_ERROR, text="Server error")

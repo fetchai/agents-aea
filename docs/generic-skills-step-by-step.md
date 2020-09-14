@@ -1314,7 +1314,7 @@ protocols:
 - fetchai/default:0.5.0
 - fetchai/fipa:0.6.0
 - fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.5.0
+- fetchai/oef_search:0.6.0
 skills: []
 behaviours:
   service_registration:
@@ -2108,7 +2108,7 @@ class GenericLedgerApiHandler(Handler):
         self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         signing_msg, signing_dialogue = signing_dialogues.create(
-            counterparty="decision_maker",
+            counterparty=self.context.decision_maker_address,
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
@@ -2773,7 +2773,7 @@ protocols:
 - fetchai/default:0.5.0
 - fetchai/fipa:0.6.0
 - fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.5.0
+- fetchai/oef_search:0.6.0
 - fetchai/signing:0.3.0
 skills: []
 behaviours:
@@ -2876,7 +2876,7 @@ Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yam
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
-  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
+  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
 ### Fund the buyer AEA
@@ -2893,7 +2893,7 @@ Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add protocol fetchai/fipa:0.6.0
 aea install
@@ -2909,7 +2909,7 @@ Add the remaining packages for the buyer AEA:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add protocol fetchai/fipa:0.6.0
 aea add protocol fetchai/signing:0.3.0

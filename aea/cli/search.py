@@ -21,7 +21,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, List, cast
+from typing import Dict, List, Tuple, cast
 
 import click
 
@@ -62,47 +62,52 @@ def search(click_context, local):
 
 @search.command()
 @click.option("--query", default="", help="Query string to search Connections by name.")
+@click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def connections(ctx: Context, query):
+def connections(ctx: Context, query, page):
     """Search for Connections."""
     item_type = "connection"
-    _output_search_results(item_type, search_items(ctx, item_type, query))
+    _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
 @search.command()
 @click.option("--query", default="", help="Query string to search Contracts by name.")
+@click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def contracts(ctx: Context, query):
+def contracts(ctx: Context, query, page):
     """Search for Contracts."""
     item_type = "contract"
-    _output_search_results(item_type, search_items(ctx, item_type, query))
+    _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
 @search.command()
 @click.option("--query", default="", help="Query string to search Protocols by name.")
+@click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def protocols(ctx: Context, query):
+def protocols(ctx: Context, query, page):
     """Search for Protocols."""
     item_type = "protocol"
-    _output_search_results(item_type, search_items(ctx, item_type, query))
+    _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
 @search.command()
 @click.option("--query", default="", help="Query string to search Skills by name.")
+@click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def skills(ctx: Context, query):
+def skills(ctx: Context, query, page):
     """Search for Skills."""
     item_type = "skill"
-    _output_search_results(item_type, search_items(ctx, item_type, query))
+    _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
 @search.command()
 @click.option("--query", default="", help="Query string to search Agents by name.")
+@click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def agents(ctx: Context, query):
+def agents(ctx: Context, query, page):
     """Search for Agents."""
     item_type = "agent"
-    _output_search_results(item_type, search_items(ctx, item_type, query))
+    _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
 def setup_search_ctx(ctx: Context, local: bool) -> None:
@@ -198,7 +203,9 @@ def _search_items_locally(ctx, item_type_plural):
     return sorted(result, key=lambda k: k["name"])
 
 
-def search_items(ctx: Context, item_type: str, query: str) -> List:
+def search_items(
+    ctx: Context, item_type: str, query: str, page: int
+) -> Tuple[List, int]:
     """
     Search items by query and click.echo results.
 
@@ -206,25 +213,45 @@ def search_items(ctx: Context, item_type: str, query: str) -> List:
     :param item_type: item type.
     :param query: query string.
 
-    :return: None
+    :return: (List of items, int items total count).
     """
     click.echo('Searching for "{}"...'.format(query))
     item_type_plural = item_type + "s"
     if ctx.config.get("is_local"):
-        return _search_items_locally(ctx, item_type_plural)
-    return request_api("GET", "/{}".format(item_type_plural), params={"search": query})
+        results = _search_items_locally(ctx, item_type_plural)
+        count = len(results)
+    else:
+        resp = request_api(
+            "GET",
+            "/{}".format(item_type_plural),
+            params={"search": query, "page": page},
+        )
+        results = resp["results"]
+        count = resp["count"]
+    return results, count
 
 
-def _output_search_results(item_type: str, results: List[Dict]) -> None:
+def _output_search_results(
+    item_type: str, results: List[Dict], count: int, page: int
+) -> None:
     """
     Output search results.
 
-    :param results: list of found items
+    :param item_type: str item type.
+    :param results: list of found items.
+    :param count: items total count.
 
     """
     item_type_plural = item_type + "s"
-    if len(results) == 0:
+    len_results = len(results)
+    if len_results == 0:
         click.echo("No {} found.".format(item_type_plural))  # pragma: no cover
     else:
         click.echo("{} found:\n".format(item_type_plural.title()))
         click.echo(format_items(results))
+        if count > len_results:
+            click.echo(
+                "{} {} out of {}.\nPage {}".format(
+                    len_results, item_type_plural, count, page
+                )
+            )  # pragma: no cover

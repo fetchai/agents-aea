@@ -25,7 +25,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.8.0,fetchai/oef:0.8.0"
+aea run --connections "fetchai/p2p_libp2p:0.8.0,fetchai/oef:0.9.0"
 ```
 ``` bash
 My libp2p addresses: ...
@@ -45,7 +45,7 @@ cd p2p_libp2p
 go build
 ```
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.8.0,fetchai/oef:0.8.0"
+aea run --connections "fetchai/p2p_libp2p:0.8.0,fetchai/oef:0.9.0"
 ```
 ``` bash
 chmod +x libp2p_node
@@ -63,8 +63,8 @@ config:
 ```
 ``` yaml
 default_routing:
-  ? "fetchai/oef_search:0.5.0"
-  : "fetchai/oef:0.8.0"
+  ? "fetchai/oef_search:0.6.0"
+  : "fetchai/oef:0.9.0"
 ```
 ``` yaml
 config:

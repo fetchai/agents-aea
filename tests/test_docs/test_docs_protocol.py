@@ -69,7 +69,7 @@ class TestProtocolDocs:
         )
 
     def test_oef_search_protocol(self):
-        """Test the fetchai/oef_search:0.5.0 protocol documentation."""
+        """Test the fetchai/oef_search:0.6.0 protocol documentation."""
         # this is the offset of code blocks for the section under testing
         offset = 4
 

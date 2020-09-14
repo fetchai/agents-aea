@@ -40,6 +40,7 @@ def test_agent_context():
     default_connection = "default_connection_stub"
     default_routing = "default_routing_stub"
     search_service_address = "search_service_address_stub"
+    decision_maker_address = "decision_maker_address_stub"
     value = "some_value"
     kwargs = {"some_key": value}
     ac = AgentContext(
@@ -52,6 +53,7 @@ def test_agent_context():
         default_connection=default_connection,
         default_routing=default_routing,
         search_service_address=search_service_address,
+        decision_maker_address=decision_maker_address,
         **kwargs
     )
     assert ac.shared_state == {}
@@ -68,3 +70,4 @@ def test_agent_context():
     assert ac.default_routing == default_routing
     assert ac.search_service_address == search_service_address
     assert ac.namespace.some_key == value
+    assert ac.decision_maker_address == decision_maker_address
