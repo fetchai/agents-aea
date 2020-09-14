@@ -389,7 +389,7 @@ class PublicId(JSONSerializable):
         AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
     )
 
-    def __init__(self, author: str, name: str, version: PackageVersionLike):
+    def __init__(self, author: str, name: str, version: PackageVersionLike = "latest"):
         """Initialize the public identifier."""
         self._author = author
         self._name = name
