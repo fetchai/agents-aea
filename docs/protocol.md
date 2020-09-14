@@ -132,6 +132,7 @@ class Performative(Enum):
     SEARCH_SERVICES = "search_services"
     OEF_ERROR = "oef_error"
     SEARCH_RESULT = "search_result"
+    SUCCESS = "success"
 
     def __str__(self):
         """Get string representation."""

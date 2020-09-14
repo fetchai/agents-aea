@@ -46,7 +46,7 @@ MESSAGE_ID = 1
 RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.8.0")
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
