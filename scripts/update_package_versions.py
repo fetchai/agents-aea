@@ -34,7 +34,7 @@ import subprocess  # nosec
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, Set, Optional
+from typing import Dict, Optional, Set
 
 from click.testing import CliRunner
 
@@ -43,7 +43,7 @@ import semver
 import yaml
 
 from aea.cli import cli
-from aea.configurations.base import PublicId, PackageId, PackageType
+from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.loader import ConfigLoader
 
 from scripts.generate_ipfs_hashes import update_hashes
@@ -262,11 +262,15 @@ def get_public_ids_to_update() -> Set[PackageId]:
             difference = minor_version_difference(current_public_id, deployed_public_id)
             # check if the public ids of the local package and the package in the registry are already the same.
             if difference == 0:
-                print("Package `{}` of type `{}` needs to be bumped!".format(name, type_))
+                print(
+                    "Package `{}` of type `{}` needs to be bumped!".format(name, type_)
+                )
                 result.add(PackageId(type_[:-1], current_public_id))
             elif difference == 1:
                 print(
-                    "Package `{}` of type `{}` already at correct version!".format(name, type_)
+                    "Package `{}` of type `{}` already at correct version!".format(
+                        name, type_
+                    )
                 )
                 continue
             else:
@@ -279,14 +283,22 @@ def get_public_ids_to_update() -> Set[PackageId]:
     return result
 
 
-def _get_ambiguous_public_ids(all_package_ids_to_update: Set[PackageId]) -> Set[PublicId]:
+def _get_ambiguous_public_ids(
+    all_package_ids_to_update: Set[PackageId],
+) -> Set[PublicId]:
     """Get the public ids that are the public ids of more than one package id."""
-    return set(map(operator.itemgetter(0), filter(lambda x: x[1] > 1, Counter(id_.public_id for id_ in all_package_ids_to_update).items())))
+    return set(
+        map(
+            operator.itemgetter(0),
+            filter(
+                lambda x: x[1] > 1,
+                Counter(id_.public_id for id_ in all_package_ids_to_update).items(),
+            ),
+        )
+    )
 
 
-def process_packages(
-    all_package_ids_to_update: Set[PackageId]
-) -> bool:
+def process_packages(all_package_ids_to_update: Set[PackageId]) -> bool:
     """Process the package versions."""
     is_bumped = False
     ambiguous_public_ids = _get_ambiguous_public_ids(all_package_ids_to_update)
@@ -311,8 +323,10 @@ def minor_version_difference(
 
 
 def bump_package_version(
-    current_public_id: PublicId, configuration_file_path: Path, type_: str,
-    is_ambiguous: bool = False
+    current_public_id: PublicId,
+    configuration_file_path: Path,
+    type_: str,
+    is_ambiguous: bool = False,
 ) -> None:
     """
     Bump the version references of the package in the repo.
@@ -327,12 +341,20 @@ def bump_package_version(
     for rootdir in DIRECTORIES:
         for path in Path(rootdir).glob("**/*"):
             if path.is_file() and str(path).endswith((".py", ".yaml", ".md")):
-                inplace_change(path, str(current_public_id), str(new_public_id), type_, is_ambiguous)
+                inplace_change(
+                    path,
+                    str(current_public_id),
+                    str(new_public_id),
+                    type_,
+                    is_ambiguous,
+                )
 
     bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
 
 
-def _can_disambiguate_from_context(line: str, old_string: str, type_: str) -> Optional[bool]:
+def _can_disambiguate_from_context(
+    line: str, old_string: str, type_: str
+) -> Optional[bool]:
     """
     Check whether we can disambiguate the public id given contextual information.
 
@@ -343,7 +365,9 @@ def _can_disambiguate_from_context(line: str, old_string: str, type_: str) -> Op
 
     :return: if True/False, the old string can/cannot be replaced. If None, we don't know.
     """
-    match = re.search(fr"aea +add +(skill|protocol|connection|contract) +{old_string}", line)
+    match = re.search(
+        fr"aea +add +(skill|protocol|connection|contract) +{old_string}", line
+    )
     if match is not None:
         return match.group(1) == type_[:-1]
     if re.search(fr"aea +fetch +{old_string}", line) is not None:
@@ -356,18 +380,16 @@ def _can_disambiguate_from_context(line: str, old_string: str, type_: str) -> Op
 
 def _ask_to_user(lines, line, idx, old_string, type_):
     print("=" * 50)
-    above_rows = lines[idx - arguments.context: idx]
-    below_rows = lines[idx + 1: idx + arguments.context]
+    above_rows = lines[idx - arguments.context : idx]
+    below_rows = lines[idx + 1 : idx + arguments.context]
     print("\n".join(above_rows))
     print(line.replace(old_string, "\033[91m" + old_string + "\033[0m"))
     print("\n".join(below_rows))
-    answer = input(  # nosec
-        f"Replace for component ({type_}, {old_string})? [y/N]: ",
-    )
+    answer = input(f"Replace for component ({type_}, {old_string})? [y/N]: ",)  # nosec
     return answer
 
 
-def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_, is_ambiguous) -> str:
+def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_) -> str:
     """
     Ask to user if the line should be replaced or not, If the script arguments allow that.
 
@@ -375,7 +397,6 @@ def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_, 
     :param old_string: the old string.
     :param new_string: the new string.
     :param type_: the type of the package.
-    :param is_ambiguous: if False, doesn't ask to the user.
     :return: the updated content.
     """
     if arguments.no_interactive and arguments.replace_by_default:
@@ -413,17 +434,19 @@ def replace_aea_add_statements(content, old_string, new_string, type_) -> str:
     """Replace statements of the type: 'aea add <type> <old_string>'."""
     if type_ != "agents":
         content = re.sub(
-            fr"aea +add +{type_} +{old_string}", f"aea add {type_} {new_string}", content
+            fr"aea +add +{type_} +{old_string}",
+            f"aea add {type_} {new_string}",
+            content,
         )
     return content
 
 
-def replace_type_and_public_id_occurrences(
-    line, old_string, new_string, type_
-) -> str:
+def replace_type_and_public_id_occurrences(line, old_string, new_string, type_) -> str:
     """Replace the public id whenever the type and the id occur in the same row,
     and NOT when other type names occur."""
-    if re.match(f"{type_}.*{old_string}", line) and all(_type not in line for _type in TYPES.difference({type_})):
+    if re.match(f"{type_}.*{old_string}", line) and all(
+        _type not in line for _type in TYPES.difference({type_})
+    ):
         line = line.replace(old_string, new_string)
     return line
 
@@ -459,21 +482,25 @@ def replace_in_yamls(content, old_string, new_string, type_) -> str:
     return content
 
 
-def inplace_change(fp: Path, old_string: str, new_string: str, type_: str, is_ambiguous: bool) -> None:
+def inplace_change(
+    fp: Path, old_string: str, new_string: str, type_: str, is_ambiguous: bool
+) -> None:
     """Replace the occurrence of a string with a new one in the provided file."""
 
     content = fp.read_text()
     if old_string not in content:
         return
 
-    print(f"Processing file {fp} for replacing {old_string} with {new_string} (is_ambiguous: {is_ambiguous})")
+    print(
+        f"Processing file {fp} for replacing {old_string} with {new_string} (is_ambiguous: {is_ambiguous})"
+    )
 
     if not is_ambiguous:
         content = content.replace(old_string, new_string)
     else:
         content = replace_in_yamls(content, old_string, new_string, type_)
         content = _ask_to_user_and_replace_if_allowed(
-            content, old_string, new_string, type_, is_ambiguous
+            content, old_string, new_string, type_
         )
 
     with fp.open(mode="w") as f:
@@ -505,7 +532,9 @@ def process_package(package_id: PackageId, is_ambiguous: bool) -> None:
     type_plural = package_id.package_type.to_plural()
     configuration_file_path = get_configuration_file_path(type_plural, package_id.name)
     current_public_id = get_public_id_from_yaml(configuration_file_path)
-    bump_package_version(current_public_id, configuration_file_path, type_plural, is_ambiguous)
+    bump_package_version(
+        current_public_id, configuration_file_path, type_plural, is_ambiguous
+    )
 
 
 def run_once() -> bool:
