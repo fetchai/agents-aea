@@ -351,12 +351,15 @@ class TestRunnable:
     async def test_exception(self):
         """Test runnable async methods."""
         # for pydocstyle
+        import time
+
         class TestRun(Runnable):
             async def run(self):
                 raise Exception("awaited")
 
         run = TestRun(threaded=True)
         run.start()
+        time.sleep(0.1)
         with pytest.raises(Exception, match="awaited"):
             run.wait_completed(sync=True, timeout=1)
 
@@ -381,7 +384,7 @@ class TestRunnable:
 
         run = TestRun(threaded=True)
         run.start()
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.4)
         assert run._task
 
         with pytest.raises(Exception, match="awaited"):

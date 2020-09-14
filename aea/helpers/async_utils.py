@@ -568,14 +568,34 @@ class Runnable(ABC):
             logger.warning("Already got result, skip")
             return ready_future
 
-        if self._task.done():
-            self._got_result = True
-            return self._task
-
         if sync:
             self._wait_sync(timeout)
             return ready_future
 
+        return self._wait_async(timeout)
+
+    def _wait_sync(self, timeout: Optional[float] = None) -> None:
+        """Wait task completed in sync manner."""
+        if self._task is None:
+            raise ValueError("task is not set!")
+
+        if self._threaded or self._loop.is_running():
+            start_time = time.time()
+
+            while not self._task.done():
+                time.sleep(0.01)
+                if timeout is not None and time.time() - start_time > timeout:
+                    raise asyncio.TimeoutError()
+
+            self._got_result = True
+            if self._task.exception():
+                raise self._task.exception()
+        else:
+            self._loop.run_until_complete(
+                asyncio.wait_for(self._wait(), timeout=timeout)
+            )
+
+    def _wait_async(self, timeout):
         if not self._threaded:
             return asyncio.wait_for(self._wait(), timeout=timeout)
 
@@ -594,28 +614,14 @@ class Runnable(ABC):
             finally:
                 self._got_result = True
 
-        self._task.add_done_callback(
-            lambda task: loop.call_soon_threadsafe(lambda: done(task))
-        )
-        return fut
-
-    def _wait_sync(self, timeout: Optional[float] = None) -> None:
-        """Wait task completed in sync manner."""
-        if self._task is None:
-            raise ValueError("task is not set!")
-        if self._loop.is_running():
-            start_time = time.time()
-            while not self._task.done():
-                time.sleep(0.01)
-                if timeout is not None and time.time() - start_time > timeout:
-                    raise asyncio.TimeoutError()
-            self._got_result = True
-            if self._task.exception():
-                raise self._task.exception()
+        if self._task.done():
+            done(self._task)
         else:
-            self._loop.run_until_complete(
-                asyncio.wait_for(self._wait(), timeout=timeout)
+            self._task.add_done_callback(
+                lambda task: loop.call_soon_threadsafe(lambda: done(task))
             )
+
+        return fut
 
     async def _wait(self) -> None:
         """Wait internal method."""
