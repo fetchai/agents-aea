@@ -130,6 +130,10 @@
       "type": "string",
       "enum": ["propagate", "just_log", "stop_and_exit"]
     },
+    "connection_exception_policy": {
+      "type": "string",
+      "enum": ["propagate", "just_log", "stop_and_exit"]
+    },
     "loop_mode": {
       "type": "string",
       "enum": ["async", "sync"]
