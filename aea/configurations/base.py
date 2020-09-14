@@ -20,6 +20,7 @@
 """Classes to handle AEA configurations."""
 
 import base64
+import functools
 import gzip
 import json
 import pprint
@@ -98,8 +99,47 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 
-PackageVersion = Type[semver.VersionInfo]
-PackageVersionLike = Union[str, semver.VersionInfo]
+VersionInfo = Type[semver.VersionInfo]
+PackageVersionLike = Union[str, VersionInfo]
+
+
+@functools.total_ordering
+class PackageVersion:
+    """A package version."""
+
+    def __init__(self, version_like: PackageVersionLike):
+        """
+        Initialize a package version.
+
+        :param version_like: a string, os a semver.VersionInfo object.
+        """
+        if version_like == "latest":
+            self._version = version_like
+        elif isinstance(version_like, str):
+            self._version = semver.VersionInfo.parse(version_like)
+        else:
+            raise ValueError("Version type not valid.")
+
+    @property
+    def is_latest(self) -> bool:
+        """Check whether the version is 'latest'."""
+        return self._version == "latest"
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        return str(self._version)
+
+    def __eq__(self, other) -> bool:
+        """Check equality."""
+        return isinstance(other, PackageVersion) and self._version == other._version
+
+    def __lt__(self, other):
+        """Compare with another object."""
+        enforce(
+            isinstance(other, PackageVersion),
+            f"Cannot compare {type(self)} with type {type(other)}.",
+        )
+        return str(self) < str(other)
 
 
 class PackageType(Enum):
@@ -332,11 +372,16 @@ class PublicId(JSONSerializable):
     >>> another_public_id = PublicId("author", "my_package", "0.1.0")
     >>> assert hash(public_id) == hash(another_public_id)
     >>> assert public_id == another_public_id
+    >>> latest_public_id = PublicId("author", "my_package", "latest")
+    >>> latest_public_id
+    <author/my_package:latest>
+    >>> latest_public_id.package_version.is_latest
+    True
     """
 
     AUTHOR_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
-    VERSION_REGEX = r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
+    VERSION_REGEX = r"(latest|(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
     PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(
         AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
     )
@@ -348,15 +393,7 @@ class PublicId(JSONSerializable):
         """Initialize the public identifier."""
         self._author = author
         self._name = name
-        self._version, self._version_info = self._process_version(version)
-
-    @staticmethod
-    def _process_version(version_like: PackageVersionLike) -> Tuple[Any, Any]:
-        if isinstance(version_like, str):
-            return version_like, semver.VersionInfo.parse(version_like)
-        if isinstance(version_like, semver.VersionInfo):
-            return str(version_like), version_like
-        raise ValueError("Version type not valid.")
+        self._package_version = PackageVersion(version)
 
     @property
     def author(self) -> str:
@@ -370,13 +407,13 @@ class PublicId(JSONSerializable):
 
     @property
     def version(self) -> str:
-        """Get the version."""
-        return self._version
+        """Get the version string."""
+        return str(self._package_version)
 
     @property
-    def version_info(self) -> PackageVersion:
-        """Get the package version."""
-        return self._version_info
+    def package_version(self) -> PackageVersion:
+        """Get the package version object."""
+        return self._package_version
 
     @property
     def latest(self) -> str:
@@ -504,7 +541,7 @@ class PublicId(JSONSerializable):
             and self.author == other.author
             and self.name == other.name
         ):
-            return self.version_info < other.version_info
+            return self.package_version < other.package_version
         raise ValueError(
             "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
                 self, other
