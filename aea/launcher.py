@@ -89,10 +89,8 @@ def _run_agent(
     _set_logger(log_level=log_level)
 
     agent = load_agent(agent_dir)
-    on_stop = False
 
     def stop_event_thread():
-        nonlocal on_stop
         try:
             stop_event.wait()
         except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:  # pragma: nocover
@@ -100,10 +98,8 @@ def _run_agent(
                 f"Exception raised in stop_event_thread {e} {type(e)}. Skip it, looks process is closed."
             )
         finally:
-            if not on_stop:
-                logger.debug("_run_agent: stop event raised. call agent.stop")
-                on_stop = True
-                agent.stop()
+            logger.debug("_run_agent: stop event raised. call agent.stop")
+            agent.runtime.stop()
 
     Thread(target=stop_event_thread, daemon=True).start()
     try:
@@ -116,10 +112,8 @@ def _run_agent(
         exc.__traceback__ = e.__traceback__
         raise exc
     finally:
-        if not on_stop:
-            logger.debug("_run_agent: call agent.stop")
-            on_stop = True
-            agent.stop()
+        logger.debug("_run_agent: call agent.stop")
+        agent.stop()
 
 
 class AEADirTask(AbstractExecutorTask):

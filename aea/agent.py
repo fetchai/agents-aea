@@ -196,7 +196,7 @@ class Agent(AbstractAgent):
         if was_started:
             self.runtime.wait_completed(sync=True)
         else:
-            raise ValueError("Failed to start runtime! Ws it already started?")
+            raise ValueError("Failed to start runtime! Was it already started?")
 
     def stop(self) -> None:
         """
