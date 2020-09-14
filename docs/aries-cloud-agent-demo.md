@@ -192,10 +192,10 @@ The following steps create **Alice_AEA** from scratch:
 aea create aries_alice
 cd aries_alice
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/http_client:0.8.0
 aea add connection fetchai/webhook:0.6.0
-aea add skill fetchai/aries_alice:0.6.0
+aea add skill fetchai/aries_alice:0.7.0
 ```
 </p>
 </details>
@@ -277,10 +277,10 @@ The following steps create **Faber_AEA** from scratch:
 aea create aries_faber
 cd aries_faber
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/http_client:0.8.0
 aea add connection fetchai/webhook:0.6.0
-aea add skill fetchai/aries_faber:0.5.0
+aea add skill fetchai/aries_faber:0.6.0
 ```
 </p>
 </details>

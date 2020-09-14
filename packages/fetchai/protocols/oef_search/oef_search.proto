@@ -5,6 +5,10 @@ package fetch.aea.OefSearch;
 message OefSearchMessage{
 
     // Custom Types
+    message AgentsInfo{
+        bytes agents_info = 1;
+    }
+
     message Description{
         bytes description = 1;
     }
@@ -45,7 +49,10 @@ message OefSearchMessage{
 
     message Search_Result_Performative{
         repeated string agents = 1;
+        AgentsInfo agents_info = 2;
     }
+
+    message Success_Performative{}
 
     message Oef_Error_Performative{
         OefErrorOperation oef_error_operation = 1;
@@ -62,6 +69,7 @@ message OefSearchMessage{
         Register_Service_Performative register_service = 6;
         Search_Result_Performative search_result = 7;
         Search_Services_Performative search_services = 8;
-        Unregister_Service_Performative unregister_service = 9;
+        Success_Performative success = 9;
+        Unregister_Service_Performative unregister_service = 10;
     }
 }

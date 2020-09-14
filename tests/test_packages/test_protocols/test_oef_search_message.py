@@ -47,6 +47,9 @@ def test_oef_type_string_value():
     assert (
         str(OefSearchMessage.Performative.SEARCH_RESULT) == "search_result"
     ), "The string representation must be search_result"
+    assert (
+        str(OefSearchMessage.Performative.SUCCESS) == "success"
+    ), "The string representation must be success"
 
 
 def test_oef_error_operation():
