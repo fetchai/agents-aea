@@ -70,7 +70,7 @@ cd car_detector
 aea add connection fetchai/p2p_libp2p:0.8.0
 aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
-aea add skill fetchai/carpark_detection:0.10.0
+aea add skill fetchai/carpark_detection:0.11.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
@@ -104,7 +104,7 @@ cd car_data_buyer
 aea add connection fetchai/p2p_libp2p:0.8.0
 aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
-aea add skill fetchai/carpark_client:0.10.0
+aea add skill fetchai/carpark_client:0.11.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
