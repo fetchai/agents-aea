@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetchai.aea.fetchai.state_update;
+package aea.fetchai.state_update;
 
 message StateUpdateMessage{
 

@@ -12,8 +12,8 @@ fingerprint:
   dialogues.py: QmQ1WKs3Dn15oDSwpc4N8hdADLxrn76U4X5SiLAmyGiPPY
   message.py: QmWMUnBpZxBq1PDZ6JsR9vwaKdywBHvL5hghekWeph8j9B
   serialization.py: QmT4wm2vP8QUFYCCaCCNNe4kMGgPCsFqkBTvKJFUYDJC4S
-  signing.proto: QmZEfnzAacy2rtbqZrPUqPBECRDbJPg5GDcZUyiSAah8Kt
-  signing_pb2.py: QmbZvzqyJWpqttSFwK6wx3gHrrTFiajs2hmFZVsSKFtVZR
+  signing.proto: QmZN9CmcfXCBiMQd9GTG81LadsbVQQ7j5pLFxEiQsQ4Sqk
+  signing_pb2.py: QmYQH8PDeC25ysrxeqh4nNv38bUL7jv9gRhta9gaNiXLL2
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

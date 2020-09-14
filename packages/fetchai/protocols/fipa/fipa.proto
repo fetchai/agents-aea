@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetchai.aea.fetchai.fipa;
+package aea.fetchai.fipa;
 
 message FipaMessage{
 

@@ -1760,7 +1760,7 @@ class ProtocolGenerator:
 
         # heading
         proto_buff_schema_str = self.indent + 'syntax = "proto3";\n\n'
-        proto_buff_schema_str += self.indent + "package fetchai.aea.{}.{};\n\n".format(
+        proto_buff_schema_str += self.indent + "package aea.{}.{};\n\n".format(
             self.protocol_specification.author, self.protocol_specification.name
         )
         proto_buff_schema_str += self.indent + "message {}Message{{\n\n".format(

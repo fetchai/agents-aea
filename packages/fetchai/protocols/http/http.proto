@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetchai.aea.fetchai.http;
+package aea.fetchai.http;
 
 message HttpMessage{
 

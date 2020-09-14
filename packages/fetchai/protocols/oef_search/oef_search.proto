@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetchai.aea.fetchai.oef_search;
+package aea.fetchai.oef_search;
 
 message OefSearchMessage{
 

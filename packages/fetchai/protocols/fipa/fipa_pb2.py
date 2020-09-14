@@ -16,25 +16,25 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="fipa.proto",
-    package="fetchai.aea.fetchai.fipa",
+    package="aea.fetchai.fipa",
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n\nfipa.proto\x12\x18\x66\x65tchai.aea.fetchai.fipa"\xe2\x0c\n\x0b\x46ipaMessage\x12K\n\x06\x61\x63\x63\x65pt\x18\x05 \x01(\x0b\x32\x39.fetchai.aea.fetchai.fipa.FipaMessage.Accept_PerformativeH\x00\x12]\n\x0f\x61\x63\x63\x65pt_w_inform\x18\x06 \x01(\x0b\x32\x42.fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_PerformativeH\x00\x12\x45\n\x03\x63\x66p\x18\x07 \x01(\x0b\x32\x36.fetchai.aea.fetchai.fipa.FipaMessage.Cfp_PerformativeH\x00\x12M\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32:.fetchai.aea.fetchai.fipa.FipaMessage.Decline_PerformativeH\x00\x12K\n\x06inform\x18\t \x01(\x0b\x32\x39.fetchai.aea.fetchai.fipa.FipaMessage.Inform_PerformativeH\x00\x12W\n\x0cmatch_accept\x18\n \x01(\x0b\x32?.fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_PerformativeH\x00\x12i\n\x15match_accept_w_inform\x18\x0b \x01(\x0b\x32H.fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_PerformativeH\x00\x12M\n\x07propose\x18\x0c \x01(\x0b\x32:.fetchai.aea.fetchai.fipa.FipaMessage.Propose_PerformativeH\x00\x1a"\n\x0b\x44\x65scription\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\x0c\x1a\x8b\x01\n\x05Query\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12\x46\n\x07nothing\x18\x02 \x01(\x0b\x32\x33.fetchai.aea.fetchai.fipa.FipaMessage.Query.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1aN\n\x10\x43\x66p_Performative\x12:\n\x05query\x18\x01 \x01(\x0b\x32+.fetchai.aea.fetchai.fipa.FipaMessage.Query\x1a[\n\x14Propose_Performative\x12\x43\n\x08proposal\x18\x01 \x01(\x0b\x32\x31.fetchai.aea.fetchai.fipa.FipaMessage.Description\x1a\xa7\x01\n\x1c\x41\x63\x63\x65pt_W_Inform_Performative\x12Z\n\x04info\x18\x01 \x03(\x0b\x32L.fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xb3\x01\n"Match_Accept_W_Inform_Performative\x12`\n\x04info\x18\x01 \x03(\x0b\x32R.fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x95\x01\n\x13Inform_Performative\x12Q\n\x04info\x18\x01 \x03(\x0b\x32\x43.fetchai.aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x15\n\x13\x41\x63\x63\x65pt_Performative\x1a\x16\n\x14\x44\x65\x63line_Performative\x1a\x1b\n\x19Match_Accept_PerformativeB\x0e\n\x0cperformativeb\x06proto3'
+        '\n\nfipa.proto\x12\x10\x61\x65\x61.fetchai.fipa"\xf2\x0b\n\x0b\x46ipaMessage\x12\x43\n\x06\x61\x63\x63\x65pt\x18\x05 \x01(\x0b\x32\x31.aea.fetchai.fipa.FipaMessage.Accept_PerformativeH\x00\x12U\n\x0f\x61\x63\x63\x65pt_w_inform\x18\x06 \x01(\x0b\x32:.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_PerformativeH\x00\x12=\n\x03\x63\x66p\x18\x07 \x01(\x0b\x32..aea.fetchai.fipa.FipaMessage.Cfp_PerformativeH\x00\x12\x45\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32\x32.aea.fetchai.fipa.FipaMessage.Decline_PerformativeH\x00\x12\x43\n\x06inform\x18\t \x01(\x0b\x32\x31.aea.fetchai.fipa.FipaMessage.Inform_PerformativeH\x00\x12O\n\x0cmatch_accept\x18\n \x01(\x0b\x32\x37.aea.fetchai.fipa.FipaMessage.Match_Accept_PerformativeH\x00\x12\x61\n\x15match_accept_w_inform\x18\x0b \x01(\x0b\x32@.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_PerformativeH\x00\x12\x45\n\x07propose\x18\x0c \x01(\x0b\x32\x32.aea.fetchai.fipa.FipaMessage.Propose_PerformativeH\x00\x1a"\n\x0b\x44\x65scription\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\x0c\x1a\x83\x01\n\x05Query\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12>\n\x07nothing\x18\x02 \x01(\x0b\x32+.aea.fetchai.fipa.FipaMessage.Query.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1a\x46\n\x10\x43\x66p_Performative\x12\x32\n\x05query\x18\x01 \x01(\x0b\x32#.aea.fetchai.fipa.FipaMessage.Query\x1aS\n\x14Propose_Performative\x12;\n\x08proposal\x18\x01 \x01(\x0b\x32).aea.fetchai.fipa.FipaMessage.Description\x1a\x9f\x01\n\x1c\x41\x63\x63\x65pt_W_Inform_Performative\x12R\n\x04info\x18\x01 \x03(\x0b\x32\x44.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xab\x01\n"Match_Accept_W_Inform_Performative\x12X\n\x04info\x18\x01 \x03(\x0b\x32J.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x8d\x01\n\x13Inform_Performative\x12I\n\x04info\x18\x01 \x03(\x0b\x32;.aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x15\n\x13\x41\x63\x63\x65pt_Performative\x1a\x16\n\x14\x44\x65\x63line_Performative\x1a\x1b\n\x19Match_Accept_PerformativeB\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
 
 
 _FIPAMESSAGE_DESCRIPTION = _descriptor.Descriptor(
     name="Description",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Description",
+    full_name="aea.fetchai.fipa.FipaMessage.Description",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="description",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Description.description",
+            full_name="aea.fetchai.fipa.FipaMessage.Description.description",
             index=0,
             number=1,
             type=12,
@@ -59,13 +59,13 @@ _FIPAMESSAGE_DESCRIPTION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=730,
-    serialized_end=764,
+    serialized_start=658,
+    serialized_end=692,
 )
 
 _FIPAMESSAGE_QUERY_NOTHING = _descriptor.Descriptor(
     name="Nothing",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Query.Nothing",
+    full_name="aea.fetchai.fipa.FipaMessage.Query.Nothing",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
@@ -78,20 +78,20 @@ _FIPAMESSAGE_QUERY_NOTHING = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=888,
-    serialized_end=897,
+    serialized_start=808,
+    serialized_end=817,
 )
 
 _FIPAMESSAGE_QUERY = _descriptor.Descriptor(
     name="Query",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Query",
+    full_name="aea.fetchai.fipa.FipaMessage.Query",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="bytes",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Query.bytes",
+            full_name="aea.fetchai.fipa.FipaMessage.Query.bytes",
             index=0,
             number=1,
             type=12,
@@ -109,7 +109,7 @@ _FIPAMESSAGE_QUERY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="nothing",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Query.nothing",
+            full_name="aea.fetchai.fipa.FipaMessage.Query.nothing",
             index=1,
             number=2,
             type=11,
@@ -127,7 +127,7 @@ _FIPAMESSAGE_QUERY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="query_bytes",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Query.query_bytes",
+            full_name="aea.fetchai.fipa.FipaMessage.Query.query_bytes",
             index=2,
             number=3,
             type=12,
@@ -154,26 +154,26 @@ _FIPAMESSAGE_QUERY = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="query",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Query.query",
+            full_name="aea.fetchai.fipa.FipaMessage.Query.query",
             index=0,
             containing_type=None,
             fields=[],
         ),
     ],
-    serialized_start=767,
-    serialized_end=906,
+    serialized_start=695,
+    serialized_end=826,
 )
 
 _FIPAMESSAGE_CFP_PERFORMATIVE = _descriptor.Descriptor(
     name="Cfp_Performative",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Cfp_Performative",
+    full_name="aea.fetchai.fipa.FipaMessage.Cfp_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="query",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Cfp_Performative.query",
+            full_name="aea.fetchai.fipa.FipaMessage.Cfp_Performative.query",
             index=0,
             number=1,
             type=11,
@@ -198,20 +198,20 @@ _FIPAMESSAGE_CFP_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=908,
-    serialized_end=986,
+    serialized_start=828,
+    serialized_end=898,
 )
 
 _FIPAMESSAGE_PROPOSE_PERFORMATIVE = _descriptor.Descriptor(
     name="Propose_Performative",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Propose_Performative",
+    full_name="aea.fetchai.fipa.FipaMessage.Propose_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="proposal",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Propose_Performative.proposal",
+            full_name="aea.fetchai.fipa.FipaMessage.Propose_Performative.proposal",
             index=0,
             number=1,
             type=11,
@@ -236,20 +236,20 @@ _FIPAMESSAGE_PROPOSE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=988,
-    serialized_end=1079,
+    serialized_start=900,
+    serialized_end=983,
 )
 
 _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     name="InfoEntry",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry",
+    full_name="aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry.key",
+            full_name="aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry.key",
             index=0,
             number=1,
             type=9,
@@ -267,7 +267,7 @@ _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry.value",
+            full_name="aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry.value",
             index=1,
             number=2,
             type=9,
@@ -292,20 +292,20 @@ _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1206,
-    serialized_end=1249,
+    serialized_start=1102,
+    serialized_end=1145,
 )
 
 _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
     name="Accept_W_Inform_Performative",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative",
+    full_name="aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="info",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.info",
+            full_name="aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.info",
             index=0,
             number=1,
             type=11,
@@ -330,20 +330,20 @@ _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1082,
-    serialized_end=1249,
+    serialized_start=986,
+    serialized_end=1145,
 )
 
 _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     name="InfoEntry",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry",
+    full_name="aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry.key",
+            full_name="aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry.key",
             index=0,
             number=1,
             type=9,
@@ -361,7 +361,7 @@ _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descript
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry.value",
+            full_name="aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry.value",
             index=1,
             number=2,
             type=9,
@@ -386,20 +386,20 @@ _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descript
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1206,
-    serialized_end=1249,
+    serialized_start=1102,
+    serialized_end=1145,
 )
 
 _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
     name="Match_Accept_W_Inform_Performative",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative",
+    full_name="aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="info",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.info",
+            full_name="aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.info",
             index=0,
             number=1,
             type=11,
@@ -424,20 +424,20 @@ _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1252,
-    serialized_end=1431,
+    serialized_start=1148,
+    serialized_end=1319,
 )
 
 _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     name="InfoEntry",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry",
+    full_name="aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry.key",
+            full_name="aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry.key",
             index=0,
             number=1,
             type=9,
@@ -455,7 +455,7 @@ _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry.value",
+            full_name="aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry.value",
             index=1,
             number=2,
             type=9,
@@ -480,20 +480,20 @@ _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1206,
-    serialized_end=1249,
+    serialized_start=1102,
+    serialized_end=1145,
 )
 
 _FIPAMESSAGE_INFORM_PERFORMATIVE = _descriptor.Descriptor(
     name="Inform_Performative",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Inform_Performative",
+    full_name="aea.fetchai.fipa.FipaMessage.Inform_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="info",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.Inform_Performative.info",
+            full_name="aea.fetchai.fipa.FipaMessage.Inform_Performative.info",
             index=0,
             number=1,
             type=11,
@@ -518,13 +518,13 @@ _FIPAMESSAGE_INFORM_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1434,
-    serialized_end=1583,
+    serialized_start=1322,
+    serialized_end=1463,
 )
 
 _FIPAMESSAGE_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
     name="Accept_Performative",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Accept_Performative",
+    full_name="aea.fetchai.fipa.FipaMessage.Accept_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
@@ -537,13 +537,13 @@ _FIPAMESSAGE_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1585,
-    serialized_end=1606,
+    serialized_start=1465,
+    serialized_end=1486,
 )
 
 _FIPAMESSAGE_DECLINE_PERFORMATIVE = _descriptor.Descriptor(
     name="Decline_Performative",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Decline_Performative",
+    full_name="aea.fetchai.fipa.FipaMessage.Decline_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
@@ -556,13 +556,13 @@ _FIPAMESSAGE_DECLINE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1608,
-    serialized_end=1630,
+    serialized_start=1488,
+    serialized_end=1510,
 )
 
 _FIPAMESSAGE_MATCH_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
     name="Match_Accept_Performative",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_Performative",
+    full_name="aea.fetchai.fipa.FipaMessage.Match_Accept_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
@@ -575,20 +575,20 @@ _FIPAMESSAGE_MATCH_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1632,
-    serialized_end=1659,
+    serialized_start=1512,
+    serialized_end=1539,
 )
 
 _FIPAMESSAGE = _descriptor.Descriptor(
     name="FipaMessage",
-    full_name="fetchai.aea.fetchai.fipa.FipaMessage",
+    full_name="aea.fetchai.fipa.FipaMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="accept",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.accept",
+            full_name="aea.fetchai.fipa.FipaMessage.accept",
             index=0,
             number=5,
             type=11,
@@ -606,7 +606,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="accept_w_inform",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.accept_w_inform",
+            full_name="aea.fetchai.fipa.FipaMessage.accept_w_inform",
             index=1,
             number=6,
             type=11,
@@ -624,7 +624,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="cfp",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.cfp",
+            full_name="aea.fetchai.fipa.FipaMessage.cfp",
             index=2,
             number=7,
             type=11,
@@ -642,7 +642,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="decline",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.decline",
+            full_name="aea.fetchai.fipa.FipaMessage.decline",
             index=3,
             number=8,
             type=11,
@@ -660,7 +660,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="inform",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.inform",
+            full_name="aea.fetchai.fipa.FipaMessage.inform",
             index=4,
             number=9,
             type=11,
@@ -678,7 +678,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="match_accept",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.match_accept",
+            full_name="aea.fetchai.fipa.FipaMessage.match_accept",
             index=5,
             number=10,
             type=11,
@@ -696,7 +696,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="match_accept_w_inform",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.match_accept_w_inform",
+            full_name="aea.fetchai.fipa.FipaMessage.match_accept_w_inform",
             index=6,
             number=11,
             type=11,
@@ -714,7 +714,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="propose",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.propose",
+            full_name="aea.fetchai.fipa.FipaMessage.propose",
             index=7,
             number=12,
             type=11,
@@ -752,14 +752,14 @@ _FIPAMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="fetchai.aea.fetchai.fipa.FipaMessage.performative",
+            full_name="aea.fetchai.fipa.FipaMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
         ),
     ],
-    serialized_start=41,
-    serialized_end=1675,
+    serialized_start=33,
+    serialized_end=1555,
 )
 
 _FIPAMESSAGE_DESCRIPTION.containing_type = _FIPAMESSAGE
@@ -889,7 +889,7 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_FIPAMESSAGE_DESCRIPTION,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Description)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Description)
             ),
         ),
         Query=_reflection.GeneratedProtocolMessageType(
@@ -902,12 +902,12 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_FIPAMESSAGE_QUERY_NOTHING,
                         __module__="fipa_pb2"
-                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Query.Nothing)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Query.Nothing)
                     ),
                 ),
                 DESCRIPTOR=_FIPAMESSAGE_QUERY,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Query)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Query)
             ),
         ),
         Cfp_Performative=_reflection.GeneratedProtocolMessageType(
@@ -916,7 +916,7 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_FIPAMESSAGE_CFP_PERFORMATIVE,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Cfp_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Cfp_Performative)
             ),
         ),
         Propose_Performative=_reflection.GeneratedProtocolMessageType(
@@ -925,7 +925,7 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_FIPAMESSAGE_PROPOSE_PERFORMATIVE,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Propose_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Propose_Performative)
             ),
         ),
         Accept_W_Inform_Performative=_reflection.GeneratedProtocolMessageType(
@@ -938,12 +938,12 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,
                         __module__="fipa_pb2"
-                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry)
                     ),
                 ),
                 DESCRIPTOR=_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative)
             ),
         ),
         Match_Accept_W_Inform_Performative=_reflection.GeneratedProtocolMessageType(
@@ -956,12 +956,12 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,
                         __module__="fipa_pb2"
-                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry)
                     ),
                 ),
                 DESCRIPTOR=_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative)
             ),
         ),
         Inform_Performative=_reflection.GeneratedProtocolMessageType(
@@ -974,12 +974,12 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
                     dict(
                         DESCRIPTOR=_FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY,
                         __module__="fipa_pb2"
-                        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry)
                     ),
                 ),
                 DESCRIPTOR=_FIPAMESSAGE_INFORM_PERFORMATIVE,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Inform_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Inform_Performative)
             ),
         ),
         Accept_Performative=_reflection.GeneratedProtocolMessageType(
@@ -988,7 +988,7 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_FIPAMESSAGE_ACCEPT_PERFORMATIVE,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Accept_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Accept_Performative)
             ),
         ),
         Decline_Performative=_reflection.GeneratedProtocolMessageType(
@@ -997,7 +997,7 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_FIPAMESSAGE_DECLINE_PERFORMATIVE,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Decline_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Decline_Performative)
             ),
         ),
         Match_Accept_Performative=_reflection.GeneratedProtocolMessageType(
@@ -1006,12 +1006,12 @@ FipaMessage = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_FIPAMESSAGE_MATCH_ACCEPT_PERFORMATIVE,
                 __module__="fipa_pb2"
-                # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage.Match_Accept_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage.Match_Accept_Performative)
             ),
         ),
         DESCRIPTOR=_FIPAMESSAGE,
         __module__="fipa_pb2"
-        # @@protoc_insertion_point(class_scope:fetchai.aea.fetchai.fipa.FipaMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.fipa.FipaMessage)
     ),
 )
 _sym_db.RegisterMessage(FipaMessage)

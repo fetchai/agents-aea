@@ -13,8 +13,8 @@ fingerprint:
   dialogues.py: QmTxHrcGujP1RUYvfJygZyQoUwmDg2GBWfmbR3tWUSbyop
   message.py: QmfNdmYk3wssDJvHwMsMxXaiWCjm3fSH9Su4KmsYDZJoWg
   serialization.py: QmZYhkHa6wW5T4fSUSHar67C76ascfKLsevWEfkff3uVvU
-  tac.proto: QmdPn2Z4xiPuc16PPzd8NNsbRd95aEDbvfUm1FFjvZZcuy
-  tac_pb2.py: QmYDEdWMwpfDawJPf8rjwLnEwDjdT4KuyNwYS8kEC5swKy
+  tac.proto: QmUXk2kwqp1vo22oZdvLbWKirojeqkXdGSmiz6r14bMqSE
+  tac_pb2.py: QmQYbDoEWt4cthXQTLYozRTAb5CFWEDMFptfvryze2Reqa
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

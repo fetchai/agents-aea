@@ -11,8 +11,8 @@ fingerprint:
   dialogues.py: Qmd59WgpFccLn1zhpLdwm3zDCmCsjSoQXVn6M7PgFwwkgR
   message.py: Qmc8mnCC1K7yb1CTY3t1RXbktmg54bZ3nXVqq1KQES8jJf
   serialization.py: QmS3Tesi18wvwoxjgC4iiqkdJUMAsYSiz8Vq6oHNzr3kxh
-  state_update.proto: QmWZmuScKgykqijC58nrGrHfd2vDUk1mroEpqGt6UPLjDa
-  state_update_pb2.py: QmfAy4RWUa3GwsCyEsXK6xJ2jJ2JhbTGRg4wCfrcvviBxS
+  state_update.proto: QmX1YJaiCeEdURVzu8qx5w2gq5gs2V9cy8dJ7jg79poQLs
+  state_update_pb2.py: QmUgSCEzb6gZZBBYyLqMXxZG2Awt8znjQXeHMuX7DDdTpE
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
