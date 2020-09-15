@@ -496,7 +496,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 		}
 
 		linfo().Str("op", "route").Str("addr", target).
-			Msgf("got peer id %s for agent address", peerID.Pretty())
+			Msgf("got peer id '%s' for agent address", peerID.Pretty())
 
 		linfo().Str("op", "route").Str("addr", target).
 			Msgf("opening stream to target %s...", peerID.Pretty())
@@ -526,8 +526,8 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 }
 
 func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
-	lerror, _, linfo, _ := dhtPeer.getLoggers()
-
+	lerror, lwarn, linfo, _ := dhtPeer.getLoggers()
+	var err error
 	addressCID, err := utils.ComputeCID(address)
 	if err != nil {
 		return "", err
@@ -537,35 +537,54 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 		Msgf("Querying for providers for cid %s...", addressCID.String())
 	ctx, cancel := context.WithTimeout(context.Background(), addressLookupTimeout)
 	defer cancel()
-	providers := dhtPeer.dht.FindProvidersAsync(ctx, addressCID, 1)
+	var elapsed time.Duration
+	var provider peer.AddrInfo
+	var connected bool = false
+	var s network.Stream
+
 	start := time.Now()
-	provider := <-providers
-	elapsed := time.Since(start)
-	for provider.ID == "" {
-		err = errors.New("didn't found any provider for address within timeout")
-		lerror(err).Str("op", "lookup").Str("addr", address).Msg("")
-		select {
-		default:
-			time.Sleep(200 * time.Millisecond)
-			providers = dhtPeer.dht.FindProvidersAsync(ctx, addressCID, 1)
-			provider = <-providers
+
+	for !connected {
+		providers := dhtPeer.dht.FindProvidersAsync(ctx, addressCID, 0)
+
+		for provider = range providers {
 			elapsed = time.Since(start)
-		case <-ctx.Done():
+
+			linfo().Str("op", "lookup").Str("addr", address).
+				Msgf("found provider %s after %s", provider, elapsed.String())
+
+			// Add peer to host PeerStore - the provider should be the holder of the address
+			dhtPeer.routedHost.Peerstore().AddAddrs(provider.ID, provider.Addrs, peerstore.PermanentAddrTTL)
+
+			linfo().Str("op", "lookup").Str("addr", address).
+				Msgf("opening stream to the address provider %s...", provider)
+			ctxConnect := context.Background()
+			s, err = dhtPeer.routedHost.NewStream(ctxConnect, provider.ID, dhtnode.AeaAddressStream)
+			if err == nil {
+				connected = true
+				break
+			}
+
+			dhtPeer.routedHost.Peerstore().ClearAddrs(provider.ID)
+			lwarn().Str("op", "lookup").Str("addr", address).Msgf("couldn't open stream to address provider %s: %s", provider, err.Error())
+			lwarn().Str("op", "lookup").Str("addr", address).Msgf("looking up for other providers...")
+		}
+
+		if provider.ID == "" {
+			msg := "didn't found any provider for address"
+			lwarn().Str("op", "lookup").Str("addr", address).Msg(msg)
+			select {
+			default:
+				lwarn().Str("op", "lookup").Str("addr", address).Msg("retrying...")
+				time.Sleep(200 * time.Millisecond)
+			case <-ctx.Done():
+				err = errors.New(msg + " " + address + " within timeout")
+				lerror(err).Str("op", "lookup").Str("addr", address).Msg("")
+				return "", err
+			}
+		} else if !connected {
 			return "", err
 		}
-	}
-	linfo().Str("op", "lookup").Str("addr", address).
-		Msgf("found provider %s after %s", provider, elapsed.String())
-
-	// Add peer to host PeerStore - the provider should be the holder of the address
-	dhtPeer.routedHost.Peerstore().AddAddrs(provider.ID, provider.Addrs, peerstore.PermanentAddrTTL)
-
-	linfo().Str("op", "lookup").Str("addr", address).
-		Msgf("opening stream to the address provider %s...", provider)
-	ctx = context.Background()
-	s, err := dhtPeer.routedHost.NewStream(ctx, provider.ID, dhtnode.AeaAddressStream)
-	if err != nil {
-		return "", err
 	}
 
 	linfo().Str("op", "lookup").Str("addr", address).
