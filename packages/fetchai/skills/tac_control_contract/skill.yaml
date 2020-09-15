@@ -1,6 +1,6 @@
 name: tac_control_contract
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.

@@ -248,7 +248,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_detector:0.11.0", carpark_aea_name
+            "fetchai/car_detector:0.12.0", carpark_aea_name
         )
         assert (
             diff == []
@@ -286,7 +286,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_data_buyer:0.11.0", carpark_client_aea_name
+            "fetchai/car_data_buyer:0.12.0", carpark_client_aea_name
         )
         assert (
             diff == []

@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/car_detector:0.11.0
+aea fetch fetchai/car_detector:0.12.0
 cd car_detector
 aea install
 ```
@@ -14,7 +14,7 @@ aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 ``` bash
-aea fetch fetchai/car_data_buyer:0.11.0
+aea fetch fetchai/car_data_buyer:0.12.0
 cd car_data_buyer
 aea install
 ```

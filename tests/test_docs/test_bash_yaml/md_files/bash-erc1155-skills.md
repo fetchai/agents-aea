@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.12.0
+aea fetch fetchai/erc1155_deployer:0.13.0
 cd erc1155_deployer
 aea install
 ```
@@ -25,7 +25,7 @@ aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt --connection
 ```
 ``` bash
-aea fetch fetchai/erc1155_client:0.12.0
+aea fetch fetchai/erc1155_client:0.13.0
 cd erc1155_client
 aea install
 ```
@@ -35,7 +35,7 @@ cd erc1155_client
 aea add connection fetchai/p2p_libp2p:0.8.0
 aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
-aea add skill fetchai/erc1155_client:0.12.0
+aea add skill fetchai/erc1155_client:0.13.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```

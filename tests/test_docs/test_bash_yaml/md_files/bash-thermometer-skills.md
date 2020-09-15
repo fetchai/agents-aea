@@ -1,5 +1,5 @@
 ``` bash 
-aea fetch fetchai/thermometer_aea:0.9.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.10.0 --alias my_thermometer_aea
 cd thermometer_aea
 aea install
 ```
@@ -9,12 +9,12 @@ cd my_thermometer_aea
 aea add connection fetchai/p2p_libp2p:0.8.0
 aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
-aea add skill fetchai/thermometer:0.10.0
+aea add skill fetchai/thermometer:0.11.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```
 ``` bash
-aea fetch fetchai/thermometer_client:0.9.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.10.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -24,7 +24,7 @@ cd my_thermometer_client
 aea add connection fetchai/p2p_libp2p:0.8.0
 aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
-aea add skill fetchai/thermometer_client:0.9.0
+aea add skill fetchai/thermometer_client:0.10.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ```

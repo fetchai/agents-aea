@@ -1,6 +1,6 @@
 name: weather_station
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
@@ -23,7 +23,7 @@ protocols:
 - fetchai/ledger_api:0.3.0
 - fetchai/oef_search:0.6.0
 skills:
-- fetchai/generic_seller:0.11.0
+- fetchai/generic_seller:0.12.0
 behaviours:
   service_registration:
     args:
