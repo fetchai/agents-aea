@@ -1,6 +1,6 @@
 agent_name: aries_faber
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 description: An AEA representing Faber in the Aries demo.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'

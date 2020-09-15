@@ -15,7 +15,7 @@ aca-py start --admin 127.0.0.1 8021 --admin-insecure-mode --inbound-transport ht
 aca-py start --admin 127.0.0.1 8031 --admin-insecure-mode --inbound-transport http 0.0.0.0 8030 --outbound-transp http --webhook-url http://127.0.0.1:8032/webhooks
 ```
 ``` bash
-aea fetch fetchai/aries_alice:0.9.0
+aea fetch fetchai/aries_alice:0.10.0
 cd aries_alice
 ```
 ``` bash
@@ -54,7 +54,7 @@ aea install
 aea run
 ```
 ``` bash
-aea fetch fetchai/aries_faber:0.9.0
+aea fetch fetchai/aries_faber:0.10.0
 cd aries_faber
 ```
 ``` bash

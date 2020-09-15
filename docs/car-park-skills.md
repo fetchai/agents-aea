@@ -55,7 +55,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the car detector AEA:
 ``` bash
-aea fetch fetchai/car_detector:0.11.0
+aea fetch fetchai/car_detector:0.12.0
 cd car_detector
 aea install
 ```
@@ -89,7 +89,7 @@ default_routing:
 
 Then, fetch the car data client AEA:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.11.0
+aea fetch fetchai/car_data_buyer:0.12.0
 cd car_data_buyer
 aea install
 ```

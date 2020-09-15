@@ -398,7 +398,7 @@ This will ensure that search requests are processed by the correct connection.
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.11.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.12.0 && cd simple_service_registration
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.

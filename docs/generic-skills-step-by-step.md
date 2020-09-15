@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.8.0
+aea fetch fetchai/generic_seller:0.9.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.11.0
+aea eject skill fetchai/generic_seller:0.12.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.8.0
+aea fetch fetchai/generic_buyer:0.9.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.10.0
+aea eject skill fetchai/generic_buyer:0.11.0
 cd ..
 ```
 

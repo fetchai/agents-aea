@@ -1,6 +1,6 @@
 name: generic_seller
 author: fetchai
-version: 0.11.0
+version: 0.12.0
 type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
