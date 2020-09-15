@@ -256,7 +256,7 @@ class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
 class PublicIdTestCase(TestCase):
     """Test case for PublicId class."""
 
-    @mock.patch("aea.configurations.base.re.match", return_value=False)
+    @mock.patch("aea.configurations.base.re.match", return_value=None)
     def test_public_id_from_str_not_matching(self, *mocks):
         """Test case for from_str method regex not matching."""
         with self.assertRaises(ValueError):
@@ -425,6 +425,21 @@ def test_public_id_invalid_version():
     """Test the case when the version id is of an invalid type."""
     with pytest.raises(ValueError, match="Version type not valid."):
         PublicId("author", "name", object())
+
+
+def test_public_id_from_string():
+    """Test parsing the public id from string."""
+    public_id = PublicId.from_str("author/package:0.1.0")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "0.1.0"
+
+
+def test_public_id_from_string_without_version_string():
+    public_id = PublicId.from_str("author/package")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "latest"
 
 
 def test_public_id_from_uri_path():

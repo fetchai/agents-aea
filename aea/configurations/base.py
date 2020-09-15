@@ -99,13 +99,15 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 
-VersionInfo = Type[semver.VersionInfo]
-PackageVersionLike = Union[str, VersionInfo]
+VersionInfoClass = semver.VersionInfo
+PackageVersionLike = Union[str, semver.VersionInfo]
 
 
 @functools.total_ordering
 class PackageVersion:
     """A package version."""
+
+    _version: PackageVersionLike
 
     def __init__(self, version_like: PackageVersionLike):
         """
@@ -113,10 +115,12 @@ class PackageVersion:
 
         :param version_like: a string, os a semver.VersionInfo object.
         """
-        if version_like == "latest":
+        if isinstance(version_like, str) and version_like == "latest":
             self._version = version_like
         elif isinstance(version_like, str):
-            self._version = semver.VersionInfo.parse(version_like)
+            self._version = VersionInfoClass.parse(version_like)
+        elif isinstance(version_like, VersionInfoClass):
+            self._version = version_like
         else:
             raise ValueError("Version type not valid.")
 
@@ -139,6 +143,9 @@ class PackageVersion:
             isinstance(other, PackageVersion),
             f"Cannot compare {type(self)} with type {type(other)}.",
         )
+        other = cast(PackageVersion, other)
+        if self.is_latest or other.is_latest:
+            return self.is_latest < other.is_latest
         return str(self) < str(other)
 
 
@@ -382,18 +389,26 @@ class PublicId(JSONSerializable):
     AUTHOR_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     VERSION_REGEX = r"(latest|(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
-    PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(
+    PUBLIC_ID_REGEX = r"^({})/({})(:({}))?$".format(
         AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
     )
     PUBLIC_ID_URI_REGEX = r"^({})/({})/({})$".format(
         AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
     )
 
-    def __init__(self, author: str, name: str, version: PackageVersionLike = "latest"):
+    LATEST_VERSION = "latest"
+
+    def __init__(
+        self, author: str, name: str, version: Optional[PackageVersionLike] = None
+    ):
         """Initialize the public identifier."""
         self._author = author
         self._name = name
-        self._package_version = PackageVersion(version)
+        self._package_version = (
+            PackageVersion(version)
+            if version is not None
+            else PackageVersion(self.LATEST_VERSION)
+        )
 
     @property
     def author(self) -> str:
@@ -438,13 +453,14 @@ class PublicId(JSONSerializable):
         :return: the public id object.
         :raises ValueError: if the string in input is not well formatted.
         """
-        if not re.match(cls.PUBLIC_ID_REGEX, public_id_string):
+        match = re.match(cls.PUBLIC_ID_REGEX, public_id_string)
+        if match is None:
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_string)
             )
-        username, package_name, version = re.findall(
-            cls.PUBLIC_ID_REGEX, public_id_string
-        )[0][:3]
+        username = match.group(1)
+        package_name = match.group(2)
+        version = match.group(3)[1:] if ":" in public_id_string else None
         return PublicId(username, package_name, version)
 
     @classmethod
