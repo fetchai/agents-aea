@@ -643,18 +643,21 @@ class TestComponentRegistry:
         """Test fetch with public id :latest version."""
         item_id_1 = PublicId("author", "package", "0.1.0")
         item_id_2 = PublicId("author", "package", "0.2.0")
+        item_id_3 = PublicId("author", "package", "0.3.0")
         item_id_latest = PublicId("author", "package")
         name = "name"
         self.registry.register((item_id_1, name), MagicMock(id=1))
+        self.registry.register((item_id_3, name), MagicMock(id=3))
         self.registry.register((item_id_2, name), MagicMock(id=2))
 
         latest = self.registry.fetch((item_id_latest, name))
         assert latest is not None
-        assert latest.id == 2
+        assert latest.id == 3
 
         # restore previous state
         self.registry.unregister((item_id_1, name))
         self.registry.unregister((item_id_2, name))
+        self.registry.unregister((item_id_3, name))
 
 
 class TestHandlerRegistry:
