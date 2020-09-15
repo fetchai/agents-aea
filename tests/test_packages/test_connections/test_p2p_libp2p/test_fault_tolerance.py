@@ -53,36 +53,44 @@ class TestLibp2pConnectionRelayNodeRestart:
         os.chdir(cls.t)
 
         cls.log_files = []
+        cls.multiplexers = []
 
-        cls.genesis = _make_libp2p_connection(DEFAULT_PORT + 1)
+        try:
+            cls.genesis = _make_libp2p_connection(DEFAULT_PORT + 1)
 
-        cls.multiplexer_genesis = Multiplexer([cls.genesis])
-        cls.log_files.append(cls.genesis.node.log_file)
-        cls.multiplexer_genesis.connect()
+            cls.multiplexer_genesis = Multiplexer([cls.genesis])
+            cls.log_files.append(cls.genesis.node.log_file)
+            cls.multiplexer_genesis.connect()
+            cls.multiplexers.append(cls.multiplexer_genesis)
 
-        genesis_peer = cls.genesis.node.multiaddrs[0]
+            genesis_peer = cls.genesis.node.multiaddrs[0]
 
-        with open("node_key", "wb") as f:
-            make_crypto(DEFAULT_LEDGER).dump(f)
-            cls.relay_key_path = "node_key"
+            with open("node_key", "wb") as f:
+                make_crypto(DEFAULT_LEDGER).dump(f)
+                cls.relay_key_path = "node_key"
 
-        cls.relay = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            entry_peers=[genesis_peer],
-            node_key_file=cls.relay_key_path,
-        )
-        cls.multiplexer_relay = Multiplexer([cls.relay])
-        cls.log_files.append(cls.relay.node.log_file)
-        cls.multiplexer_relay.connect()
+            cls.relay = _make_libp2p_connection(
+                port=DEFAULT_PORT + 2,
+                entry_peers=[genesis_peer],
+                node_key_file=cls.relay_key_path,
+            )
+            cls.multiplexer_relay = Multiplexer([cls.relay])
+            cls.log_files.append(cls.relay.node.log_file)
+            cls.multiplexer_relay.connect()
+            cls.multiplexers.append(cls.multiplexer_relay)
 
-        relay_peer = cls.relay.node.multiaddrs[0]
+            relay_peer = cls.relay.node.multiaddrs[0]
 
-        cls.connection = _make_libp2p_connection(
-            DEFAULT_PORT + 3, relay=False, entry_peers=[relay_peer]
-        )
-        cls.multiplexer = Multiplexer([cls.connection])
-        cls.log_files.append(cls.connection.node.log_file)
-        cls.multiplexer.connect()
+            cls.connection = _make_libp2p_connection(
+                DEFAULT_PORT + 3, relay=False, entry_peers=[relay_peer]
+            )
+            cls.multiplexer = Multiplexer([cls.connection])
+            cls.log_files.append(cls.connection.node.log_file)
+            cls.multiplexer.connect()
+            cls.multiplexers.append(cls.multiplexer)
+        except Exception as e:
+            cls.teardown_class()
+            raise e
 
     def test_connection_is_established(self):
         assert self.relay.is_connected is True
@@ -143,6 +151,7 @@ class TestLibp2pConnectionRelayNodeRestart:
             [self.relay]
         )
         self.multiplexer_relay.connect()
+        TestLibp2pConnectionRelayNodeRestart.multiplexers.append(self.multiplexer_relay)
 
         delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)
 
@@ -155,10 +164,8 @@ class TestLibp2pConnectionRelayNodeRestart:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        cls.multiplexer.disconnect()
-        cls.multiplexer_relay.disconnect()
-        cls.multiplexer_genesis.disconnect()
-
+        for mux in cls.multiplexers:
+            mux.disconnect()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
