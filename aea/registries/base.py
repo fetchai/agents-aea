@@ -423,10 +423,10 @@ class ComponentRegistry(
             return None
         return name_to_item.get(item_name, None)
 
-    def fetch_by_skill(self, skill_id: SkillId) -> List[Item]:
+    def fetch_by_skill(self, skill_id: SkillId) -> List[SkillComponentType]:
         """Fetch all the items of a given skill."""
-        temp = self._items.fetch(skill_id)
-        name_to_item = {} if temp is None else temp
+        temp: Optional[Dict[str, SkillComponentType]] = self._items.fetch(skill_id)
+        name_to_item: Dict[str, SkillComponentType] = {} if temp is None else temp
         return list(name_to_item.values())
 
     def fetch_all(self) -> List[SkillComponentType]:
@@ -446,7 +446,9 @@ class ComponentRegistry(
         """Get the item ids."""
         result: Set[Tuple[SkillId, str]] = set()
         for skill_id in self._items.ids():
-            name_to_item = self._items.fetch(skill_id)
+            name_to_item = cast(
+                Dict[str, SkillComponentType], self._items.fetch(skill_id)
+            )
             for name, _ in name_to_item.items():
                 result.add((skill_id, name))
         return result
@@ -549,9 +551,10 @@ class HandlerRegistry(ComponentRegistry[Handler]):
             )
         if protocol_handlers_by_skill is None:
             # registry from skill ids to handlers.
-            new_registry = PublicIdRegistry()
+            new_registry: PublicIdRegistry = PublicIdRegistry()
             self._items_by_protocol_and_skill.register(protocol_id, new_registry)
-        self._items_by_protocol_and_skill.fetch(protocol_id).register(skill_id, item)
+        registry = cast(Registry, self._items_by_protocol_and_skill.fetch(protocol_id))
+        registry.register(skill_id, item)
         super().register(item_id, item, is_dynamically_added=is_dynamically_added)
 
     def unregister(self, item_id: Tuple[SkillId, str]) -> None:
@@ -567,8 +570,8 @@ class HandlerRegistry(ComponentRegistry[Handler]):
 
         # remove from index by protocol and skill
         protocol_id = cast(ProtocolId, handler.SUPPORTED_PROTOCOL)
-        protocol_handlers_by_skill = self._items_by_protocol_and_skill.fetch(
-            protocol_id
+        protocol_handlers_by_skill = cast(
+            PublicIdRegistry, self._items_by_protocol_and_skill.fetch(protocol_id)
         )
         protocol_handlers_by_skill.unregister(skill_id)
         if len(protocol_handlers_by_skill.ids()) == 0:
@@ -584,15 +587,16 @@ class HandlerRegistry(ComponentRegistry[Handler]):
 
         self._dynamically_added.pop(skill_id, None)
 
-        handlers = self._items.fetch(skill_id).values()
+        handlers = cast(Dict[str, Handler], self._items.fetch(skill_id)).values()
         self._items.unregister(skill_id)
 
         # unregister from the protocol-skill index
         for handler in handlers:
             protocol_id = cast(ProtocolId, handler.SUPPORTED_PROTOCOL)
             if protocol_id in self._items_by_protocol_and_skill.ids():
-                skill_id_to_handler = self._items_by_protocol_and_skill.fetch(
-                    protocol_id
+                skill_id_to_handler = cast(
+                    PublicIdRegistry,
+                    self._items_by_protocol_and_skill.fetch(protocol_id),
                 )
                 skill_id_to_handler.unregister(skill_id)
 
@@ -606,11 +610,11 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         if protocol_id not in self._items_by_protocol_and_skill.ids():
             return []
 
-        protocol_handlers_by_skill = self._items_by_protocol_and_skill.fetch(
-            protocol_id
+        protocol_handlers_by_skill = cast(
+            PublicIdRegistry, self._items_by_protocol_and_skill.fetch(protocol_id)
         )
         handlers = [
-            protocol_handlers_by_skill.fetch(skill_id)
+            cast(Handler, protocol_handlers_by_skill.fetch(skill_id))
             for skill_id in protocol_handlers_by_skill.ids()
         ]
         return handlers
@@ -627,7 +631,9 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         """
         if protocol_id not in self._items_by_protocol_and_skill.ids():
             return None
-        protocols_by_skill_id = self._items_by_protocol_and_skill.fetch(protocol_id)
+        protocols_by_skill_id = cast(
+            PublicIdRegistry, self._items_by_protocol_and_skill.fetch(protocol_id)
+        )
         if skill_id not in protocols_by_skill_id.ids():
             return None
         return protocols_by_skill_id.fetch(skill_id)
