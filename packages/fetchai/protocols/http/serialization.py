@@ -21,6 +21,7 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
@@ -40,12 +41,15 @@ class HttpSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(HttpMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         http_msg = http_pb2.HttpMessage()
-        http_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        http_msg.dialogue_starter_reference = dialogue_reference[0]
-        http_msg.dialogue_responder_reference = dialogue_reference[1]
-        http_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == HttpMessage.Performative.REQUEST:
@@ -77,8 +81,11 @@ class HttpSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        http_bytes = http_msg.SerializeToString()
-        return http_bytes
+        dialogue_message_pb.content = http_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -88,15 +95,17 @@ class HttpSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'Http' message.
         """
+        message_pb = ProtobufMessage()
         http_pb = http_pb2.HttpMessage()
-        http_pb.ParseFromString(obj)
-        message_id = http_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            http_pb.dialogue_starter_reference,
-            http_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = http_pb.target
+        target = message_pb.dialogue_message.target
 
+        http_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = http_pb.WhichOneof("performative")
         performative_id = HttpMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

@@ -21,6 +21,7 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
@@ -45,12 +46,15 @@ class LedgerApiSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(LedgerApiMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         ledger_api_msg = ledger_api_pb2.LedgerApiMessage()
-        ledger_api_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        ledger_api_msg.dialogue_starter_reference = dialogue_reference[0]
-        ledger_api_msg.dialogue_responder_reference = dialogue_reference[1]
-        ledger_api_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == LedgerApiMessage.Performative.GET_BALANCE:
@@ -121,8 +125,11 @@ class LedgerApiSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        ledger_api_bytes = ledger_api_msg.SerializeToString()
-        return ledger_api_bytes
+        dialogue_message_pb.content = ledger_api_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -132,15 +139,17 @@ class LedgerApiSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'LedgerApi' message.
         """
+        message_pb = ProtobufMessage()
         ledger_api_pb = ledger_api_pb2.LedgerApiMessage()
-        ledger_api_pb.ParseFromString(obj)
-        message_id = ledger_api_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            ledger_api_pb.dialogue_starter_reference,
-            ledger_api_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = ledger_api_pb.target
+        target = message_pb.dialogue_message.target
 
+        ledger_api_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = ledger_api_pb.WhichOneof("performative")
         performative_id = LedgerApiMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

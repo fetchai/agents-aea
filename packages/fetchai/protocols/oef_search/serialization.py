@@ -21,6 +21,7 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
@@ -44,12 +45,15 @@ class OefSearchSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(OefSearchMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         oef_search_msg = oef_search_pb2.OefSearchMessage()
-        oef_search_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        oef_search_msg.dialogue_starter_reference = dialogue_reference[0]
-        oef_search_msg.dialogue_responder_reference = dialogue_reference[1]
-        oef_search_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == OefSearchMessage.Performative.REGISTER_SERVICE:
@@ -87,8 +91,11 @@ class OefSearchSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        oef_search_bytes = oef_search_msg.SerializeToString()
-        return oef_search_bytes
+        dialogue_message_pb.content = oef_search_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -98,15 +105,17 @@ class OefSearchSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'OefSearch' message.
         """
+        message_pb = ProtobufMessage()
         oef_search_pb = oef_search_pb2.OefSearchMessage()
-        oef_search_pb.ParseFromString(obj)
-        message_id = oef_search_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            oef_search_pb.dialogue_starter_reference,
-            oef_search_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = oef_search_pb.target
+        target = message_pb.dialogue_message.target
 
+        oef_search_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = oef_search_pb.WhichOneof("performative")
         performative_id = OefSearchMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

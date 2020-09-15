@@ -28,6 +28,7 @@ the desired outcomes.
 
 It requires the `aea` package, `black` and `isort` tools.
 """
+import logging
 import operator
 import os
 import pprint
@@ -38,7 +39,7 @@ import sys
 import tempfile
 from io import StringIO
 from pathlib import Path
-from typing import Optional
+from typing import Match, Optional, cast
 
 from aea.configurations.base import ComponentType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, load_component_configuration
@@ -67,7 +68,24 @@ PROTOCOL_PATHS = list(
 )
 
 
-def assert_(condition, message=""):
+def _setup_logger() -> logging.Logger:
+    """Set up the logger."""
+    FORMAT = "[%(asctime)s][%(levelname)s] %(message)s"
+    logging.basicConfig(format=FORMAT)
+    logger_ = logging.getLogger("generate_all_protocols")
+    logger_.setLevel(logging.INFO)
+    return logger_
+
+
+logger = _setup_logger()
+
+
+def log(message: str, level: int = logging.INFO):
+    """Produce a logging message."""
+    logger.log(level, message)
+
+
+def enforce(condition, message=""):
     """Custom assertion."""
     if not condition:
         raise AssertionError(message)
@@ -76,7 +94,7 @@ def assert_(condition, message=""):
 def run_cli(*args, **kwargs):
     """Run a CLI command."""
     return_code = subprocess.check_call(args, **kwargs)  # nosec
-    assert_(
+    enforce(
         return_code == 0,
         f"Return code of {pprint.pformat(args)} is {return_code} != 0.",
     )
@@ -93,8 +111,11 @@ def run_aea(*args, **kwargs) -> None:
     run_cli(sys.executable, "-m", "aea.cli", *args, **kwargs)
 
 
-class AEAProject(object):
+class AEAProject:
     """A context manager class to create and delete an AEA project."""
+
+    old_cwd: str
+    temp_dir: str
 
     def __init__(self, name: str = "my_aea", parent_dir: Optional[str] = None):
         """
@@ -134,19 +155,20 @@ def _load_protocol_specification_from_string(
 
 def _get_protocol_specification_from_readme(package_path: Path) -> str:
     """Get the protocol specification from the package README."""
+    log(f"Get protocol specification from README {package_path}")
     readme = package_path / "README.md"
     readme_content = readme.read_text()
-    assert_(
+    enforce(
         "## Specification" in readme_content,
         f"Cannot find specification section in {package_path}",
     )
 
     search_result = SPECIFICATION_REGEX.search(readme_content)
-    assert_(
+    enforce(
         search_result is not None,
         f"Cannot find specification section in README of {package_path}",
     )
-    specification_content = search_result.group(0)
+    specification_content = cast(Match, search_result).group(0)
     # just for validation of the parsed string
     _load_protocol_specification_from_string(specification_content)
     return specification_content
@@ -162,7 +184,9 @@ def _save_specification_in_temporary_file(name: str, specification_content: str)
     """
     # here, the cwd is the temporary AEA project
     # hence, we are writing in a temporary directory
-    Path("..", name + ".yaml").write_text(specification_content)
+    spec_path = Path("..", name + ".yaml")
+    log(f"Save specification '{name}' in temporary file {spec_path}")
+    spec_path.write_text(specification_content)
 
 
 def _generate_protocol(package_path: Path) -> None:
@@ -172,7 +196,9 @@ def _generate_protocol(package_path: Path) -> None:
     :param package_path: package to the path.
     :return: None
     """
-    run_aea("generate", "protocol", os.path.join("..", package_path.name) + ".yaml")
+    cmd = ["generate", "protocol", os.path.join("..", package_path.name) + ".yaml"]
+    log(f"Generate the protocol. Command: {pprint.pformat(cmd)}")
+    run_aea(*cmd)
 
 
 def replace_in_directory(name: str):
@@ -182,16 +208,20 @@ def replace_in_directory(name: str):
     :param name: the protocol name.
     :return: None
     """
+    log(f"Replace prefix of import statements in directory '{name}'")
     replace_replacement_pairs = [
         (f"from packages.fetchai.protocols.{name}", f"from aea.protocols.{name}"),
         (f"aea.packages.fetchai.protocols.{name}", f"aea.protocols.{name}"),
     ]
-    for submodule in Path("protocols", name).rglob("*.py"):
+    package_dir = Path("protocols", name)
+    for submodule in package_dir.rglob("*.py"):
+        log(f"Process submodule {submodule.relative_to(package_dir)}")
         for to_replace, replacement in replace_replacement_pairs:
             if to_replace not in submodule.read_text():
                 continue
             submodule.write_text(submodule.read_text().replace(to_replace, replacement))
             run_cli("isort", str(submodule))
+            run_cli("black", str(submodule))
 
 
 def _fix_generated_protocol(package_path: Path) -> None:
@@ -207,7 +237,7 @@ def _fix_generated_protocol(package_path: Path) -> None:
                          Used also to recover the protocol name.
     :return: None
     """
-    # restore original custom types.
+    log(f"Restore original custom types in {package_path}")
     custom_types_module = package_path / CUSTOM_TYPE_MODULE_NAME
     if custom_types_module.exists():
         file_to_replace = Path("protocols", package_path.name, CUSTOM_TYPE_MODULE_NAME)
@@ -215,11 +245,12 @@ def _fix_generated_protocol(package_path: Path) -> None:
 
     # if it is a library protocol, replace import prefixes.
     if package_path.parents[1].name == "aea":
+        log("Replace import prefixes (it's a library protocol)")
         replace_in_directory(package_path.name)
 
-    # copy the README
     package_readme_file = package_path / README_FILENAME
     if package_readme_file.exists():
+        log(f"Copy the README {package_readme_file} into the new generated protocol.")
         shutil.copyfile(
             package_readme_file, Path("protocols", package_path.name, README_FILENAME)
         )
@@ -233,13 +264,14 @@ def _update_original_protocol(package_path: Path) -> None:
                          Used to recover the protocol name.
     :return: None
     """
+    log(f"Copy the new protocol into the original directory {package_path}")
     shutil.rmtree(package_path)
     shutil.copytree(Path("protocols", package_path.name), package_path)
 
 
 def _fingerprint_protocol(name: str):
     """Fingerprint the generated (and modified) protocol."""
-    # recover public id.
+    log(f"Fingerprint the generated (and modified) protocol '{name}'")
     protocol_config = load_component_configuration(
         ComponentType.PROTOCOL, Path("protocols", name), skip_consistency_check=True
     )
@@ -272,11 +304,11 @@ def _process_protocol(package_path: Path) -> None:
 def _check_preliminaries():
     """Check that the required software is in place."""
     try:
-        import aea
+        import aea  # noqa: F401  # pylint: disable=import-outside-toplevel,unused-import
     except ModuleNotFoundError:
-        assert_(False, "'aea' package not installed.")
-    assert_(shutil.which("black") is not None, "black command line tool not found.")
-    assert_(shutil.which("isort") is not None, "isort command line tool not found.")
+        enforce(False, "'aea' package not installed.")
+    enforce(shutil.which("black") is not None, "black command line tool not found.")
+    enforce(shutil.which("isort") is not None, "isort command line tool not found.")
 
 
 def main():
@@ -287,6 +319,8 @@ def main():
         run_aea("remove", "protocol", "fetchai/default:0.5.0")
 
         for package_path in PROTOCOL_PATHS:
+            log("=" * 100)
+            log(f"Processing protocol at path {package_path}")
             _process_protocol(package_path)
 
 

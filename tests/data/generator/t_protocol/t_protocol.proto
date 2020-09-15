@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetchai.aea.fetchai.t_protocol;
+package aea.fetchai.t_protocol;
 
 message TProtocolMessage{
 

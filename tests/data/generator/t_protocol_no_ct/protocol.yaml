@@ -6,12 +6,12 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  __init__.py: QmRGHGRoZHGCXQ29v3q93Nt6J5TuhggYvUvZoQfrM6c3yp
-  dialogues.py: QmUjFTMYk2C69dcYfsKorTQWJbaUGEz8orCQnkZtFbR6Je
-  message.py: Qma11dAGwWr3oYSWAmRrwLJj9mLvyLVD66svTyHwU3HVNB
-  serialization.py: QmUvPmEbmg34A4XKCba3H2QFSdviUzEWMsBUNdJg4pysKD
-  t_protocol_no_ct.proto: QmUsW7bFZ3Ru3p6VSkAQekEhdYKcH2cxiSez291YxZ2kQ9
-  t_protocol_no_ct_pb2.py: Qmb8Z6BoyZabtBkwdwKxCf9F5igPcp3faEirorkHDeis2g
+  __init__.py: QmX5UaUHNHe91qfCqwmAZStU3WN9evJqBwk1zKwQoFPzNV
+  dialogues.py: QmPHhh9wkKDG7Fiy9E2WkkggYULFhLrySihJpoBw3mRn2o
+  message.py: QmULXAb5Daeke4p9hRUNWhYrh4ZWdxvArP1GCZk1245HGe
+  serialization.py: Qmdsbpcnnm9eyU9GheUQDY6dkdzmN4on7j6zmiTjeuUMxD
+  t_protocol_no_ct.proto: Qmc8KkKnWZ9utBxrbEyWhVDRdut87DkFvmHP3SYUg4J3EU
+  t_protocol_no_ct_pb2.py: QmPDVxuXLGrVes8nv66g2JFT3rqUN9AjzrMeCFyDK4rjyw
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

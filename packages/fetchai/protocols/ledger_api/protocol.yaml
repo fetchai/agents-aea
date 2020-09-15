@@ -10,10 +10,10 @@ fingerprint:
   __init__.py: Qmct8jVx6ndWwaa5HXJAJgMraVuZ8kMeyx6rnEeHAYHwDJ
   custom_types.py: QmWRrvFStMhVJy8P2WD6qjDgk14ZnxErN7XymxUtof7HQo
   dialogues.py: QmRtWkAfR9WTvygMJ36R758RzdY2mGQs2fgtHCfjxmeaHy
-  ledger_api.proto: QmfLcv7jJcGJ1gAdCMqsyxJcRud7RaTWteSXHL5NvGuViP
-  ledger_api_pb2.py: QmQhM848REJTDKDoiqxkTniChW8bNNm66EtwMRkvVdbMry
+  ledger_api.proto: QmR7b3Mj4Jt4Y5ChZ7x42nxLtQrs2VBRvb2dqV3EaPW6B8
+  ledger_api_pb2.py: QmUMeo2X58acnBaVQuDpMhteNuzagbT79vf5mdtMJLk9VF
   message.py: QmcLuy4YcL22qs3jHf5KHZ7vZueiTDrEmbWjfRTbyzwc5m
-  serialization.py: QmUvysZKkt5xLKLVHAyaZQ3jsRDkPn5bJURdsTDHgkE3HS
+  serialization.py: QmSarPknCq2LiKZx3PHgE9eXhrygPSyiu15WCS46W9BD3E
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
