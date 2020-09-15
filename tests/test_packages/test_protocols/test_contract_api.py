@@ -235,9 +235,8 @@ def test_raw_transaction_serialization():
         "some_ledger_id", b"some_body"
     )
     msg = ContractApiMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
+        message_id=2,
+        target=1,
         performative=ContractApiMessage.Performative.RAW_TRANSACTION,
         raw_transaction=raw_transaction_arg,
     )
@@ -268,9 +267,6 @@ def test_raw_message_serialization():
     """Test the serialization for 'raw_message' speech-act works."""
     raw_message_arg = ContractApiMessage.RawMessage("some_ledger_id", b"some_body")
     msg = ContractApiMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
         performative=ContractApiMessage.Performative.RAW_MESSAGE,
         raw_message=raw_message_arg,
     )
@@ -300,9 +296,6 @@ def test_raw_message_serialization():
 def test_error_serialization():
     """Test the serialization for 'error' speech-act works."""
     msg = ContractApiMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
         performative=ContractApiMessage.Performative.ERROR,
         code=7,
         message="some_error_message",

@@ -140,7 +140,39 @@ def test_search_result_serialization():
     msg = OefSearchMessage(
         performative=OefSearchMessage.Performative.SEARCH_RESULT,
         agents=("agent_1", "agent_2", "agent_3"),
+        agents_info=OefSearchMessage.AgentsInfo(
+            {
+                "key_1": {"key_1": b"value_1", "key_2": b"value_2"},
+                "key_2": {"key_3": b"value_3", "key_4": b"value_4"},
+            }
+        ),
     )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        protocol_id=OefSearchMessage.protocol_id,
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
+def test_success_serialization():
+    """Test the serialization for 'success' speech-act works."""
+    msg = OefSearchMessage(performative=OefSearchMessage.Performative.SUCCESS,)
     msg.to = "receiver"
     envelope = Envelope(
         to=msg.to,
@@ -273,6 +305,23 @@ def test_incorrect_message(mocked_enforce):
         )
 
         mock_logger.assert_any_call("some error")
+
+
+def test_agent_info():
+    """Test that we raise an exception when the fipa message is incorrect."""
+    agents_info = OefSearchMessage.AgentsInfo(
+        {
+            "agent_address_1": {"key_1": b"value_1", "key_2": b"value_2"},
+            "agent_address_2": {"key_3": b"value_3", "key_4": b"value_4"},
+        }
+    )
+    assert agents_info.get_info_for_agent("agent_address_1") == {
+        "key_1": b"value_1",
+        "key_2": b"value_2",
+    }
+
+    with pytest.raises(ValueError, match="body must not be None"):
+        OefSearchMessage.AgentsInfo(None)
 
 
 class TestDialogues:
