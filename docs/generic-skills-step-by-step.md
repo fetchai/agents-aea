@@ -1314,7 +1314,7 @@ protocols:
 - fetchai/default:0.5.0
 - fetchai/fipa:0.6.0
 - fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.5.0
+- fetchai/oef_search:0.6.0
 skills: []
 behaviours:
   service_registration:
@@ -2773,7 +2773,7 @@ protocols:
 - fetchai/default:0.5.0
 - fetchai/fipa:0.6.0
 - fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.5.0
+- fetchai/oef_search:0.6.0
 - fetchai/signing:0.3.0
 skills: []
 behaviours:
@@ -2876,7 +2876,7 @@ Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yam
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
-  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
+  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
 ### Fund the buyer AEA
@@ -2893,7 +2893,7 @@ Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add protocol fetchai/fipa:0.6.0
 aea install
@@ -2909,7 +2909,7 @@ Add the remaining packages for the buyer AEA:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add protocol fetchai/fipa:0.6.0
 aea add protocol fetchai/signing:0.3.0

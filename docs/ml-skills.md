@@ -75,7 +75,7 @@ The following steps create the data provider from scratch:
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add skill fetchai/ml_data_provider:0.10.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
@@ -86,7 +86,7 @@ In `ml_data_provider/aea-config.yaml` add
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
-  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
+  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
 </p>
@@ -109,7 +109,7 @@ The following steps create the model trainer from scratch:
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add skill fetchai/ml_train:0.10.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
@@ -120,7 +120,7 @@ In `ml_model_trainer/aea-config.yaml` add
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
-  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
+  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
 </p>
