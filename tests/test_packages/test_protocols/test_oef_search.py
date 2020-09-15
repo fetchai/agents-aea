@@ -17,8 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the gym protocol package."""
-
+"""This module contains the tests of the oef_search protocol package."""
 from typing import Type
 from unittest import mock
 
@@ -26,29 +25,39 @@ import pytest
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
+from aea.helpers.search.models import (
+    Constraint,
+    ConstraintType,
+    Description,
+    Query,
+)
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
-from packages.fetchai.protocols.gym.message import GymMessage
-from packages.fetchai.protocols.gym.message import logger as gym_message_logger
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogue,
+    OefSearchDialogues,
+)
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.message import (
+    logger as oef_search_message_logger,
+)
 
 
-def test_act_serialization():
-    """Test the serialization for 'act' speech-act works."""
-    msg = GymMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=GymMessage.Performative.ACT,
-        action=GymMessage.AnyObject("some_action"),
-        step_id=1,
+def test_register_service_serialization():
+    """Test the serialization for 'register_service' speech-act works."""
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+        service_description=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
     envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
+        to=msg.to,
+        sender="sender",
+        protocol_id=OefSearchMessage.protocol_id,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -59,29 +68,27 @@ def test_act_serialization():
     assert expected_envelope.protocol_id == actual_envelope.protocol_id
     assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = GymMessage.serializer.decode(actual_envelope.message)
+    actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
     actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
 
-def test_percept_serialization():
-    """Test the serialization for 'percept' speech-act works."""
-    msg = GymMessage(
+def test_unregister_service_serialization():
+    """Test the serialization for 'unregister_service' speech-act works."""
+    msg = OefSearchMessage(
         message_id=2,
-        dialogue_reference=(str(0), ""),
         target=1,
-        performative=GymMessage.Performative.PERCEPT,
-        step_id=1,
-        observation=GymMessage.AnyObject("some_observation"),
-        reward=10.0,
-        done=False,
-        info=GymMessage.AnyObject("some_info"),
+        performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+        service_description=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
     envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
+        to=msg.to,
+        sender="sender",
+        protocol_id=OefSearchMessage.protocol_id,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -92,29 +99,25 @@ def test_percept_serialization():
     assert expected_envelope.protocol_id == actual_envelope.protocol_id
     assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = GymMessage.serializer.decode(actual_envelope.message)
+    actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
     actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
 
-def test_status_serialization():
-    """Test the serialization for 'status' speech-act works."""
-    content_arg = {
-        "key_1": "value_1",
-        "key_2": "value_2",
-    }
-    msg = GymMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=GymMessage.Performative.STATUS,
-        content=content_arg,
+def test_search_services_serialization():
+    """Test the serialization for 'search_services' speech-act works."""
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+        query=Query([Constraint("something", ConstraintType(">", 1))]),
     )
     msg.to = "receiver"
     envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
+        to=msg.to,
+        sender="sender",
+        protocol_id=OefSearchMessage.protocol_id,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -125,24 +128,25 @@ def test_status_serialization():
     assert expected_envelope.protocol_id == actual_envelope.protocol_id
     assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = GymMessage.serializer.decode(actual_envelope.message)
+    actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
     actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
 
-def test_reset_serialization():
-    """Test the serialization for 'reset' speech-act works."""
-    msg = GymMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=GymMessage.Performative.RESET,
+def test_search_result_serialization():
+    """Test the serialization for 'search_result' speech-act works."""
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.SEARCH_RESULT,
+        agents=("agent_1", "agent_2", "agent_3"),
     )
     msg.to = "receiver"
     envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
+        to=msg.to,
+        sender="sender",
+        protocol_id=OefSearchMessage.protocol_id,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -153,24 +157,25 @@ def test_reset_serialization():
     assert expected_envelope.protocol_id == actual_envelope.protocol_id
     assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = GymMessage.serializer.decode(actual_envelope.message)
+    actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
     actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
 
-def test_close_serialization():
-    """Test the serialization for 'close' speech-act works."""
-    msg = GymMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=GymMessage.Performative.CLOSE,
+def test_oef_error_serialization():
+    """Test the serialization for 'oef_error' speech-act works."""
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.OEF_ERROR,
+        oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
     )
     msg.to = "receiver"
     envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
+        to=msg.to,
+        sender="sender",
+        protocol_id=OefSearchMessage.protocol_id,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -181,105 +186,128 @@ def test_close_serialization():
     assert expected_envelope.protocol_id == actual_envelope.protocol_id
     assert expected_envelope.message != actual_envelope.message
 
-    actual_msg = GymMessage.serializer.decode(actual_envelope.message)
+    actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
     actual_msg.to = actual_envelope.to
     actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
 
 
-def test_performative_string_value():
-    """Test the string value of the performatives."""
-    assert str(GymMessage.Performative.ACT) == "act", "The str value must be act"
+def test_oef_type_string_value():
+    """Test the string value of the type."""
     assert (
-        str(GymMessage.Performative.PERCEPT) == "percept"
-    ), "The str value must be percept"
+        str(OefSearchMessage.Performative.REGISTER_SERVICE) == "register_service"
+    ), "The str value must be register_service"
     assert (
-        str(GymMessage.Performative.STATUS) == "status"
-    ), "The str value must be status"
-    assert str(GymMessage.Performative.RESET) == "reset", "The str value must be reset"
-    assert str(GymMessage.Performative.CLOSE) == "close", "The str value must be close"
+        str(OefSearchMessage.Performative.UNREGISTER_SERVICE) == "unregister_service"
+    ), "The str value must be unregister_service"
+    assert (
+        str(OefSearchMessage.Performative.SEARCH_SERVICES) == "search_services"
+    ), "The str value must be search_services"
+    assert (
+        str(OefSearchMessage.Performative.OEF_ERROR) == "oef_error"
+    ), "The str value must be oef_error"
+    assert (
+        str(OefSearchMessage.Performative.SEARCH_RESULT) == "search_result"
+    ), "The str value must be search_result"
+
+
+def test_oef_error_operation():
+    """Test the string value of the error operation."""
+    assert (
+        str(OefSearchMessage.OefErrorOperation.REGISTER_SERVICE) == "0"
+    ), "The str value must be 0"
+    assert (
+        str(OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE) == "1"
+    ), "The str value must be 1"
+    assert (
+        str(OefSearchMessage.OefErrorOperation.SEARCH_SERVICES) == "2"
+    ), "The str value must be 2"
+    assert (
+        str(OefSearchMessage.OefErrorOperation.SEND_MESSAGE) == "3"
+    ), "The str value must be 3"
+    assert (
+        str(OefSearchMessage.OefErrorOperation.OTHER) == "10000"
+    ), "The str value must be 10000"
 
 
 def test_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
-    msg = GymMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=GymMessage.Performative.RESET,
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+        service_description=Description({"foo1": 1, "bar1": 2}),
     )
 
     with pytest.raises(ValueError, match="Performative not valid:"):
-        with mock.patch.object(GymMessage.Performative, "__eq__", return_value=False):
-            GymMessage.serializer.encode(msg)
+        with mock.patch.object(
+            OefSearchMessage.Performative, "__eq__", return_value=False
+        ):
+            OefSearchMessage.serializer.encode(msg)
 
 
 def test_decoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during decoding."""
-    msg = GymMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=GymMessage.Performative.RESET,
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+        service_description=Description({"foo1": 1, "bar1": 2}),
     )
 
-    encoded_msg = GymMessage.serializer.encode(msg)
+    encoded_msg = OefSearchMessage.serializer.encode(msg)
     with pytest.raises(ValueError, match="Performative not valid:"):
-        with mock.patch.object(GymMessage.Performative, "__eq__", return_value=False):
-            GymMessage.serializer.decode(encoded_msg)
+        with mock.patch.object(
+            OefSearchMessage.Performative, "__eq__", return_value=False
+        ):
+            OefSearchMessage.serializer.decode(encoded_msg)
 
 
 @mock.patch(
-    "packages.fetchai.protocols.gym.message.enforce",
+    "packages.fetchai.protocols.oef_search.message.enforce",
     side_effect=AEAEnforceError("some error"),
 )
 def test_incorrect_message(mocked_enforce):
-    """Test that we raise an exception when the message is incorrect."""
-    with mock.patch.object(gym_message_logger, "error") as mock_logger:
-        GymMessage(
-            message_id=1,
-            dialogue_reference=(str(0), ""),
-            target=0,
-            performative=GymMessage.Performative.RESET,
+    """Test that we raise an exception when the fipa message is incorrect."""
+    with mock.patch.object(oef_search_message_logger, "error") as mock_logger:
+        OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=Description({"foo1": 1, "bar1": 2}),
         )
 
         mock_logger.assert_any_call("some error")
 
 
 class TestDialogues:
-    """Tests gym dialogues."""
+    """Tests oef_search dialogues."""
 
     @classmethod
     def setup_class(cls):
         """Set up the test."""
         cls.agent_addr = "agent address"
-        cls.env_addr = "env address"
-        cls.agent_dialogues = AgentDialogues(cls.agent_addr)
-        cls.env_dialogues = EnvironmentDialogues(cls.env_addr)
+        cls.oef_node_addr = "oef_node address"
+        cls.agent_dialogues = BuyerDialogues(cls.agent_addr)
+        cls.oef_node_dialogues = OEFNodeDialogues(cls.oef_node_addr)
 
     def test_create_self_initiated(self):
         """Test the self initialisation of a dialogue."""
         result = self.agent_dialogues._create_self_initiated(
-            dialogue_opponent_addr=self.env_addr,
+            dialogue_opponent_addr=self.oef_node_addr,
             dialogue_reference=(str(0), ""),
-            role=GymDialogue.Role.AGENT,
+            role=OefSearchDialogue.Role.AGENT,
         )
-        assert isinstance(result, GymDialogue)
-        assert result.role == GymDialogue.Role.AGENT, "The role must be Agent."
+        assert isinstance(result, OefSearchDialogue)
+        assert result.role == OefSearchDialogue.Role.AGENT, "The role must be agent."
 
     def test_create_opponent_initiated(self):
         """Test the opponent initialisation of a dialogue."""
         result = self.agent_dialogues._create_opponent_initiated(
-            dialogue_opponent_addr=self.env_addr,
+            dialogue_opponent_addr=self.oef_node_addr,
             dialogue_reference=(str(0), ""),
-            role=GymDialogue.Role.AGENT,
+            role=OefSearchDialogue.Role.AGENT,
         )
-        assert isinstance(result, GymDialogue)
-        assert result.role == GymDialogue.Role.AGENT, "The role must be agent."
+        assert isinstance(result, OefSearchDialogue)
+        assert result.role == OefSearchDialogue.Role.AGENT, "The role must be agent."
 
 
-class AgentDialogue(GymDialogue):
+class BuyerDialogue(OefSearchDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
     def __init__(
@@ -287,7 +315,7 @@ class AgentDialogue(GymDialogue):
         dialogue_label: DialogueLabel,
         self_address: Address,
         role: BaseDialogue.Role,
-        message_class: Type[GymMessage],
+        message_class: Type[OefSearchMessage],
     ) -> None:
         """
         Initialize a dialogue.
@@ -298,7 +326,7 @@ class AgentDialogue(GymDialogue):
 
         :return: None
         """
-        GymDialogue.__init__(
+        OefSearchDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
             self_address=self_address,
@@ -307,7 +335,7 @@ class AgentDialogue(GymDialogue):
         )
 
 
-class AgentDialogues(GymDialogues):
+class BuyerDialogues(OefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, self_address: Address) -> None:
@@ -326,17 +354,17 @@ class AgentDialogues(GymDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
-            return GymDialogue.Role.AGENT
+            return OefSearchDialogue.Role.AGENT
 
-        GymDialogues.__init__(
+        OefSearchDialogues.__init__(
             self,
             self_address=self_address,
             role_from_first_message=role_from_first_message,
-            dialogue_class=AgentDialogue,
+            dialogue_class=BuyerDialogue,
         )
 
 
-class EnvironmentDialogue(GymDialogue):
+class OEFNodeDialogue(OefSearchDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
     def __init__(
@@ -344,7 +372,7 @@ class EnvironmentDialogue(GymDialogue):
         dialogue_label: DialogueLabel,
         self_address: Address,
         role: BaseDialogue.Role,
-        message_class: Type[GymMessage],
+        message_class: Type[OefSearchMessage],
     ) -> None:
         """
         Initialize a dialogue.
@@ -355,7 +383,7 @@ class EnvironmentDialogue(GymDialogue):
 
         :return: None
         """
-        GymDialogue.__init__(
+        OefSearchDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
             self_address=self_address,
@@ -364,7 +392,7 @@ class EnvironmentDialogue(GymDialogue):
         )
 
 
-class EnvironmentDialogues(GymDialogues):
+class OEFNodeDialogues(OefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, self_address: Address) -> None:
@@ -383,11 +411,11 @@ class EnvironmentDialogues(GymDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
-            return GymDialogue.Role.ENVIRONMENT
+            return OefSearchDialogue.Role.OEF_NODE
 
-        GymDialogues.__init__(
+        OefSearchDialogues.__init__(
             self,
             self_address=self_address,
             role_from_first_message=role_from_first_message,
-            dialogue_class=EnvironmentDialogue,
+            dialogue_class=OEFNodeDialogue,
         )
