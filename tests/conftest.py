@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Conftest module for Pytest."""
-from aea.crypto.base import Crypto
 import asyncio
 import inspect
 import logging
