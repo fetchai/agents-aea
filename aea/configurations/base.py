@@ -127,7 +127,7 @@ class PackageVersion:
     @property
     def is_latest(self) -> bool:
         """Check whether the version is 'latest'."""
-        return self._version == "latest"
+        return isinstance(self._version, str) and self._version == "latest"
 
     def __str__(self) -> str:
         """Get the string representation."""
@@ -434,6 +434,10 @@ class PublicId(JSONSerializable):
     def latest(self) -> str:
         """Get the public id in `latest` form."""
         return "{author}/{name}:*".format(author=self.author, name=self.name)
+
+    def same_prefix(self, other: "PublicId") -> bool:
+        """Check if the other public id has the same author and name of this."""
+        return self.name == other.name and self.author == other.author
 
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":

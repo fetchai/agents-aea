@@ -22,6 +22,7 @@
 import copy
 import logging
 from abc import ABC, abstractmethod
+from operator import itemgetter
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.components.base import Component
@@ -58,7 +59,7 @@ class Registry(Generic[ItemId, Item], WithLogger, ABC):
 
         :param item_id: the public id of the item.
         :param item: the item.
-        :param is_dynamicall_added: whether or not the item is dynamicall added.
+        :param is_dynamically_added: whether or not the item is dynamically added.
         :return: None
         :raises: ValueError if an item is already registered with that item id.
         """
@@ -91,6 +92,14 @@ class Registry(Generic[ItemId, Item], WithLogger, ABC):
         """
 
     @abstractmethod
+    def ids(self) -> Set[ItemId]:
+        """
+        Return the set of all the used item ids.
+
+        :return: the set of item ids.
+        """
+
+    @abstractmethod
     def setup(self) -> None:
         """
         Set up registry.
@@ -105,6 +114,71 @@ class Registry(Generic[ItemId, Item], WithLogger, ABC):
 
         :return: None
         """
+
+
+class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
+    """
+    This class implement a registry whose keys are public ids.
+
+    In particular, it is able to handle the case when the public id
+    points to the 'latest' version of a package.
+    """
+
+    def __init__(self):
+        """Initialize the registry."""
+        super().__init__()
+        self._public_id_to_item: Dict[PublicId, Item] = {}
+
+    def register(  # pylint: disable=arguments-differ,unused-argument
+        self, public_id: PublicId, item: Item, is_dynamically_added: bool = False
+    ) -> None:
+        """Register an item."""
+        if public_id.package_version.is_latest:
+            raise ValueError(
+                f"Cannot register item with public id 'latest': {public_id}"
+            )
+        if public_id in self._public_id_to_item:
+            raise ValueError(f"Item already registered with item id '{public_id}'")
+        self._public_id_to_item[public_id] = item
+
+    def unregister(self, public_id: PublicId) -> None:
+        """Unregister an item."""
+        if public_id not in self._public_id_to_item:
+            raise ValueError(f"No item registered with item id '{public_id}'")
+        self._public_id_to_item.pop(public_id)
+
+    def fetch(self, public_id: PublicId) -> Optional[Item]:
+        """
+        Fetch an item associated with a public id.
+
+        :param public_id: the public id.
+        :return: an item, or None if the key is not present.
+        """
+        if public_id.package_version.is_latest:
+            filtered_records: List[Tuple[PublicId, Item]] = list(
+                filter(
+                    lambda x: public_id.same_prefix(x[0]),
+                    self._public_id_to_item.items(),
+                )
+            )
+            if len(filtered_records) == 0:
+                return None
+            return max(filtered_records, key=itemgetter(0))[1]
+        return self._public_id_to_item.get(public_id, None)
+
+    def fetch_all(self) -> List[Item]:
+        """Fetch all the items."""
+        return list(self._public_id_to_item.values())
+
+    def ids(self) -> Set[PublicId]:
+        """Get all the item ids."""
+        return set(self._public_id_to_item.keys())
+
+    def setup(self) -> None:
+        """Set up the items."""
+
+    def teardown(self) -> None:
+        """Tear down the items."""
 
 
 class AgentComponentRegistry(Registry[ComponentId, Component]):
@@ -131,7 +205,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :param component_id: the id of the component.
         :param component: the component object.
-        :param is_dynamicall_added: whether or not the item is dynamicall added.
+        :param is_dynamically_added: whether or not the item is dynamically added.
         """
         if component_id in self._registered_keys:
             raise ValueError(
@@ -222,6 +296,10 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         """
         return list(self._components_by_type.get(component_type, {}).values())
 
+    def ids(self) -> Set[ComponentId]:
+        """Get the item ids."""
+        return self._registered_keys
+
     def setup(self) -> None:
         """
         Set up the registry.
@@ -251,8 +329,10 @@ class ComponentRegistry(
         :return: None
         """
         super().__init__()
-        self._items = {}  # type: Dict[SkillId, Dict[str, SkillComponentType]]
-        self._dynamically_added = {}  # type: Dict[SkillId, Set[str]]
+        self._items: PublicIdRegistry[
+            Dict[str, SkillComponentType]
+        ] = PublicIdRegistry()
+        self._dynamically_added: Dict[SkillId, Set[str]] = {}
 
     def register(
         self,
@@ -265,19 +345,25 @@ class ComponentRegistry(
 
         :param item_id: a pair (skill id, item name).
         :param item: the item to register.
-        :param is_dynamicall_added: whether or not the item is dynamicall added.
+        :param is_dynamically_added: whether or not the item is dynamically added.
         :return: None
         :raises: ValueError if an item is already registered with that item id.
         """
         skill_id = item_id[0]
         item_name = item_id[1]
-        if item_name in self._items.get(skill_id, {}).keys():
+        skill_items = self._items.fetch(skill_id)
+        if skill_items is not None and item_name in skill_items.keys():
             raise ValueError(
-                "Item already registered with skill id '{}' and name '{}'".format(
-                    skill_id, item_name
-                )
+                f"Item already registered with skill id '{skill_id}' and name '{item_name}'"
             )
-        self._items.setdefault(skill_id, {})[item_name] = item
+
+        if skill_items is not None:
+            self._items.unregister(skill_id)
+        else:
+            skill_items = {}
+        skill_items[item_name] = item
+        self._items.register(skill_id, skill_items)
+
         if is_dynamically_added:
             self._dynamically_added.setdefault(skill_id, set()).add(item_name)
 
@@ -303,15 +389,18 @@ class ComponentRegistry(
         """
         skill_id = item_id[0]
         item_name = item_id[1]
-        name_to_item = self._items.get(skill_id, {})
-        if item_name not in name_to_item:
+        name_to_item = self._items.fetch(skill_id)
+        if name_to_item is None or item_name not in name_to_item:
             raise ValueError(
                 "No item registered with component id '{}'".format(item_id)
             )
         self.logger.debug("Unregistering item with id {}".format(item_id))
         item = name_to_item.pop(item_name)
         if len(name_to_item) == 0:
-            self._items.pop(skill_id, None)
+            self._items.unregister(skill_id)
+        else:
+            self._items.unregister(skill_id)
+            self._items.register(skill_id, name_to_item)
 
         items = self._dynamically_added.get(skill_id, None)
         if items is not None:
@@ -329,26 +418,38 @@ class ComponentRegistry(
         """
         skill_id = item_id[0]
         item_name = item_id[1]
-        return self._items.get(skill_id, {}).get(item_name, None)
+        name_to_item = self._items.fetch(skill_id)
+        if name_to_item is None:
+            return None
+        return name_to_item.get(item_name, None)
 
     def fetch_by_skill(self, skill_id: SkillId) -> List[Item]:
         """Fetch all the items of a given skill."""
-        return [*self._items.get(skill_id, {}).values()]
+        temp = self._items.fetch(skill_id)
+        name_to_item = {} if temp is None else temp
+        return list(name_to_item.values())
 
     def fetch_all(self) -> List[SkillComponentType]:
         """Fetch all the items."""
-        return [
-            item for skill_id, items in self._items.items() for item in items.values()
-        ]
+        return [item for items in self._items.fetch_all() for item in items.values()]
 
     def unregister_by_skill(self, skill_id: SkillId) -> None:
         """Unregister all the components by skill."""
-        if skill_id not in self._items:
+        if skill_id not in self._items.ids():
             raise ValueError(
                 "No component of skill {} present in the registry.".format(skill_id)
             )
-        self._items.pop(skill_id, None)
+        self._items.unregister(skill_id)
         self._dynamically_added.pop(skill_id, None)
+
+    def ids(self) -> Set[Tuple[SkillId, str]]:
+        """Get the item ids."""
+        result: Set[Tuple[SkillId, str]] = set()
+        for skill_id in self._items.ids():
+            name_to_item = self._items.fetch(skill_id)
+            for name, _ in name_to_item.items():
+                result.add((skill_id, name))
+        return result
 
     def setup(self) -> None:
         """
@@ -377,14 +478,14 @@ class ComponentRegistry(
 
         :return: None
         """
-        for skill_id, items in self._items.items():
-            for _, item in items.items():
+        for name_to_items in self._items.fetch_all():
+            for _, item in name_to_items.items():
                 try:
                     item.teardown()
                 except Exception as e:  # pragma: nocover # pylint: disable=broad-except
                     self.logger.warning(
                         "An error occurred while tearing down item {}/{}: {}".format(
-                            skill_id, type(item).__name__, str(e)
+                            item.skill_id, type(item).__name__, str(e)
                         )
                     )
         _dynamically_added = copy.deepcopy(self._dynamically_added)
@@ -403,9 +504,10 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         :return: None
         """
         super().__init__()
-        self._items_by_protocol_and_skill = (
-            {}
-        )  # type: Dict[ProtocolId, Dict[SkillId, Handler]]
+        # nested public id registries; one for protocol ids, one for skill ids
+        self._items_by_protocol_and_skill = PublicIdRegistry[
+            PublicIdRegistry[Handler]
+        ]()
 
     def register(
         self,
@@ -418,36 +520,39 @@ class HandlerRegistry(ComponentRegistry[Handler]):
 
         :param item_id: the item id.
         :param item: the handler.
-        :param is_dynamicall_added: whether or not the item is dynamicall added.
+        :param is_dynamically_added: whether or not the item is dynamically added.
         :return: None
         :raises ValueError: if the protocol is None, or an item with pair (skill_id, protocol_id_ already exists.
         """
-        super().register(item_id, item, is_dynamically_added=is_dynamically_added)
-
         skill_id = item_id[0]
 
         protocol_id = item.SUPPORTED_PROTOCOL
         if protocol_id is None:
-            super().unregister(item_id)
             raise ValueError(
                 "Please specify a supported protocol for handler class '{}'".format(
                     item.__class__.__name__
                 )
             )
 
-        protocol_handlers_by_skill = self._items_by_protocol_and_skill.get(
-            protocol_id, {}
+        protocol_handlers_by_skill = self._items_by_protocol_and_skill.fetch(
+            protocol_id
         )
-        if skill_id in protocol_handlers_by_skill:
+        if (
+            protocol_handlers_by_skill is not None
+            and skill_id in protocol_handlers_by_skill.ids()
+        ):
             # clean up previous modifications done by super().register
-            super().unregister(item_id)
             raise ValueError(
                 "A handler already registered with pair of protocol id {} and skill id {}".format(
                     protocol_id, skill_id
                 )
             )
-
-        self._items_by_protocol_and_skill.setdefault(protocol_id, {})[skill_id] = item
+        if protocol_handlers_by_skill is None:
+            # registry from skill ids to handlers.
+            new_registry = PublicIdRegistry()
+            self._items_by_protocol_and_skill.register(protocol_id, new_registry)
+        self._items_by_protocol_and_skill.fetch(protocol_id).register(skill_id, item)
+        super().register(item_id, item, is_dynamically_added=is_dynamically_added)
 
     def unregister(self, item_id: Tuple[SkillId, str]) -> None:
         """
@@ -462,29 +567,34 @@ class HandlerRegistry(ComponentRegistry[Handler]):
 
         # remove from index by protocol and skill
         protocol_id = cast(ProtocolId, handler.SUPPORTED_PROTOCOL)
-        protocol_handlers_by_skill = self._items_by_protocol_and_skill.get(
-            protocol_id, {}
+        protocol_handlers_by_skill = self._items_by_protocol_and_skill.fetch(
+            protocol_id
         )
-        protocol_handlers_by_skill.pop(skill_id, None)
-        if len(protocol_handlers_by_skill) == 0:
-            self._items_by_protocol_and_skill.pop(protocol_id, None)
+        protocol_handlers_by_skill.unregister(skill_id)
+        if len(protocol_handlers_by_skill.ids()) == 0:
+            self._items_by_protocol_and_skill.unregister(protocol_id)
 
     def unregister_by_skill(self, skill_id: SkillId) -> None:
         """Unregister all the components by skill."""
         # unregister from the main index.
-        if skill_id not in self._items:
+        if skill_id not in self._items.ids():
             raise ValueError(
                 "No component of skill {} present in the registry.".format(skill_id)
             )
 
         self._dynamically_added.pop(skill_id, None)
 
-        handlers = self._items.pop(skill_id).values()
+        handlers = self._items.fetch(skill_id).values()
+        self._items.unregister(skill_id)
 
         # unregister from the protocol-skill index
         for handler in handlers:
             protocol_id = cast(ProtocolId, handler.SUPPORTED_PROTOCOL)
-            self._items_by_protocol_and_skill.get(protocol_id, {}).pop(skill_id, None)
+            if protocol_id in self._items_by_protocol_and_skill.ids():
+                skill_id_to_handler = self._items_by_protocol_and_skill.fetch(
+                    protocol_id
+                )
+                skill_id_to_handler.unregister(skill_id)
 
     def fetch_by_protocol(self, protocol_id: ProtocolId) -> List[Handler]:
         """
@@ -493,12 +603,15 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         :param protocol_id: the protocol id
         :return: the handlers registered for the protocol_id and skill_id
         """
-        protocol_handlers_by_skill = self._items_by_protocol_and_skill.get(
-            protocol_id, {}
+        if protocol_id not in self._items_by_protocol_and_skill.ids():
+            return []
+
+        protocol_handlers_by_skill = self._items_by_protocol_and_skill.fetch(
+            protocol_id
         )
         handlers = [
-            protocol_handlers_by_skill[skill_id]
-            for skill_id in protocol_handlers_by_skill
+            protocol_handlers_by_skill.fetch(skill_id)
+            for skill_id in protocol_handlers_by_skill.ids()
         ]
         return handlers
 
@@ -512,6 +625,9 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         :param skill_id: the skill id.
         :return: the handlers registered for the protocol_id and skill_id
         """
-        return self._items_by_protocol_and_skill.get(protocol_id, {}).get(
-            skill_id, None
-        )
+        if protocol_id not in self._items_by_protocol_and_skill.ids():
+            return None
+        protocols_by_skill_id = self._items_by_protocol_and_skill.fetch(protocol_id)
+        if skill_id not in protocols_by_skill_id.ids():
+            return None
+        return protocols_by_skill_id.fetch(skill_id)
