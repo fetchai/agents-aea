@@ -388,7 +388,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        for mux in cls.mutliplexers:
+        for mux in reversed(cls.mutliplexers):
             mux.disconnect()
         os.chdir(cls.cwd)
         try:
