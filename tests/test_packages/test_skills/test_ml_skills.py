@@ -80,7 +80,7 @@ class TestMLSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.12.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.11.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -257,7 +257,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.12.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.11.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()

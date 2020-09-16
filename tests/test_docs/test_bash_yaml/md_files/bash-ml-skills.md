@@ -9,7 +9,7 @@ cd ml_data_provider
 aea add connection fetchai/p2p_libp2p:0.8.0
 aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
-aea add skill fetchai/ml_data_provider:0.12.0
+aea add skill fetchai/ml_data_provider:0.11.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 aea install
 ```

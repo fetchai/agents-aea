@@ -29,12 +29,13 @@ Run this script from the root of the project directory:
 import argparse
 import operator
 import os
+import pprint
 import re
 import subprocess  # nosec
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, Optional, Set
+from typing import Dict, Optional, Set, Tuple
 
 from click.testing import CliRunner
 
@@ -186,7 +187,7 @@ def get_public_id_from_yaml(configuration_file_path: Path) -> PublicId:
     """
     Get the public id from yaml.
 
-    :param configuration_file: the path to the config yaml
+    :param configuration_file_path: the path to the config yaml
     """
     data = yaml.safe_load(configuration_file_path.open())
     author = data["author"]
@@ -283,6 +284,11 @@ def get_public_ids_to_update() -> Set[PackageId]:
     return result
 
 
+def _extract_prefix(public_id: PublicId) -> Tuple[str, str]:
+    """Extract (author, package_name) from public id."""
+    return public_id.author, public_id.name
+
+
 def _get_ambiguous_public_ids(
     all_package_ids_to_update: Set[PackageId],
 ) -> Set[PublicId]:
@@ -292,7 +298,9 @@ def _get_ambiguous_public_ids(
             operator.itemgetter(0),
             filter(
                 lambda x: x[1] > 1,
-                Counter(id_.public_id for id_ in all_package_ids_to_update).items(),
+                Counter(
+                    _extract_prefix(id_.public_id) for id_ in all_package_ids_to_update
+                ).items(),
             ),
         )
     )
@@ -304,11 +312,13 @@ def process_packages(all_package_ids_to_update: Set[PackageId]) -> bool:
     ambiguous_public_ids = _get_ambiguous_public_ids(all_package_ids_to_update)
     print("*" * 100)
     print("Start processing.")
-    print(f"Ambiguous public ids: {ambiguous_public_ids}")
+    print(
+        f"Ambiguous public ids: {pprint.pformat(map(lambda x: '/'.join(x), ambiguous_public_ids))}"
+    )
     for package_id in all_package_ids_to_update:
         print("#" * 50)
         print(f"Processing {package_id}")
-        is_ambiguous = package_id.public_id in ambiguous_public_ids
+        is_ambiguous = _extract_prefix(package_id.public_id) in ambiguous_public_ids
         process_package(package_id, is_ambiguous)
         is_bumped = True
     return is_bumped
@@ -372,7 +382,9 @@ def _can_disambiguate_from_context(
         return match.group(1) == type_[:-1]
     if re.search(fr"aea +fetch +{old_string}", line) is not None:
         return type_ == "agents"
-    match = re.search(f"(skill|protocol|connection|contract)s?.*{old_string}", line)
+    match = re.search(
+        f"(skill|protocol|connection|contract|agent)s?.*{old_string}", line
+    )
     if match is not None:
         return (match.group(1) + "s") == type_
     return None
@@ -382,9 +394,9 @@ def _ask_to_user(lines, line, idx, old_string, type_):
     print("=" * 50)
     above_rows = lines[idx - arguments.context : idx]
     below_rows = lines[idx + 1 : idx + arguments.context]
-    print("\n".join(above_rows))
-    print(line.replace(old_string, "\033[91m" + old_string + "\033[0m"))
-    print("\n".join(below_rows))
+    print("".join(above_rows))
+    print(line.rstrip().replace(old_string, "\033[91m" + old_string + "\033[0m"))
+    print("".join(below_rows))
     answer = input(f"Replace for component ({type_}, {old_string})? [y/N]: ",)  # nosec
     return answer
 
@@ -403,7 +415,7 @@ def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_) 
         content = content.replace(old_string, new_string)
         return content
 
-    lines = content.splitlines()
+    lines = content.splitlines(keepends=True)
     for idx, line in enumerate(lines[:]):
         if old_string not in line:
             continue
@@ -418,7 +430,7 @@ def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_) 
         answer = _ask_to_user(lines, line, idx, old_string, type_)
         if answer == "y":
             lines[idx] = line.replace(old_string, new_string)
-    return "\n".join(lines)
+    return "".join(lines)
 
 
 def replace_aea_fetch_statements(content, old_string, new_string, type_) -> str:
