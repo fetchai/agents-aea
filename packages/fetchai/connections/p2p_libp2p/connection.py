@@ -279,7 +279,7 @@ class Libp2pNode:
             node_log = f.read()
         if returncode != 0:
             raise Exception(
-                "Error while downloading golang dependencies and building it: {},\n{}".format(
+                "Error while downloading golang dependencies and building it: {}\n{}".format(
                     returncode, node_log
                 )
             )

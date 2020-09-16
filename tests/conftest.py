@@ -793,12 +793,15 @@ def _make_libp2p_connection(
     delegate_port: int = 11234,
     delegate_host: str = "127.0.0.1",
     node_key_file: Optional[str] = None,
+    agent_address: Optional[Address] = None,
 ) -> P2PLibp2pConnection:
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
         os.remove(log_file)
-    crypto = make_crypto(COSMOS)
-    identity = Identity("", address=crypto.address)
+    address = agent_address
+    if address is None:
+        address = make_crypto(COSMOS).address
+    identity = Identity("", address=address)
     if relay and delegate:
         configuration = ConnectionConfig(
             node_key_file=node_key_file,
