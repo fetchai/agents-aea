@@ -18,20 +18,25 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+""" Runs an ACN libp2p node without requiring the agents framework """
 
 import os
 import subprocess
 import argparse
 from typing import Dict, List, Optional
 
-from multihash import decode as multihashdecode
+# needed only if checks are enabled
+from binascii import unhexlify
+
+# needed only if checks are enabled
+from multihash import decode as multihashdecode  # type: ignore
 from ecdsa import SigningKey, curves
 from base58 import b58decode
-from binascii import unhexlify
 
 
 class AcnNodeConfig:
     """
+    Store the configuration of an acn node as a dictionary
     """
 
     KEY = "AEA_P2P_ID"
@@ -53,6 +58,16 @@ class AcnNodeConfig:
         entry_peers_maddrs: Optional[List[str]] = None,
         enable_checks: bool = True,
     ):
+        """
+        Initialize a new ACN configuration from arguments
+
+        :param key: node private key to use as identity
+        :param uri: node local uri to bind to
+        :param external_uri: node external uri, needed to be reached by others
+        :param delegate_uri: node local uri for delegate service
+        :param entry_peers_maddrs: multiaddresses of peers to join their network
+        :param enable_checks: to check if provided configuration is valid
+        """
         self.config: Dict[str, str] = dict()
 
         self.config[AcnNodeConfig.KEY] = key
@@ -88,7 +103,7 @@ class AcnNodeConfig:
     def from_file(cls, file_path: str, enable_checks: bool = True) -> "AcnNodeConfig":
         """
         Create a new AcnNodeConfig objet from file
-        
+
         :param file_path: path to the file containing the configuration
         :return: newly created AcnNodeConfig object, if successful
         """
@@ -110,15 +125,17 @@ class AcnNodeConfig:
         uri = config[AcnNodeConfig.URI]
         external_uri = config.get(AcnNodeConfig.EXTERNAL_URI, None)
         delegate_uri = config.get(AcnNodeConfig.DELEGATE_URI, None)
-        entry_peers = config.get(AcnNodeConfig.ENTRY_PEERS_MADDRS, None)
+        entry_peers = config.get(AcnNodeConfig.ENTRY_PEERS_MADDRS, "")
 
-        return cls(key, uri, external_uri, delegate_uri, entry_peers, enable_checks)
+        return cls(
+            key, uri, external_uri, delegate_uri, entry_peers.split(","), enable_checks
+        )
 
     @staticmethod
     def check_config(config: Dict[str, str]) -> None:
         """
         Validate an ACN node configuration
-        
+
         :param config: dictionary containing the configuration to check
         """
 
@@ -159,6 +176,7 @@ class AcnNodeConfig:
 
 class AcnNodeStandalone:
     """
+    Deploy an anc node in standalone mode
     """
 
     def __init__(self, config: AcnNodeConfig, libp2p_node_binary: str):
@@ -174,7 +192,7 @@ class AcnNodeStandalone:
         self._proc = None  # type: Optional[subprocess.Popen]
 
     def run(self):
-        """ """
+        """ Run the node """
 
         config_file = ".acn_config"
         self.config.dump(config_file)
@@ -189,7 +207,7 @@ class AcnNodeStandalone:
             pass
 
     def stop(self):
-        """ """
+        """ Stop the node """
 
         if self._proc is not None:
             self._proc.terminate()
@@ -197,6 +215,8 @@ class AcnNodeStandalone:
 
 
 def parse_commandline():
+    """ Parse script cl arguments """
+
     parser = argparse.ArgumentParser()
     parser.add_argument("libp2p_node")
     config = parser.add_mutually_exclusive_group(required=False)
@@ -219,7 +239,6 @@ def parse_commandline():
         action="store",
         type=str,
         dest="key",
-        # required=True,
         help="node's private key file",
     )
     parser.add_argument(
@@ -227,7 +246,6 @@ def parse_commandline():
         action="store",
         type=str,
         dest="uri",
-        # required=True,
         help="node's local uri in format {ip_address:port}",
     )
     parser.add_argument(
@@ -259,10 +277,10 @@ def parse_commandline():
     if (
         args.config_from_env is False
         and args.config_from_file is None
-        and (args.key is None or args.uri is None)
+        and (args.key is None or args.uri is None or args.external_uri is None)
     ):
         parser.error(
-            "--key-file and --uri are required when configuration is not passed through env or file"
+            "--key-file, --uri, and --uri-external are required when configuration is not passed through env or file"
         )
 
     return args
@@ -289,7 +307,6 @@ if __name__ == "__main__":
         node_config = AcnNodeConfig.from_file(args.config_from_file)
 
     else:
-        print("Config from argsssssssssssss")
         with open(args.key, "r") as f:
             key = f.read().strip()
         node_config = AcnNodeConfig(
@@ -302,73 +319,3 @@ if __name__ == "__main__":
     except Exception:
         node.stop()
         raise
-
-###    if args.priv is not None:
-###        priv = FetchAICrypto(args.priv)
-###    else:
-###        priv = FetchAICrypto()
-###
-###    # uri (host & port)
-###    uri = None
-###    uri_from_env = os.environ.get("NODE_LOCAL_URI")
-###    if uri_from_env is not None:
-###        uri = Uri(uri_from_env)
-###    else:
-###        uri = Uri(args.uri)
-###
-###    # external uri (host & port)
-###    external_uri = None
-###    public_uri_from_env = os.environ.get("NODE_PUBLIC_URI")
-###    if public_uri_from_env is not None:
-###        public_uri = Uri(public_uri_from_env)
-###    elif args.public_uri is not None:
-###        public_uri = Uri(args.public_uri)
-###
-###    # delegate uri (host & port)
-###    delegate_uri = None
-###    delegate_uri_from_env = os.environ.get("NODE_DELEGATE_URI")
-###    if delegate_uri_from_env is not None:
-###        delegate_uri = Uri(delegate_uri_from_env)
-###    elif args.delegate_uri is not None:
-###        delegate_uri = Uri(args.delegate_uri)
-###
-###    # entry peers, optional
-###    entry_peers = list()
-###    entry_peers_from_env = os.environ.get("NODE_ENTRY_PEERS")
-###    if entry_peers_from_env is not None:
-###        entry_peers = [
-###            MultiAddr(maddr)
-###            for maddr in list(filter(None, entry_peers_from_env.split(",")))
-###        ]
-###    elif args.entry_peers_maddrs is not None:
-###        entry_peers = [MultiAddr(maddr) for maddr in args.entry_peers_maddrs]
-###
-###    # peers to send messages to
-###    peers_pubs = list()
-###    if args.peers_ids_file is not None:
-###        with open(args.peers_ids_file, "r") as f:
-###            peers_pubs = [line.strip() for line in f.readlines()]
-###
-###    # number of messages to send to each peer
-###    nbr_msgs = 0
-###    if args.nbr_msgs is not None:
-###        nbr_msgs = args.nbr_msgs
-###
-###    # node key pair
-###    key_from_env = os.environ.get("NODE_PRIV_KEY")
-###    node_key_file = "{}/key.txt".format(tempfile.mkdtemp())
-###    if key_from_env is not None:
-###        with open(node_key_file, "w") as f:
-###            f.write(key_from_env)
-###    elif args.priv_node is not None:
-###        with open(node_key_file, "wb") as f:
-###            FetchAICrypto(args.priv_node).dump(f)
-###    else:
-###        with open(node_key_file, "wb") as f:
-###            FetchAICrypto().dump(f)
-###
-###    # run the connection
-###    runP2PLibp2pConnectionWithinMultiplexer(
-###        node_key_file, uri, entry_peers, peers_pubs, nbr_msgs, public_uri, delegate_uri
-###    )
-###
