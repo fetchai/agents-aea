@@ -14,47 +14,6 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
 ``` bash
 aea run --connections fetchai/p2p_libp2p:0.8.0
 ```
-<<<<<<< HEAD
-``` bash
-aea fetch fetchai/weather_station:0.12.0
-aea fetch fetchai/weather_client:0.12.0
-```
-``` bash
-aea add connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-``` bash
-aea run --connections "fetchai/p2p_libp2p:0.8.0,fetchai/oef:0.9.0"
-```
-``` bash
-My libp2p addresses: ...
-```
-``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt
-```
-``` bash
-aea generate-wealth fetchai
-```
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages/fetchai/connections/p2p_libp2p
-cd p2p_libp2p
-```
-``` bash
-go build
-```
-``` bash
-aea run --connections "fetchai/p2p_libp2p:0.8.0,fetchai/oef:0.9.0"
-```
-``` bash
-chmod +x libp2p_node
-```
-``` bash
-./libp2p_node .env.libp2p
-```
-=======
   ``` bash
   svn export https://github.com/fetchai/agents-aea.git/trunk/packages/fetchai/connections/p2p_libp2p
   cd p2p_libp2p
@@ -85,7 +44,6 @@ chmod +x libp2p_node
     --uri-delegate <AEA_P2P_DELEGATE_URI> \
     --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
   ```
->>>>>>> develop
 ``` yaml
 config:
   delegate_uri: 127.0.0.1:11001
