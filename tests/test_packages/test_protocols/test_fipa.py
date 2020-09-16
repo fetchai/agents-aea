@@ -22,6 +22,7 @@
 import logging
 from typing import Any, Optional, Type
 from unittest import mock
+import sys
 
 import pytest
 
@@ -37,7 +38,10 @@ from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogue
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.message import logger as fipa_message_logger
 
+from tests.conftest import (ROOT_DIR)
+
 logger = logging.getLogger(__name__)
+sys.path.append(ROOT_DIR)
 
 
 def test_cfp_serialization():
