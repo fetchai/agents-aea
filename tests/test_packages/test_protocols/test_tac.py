@@ -32,6 +32,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
+import packages
 from packages.fetchai.protocols.tac.dialogues import TacDialogue, TacDialogues
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.message import logger as tac_message_logger
@@ -367,8 +368,9 @@ def test_decoding_unknown_performative():
             TacMessage.serializer.decode(encoded_msg)
 
 
-@mock.patch(
-    "packages.fetchai.protocols.tac.message.enforce",
+@mock.patch.object(
+    packages.fetchai.protocols.tac.message,
+    "enforce",
     side_effect=AEAEnforceError("some error"),
 )
 def test_incorrect_message(mocked_enforce):

@@ -32,6 +32,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
+import packages
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
@@ -408,8 +409,9 @@ def test_decoding_unknown_performative():
             LedgerApiMessage.serializer.decode(encoded_msg)
 
 
-@mock.patch(
-    "packages.fetchai.protocols.ledger_api.message.enforce",
+@mock.patch.object(
+    packages.fetchai.protocols.ledger_api.message,
+    "enforce",
     side_effect=AEAEnforceError("some error"),
 )
 def test_incorrect_message(mocked_enforce):

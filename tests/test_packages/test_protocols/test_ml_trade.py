@@ -39,6 +39,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
+import packages
 from packages.fetchai.protocols.ml_trade.dialogues import (
     MlTradeDialogue,
     MlTradeDialogues,
@@ -203,8 +204,9 @@ def test_decoding_unknown_performative():
             MlTradeMessage.serializer.decode(encoded_msg)
 
 
-@mock.patch(
-    "packages.fetchai.protocols.ml_trade.message.enforce",
+@mock.patch.object(
+    packages.fetchai.protocols.ml_trade.message,
+    "enforce",
     side_effect=AEAEnforceError("some error"),
 )
 def test_fipa_incorrect_message(mocked_enforce):

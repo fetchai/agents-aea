@@ -38,6 +38,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
+import packages
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue,
     OefSearchDialogues,
@@ -298,8 +299,9 @@ def test_decoding_unknown_performative():
             OefSearchMessage.serializer.decode(encoded_msg)
 
 
-@mock.patch(
-    "packages.fetchai.protocols.oef_search.message.enforce",
+@mock.patch.object(
+    packages.fetchai.protocols.oef_search.message,
+    "enforce",
     side_effect=AEAEnforceError("some error"),
 )
 def test_incorrect_message(mocked_enforce):
