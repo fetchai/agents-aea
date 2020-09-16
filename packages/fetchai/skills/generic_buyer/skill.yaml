@@ -1,6 +1,6 @@
 name: generic_buyer
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0

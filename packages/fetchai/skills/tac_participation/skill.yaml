@@ -1,6 +1,6 @@
 name: tac_participation
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: skill
 description: The tac participation skill implements the logic for an AEA to participate
   in the TAC.

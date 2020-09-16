@@ -79,7 +79,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.add_item("skill", "fetchai/erc1155_deploy:0.13.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.12.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.13.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -123,7 +123,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.add_item("skill", "fetchai/erc1155_client:0.12.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.12.0", client_aea_name
+            "fetchai/erc1155_client:0.13.0", client_aea_name
         )
         assert (
             diff == []

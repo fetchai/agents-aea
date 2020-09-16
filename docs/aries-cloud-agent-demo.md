@@ -180,7 +180,7 @@ Now you can create **Alice_AEA** and **Faber_AEA** in terminals 3 and 4 respecti
 In the third terminal, fetch **Alice_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_alice:0.9.0
+aea fetch fetchai/aries_alice:0.10.0
 cd aries_alice
 ```
 
@@ -265,7 +265,7 @@ Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take 
 In the fourth terminal, fetch **Faber_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_faber:0.9.0
+aea fetch fetchai/aries_faber:0.10.0
 cd aries_faber
 ```
 

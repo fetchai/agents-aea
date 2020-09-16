@@ -69,14 +69,14 @@ class TestTacSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/soef:0.8.0")
-        self.add_item("skill", "fetchai/tac_control:0.6.0")
+        self.add_item("skill", "fetchai/tac_control:0.7.0")
         self.set_config("agent.default_ledger", FETCHAI)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.8.0", tac_controller_name
+            "fetchai/tac_controller:0.9.0", tac_controller_name
         )
         assert (
             diff == []
@@ -110,14 +110,14 @@ class TestTacSkills(AEATestCaseMany):
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
             self.add_item("connection", "fetchai/soef:0.8.0")
             self.add_item("connection", "fetchai/ledger:0.4.0")
-            self.add_item("skill", "fetchai/tac_participation:0.7.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.8.0")
+            self.add_item("skill", "fetchai/tac_participation:0.8.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.9.0")
             self.set_config("agent.default_ledger", FETCHAI)
             setting_path = "agent.default_routing"
             self.force_set_config(setting_path, default_routing)
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.9.0", agent_name
+                "fetchai/tac_participant:0.10.0", agent_name
             )
             assert (
                 diff == []
@@ -279,12 +279,12 @@ class TestTacSkillsContract(AEATestCaseMany):
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
-        self.add_item("skill", "fetchai/tac_control_contract:0.7.0")
+        self.add_item("skill", "fetchai/tac_control_contract:0.8.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.9.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.10.0", tac_controller_name
         )
         assert (
             diff == []
@@ -304,8 +304,8 @@ class TestTacSkillsContract(AEATestCaseMany):
             self.set_agent_context(agent_name)
             self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
-            self.add_item("skill", "fetchai/tac_participation:0.7.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.8.0")
+            self.add_item("skill", "fetchai/tac_participation:0.8.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.9.0")
             self.set_config("agent.default_ledger", ETHEREUM)
             self.set_config(
                 "vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract",
@@ -319,7 +319,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.9.0", agent_name
+                "fetchai/tac_participant:0.10.0", agent_name
             )
             assert (
                 diff == []

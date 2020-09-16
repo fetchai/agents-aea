@@ -1,6 +1,6 @@
 agent_name: car_detector
 author: fetchai
-version: 0.11.0
+version: 0.12.0
 description: An agent which sells car park data to instances of `car_data_buyer` agents.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
@@ -20,7 +20,7 @@ protocols:
 skills:
 - fetchai/carpark_detection:0.11.0
 - fetchai/error:0.5.0
-- fetchai/generic_seller:0.11.0
+- fetchai/generic_seller:0.12.0
 default_connection: fetchai/p2p_libp2p:0.8.0
 default_ledger: fetchai
 logging_config:

@@ -26,7 +26,7 @@ with a one-step atomic swap functionality. That means the trade between the two 
 Fetch the AEA that will deploy the contract.
 
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.12.0
+aea fetch fetchai/erc1155_deployer:0.13.0
 cd erc1155_deployer
 aea install
 ```
@@ -81,7 +81,7 @@ aea add-key cosmos cosmos_private_key.txt --connection
 In another terminal, fetch the AEA that will get some tokens from the deployer.
 
 ``` bash
-aea fetch fetchai/erc1155_client:0.12.0
+aea fetch fetchai/erc1155_client:0.13.0
 cd erc1155_client
 aea install
 ```
