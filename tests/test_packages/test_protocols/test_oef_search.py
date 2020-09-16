@@ -47,7 +47,7 @@ from packages.fetchai.protocols.oef_search.message import (
     logger as oef_search_message_logger,
 )
 
-from tests.conftest import (ROOT_DIR)
+from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)
 
