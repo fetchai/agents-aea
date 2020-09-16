@@ -279,7 +279,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             )
             cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
             cls.multiplexer_client_2.connect()
-            cls.mutliplexers.append(cls.multiplexer_client_1)
+            cls.mutliplexers.append(cls.multiplexer_client_2)
         except Exception:
             cls.teardown_class()
             raise
