@@ -17,37 +17,42 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the FIPA protocol."""
+"""This module contains the tests of the fipa protocol package."""
 
 import logging
+import sys
 from typing import Any, Optional, Type
 from unittest import mock
 
 import pytest
 
 from aea.common import Address
+from aea.exceptions import AEAEnforceError
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
+import packages
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.message import logger as fipa_message_logger
+
+from tests.conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)
+sys.path.append(ROOT_DIR)
 
 
-def test_fipa_cfp_serialization():
+def test_cfp_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
-    query = Query([Constraint("something", ConstraintType(">", 1))])
-
     msg = FipaMessage(
         message_id=1,
         dialogue_reference=(str(0), ""),
         target=0,
         performative=FipaMessage.Performative.CFP,
-        query=query,
+        query=Query([Constraint("something", ConstraintType(">", 1))]),
     )
     msg.to = "receiver"
     envelope = Envelope(
@@ -69,45 +74,14 @@ def test_fipa_cfp_serialization():
     assert expected_msg == actual_msg
 
 
-def test_fipa_cfp_serialization_bytes():
-    """Test that the serialization - deserialization for the 'fipa' protocol works."""
-    query = Query([Constraint("something", ConstraintType(">", 1))])
-    msg = FipaMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=FipaMessage.Performative.CFP,
-        query=query,
-    )
-    msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
-    envelope_bytes = envelope.encode()
-
-    actual_envelope = Envelope.decode(envelope_bytes)
-    expected_envelope = envelope
-    assert expected_envelope.to == actual_envelope.to
-    assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
-    assert expected_envelope.message != actual_envelope.message
-
-    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
-    actual_msg.to = actual_envelope.to
-    actual_msg.sender = actual_envelope.sender
-    expected_msg = msg
-    assert expected_msg == actual_msg
-
-
-def test_fipa_propose_serialization():
+def test_propose_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
-    proposal = Description({"foo1": 1, "bar1": 2})
     msg = FipaMessage(
         message_id=1,
         dialogue_reference=(str(0), ""),
         target=0,
         performative=FipaMessage.Performative.PROPOSE,
-        proposal=proposal,
+        proposal=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
     envelope = Envelope(
@@ -129,7 +103,7 @@ def test_fipa_propose_serialization():
     assert expected_msg == actual_msg
 
 
-def test_fipa_accept_serialization():
+def test_accept_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
     msg = FipaMessage(
         message_id=1,
@@ -157,7 +131,35 @@ def test_fipa_accept_serialization():
     assert expected_msg == actual_msg
 
 
-def test_performative_match_accept():
+def test_decline_serialization():
+    """Test that the serialization for the 'fipa' protocol works."""
+    msg = FipaMessage(
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=FipaMessage.Performative.DECLINE,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
+def test_match_accept_serialization():
     """Test the serialization - deserialization of the match_accept performative."""
     msg = FipaMessage(
         message_id=1,
@@ -185,7 +187,7 @@ def test_performative_match_accept():
     assert expected_msg == actual_msg
 
 
-def test_performative_accept_with_inform():
+def test_accept_with_inform_serialization():
     """Test the serialization - deserialization of the accept_with_address performative."""
     msg = FipaMessage(
         message_id=1,
@@ -214,7 +216,7 @@ def test_performative_accept_with_inform():
     assert expected_msg == actual_msg
 
 
-def test_performative_match_accept_with_inform():
+def test_match_accept_with_inform_serialization():
     """Test the serialization - deserialization of the match_accept_with_address performative."""
     msg = FipaMessage(
         message_id=1,
@@ -243,7 +245,7 @@ def test_performative_match_accept_with_inform():
     assert expected_msg == actual_msg
 
 
-def test_performative_inform():
+def test_inform_serialization():
     """Test the serialization-deserialization of the inform performative."""
     msg = FipaMessage(
         message_id=1,
@@ -298,28 +300,18 @@ def test_performative_string_value():
     ), "The str value must be inform"
 
 
-def test_fipa_encoding_unknown_performative():
+def test_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
-    msg = FipaMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=FipaMessage.Performative.ACCEPT,
-    )
+    msg = FipaMessage(performative=FipaMessage.Performative.ACCEPT,)
 
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(FipaMessage.Performative, "__eq__", return_value=False):
             FipaMessage.serializer.encode(msg)
 
 
-def test_fipa_decoding_unknown_performative():
+def test_decoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during decoding."""
-    msg = FipaMessage(
-        message_id=1,
-        dialogue_reference=(str(0), ""),
-        target=0,
-        performative=FipaMessage.Performative.ACCEPT,
-    )
+    msg = FipaMessage(performative=FipaMessage.Performative.ACCEPT,)
 
     encoded_msg = FipaMessage.serializer.encode(msg)
     with pytest.raises(ValueError, match="Performative not valid:"):
@@ -327,8 +319,26 @@ def test_fipa_decoding_unknown_performative():
             FipaMessage.serializer.decode(encoded_msg)
 
 
+@mock.patch.object(
+    packages.fetchai.protocols.fipa.message,
+    "enforce",
+    side_effect=AEAEnforceError("some error"),
+)
+def test_incorrect_message(mocked_enforce):
+    """Test that we raise an exception when the fipa message is incorrect."""
+    with mock.patch.object(fipa_message_logger, "error") as mock_logger:
+        FipaMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=FipaMessage.Performative.ACCEPT,
+        )
+
+        mock_logger.assert_any_call("some error")
+
+
 class TestDialogues:
-    """Tests dialogues model from the packages protocols fipa."""
+    """Tests fipa dialogues."""
 
     @classmethod
     def setup_class(cls):
