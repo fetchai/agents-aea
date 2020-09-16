@@ -171,12 +171,16 @@ func (aea *AeaApi) Init() error {
 	logger.Debug().Msgf("uri delegate service: %s", uri_delegate)
 
 	if aea.id == "" || uri == "" {
-		err := errors.New("couldn't get AEA configuration")
+		err := errors.New("couldn't get AEA configuration: key and uri are required")
 		logger.Error().Str("err", err.Error()).Msg("")
 		return err
 	}
-	if aea.msgin_path == "" || aea.msgout_path == "" || aea.agent_addr == "" {
+	if aea.msgin_path == "" && aea.msgout_path == "" && aea.agent_addr == "" {
 		aea.standalone = true
+	} else if aea.msgin_path == "" || aea.msgout_path == "" || aea.agent_addr == "" {
+		err := errors.New("couldn't get AEA configuration: pipes paths are required when agent address is provided")
+		logger.Error().Str("err", err.Error()).Msg("")
+		return err
 	}
 
 	// parse uri

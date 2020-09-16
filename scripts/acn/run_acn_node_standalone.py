@@ -18,7 +18,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-""" Runs an ACN libp2p node without requiring the agents framework """
+""" Run an ACN libp2p node without requiring the agents framework """
 
 import os
 import subprocess
@@ -176,7 +176,7 @@ class AcnNodeConfig:
 
 class AcnNodeStandalone:
     """
-    Deploy an anc node in standalone mode
+    Deploy an acn node in standalone mode
     """
 
     def __init__(self, config: AcnNodeConfig, libp2p_node_binary: str):
