@@ -7,7 +7,7 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt install -y python3 python3-pip
 
 # utils
-RUN apt install -y wget
+RUN apt install -y wget subversion
 
 # golang
 RUN wget https://dl.google.com/go/go1.13.8.linux-amd64.tar.gz && \
@@ -22,8 +22,14 @@ RUN python3 -m pip install pymultihash ecdsa base58
 
 WORKDIR /acn/
 
-#RUN go build
+# get node source code
+RUN svn export https://github.com/fetchai/agents-aea/branches/feature/add-standalone-acn-node/packages/fetchai/connections/p2p_libp2p/ /acn/node
 
-#CMD [ "python3", "-u", "/acn/run_acn_node_standalone.py"]
-ENTRYPOINT ["echo"]
+# get deployment script
+RUN svn export https://github.com/fetchai/agents-aea/branches/feature/add-standalone-acn-node/scripts/acn/run_acn_node_standalone.py /acn/
+
+# build node
+RUN cd /acn/node && go build
+
+ENTRYPOINT [ "python3", "-u", "/acn/run_acn_node_standalone.py", "/acn/node/libp2p_node"]
 
