@@ -1,14 +1,14 @@
-# Weather Station
+# Car Park Detection
 
 ## Description
 
-This skill sells dummy weather data.
+This skill sells information on the number of car parking spaces available in a given vicinity.
 
-This skill is part of the Fetch.ai weather demo. It reads data from a database, that is populated with  dummy data from a weather station. It can be requested (for example by an agent with the weather_client skill) to provide weather data for specific dates, which it delivers after it receives payment.
+This skill is part of the Fetch.ai car park demo. It registers the "car park availability selling service" on the soef. It can be requested (for example by an agent with the carpark_client skill) to provide its data. It then negotiates the price and delivers the data after it receives payment.
 
 ## Behaviours
 
-* service_registration: registers service on soef search service 
+* service_registration: registers car park info selling service on the soef 
 
 ## Handlers
 
@@ -18,4 +18,4 @@ This skill is part of the Fetch.ai weather demo. It reads data from a database, 
 
 ## Links
 
-* <a href="https://docs.fetch.ai/aea/weather-skills/" target="_blank">Weather Demo</a>
+* <a href="https://docs.fetch.ai/aea/car-park-skills/" target="_blank">Car Park Demo</a>

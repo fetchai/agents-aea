@@ -8,7 +8,7 @@ This skill is part of the Fetch.ai weather demo. It reads data from a database, 
 
 ## Behaviours
 
-* service_registration: registers service on soef search service 
+* service_registration: registers weather selling service on the soef 
 
 ## Handlers
 
