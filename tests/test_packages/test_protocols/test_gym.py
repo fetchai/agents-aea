@@ -19,6 +19,7 @@
 
 """This module contains the tests of the gym protocol package."""
 
+import sys
 from typing import Type
 from unittest import mock
 
@@ -34,6 +35,10 @@ from aea.protocols.dialogue.base import DialogueLabel
 from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.message import logger as gym_message_logger
+
+from tests.conftest import (ROOT_DIR)
+
+sys.path.append(ROOT_DIR)
 
 
 def test_act_serialization():

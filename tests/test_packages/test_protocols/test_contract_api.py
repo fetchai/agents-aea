@@ -20,6 +20,7 @@
 """This module contains the tests of the contract_api protocol package."""
 
 import logging
+import sys
 from typing import Type
 from unittest import mock
 
@@ -41,7 +42,10 @@ from packages.fetchai.protocols.contract_api.message import (
     logger as contract_api_message_logger,
 )
 
+from tests.conftest import (ROOT_DIR)
+
 logger = logging.getLogger(__name__)
+sys.path.append(ROOT_DIR)
 
 
 def test_get_deploy_transaction_serialization():

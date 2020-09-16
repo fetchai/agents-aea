@@ -19,6 +19,7 @@
 
 """This module contains the tests of the http protocol package."""
 
+import sys
 from typing import Type
 from unittest import mock
 
@@ -34,6 +35,10 @@ from aea.protocols.dialogue.base import DialogueLabel
 from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.message import logger as http_message_logger
+
+from tests.conftest import (ROOT_DIR)
+
+sys.path.append(ROOT_DIR)
 
 
 def test_request_serialization():

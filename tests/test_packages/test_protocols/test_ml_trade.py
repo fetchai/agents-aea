@@ -20,6 +20,7 @@
 """This module contains the tests of the ml_trade protocol package."""
 
 import logging
+import sys
 from typing import Type
 from unittest import mock
 
@@ -47,7 +48,10 @@ from packages.fetchai.protocols.ml_trade.message import (
     logger as ml_trade_message_logger,
 )
 
+from tests.conftest import (ROOT_DIR)
+
 logger = logging.getLogger(__name__)
+sys.path.append(ROOT_DIR)
 
 
 def test_cfp_serialization():

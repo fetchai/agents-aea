@@ -20,9 +20,9 @@
 """This module contains the tests of the fipa protocol package."""
 
 import logging
+import sys
 from typing import Any, Optional, Type
 from unittest import mock
-import sys
 
 import pytest
 

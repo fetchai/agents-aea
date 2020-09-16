@@ -19,6 +19,7 @@
 
 """This module contains the tests of the messages module."""
 
+import sys
 from typing import Type
 from unittest import mock
 
@@ -39,6 +40,10 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ledger_api.message import (
     logger as ledger_api_message_logger,
 )
+
+from tests.conftest import (ROOT_DIR)
+
+sys.path.append(ROOT_DIR)
 
 
 def test_get_balance_serialization():

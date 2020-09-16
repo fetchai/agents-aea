@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the oef_search protocol package."""
+
+import sys
 from typing import Type
 from unittest import mock
 
@@ -44,6 +46,10 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.message import (
     logger as oef_search_message_logger,
 )
+
+from tests.conftest import (ROOT_DIR)
+
+sys.path.append(ROOT_DIR)
 
 
 def test_register_service_serialization():
