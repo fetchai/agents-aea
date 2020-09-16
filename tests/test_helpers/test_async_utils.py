@@ -29,7 +29,6 @@ from aea.helpers.async_utils import (
     HandlerItemGetter,
     PeriodicCaller,
     ThreadedAsyncRunner,
-    cancel_and_wait,
     ensure_list,
     ensure_loop,
 )
@@ -215,24 +214,6 @@ async def test_threaded_async_run_cancel_task():
     with pytest.raises(CancelledError):
         task.result()
     assert task.done()
-    runner.stop()
-
-
-@pytest.mark.asyncio
-async def test_cancel_and_wait():
-    """Test task cancel and wait."""
-    loop = asyncio.get_event_loop()
-    task = loop.create_task(asyncio.sleep(1))
-
-    r = await cancel_and_wait(task)
-    assert isinstance(r, asyncio.CancelledError)
-
-    # cancel and wait completed task
-    task = loop.create_task(asyncio.sleep(0))
-    await asyncio.sleep(0.01)
-    assert task.done()
-    r = await cancel_and_wait(task)
-    assert r is None
 
 
 @pytest.mark.asyncio

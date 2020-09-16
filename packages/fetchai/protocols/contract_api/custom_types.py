@@ -69,7 +69,7 @@ class Kwargs:
         :return: None
         """
         kwargs_bytes = pickle.dumps(kwargs_object)  # nosec
-        kwargs_protobuf_object.kwargs_bytes = kwargs_bytes
+        kwargs_protobuf_object.kwargs = kwargs_bytes
 
     @classmethod
     def decode(cls, kwargs_protobuf_object) -> "Kwargs":
@@ -81,7 +81,7 @@ class Kwargs:
         :param kwargs_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'kwargs_protobuf_object' argument.
         """
-        kwargs = pickle.loads(kwargs_protobuf_object.kwargs_bytes)  # nosec
+        kwargs = pickle.loads(kwargs_protobuf_object.kwargs)  # nosec
         return kwargs
 
     def __eq__(self, other):
