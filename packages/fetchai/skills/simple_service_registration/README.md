@@ -2,17 +2,17 @@
 
 ## Description
 
-This skill registers and unregisters an agent and service on the soef.
+This skill registers and unregisters an agent and service on the SOEF.
 
-This skill is used in the "Guide on Writing a Skill" section in the documentation. On start, it registers an agent and its service on the soef, and on termination it unregisters the agent and its service from soef.
+This skill is used in the "Guide on Writing a Skill" section in the documentation. On start, it registers an agent and its service on the SOEF, and on termination it unregisters the agent and its service from SOEF.
 
 ## Behaviours
 
-* service: registers and unregisters a service on the soef 
+* service: registers and unregisters a service on the SOEF 
 
 ## Handlers
 
-* oef_search: handles oef_search messages if interactions with soef is erratic
+* oef_search: handles oef_search messages if interactions with SOEF is erratic
 
 ## Links
 

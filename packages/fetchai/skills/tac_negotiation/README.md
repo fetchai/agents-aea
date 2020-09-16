@@ -4,12 +4,12 @@
 
 This is the skill for negotiation in a TAC.
 
-This skill is part of the Fetch.ai TAC demo. It manages registration and searching of agents and services on the soef and negotiations of goods with other agents.
+This skill is part of the Fetch.ai TAC demo. It manages registration and searching of agents and services on the SOEF and negotiations of goods with other agents.
 
 ## Behaviours
 
 * clean_up: updates and cleans up confirmed and pending transactions 
-* tac_negotiation: registers/unregisters the agent and its buyeing/selling services on the soef 
+* tac_negotiation: registers/unregisters the agent and its buyeing/selling services on the SOEF 
 
 ## Handlers
 

@@ -2,14 +2,14 @@
 
 ## Description
 
-This skill purchases information on available car parking spaces in a vicinity
+This skill purchases information on available car parking spaces in a vicinity.
 
-This skill finds an agent on the soef which sells car park availability data in a vicinity, requests this data, negotiates the price, pays the proposed amount if agreement is reach, and receives the data bought.
+This skill finds an agent on the SOEF which sells car park availability data in a vicinity, requests this data, negotiates the price, pays the proposed amount if agreement is reach, and receives the data bought.
 
 
 ## Behaviours
 
-* search: searches for data selling service on soef 
+* search: searches for data selling service on SOEF
 
 ## Handlers
 

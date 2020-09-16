@@ -13,7 +13,7 @@ This skill is part of the Fetch.ai TAC demo. It manages the progression of the c
 ## Handlers
 
 * tac: handles TAC messages to manage tht competition
-* oef: handles oef_search messages if (un)registrations on soef is unsuccessful
+* oef: handles oef_search messages if (un)registrations on SOEF is unsuccessful
 
 ## Links
 

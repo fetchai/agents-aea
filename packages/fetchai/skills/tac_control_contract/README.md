@@ -14,7 +14,7 @@ This skill is part of the Fetch.ai TAC demo. It manages the smart contract (cont
 ## Handlers
 
 * tac: handles TAC messages for registering/unregistering agents in the TAC
-* oef: handles oef_search messages if (un)registration on soef is unsuccessful
+* oef: handles oef_search messages if (un)registration on SOEF is unsuccessful
 * transaction: handles signing messages for communication with the ledger
 
 ## Links

@@ -4,12 +4,12 @@
 
 This is a generic skill for buying data.
 
-This skill finds an agent on the soef which sells data, requests specific data, negotiates the price, pays the proposed amount if agreement is reach, and receives the data bought.
+This skill finds an agent on the SOEF which sells data, requests specific data, negotiates the price, pays the proposed amount if agreement is reach, and receives the data bought.
 
 
 ## Behaviours
 
-* search: searches for data selling service on soef 
+* search: searches for data selling service on SOEF
 
 ## Handlers
 

@@ -2,14 +2,14 @@
 
 ## Description
 
-This is a skill for buying data via a smart contract.
+This is a skill for demoing the purchase of data via a smart contract.
 
-This skill finds an `ERC1155 contract deployment AEA` on the soef, requests specific data, negotiates the price, pays the proposed amount via smart contract if agreement is reach, and receives the data bought.
+This skill finds an `ERC1155 contract deployment AEA` on the SOEF, requests specific data, negotiates the price, pays the proposed amount via smart contract if agreement is reach, and receives the data bought.
 
 
 ## Behaviours
 
-* search: searches for the ERC1155 deployment agent on the soef
+* search: searches for the ERC1155 deployment agent on the SOEF
 
 ## Handlers
 

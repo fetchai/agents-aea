@@ -14,7 +14,7 @@ This skill is part of the Fetch.ai car park demo. It registers the "car park ava
 
 * fipa: handles fipa messages for negotiation
 * ledger_api: handles ledger_api messages for payment
-* oef_search: handles oef_search messages if service registration on soef is unsuccessful
+* oef_search: handles oef_search messages if service registration on SOEF is unsuccessful
 
 ## Links
 

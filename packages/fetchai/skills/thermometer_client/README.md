@@ -8,7 +8,7 @@ This skill is part of the Fetch.ai thermometer demo. It finds an agent which sel
 
 ## Behaviours
 
-* search: searches for thermometer data selling service on soef 
+* search: searches for thermometer data selling service on SOEF 
 
 ## Handlers
 
