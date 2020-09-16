@@ -106,12 +106,12 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.8.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/oef_search:0.5.0)']"
+        "Package 'fetchai/oef:0.9.0' of type 'connection' cannot be added. "
+        "Missing dependencies: ['(protocol, fetchai/oef_search:0.6.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef:0.8.0" requires
-        # "fetchai/oef_search:0.5.0" and "fetchai/fipa:0.6.0" protocols.
+        # connection "fetchai/oef:0.9.0" requires
+        # "fetchai/oef_search:0.6.0" and "fetchai/fipa:0.6.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
@@ -471,6 +471,7 @@ def test_set_from_config():
         "file_path": ROOT_DIR + "/aea/decision_maker/default.py",
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
+    agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
     agent_configuration._default_connection = None
     agent_configuration.connection_private_key_paths_dict = {"fetchai": None}
     agent_configuration.ledger_apis_dict = {"fetchai": None}

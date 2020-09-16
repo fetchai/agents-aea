@@ -26,7 +26,7 @@ import time
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
-from asyncio.tasks import FIRST_COMPLETED, Task
+from asyncio.tasks import FIRST_COMPLETED
 from collections.abc import Iterable
 from contextlib import contextmanager, suppress
 from threading import Thread
@@ -375,20 +375,6 @@ class ThreadedAsyncRunner(Thread):
         logger.debug("Wait thread to join...")
         self.join(10)
         logger.debug("Stopped.")
-
-
-async def cancel_and_wait(task: Optional[Task]) -> Any:
-    """Wait cancelled task and skip CancelledError."""
-    if not task:  # pragma: nocover
-        return
-    try:
-        if task.done():
-            return await task
-
-        task.cancel()
-        return await task
-    except CancelledError as e:
-        return e
 
 
 class AwaitableProc:

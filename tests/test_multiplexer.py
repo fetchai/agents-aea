@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the Multiplexer."""
 
 import asyncio
@@ -28,7 +27,7 @@ import unittest.mock
 from pathlib import Path
 from threading import Thread
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -36,12 +35,20 @@ import aea
 from aea.configurations.base import PublicId
 from aea.connections.base import ConnectionStates
 from aea.exceptions import AEAEnforceError
+from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
-from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
+from aea.multiplexer import (
+    AsyncMultiplexer,
+    InBox,
+    Multiplexer,
+    OutBox,
+)
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
+
+from tests.common.utils import wait_for_condition
 
 from .conftest import (
     UNKNOWN_CONNECTION_PUBLIC_ID,
@@ -581,3 +588,82 @@ def test_multiplexer_setup():
         multiplexer._connection_consistency_checks()
     multiplexer.setup(connections, default_routing=None)
     multiplexer._connection_consistency_checks()
+
+
+class TestExceptionHandlingOnConnectionSend:
+    """Test exception handling policy on connection.send."""
+
+    def setup(self):
+        """Set up test case."""
+        self.connection = _make_dummy_connection()
+        self.multiplexer = Multiplexer([self.connection])
+        self.multiplexer.connect()
+
+        self.envelope = Envelope(
+            to="",
+            sender="",
+            protocol_id=DefaultMessage.protocol_id,
+            message=b"",
+            context=EnvelopeContext(connection_id=self.connection.connection_id),
+        )
+        self.exception = ValueError("expected")
+
+    def teardown(self):
+        """Tear down test case."""
+        self.multiplexer.disconnect()
+
+    def test_default_policy(self):
+        """Test just log exception."""
+        assert self.multiplexer._exception_policy == ExceptionPolicyEnum.just_log
+
+        with patch.object(self.connection, "send", side_effect=self.exception):
+            self.multiplexer.put(self.envelope)
+            time.sleep(1)
+            assert not self.multiplexer._send_loop_task.done()
+
+    def test_propagate_policy(self):
+        """Test propagate exception."""
+        with patch.object(self.connection, "send", side_effect=self.exception):
+            self.multiplexer._exception_policy = ExceptionPolicyEnum.propagate
+            self.multiplexer.put(self.envelope)
+            time.sleep(1)
+            wait_for_condition(
+                lambda: self.multiplexer._send_loop_task.done(), timeout=5
+            )
+            assert self.multiplexer._send_loop_task.exception() == self.exception
+
+    def test_stop_policy(self):
+        """Test stop multiplexer on exception."""
+        with patch.object(self.connection, "send", side_effect=self.exception):
+            self.multiplexer._exception_policy = ExceptionPolicyEnum.stop_and_exit
+            self.multiplexer.put(self.envelope)
+            time.sleep(1)
+            wait_for_condition(
+                lambda: self.multiplexer.connection_status.is_disconnected, timeout=5
+            )
+
+    def test_disconnect_order(self):
+        """Test disconnect order: tasks first, disconnect_all next."""
+        parent = MagicMock()
+
+        async def fn():
+            return
+
+        with patch.object(
+            self.multiplexer, "_stop_receive_send_loops", return_value=fn()
+        ) as stop_loops, patch.object(
+            self.multiplexer, "_disconnect_all", return_value=fn()
+        ) as disconnect_all, patch.object(
+            self.multiplexer, "_check_and_set_disconnected_state"
+        ) as check_and_set_disconnected_state:
+            parent.attach_mock(stop_loops, "stop_loops")
+            parent.attach_mock(disconnect_all, "disconnect_all")
+            parent.attach_mock(
+                check_and_set_disconnected_state, "check_and_set_disconnected_state"
+            )
+            self.multiplexer.disconnect()
+            assert parent.mock_calls == [
+                call.stop_loops(),
+                call.disconnect_all(),
+                call.check_and_set_disconnected_state(),
+            ]

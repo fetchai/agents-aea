@@ -49,7 +49,10 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
-from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
+from packages.fetchai.protocols.oef_search.custom_types import (
+    AgentsInfo,
+    OefErrorOperation,
+)
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -60,7 +63,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.8.0")
 
 NOT_SPECIFIED = object()
 
@@ -619,11 +622,27 @@ class SOEFChannel:
         self._check_data_model(service_description, ModelNames.location_agent)
 
         agent_location = service_description.values.get("location", None)
+
         if agent_location is None or not isinstance(
             agent_location, Location
         ):  # pragma: nocover
             raise SOEFException.debug("Bad location provided.")
-        await self._set_location(agent_location)
+
+        disclosure_accuracy = service_description.values.get(
+            "disclosure_accuracy", None
+        )
+
+        if disclosure_accuracy not in [
+            None,
+            "none",
+            "low",
+            "medium",
+            "high",
+            "maximum",
+        ]:
+            raise SOEFException.debug("Bad disclosure_accuracy.")
+
+        await self._set_location(agent_location, disclosure_accuracy)
 
     @staticmethod
     def _check_data_model(
@@ -643,7 +662,9 @@ class SOEFChannel:
                 f"Bad service description! expected {data_model_name} but go {service_description.data_model.name}"
             )
 
-    async def _set_location(self, agent_location: Location) -> None:
+    async def _set_location(
+        self, agent_location: Location, disclosure_accuracy: Optional[str] = None
+    ) -> None:
         """
         Set the location.
 
@@ -656,6 +677,12 @@ class SOEFChannel:
             "latitude": str(latitude),
         }
         await self._generic_oef_command("set_position", params)
+        if disclosure_accuracy:
+            await self._generic_oef_command(
+                "set_find_position_disclosure_accuracy",
+                {"accuracy": disclosure_accuracy},
+            )
+
         self.agent_location = agent_location
 
     async def _set_personality_piece_handler(
@@ -947,10 +974,7 @@ class SOEFChannel:
             "find_around_me", {"range_in_km": [str(radius)], **params}
         )
         root = ET.fromstring(response_text)
-        agents = {
-            key: {} for key in self.SUPPORTED_CHAIN_IDENTIFIERS
-        }  # type: Dict[str, Dict[str, str]]
-        agents_l = []  # type: List[str]
+        agents = {}  # type: Dict[str, Dict[str, Union[str, Dict[str, str]]]]
         for agent in root.findall(path=".//agent"):
             chain_identifier = ""
             for identities in agent.findall("identities"):
@@ -962,15 +986,27 @@ class SOEFChannel:
                         if chain_identifier_key == "chain_identifier":
                             chain_identifier = chain_identifier_name
                             agent_address = identity.text
-            agent_distance = agent.find("range_in_km").text
-            if chain_identifier in agents:
-                agents[chain_identifier][agent_address] = agent_distance
-                agents_l.append(agent_address)
+
+                            range_in_km = agent.find("range_in_km").text
+                            agents[agent_address] = {
+                                "chain_identifier": chain_identifier,
+                                "address": agent_address,
+                                "range_in_km": range_in_km,
+                                **agent.attrib,
+                            }
+                            location = agent.find("./location")
+                            if location:
+                                agents[agent_address]["location"] = {
+                                    **location.attrib,
+                                    "longitude": location.find("longitude").text,
+                                    "latitude": location.find("latitude").text,
+                                }
 
         message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
             target_message=oef_message,
-            agents=tuple(agents_l),
+            agents=tuple(agents.keys()),
+            agents_info=AgentsInfo(agents),
         )
         envelope = Envelope(
             to=message.to,
@@ -992,7 +1028,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.5.0")
+                PublicId.from_str("fetchai/oef_search:0.6.0")
             ]
 
         super().__init__(**kwargs)

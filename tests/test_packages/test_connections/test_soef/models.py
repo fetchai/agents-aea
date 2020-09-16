@@ -25,7 +25,10 @@ from packages.fetchai.connections.soef.connection import ModelNames
 
 AGENT_LOCATION_MODEL = DataModel(
     ModelNames.location_agent,
-    [Attribute("location", Location, True, "The location where the agent is.")],
+    [
+        Attribute("location", Location, True, "The location where the agent is."),
+        Attribute("disclosure_accuracy", str, False, "Optional disclosure accuracy."),
+    ],
     "A data model to describe location of an agent.",
 )
 

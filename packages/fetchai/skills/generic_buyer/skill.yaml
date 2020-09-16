@@ -10,7 +10,7 @@ fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
   behaviours.py: QmP1tmn5DJ6fYjHwcmEevhGoS5JXtEK8bDWFCHGxnG3VCe
   dialogues.py: QmPoKjJbwVWFPiKuV4a3ZC21SNLsWZUMXAGFzJuVedgxZ4
-  handlers.py: QmamfxrYWsHgphzuZuVGSy2Y8yTv7rUKQin4trwsviebEG
+  handlers.py: QmYBCGkeoR85f5nft8UigzYHt9NTvHoFX8beuwLHhvESPE
   strategy.py: Qmb2T99WnQQa4qyZSdu31QyrbtHy8ZWC6Jhv9sVrTYrFxE
 fingerprint_ignore_patterns: []
 contracts: []
@@ -18,7 +18,7 @@ protocols:
 - fetchai/default:0.5.0
 - fetchai/fipa:0.6.0
 - fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.5.0
+- fetchai/oef_search:0.6.0
 skills: []
 behaviours:
   search:

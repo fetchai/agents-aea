@@ -395,7 +395,7 @@ class TestHTTPServer:
             status_text="Success",
             bodyy=b"",
         )
-        message.to = "to_key"
+        message.to = str(HTTPServerConnection.connection_id)
         message.sender = "from_key"
         envelope = Envelope(
             to=message.to,

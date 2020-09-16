@@ -74,7 +74,7 @@ The following steps create the weather station from scratch:
 aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add skill fetchai/weather_station:0.10.0
 aea install
@@ -85,7 +85,7 @@ In `weather_station/aea-config.yaml` add
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
-  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
+  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
 </p>
@@ -109,7 +109,7 @@ The following steps create the weather client from scratch:
 aea create my_weather_client
 cd my_weather_client
 aea add connection fetchai/p2p_libp2p:0.8.0
-aea add connection fetchai/soef:0.7.0
+aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/ledger:0.4.0
 aea add skill fetchai/weather_client:0.9.0
 aea install
@@ -120,7 +120,7 @@ In `my_weather_client/aea-config.yaml` add
 ``` yaml
 default_routing:
   fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
-  fetchai/oef_search:0.5.0: fetchai/soef:0.7.0
+  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
 </p>
@@ -193,5 +193,3 @@ cd ..
 aea delete my_weather_station
 aea delete my_weather_client
 ```
-
-

@@ -27,6 +27,9 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.oef_search.custom_types import (
+    AgentsInfo as CustomAgentsInfo,
+)
+from packages.fetchai.protocols.oef_search.custom_types import (
     Description as CustomDescription,
 )
 from packages.fetchai.protocols.oef_search.custom_types import (
@@ -42,7 +45,9 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = ProtocolId.from_str("fetchai/oef_search:0.5.0")
+    protocol_id = ProtocolId.from_str("fetchai/oef_search:0.6.0")
+
+    AgentsInfo = CustomAgentsInfo
 
     Description = CustomDescription
 
@@ -57,6 +62,7 @@ class OefSearchMessage(Message):
         REGISTER_SERVICE = "register_service"
         SEARCH_RESULT = "search_result"
         SEARCH_SERVICES = "search_services"
+        SUCCESS = "success"
         UNREGISTER_SERVICE = "unregister_service"
 
         def __str__(self):
@@ -84,6 +90,7 @@ class OefSearchMessage(Message):
             "register_service",
             "search_result",
             "search_services",
+            "success",
             "unregister_service",
         }
         super().__init__(
@@ -128,6 +135,12 @@ class OefSearchMessage(Message):
         """Get the 'agents' content from the message."""
         enforce(self.is_set("agents"), "'agents' content is not set.")
         return cast(Tuple[str, ...], self.get("agents"))
+
+    @property
+    def agents_info(self) -> CustomAgentsInfo:
+        """Get the 'agents_info' content from the message."""
+        enforce(self.is_set("agents_info"), "'agents_info' content is not set.")
+        return cast(CustomAgentsInfo, self.get("agents_info"))
 
     @property
     def oef_error_operation(self) -> CustomOefErrorOperation:
@@ -224,7 +237,7 @@ class OefSearchMessage(Message):
                     ),
                 )
             elif self.performative == OefSearchMessage.Performative.SEARCH_RESULT:
-                expected_nb_of_contents = 1
+                expected_nb_of_contents = 2
                 enforce(
                     type(self.agents) == tuple,
                     "Invalid type for content 'agents'. Expected 'tuple'. Found '{}'.".format(
@@ -235,6 +248,14 @@ class OefSearchMessage(Message):
                     all(type(element) == str for element in self.agents),
                     "Invalid type for tuple elements in content 'agents'. Expected 'str'.",
                 )
+                enforce(
+                    type(self.agents_info) == CustomAgentsInfo,
+                    "Invalid type for content 'agents_info'. Expected 'AgentsInfo'. Found '{}'.".format(
+                        type(self.agents_info)
+                    ),
+                )
+            elif self.performative == OefSearchMessage.Performative.SUCCESS:
+                expected_nb_of_contents = 0
             elif self.performative == OefSearchMessage.Performative.OEF_ERROR:
                 expected_nb_of_contents = 1
                 enforce(
