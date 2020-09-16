@@ -16,14 +16,14 @@ This class keeps track of all oef_search dialogues.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs) -> None
+ | __init__(self_address: Address, **kwargs) -> None
 ```
 
 Initialize dialogues.
 
 **Arguments**:
 
-- `agent_address`: the address of the agent for whom dialogues are maintained
+- `self_address`: the address of the entity for whom dialogues are maintained
 
 **Returns**:
 
@@ -42,14 +42,14 @@ This class keeps track of all oef_search dialogues.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs) -> None
+ | __init__(self_address: Address, **kwargs) -> None
 ```
 
 Initialize dialogues.
 
 **Arguments**:
 
-- `agent_address`: the address of the agent for whom dialogues are maintained
+- `self_address`: the address of the entity for whom dialogues are maintained
 
 **Returns**:
 

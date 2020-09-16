@@ -288,15 +288,6 @@ Run a coroutine inside the event loop.
 
 Stop event loop in thread.
 
-<a name="aea.helpers.async_utils.cancel_and_wait"></a>
-#### cancel`_`and`_`wait
-
-```python
-async cancel_and_wait(task: Optional[Task]) -> Any
-```
-
-Wait cancelled task and skip CancelledError.
-
 <a name="aea.helpers.async_utils.AwaitableProc"></a>
 ## AwaitableProc Objects
 

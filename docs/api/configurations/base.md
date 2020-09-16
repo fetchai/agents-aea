@@ -1197,7 +1197,7 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, default_routing: Optional[Dict] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None)
+ | __init__(agent_name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_routing: Optional[Dict] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None)
 ```
 
 Instantiate the agent configuration object.

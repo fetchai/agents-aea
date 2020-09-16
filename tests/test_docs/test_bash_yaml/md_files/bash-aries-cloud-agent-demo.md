@@ -21,7 +21,7 @@ cd aries_alice
 ``` bash
 aea create aries_alice
 cd aries_alice
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/http_client:0.8.0
 aea add connection fetchai/webhook:0.6.0
@@ -60,7 +60,7 @@ cd aries_faber
 ``` bash
 aea create aries_faber
 cd aries_faber
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
 aea add connection fetchai/http_client:0.8.0
 aea add connection fetchai/webhook:0.6.0
