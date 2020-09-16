@@ -313,7 +313,7 @@ def process_packages(all_package_ids_to_update: Set[PackageId]) -> bool:
     print("*" * 100)
     print("Start processing.")
     print(
-        f"Ambiguous public ids: {pprint.pformat(map(lambda x: '/'.join(x), ambiguous_public_ids))}"
+        f"Ambiguous public ids: {pprint.pformat(map(lambda x: '/'.join(str(x)), ambiguous_public_ids))}"
     )
     for package_id in all_package_ids_to_update:
         print("#" * 50)
