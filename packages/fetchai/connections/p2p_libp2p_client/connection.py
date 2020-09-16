@@ -231,9 +231,9 @@ class P2PLibp2pClientConnection(Connection):
             if self._in_queue is None:
                 raise ValueError("Input queue not initialized.")  # pragma: nocover
             data = await self._in_queue.get()
-            if data is None:
+            if data is None:  # pragma: no cover
                 self.logger.debug("Received None.")
-                if not self.is_disconnected:  # pragma: no cover
+                if not self.is_disconnected:
                     await self.disconnect()
                 return None
                 # TOFIX(LR) attempt restarting the node?

@@ -9,15 +9,15 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmZLsx2wJE762rqDqfeqLMg9RBczvALxy3H2U9kfRvgK3s
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: QmR5JnMjWs297gDK38nGASA6mUBrXHGJBqMNYd2awmDutt
+  behaviours.py: QmR3owNU8XPaiqPQSrwBjVVtsij9tvPUnyEVqmuekQ6Xdf
   dialogues.py: QmPb2odXbXxuY5Ygm9mfCufM2mtMZ23oapsAzsWHC2x2k4
-  handlers.py: QmSX3ar8CvXgKMTDeAHXcX5WWjAQwhQ5ihKq3ZqSYEgsZy
+  handlers.py: QmTK8i26gDaWc713KGvu9pTyv25xCatcZRfhYLGnZqeJtf
   strategy.py: QmNg87LgfLPoPyokFrmvrNghQD7JkWehRNAdRNyB3YogeN
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.9.0
 protocols:
-- fetchai/contract_api:0.3.0
+- fetchai/contract_api:0.4.0
 - fetchai/default:0.5.0
 - fetchai/fipa:0.6.0
 - fetchai/ledger_api:0.3.0

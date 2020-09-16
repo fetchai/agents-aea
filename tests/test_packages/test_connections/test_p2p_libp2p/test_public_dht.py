@@ -348,8 +348,8 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
 
     @libp2p_log_on_failure
     def test_connectivity(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.9.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.9.0")
 
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.set_config(

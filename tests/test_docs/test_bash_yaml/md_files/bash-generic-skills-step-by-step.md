@@ -48,22 +48,22 @@ aea add-key fetchai fetchai_private_key.txt --connection
 aea generate-wealth fetchai --sync
 ```
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.4.0
+aea add connection fetchai/ledger:0.5.0
 aea add protocol fetchai/fipa:0.6.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
 aea run
 ```
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.4.0
+aea add connection fetchai/ledger:0.5.0
 aea add protocol fetchai/fipa:0.6.0
 aea add protocol fetchai/signing:0.3.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
 ```
 ``` bash
 aea run
@@ -225,7 +225,7 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.5.0
   fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 ``` yaml

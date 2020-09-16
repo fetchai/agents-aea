@@ -67,18 +67,18 @@ The following steps create the car detector from scratch:
 ``` bash
 aea create car_detector
 cd car_detector
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.4.0
+aea add connection fetchai/ledger:0.5.0
 aea add skill fetchai/carpark_detection:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
 ```
 
 In `car_detector/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.5.0
   fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
@@ -101,18 +101,18 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.4.0
+aea add connection fetchai/ledger:0.5.0
 aea add skill fetchai/carpark_client:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
 ```
 
 In `car_data_buyer/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.5.0
   fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 

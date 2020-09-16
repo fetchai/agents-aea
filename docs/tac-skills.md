@@ -112,12 +112,12 @@ The following steps create the controller from scratch:
 ``` bash
 aea create tac_controller
 cd tac_controller
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.4.0
+aea add connection fetchai/ledger:0.5.0
 aea add skill fetchai/tac_control:0.7.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
 aea config set agent.default_ledger fetchai
 ```
 
@@ -152,40 +152,40 @@ aea create tac_participant_two
 Build participant one:
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.4.0
+aea add connection fetchai/ledger:0.5.0
 aea add skill fetchai/tac_participation:0.8.0
 aea add skill fetchai/tac_negotiation:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
 aea config set agent.default_ledger fetchai
 ```
 
 In `tac_participant_one/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.5.0
   fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
 Then, build participant two:
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.4.0
+aea add connection fetchai/ledger:0.5.0
 aea add skill fetchai/tac_participation:0.8.0
 aea add skill fetchai/tac_negotiation:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
 aea config set agent.default_ledger fetchai
 ```
 
 In `tac_participant_two/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.5.0
   fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 
