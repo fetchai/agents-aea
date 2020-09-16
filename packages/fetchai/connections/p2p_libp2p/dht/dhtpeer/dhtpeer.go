@@ -540,7 +540,7 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	var elapsed time.Duration
 	var provider peer.AddrInfo
 	var connected bool = false
-	var s network.Stream
+	var stream network.Stream
 
 	start := time.Now()
 
@@ -559,7 +559,7 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 			linfo().Str("op", "lookup").Str("addr", address).
 				Msgf("opening stream to the address provider %s...", provider)
 			ctxConnect := context.Background()
-			s, err = dhtPeer.routedHost.NewStream(ctxConnect, provider.ID, dhtnode.AeaAddressStream)
+			stream, err = dhtPeer.routedHost.NewStream(ctxConnect, provider.ID, dhtnode.AeaAddressStream)
 			if err == nil {
 				connected = true
 				break
@@ -571,7 +571,7 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 		}
 
 		if provider.ID == "" {
-			msg := "didn't found any provider for address"
+			msg := "didn't find any provider for address"
 			lwarn().Str("op", "lookup").Str("addr", address).Msg(msg)
 			select {
 			default:
@@ -590,16 +590,16 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	linfo().Str("op", "lookup").Str("addr", address).
 		Msg("reading peer ID from provider...")
 
-	err = utils.WriteBytes(s, []byte(address))
+	err = utils.WriteBytes(stream, []byte(address))
 	if err != nil {
 		return "", errors.New("ERROR while sending address to peer:" + err.Error())
 	}
 
-	msg, err := utils.ReadString(s)
+	msg, err := utils.ReadString(stream)
 	if err != nil {
 		return "", errors.New("ERROR while reading target peer id from peer:" + err.Error())
 	}
-	s.Close()
+	stream.Close()
 
 	peerid, err := peer.Decode(msg)
 	if err != nil {

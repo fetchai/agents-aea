@@ -270,10 +270,7 @@ class TestLibp2pConnectionAgentMobility:
             content=b"helloAfterChangingPeer",
         )
         envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            to=addr_2, sender=addr_1, protocol_id=msg.protocol_id, message=msg.encode(),
         )
 
         self.multiplexer1.put(envelope)
