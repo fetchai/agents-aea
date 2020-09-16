@@ -272,8 +272,8 @@ class AsyncMultiplexer(WithLogger):
                 self.logger.exception("Exception on disconnect:")
                 raise AEAConnectionError("Failed to disconnect the multiplexer.")
 
-    async def _stop_recv_send_loops(self) -> None:
-        """Stop recv and send loops."""
+    async def _stop_receive_send_loops(self) -> None:
+        """Stop receive and send loops."""
         self.logger.debug("Stopping recv loop...")
         if self._recv_loop_task:
             self._recv_loop_task.cancel()
@@ -293,6 +293,15 @@ class AsyncMultiplexer(WithLogger):
         self._send_loop_task = None
         self.logger.debug("Send loop stopped.")
 
+    def _check_and_set_disconnected_state(self) -> None:
+        """Check every connection is disconnected and set disconnected state."""
+        if all([c.is_disconnected for c in self.connections]):
+            self.connection_status.set(ConnectionStates.disconnected)
+        else:
+            raise AEAConnectionError(
+                "Failed to disconnect multiplexer, some connections are not disconnected!"
+            )
+
     async def _stop(self) -> None:
         """
         Stop the multiplexer.
@@ -302,15 +311,9 @@ class AsyncMultiplexer(WithLogger):
         """
         self.logger.debug("Stopping multiplexer...")
 
-        await asyncio.wait_for(self._stop_recv_send_loops(), timeout=60)
+        await asyncio.wait_for(self._stop_receive_send_loops(), timeout=60)
         await asyncio.wait_for(self._disconnect_all(), timeout=60)
-
-        if all([c.is_disconnected for c in self.connections]):
-            self.connection_status.set(ConnectionStates.disconnected)
-        else:
-            raise AEAConnectionError(
-                "Failed to disconnect multiplexer, some connections are not disconnected!"
-            )
+        self._check_and_set_disconnected_state()
 
         self.logger.debug("Multiplexer stopped.")
 
