@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 
-
 """This test module contains the tests for the OEF communication using an OEF."""
 
 import asyncio
@@ -25,6 +24,7 @@ import logging
 import sys
 import time
 import unittest
+from contextlib import suppress
 from typing import Dict, cast
 from unittest import mock
 from unittest.mock import patch
@@ -35,7 +35,6 @@ from oef.query import ConstraintExpr
 import pytest
 
 from aea.common import Address
-from aea.helpers.async_utils import cancel_and_wait
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -1103,8 +1102,9 @@ async def test_cannot_connect_to_oef():
         mock_logger.assert_any_call(
             "Cannot connect to OEFChannel. Retrying in 5 seconds..."
         )
-
-        await cancel_and_wait(task)
+        with suppress(asyncio.CancelledError):
+            task.cancel()
+            await task
         await oef_connection.disconnect()
 
 

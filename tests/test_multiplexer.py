@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the Multiplexer."""
 
 import asyncio
@@ -28,7 +27,7 @@ import unittest.mock
 from pathlib import Path
 from threading import Thread
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -642,3 +641,29 @@ class TestExceptionHandlingOnConnectionSend:
             wait_for_condition(
                 lambda: self.multiplexer.connection_status.is_disconnected, timeout=5
             )
+
+    def test_disconnect_order(self):
+        """Test disconnect order: tasks first, disconnect_all next."""
+        parent = MagicMock()
+
+        async def fn():
+            return
+
+        with patch.object(
+            self.multiplexer, "_stop_receive_send_loops", return_value=fn()
+        ) as stop_loops, patch.object(
+            self.multiplexer, "_disconnect_all", return_value=fn()
+        ) as disconnect_all, patch.object(
+            self.multiplexer, "_check_and_set_disconnected_state"
+        ) as check_and_set_disconnected_state:
+            parent.attach_mock(stop_loops, "stop_loops")
+            parent.attach_mock(disconnect_all, "disconnect_all")
+            parent.attach_mock(
+                check_and_set_disconnected_state, "check_and_set_disconnected_state"
+            )
+            self.multiplexer.disconnect()
+            assert parent.mock_calls == [
+                call.stop_loops(),
+                call.disconnect_all(),
+                call.check_and_set_disconnected_state(),
+            ]
