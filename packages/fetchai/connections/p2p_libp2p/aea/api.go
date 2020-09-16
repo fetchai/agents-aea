@@ -74,6 +74,7 @@ type AeaApi struct {
 	closing       bool
 	connected     bool
 	sandbox       bool
+	standalone    bool
 }
 
 func (aea AeaApi) AeaAddress() string {
@@ -101,10 +102,20 @@ func (aea AeaApi) EntryPeers() []string {
 }
 
 func (aea AeaApi) Put(envelope *Envelope) error {
+	if aea.standalone {
+		errorMsg := "node running in standalone mode"
+		logger.Warn().Msgf(errorMsg)
+		return errors.New(errorMsg)
+	}
 	return write_envelope(aea.pipe, envelope)
 }
 
 func (aea *AeaApi) Get() *Envelope {
+	if aea.standalone {
+		errorMsg := "node running in standalone mode"
+		logger.Warn().Msgf(errorMsg)
+		return nil
+	}
 	return <-aea.out_queue
 }
 
@@ -113,7 +124,7 @@ func (aea *AeaApi) Queue() <-chan *Envelope {
 }
 
 func (aea *AeaApi) Connected() bool {
-	return aea.connected
+	return aea.connected || aea.standalone
 }
 
 func (aea *AeaApi) Stop() {
@@ -138,7 +149,7 @@ func (aea *AeaApi) Init() error {
 	logger.Debug().Msgf("env_file: %s", env_file)
 
 	// get config
-	err := godotenv.Load(env_file)
+	err := godotenv.Overload(env_file)
 	if err != nil {
 		log.Fatal("Error loading env file")
 	}
@@ -159,8 +170,15 @@ func (aea *AeaApi) Init() error {
 	logger.Debug().Msgf("uri public: %s", uri_public)
 	logger.Debug().Msgf("uri delegate service: %s", uri_delegate)
 
-	if aea.msgin_path == "" || aea.msgout_path == "" || aea.id == "" || uri == "" {
-		err := errors.New("couldn't get AEA configuration")
+	if aea.id == "" || uri == "" {
+		err := errors.New("couldn't get AEA configuration: key and uri are required")
+		logger.Error().Str("err", err.Error()).Msg("")
+		return err
+	}
+	if aea.msgin_path == "" && aea.msgout_path == "" && aea.agent_addr == "" {
+		aea.standalone = true
+	} else if aea.msgin_path == "" || aea.msgout_path == "" || aea.agent_addr == "" {
+		err := errors.New("couldn't get AEA configuration: pipes paths are required when agent address is provided")
 		logger.Error().Str("err", err.Error()).Msg("")
 		return err
 	}
@@ -225,12 +243,19 @@ func (aea *AeaApi) Init() error {
 	}
 
 	// setup pipe
-	aea.pipe = NewPipe(aea.msgin_path, aea.msgout_path)
+	if !aea.standalone {
+		aea.pipe = NewPipe(aea.msgin_path, aea.msgout_path)
+	}
 
 	return nil
 }
 
 func (aea *AeaApi) Connect() error {
+	if aea.standalone {
+		logger.Info().Msg("Successfully running in standalone mode")
+		return nil
+	}
+
 	// open pipes
 	err := aea.pipe.Connect()
 
