@@ -16,13 +16,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the soef connection module."""
 
 import logging
 import time
 from threading import Thread
 from typing import Any, Dict, Optional, Tuple, cast
+from urllib.parse import urlencode
+
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 import pytest
 
@@ -187,15 +189,41 @@ class Instance:
         )
         logger.info(f"Searching for agents with query: {query}")
         self.multiplexer.put(search_envelope)
-        wait_for_condition(lambda: not self.multiplexer.in_queue.empty(), timeout=20)
 
         # check for search results
-        envelope = self.multiplexer.get()
+        envelope = self.get()
         assert envelope
         message = cast(OefSearchMessage, envelope.message)
         receiving_dialogue = self.oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
         return message
+
+    def get(self):
+        wait_for_condition(lambda: not self.multiplexer.in_queue.empty(), timeout=20)
+        return self.multiplexer.get()
+
+    def generic_command(self, command: str, **parameters: dict) -> None:
+        """Register personality pieces."""
+        service_instance = {"command": command}
+        if parameters:
+            service_instance["parameters"] = urlencode(parameters)
+
+        service_description = Description(
+            service_instance, data_model=models.AGENT_GENERIC_COMMAND_MODEL
+        )
+        message, _ = self.oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=service_description,
+        )
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
+            message=message,
+        )
+        logger.info(f"Send generic command {command} {parameters}")
+        self.multiplexer.put(envelope)
 
 
 class TestRealNetwork:
@@ -325,6 +353,30 @@ class TestRealNetwork:
             agent.multiplexer.put(envelope)
             time.sleep(3)
             assert agent.multiplexer.in_queue.empty()
+
+        finally:
+            agent.stop()
+
+    @pytest.mark.integration
+    def test_generic_command(self):
+        """Test generic command."""
+        agent_location = Location(*self.LOCATION)
+        agent = Instance(agent_location)
+        agent.start()
+
+        try:
+            agent.generic_command("ping")
+            envelope = agent.get()
+            assert (
+                envelope.message.performative == OefSearchMessage.Performative.SUCCESS
+            )
+            ET.fromstring(envelope.message.service_description.values["content"])
+
+            agent.generic_command("bad_command")
+            envelope = agent.get()
+            assert (
+                envelope.message.performative == OefSearchMessage.Performative.OEF_ERROR
+            )
 
         finally:
             agent.stop()

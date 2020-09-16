@@ -21,6 +21,7 @@
 import asyncio
 import copy
 import logging
+import urllib
 from asyncio import CancelledError
 from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -88,6 +89,7 @@ class ModelNames:
     personality_agent = "personality_agent"
     search_model = "search_model"
     ping = "ping"
+    generic_command = "generic_command"
 
 
 class SOEFException(Exception):
@@ -484,6 +486,7 @@ class SOEFChannel:
             "personality_agent": self._set_personality_piece_handler,
             "set_service_key": self._set_service_key_handler,
             "ping": self._ping_handler,
+            "generic_command": self._generic_command_handler,
         }  # type: Dict[str, Callable]
         data_model_name = service_description.data_model.name
 
@@ -493,9 +496,14 @@ class SOEFChannel:
             )
 
         handler = data_model_handlers[data_model_name]
-        await handler(service_description)
+        await handler(service_description, oef_message, oef_search_dialogue)
 
-    async def _ping_handler(self, service_description: Description) -> None:
+    async def _ping_handler(
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+    ) -> None:
         """
         Perform ping command.
 
@@ -505,6 +513,47 @@ class SOEFChannel:
         """
         self._check_data_model(service_description, ModelNames.ping)
         await self._ping_command()
+
+    async def _generic_command_handler(
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+    ) -> None:
+        """
+        Perform ping command.
+
+        :param service_description: Service description
+
+        :return None
+        """
+        if not self.in_queue:
+            """not connected."""
+            return
+
+        self._check_data_model(service_description, ModelNames.generic_command)
+        command = service_description.values.get("command", None)
+        params = service_description.values.get("parameters", {})
+        if params:
+            params = urllib.parse.parse_qs(params)
+
+        content = await self._generic_oef_command(command, params)
+
+        message = oef_search_dialogue.reply(
+            performative=OefSearchMessage.Performative.SUCCESS,
+            target_message=oef_message,
+            service_description=Description(
+                {"content": content, **service_description.values}
+            ),
+        )
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
+            message=message,
+            context=oef_search_dialogue.envelope_context,
+        )
+        await self.in_queue.put(envelope)
 
     async def _ping_command(self) -> None:
         """Perform ping on registered agent."""
@@ -528,7 +577,12 @@ class SOEFChannel:
                     self.logger.exception("Error on periodic ping command!")
                 await asyncio.sleep(period)
 
-    async def _set_service_key_handler(self, service_description: Description) -> None:
+    async def _set_service_key_handler(
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+    ) -> None:
         """
         Set service key from service description.
 
@@ -585,7 +639,10 @@ class SOEFChannel:
         await self._generic_oef_command("set_service_key", {"key": key, "value": value})
 
     async def _remove_service_key_handler(
-        self, service_description: Description
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
     ) -> None:
         """
         Remove service key from service description.
@@ -611,7 +668,10 @@ class SOEFChannel:
         await self._generic_oef_command("remove_service_key", {"key": key})
 
     async def _register_location_handler(
-        self, service_description: Description
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
     ) -> None:
         """
         Register service with location.
@@ -686,7 +746,10 @@ class SOEFChannel:
         self.agent_location = agent_location
 
     async def _set_personality_piece_handler(
-        self, service_description: Description
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
     ) -> None:
         """
         Set the personality piece.
