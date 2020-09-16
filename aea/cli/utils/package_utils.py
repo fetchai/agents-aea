@@ -258,7 +258,10 @@ def find_item_locally(ctx, item_type, item_public_id) -> Path:
     # check that the configuration file of the found package matches the expected author and version.
     version = item_configuration.version
     author = item_configuration.author
-    if item_public_id.author != author or item_public_id.version != version:
+    if item_public_id.author != author or (
+        not item_public_id.package_version.is_latest
+        and item_public_id.version != version
+    ):
         raise click.ClickException(
             "Cannot find {} with author and version specified.".format(item_type)
         )
