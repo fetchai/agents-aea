@@ -19,13 +19,74 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
+import pickle  # nosec
 from enum import Enum
+from typing import Any, Dict
 
+from aea.exceptions import enforce
 from aea.helpers.search.models import Description as BaseDescription
 from aea.helpers.search.models import Query as BaseQuery
 
 
 Description = BaseDescription
+
+
+class AgentsInfo:
+    """This class represents an instance of AgentsInfo."""
+
+    def __init__(self, body: Dict[str, Dict[str, Any]]):
+        """Initialise an instance of AgentsInfo."""
+        self._body = body
+        self._check_consistency()
+
+    def _check_consistency(self) -> None:
+        """Check consistency of the object."""
+        if self._body is None:
+            raise ValueError("body must not be None")
+        enforce(
+            isinstance(self._body, dict)
+            and all([isinstance(key, str) for key in self._body.keys()])
+            and all([isinstance(value, dict) for value in self._body.values()]),
+            "Body must be dict and keys must be str and values must be dict.",
+        )
+
+    @property
+    def body(self) -> Dict[str, Dict[str, Any]]:
+        """Get the body."""
+        return self._body
+
+    def get_info_for_agent(self, agent_address: str) -> Dict[str, Any]:
+        """Get the info for the agent address."""
+        return self._body.get(agent_address, {})
+
+    @staticmethod
+    def encode(agents_info_protobuf_object, agents_info_object: "AgentsInfo") -> None:
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        The protocol buffer object in the agents_info_protobuf_object argument is matched with the instance of this class in the 'agents_info_object' argument.
+
+        :param agents_info_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param agents_info_object: an instance of this class to be encoded in the protocol buffer object.
+        :return: None
+        """
+        agents_info_bytes = pickle.dumps(agents_info_object)  # nosec
+        agents_info_protobuf_object.agents_info = agents_info_bytes
+
+    @classmethod
+    def decode(cls, agents_info_protobuf_object) -> "AgentsInfo":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class is created that matches the protocol buffer object in the 'agents_info_protobuf_object' argument.
+
+        :param agents_info_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'agents_info_protobuf_object' argument.
+        """
+        agents_info_object = pickle.loads(  # nosec
+            agents_info_protobuf_object.agents_info
+        )
+        return agents_info_object
 
 
 class OefErrorOperation(Enum):

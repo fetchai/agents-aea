@@ -287,6 +287,7 @@ class AEABuilder:
         DecisionMakerHandler
     ] = DefaultDecisionMakerHandler
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
+    DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.just_log
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
@@ -350,6 +351,7 @@ class AEABuilder:
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
+        self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
@@ -438,6 +440,19 @@ class AEABuilder:
         :return: self
         """
         self._skill_exception_policy = skill_exception_policy
+        return self
+
+    def set_connection_exception_policy(
+        self, connection_exception_policy: Optional[ExceptionPolicyEnum]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set skill exception policy.
+
+        :param skill_exception_policy: the policy
+
+        :return: self
+        """
+        self._connection_exception_policy = connection_exception_policy
         return self
 
     def set_default_routing(
@@ -877,6 +892,7 @@ class AEABuilder:
             max_reactions=self._get_max_reactions(),
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
+            connection_exception_policy=self._get_connection_exception_policy(),
             default_routing=self._get_default_routing(),
             default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
@@ -945,6 +961,18 @@ class AEABuilder:
             self._skill_exception_policy
             if self._skill_exception_policy is not None
             else self.DEFAULT_SKILL_EXCEPTION_POLICY
+        )
+
+    def _get_connection_exception_policy(self) -> ExceptionPolicyEnum:
+        """
+        Return the skill exception policy.
+
+        :return: the skill exception policy.
+        """
+        return (
+            self._connection_exception_policy
+            if self._connection_exception_policy is not None
+            else self.DEFAULT_CONNECTION_EXCEPTION_POLICY
         )
 
     def _get_default_routing(self) -> Dict[PublicId, PublicId]:
@@ -1138,6 +1166,10 @@ class AEABuilder:
         if agent_configuration.skill_exception_policy is not None:
             self.set_skill_exception_policy(
                 ExceptionPolicyEnum(agent_configuration.skill_exception_policy)
+            )
+        if agent_configuration.connection_exception_policy is not None:
+            self.set_connection_exception_policy(
+                ExceptionPolicyEnum(agent_configuration.connection_exception_policy)
             )
         self.set_default_routing(agent_configuration.default_routing)
         self.set_loop_mode(agent_configuration.loop_mode)

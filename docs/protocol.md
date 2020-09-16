@@ -117,11 +117,11 @@ msg = DefaultMessage(
 
 Each AEA's `fetchai/error:0.5.0` skill utilises the `fetchai/default:0.5.0` protocol for error handling.
 
-## `fetchai/oef_search:0.5.0` protocol
+## `fetchai/oef_search:0.6.0` protocol
 
-The `fetchai/oef_search:0.5.0` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:0.6.0` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
 
-The `fetchai/oef_search:0.5.0` protocol definition includes an `OefSearchMessage` with the following message types:
+The `fetchai/oef_search:0.6.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ``` python
 class Performative(Enum):
@@ -132,6 +132,7 @@ class Performative(Enum):
     SEARCH_SERVICES = "search_services"
     OEF_ERROR = "oef_error"
     SEARCH_RESULT = "search_result"
+    SUCCESS = "success"
 
     def __str__(self):
         """Get string representation."""
@@ -230,7 +231,7 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The <a href="../simple-oef">SOEF search node</a> will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.5.0`.
+* The <a href="../simple-oef">SOEF search node</a> will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.6.0`.
 
 * If the <a href="../simple-oef">SOEF search node</a> encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 ``` python

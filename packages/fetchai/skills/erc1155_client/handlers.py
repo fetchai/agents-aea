@@ -414,7 +414,7 @@ class ContractApiHandler(Handler):
         self.context.logger.info("received raw message={}".format(contract_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         signing_msg, signing_dialogue = signing_dialogues.create(
-            counterparty="decision_maker",
+            counterparty=self.context.decision_maker_address,
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             raw_message=RawMessage(
                 contract_api_msg.raw_message.ledger_id,

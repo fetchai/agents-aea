@@ -237,6 +237,8 @@ class ProtectedQueue(Queue):
 class DecisionMakerHandler(ABC):
     """This class implements the decision maker."""
 
+    self_address: str = "decision_maker"
+
     def __init__(self, identity: Identity, wallet: Wallet, **kwargs):
         """
         Initialize the decision maker handler.

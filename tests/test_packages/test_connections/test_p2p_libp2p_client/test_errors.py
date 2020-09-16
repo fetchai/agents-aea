@@ -112,15 +112,22 @@ class TestLibp2pClientConnectionNodeDisconnected:
         os.chdir(cls.t)
 
         cls.log_files = []
+        cls.multiplexers = []
 
-        cls.connection_node = _make_libp2p_connection(delegate=True)
-        cls.multiplexer_node = Multiplexer([cls.connection_node])
-        cls.log_files.append(cls.connection_node.node.log_file)
-        cls.multiplexer_node.connect()
+        try:
+            cls.connection_node = _make_libp2p_connection(delegate=True)
+            cls.multiplexer_node = Multiplexer([cls.connection_node])
+            cls.log_files.append(cls.connection_node.node.log_file)
+            cls.multiplexer_node.connect()
+            cls.multiplexers.append(cls.multiplexer_node)
 
-        cls.connection_client = _make_libp2p_client_connection()
-        cls.multiplexer_client = Multiplexer([cls.connection_client])
-        cls.multiplexer_client.connect()
+            cls.connection_client = _make_libp2p_client_connection()
+            cls.multiplexer_client = Multiplexer([cls.connection_client])
+            cls.multiplexer_client.connect()
+            cls.multiplexers.append(cls.multiplexer_client)
+        except Exception:
+            cls.teardown_class()
+            raise
 
     def test_node_disconnected(self):
         assert self.connection_client.is_connected is True
@@ -130,9 +137,8 @@ class TestLibp2pClientConnectionNodeDisconnected:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        cls.multiplexer_client.disconnect()
-        cls.multiplexer_node.disconnect()
-
+        for mux in cls.multiplexers:
+            mux.disconnect()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

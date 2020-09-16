@@ -1,6 +1,6 @@
 name: aries_alice
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 type: skill
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
@@ -17,6 +17,7 @@ contracts: []
 protocols:
 - fetchai/default:0.5.0
 - fetchai/http:0.5.0
+- fetchai/oef_search:0.6.0
 skills: []
 behaviours:
   alice:

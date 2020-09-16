@@ -1296,6 +1296,7 @@ class AgentConfig(PackageConfiguration):
         max_reactions: Optional[int] = None,
         decision_maker_handler: Optional[Dict] = None,
         skill_exception_policy: Optional[str] = None,
+        connection_exception_policy: Optional[str] = None,
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
@@ -1332,7 +1333,9 @@ class AgentConfig(PackageConfiguration):
         self.period: Optional[float] = period
         self.execution_timeout: Optional[float] = execution_timeout
         self.max_reactions: Optional[int] = max_reactions
+
         self.skill_exception_policy: Optional[str] = skill_exception_policy
+        self.connection_exception_policy: Optional[str] = connection_exception_policy
 
         self.decision_maker_handler = (
             decision_maker_handler if decision_maker_handler is not None else {}
@@ -1504,6 +1507,8 @@ class AgentConfig(PackageConfiguration):
             config["decision_maker_handler"] = self.decision_maker_handler
         if self.skill_exception_policy is not None:
             config["skill_exception_policy"] = self.skill_exception_policy
+        if self.connection_exception_policy is not None:
+            config["connection_exception_policy"] = self.skill_exception_policy
         if self.default_routing != {}:
             config["default_routing"] = {
                 str(key): str(value) for key, value in self.default_routing.items()
@@ -1537,6 +1542,9 @@ class AgentConfig(PackageConfiguration):
             max_reactions=cast(int, obj.get("max_reactions")),
             decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),
             skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
+            connection_exception_policy=cast(
+                str, obj.get("connection_exception_policy")
+            ),
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),

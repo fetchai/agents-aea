@@ -203,6 +203,11 @@ class SkillContext:
         return self._get_agent_context().search_service_address
 
     @property
+    def decision_maker_address(self) -> Address:
+        """Get the address of the decision maker."""
+        return self._get_agent_context().decision_maker_address
+
+    @property
     def handlers(self) -> SimpleNamespace:
         """Get handlers of the skill."""
         if self._skill is None:

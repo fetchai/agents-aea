@@ -156,6 +156,13 @@ class TestSkillContext:
             == self.my_aea.context.search_service_address
         )
 
+    def test_decision_maker_address(self):
+        """Test 'decision_maker_address' property getter."""
+        assert (
+            self.skill_context.decision_maker_address
+            == self.my_aea.context.decision_maker_address
+        )
+
     def test_namespace(self):
         """Test the 'namespace' property getter."""
         assert isinstance(self.skill_context.namespace, SimpleNamespace)

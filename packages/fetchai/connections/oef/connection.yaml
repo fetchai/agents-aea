@@ -1,20 +1,20 @@
 name: oef
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 type: connection
 description: The oef connection provides a wrapper around the OEF SDK for connection
   with the OEF search and communication node.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmQmzS13ufkoWdftbGThxU8s8nLkThZugQecFz28n6gRsQ
+  README.md: QmVHWxThR1u9a4BEm89oCxUTPGnN6PznvNgo6oZLqDD3n5
   __init__.py: QmUAen8tmoBHuCerjA3FSGKJRLG6JYyUS3chuWzPxKYzez
-  connection.py: QmUX3ADCaqGp6atsWPgum6S5KD7bqAeRH8wMLYQwp8hFqd
+  connection.py: QmPqX1PuLRx7mUtgxog1cckr9VTD9jDQQXGBaQa5zaf1QJ
   object_translator.py: QmdScfifH8EX472dGUhHin634G4zYS2TLSxSJdSLL9AoAC
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/default:0.5.0
-- fetchai/oef_search:0.5.0
+- fetchai/oef_search:0.6.0
 class_name: OEFConnection
 config:
   addr: 127.0.0.1

@@ -459,7 +459,7 @@ class LedgerApiHandler(Handler):
         if last_msg is None:
             raise ValueError("Could not retrive last outgoing ledger_api_msg.")
         signing_msg, signing_dialogue = signing_dialogues.create(
-            counterparty="decision_maker",
+            counterparty=self.context.decision_maker_address,
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             raw_transaction=ledger_api_msg.raw_transaction,
             terms=last_msg.terms,

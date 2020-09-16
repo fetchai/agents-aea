@@ -115,6 +115,9 @@
     "skill_exception_policy": {
       "$ref": "definitions.json#/definitions/skill_exception_policy"
     },
+    "connection_exception_policy": {
+      "$ref": "definitions.json#/definitions/connection_exception_policy"
+    },
     "default_routing": {
       "type": "object",
       "uniqueItems": true,

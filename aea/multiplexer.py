@@ -22,13 +22,16 @@ import queue
 import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
-from typing import Collection, Dict, List, Optional, Sequence, Tuple, cast
+from contextlib import suppress
+from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
+
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
-from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner, cancel_and_wait
+from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner
+from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger
 from aea.mail.base import (
     AEAConnectionError,
@@ -78,6 +81,7 @@ class AsyncMultiplexer(WithLogger):
         connections: Optional[Sequence[Connection]] = None,
         default_connection_index: int = 0,
         loop: Optional[AbstractEventLoop] = None,
+        exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.just_log,
     ):
         """
         Initialize the connection multiplexer.
@@ -90,6 +94,7 @@ class AsyncMultiplexer(WithLogger):
         :param agent_name: the name of the agent that owns the multiplexer, for logging purposes.
         """
         super().__init__(default_logger)
+        self._exception_policy: ExceptionPolicyEnum = exception_policy
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
@@ -131,6 +136,24 @@ class AsyncMultiplexer(WithLogger):
             )
             for idx, connection in enumerate(connections):
                 self.add_connection(connection, idx == default_connection_index)
+
+    def _handle_exception(self, fn: Callable, exc: Exception) -> None:
+        """
+        Handle exception raised.
+
+        :param fn: a method where it raised .send .connect etc
+        :param exc:  exception
+
+        :return: None.
+        """
+        if self._exception_policy == ExceptionPolicyEnum.just_log:
+            self.logger.exception(f"Exception raised in {fn}")
+        elif self._exception_policy == ExceptionPolicyEnum.propagate:
+            raise exc
+        elif self._exception_policy == ExceptionPolicyEnum.stop_and_exit:
+            self._loop.create_task(AsyncMultiplexer.disconnect(self))
+        else:  # pragma: nocover
+            raise ValueError(f"Unknown exception policy: {self._exception_policy}")
 
     def add_connection(self, connection: Connection, is_default: bool = False) -> None:
         """
@@ -240,16 +263,44 @@ class AsyncMultiplexer(WithLogger):
         async with self._lock:
             if self.connection_status.is_disconnected:
                 self.logger.debug("Multiplexer already disconnected.")
-                await asyncio.wait_for(self._stop(), timeout=60)
                 return
             try:
                 self.connection_status.set(ConnectionStates.disconnecting)
-                await asyncio.wait_for(self._disconnect_all(), timeout=60)
                 await asyncio.wait_for(self._stop(), timeout=60)
                 self.logger.debug("Multiplexer disconnected.")
             except (CancelledError, Exception):
                 self.logger.exception("Exception on disconnect:")
                 raise AEAConnectionError("Failed to disconnect the multiplexer.")
+
+    async def _stop_receive_send_loops(self) -> None:
+        """Stop receive and send loops."""
+        self.logger.debug("Stopping recv loop...")
+        if self._recv_loop_task:
+            self._recv_loop_task.cancel()
+            with suppress(Exception):
+                await self._recv_loop_task
+        self._recv_loop_task = None
+        self.logger.debug("Recv loop stopped.")
+
+        self.logger.debug("Stopping send loop...")
+        if self._send_loop_task:
+            # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing envelopes.
+            await self.out_queue.put(None)
+            self._send_loop_task.cancel()
+            with suppress(Exception):
+                await self._send_loop_task
+
+        self._send_loop_task = None
+        self.logger.debug("Send loop stopped.")
+
+    def _check_and_set_disconnected_state(self) -> None:
+        """Check every connection is disconnected and set disconnected state."""
+        if all([c.is_disconnected for c in self.connections]):
+            self.connection_status.set(ConnectionStates.disconnected)
+        else:
+            raise AEAConnectionError(
+                "Failed to disconnect multiplexer, some connections are not disconnected!"
+            )
 
     async def _stop(self) -> None:
         """
@@ -259,21 +310,10 @@ class AsyncMultiplexer(WithLogger):
         Disconnect every connection.
         """
         self.logger.debug("Stopping multiplexer...")
-        await cancel_and_wait(self._recv_loop_task)
-        self._recv_loop_task = None
 
-        if self._send_loop_task is not None and not self._send_loop_task.done():
-            # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing envelopes.
-            await self.out_queue.put(None)
-            await cancel_and_wait(self._send_loop_task)
-            self._send_loop_task = None
-
-        if all([c.is_disconnected for c in self.connections]):
-            self.connection_status.set(ConnectionStates.disconnected)
-        else:
-            raise AEAConnectionError(
-                "Failed to disconnect multiplexer, some connections are not disconnected!"
-            )
+        await asyncio.wait_for(self._stop_receive_send_loops(), timeout=60)
+        await asyncio.wait_for(self._disconnect_all(), timeout=60)
+        self._check_and_set_disconnected_state()
 
         self.logger.debug("Multiplexer stopped.")
 
@@ -377,7 +417,7 @@ class AsyncMultiplexer(WithLogger):
                 self.logger.error(str(e))
             except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.error("Error in the sending loop: {}".format(str(e)))
-                return
+                raise
 
     async def _receiving_loop(self) -> None:
         """Process incoming envelopes."""
@@ -404,11 +444,10 @@ class AsyncMultiplexer(WithLogger):
                         new_task = asyncio.ensure_future(connection.receive())
                         task_to_connection[new_task] = connection
 
-            except asyncio.CancelledError:
+            except asyncio.CancelledError:  # pragma: nocover
                 self.logger.debug("Receiving loop cancelled.")
                 break
             except Exception as e:  # pylint: disable=broad-except
-                self.logger.error("Error in the receiving loop: {}".format(str(e)))
                 self.logger.exception("Error in the receiving loop: {}".format(str(e)))
                 break
 
@@ -465,8 +504,8 @@ class AsyncMultiplexer(WithLogger):
 
         try:
             await connection.send(envelope)
-        except Exception as e:  # pragma: no cover
-            raise e
+        except Exception as e:  # pylint: disable=broad-except
+            self._handle_exception(self._send, e)
 
     def get(
         self, block: bool = False, timeout: Optional[float] = None
