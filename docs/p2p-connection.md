@@ -134,4 +134,3 @@ The script allows different methods to pass these values to the node:
   ```
 
 Note that the script will always save the configuration of the running node as a file under name `.acn_config` within current working directory. This can be handy to ensure exact same configuration for future runs of the node.
-``` 
