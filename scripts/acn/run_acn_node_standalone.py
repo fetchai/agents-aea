@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -21,7 +19,7 @@
 """ Run an ACN libp2p node without requiring the agents framework """
 
 import os
-import subprocess
+import subprocess  # nosec
 import argparse
 from typing import Dict, List, Optional
 
