@@ -20,8 +20,10 @@
 """Envelopes generation speed for Behaviour act test."""
 import itertools
 import os
+import struct
 import sys
 import time
+
 
 import click
 
@@ -56,7 +58,12 @@ class TestHandler(Handler):
 
     def setup(self) -> None:
         """Noop setup."""
-        self.count = 0  # pylint: disable=attribute-defined-outside-init
+        self.count: int = 0  # pylint: disable=attribute-defined-outside-init
+        self.rtt_total_time: float = 0.0  # pylint: disable=attribute-defined-outside-init
+        self.rtt_count: int = 0  # pylint: disable=attribute-defined-outside-init
+
+        self.latency_total_time: float = 0.0  # pylint: disable=attribute-defined-outside-init
+        self.latency_count: int = 0  # pylint: disable=attribute-defined-outside-init
 
     def teardown(self) -> None:
         """Noop teardown."""
@@ -64,7 +71,36 @@ class TestHandler(Handler):
     def handle(self, message: Message) -> None:
         """Handle incoming message."""
         self.count += 1
-        self.context.outbox.put(make_envelope(message.to, message.sender))
+
+        if message.dialogue_reference[0] != "":
+            rtt_ts, latency_ts = struct.unpack("dd", message.content)  # type: ignore
+            if message.dialogue_reference[0] == self.context.agent_address:
+                self.rtt_total_time += time.time() - rtt_ts
+                self.rtt_count += 1
+
+            self.latency_total_time += time.time() - latency_ts
+            self.latency_count += 1
+
+        if message.dialogue_reference[0] in ["", self.context.agent_address]:
+            # create new
+            response_msg = DefaultMessage(
+                dialogue_reference=(self.context.agent_address, ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=struct.pack("dd", time.time(), time.time()),
+            )
+        else:
+            # update ttfb copy rtt
+            response_msg = DefaultMessage(
+                dialogue_reference=message.dialogue_reference,
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=struct.pack("dd", rtt_ts, time.time()),  # type: ignore
+            )
+
+        self.context.outbox.put(make_envelope(message.to, message.sender, response_msg))
 
 
 def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
@@ -114,10 +150,26 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     total_messages = sum([skill.handlers["test"].count for skill in skills])
     rate = total_messages / duration
 
+    rtt_total_time = sum([skill.handlers["test"].rtt_total_time for skill in skills])
+    rtt_count = sum([skill.handlers["test"].rtt_count for skill in skills])
+
+    if rtt_count == 0:
+        rtt_count = -1
+
+    latency_total_time = sum(
+        [skill.handlers["test"].latency_total_time for skill in skills]
+    )
+    latency_count = sum([skill.handlers["test"].latency_count for skill in skills])
+
+    if latency_count == 0:
+        latency_count = -1
+
     return [
         ("Total Messages handled", total_messages),
         ("Messages rate(envelopes/second)", rate),
         ("Mem usage(Mb)", mem_usage),
+        ("RTT (ms)", rtt_total_time / rtt_count),
+        ("Latency (ms)", latency_total_time / latency_count),
     ]
 
 
