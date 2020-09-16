@@ -623,6 +623,7 @@ def test_agent_config_to_json_with_optional_configurations():
         max_reactions=100,
         decision_maker_handler=dict(dotted_path="", file_path=""),
         skill_exception_policy="propagate",
+        connection_exception_policy="propagate",
         default_routing={"author/name:0.1.0": "author/name:0.1.0"},
         loop_mode="sync",
         runtime_mode="async",
