@@ -148,7 +148,6 @@ def test_send_signed_transaction_serialization():
 
 def test_get_transaction_receipt_serialization():
     """Test the serialization for 'get_transaction_receipt' speech-act works."""
-    pytest.skip("This test fails. Investigate!")
     msg = LedgerApiMessage(
         message_id=2,
         target=1,
@@ -245,7 +244,6 @@ def test_raw_transaction_serialization():
 
 def test_transaction_digest_serialization():
     """Test the serialization for 'transaction_digest' speech-act works."""
-    pytest.skip("This test fails. Investigate!")
     msg = LedgerApiMessage(
         message_id=2,
         target=1,
@@ -279,7 +277,6 @@ def test_transaction_digest_serialization():
 
 def test_transaction_receipt_serialization():
     """Test the serialization for 'transaction_receipt' speech-act works."""
-    pytest.skip("This test fails. Investigate!")
     msg = LedgerApiMessage(
         message_id=2,
         target=1,

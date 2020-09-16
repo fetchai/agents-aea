@@ -46,7 +46,6 @@ logger = logging.getLogger(__name__)
 
 def test_get_deploy_transaction_serialization():
     """Test the serialization for 'get_deploy_transaction' speech-act works."""
-    pytest.skip("This test fails. Investigate!")
     kwargs_arg = ContractApiMessage.Kwargs({"key_1": 1, "key_2": 2})
     msg = ContractApiMessage(
         message_id=1,
@@ -83,7 +82,6 @@ def test_get_deploy_transaction_serialization():
 
 def test_get_raw_transaction_serialization():
     """Test the serialization for 'get_raw_transaction' speech-act works."""
-    pytest.skip("This test fails. Investigate!")
     kwargs_arg = ContractApiMessage.Kwargs({"key_1": 1, "key_2": 2})
     msg = ContractApiMessage(
         message_id=1,
@@ -121,7 +119,6 @@ def test_get_raw_transaction_serialization():
 
 def test_get_raw_message_serialization():
     """Test the serialization for 'get_raw_message' speech-act works."""
-    pytest.skip("This test fails. Investigate!")
     kwargs_arg = ContractApiMessage.Kwargs({"key_1": 1, "key_2": 2})
     msg = ContractApiMessage(
         message_id=1,
@@ -159,7 +156,6 @@ def test_get_raw_message_serialization():
 
 def test_get_state_serialization():
     """Test the serialization for 'get_state' speech-act works."""
-    pytest.skip("This test fails. Investigate!")
     kwargs_arg = ContractApiMessage.Kwargs({"key_1": 1, "key_2": 2})
     msg = ContractApiMessage(
         message_id=1,
@@ -197,7 +193,6 @@ def test_get_state_serialization():
 
 def test_state_serialization():
     """Test the serialization for 'state' speech-act works."""
-    pytest.skip("This test fails. Investigate!")
     state_arg = ContractApiMessage.State("some_ledger_id", b"some_body")
     msg = ContractApiMessage(
         message_id=1,
