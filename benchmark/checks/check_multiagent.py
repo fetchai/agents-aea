@@ -45,10 +45,10 @@ from benchmark.checks.utils import make_skill, wait_for_condition
 ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")
 sys.path.append(ROOT_PATH)
 
-from packages.fetchai.connections.local.connection import (  # pylint: disable=C0413
+from packages.fetchai.connections.local.connection import (  # noqa: E402 # pylint: disable=C0413
     LocalNode,
     OEFLocalConnection,
-)  # noqa:  E402
+)
 
 
 class TestHandler(Handler):
