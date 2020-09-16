@@ -18,18 +18,19 @@
 # ------------------------------------------------------------------------------
 """ Run an ACN libp2p node without requiring the agents framework """
 
+import argparse
 import os
 import subprocess  # nosec
-import argparse
+from binascii import unhexlify
 from typing import Dict, List, Optional
 
-# needed only if checks are enabled
-from binascii import unhexlify
+# following imports needed only if checks are enabled
 
-# needed only if checks are enabled
-from multihash import decode as multihashdecode  # type: ignore
-from ecdsa import SigningKey, curves
 from base58 import b58decode
+
+from ecdsa import SigningKey, curves
+
+from multihash import decode as multihashdecode  # type: ignore
 
 
 class AcnNodeConfig:

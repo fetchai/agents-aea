@@ -102,7 +102,7 @@ Next, to run the node binary in standalone mode, it requires values for the foll
 - `AEA_P2P_URI`: the local host and port to use by node
 - `AEA_P2P_URI_PUBLIC`: the URI under which the peer is reachable publicly
 - `AEA_P2P_DELEGATE_URI`: the URI under which the peer receives delegate connections
-- `AEA_P2P_ENTRY_URIS`: an optionally supplied list of entry Multiaddresses for the peer to bootstrap
+- `AEA_P2P_ENTRY_URIS`: an optionally supplied list of entry Multiaddresses for the peer to bootstrap, comma-separated (`,`)
 
 The script allows different methods to pass these values to the node:
 
@@ -116,19 +116,21 @@ The script allows different methods to pass these values to the node:
   ```
   or
   ``` bash
-  docker run -v $(pwd)/<acn_config_file>:/acn/acn_config -it acn_node_standalone --config-from-file /acn/acn_config
+  docker run -v <acn_config_file>:/acn/acn_config -it acn_node_standalone --config-from-file /acn/acn_config
   ```
 - using command line arguments as follow
   ``` bash
   python3 run_acn_node_standalone.py libp2p_node --key-file <node_private_key.txt> \
     --uri <AEA_P2P_URI> --uri-external <AEA_P2P_URI_PUBLIC>  \
-    --uri-delegate <AEA_P2P_DELEGATE_URI> --entry-peers-maddrs <AEA_P2P_ENTRY_URIS>
+    --uri-delegate <AEA_P2P_DELEGATE_URI> \
+    --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
   ```
   or 
   ``` bash
-  docker run -v $(pwd)/<node_private_key.txt>:/acn/key.txt -it acn_node_standalone --key-file /acn/key.txt \
+  docker run -v <node_private_key.txt>:/acn/key.txt -it acn_node_standalone --key-file /acn/key.txt \
     --uri <AEA_P2P_URI> --uri-external <AEA_P2P_URI_PUBLIC>  \
-    --uri-delegate <AEA_P2P_DELEGATE_URI> --entry-peers-maddrs <AEA_P2P_ENTRY_URIS>
+    --uri-delegate <AEA_P2P_DELEGATE_URI> \
+    --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
   ```
 
 Note that the script will always save the configuration of the running node as a file under name `.acn_config` within current working directory. This can be handy to ensure exact same configuration for future runs of the node.
