@@ -314,7 +314,7 @@ def test_incorrect_message(mocked_enforce):
 
 
 def test_agent_info():
-    """Test that we raise an exception when the fipa message is incorrect."""
+    """Test the agent_info custom type."""
     agents_info = OefSearchMessage.AgentsInfo(
         {
             "agent_address_1": {"key_1": b"value_1", "key_2": b"value_2"},

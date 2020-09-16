@@ -406,6 +406,16 @@ def test_incorrect_message(mocked_enforce):
         mock_logger.assert_any_call("some error")
 
 
+def test_kwargs():
+    """Test the kwargs custom type."""
+    body = {"key_1": 1, "key_2": 2}
+    kwargs = ContractApiMessage.Kwargs(body)
+    assert str(kwargs) == "Kwargs: body={}".format(body)
+
+    with pytest.raises(ValueError, match="body must not be None"):
+        ContractApiMessage.Kwargs(None)
+
+
 class TestDialogues:
     """Tests contract_api dialogues."""
 
