@@ -7,6 +7,7 @@ description: The tac participation skill implements the logic for an AEA to part
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
+  README.md: QmdkaVMzDMpqeEeXEpe16NtZUrAsz5KbZSW3kaPJ89KfKy
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmX3UbuLohnPSLM2W6LrWcZyo4zXCr1YN5Bznu61v27SZC
   dialogues.py: QmZrJ1d9mhtfkxRg5QfsKbbtVZFa6cKna4anRWHvzNTEdD
