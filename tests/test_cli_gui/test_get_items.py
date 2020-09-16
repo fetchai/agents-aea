@@ -34,7 +34,7 @@ class GetRegisteredItemsTestCase(TestCase):
 
     @mock.patch("aea.cli_gui.cli_setup_search_ctx")
     @mock.patch(
-        "aea.cli_gui.cli_search_items", return_value=[{"name": "some-connection"}]
+        "aea.cli_gui.cli_search_items", return_value=([{"name": "some-connection"}], 1)
     )
     def test_get_registered_items_positive(
         self, cli_setup_search_ctx_mock, cli_search_items_mock

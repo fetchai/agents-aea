@@ -517,6 +517,143 @@ class TestDialogues:
             == buyer_dialogue.dialogue_label.dialogue_reference[0]
         ), "Dialogue refernce changed unexpectedly."
 
+    def test_counter_proposing(self):
+        """Test that fipa supports counter proposing."""
+        cfp_msg, buyer_dialogue = self.buyer_dialogues.create(
+            counterparty=self.seller_addr,
+            performative=FipaMessage.Performative.CFP,
+            query=Query([Constraint("something", ConstraintType(">", 1))]),
+        )
+
+        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing message."
+        assert len(buyer_dialogue._incoming_messages) == 0, "Some incoming messages."
+        assert (
+            buyer_dialogue.last_outgoing_message == cfp_msg
+        ), "wrong outgoing message in buyer dialogue after sending cfp."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[1] == ""
+        ), "Dialogue reference incorrect."
+        dialogue_reference_left_part = buyer_dialogue.dialogue_label.dialogue_reference[
+            0
+        ]
+
+        # cfp arrives at seller
+
+        seller_dialogue = self.seller_dialogues.update(cfp_msg)
+
+        assert len(seller_dialogue._outgoing_messages) == 0, "Some outgoing message."
+        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
+        assert (
+            seller_dialogue.last_incoming_message == cfp_msg
+        ), "wrong incoming message in seller dialogue after receiving cfp."
+        assert (
+            seller_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            seller_dialogue.dialogue_label.dialogue_reference[1] != ""
+        ), "Dialogue reference incorrect."
+
+        # seller creates proposal
+        proposal_msg = seller_dialogue.reply(
+            target_message=cfp_msg,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=Description({"foo1": 1, "bar1": 2}),
+        )
+
+        assert len(seller_dialogue._outgoing_messages) == 1, "No outgoing messages."
+        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
+        assert (
+            seller_dialogue.last_outgoing_message == proposal_msg
+        ), "wrong outgoing message in seller dialogue after sending proposal."
+
+        # proposal arrives at buyer
+
+        buyer_dialogue = self.buyer_dialogues.update(proposal_msg)
+
+        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing messages."
+        assert len(buyer_dialogue._incoming_messages) == 1, "No incoming messages."
+        assert (
+            buyer_dialogue.last_incoming_message == proposal_msg
+        ), "wrong incoming message in buyer dialogue after receiving proposal."
+        assert (
+            buyer_dialogue.last_incoming_message == proposal_msg
+        ), "Wrong incoming message."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[1] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            dialogue_reference_left_part
+            == buyer_dialogue.dialogue_label.dialogue_reference[0]
+        ), "Dialogue refernce changed unexpectedly."
+
+        # buyer creates counter proposal 1
+        counter_proposal_msg_1 = buyer_dialogue.reply(
+            target_message=proposal_msg,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=Description({"foo1": 3, "bar1": 3}),
+        )
+
+        assert (
+            len(buyer_dialogue._outgoing_messages) == 2
+        ), "incorrect number of outgoing_messages in buyer dialogue after sending counter-proposal 1."
+        assert (
+            len(buyer_dialogue._incoming_messages) == 1
+        ), "incorrect number of incoming_messages in buyer dialogue after sending counter-proposal 1."
+        assert (
+            buyer_dialogue.last_outgoing_message == counter_proposal_msg_1
+        ), "wrong outgoing message in buyer dialogue after sending counter-proposal 1."
+
+        # counter-proposal 1 arrives at seller
+
+        seller_dialogue = self.seller_dialogues.update(counter_proposal_msg_1)
+
+        assert (
+            len(seller_dialogue._outgoing_messages) == 1
+        ), "incorrect number of outgoing_messages in seller dialogue after receiving counter-proposal 1."
+        assert (
+            len(seller_dialogue._incoming_messages) == 2
+        ), "incorrect number of incoming_messages in seller dialogue after receiving counter-proposal 1."
+        assert (
+            seller_dialogue.last_incoming_message == counter_proposal_msg_1
+        ), "wrong incoming message in seller dialogue after receiving counter-proposal 1."
+
+        # seller creates counter-proposal 2
+        counter_proposal_msg_2 = seller_dialogue.reply(
+            target_message=counter_proposal_msg_1,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=Description({"foo1": 2, "bar1": 2}),
+        )
+
+        assert (
+            len(seller_dialogue._outgoing_messages) == 2
+        ), "incorrect number of outgoing_messages in seller dialogue after sending counter-proposal 2."
+        assert (
+            len(seller_dialogue._incoming_messages) == 2
+        ), "incorrect number of incoming_messages in seller dialogue after sending counter-proposal 2."
+        assert (
+            seller_dialogue.last_outgoing_message == counter_proposal_msg_2
+        ), "wrong outgoing message in seller dialogue after sending counter-proposal 2."
+
+        # counter-proposal 2 arrives at buyer
+
+        buyer_dialogue = self.buyer_dialogues.update(counter_proposal_msg_2)
+
+        assert (
+            len(buyer_dialogue._outgoing_messages) == 2
+        ), "incorrect number of outgoing_messages in buyer dialogue after receiving counter-proposal 2."
+        assert (
+            len(buyer_dialogue._incoming_messages) == 2
+        ), "incorrect number of incoming_messages in buyer dialogue after receiving counter-proposal 2."
+        assert (
+            buyer_dialogue.last_incoming_message == counter_proposal_msg_2
+        ), "wrong incoming message in buyer dialogue after receiving counter-proposal 2."
+
 
 class BuyerDialogue(FipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""

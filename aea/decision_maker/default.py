@@ -24,6 +24,7 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, cast
 
+from aea.common import Address
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
 from aea.decision_maker.base import OwnershipState as BaseOwnershipState
@@ -35,7 +36,7 @@ from aea.helpers.preference_representations.base import (
 )
 from aea.helpers.transaction.base import SignedMessage, SignedTransaction, Terms
 from aea.identity.base import Identity
-from aea.protocols.base import Address, Message
+from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.signing.dialogues import SigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
@@ -59,11 +60,11 @@ logger = logging.getLogger(__name__)
 class SigningDialogues(BaseSigningDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
 
@@ -80,7 +81,7 @@ class SigningDialogues(BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            self_address="decision_maker",
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
@@ -89,11 +90,11 @@ class SigningDialogues(BaseSigningDialogues):
 class StateUpdateDialogues(BaseStateUpdateDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs) -> None:
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
+        :param self_address: the address of the entity for whom dialogues are maintained
         :return: None
         """
 
@@ -110,7 +111,7 @@ class StateUpdateDialogues(BaseStateUpdateDialogues):
 
         BaseStateUpdateDialogues.__init__(
             self,
-            self_address="decision_maker",
+            self_address=self_address,
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
@@ -568,8 +569,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         super().__init__(
             identity=identity, wallet=wallet, **kwargs,
         )
-        self.signing_dialogues = SigningDialogues()
-        self.state_update_dialogues = StateUpdateDialogues()
+        self.signing_dialogues = SigningDialogues(self.self_address)
+        self.state_update_dialogues = StateUpdateDialogues(self.self_address)
 
     def handle(self, message: Message) -> None:
         """

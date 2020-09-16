@@ -1,21 +1,23 @@
 
-Message routing can be split up into the routing of incoming and outgoing messages.
+Message routing can be split up into the routing of incoming and outgoing `Messages`.
 
-# Incoming messages
+## Incoming `Messages`
 
-- connections receive envelopes which they deposit in inbox
-- agent loop's react picks envelopes off the inbox
-- tries to decode the message; errors are handled by the error skill
-- messages are dispatched to all relevant handlers
+- `Connections` receive `Envelopes` which they deposit in `InBox`
+- `AgentLoop`'s react picks `Envelopes` off the `InBox`
+- the AEA tries to decode the message; errors are handled by the error `Skill`
+- `Messages` are dispatched to all relevant `Handlers`. To limit dispatch to a specific `Handler` in a specific `Skill` the `EnvelopeContext` can be used to reference a unique `skill id`.
 
-# Outgoing messages
+## Outgoing `Messages`
 
-- skills deposit messages in outbox
-- outbox constructs an envelope from the message
+- `Skills` deposit `Messages` in `OutBox`
+- `OutBox` constructs an `Envelope` from the `Message`
+- `Multiplexer` assigns messages to relevant `Connection` based on three rules:
+1. checks if `EnvelopeContext` exists and specifies a `Connection`, if so uses that else
+2. checks if default routing is specified for the `protocol_id` referenced in the `Envelope`, if so uses that else
+3. sends to default `Connection`.
+- `Connections` can encode envelopes where necessary or pass them on for transport to another agent
 
-- multiplexer assigns messages to relevant connection based on three rules:
-1. checks if envelope context exists and uses that
-2. checks if default routing applies
-3. sends to default connection
+## Address fields in `Envelopes`/`Messages`
 
-- connections can encode envelopes where necessary
+Addresses can reference agents or components within an agent. If the address references an agent then it must follow the address standard of agents. If the address references a component then it must be a public id.

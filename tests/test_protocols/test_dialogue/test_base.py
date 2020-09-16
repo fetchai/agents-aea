@@ -1244,6 +1244,24 @@ class TestDialoguesBase:
 
         assert len(self.own_dialogues.dialogues) == 0
 
+    def test_update_negative_no_matching_to(self):
+        """Negative test for the 'update' method: the 'to' field of the input message does not match self address."""
+        invalid_message_1_by_other = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        invalid_message_1_by_other.to = self.agent_address + "wrong_stuff"
+        invalid_message_1_by_other.sender = self.opponent_address
+
+        assert len(self.own_dialogues.dialogues) == 0
+
+        with pytest.raises(AEAEnforceError) as cm:
+            self.own_dialogues.update(invalid_message_1_by_other)
+        assert str(cm.value) == "Message to and dialogue self address do not match."
+
+        assert len(self.own_dialogues.dialogues) == 0
+
     def test_update_negative_invalid_message(self):
         """Negative test for the 'update' method: the message is invalid."""
         invalid_message_1_by_other = DefaultMessage(

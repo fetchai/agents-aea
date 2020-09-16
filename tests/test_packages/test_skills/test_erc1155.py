@@ -58,7 +58,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         default_routing = {
             "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.4.0",
             "fetchai/contract_api:0.3.0": "fetchai/ledger:0.4.0",
-            "fetchai/oef_search:0.5.0": "fetchai/soef:0.7.0",
+            "fetchai/oef_search:0.6.0": "fetchai/soef:0.8.0",
         }
 
         # generate random location
@@ -71,12 +71,12 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_agent_context(deploy_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
-        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_deploy:0.12.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.13.0")
 
         diff = self.difference_to_fetched_agent(
             "fetchai/erc1155_deployer:0.12.0", deploy_aea_name
@@ -115,12 +115,12 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_agent_context(client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
         self.add_item("connection", "fetchai/ledger:0.4.0")
-        self.add_item("connection", "fetchai/soef:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.8.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.11.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.12.0")
 
         diff = self.difference_to_fetched_agent(
             "fetchai/erc1155_client:0.12.0", client_aea_name
