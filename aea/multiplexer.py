@@ -16,13 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Module for the multiplexer class and related classes."""
 import asyncio
 import queue
 import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
+from contextlib import suppress
 from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 
@@ -30,7 +30,7 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
-from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner, cancel_and_wait
+from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger
 from aea.mail.base import (
@@ -263,16 +263,44 @@ class AsyncMultiplexer(WithLogger):
         async with self._lock:
             if self.connection_status.is_disconnected:
                 self.logger.debug("Multiplexer already disconnected.")
-                await asyncio.wait_for(self._stop(), timeout=60)
                 return
             try:
                 self.connection_status.set(ConnectionStates.disconnecting)
-                await asyncio.wait_for(self._disconnect_all(), timeout=60)
                 await asyncio.wait_for(self._stop(), timeout=60)
                 self.logger.debug("Multiplexer disconnected.")
             except (CancelledError, Exception):
                 self.logger.exception("Exception on disconnect:")
                 raise AEAConnectionError("Failed to disconnect the multiplexer.")
+
+    async def _stop_receive_send_loops(self) -> None:
+        """Stop receive and send loops."""
+        self.logger.debug("Stopping recv loop...")
+        if self._recv_loop_task:
+            self._recv_loop_task.cancel()
+            with suppress(Exception):
+                await self._recv_loop_task
+        self._recv_loop_task = None
+        self.logger.debug("Recv loop stopped.")
+
+        self.logger.debug("Stopping send loop...")
+        if self._send_loop_task:
+            # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing envelopes.
+            await self.out_queue.put(None)
+            self._send_loop_task.cancel()
+            with suppress(Exception):
+                await self._send_loop_task
+
+        self._send_loop_task = None
+        self.logger.debug("Send loop stopped.")
+
+    def _check_and_set_disconnected_state(self) -> None:
+        """Check every connection is disconnected and set disconnected state."""
+        if all([c.is_disconnected for c in self.connections]):
+            self.connection_status.set(ConnectionStates.disconnected)
+        else:
+            raise AEAConnectionError(
+                "Failed to disconnect multiplexer, some connections are not disconnected!"
+            )
 
     async def _stop(self) -> None:
         """
@@ -282,21 +310,10 @@ class AsyncMultiplexer(WithLogger):
         Disconnect every connection.
         """
         self.logger.debug("Stopping multiplexer...")
-        await cancel_and_wait(self._recv_loop_task)
-        self._recv_loop_task = None
 
-        if self._send_loop_task is not None and not self._send_loop_task.done():
-            # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing envelopes.
-            await self.out_queue.put(None)
-            await cancel_and_wait(self._send_loop_task)
-            self._send_loop_task = None
-
-        if all([c.is_disconnected for c in self.connections]):
-            self.connection_status.set(ConnectionStates.disconnected)
-        else:
-            raise AEAConnectionError(
-                "Failed to disconnect multiplexer, some connections are not disconnected!"
-            )
+        await asyncio.wait_for(self._stop_receive_send_loops(), timeout=60)
+        await asyncio.wait_for(self._disconnect_all(), timeout=60)
+        self._check_and_set_disconnected_state()
 
         self.logger.debug("Multiplexer stopped.")
 
