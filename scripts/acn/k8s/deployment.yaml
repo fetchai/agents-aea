@@ -1,0 +1,78 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: deployment-name-here
+  namespace: agents-p2p-dht
+  labels:
+    app: deployment-name-here
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deployment-name-here 
+  template:
+    metadata:
+      labels:
+        app: deployment-name-here
+
+    spec:
+      initContainers:
+      - name: check-entry-peer
+        image: subfuzion/netcat
+        command: ['sh', '-c', 
+          'if [ -z "${LATEST_ENTRY_PEER_HOST}" ]; then exit 0; fi; until nc -w 2 -zv ${LATEST_ENTRY_PEER_HOST} ${LATEST_ENTRY_PEER_PORT}; do echo waiting for ${LATEST_ENTRY_PEER_HOST}:${LATEST_ENTRY_PEER_PORT} ; sleep 2; done;']
+        env:
+          - name: LATEST_ENTRY_PEER_HOST
+            value: latest-entry-peer-host-here
+          - name: LATEST_ENTRY_PEER_PORT
+            value: latest-entry-peer-port-here
+     
+      containers:
+      - image: gcr-image-with-tag-here
+        name: agents-p2p-dht
+        ports:
+        - containerPort: node-port-number-here
+        - containerPort: node-delegate-port-number-here
+
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "150m"
+          limits:
+            memory: "4000Mi"
+            cpu: "2000m"
+        
+        env:
+          - name: AEA_P2P_ID
+            valueFrom:
+              secretKeyRef:
+                name: node-priv-key-name-here
+                key: priv-key
+          - name: AEA_P2P_URI_PUBLIC
+            value: node-public-uri-here
+          - name: AEA_P2P_URI
+            value: node-local-uri-here
+          - name: AEA_P2P_DELEGATE_URI
+            value: node-delegate-uri-here
+          - name: AEA_P2P_ENTRY_URIS
+            value: node-entry-peers-list-here
+
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: deployment-name-here
+  namespace: agents-p2p-dht
+spec:
+  selector:
+    app: deployment-name-here
+  ports:
+    - name: libp2p 
+      protocol: TCP
+      port: node-port-number-here
+      targetPort: node-port-number-here
+    - name: tcp
+      protocol: TCP
+      port: node-delegate-port-number-here
+      targetPort: node-delegate-port-number-here
