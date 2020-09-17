@@ -48,7 +48,7 @@ from packages.fetchai.skills.erc1155_deploy.dialogues import (
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.4.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.5.0"
 
 
 class FipaHandler(Handler):
@@ -472,7 +472,7 @@ class ContractApiHandler(Handler):
         self.context.logger.info("received raw transaction={}".format(contract_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         signing_msg, signing_dialogue = signing_dialogues.create(
-            counterparty="decision_maker",
+            counterparty=self.context.decision_maker_address,
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             raw_transaction=contract_api_msg.raw_transaction,
             terms=contract_api_dialogue.terms,

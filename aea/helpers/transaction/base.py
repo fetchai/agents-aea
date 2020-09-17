@@ -365,7 +365,7 @@ class State:
         :return: None
         """
         state_bytes = pickle.dumps(state_object)  # nosec
-        state_protobuf_object.state_bytes = state_bytes
+        state_protobuf_object.state = state_bytes
 
     @classmethod
     def decode(cls, state_protobuf_object) -> "State":
@@ -377,7 +377,7 @@ class State:
         :param state_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'state_protobuf_object' argument.
         """
-        state = pickle.loads(state_protobuf_object.state_bytes)  # nosec
+        state = pickle.loads(state_protobuf_object.state)  # nosec
         return state
 
     def __eq__(self, other):
@@ -895,9 +895,7 @@ class TransactionDigest:
         :return: None
         """
         transaction_digest_bytes = pickle.dumps(transaction_digest_object)  # nosec
-        transaction_digest_protobuf_object.transaction_digest_bytes = (
-            transaction_digest_bytes
-        )
+        transaction_digest_protobuf_object.transaction_digest = transaction_digest_bytes
 
     @classmethod
     def decode(cls, transaction_digest_protobuf_object) -> "TransactionDigest":
@@ -910,7 +908,7 @@ class TransactionDigest:
         :return: A new instance of this class that matches the protocol buffer object in the 'transaction_digest_protobuf_object' argument.
         """
         transaction_digest = pickle.loads(  # nosec
-            transaction_digest_protobuf_object.transaction_digest_bytes
+            transaction_digest_protobuf_object.transaction_digest
         )
         return transaction_digest
 
@@ -973,7 +971,7 @@ class TransactionReceipt:
         :return: None
         """
         transaction_receipt_bytes = pickle.dumps(transaction_receipt_object)  # nosec
-        transaction_receipt_protobuf_object.transaction_receipt_bytes = (
+        transaction_receipt_protobuf_object.transaction_receipt = (
             transaction_receipt_bytes
         )
 
@@ -988,7 +986,7 @@ class TransactionReceipt:
         :return: A new instance of this class that matches the protocol buffer object in the 'transaction_receipt_protobuf_object' argument.
         """
         transaction_receipt = pickle.loads(  # nosec
-            transaction_receipt_protobuf_object.transaction_receipt_bytes
+            transaction_receipt_protobuf_object.transaction_receipt
         )
         return transaction_receipt
 

@@ -1,4 +1,4 @@
-The AEA framework consists of several core elements, some which are required to run an AEA and others which are optional.
+The AEA framework consists of several core elements, some of which are required to run an AEA and others which are optional.
 
 ## The advanced elements AEAs use
 
@@ -8,7 +8,7 @@ In <a href="../core-components-1">Core Components - Part 1</a> we discussed the 
 
 <img src="../assets/decision-maker.png" alt="Decision Maker of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
-The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of like a wallet manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component which has access to the wallet's private keys.
+The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of as a `Wallet` manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component which has access to the `Wallet`'s private keys.
 
 You can learn more about the decision maker <a href="../decision-maker">here</a>. In the simplest form, it acts like a `Handler` with a `Wallet`.
 
@@ -20,7 +20,7 @@ The <a href="../api/crypto/wallet#wallet-objects">`Wallet`</a> contains the priv
 
 The <a href="../api/identity/base#identity-objects">`Identity`</a> is an abstraction that represents the identity of an AEA in the Open Economic Framework, backed by public-key cryptography. It contains the AEA's addresses as well as its name.
 
-The identity can be accessed in a skill via the <a href="../api/context/base#agentcontext-objects">agent context</a>.
+The identity can be accessed in a `Skill` via the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>.
 
 ## Optional elements AEAs use
 
@@ -28,11 +28,11 @@ The identity can be accessed in a skill via the <a href="../api/context/base#age
 
 <img src="../assets/contracts.png" alt="Contracts of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
-<a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract. They expose an API to abstract implementation specifics of the ABI from the skills.
+<a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract. They expose an API to abstract implementation specifics of the ABI from the `Skills`.
 
-Contracts usually contain the logic to create contract transactions.
+`Contracts` usually contain the logic to create contract transactions.
 
-Contracts can be added as packages. For more details on contracts also read the contract guide <a href="../contract">here</a>.
+`Contracts` can be added as packages. For more details on `Contracts` also read the `Contract` guide <a href="../contract">here</a>.
 
 ## Putting it together
 
@@ -50,12 +50,12 @@ We recommend you continue with the next step in the 'Getting Started' series:
 
 ### Relevant deep-dives
 
-Understanding the decision maker is vital to developing a goal oriented and crypto-economically safe AEA. You can learn more about the decision maker in the following section:
+Understanding the decision maker is vital to developing a goal oriented and crypto-economically safe AEA. You can learn more about the `DecisionMaker` in the following section:
 
 - <a href="../decision-maker">Decision Maker</a>
 
 
-Understanding contracts is important when developing AEAs that make commitments or use smart contracts for other aims. You can learn more about the contracts agents use in the following section:
+Understanding `Contracts` is important when developing AEAs that make commitments or use smart contracts for other aims. You can learn more about the `Contracts` agents use in the following section:
 
 - <a href="../contract">Contracts</a>
 

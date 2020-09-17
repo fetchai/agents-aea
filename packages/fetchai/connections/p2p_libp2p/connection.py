@@ -60,7 +60,7 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.8.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.9.0")
 
 MultiAddr = str
 
@@ -279,7 +279,7 @@ class Libp2pNode:
             node_log = f.read()
         if returncode != 0:
             raise Exception(
-                "Error while downloading golang dependencies and building it: {},\n{}".format(
+                "Error while downloading golang dependencies and building it: {}\n{}".format(
                     returncode, node_log
                 )
             )

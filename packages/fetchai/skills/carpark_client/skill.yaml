@@ -1,12 +1,13 @@
 name: carpark_client
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 type: skill
 description: The carpark client skill implements the functionality to run a client
   for carpark data.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
+  README.md: QmeypYUvYR61ZD7qWQmeMnGq3ior9dQ6uuRpAduws65rFG
   __init__.py: QmPZ4bRmXpsDKD7ogCJHEMrtm67hpA5aqxvujgfQD1PtMd
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
   dialogues.py: QmcMynppu7B2nZR21LzxFQMpoRdegpWpwcXti2ba4Vcei5
@@ -18,9 +19,9 @@ protocols:
 - fetchai/default:0.5.0
 - fetchai/fipa:0.6.0
 - fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.5.0
+- fetchai/oef_search:0.6.0
 skills:
-- fetchai/generic_buyer:0.10.0
+- fetchai/generic_buyer:0.11.0
 behaviours:
   search:
     args:

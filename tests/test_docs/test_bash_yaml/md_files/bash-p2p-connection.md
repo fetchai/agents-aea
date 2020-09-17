@@ -1,58 +1,49 @@
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
-aea run --connections fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
+aea run --connections fetchai/p2p_libp2p:0.9.0
 ```
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.9.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
 ```
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.8.0
+aea run --connections fetchai/p2p_libp2p:0.9.0
 ```
-``` bash
-aea fetch fetchai/weather_station:0.11.0
-aea fetch fetchai/weather_client:0.11.0
-```
-``` bash
-aea add connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-``` bash
-aea run --connections "fetchai/p2p_libp2p:0.8.0,fetchai/oef:0.8.0"
-```
-``` bash
-My libp2p addresses: ...
-```
-``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt
-```
-``` bash
-aea generate-wealth fetchai
-```
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages/fetchai/connections/p2p_libp2p
-cd p2p_libp2p
-```
-``` bash
-go build
-```
-``` bash
-aea run --connections "fetchai/p2p_libp2p:0.8.0,fetchai/oef:0.8.0"
-```
-``` bash
-chmod +x libp2p_node
-```
-``` bash
-./libp2p_node .env.libp2p
-```
+  ``` bash
+  svn export https://github.com/fetchai/agents-aea.git/trunk/packages/fetchai/connections/p2p_libp2p
+  cd p2p_libp2p
+  go build
+  chmod +x libp2p_node
+  ```
+  ``` bash
+  docker build -t acn_node_standalone -f scripts/acn/Dockerfile .
+  ```
+  ``` bash
+  python3 run_acn_node_standalone.py libp2p_node --config-from-env
+  ```
+  ``` bash
+  python3 run_acn_node_standalone.py libp2p_node --config-from-file <env-file-path>
+  ```
+  ``` bash
+  docker run -v <acn_config_file>:/acn/acn_config -it acn_node_standalone --config-from-file /acn/acn_config
+  ```
+  ``` bash
+  python3 run_acn_node_standalone.py libp2p_node --key-file <node_private_key.txt> \
+    --uri <AEA_P2P_URI> --uri-external <AEA_P2P_URI_PUBLIC>  \
+    --uri-delegate <AEA_P2P_DELEGATE_URI> \
+    --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
+  ```
+  ``` bash
+  docker run -v <node_private_key.txt>:/acn/key.txt -it acn_node_standalone --key-file /acn/key.txt \
+    --uri <AEA_P2P_URI> --uri-external <AEA_P2P_URI_PUBLIC>  \
+    --uri-delegate <AEA_P2P_DELEGATE_URI> \
+    --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
+  ```
 ``` yaml
 config:
   delegate_uri: 127.0.0.1:11001
@@ -63,8 +54,8 @@ config:
 ```
 ``` yaml
 default_routing:
-  ? "fetchai/oef_search:0.5.0"
-  : "fetchai/oef:0.8.0"
+  ? "fetchai/oef_search:0.6.0"
+  : "fetchai/oef:0.9.0"
 ```
 ``` yaml
 config:
@@ -85,14 +76,4 @@ config:
   local_uri: 127.0.0.1:9001
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:9001
-```
-``` txt
-AEA_AGENT_ADDR=cosmos1azvdhesjk739d2j0xdmhyzlu3kfvqqje9r7uay
-AEA_P2P_ID=1ceb61fb96132480c8a8bc3023801e626fff0f871965858584744ed5a6299773
-AEA_P2P_URI=127.0.0.1:9001
-AEA_P2P_ENTRY_URIS=/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm6ghFe59TZ2vHQCcr1dx5P4WWEEAfVp5K6jcgmXjG8bGQ
-NODE_TO_AEA=033a2-libp2p_to_aea
-AEA_TO_NODE=033a2-aea_to_libp2p
-AEA_P2P_URI_PUBLIC=127.0.0.1:9001
-AEA_P2P_DELEGATE_URI=127.0.0.1:11001
 ```

@@ -28,7 +28,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.11.0
+aea fetch fetchai/weather_station:0.12.0
 cd weather_station
 ```
 
@@ -122,7 +122,7 @@ def run():
     # specify the default routing for some protocols
     default_routing = {
         PublicId.from_str("fetchai/ledger_api:0.3.0"): LedgerConnection.connection_id,
-        PublicId.from_str("fetchai/oef_search:0.5.0"): SOEFConnection.connection_id,
+        PublicId.from_str("fetchai/oef_search:0.6.0"): SOEFConnection.connection_id,
     }
     default_connection = P2PLibp2pConnection.connection_id
 
@@ -189,7 +189,7 @@ def run():
         api_key=API_KEY,
         soef_addr=SOEF_ADDR,
         soef_port=SOEF_PORT,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.5.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.6.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity)

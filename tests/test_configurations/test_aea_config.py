@@ -252,6 +252,18 @@ class TestSkillExceptionPolicyConfigVariable(BaseConfigTestVariable):
     AEA_DEFAULT_VALUE = ExceptionPolicyEnum.propagate
 
 
+class TestConnectionExceptionPolicyConfigVariable(BaseConfigTestVariable):
+    """Test `skill_exception_policy` aea config option."""
+
+    OPTION_NAME = "connection_exception_policy"
+    CONFIG_ATTR_NAME = "connection_exception_policy"
+    GOOD_VALUES = ExceptionPolicyEnum  # type: ignore
+    INCORRECT_VALUES = [None, "sTrING?", -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_connection_exception_policy"
+    AEA_DEFAULT_VALUE = ExceptionPolicyEnum.propagate
+
+
 class TestRuntimeModeConfigVariable(BaseConfigTestVariable):
     """Test `runtime_mode` aea config option."""
 

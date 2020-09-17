@@ -16,10 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This test module contains tests for iteract command."""
-import time
 from unittest import TestCase, mock
 
 import pytest
@@ -204,54 +201,72 @@ class TestInteractEcho(AEATestCaseEmpty):
     @pytest.mark.integration
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
-        self.add_item("skill", "fetchai/echo:0.6.0")
+        self.add_item("skill", "fetchai/echo:0.7.0")
         self.run_agent()
         process = self.run_interaction()
 
-        time.sleep(1.0)
+        assert not self.missing_from_output(
+            process,
+            [
+                "Starting AEA interaction channel...",
+                "Provide message of protocol fetchai/default:0.5.0 for performative bytes",
+            ],
+            timeout=10,
+            is_terminating=False,
+        )
 
         # send first message
         process.stdin.write(b"hello\n")
         process.stdin.flush()
-        time.sleep(3.0)
+
+        assert not self.missing_from_output(
+            process,
+            [
+                "Sending envelope:",
+                f"to: {self.agent_name}",
+                f"sender: {self.agent_name}_interact",
+                "protocol_id: fetchai/default:0.5.0",
+                "message_id=1,target=0,performative=bytes,content=b'hello')",
+                "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
+            ],
+            timeout=10,
+            is_terminating=False,
+        )
 
         # read incoming messages
         process.stdin.write(b"\n")
         process.stdin.flush()
-        time.sleep(1.0)
+        assert not self.missing_from_output(
+            process,
+            [
+                "Interrupting input, checking inbox ...",
+                "Received envelope:",
+                f"to: {self.agent_name}_interact",
+                f"sender: {self.agent_name}",
+                "protocol_id: fetchai/default:0.5.0",
+                "message_id=2,target=1,performative=bytes,content=b'hello')",
+                "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
+            ],
+            timeout=10,
+            is_terminating=False,
+        )
 
         # read another message - should return nothing
         process.stdin.write(b"\n")
         process.stdin.flush()
-        time.sleep(1.0)
+        assert not self.missing_from_output(
+            process,
+            [
+                "Interrupting input, checking inbox ...",
+                "Received no new envelope!",
+                "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
+            ],
+            timeout=10,
+            is_terminating=False,
+        )
 
         send_control_c(process)
-        time.sleep(0.5)
 
-        expected_output = [
-            "Starting AEA interaction channel...",
-            "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
-            "Sending envelope:",
-            f"to: {self.agent_name}",
-            f"sender: {self.agent_name}_interact",
-            "protocol_id: fetchai/default:0.5.0",
-            "message_id=1,target=0,performative=bytes,content=b'hello')",
-            "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
-            "Interrupting input, checking inbox ...",
-            "Received envelope:",
-            f"to: {self.agent_name}_interact",
-            f"sender: {self.agent_name}",
-            "protocol_id: fetchai/default:0.5.0",
-            "message_id=2,target=1,performative=bytes,content=b'hello')",
-            "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
-            "Interrupting input, checking inbox ...",
-            "Received no new envelope!",
-            "Provide message of protocol fetchai/default:0.5.0 for performative bytes:",
-            "Interaction interrupted!",
-        ]
-        missing = self.missing_from_output(
-            process, expected_output, timeout=10, is_terminating=False
-        )
-        assert len(missing) == 0, "Strings {} didn't appear in agent output.".format(
-            missing
+        assert not self.missing_from_output(
+            process, ["Interaction interrupted!"], timeout=10, is_terminating=False
         )

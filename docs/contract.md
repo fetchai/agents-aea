@@ -1,4 +1,4 @@
-<a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for Fetch.ai and third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract and its byte code. They implement a translation between framework messages (in the `fetchai/contract_api:0.3.0` protocol) and the implementation specifics of the ABI.
+<a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for Fetch.ai and third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract and its byte code. They implement a translation between framework messages (in the `fetchai/contract_api:0.4.0` protocol) and the implementation specifics of the ABI.
 
 Contracts usually implement four types of methods:
 
@@ -16,9 +16,9 @@ The smart contract wrapped in a AEA contract package might be a third-party smar
 
 Interacting with contracts in almost all cases requires network access. Therefore, the framework executes contract related logic in a <a href="../connection">Connection</a>.
 
-In particular, the `fetchai/ledger:0.4.0` connection can be used to execute contract related logic. The skills communicate with the `fetchai/ledger:0.4.0` connection via the `fetchai/contract_api:0.3.0` protocol. This protocol implements a request-response pattern to serve the four types of methods listed above:
+In particular, the `fetchai/ledger:0.5.0` connection can be used to execute contract related logic. The skills communicate with the `fetchai/ledger:0.5.0` connection via the `fetchai/contract_api:0.4.0` protocol. This protocol implements a request-response pattern to serve the four types of methods listed above:
 
-- the `get_deploy_transaction` message is used to request a deploy transaction for a specific contract. For instance, to request a deploy transaction for the deployment of the smart contract wrapped in the `fetchai/erc1155:0.9.0` package, we send the following message to the `fetchai/ledger:0.4.0`:
+- the `get_deploy_transaction` message is used to request a deploy transaction for a specific contract. For instance, to request a deploy transaction for the deployment of the smart contract wrapped in the `fetchai/erc1155:0.9.0` package, we send the following message to the `fetchai/ledger:0.5.0`:
 
 ``` python
 contract_api_msg = ContractApiMessage(
@@ -32,9 +32,9 @@ contract_api_msg = ContractApiMessage(
     ),
 )
 ```
-This message will be handled by the `fetchai/ledger:0.4.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. To send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.4.0` connection using the `fetchai/ledger_api:0.3.0` protocol.
+This message will be handled by the `fetchai/ledger:0.5.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. To send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.5.0` connection using the `fetchai/ledger_api:0.3.0` protocol.
 
-- the `get_raw_transaction` message is used to request any transaction for a specific contract which changes state in the contract. For instance, to request a transaction for the creation of token in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.9.0` package, we send the following message to the `fetchai/ledger:0.4.0`:
+- the `get_raw_transaction` message is used to request any transaction for a specific contract which changes state in the contract. For instance, to request a transaction for the creation of token in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.9.0` package, we send the following message to the `fetchai/ledger:0.5.0`:
 
 ``` python
 contract_api_msg = ContractApiMessage(
@@ -52,9 +52,9 @@ contract_api_msg = ContractApiMessage(
     ),
 )
 ```
-This message will be handled by the `fetchai/ledger:0.4.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. For this to be executed correctly, the `fetchai/erc1155:0.9.0` contract package needs to implement the `get_create_batch_transaction` method with the specified key word arguments. Similarly to above, to send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.4.0` connection using the `fetchai/ledger_api:0.3.0` protocol.
+This message will be handled by the `fetchai/ledger:0.5.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. For this to be executed correctly, the `fetchai/erc1155:0.9.0` contract package needs to implement the `get_create_batch_transaction` method with the specified key word arguments. Similarly to above, to send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.5.0` connection using the `fetchai/ledger_api:0.3.0` protocol.
 
-- the `get_raw_message` message is used to request any contract method call for a specific contract which does not change state in the contract. For instance, to request a call to get a hash from some input data in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.9.0` package, we send the following message to the `fetchai/ledger:0.4.0`:
+- the `get_raw_message` message is used to request any contract method call for a specific contract which does not change state in the contract. For instance, to request a call to get a hash from some input data in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.9.0` package, we send the following message to the `fetchai/ledger:0.5.0`:
 
 ``` python
 contract_api_msg = ContractApiMessage(
@@ -77,10 +77,10 @@ contract_api_msg = ContractApiMessage(
     ),
 )
 ```
-This message will be handled by the `fetchai/ledger:0.4.0` connection and then a `raw_message` message will be returned with the matching raw message. For this to be executed correctly, the `fetchai/erc1155:0.9.0` contract package needs to implement the `get_hash_single` method with the specified key word arguments. We can then send the raw message to the `fetchai/ledger:0.4.0` connection using the `fetchai/ledger_api:0.3.0` protocol. In this case, signing is not required.
+This message will be handled by the `fetchai/ledger:0.5.0` connection and then a `raw_message` message will be returned with the matching raw message. For this to be executed correctly, the `fetchai/erc1155:0.9.0` contract package needs to implement the `get_hash_single` method with the specified key word arguments. We can then send the raw message to the `fetchai/ledger:0.5.0` connection using the `fetchai/ledger_api:0.3.0` protocol. In this case, signing is not required.
 
 
-- the `get_state` message is used to request any contract method call to query state in the deployed contract. For instance, to request a call to get the balances in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.9.0` package, we send the following message to the `fetchai/ledger:0.4.0`:
+- the `get_state` message is used to request any contract method call to query state in the deployed contract. For instance, to request a call to get the balances in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.9.0` package, we send the following message to the `fetchai/ledger:0.5.0`:
 
 ``` python
 contract_api_msg = ContractApiMessage(
@@ -95,7 +95,7 @@ contract_api_msg = ContractApiMessage(
     ),
 )
 ```
-This message will be handled by the `fetchai/ledger:0.4.0` connection and then a `state` message will be returned with the matching state. For this to be executed correctly, the `fetchai/erc1155:0.9.0` contract package needs to implement the `get_balance` method with the specified key word arguments. We can then send the raw message to the `fetchai/ledger:0.4.0` connection using the `fetchai/ledger_api:0.3.0` protocol. In this case, signing is not required.
+This message will be handled by the `fetchai/ledger:0.5.0` connection and then a `state` message will be returned with the matching state. For this to be executed correctly, the `fetchai/erc1155:0.9.0` contract package needs to implement the `get_balance` method with the specified key word arguments. We can then send the raw message to the `fetchai/ledger:0.5.0` connection using the `fetchai/ledger_api:0.3.0` protocol. In this case, signing is not required.
 
 
 ## Developing your own
@@ -168,6 +168,6 @@ class MyContract(Contract):
         tx = cls._try_estimate_gas(ledger_api, tx)
         return tx
 ```
-Above, we implement a method to create a transaction, in this case a transaction to create a batch of tokens. The method will be called by the framework, specifically the `fetchai/ledger:0.4.0` connection once it receives a message (see bullet point 2 above). The method first gets the latest transaction nonce of the `deployer_address`, then constracts the contract instance, then uses the instance to build the transaction and finally updates the gas on the transaction.
+Above, we implement a method to create a transaction, in this case a transaction to create a batch of tokens. The method will be called by the framework, specifically the `fetchai/ledger:0.5.0` connection once it receives a message (see bullet point 2 above). The method first gets the latest transaction nonce of the `deployer_address`, then constracts the contract instance, then uses the instance to build the transaction and finally updates the gas on the transaction.
 
-It helps to look at existing contract packages, like `fetchai/erc1155:0.9.0`, and skills using them, like `fetchai/erc1155_client:0.11.0` and `fetchai/erc1155_deploy:0.12.0`, for inspiration and guidance.
+It helps to look at existing contract packages, like `fetchai/erc1155:0.9.0`, and skills using them, like `fetchai/erc1155_client:0.11.0` and `fetchai/erc1155_deploy:0.13.0`, for inspiration and guidance.

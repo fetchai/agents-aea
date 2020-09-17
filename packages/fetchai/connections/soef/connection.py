@@ -21,6 +21,7 @@
 import asyncio
 import copy
 import logging
+import urllib
 from asyncio import CancelledError
 from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -49,7 +50,10 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
-from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
+from packages.fetchai.protocols.oef_search.custom_types import (
+    AgentsInfo,
+    OefErrorOperation,
+)
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -60,7 +64,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.8.0")
 
 NOT_SPECIFIED = object()
 
@@ -85,6 +89,7 @@ class ModelNames:
     personality_agent = "personality_agent"
     search_model = "search_model"
     ping = "ping"
+    generic_command = "generic_command"
 
 
 class SOEFException(Exception):
@@ -481,6 +486,7 @@ class SOEFChannel:
             "personality_agent": self._set_personality_piece_handler,
             "set_service_key": self._set_service_key_handler,
             "ping": self._ping_handler,
+            "generic_command": self._generic_command_handler,
         }  # type: Dict[str, Callable]
         data_model_name = service_description.data_model.name
 
@@ -490,9 +496,14 @@ class SOEFChannel:
             )
 
         handler = data_model_handlers[data_model_name]
-        await handler(service_description)
+        await handler(service_description, oef_message, oef_search_dialogue)
 
-    async def _ping_handler(self, service_description: Description) -> None:
+    async def _ping_handler(
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+    ) -> None:
         """
         Perform ping command.
 
@@ -502,6 +513,51 @@ class SOEFChannel:
         """
         self._check_data_model(service_description, ModelNames.ping)
         await self._ping_command()
+
+    async def _generic_command_handler(
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+    ) -> None:
+        """
+        Perform ping command.
+
+        :param service_description: Service description
+
+        :return None
+        """
+        if not self.in_queue:  # pragma: no cover
+            """not connected."""
+            return
+
+        self._check_data_model(service_description, ModelNames.generic_command)
+        command = service_description.values.get("command", None)
+        params = service_description.values.get("parameters", {})
+
+        if params:
+            params = urllib.parse.parse_qs(params)
+
+        content = await self._generic_oef_command(command, params)
+
+        message = oef_search_dialogue.reply(
+            performative=OefSearchMessage.Performative.SUCCESS,
+            target_message=oef_message,
+            agents_info=AgentsInfo(
+                {
+                    "response": {"content": content},
+                    "command": service_description.values,
+                }
+            ),
+        )
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
+            message=message,
+            context=oef_search_dialogue.envelope_context,
+        )
+        await self.in_queue.put(envelope)
 
     async def _ping_command(self) -> None:
         """Perform ping on registered agent."""
@@ -525,7 +581,12 @@ class SOEFChannel:
                     self.logger.exception("Error on periodic ping command!")
                 await asyncio.sleep(period)
 
-    async def _set_service_key_handler(self, service_description: Description) -> None:
+    async def _set_service_key_handler(
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+    ) -> None:
         """
         Set service key from service description.
 
@@ -582,7 +643,10 @@ class SOEFChannel:
         await self._generic_oef_command("set_service_key", {"key": key, "value": value})
 
     async def _remove_service_key_handler(
-        self, service_description: Description
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
     ) -> None:
         """
         Remove service key from service description.
@@ -608,7 +672,10 @@ class SOEFChannel:
         await self._generic_oef_command("remove_service_key", {"key": key})
 
     async def _register_location_handler(
-        self, service_description: Description
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
     ) -> None:
         """
         Register service with location.
@@ -619,11 +686,27 @@ class SOEFChannel:
         self._check_data_model(service_description, ModelNames.location_agent)
 
         agent_location = service_description.values.get("location", None)
+
         if agent_location is None or not isinstance(
             agent_location, Location
         ):  # pragma: nocover
             raise SOEFException.debug("Bad location provided.")
-        await self._set_location(agent_location)
+
+        disclosure_accuracy = service_description.values.get(
+            "disclosure_accuracy", None
+        )
+
+        if disclosure_accuracy not in [
+            None,
+            "none",
+            "low",
+            "medium",
+            "high",
+            "maximum",
+        ]:
+            raise SOEFException.debug("Bad disclosure_accuracy.")  # pragma: nocover
+
+        await self._set_location(agent_location, disclosure_accuracy)
 
     @staticmethod
     def _check_data_model(
@@ -643,7 +726,9 @@ class SOEFChannel:
                 f"Bad service description! expected {data_model_name} but go {service_description.data_model.name}"
             )
 
-    async def _set_location(self, agent_location: Location) -> None:
+    async def _set_location(
+        self, agent_location: Location, disclosure_accuracy: Optional[str] = None
+    ) -> None:
         """
         Set the location.
 
@@ -656,10 +741,19 @@ class SOEFChannel:
             "latitude": str(latitude),
         }
         await self._generic_oef_command("set_position", params)
+        if disclosure_accuracy:
+            await self._generic_oef_command(
+                "set_find_position_disclosure_accuracy",
+                {"accuracy": disclosure_accuracy},
+            )
+
         self.agent_location = agent_location
 
     async def _set_personality_piece_handler(
-        self, service_description: Description
+        self,
+        service_description: Description,
+        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
+        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
     ) -> None:
         """
         Set the personality piece.
@@ -799,9 +893,9 @@ class SOEFChannel:
         if data_model_name == "location_agent":
             await handler()
         else:
-            await handler(service_description)
+            await handler(service_description, oef_message, oef_search_dialogue)
 
-    async def _unregister_agent(self) -> None:
+    async def _unregister_agent(self) -> None:  # pylint: disable=unused-argument
         """
         Unnregister a service_name from the SOEF.
 
@@ -947,10 +1041,7 @@ class SOEFChannel:
             "find_around_me", {"range_in_km": [str(radius)], **params}
         )
         root = ET.fromstring(response_text)
-        agents = {
-            key: {} for key in self.SUPPORTED_CHAIN_IDENTIFIERS
-        }  # type: Dict[str, Dict[str, str]]
-        agents_l = []  # type: List[str]
+        agents = {}  # type: Dict[str, Dict[str, Union[str, Dict[str, str]]]]
         for agent in root.findall(path=".//agent"):
             chain_identifier = ""
             for identities in agent.findall("identities"):
@@ -962,15 +1053,27 @@ class SOEFChannel:
                         if chain_identifier_key == "chain_identifier":
                             chain_identifier = chain_identifier_name
                             agent_address = identity.text
-            agent_distance = agent.find("range_in_km").text
-            if chain_identifier in agents:
-                agents[chain_identifier][agent_address] = agent_distance
-                agents_l.append(agent_address)
+
+                            range_in_km = agent.find("range_in_km").text
+                            agents[agent_address] = {
+                                "chain_identifier": chain_identifier,
+                                "address": agent_address,
+                                "range_in_km": range_in_km,
+                                **agent.attrib,
+                            }
+                            location = agent.find("./location")
+                            if location:
+                                agents[agent_address]["location"] = {
+                                    **location.attrib,
+                                    "longitude": location.find("longitude").text,
+                                    "latitude": location.find("latitude").text,
+                                }
 
         message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
             target_message=oef_message,
-            agents=tuple(agents_l),
+            agents=tuple(agents.keys()),
+            agents_info=AgentsInfo(agents),
         )
         envelope = Envelope(
             to=message.to,
@@ -992,7 +1095,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.5.0")
+                PublicId.from_str("fetchai/oef_search:0.6.0")
             ]
 
         super().__init__(**kwargs)

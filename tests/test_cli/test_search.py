@@ -97,7 +97,9 @@ class TestSearchContractsLocal(TestCase):
         )
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
-    @mock.patch("aea.cli.search.request_api", return_value=["item1"])
+    @mock.patch(
+        "aea.cli.search.request_api", return_value={"results": ["item1"], "count": 1}
+    )
     def test_search_contracts_registry_positive(self, *mocks):
         """Test search contracts in registry command positive result."""
         result = self.runner.invoke(
@@ -247,7 +249,10 @@ class TestSearchAgentsLocal:
             pass
 
 
-@mock.patch("aea.cli.search.request_api", return_value=["correct", "results"])
+@mock.patch(
+    "aea.cli.search.request_api",
+    return_value={"results": ["correct", "results"], "count": 2},
+)
 @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
 class RegistrySearchTestCase(TestCase):
     """Test case for search --registry CLI command."""
@@ -270,7 +275,7 @@ class RegistrySearchTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
-            "GET", "/connections", params={"search": "some"}
+            "GET", "/connections", params={"search": "some", "page": 1}
         )
         format_items_mock.assert_called_once_with(["correct", "results"])
 
@@ -288,7 +293,7 @@ class RegistrySearchTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
-            "GET", "/agents", params={"search": "some"}
+            "GET", "/agents", params={"search": "some", "page": 1}
         )
         format_items_mock.assert_called_once_with(["correct", "results"])
 
@@ -306,7 +311,7 @@ class RegistrySearchTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
-            "GET", "/protocols", params={"search": "some"}
+            "GET", "/protocols", params={"search": "some", "page": 1}
         )
         format_items_mock.assert_called_once_with(["correct", "results"])
 
@@ -324,7 +329,7 @@ class RegistrySearchTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
-            "GET", "/skills", params={"search": "some"}
+            "GET", "/skills", params={"search": "some", "page": 1}
         )
         format_items_mock.assert_called_once_with(["correct", "results"])
 
@@ -358,7 +363,7 @@ class TestSearchWithRegistryInSubfolderLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.6.0")
+        public_id_echo = PublicId.from_str("fetchai/echo:0.7.0")
         public_id_error = PublicId.from_str("fetchai/error:0.5.0")
         expected = (
             'Searching for ""...\n'
@@ -440,7 +445,7 @@ class TestSearchInAgentDirectoryLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.6.0")
+        public_id_echo = PublicId.from_str("fetchai/echo:0.7.0")
         public_id_error = PublicId.from_str("fetchai/error:0.5.0")
         expected = (
             'Searching for ""...\n'

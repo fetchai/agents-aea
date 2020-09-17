@@ -66,13 +66,13 @@ class TestLibp2pClientConnectionConnectDisconnect:
             await self.connection_node.connect()
             await self.connection.connect()
             assert self.connection.is_connected is True
-        except Exception as e:
-            await self.connection.disconnect()
-            raise e
 
-        await self.connection.disconnect()
-        assert self.connection.is_connected is False
-        await self.connection_node.disconnect()
+            await self.connection.disconnect()
+            assert self.connection.is_connected is False
+        except Exception:
+            raise
+        finally:
+            await self.connection_node.disconnect()
 
     @classmethod
     def teardown_class(cls):
@@ -103,13 +103,17 @@ class TestLibp2pClientConnectionEchoEnvelope:
         cls.log_files.append(cls.connection_node.node.log_file)
         cls.multiplexer_node.connect()
 
-        cls.connection_client_1 = _make_libp2p_client_connection()
-        cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
-        cls.multiplexer_client_1.connect()
+        try:
+            cls.connection_client_1 = _make_libp2p_client_connection()
+            cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
+            cls.multiplexer_client_1.connect()
 
-        cls.connection_client_2 = _make_libp2p_client_connection()
-        cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
-        cls.multiplexer_client_2.connect()
+            cls.connection_client_2 = _make_libp2p_client_connection()
+            cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
+            cls.multiplexer_client_2.connect()
+        except Exception:
+            cls.multiplexer_node.disconnect()
+            raise
 
     def test_connection_is_established(self):
         assert self.connection_client_1.is_connected is True
@@ -237,6 +241,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         os.chdir(cls.t)
 
         cls.log_files = []
+        cls.mutliplexers = []
 
         cls.connection_node_1 = _make_libp2p_connection(
             port=DEFAULT_PORT + 1,
@@ -246,30 +251,38 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
         cls.log_files.append(cls.connection_node_1.node.log_file)
         cls.multiplexer_node_1.connect()
+        cls.mutliplexers.append(cls.multiplexer_node_1)
 
         genesis_peer = cls.connection_node_1.node.multiaddrs[0]
 
-        cls.connection_node_2 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            delegate_port=DEFAULT_DELEGATE_PORT + 2,
-            entry_peers=[genesis_peer],
-            delegate=True,
-        )
-        cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
-        cls.log_files.append(cls.connection_node_2.node.log_file)
-        cls.multiplexer_node_2.connect()
+        try:
+            cls.connection_node_2 = _make_libp2p_connection(
+                port=DEFAULT_PORT + 2,
+                delegate_port=DEFAULT_DELEGATE_PORT + 2,
+                entry_peers=[genesis_peer],
+                delegate=True,
+            )
+            cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
+            cls.log_files.append(cls.connection_node_2.node.log_file)
+            cls.multiplexer_node_2.connect()
+            cls.mutliplexers.append(cls.multiplexer_node_2)
 
-        cls.connection_client_1 = _make_libp2p_client_connection(
-            DEFAULT_DELEGATE_PORT + 1
-        )
-        cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
-        cls.multiplexer_client_1.connect()
+            cls.connection_client_1 = _make_libp2p_client_connection(
+                DEFAULT_DELEGATE_PORT + 1
+            )
+            cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
+            cls.multiplexer_client_1.connect()
+            cls.mutliplexers.append(cls.multiplexer_client_1)
 
-        cls.connection_client_2 = _make_libp2p_client_connection(
-            DEFAULT_DELEGATE_PORT + 2
-        )
-        cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
-        cls.multiplexer_client_2.connect()
+            cls.connection_client_2 = _make_libp2p_client_connection(
+                DEFAULT_DELEGATE_PORT + 2
+            )
+            cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
+            cls.multiplexer_client_2.connect()
+            cls.mutliplexers.append(cls.multiplexer_client_2)
+        except Exception:
+            cls.teardown_class()
+            raise
 
     def test_connection_is_established(self):
         assert self.connection_node_1.is_connected is True
@@ -375,11 +388,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        cls.multiplexer_client_1.disconnect()
-        cls.multiplexer_client_2.disconnect()
-        cls.multiplexer_node_1.disconnect()
-        cls.multiplexer_node_2.disconnect()
-
+        for mux in reversed(cls.mutliplexers):
+            mux.disconnect()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -400,45 +410,51 @@ class TestLibp2pClientConnectionRouting:
         os.chdir(cls.t)
 
         cls.log_files = []
+        cls.multiplexers = []
 
-        cls.connection_node_1 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 1,
-            delegate_port=DEFAULT_DELEGATE_PORT + 1,
-            delegate=True,
-        )
-        cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
-        cls.log_files.append(cls.connection_node_1.node.log_file)
-        cls.multiplexer_node_1.connect()
+        try:
+            cls.connection_node_1 = _make_libp2p_connection(
+                port=DEFAULT_PORT + 1,
+                delegate_port=DEFAULT_DELEGATE_PORT + 1,
+                delegate=True,
+            )
+            cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
+            cls.log_files.append(cls.connection_node_1.node.log_file)
+            cls.multiplexer_node_1.connect()
+            cls.multiplexers.append(cls.multiplexer_node_1)
 
-        entry_peer = cls.connection_node_1.node.multiaddrs[0]
+            entry_peer = cls.connection_node_1.node.multiaddrs[0]
 
-        cls.connection_node_2 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            delegate_port=DEFAULT_DELEGATE_PORT + 2,
-            entry_peers=[entry_peer],
-            delegate=True,
-        )
-        cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
-        cls.log_files.append(cls.connection_node_2.node.log_file)
-        cls.multiplexer_node_2.connect()
+            cls.connection_node_2 = _make_libp2p_connection(
+                port=DEFAULT_PORT + 2,
+                delegate_port=DEFAULT_DELEGATE_PORT + 2,
+                entry_peers=[entry_peer],
+                delegate=True,
+            )
+            cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
+            cls.log_files.append(cls.connection_node_2.node.log_file)
+            cls.multiplexer_node_2.connect()
+            cls.multiplexers.append(cls.multiplexer_node_2)
 
-        cls.connections = [cls.connection_node_1, cls.connection_node_2]
-        cls.multiplexers = [cls.multiplexer_node_1, cls.multiplexer_node_2]
-        cls.addresses = [
-            cls.connection_node_1.address,
-            cls.connection_node_2.address,
-        ]
+            cls.connections = [cls.connection_node_1, cls.connection_node_2]
+            cls.addresses = [
+                cls.connection_node_1.address,
+                cls.connection_node_2.address,
+            ]
 
-        for _ in range(DEFAULT_CLIENTS_PER_NODE):
-            for port in [DEFAULT_DELEGATE_PORT + 1, DEFAULT_DELEGATE_PORT + 2]:
-                conn = _make_libp2p_client_connection(port)
-                muxer = Multiplexer([conn])
+            for _ in range(DEFAULT_CLIENTS_PER_NODE):
+                for port in [DEFAULT_DELEGATE_PORT + 1, DEFAULT_DELEGATE_PORT + 2]:
+                    conn = _make_libp2p_client_connection(port)
+                    mux = Multiplexer([conn])
 
-                cls.connections.append(conn)
-                cls.multiplexers.append(muxer)
-                cls.addresses.append(conn.address)
+                    cls.connections.append(conn)
+                    cls.addresses.append(conn.address)
 
-                muxer.connect()
+                    mux.connect()
+                    cls.multiplexers.append(mux)
+        except Exception:
+            cls.teardown_class()
+            raise
 
     def test_connection_is_established(self):
         for conn in self.connections:
@@ -478,9 +494,8 @@ class TestLibp2pClientConnectionRouting:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        for multiplexer in reversed(cls.multiplexers):
-            multiplexer.disconnect()
-
+        for mux in reversed(cls.multiplexers):
+            mux.disconnect()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
