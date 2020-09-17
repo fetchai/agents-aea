@@ -287,7 +287,7 @@ class AEABuilder:
         DecisionMakerHandler
     ] = DefaultDecisionMakerHandler
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
-    DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.just_log
+    DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"

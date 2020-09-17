@@ -612,19 +612,19 @@ class TestExceptionHandlingOnConnectionSend:
         """Tear down test case."""
         self.multiplexer.disconnect()
 
-    def test_default_policy(self):
+    def test_log_policy(self):
         """Test just log exception."""
-        assert self.multiplexer._exception_policy == ExceptionPolicyEnum.just_log
-
         with patch.object(self.connection, "send", side_effect=self.exception):
+            self.multiplexer._exception_policy = ExceptionPolicyEnum.just_log
             self.multiplexer.put(self.envelope)
             time.sleep(1)
             assert not self.multiplexer._send_loop_task.done()
 
     def test_propagate_policy(self):
         """Test propagate exception."""
+        assert self.multiplexer._exception_policy == ExceptionPolicyEnum.propagate
+
         with patch.object(self.connection, "send", side_effect=self.exception):
-            self.multiplexer._exception_policy = ExceptionPolicyEnum.propagate
             self.multiplexer.put(self.envelope)
             time.sleep(1)
             wait_for_condition(

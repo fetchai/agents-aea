@@ -81,7 +81,7 @@ class AsyncMultiplexer(WithLogger):
         connections: Optional[Sequence[Connection]] = None,
         default_connection_index: int = 0,
         loop: Optional[AbstractEventLoop] = None,
-        exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.just_log,
+        exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
     ):
         """
         Initialize the connection multiplexer.
