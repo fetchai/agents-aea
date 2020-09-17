@@ -423,7 +423,7 @@ class OEFLocalConnection(Connection):
             if self._reader is None:
                 raise ValueError("No reader set!")  # pragma: nocover
             envelope = await self._reader.get()
-            if envelope is None:
+            if envelope is None:  # pragma: no cover
                 self.logger.debug("Receiving task terminated.")
                 return None
             self.logger.debug("Received envelope {}".format(envelope))

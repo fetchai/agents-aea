@@ -46,39 +46,68 @@ And then, the `aea-develop:latest` image:
 # Publish to k8s
 
 Switch the context:
-```
+``` bash
 kubectx sandbox
 ```
 
 List pods in cluster:
-```
+``` bash
 kubectl get pods
 ```
 
 Optionally, create new namespace:
-```
+``` bash
 kubectl create namespace aea-research
 ```
 
 Ensure right namespace is used:
-```
+``` bash
 kubens aea-research
 ```
 Choose namespace in cluster:
-```
+``` bash
 kubens aea-research
 ```
 To enter selected namespace:
-```
+``` bash
 kubens
 ```
 
 From the `develop-image` folder run:
-```
+``` bash
 skaffold run -p sandbox
 ```
 
 SSH into a new image:
-```
+``` bash
 kubectl run --generator=run-pod/v1 -it debian --image=debian -- bash
 ```
+
+# Dedicated node pool for benchmarking agents
+
+
+## Setup and tear down
+
+To create the node pool
+``` bash
+gcloud container node-pools create agent-test-pool --cluster sandbox --project fetch-ai-sandbox --node-taints dedicated=agent:NoSchedule --machine-type=n1-standard-4 --num-nodes=1 --enable-autoscaling --node-labels=type=agent-test --max-nodes=1  --min-nodes=0
+```
+To remove the node pool 
+``` bash
+gcloud container node-pools delete agent-test-pool --cluster sandbox --project fetch-ai-sandbox
+```
+
+## Usage
+
+List pods
+
+``` bash
+kubectl get pod -o wide
+```
+
+``` bash
+kubectl exec -it NAME -- bash
+```
+
+
+

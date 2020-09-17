@@ -700,7 +700,7 @@ class SOEFChannel:
             "high",
             "maximum",
         ]:
-            raise SOEFException.debug("Bad disclosure_accuracy.")
+            raise SOEFException.debug("Bad disclosure_accuracy.")  # pragma: nocover
 
         await self._set_location(agent_location, disclosure_accuracy)
 

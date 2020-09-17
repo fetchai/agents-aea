@@ -1,12 +1,13 @@
 name: tac_control
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
+  README.md: QmdWECpRXZXH5JPV6wVHqeUtvjBhieUFTEoT2e7EY16N8M
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
   behaviours.py: QmTVCXtTpH1A55vWnynz1PjM4VCrQ6EDy5XfcJpT93doEq
   dialogues.py: QmcVYVTZ95UKBnXzmKyGLo5LwSVcGYUTrifosQMSpzNnCX

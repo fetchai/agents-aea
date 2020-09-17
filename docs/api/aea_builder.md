@@ -313,6 +313,23 @@ Set skill exception policy.
 
 self
 
+<a name="aea.aea_builder.AEABuilder.set_connection_exception_policy"></a>
+#### set`_`connection`_`exception`_`policy
+
+```python
+ | set_connection_exception_policy(connection_exception_policy: Optional[ExceptionPolicyEnum]) -> "AEABuilder"
+```
+
+Set skill exception policy.
+
+**Arguments**:
+
+- `skill_exception_policy`: the policy
+
+**Returns**:
+
+self
+
 <a name="aea.aea_builder.AEABuilder.set_default_routing"></a>
 #### set`_`default`_`routing
 

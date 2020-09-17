@@ -31,7 +31,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.4.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.5.0"
 
 
 class OefSearchHandler(Handler):
