@@ -202,9 +202,10 @@ class Instance:
         wait_for_condition(lambda: not self.multiplexer.in_queue.empty(), timeout=20)
         return self.multiplexer.get()
 
-    def generic_command(self, command: str, **parameters: dict) -> None:
+    def generic_command(self, command: str, parameters: Optional[dict] = None) -> None:
         """Register personality pieces."""
         service_instance = {"command": command}
+
         if parameters:
             service_instance["parameters"] = urlencode(parameters)
 
@@ -365,7 +366,7 @@ class TestRealNetwork:
         agent.start()
 
         try:
-            agent.generic_command("ping")
+            agent.generic_command("set_service_key", {"key": "test", "value": "test"})
             envelope = agent.get()
             assert (
                 envelope.message.performative == OefSearchMessage.Performative.SUCCESS

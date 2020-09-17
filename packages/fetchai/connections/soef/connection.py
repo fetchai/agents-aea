@@ -527,13 +527,14 @@ class SOEFChannel:
 
         :return None
         """
-        if not self.in_queue:
+        if not self.in_queue:  # pragma: no cover
             """not connected."""
             return
 
         self._check_data_model(service_description, ModelNames.generic_command)
         command = service_description.values.get("command", None)
         params = service_description.values.get("parameters", {})
+
         if params:
             params = urllib.parse.parse_qs(params)
 
