@@ -261,7 +261,7 @@ class TestConnectionExceptionPolicyConfigVariable(BaseConfigTestVariable):
     INCORRECT_VALUES = [None, "sTrING?", -1]
     REQUIRED = False
     AEA_ATTR_NAME = "_connection_exception_policy"
-    AEA_DEFAULT_VALUE = ExceptionPolicyEnum.just_log
+    AEA_DEFAULT_VALUE = ExceptionPolicyEnum.propagate
 
 
 class TestRuntimeModeConfigVariable(BaseConfigTestVariable):
