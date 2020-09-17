@@ -255,7 +255,13 @@ class OefSearchMessage(Message):
                     ),
                 )
             elif self.performative == OefSearchMessage.Performative.SUCCESS:
-                expected_nb_of_contents = 0
+                expected_nb_of_contents = 1
+                enforce(
+                    type(self.agents_info) == CustomAgentsInfo,
+                    "Invalid type for content 'agents_info'. Expected 'AgentsInfo'. Found '{}'.".format(
+                        type(self.agents_info)
+                    ),
+                )
             elif self.performative == OefSearchMessage.Performative.OEF_ERROR:
                 expected_nb_of_contents = 1
                 enforce(

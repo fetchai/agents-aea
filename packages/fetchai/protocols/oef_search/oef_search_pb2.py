@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="fetch.aea.OefSearch",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x10oef_search.proto\x12\x13\x66\x65tch.aea.OefSearch"\x98\r\n\x10OefSearchMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12Q\n\toef_error\x18\x05 \x01(\x0b\x32<.fetch.aea.OefSearch.OefSearchMessage.Oef_Error_PerformativeH\x00\x12_\n\x10register_service\x18\x06 \x01(\x0b\x32\x43.fetch.aea.OefSearch.OefSearchMessage.Register_Service_PerformativeH\x00\x12Y\n\rsearch_result\x18\x07 \x01(\x0b\x32@.fetch.aea.OefSearch.OefSearchMessage.Search_Result_PerformativeH\x00\x12]\n\x0fsearch_services\x18\x08 \x01(\x0b\x32\x42.fetch.aea.OefSearch.OefSearchMessage.Search_Services_PerformativeH\x00\x12M\n\x07success\x18\t \x01(\x0b\x32:.fetch.aea.OefSearch.OefSearchMessage.Success_PerformativeH\x00\x12\x63\n\x12unregister_service\x18\n \x01(\x0b\x32\x45.fetch.aea.OefSearch.OefSearchMessage.Unregister_Service_PerformativeH\x00\x1a!\n\nAgentsInfo\x12\x13\n\x0b\x61gents_info\x18\x01 \x01(\x0c\x1a"\n\x0b\x44\x65scription\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\x0c\x1a\xd1\x01\n\x11OefErrorOperation\x12W\n\toef_error\x18\x01 \x01(\x0e\x32\x44.fetch.aea.OefSearch.OefSearchMessage.OefErrorOperation.OefErrorEnum"c\n\x0cOefErrorEnum\x12\x14\n\x10REGISTER_SERVICE\x10\x00\x12\x16\n\x12UNREGISTER_SERVICE\x10\x01\x12\x13\n\x0fSEARCH_SERVICES\x10\x02\x12\x10\n\x0cSEND_MESSAGE\x10\x03\x1a\x8b\x01\n\x05Query\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12\x46\n\x07nothing\x18\x02 \x01(\x0b\x32\x33.fetch.aea.OefSearch.OefSearchMessage.Query.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1ao\n\x1dRegister_Service_Performative\x12N\n\x13service_description\x18\x01 \x01(\x0b\x32\x31.fetch.aea.OefSearch.OefSearchMessage.Description\x1aq\n\x1fUnregister_Service_Performative\x12N\n\x13service_description\x18\x01 \x01(\x0b\x32\x31.fetch.aea.OefSearch.OefSearchMessage.Description\x1aZ\n\x1cSearch_Services_Performative\x12:\n\x05query\x18\x01 \x01(\x0b\x32+.fetch.aea.OefSearch.OefSearchMessage.Query\x1as\n\x1aSearch_Result_Performative\x12\x0e\n\x06\x61gents\x18\x01 \x03(\t\x12\x45\n\x0b\x61gents_info\x18\x02 \x01(\x0b\x32\x30.fetch.aea.OefSearch.OefSearchMessage.AgentsInfo\x1a\x16\n\x14Success_Performative\x1an\n\x16Oef_Error_Performative\x12T\n\x13oef_error_operation\x18\x01 \x01(\x0b\x32\x37.fetch.aea.OefSearch.OefSearchMessage.OefErrorOperationB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x10oef_search.proto\x12\x13\x66\x65tch.aea.OefSearch"\xdf\r\n\x10OefSearchMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12Q\n\toef_error\x18\x05 \x01(\x0b\x32<.fetch.aea.OefSearch.OefSearchMessage.Oef_Error_PerformativeH\x00\x12_\n\x10register_service\x18\x06 \x01(\x0b\x32\x43.fetch.aea.OefSearch.OefSearchMessage.Register_Service_PerformativeH\x00\x12Y\n\rsearch_result\x18\x07 \x01(\x0b\x32@.fetch.aea.OefSearch.OefSearchMessage.Search_Result_PerformativeH\x00\x12]\n\x0fsearch_services\x18\x08 \x01(\x0b\x32\x42.fetch.aea.OefSearch.OefSearchMessage.Search_Services_PerformativeH\x00\x12M\n\x07success\x18\t \x01(\x0b\x32:.fetch.aea.OefSearch.OefSearchMessage.Success_PerformativeH\x00\x12\x63\n\x12unregister_service\x18\n \x01(\x0b\x32\x45.fetch.aea.OefSearch.OefSearchMessage.Unregister_Service_PerformativeH\x00\x1a!\n\nAgentsInfo\x12\x13\n\x0b\x61gents_info\x18\x01 \x01(\x0c\x1a"\n\x0b\x44\x65scription\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\x0c\x1a\xd1\x01\n\x11OefErrorOperation\x12W\n\toef_error\x18\x01 \x01(\x0e\x32\x44.fetch.aea.OefSearch.OefSearchMessage.OefErrorOperation.OefErrorEnum"c\n\x0cOefErrorEnum\x12\x14\n\x10REGISTER_SERVICE\x10\x00\x12\x16\n\x12UNREGISTER_SERVICE\x10\x01\x12\x13\n\x0fSEARCH_SERVICES\x10\x02\x12\x10\n\x0cSEND_MESSAGE\x10\x03\x1a\x8b\x01\n\x05Query\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12\x46\n\x07nothing\x18\x02 \x01(\x0b\x32\x33.fetch.aea.OefSearch.OefSearchMessage.Query.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1ao\n\x1dRegister_Service_Performative\x12N\n\x13service_description\x18\x01 \x01(\x0b\x32\x31.fetch.aea.OefSearch.OefSearchMessage.Description\x1aq\n\x1fUnregister_Service_Performative\x12N\n\x13service_description\x18\x01 \x01(\x0b\x32\x31.fetch.aea.OefSearch.OefSearchMessage.Description\x1aZ\n\x1cSearch_Services_Performative\x12:\n\x05query\x18\x01 \x01(\x0b\x32+.fetch.aea.OefSearch.OefSearchMessage.Query\x1as\n\x1aSearch_Result_Performative\x12\x0e\n\x06\x61gents\x18\x01 \x03(\t\x12\x45\n\x0b\x61gents_info\x18\x02 \x01(\x0b\x32\x30.fetch.aea.OefSearch.OefSearchMessage.AgentsInfo\x1a]\n\x14Success_Performative\x12\x45\n\x0b\x61gents_info\x18\x01 \x01(\x0b\x32\x30.fetch.aea.OefSearch.OefSearchMessage.AgentsInfo\x1an\n\x16Oef_Error_Performative\x12T\n\x13oef_error_operation\x18\x01 \x01(\x0b\x32\x37.fetch.aea.OefSearch.OefSearchMessage.OefErrorOperationB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
@@ -451,7 +451,26 @@ _OEFSEARCHMESSAGE_SUCCESS_PERFORMATIVE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
-    fields=[],
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="agents_info",
+            full_name="fetch.aea.OefSearch.OefSearchMessage.Success_Performative.agents_info",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
     extensions=[],
     nested_types=[],
     enum_types=[],
@@ -461,7 +480,7 @@ _OEFSEARCHMESSAGE_SUCCESS_PERFORMATIVE = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=1580,
-    serialized_end=1602,
+    serialized_end=1673,
 )
 
 _OEFSEARCHMESSAGE_OEF_ERROR_PERFORMATIVE = _descriptor.Descriptor(
@@ -498,8 +517,8 @@ _OEFSEARCHMESSAGE_OEF_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1604,
-    serialized_end=1714,
+    serialized_start=1675,
+    serialized_end=1785,
 )
 
 _OEFSEARCHMESSAGE = _descriptor.Descriptor(
@@ -718,7 +737,7 @@ _OEFSEARCHMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=42,
-    serialized_end=1730,
+    serialized_end=1801,
 )
 
 _OEFSEARCHMESSAGE_AGENTSINFO.containing_type = _OEFSEARCHMESSAGE
@@ -769,6 +788,9 @@ _OEFSEARCHMESSAGE_SEARCH_RESULT_PERFORMATIVE.fields_by_name[
     "agents_info"
 ].message_type = _OEFSEARCHMESSAGE_AGENTSINFO
 _OEFSEARCHMESSAGE_SEARCH_RESULT_PERFORMATIVE.containing_type = _OEFSEARCHMESSAGE
+_OEFSEARCHMESSAGE_SUCCESS_PERFORMATIVE.fields_by_name[
+    "agents_info"
+].message_type = _OEFSEARCHMESSAGE_AGENTSINFO
 _OEFSEARCHMESSAGE_SUCCESS_PERFORMATIVE.containing_type = _OEFSEARCHMESSAGE
 _OEFSEARCHMESSAGE_OEF_ERROR_PERFORMATIVE.fields_by_name[
     "oef_error_operation"
