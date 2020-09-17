@@ -129,6 +129,8 @@ OUTPUT_FILE = "output.txt"
 
 
 def run():
+    """Run demo."""
+
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
         os.remove(INPUT_FILE)

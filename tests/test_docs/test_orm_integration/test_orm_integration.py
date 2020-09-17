@@ -310,10 +310,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
 
 def test_strategy_consistency():
-    """
-    Test that the seller strategy specified in the documentation
-    is the same we use in the tests.
-    """
+    """Test that the seller strategy specified in the documentation is the same we use in the tests."""
     markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
 
     skill_doc_file = Path(ROOT_DIR, "docs", "orm-integration.md")

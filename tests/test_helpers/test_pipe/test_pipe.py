@@ -60,6 +60,7 @@ class TestAEAHelperMakePipe:
 
     @pytest.mark.asyncio
     async def test_connection_communication(self):
+        """Test connection communication."""
         pipe = make_ipc_channel()
         assert (
             pipe.in_path is not None and pipe.out_path is not None
@@ -94,6 +95,7 @@ class TestAEAHelperTCPSocketChannel:
 
     @pytest.mark.asyncio
     async def test_connection_communication(self):
+        """Test connection communication."""
         pipe = TCPSocketChannel()
         assert (
             pipe.in_path is not None and pipe.out_path is not None
@@ -123,6 +125,7 @@ class TestAEAHelperTCPSocketChannel:
 
     @pytest.mark.asyncio
     async def test_connection_refused(self):
+        """Test connection refused."""
         pipe = TCPSocketChannel()
         assert (
             pipe.in_path is not None and pipe.out_path is not None
@@ -141,6 +144,7 @@ class TestAEAHelperPosixNamedPipeChannel:
 
     @pytest.mark.asyncio
     async def test_connection_communication(self):
+        """Test connection communication."""
         pipe = PosixNamedPipeChannel()
         assert (
             pipe.in_path is not None and pipe.out_path is not None

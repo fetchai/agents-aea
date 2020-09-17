@@ -33,6 +33,7 @@ PEER_ID = "16Uiu2HAkw1VyY3RkiuMy38XKjb6w9EhbtXfwHkRpbQzNvXYVkG1T"
 
 
 def test_multiaddr_consistency():
+    """Test multiaddress consistency."""
     key = make_crypto(DEFAULT_LEDGER)
     maddr1 = MultiAddr(HOST, PORT, key.public_key)
 
@@ -52,6 +53,7 @@ def test_multiaddr_consistency():
 
 
 def test_multiaddr_correctness():
+    """Test multiaddress correctness."""
     tmpdir = tempfile.mkdtemp()
     key_file = tmpdir + "/key"
     with open(key_file, "w+") as k:

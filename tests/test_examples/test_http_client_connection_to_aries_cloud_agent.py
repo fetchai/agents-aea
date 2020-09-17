@@ -101,6 +101,7 @@ class TestAEAToACA:
 
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):
+        """Test connecting to aca."""
         configuration = ConnectionConfig(
             host=self.aca_admin_address,
             port=self.aca_admin_port,
@@ -166,6 +167,7 @@ class TestAEAToACA:
 
     @pytest.mark.asyncio
     async def test_end_to_end_aea_aca(self):
+        """Test the end to end aea aca interaction."""
         # AEA components
         wallet = Wallet({DEFAULT_LEDGER: DEFAULT_PRIVATE_KEY_FILE})
         identity = Identity(
@@ -266,6 +268,7 @@ class TestAEAToACA:
 
     @classmethod
     def teardown_class(cls):
+        """Teardown the aca."""
         # terminate the ACA
         cls.process.terminate()
 

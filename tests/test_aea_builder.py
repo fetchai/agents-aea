@@ -655,8 +655,7 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
 
 
 class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmpty):
-    """Test builder set from project dir with custom component config fails
-    when the component is not declared in the agent configuration."""
+    """Test builder set from project dir with custom component config fails when the component is not declared in the agent configuration."""
 
     def _add_stub_connection_config(self):
         """Add custom stub connection config."""

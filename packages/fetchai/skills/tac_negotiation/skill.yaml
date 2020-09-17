@@ -13,7 +13,7 @@ fingerprint:
   dialogues.py: QmdPAjBTpgrW9qP8SnAjKHWxBQRiGUqmgiiXMdrPKAJUKj
   handlers.py: QmeSaLfQV3rzHuHPhzsBps9z4AbX1MNevTs2YTjnZaWuEA
   helpers.py: QmfRnfpeCtHMEXSH3q3ofWhoSc7pbpRrSFSBVStUK3JWt3
-  strategy.py: QmPSfuF3MMjryq6Gg7JHbk5qcVpDLf1fGD7j2ozGSwxbz2
+  strategy.py: QmYcwqZ9ejjK2zxN8nKoc3kvBoGamTxwGQqXJrWV5s8STx
   transactions.py: Qmc9Re92RLFkfds1NspTRym1wn7XPGSNDRFGtaG6Hrix4E
 fingerprint_ignore_patterns: []
 contracts:

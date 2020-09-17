@@ -56,9 +56,11 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         cls.node_multiplexer.connect()
 
     def test_node(self):
+        """Test the node is connected."""
         assert self.node_connection.is_connected is True
 
     def test_connection(self):
+        """Test the connection can be used in an aea."""
         self.add_item("connection", "fetchai/p2p_libp2p_client:0.6.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.force_set_config(

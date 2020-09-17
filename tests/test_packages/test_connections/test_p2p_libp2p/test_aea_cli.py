@@ -43,6 +43,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
 
     @libp2p_log_on_failure
     def test_agent(self):
+        """Test with aea."""
         self.add_item("connection", "fetchai/p2p_libp2p:0.9.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.9.0")
 
@@ -87,6 +88,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
 
     @libp2p_log_on_failure
     def test_agent(self):
+        """Test with aea."""
         self.add_item("connection", "fetchai/p2p_libp2p:0.9.0")
 
         # setup a full node: with public uri, relay service, and delegate service

@@ -199,6 +199,7 @@ class Instance:
         return message
 
     def get(self):
+        """Get an instance."""
         wait_for_condition(lambda: not self.multiplexer.in_queue.empty(), timeout=20)
         return self.multiplexer.get()
 

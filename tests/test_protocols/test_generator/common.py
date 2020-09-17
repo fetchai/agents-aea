@@ -31,4 +31,5 @@ PATH_TO_T_PROTOCOL = os.path.join(
 
 
 def black_is_not_installed(*args, **kwargs):
+    """Check black is not installed."""
     return not args[0] == "black"

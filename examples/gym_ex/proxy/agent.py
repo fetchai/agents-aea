@@ -78,6 +78,12 @@ class ProxyAgent(Agent):
         pass
 
     def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle envelope.
+
+        :param envelope: the envelope
+        :return: None
+        """
         if envelope is not None:
             self.proxy_env_queue.put(envelope)
 

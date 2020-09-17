@@ -319,6 +319,8 @@ FETCHAI_PRIVATE_KEY_FILE_2 = "fetchai_private_key_2.txt"
 
 
 def run():
+    """Run demo."""
+
     # Create a private key
     create_private_key(
         FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1

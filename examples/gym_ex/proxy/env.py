@@ -219,7 +219,6 @@ class ProxyEnv(gym.Env):
         self._agent.outbox.put_message(message=gym_msg)
 
     def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> GymMessage:
-
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 
@@ -250,7 +249,6 @@ class ProxyEnv(gym.Env):
         raise ValueError("Missing envelope.")
 
     def _decode_status(self, envelope: Envelope) -> None:
-
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 

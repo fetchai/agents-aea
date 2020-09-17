@@ -63,8 +63,7 @@ def test_component_loading_generic_module_not_found_error(component_configuratio
 def test_component_loading_module_not_found_error_non_framework_package(
     component_configuration,
 ):
-    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs
-    for a generic import path (non framework related."""
+    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs for a generic import path (non framework related."""
     with mock.patch.object(
         Protocol,
         "from_config",
@@ -77,9 +76,7 @@ def test_component_loading_module_not_found_error_non_framework_package(
 def test_component_loading_module_not_found_error_framework_package(
     component_configuration,
 ):
-    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs
-    for a framework-related import (starts with 'packages') but for some reason it doesn't
-    contain the author name."""
+    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs for a framework-related import (starts with 'packages') but for some reason it doesn't contain the author name."""
     with mock.patch.object(
         Protocol,
         "from_config",
@@ -92,8 +89,7 @@ def test_component_loading_module_not_found_error_framework_package(
 def test_component_loading_module_not_found_error_framework_package_with_wrong_author(
     component_configuration,
 ):
-    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs
-    for a framework-related import (starts with 'packages') with wrong author."""
+    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs for a framework-related import (starts with 'packages') with wrong author."""
     with mock.patch.object(
         Protocol,
         "from_config",
@@ -109,8 +105,7 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_a
 def test_component_loading_module_not_found_error_framework_package_with_wrong_type(
     component_configuration,
 ):
-    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs
-    for a framework-related import (starts with 'packages') with correct author but wrong type."""
+    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs for a framework-related import (starts with 'packages') with correct author but wrong type."""
     with mock.patch.object(
         Protocol,
         "from_config",
@@ -128,8 +123,7 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_t
 def test_component_loading_module_not_found_error_framework_package_with_wrong_name(
     component_configuration,
 ):
-    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs
-    for a framework-related import (starts with 'packages') with correct author and type but wrong name."""
+    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs for a framework-related import (starts with 'packages') with correct author and type but wrong name."""
     with mock.patch.object(
         Protocol,
         "from_config",
@@ -147,8 +141,7 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_n
 def test_component_loading_module_not_found_error_framework_package_with_wrong_suffix(
     component_configuration,
 ):
-    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs
-    for a framework-related import (starts with 'packages') with correct author and type but wrong suffix."""
+    """Test 'load_component_from_config' method when a "ModuleNotFoundError" occurs for a framework-related import (starts with 'packages') with correct author and type but wrong suffix."""
     with mock.patch.object(
         Protocol,
         "from_config",

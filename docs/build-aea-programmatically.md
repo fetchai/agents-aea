@@ -176,6 +176,8 @@ FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifi
 
 
 def run():
+    """Run demo."""
+
     # Create a private key
     create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 

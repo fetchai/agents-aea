@@ -38,15 +38,18 @@ class MyTask(Task):
         self.return_value = return_value
 
     def setup(self) -> None:
+        """Setup task."""
         self.setup_called = True
 
     def execute(self, *args, **kwargs) -> None:
+        """Execute task."""
         self.execute_called = True
         self.execute_args = args
         self.execute_kwargs = kwargs
         return self.return_value
 
     def teardown(self) -> None:
+        """Teardown task."""
         self.teardown_called = True
 
 

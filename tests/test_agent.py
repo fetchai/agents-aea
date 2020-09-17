@@ -62,6 +62,7 @@ class DummyAgent(Agent):
 
     @property
     def resources(self):
+        """Get resources."""
         return Mock()
 
 

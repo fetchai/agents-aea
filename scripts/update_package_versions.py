@@ -454,8 +454,7 @@ def replace_aea_add_statements(content, old_string, new_string, type_) -> str:
 
 
 def replace_type_and_public_id_occurrences(line, old_string, new_string, type_) -> str:
-    """Replace the public id whenever the type and the id occur in the same row,
-    and NOT when other type names occur."""
+    """Replace the public id whenever the type and the id occur in the same row, and NOT when other type names occur."""
     if re.match(f"{type_}.*{old_string}", line) and all(
         _type not in line for _type in TYPES.difference({type_})
     ):

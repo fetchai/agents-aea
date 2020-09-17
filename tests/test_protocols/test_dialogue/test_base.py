@@ -1582,6 +1582,7 @@ class TestDialoguesBase:
         assert nonce != second_nonce
 
     def test_get_dialogues_with_counterparty(self):
+        """Test get dialogues with counterparty."""
         assert (
             self.own_dialogues.get_dialogues_with_counterparty(self.opponent_address)
             == []

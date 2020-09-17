@@ -88,6 +88,7 @@ def test_non_implemented_class_methods():
 
 @pytest.fixture()
 def dummy_contract(request):
+    """Dummy contract fixture."""
     directory = Path(ROOT_DIR, "tests", "data", "dummy_contract")
     configuration = load_component_configuration(ComponentType.CONTRACT, directory)
     configuration._directory = directory

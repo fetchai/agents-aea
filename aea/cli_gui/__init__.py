@@ -23,7 +23,7 @@ import os
 import subprocess  # nosec
 import sys
 import threading
-from typing import Dict, List
+from typing import Any, Dict, List, Tuple
 
 from click import ClickException
 
@@ -232,9 +232,13 @@ def remove_local_item(agent_id: str, item_type: str, item_id: str):
         return agent_id, 201  # 200 (OK)
 
 
-def get_local_items(agent_id: str, item_type: str):
+def get_local_items(agent_id: str, item_type: str) -> Tuple[List[Dict[Any, Any]], int]:
+    """
+    Return a list of protocols, skills or connections supported by a local agent.
 
-    """Return a list of protocols, skills or connections supported by a local agent."""
+    :param agent_id: the id of the agent
+    :param item_type: the type of item
+    """
     if agent_id == "NONE":
         return [], 200  # 200 (Success)
 
@@ -244,7 +248,7 @@ def get_local_items(agent_id: str, item_type: str):
         try_to_load_agent_config(ctx)
         result = cli_list_agent_items(ctx, item_type)
     except ClickException:
-        return {"detail": "Failed to list agent items."}, 400  # 400 Bad request
+        return [{"detail": "Failed to list agent items."}], 400  # 400 Bad request
     else:
         sorted_items = sort_items(result)
         return sorted_items, 200  # 200 (Success)

@@ -32,6 +32,7 @@ class TestComponentProperties:
     """Test accessibility of component properties."""
 
     def setup_class(self):
+        """Setup test."""
         self.configuration = ProtocolConfig("name", "author", "0.1.0")
         self.component = Component(configuration=self.configuration)
         self.directory = Path()

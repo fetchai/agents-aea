@@ -378,9 +378,7 @@ class ThreadedAsyncRunner(Thread):
 
 
 class AwaitableProc:
-    """
-    Async-friendly subprocess.Popen
-    """
+    """Async-friendly subprocess.Popen."""
 
     def __init__(self, *args, **kwargs):
         """Initialise awaitable proc."""
