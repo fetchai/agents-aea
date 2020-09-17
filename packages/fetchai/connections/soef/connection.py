@@ -889,9 +889,9 @@ class SOEFChannel:
         if data_model_name == "location_agent":
             await handler()
         else:
-            await handler(service_description)
+            await handler(service_description, oef_message, oef_search_dialogue)
 
-    async def _unregister_agent(self) -> None:
+    async def _unregister_agent(self) -> None:  # pylint: disable=unused-argument
         """
         Unnregister a service_name from the SOEF.
 
