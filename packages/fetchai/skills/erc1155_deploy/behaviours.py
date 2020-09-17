@@ -35,7 +35,7 @@ from packages.fetchai.skills.erc1155_deploy.dialogues import (
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 
 DEFAULT_SERVICES_INTERVAL = 30.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.5.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
 
 class ServiceRegistrationBehaviour(TickerBehaviour):
@@ -130,7 +130,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id="fetchai/erc1155:0.9.0",
+            contract_id="fetchai/erc1155:0.10.0",
             callable="get_deploy_transaction",
             kwargs=ContractApiMessage.Kwargs(
                 {"deployer_address": self.context.agent_address}
@@ -156,7 +156,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id="fetchai/erc1155:0.9.0",
+            contract_id="fetchai/erc1155:0.10.0",
             contract_address=strategy.contract_address,
             callable="get_create_batch_transaction",
             kwargs=ContractApiMessage.Kwargs(
@@ -186,7 +186,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id="fetchai/erc1155:0.9.0",
+            contract_id="fetchai/erc1155:0.10.0",
             contract_address=strategy.contract_address,
             callable="get_mint_batch_transaction",
             kwargs=ContractApiMessage.Kwargs(

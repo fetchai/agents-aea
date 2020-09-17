@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/gym_aea:0.10.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.11.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -8,10 +8,10 @@ aea create my_gym_aea
 cd my_gym_aea
 ```
 ``` bash
-aea add skill fetchai/gym:0.7.0
+aea add skill fetchai/gym:0.8.0
 ```
 ``` bash
-aea add connection fetchai/gym:0.7.0
+aea add connection fetchai/gym:0.8.0
 aea config set agent.default_connection fetchai/gym:0.7.0
 ```
 ``` bash

@@ -1,17 +1,17 @@
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.13.0
+aea fetch fetchai/erc1155_deployer:0.14.0
 cd erc1155_deployer
 aea install
 ```
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/p2p_libp2p:0.9.0
+aea add connection fetchai/p2p_libp2p:0.10.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.5.0
-aea add skill fetchai/erc1155_deploy:0.13.0
+aea add connection fetchai/ledger:0.6.0
+aea add skill fetchai/erc1155_deploy:0.14.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
@@ -25,19 +25,19 @@ aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt --connection
 ```
 ``` bash
-aea fetch fetchai/erc1155_client:0.13.0
+aea fetch fetchai/erc1155_client:0.14.0
 cd erc1155_client
 aea install
 ```
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/p2p_libp2p:0.9.0
+aea add connection fetchai/p2p_libp2p:0.10.0
 aea add connection fetchai/soef:0.8.0
-aea add connection fetchai/ledger:0.5.0
-aea add skill fetchai/erc1155_client:0.12.0
+aea add connection fetchai/ledger:0.6.0
+aea add skill fetchai/erc1155_client:0.13.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
@@ -75,14 +75,14 @@ aea delete erc1155_client
 ```
 ``` yaml
 default_routing:
-  fetchai/contract_api:0.4.0: fetchai/ledger:0.5.0
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.5.0
+  fetchai/contract_api:0.5.0: fetchai/ledger:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.6.0
   fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 ``` yaml
 default_routing:
-  fetchai/contract_api:0.4.0: fetchai/ledger:0.5.0
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.5.0
+  fetchai/contract_api:0.5.0: fetchai/ledger:0.6.0
+  fetchai/ledger_api:0.3.0: fetchai/ledger:0.6.0
   fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
 ```
 ``` yaml

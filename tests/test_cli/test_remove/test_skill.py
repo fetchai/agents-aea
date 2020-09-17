@@ -45,7 +45,7 @@ class TestRemoveSkillWithPublicId:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/gym:0.7.0"
+        cls.skill_id = "fetchai/gym:0.8.0"
         cls.skill_name = "gym"
 
         os.chdir(cls.t)
@@ -114,7 +114,7 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/gym:0.7.0"
+        cls.skill_id = "fetchai/gym:0.8.0"
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -168,7 +168,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/gym:0.7.0"
+        cls.skill_id = "fetchai/gym:0.8.0"
         cls.skill_name = "gym"
 
         os.chdir(cls.t)
