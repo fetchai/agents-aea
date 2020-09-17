@@ -186,12 +186,20 @@ class MyAgent(Agent):
         super().__init__(identity, connections)
 
     def setup(self):
+        """Setup the agent."""
         pass
 
     def act(self):
+        """Act implementation."""
         print("Act called for tick {}".format(self.tick))
 
     def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle envelope.
+
+        :param envelope: the envelope received
+        :return: None
+        """
         print("React called for tick {}".format(self.tick))
         if envelope is not None and envelope.protocol_id == DefaultMessage.protocol_id:
             sender = envelope.sender
@@ -209,6 +217,7 @@ class MyAgent(Agent):
             self.outbox.put(envelope)
 
     def teardown(self):
+        """Teardown the agent."""
         pass
 
 

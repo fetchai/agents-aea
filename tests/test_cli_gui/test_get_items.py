@@ -94,4 +94,4 @@ class GetLocalItemsTestCase(TestCase):
 
         result = json.loads(response.get_data(as_text=True))
         expected_result = "Failed to list agent items."
-        self.assertEqual(result["detail"], expected_result)
+        self.assertEqual(result[0]["detail"], expected_result)
