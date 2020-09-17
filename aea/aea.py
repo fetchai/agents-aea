@@ -81,7 +81,7 @@ class AEA(Agent, WithLogger):
             DecisionMakerHandler
         ] = DefaultDecisionMakerHandler,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
-        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.just_log,
+        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         default_connection: Optional[PublicId] = None,

@@ -114,7 +114,7 @@ class BaseRuntime(ABC):
     def _get_multiplexer_instance(self) -> Multiplexer:
         """Create multiplexer instance."""
         exception_policy = getattr(
-            self._agent, "_connection_exception_policy", ExceptionPolicyEnum.just_log
+            self._agent, "_connection_exception_policy", ExceptionPolicyEnum.propagate
         )
         return Multiplexer(
             self._agent.connections, loop=self.loop, exception_policy=exception_policy
