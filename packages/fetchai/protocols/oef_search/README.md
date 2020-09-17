@@ -25,7 +25,8 @@ speech_acts:
   search_result:
     agents: pt:list[pt:str]
     agents_info: ct:AgentsInfo
-  success: {}
+  success:
+    agents_info: ct:AgentsInfo
   oef_error:
     oef_error_operation: ct:OefErrorOperation
 ...
