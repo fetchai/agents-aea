@@ -542,8 +542,11 @@ class SOEFChannel:
         message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SUCCESS,
             target_message=oef_message,
-            service_description=Description(
-                {"content": content, **service_description.values}
+            agents_info=AgentsInfo(
+                {
+                    "response": {"content": content},
+                    "command": service_description.values,
+                }
             ),
         )
         envelope = Envelope(

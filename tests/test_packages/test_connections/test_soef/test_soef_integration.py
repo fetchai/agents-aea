@@ -370,7 +370,7 @@ class TestRealNetwork:
             assert (
                 envelope.message.performative == OefSearchMessage.Performative.SUCCESS
             )
-            ET.fromstring(envelope.message.service_description.values["content"])
+            ET.fromstring(envelope.message.agents_info.body["response"]["content"])
 
             agent.generic_command("bad_command")
             envelope = agent.get()
