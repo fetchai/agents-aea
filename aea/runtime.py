@@ -152,7 +152,7 @@ class BaseRuntime(Runnable):
         return self.RUN_LOOPS[loop_mode]
 
     def _set_task(self):
-        self._task = self._loop.create_task(self._run_wrapper(), name=self._agent.name)
+        self._task = self._loop.create_task(self._run_wrapper())
 
     @property
     def decision_maker(self) -> DecisionMaker:
