@@ -436,8 +436,7 @@ def test_public_id_from_uri_path():
 
 
 def test_public_id_from_uri_path_wrong_input():
-    """Test that when a bad formatted path is passed in input of PublicId.from_uri_path
-    an exception is raised."""
+    """Test that when a bad formatted path is passed in input of PublicId.from_uri_path an exception is raised."""
     with pytest.raises(
         ValueError, match="Input 'bad/formatted:input' is not well formatted."
     ):
@@ -634,6 +633,7 @@ def test_agent_config_to_json_with_optional_configurations():
 
 
 def test_protocol_specification_attributes():
+    """Test protocol specification attributes."""
     protocol_specification = ProtocolSpecification("name", "author", "0.1.0")
 
     # test getter and setter for 'protobuf_snippets'

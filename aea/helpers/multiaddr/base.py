@@ -45,20 +45,29 @@ ZERO = b"\x00"
 if ENABLE_INLINING:
 
     class IdentityHash:
-        """ Neutral hashing implementation for inline multihashing """
+        """Neutral hashing implementation for inline multihashing."""
 
         _digest: bytes
 
         def __init__(self) -> None:
-            """ Initialize IdentityHash object """
+            """Initialize IdentityHash object."""
             self._digest = bytearray()
 
         def update(self, input_data: bytes) -> None:
-            """ Update data to hash """
+            """
+            Update data to hash.
+
+            :param input_data: the data
+            :return: None
+            """
             self._digest += input_data
 
         def digest(self) -> bytes:
-            """ Hash of input data """
+            """
+            Get hash of input data.
+
+            :return: the hash
+            """
             return self._digest
 
     multihash.FuncReg.register(
@@ -67,26 +76,26 @@ if ENABLE_INLINING:
 
 
 def _pad_scalar(scalar):
+    """Pad scalar."""
     return (ZERO * (KEY_SIZE - len(scalar))) + scalar
 
 
 def _pad_hex(hexed):
-    """ Pad odd-length hex strings """
+    """Pad odd-length hex strings."""
     return hexed if not len(hexed) & 1 else "0" + hexed
 
 
 def _hex_to_bytes(hexed):
+    """Hex to bytes."""
     return _pad_scalar(unhexlify(_pad_hex(hexed)))
 
 
 class MultiAddr:
-    """
-    Protocol Labs' Multiaddress representation of a network address
-    """
+    """Protocol Labs' Multiaddress representation of a network address."""
 
     def __init__(self, host: str, port: int, public_key: str):
         """
-        Initialize a multiaddress
+        Initialize a multiaddress.
 
         :param host: ip host of the address
         :param host: port number of the address
@@ -136,7 +145,7 @@ class MultiAddr:
         return self._peerid
 
     def format(self) -> str:
-        """ Canonical representation of a multiaddress """
+        """Canonical representation of a multiaddress."""
         return f"/dns4/{self._host}/tcp/{self._port}/p2p/{self._peerid}"
 
     def __str__(self) -> str:

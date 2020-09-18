@@ -93,10 +93,12 @@ class TestLibp2pConnectionRelayNodeRestart:
             raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.relay.is_connected is True
         assert self.connection.is_connected is True
 
     def test_envelope_routed_after_relay_restart(self):
+        """Test envelope routed after relay restart."""
         addr_1 = self.connection.address
         addr_2 = self.genesis.address
 
@@ -220,10 +222,12 @@ class TestLibp2pConnectionAgentMobility:
             raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.connection1.is_connected is True
         assert self.connection2.is_connected is True
 
     def test_envelope_routed_after_peer_changed(self):
+        """Test envelope routed after peer changed."""
         addr_1 = self.connection1.address
         addr_2 = self.connection2.address
 

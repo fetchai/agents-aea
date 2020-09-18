@@ -76,7 +76,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.12.0",
+            "fetchai/simple_service_registration:0.13.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -107,9 +107,9 @@ class TestBuildSkill(AEATestCaseMany):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.9.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
         self.add_item("connection", "fetchai/soef:0.8.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.9.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
 

@@ -53,10 +53,12 @@ logging.basicConfig(level=logging.INFO)
 
 
 def black_is_not_installed_side_effect(*args, **kwargs):
+    """Black not installed."""
     return not args[0] == "black"
 
 
 def protoc_is_not_installed_side_effect(*args, **kwargs):
+    """Protoco not installed."""
     return not args[0] == "protoc"
 
 
@@ -65,6 +67,7 @@ class TestCommon(TestCase):
 
     @classmethod
     def setup_class(cls):
+        """Setup test."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)

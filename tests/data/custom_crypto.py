@@ -29,38 +29,79 @@ class CustomCrypto(Crypto):
 
     @classmethod
     def generate_private_key(cls) -> EntityClass:
+        """Generare private key."""
         pass
 
     @classmethod
     def load_private_key_from_path(cls, file_name: str) -> EntityClass:
+        """
+        Load private key from path.
+
+        :param file_name: file name
+        """
         pass
 
     @property
     def public_key(self) -> str:
+        """Get public key."""
         pass
 
     @property
     def address(self) -> str:
+        """Get address."""
         pass
 
     @property
     def private_key(self) -> str:
+        """Get private key."""
         pass
 
     @classmethod
     def get_address_from_public_key(cls, public_key: str) -> str:
+        """
+        Get address from public key.
+
+        :param public_key: the public key.
+        :return: the address
+        """
         pass
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
+        """
+        Sign message.
+
+        :param message: the message
+        :param is_deprecated_mode: whether or not deprecated signing mode is used.
+        :return: signed message string
+        """
         pass
 
     def sign_transaction(self, transaction: Any) -> Any:
+        """
+        Sign transaction.
+
+        :param transaction: the transaction to be signed
+        :return: the signed transaction
+        """
         pass
 
     def recover_message(
         self, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[Address, ...]:
+        """
+        Recover message.
+
+        :param message: the message
+        :param signature: the signature
+        :param is_deprecated_mode: whether or not it is deprecated
+        """
         pass
 
     def dump(self, fp: BinaryIO) -> None:
+        """
+        Dump the private key.
+
+        :param fp: the file path
+        :return: None
+        """
         pass

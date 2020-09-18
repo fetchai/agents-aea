@@ -1,6 +1,6 @@
 name: erc1155
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 type: contract
 description: The erc1155 contract implements an ERC1155 contract package.
 license: Apache-2.0
@@ -10,7 +10,7 @@ fingerprint:
   build/Migrations.json: QmfFYYWoq1L1Ni6YPBWWoRPvCZKBLZ7qzN3UDX537mCeuE
   build/erc1155.json: Qma5n7au2NDCg1nLwYfYnmFNwWChFuXtu65w5DV7wAZRvw
   build/erc1155.wasm: Qmc9gthbdwRSywinTHKjRVQdFzrKTxUuLDx2ryNfQp1xqf
-  contract.py: QmYSTxYstk7dmP8TfgiX6HZpegoWTwW8DfBdXpzyBGp9pN
+  contract.py: QmSEfxq6dH53q9qEw3KrtTgUqvyDgCefy59RNpciGGAGi6
   contracts/Migrations.sol: QmbW34mYrj3uLteyHf3S46pnp9bnwovtCXHbdBHfzMkSZx
   contracts/erc1155.vy: QmXwob8G1uX7fDvtuuKW139LALWtQmGw2vvaTRBVAWRxTx
   migrations/1_initial_migration.js: QmcxaWKQ2yPkQBmnpXmcuxPZQUMuUudmPmX3We8Z9vtAf7

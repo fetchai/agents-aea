@@ -57,6 +57,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def run():
+    """Run demo."""
+
     # Create a private key
     create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
     create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)

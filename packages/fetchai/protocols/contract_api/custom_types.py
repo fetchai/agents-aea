@@ -85,7 +85,9 @@ class Kwargs:
         return kwargs
 
     def __eq__(self, other):
+        """Check equality."""
         return isinstance(other, Kwargs) and self.body == other.body
 
     def __str__(self):
+        """Get string representation."""
         return "Kwargs: body={}".format(self.body)

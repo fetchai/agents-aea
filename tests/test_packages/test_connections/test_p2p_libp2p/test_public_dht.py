@@ -63,6 +63,7 @@ class TestLibp2pConnectionPublicDHTRelay:
         cls.log_files = []
 
     def test_connectivity(self):
+        """Test connectivity."""
         for maddr in PUBLIC_DHT_MADDRS:
             connection = _make_libp2p_connection(
                 DEFAULT_PORT + 1, relay=False, entry_peers=[maddr]
@@ -81,6 +82,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 multiplexer.disconnect()
 
     def test_communication_direct(self):
+        """Test communication direct."""
         for maddr in PUBLIC_DHT_MADDRS:
             multiplexers = []
             try:
@@ -136,6 +138,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     mux.disconnect()
 
     def test_communication_indirect(self):
+        """Test communication indirect."""
         assert len(PUBLIC_DHT_MADDRS) > 1, "Test requires at least 2 public dht node"
 
         for i in range(len(PUBLIC_DHT_MADDRS)):
@@ -215,6 +218,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
     """Test that public DHT's delegate service is working properly"""
 
     def test_connectivity(self):
+        """Test connectivity."""
         for uri in PUBLIC_DHT_DELEGATE_URIS:
             connection = _make_libp2p_client_connection(uri=uri)
             multiplexer = Multiplexer([connection])
@@ -230,6 +234,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 multiplexer.disconnect()
 
     def test_communication_direct(self):
+        """Test communication direct."""
         for uri in PUBLIC_DHT_DELEGATE_URIS:
             multiplexers = []
             try:
@@ -279,6 +284,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     mux.disconnect()
 
     def test_communication_indirect(self):
+        """Test communication indirect."""
         assert (
             len(PUBLIC_DHT_DELEGATE_URIS) > 1
         ), "Test requires at least 2 public dht node"
@@ -348,8 +354,9 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
 
     @libp2p_log_on_failure
     def test_connectivity(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.9.0")
+        """Test connectivity."""
+        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
 
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.set_config(
@@ -393,7 +400,8 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
     def test_connectivity(self):
-        self.add_item("connection", "fetchai/p2p_libp2p_client:0.6.0")
+        """Test connectivity."""
+        self.add_item("connection", "fetchai/p2p_libp2p_client:0.7.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.force_set_config(
             "{}.nodes".format(config_path),

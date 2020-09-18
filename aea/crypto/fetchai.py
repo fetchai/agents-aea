@@ -50,9 +50,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
     identifier = _FETCHAI
 
     def __init__(self, **kwargs):
-        """
-        Initialize the Fetch.ai ledger APIs.
-        """
+        """Initialize the Fetch.ai ledger APIs."""
         if "address" not in kwargs:
             kwargs["address"] = DEFAULT_ADDRESS  # pragma: nocover
         if "denom" not in kwargs:

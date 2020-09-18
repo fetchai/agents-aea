@@ -73,6 +73,7 @@ def load_yaml(filepath: str) -> Dict:
 def is_readme_present(readme_path: str) -> bool:
     """
     Check is readme file present.
+
     This method is needed for proper testing.
 
     :param readme_path: path to readme file.

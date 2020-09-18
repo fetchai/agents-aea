@@ -19,9 +19,7 @@
 # ------------------------------------------------------------------------------
 # pylint: disable=cyclic-import
 
-"""
-This script will update the symlinks of the project, cross-platform compatible.
-"""
+"""This script will update the symlinks of the project, cross-platform compatible."""
 
 import contextlib
 import inspect

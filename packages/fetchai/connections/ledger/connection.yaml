@@ -1,20 +1,20 @@
 name: ledger
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 type: connection
 description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmRWAyV2qsyzALTGQft4m9Nd3N6kCcuK1AQ7APmwfAoouW
+  README.md: QmfQN7UK1M4pBUzKVzPannPLVi8iiULKHNtJ7XpoWpjqfc
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmP6SiNTCWBW8Bt6wsgP2gp7K2LcV4AeVk2saM7tqyx44S
+  base.py: QmNnSBVmVgdDFwzqDUncwLHeyDfMEfmvujJdKbdGNGH4Be
   connection.py: QmS3CJwjgzZ5SrAeJjCnC5ChZDfTsDuV6ndgMsGV1bidnf
-  contract_dispatcher.py: QmQFEapPMbSn5CLmtkqQTmD5pTgfXDAGc3qo8rc5Jg7Drn
+  contract_dispatcher.py: QmRegSPqqkns7xp5zr6xiuTxjGLiGGG2qLkwunpFCbzEwX
   ledger_dispatcher.py: QmarLEyR2Je6NtXSJmPy9NbGL7J85FVAZJPkFKqCotEKjc
 fingerprint_ignore_patterns: []
 protocols:
-- fetchai/contract_api:0.4.0
+- fetchai/contract_api:0.5.0
 - fetchai/ledger_api:0.3.0
 class_name: LedgerConnection
 config:
@@ -26,6 +26,6 @@ config:
       address: https://rest-agent-land.fetch.ai:443
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/contract_api:0.4.0
+- fetchai/contract_api:0.5.0
 - fetchai/ledger_api:0.3.0
 dependencies: {}

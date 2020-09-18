@@ -18,9 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This tool generates the API docs.
-"""
+"""This tool generates the API docs."""
 
 import shutil
 import subprocess  # nosec

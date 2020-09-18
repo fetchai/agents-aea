@@ -48,6 +48,7 @@ class TestExtractSpecification(TestCase):
 
     @classmethod
     def setup_class(cls):
+        """Setup class."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)

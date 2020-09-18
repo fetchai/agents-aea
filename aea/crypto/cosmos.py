@@ -355,9 +355,7 @@ class _CosmosApi(LedgerApi):
     identifier = _COSMOS
 
     def __init__(self, **kwargs):
-        """
-        Initialize the Cosmos ledger APIs.
-        """
+        """Initialize the Cosmos ledger APIs."""
         self._api = None
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
@@ -991,16 +989,12 @@ class CosmosFaucetApi(FaucetApi):
 
     @classmethod
     def _faucet_request_uri(cls) -> str:
-        """
-        Generates the request URI derived from `cls.faucet_base_url`
-        """
+        """Generates the request URI derived from `cls.faucet_base_url`."""
         if cls.testnet_faucet_url is None:  # pragma: nocover
             raise ValueError("Testnet faucet url not set.")
         return f"{cls.testnet_faucet_url}/claim/requests"
 
     @classmethod
     def _faucet_status_uri(cls, uid: str) -> str:
-        """
-        Generates the status URI derived from `cls.faucet_base_url`
-        """
+        """Generates the status URI derived from `cls.faucet_base_url`."""
         return f"{cls._faucet_request_uri()}/{uid}"

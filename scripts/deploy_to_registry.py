@@ -18,9 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This script deploys all new packages to registry.
-"""
+"""This script deploys all new packages to registry."""
 
 import os
 import shutil

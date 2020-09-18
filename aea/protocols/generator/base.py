@@ -1904,6 +1904,7 @@ class ProtocolGenerator:
     def generate_protobuf_only_mode(self) -> None:
         """
         Run the generator in "protobuf only" mode:
+
         a) validate the protocol specification.
         b) create the protocol buffer schema file.
 
@@ -1936,6 +1937,7 @@ class ProtocolGenerator:
     def generate_full_mode(self) -> None:
         """
         Run the generator in "full" mode:
+
         a) validates the protocol specification.
         b) creates the protocol buffer schema file.
         c) generates python modules.
@@ -1999,6 +2001,7 @@ class ProtocolGenerator:
     def generate(self, protobuf_only: bool = False) -> None:
         """
         Run the generator. If in "full" mode (protobuf_only is False), it:
+
         a) validates the protocol specification.
         b) creates the protocol buffer schema file.
         c) generates python modules.

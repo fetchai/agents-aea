@@ -28,7 +28,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.12.0
+aea fetch fetchai/weather_station:0.13.0
 cd weather_station
 ```
 
@@ -103,6 +103,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def run():
+    """Run demo."""
+
     # Create a private key
     create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
     create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)

@@ -82,5 +82,6 @@ class TestDecisionMakerTransaction(BaseAEATestCase):
 
     @classmethod
     def teardown_class(cls):
+        """Teardown test."""
         BaseAEATestCase.teardown_class()
         cls._unpatch_logger()

@@ -36,15 +36,13 @@ from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.6.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.7.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
 
 class Uri:
-    """
-    Holds a node address in format "host:port"
-    """
+    """Holds a node address in format "host:port"."""
 
     def __init__(
         self,
@@ -65,9 +63,11 @@ class Uri:
             self._port = randint(5000, 10000)  # nosec
 
     def __str__(self):
+        """Get string representation."""
         return "{}:{}".format(self._host, self._port)
 
     def __repr__(self):  # pragma: no cover
+        """Get object representation."""
         return self.__str__()
 
     @property
@@ -84,6 +84,7 @@ class Uri:
 class P2PLibp2pClientConnection(Connection):
     """
     A libp2p client connection.
+
     Send and receive envelopes to and from agents on the p2p network without deploying a libp2p node.
     Connect to the libp2p node using traffic delegation service.
     """
@@ -91,9 +92,7 @@ class P2PLibp2pClientConnection(Connection):
     connection_id = PUBLIC_ID
 
     def __init__(self, **kwargs):
-        """
-        Initialize a libp2p client connection.
-        """
+        """Initialize a libp2p client connection."""
         super().__init__(**kwargs)
 
         ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)

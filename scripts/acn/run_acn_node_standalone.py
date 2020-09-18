@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-""" Run an ACN libp2p node without requiring the agents framework """
+"""Run an ACN libp2p node without requiring the agents framework."""
 
 import argparse
 import os
@@ -34,9 +34,7 @@ from multihash import decode as multihashdecode  # type: ignore
 
 
 class AcnNodeConfig:
-    """
-    Store the configuration of an acn node as a dictionary
-    """
+    """Store the configuration of an acn node as a dictionary."""
 
     KEY = "AEA_P2P_ID"
     URI = "AEA_P2P_URI"
@@ -93,7 +91,7 @@ class AcnNodeConfig:
             AcnNodeConfig.check_config(self.config)
 
     def dump(self, file_path: str) -> None:
-        """ Write current configuration to file """
+        """Write current configuration to file."""
         with open(file_path, "w") as f:
             for key, value in self.config.items():
                 f.write("{}={}\n".format(key, value))
@@ -101,7 +99,7 @@ class AcnNodeConfig:
     @classmethod
     def from_file(cls, file_path: str, enable_checks: bool = True) -> "AcnNodeConfig":
         """
-        Create a new AcnNodeConfig objet from file
+        Create a new AcnNodeConfig objet from file.
 
         :param file_path: path to the file containing the configuration
         :return: newly created AcnNodeConfig object, if successful
@@ -133,7 +131,7 @@ class AcnNodeConfig:
     @staticmethod
     def check_config(config: Dict[str, str]) -> None:
         """
-        Validate an ACN node configuration
+        Validate an ACN node configuration.
 
         :param config: dictionary containing the configuration to check
         """
@@ -156,6 +154,7 @@ class AcnNodeConfig:
 
     @staticmethod
     def _check_uri(uri: str) -> None:
+        """Check uri."""
         if uri == "":
             return
         parts = uri.split(":")
@@ -165,6 +164,7 @@ class AcnNodeConfig:
 
     @staticmethod
     def _check_maddr(maddr: str) -> None:
+        """Check multiaddress."""
         if maddr == "":
             return
         parts = maddr.split("/")
@@ -174,13 +174,11 @@ class AcnNodeConfig:
 
 
 class AcnNodeStandalone:
-    """
-    Deploy an acn node in standalone mode
-    """
+    """Deploy an acn node in standalone mode."""
 
     def __init__(self, config: AcnNodeConfig, libp2p_node_binary: str):
         """
-        Initialize a new AcnNodeStandalone object
+        Initialize a new AcnNodeStandalone object.
 
         :param config: node's configuration
         :param libp2p_node_binary: path to libp2p node binary
@@ -191,8 +189,7 @@ class AcnNodeStandalone:
         self._proc = None  # type: Optional[subprocess.Popen]
 
     def run(self):
-        """ Run the node """
-
+        """Run the node."""
         config_file = ".acn_config"
         self.config.dump(config_file)
 
@@ -206,15 +203,14 @@ class AcnNodeStandalone:
             pass
 
     def stop(self):
-        """ Stop the node """
-
+        """Stop the node."""
         if self._proc is not None:
             self._proc.terminate()
             self._proc.wait()
 
 
 def parse_commandline():
-    """ Parse script cl arguments """
+    """Parse script cl arguments."""
 
     parser = argparse.ArgumentParser()
     parser.add_argument("libp2p_node")

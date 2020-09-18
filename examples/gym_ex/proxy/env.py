@@ -87,7 +87,7 @@ class ProxyEnv(gym.Env):
         super().__init__()
         self._queue: Queue = Queue()
         self._action_counter: int = 0
-        self.gym_address = "fetchai/gym:0.7.0"
+        self.gym_address = "fetchai/gym:0.8.0"
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
@@ -219,7 +219,6 @@ class ProxyEnv(gym.Env):
         self._agent.outbox.put_message(message=gym_msg)
 
     def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> GymMessage:
-
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 
@@ -250,7 +249,6 @@ class ProxyEnv(gym.Env):
         raise ValueError("Missing envelope.")
 
     def _decode_status(self, envelope: Envelope) -> None:
-
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 
