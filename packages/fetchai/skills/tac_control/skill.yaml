@@ -16,7 +16,8 @@ fingerprint:
   helpers.py: QmdG31YUJakBz8FdNNxU6RxqhWy9iv1BG253PzfxBhzqq2
   parameters.py: QmQB95beEKzyA8Aa7Y9HTPw6BPEVi6BGkpsUqN4QZ4DcVG
 fingerprint_ignore_patterns: []
-contracts: []
+contracts:
+- fetchai/erc1155:0.10.0
 protocols:
 - fetchai/oef_search:0.6.0
 - fetchai/tac:0.6.0

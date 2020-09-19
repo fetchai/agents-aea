@@ -205,6 +205,7 @@ class TacBehaviour(Behaviour):
                 agent_addr_to_name=game.conf.agent_addr_to_name,
                 good_id_to_name=game.conf.good_id_to_name,
                 version_id=game.conf.version_id,
+                info={"contract_address": game.conf.contract_address},
             )
             self.context.outbox.put_message(message=tac_msg)
             self.context.logger.debug(
