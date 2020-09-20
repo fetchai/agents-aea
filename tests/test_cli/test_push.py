@@ -18,13 +18,12 @@
 # ------------------------------------------------------------------------------
 """Test module for Registry push methods."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from click import ClickException
 
 from aea.cli import cli
 from aea.cli.push import _check_package_public_id, _save_item_locally
-
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 

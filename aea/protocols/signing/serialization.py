@@ -19,17 +19,18 @@
 
 """Serialization module for signing protocol."""
 
-from typing import Any, Dict, cast
+from typing import Any, cast, Dict
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.protocols.base import Message, Serializer
 from aea.protocols.signing import signing_pb2
-from aea.protocols.signing.custom_types import ErrorCode
-from aea.protocols.signing.custom_types import RawMessage
-from aea.protocols.signing.custom_types import RawTransaction
-from aea.protocols.signing.custom_types import SignedMessage
-from aea.protocols.signing.custom_types import SignedTransaction
-from aea.protocols.signing.custom_types import Terms
+from aea.protocols.signing.custom_types import (
+    ErrorCode,
+    RawMessage,
+    RawTransaction,
+    SignedMessage,
+    SignedTransaction,
+    Terms,
+)
 from aea.protocols.signing.message import SigningMessage
 
 

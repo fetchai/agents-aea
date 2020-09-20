@@ -20,15 +20,15 @@
 """A module with context tools of the aea cli."""
 
 from pathlib import Path
-from typing import Dict, List, cast
+from typing import cast, Dict, List
 
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
+    _get_default_configuration_file_name_from_type,
     AgentConfig,
     Dependencies,
     PackageType,
     PublicId,
-    _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
 

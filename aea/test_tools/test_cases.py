@@ -36,7 +36,6 @@ from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import pytest
-
 import yaml
 
 from aea.cli import cli
@@ -58,7 +57,6 @@ from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
 )
-
 from tests.conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)

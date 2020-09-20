@@ -25,11 +25,9 @@ import time
 from unittest.mock import MagicMock
 
 import eth_account
-
 import pytest
 
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto, EthereumFaucetApi
-
 from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     ETHEREUM_TESTNET_CONFIG,

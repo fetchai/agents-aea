@@ -30,9 +30,9 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.formatting import format_items, retrieve_details, sort_items
 from aea.configurations.base import (
+    _get_default_configuration_file_name_from_type,
     PackageType,
     PublicId,
-    _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
 

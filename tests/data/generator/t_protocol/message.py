@@ -20,12 +20,11 @@
 """This module contains t_protocol's message definition."""
 
 import logging
-from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
+from typing import cast, Dict, FrozenSet, Optional, Set, Tuple, Union
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
-
 from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")

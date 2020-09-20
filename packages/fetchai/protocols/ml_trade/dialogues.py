@@ -25,12 +25,11 @@ This module contains the classes required for ml_trade dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, cast, FrozenSet, Type
 
 from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
-
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 
 

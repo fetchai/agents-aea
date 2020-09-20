@@ -45,6 +45,8 @@ def test_loading():
     ), "Not all the subpackages are importable."
 
     # try to import a function from a skill submodule.
-    from packages.dummy_author.skills.dummy.dummy_subpackage.foo import bar  # type: ignore
+    from packages.dummy_author.skills.dummy.dummy_subpackage.foo import (  # type: ignore
+        bar,
+    )
 
     assert bar() == 42

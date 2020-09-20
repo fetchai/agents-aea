@@ -8,6 +8,6 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmedGZfo1UqT6UJoRkHys9kmquia9BQcK17y2touwSENDU
   message.py: QmQRGUakU9MGVAXy8Hmte5DEAvNYuzw8znt1h9Jg62ZEpM
-  serialization.py: QmNjyzqmoYnCxiLoBeZjXMhYkQzJpbDSFm7A9wytyRa2Xn
+  serialization.py: QmaAf5fppirUWe8JaeBbsqfbeofTHe8DDGHJooe2X389qo
 fingerprint_ignore_patterns: []
 dependencies: {}

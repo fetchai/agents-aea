@@ -20,12 +20,11 @@
 """This module contains oef_search's message definition."""
 
 import logging
-from typing import Set, Tuple, cast
+from typing import cast, Set, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
-
 from packages.fetchai.protocols.oef_search.custom_types import (
     AgentsInfo as CustomAgentsInfo,
 )

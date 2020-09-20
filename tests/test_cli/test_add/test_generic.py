@@ -18,10 +18,9 @@
 # ------------------------------------------------------------------------------
 """This test module contains tests for aea.cli.add generic methods."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from aea.cli.add import _add_item_deps
-
 from tests.test_cli.tools_for_testing import ContextMock
 
 

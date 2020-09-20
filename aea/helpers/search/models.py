@@ -25,7 +25,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
+from typing import Any, cast, Dict, List, Mapping, Optional, Tuple, Type, Union
 
 from aea.exceptions import enforce
 

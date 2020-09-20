@@ -32,12 +32,12 @@ from unittest.mock import patch
 import pytest
 
 from aea.helpers.base import (
-    MaxRetriesError,
-    RegexConstrainedString,
     exception_log_and_reraise,
     load_env_file,
     load_module,
     locate,
+    MaxRetriesError,
+    RegexConstrainedString,
     retry_decorator,
     send_control_c,
     try_decorator,
@@ -47,9 +47,7 @@ from aea.helpers.base import (
     yaml_load,
     yaml_load_all,
 )
-
 from packages.fetchai.connections.oef.connection import OEFConnection
-
 from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 

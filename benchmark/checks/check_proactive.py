@@ -25,15 +25,15 @@ import click
 
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Behaviour
-
-from benchmark.checks.utils import (  # noqa: I100
-    SyncedGeneratorConnection,
+from benchmark.checks.utils import SyncedGeneratorConnection  # noqa: I100
+from benchmark.checks.utils import (
     make_agent,
     make_envelope,
+    make_skill,
     multi_run,
     print_results,
+    wait_for_condition,
 )
-from benchmark.checks.utils import make_skill, wait_for_condition
 
 
 class TestBehaviour(Behaviour):

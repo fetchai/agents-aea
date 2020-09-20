@@ -8,9 +8,9 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: Qmc12hnCshAE3TL9ba4vo6L8ZZhynyfhEUoStJggRrbimc
   __init__.py: Qma2opyN54gwTpkVV1E14jjeMmMfoqgE6XMM9LsvGuTdkm
-  dialogues.py: Qmd59WgpFccLn1zhpLdwm3zDCmCsjSoQXVn6M7PgFwwkgR
-  message.py: QmbXbxXbu1vzrCjzDy6qDtEvssmiHKFLWGgCEenrE4TPZW
-  serialization.py: QmQDdbN4pgfdL1LUhV4J7xMUhdqUJ2Tamz7Nheca3yGw2G
+  dialogues.py: Qmettr9uNhMjKJTMPwRgkMsJxFscE6GLVMCjJWYxNNqzaq
+  message.py: QmezFVx1VikTQBGjPWz3yucbqMBs5E9eBufBYaZaQMhkG8
+  serialization.py: QmPp8zqaLLa17YCiVu5SyD5We3cLkmsXcPcnwv2UDjDvMX
   state_update.proto: QmdmEUSa7PDxJ98ZmGE7bLFPmUJv8refgbkHPejw6uDdwD
   state_update_pb2.py: QmQr5KXhapRv9AnfQe7Xbr5bBqYWp9DEMLjxX8UWmK75Z4
 fingerprint_ignore_patterns: []

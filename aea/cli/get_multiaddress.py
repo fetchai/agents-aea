@@ -21,7 +21,7 @@
 import re
 import typing
 from pathlib import Path
-from typing import Optional, Tuple, cast
+from typing import cast, Optional, Tuple
 
 import click
 from click import ClickException
@@ -31,15 +31,11 @@ from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import get_package_path_unified
-from aea.configurations.base import (
-    ConnectionConfig,
-    PublicId,
-)
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.base import Crypto
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
 from aea.helpers.multiaddr.base import MultiAddr
-
 
 URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
 

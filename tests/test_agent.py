@@ -25,9 +25,7 @@ import pytest
 
 from aea.agent import Agent, Identity
 from aea.runtime import RuntimeStates
-
 from packages.fetchai.connections.local.connection import LocalNode
-
 from tests.common.utils import wait_for_condition
 
 from .conftest import _make_local_connection

@@ -38,7 +38,6 @@ from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialog
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
-
 from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogue as BaseContractApiDialogue,
 )

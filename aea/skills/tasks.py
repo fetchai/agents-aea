@@ -23,7 +23,7 @@ import signal
 import threading
 from abc import abstractmethod
 from multiprocessing.pool import AsyncResult, Pool
-from typing import Any, Callable, Dict, Optional, Sequence, cast
+from typing import Any, Callable, cast, Dict, Optional, Sequence
 
 from aea.helpers.logging import WithLogger
 

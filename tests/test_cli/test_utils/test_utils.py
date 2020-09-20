@@ -21,14 +21,11 @@
 
 from builtins import FileNotFoundError
 from typing import cast
-from unittest import TestCase, mock
-
-from click import BadParameter, ClickException
-
-from jsonschema import ValidationError
+from unittest import mock, TestCase
 
 import pytest
-
+from click import BadParameter, ClickException
+from jsonschema import ValidationError
 from yaml import YAMLError
 
 from aea.cli.utils.click_utils import AEAJsonPathType, PublicIdParameter
@@ -53,14 +50,13 @@ from aea.cli.utils.package_utils import (
     validate_author_name,
     validate_package_name,
 )
-
 from tests.conftest import FETCHAI
 from tests.test_cli.tools_for_testing import (
     ConfigLoaderMock,
     ContextMock,
     PublicIdMock,
-    StopTest,
     raise_stoptest,
+    StopTest,
 )
 
 AUTHOR = "author"

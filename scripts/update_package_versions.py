@@ -37,16 +37,13 @@ from collections import Counter
 from pathlib import Path
 from typing import Dict, Optional, Set, Tuple
 
-from click.testing import CliRunner
-
 import semver
-
 import yaml
+from click.testing import CliRunner
 
 from aea.cli import cli
 from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.loader import ConfigLoader
-
 from scripts.generate_ipfs_hashes import update_hashes
 
 DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples", "tests"]

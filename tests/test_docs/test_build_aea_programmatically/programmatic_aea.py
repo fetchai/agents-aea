@@ -27,7 +27,7 @@ from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.connections.stub.connection import write_with_lock
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.crypto.helpers import create_private_key, PRIVATE_KEY_PATH_SCHEMA
 from aea.skills.base import Skill
 
 ROOT_DIR = "./"

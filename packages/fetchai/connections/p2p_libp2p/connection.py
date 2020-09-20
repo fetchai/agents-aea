@@ -28,7 +28,7 @@ import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from pathlib import Path
 from random import randint
-from typing import IO, List, Optional, Sequence, cast
+from typing import cast, IO, List, Optional, Sequence
 
 from aea.common import Address
 from aea.configurations.base import PublicId

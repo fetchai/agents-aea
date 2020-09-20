@@ -31,7 +31,6 @@ from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registries.base import EntryPoint
 from aea.exceptions import AEAException
-
 from tests.conftest import COSMOS, ETHEREUM, FETCHAI
 from tests.data.custom_crypto import CustomCrypto
 

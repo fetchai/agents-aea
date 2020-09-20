@@ -18,13 +18,12 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI scaffold generic methods and commands."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from click import ClickException
 
 from aea.cli import cli
 from aea.cli.scaffold import _scaffold_dm_handler
-
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock
 

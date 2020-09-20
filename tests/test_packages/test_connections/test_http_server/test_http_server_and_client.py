@@ -29,18 +29,11 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
-from packages.fetchai.protocols.http.dialogues import HttpDialogue
-from packages.fetchai.protocols.http.dialogues import HttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
-
-from tests.conftest import (
-    get_host,
-    get_unused_tcp_port,
-)
-
+from tests.conftest import get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)
 

@@ -25,6 +25,7 @@ from multiprocessing.pool import AsyncResult
 from typing import (
     Any,
     Callable,
+    cast,
     Collection,
     Dict,
     List,
@@ -32,7 +33,6 @@ from typing import (
     Sequence,
     Tuple,
     Type,
-    cast,
 )
 
 from aea.agent import Agent

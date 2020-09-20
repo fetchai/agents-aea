@@ -19,14 +19,11 @@
 
 """Serialization module for fipa protocol."""
 
-from typing import Any, Dict, cast
+from typing import Any, cast, Dict
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
-
+from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.fipa import fipa_pb2
-from packages.fetchai.protocols.fipa.custom_types import Description
-from packages.fetchai.protocols.fipa.custom_types import Query
+from packages.fetchai.protocols.fipa.custom_types import Description, Query
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 

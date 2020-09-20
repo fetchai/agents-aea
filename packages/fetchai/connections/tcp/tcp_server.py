@@ -22,12 +22,11 @@
 import asyncio
 import logging
 from asyncio import AbstractServer, Future, StreamReader, StreamWriter
-from typing import Dict, Optional, Tuple, cast
+from typing import cast, Dict, Optional, Tuple
 
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
-
 from packages.fetchai.connections.tcp.base import TCPConnection
 
 logger = logging.getLogger("aea.packages.fetchai.connections.tcp.tcp_server")

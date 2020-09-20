@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Test module for Registry publish methods."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from click import ClickException
 
@@ -28,7 +28,6 @@ from aea.cli.publish import (
     _save_agent_locally,
     _validate_pkp,
 )
-
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import (
     ContextMock,

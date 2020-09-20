@@ -21,7 +21,7 @@
 
 import os
 from pathlib import Path
-from typing import Optional, cast
+from typing import cast, Optional
 
 import click
 

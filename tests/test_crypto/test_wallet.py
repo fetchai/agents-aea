@@ -22,7 +22,6 @@
 from unittest import TestCase
 
 import eth_account
-
 import pytest
 
 from aea.crypto.cosmos import CosmosCrypto
@@ -30,7 +29,6 @@ from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException
-
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_PATH,
     ETHEREUM_PRIVATE_KEY_PATH,

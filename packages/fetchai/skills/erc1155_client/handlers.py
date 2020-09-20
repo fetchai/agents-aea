@@ -19,7 +19,7 @@
 
 """This package contains handlers for the erc1155-client skill."""
 
-from typing import Optional, cast
+from typing import cast, Optional
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.transaction.base import RawMessage, Terms
@@ -27,7 +27,6 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
-
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage

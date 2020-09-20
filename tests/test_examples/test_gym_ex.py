@@ -25,7 +25,7 @@ import tempfile
 from pathlib import Path
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import ROOT_DIR, env_path_separator
+from tests.conftest import env_path_separator, ROOT_DIR
 
 DIRECTORIES = ["packages", "examples"]
 

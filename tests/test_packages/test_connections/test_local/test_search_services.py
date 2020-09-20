@@ -35,7 +35,6 @@ from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -44,10 +43,9 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-
 from tests.common.mocks import AnyStringWith
 from tests.common.utils import wait_for_condition
-from tests.conftest import MAX_FLAKY_RERUNS, _make_local_connection
+from tests.conftest import _make_local_connection, MAX_FLAKY_RERUNS
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):

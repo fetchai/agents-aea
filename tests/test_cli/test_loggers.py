@@ -19,7 +19,7 @@
 
 """This test module contains the tests for commands in aea.cli.utils.loggers module."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from aea.cli.utils.loggers import ColorFormatter
 

@@ -33,7 +33,6 @@ from aea.helpers.multiple_executor import (
 )
 from aea.runtime import AsyncRuntime
 
-
 logger = logging.getLogger(__name__)
 
 

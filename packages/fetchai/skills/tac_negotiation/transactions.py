@@ -22,7 +22,7 @@
 import copy
 import datetime
 from collections import defaultdict, deque
-from typing import Deque, Dict, List, Tuple, cast
+from typing import cast, Deque, Dict, List, Tuple
 
 from aea.common import Address
 from aea.decision_maker.default import OwnershipState
@@ -32,7 +32,6 @@ from aea.helpers.transaction.base import RawMessage, Terms
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
-
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     FipaDialogue,
     SigningDialogue,

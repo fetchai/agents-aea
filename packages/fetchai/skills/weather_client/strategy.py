@@ -21,5 +21,4 @@
 
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
-
 Strategy = GenericStrategy

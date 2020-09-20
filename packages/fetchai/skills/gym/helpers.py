@@ -22,13 +22,12 @@
 
 from abc import ABC, abstractmethod
 from queue import Queue
-from typing import Any, Optional, Tuple, cast
+from typing import Any, cast, Optional, Tuple
 
 import gym
 
 from aea.protocols.base import Message
 from aea.skills.base import SkillContext
-
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym.dialogues import GymDialogue, GymDialogues
 

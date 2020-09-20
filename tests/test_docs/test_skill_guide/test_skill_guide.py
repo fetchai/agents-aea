@@ -29,7 +29,6 @@ import pytest
 from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
 from aea.test_tools.test_cases import AEATestCaseMany
-
 from tests.conftest import (
     AUTHOR,
     COSMOS,
@@ -43,7 +42,6 @@ from tests.conftest import (
     wait_for_localhost_ports_to_close,
 )
 from tests.test_docs.helper import extract_code_blocks
-
 
 MD_FILE = "docs/skill-guide.md"
 

@@ -30,11 +30,9 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import jsonschema
-from jsonschema import Draft4Validator
-
 import pytest
-
 import yaml
+from jsonschema import Draft4Validator
 
 import aea
 from aea.cli import cli
@@ -45,13 +43,12 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
-
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     AUTHOR,
     CLI_LOG_OPTION,
-    CONFIGURATION_SCHEMA_DIR,
     CliRunner,
+    CONFIGURATION_SCHEMA_DIR,
     ROOT_DIR,
 )
 

@@ -26,14 +26,10 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
-from typing import Generator, Optional, Set, TYPE_CHECKING, cast
+from typing import cast, Generator, Optional, Set, TYPE_CHECKING
 
 from aea.components.base import Component, load_aea_package
-from aea.configurations.base import (
-    ComponentType,
-    ConnectionConfig,
-    PublicId,
-)
+from aea.configurations.base import ComponentType, ConnectionConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
@@ -41,9 +37,8 @@ from aea.helpers.async_utils import AsyncState
 from aea.helpers.base import load_module
 from aea.identity.base import Identity
 
-
 if TYPE_CHECKING:
-    from aea.mail.base import Envelope, Address  # pragma: no cover
+    from aea.mail.base import Address, Envelope  # pragma: no cover
 
 
 logger = logging.getLogger(__name__)

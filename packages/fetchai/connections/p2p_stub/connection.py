@@ -21,7 +21,7 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import Union, cast
+from typing import cast, Union
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.stub.connection import StubConnection, write_envelope

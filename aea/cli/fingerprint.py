@@ -19,21 +19,19 @@
 
 """Implementation of the 'aea add' subcommand."""
 from pathlib import Path
-from typing import Dict, cast
+from typing import cast, Dict
 
 import click
 
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
 from aea.configurations.base import (  # noqa: F401 # pylint: disable=unused-import
+    _compute_fingerprint,
+    _get_default_configuration_file_name_from_type,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
-    _compute_fingerprint,
-)
-from aea.configurations.base import (
     PublicId,
-    _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
 

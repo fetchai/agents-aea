@@ -27,20 +27,18 @@ import unittest.mock
 from pathlib import Path
 
 import jsonschema
-from jsonschema import Draft4Validator, ValidationError
-
 import yaml
+from jsonschema import Draft4Validator, ValidationError
 
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import make_jsonschema_base_uri
-
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
+    CliRunner,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
-    CliRunner,
     PROTOCOL_CONFIGURATION_SCHEMA,
 )
 

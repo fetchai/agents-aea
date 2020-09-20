@@ -18,11 +18,10 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.get_address module."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from aea.cli import cli
 from aea.cli.get_address import _try_get_address
-
 from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
 from tests.test_cli.tools_for_testing import ContextMock
 

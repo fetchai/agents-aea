@@ -24,11 +24,9 @@ from pathlib import Path
 import mistune
 
 from aea.protocols.default.message import DefaultMessage
-
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-
 from tests.conftest import ROOT_DIR
 from tests.test_docs.helper import compare_enum_classes, compile_and_exec
 

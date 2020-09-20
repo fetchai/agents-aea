@@ -19,11 +19,9 @@
 
 """Serialization module for gym protocol."""
 
-from typing import Any, Dict, cast
+from typing import Any, cast, Dict
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
-
+from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.gym import gym_pb2
 from packages.fetchai.protocols.gym.custom_types import AnyObject
 from packages.fetchai.protocols.gym.message import GymMessage

@@ -21,12 +21,7 @@
 
 from aea.common import Address
 from aea.exceptions import enforce
-from aea.helpers.search.models import (
-    Constraint,
-    ConstraintType,
-    Location,
-    Query,
-)
+from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.skills.base import Model
 
 # Default Config

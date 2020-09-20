@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains tests for CLI Registry logout methods."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from aea.cli.registry.logout import registry_logout
 

@@ -19,10 +19,10 @@
 
 """This module contains the tests for the tasks module."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 from unittest.mock import Mock, patch
 
-from aea.skills.tasks import Task, TaskManager, init_worker
+from aea.skills.tasks import init_worker, Task, TaskManager
 
 
 def _raise_exception(self, *args, **kwargs):

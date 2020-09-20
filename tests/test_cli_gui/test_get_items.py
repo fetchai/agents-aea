@@ -19,7 +19,7 @@
 """Test module for get registered items with CLI GUI."""
 
 import json
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from tests.test_cli.tools_for_testing import raise_click_exception
 from tests.test_cli_gui.test_base import create_app

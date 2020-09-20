@@ -20,12 +20,11 @@
 """This module contains gym's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import cast, Dict, Set, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
-
 from packages.fetchai.protocols.gym.custom_types import AnyObject as CustomAnyObject
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.gym.message")

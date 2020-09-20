@@ -29,7 +29,7 @@ from logging import Logger
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
+from typing import Any, cast, Dict, Optional, Sequence, Set, Tuple, Type
 
 from aea.common import Address
 from aea.components.base import Component, load_aea_package

@@ -30,6 +30,7 @@ from threading import Thread
 from typing import (
     Any,
     Callable,
+    cast,
     Dict,
     Optional,
     Sequence,
@@ -37,9 +38,7 @@ from typing import (
     Tuple,
     Type,
     Union,
-    cast,
 )
-
 
 logger = logging.getLogger(__name__)
 

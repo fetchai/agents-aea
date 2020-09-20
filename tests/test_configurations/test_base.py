@@ -20,21 +20,22 @@
 """This module contains the tests for the aea.configurations.base module."""
 import re
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 import pytest
-
 import semver
-
 import yaml
 
 from aea.configurations.base import (
+    _check_aea_version,
+    _compare_fingerprints,
+    _get_default_configuration_file_name_from_type,
     AgentConfig,
-    CRUDCollection,
     ComponentId,
     ComponentType,
     ConnectionConfig,
     ContractConfig,
+    CRUDCollection,
     DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
@@ -44,20 +45,16 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
     SpeechActContentConfig,
-    _check_aea_version,
-    _compare_fingerprints,
-    _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
-
 from tests.conftest import (
-    AUTHOR,
-    ROOT_DIR,
     agent_config_files,
+    AUTHOR,
     connection_config_files,
     contract_config_files,
     protocol_config_files,
+    ROOT_DIR,
     skill_config_files,
 )
 

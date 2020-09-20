@@ -22,7 +22,6 @@
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
-
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,

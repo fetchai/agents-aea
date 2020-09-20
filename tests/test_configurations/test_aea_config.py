@@ -24,11 +24,9 @@ from textwrap import dedent
 from typing import Any, List, Sequence
 from unittest import TestCase
 
-from jsonschema.exceptions import ValidationError  # type: ignore
-
 import pytest
-
 import yaml
+from jsonschema.exceptions import ValidationError  # type: ignore
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -41,7 +39,6 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-
 from tests.conftest import CUR_PATH, ROOT_DIR
 
 

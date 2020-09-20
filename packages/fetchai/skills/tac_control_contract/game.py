@@ -23,7 +23,7 @@ import copy
 import datetime
 import pprint
 from enum import Enum
-from typing import Dict, List, Optional, cast
+from typing import cast, Dict, List, Optional
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
@@ -33,7 +33,6 @@ from aea.helpers.preference_representations.base import (
 )
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
-
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control_contract.helpers import (
     determine_scaling_factor,

@@ -23,7 +23,6 @@ import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.identity.base import Identity
-
 from tests.conftest import FETCHAI
 
 

@@ -19,16 +19,14 @@
 """This test module contains the tests for CLI Registry fetch methods."""
 
 import os
-from unittest import TestCase, mock
-
-from click import ClickException
+from unittest import mock, TestCase
 
 import pytest
+from click import ClickException
 
 from aea.cli import cli
 from aea.cli.fetch import _is_version_correct, fetch_agent_locally
 from aea.test_tools.test_cases import AEATestCaseMany
-
 from tests.conftest import CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 

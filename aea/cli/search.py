@@ -21,7 +21,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, List, Tuple, cast
+from typing import cast, Dict, List, Tuple
 
 import click
 

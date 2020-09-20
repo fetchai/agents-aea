@@ -23,16 +23,12 @@ import re
 from typing import Dict, Type
 
 from aea.components.base import Component
-from aea.configurations.base import (
-    ComponentConfiguration,
-    ComponentType,
-)
+from aea.configurations.base import ComponentConfiguration, ComponentType
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.exceptions import AEAPackageLoadingError, enforce
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
-
 
 logger = logging.getLogger(__name__)
 

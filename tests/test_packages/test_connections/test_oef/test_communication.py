@@ -25,14 +25,13 @@ import sys
 import time
 import unittest
 from contextlib import suppress
-from typing import Dict, cast
+from typing import cast, Dict
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
 from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
-
-import pytest
 
 from aea.common import Address
 from aea.helpers.search.models import (
@@ -51,7 +50,6 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.test_tools.test_cases import UseOef
-
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -60,11 +58,10 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-
 from tests.conftest import (
+    _make_oef_connection,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_ADDRESS_TWO,
-    _make_oef_connection,
 )
 
 logger = logging.getLogger(__name__)

@@ -25,11 +25,9 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
-from jsonschema import ValidationError
-
 import pytest
-
 import yaml
+from jsonschema import ValidationError
 
 import aea
 from aea.cli import cli
@@ -40,15 +38,14 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.test_tools.test_cases import AEATestCaseEmpty
-
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
-    CUR_PATH,
     CliRunner,
+    CUR_PATH,
+    double_escape_windows_path_separator,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
-    double_escape_windows_path_separator,
 )
 
 

@@ -21,12 +21,11 @@
 """This module contains the helpers methods for the controller agent."""
 
 import random
-from typing import Dict, List, Tuple, cast
+from typing import cast, Dict, List, Tuple
 
 import numpy as np
 
 from aea.exceptions import enforce
-
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.

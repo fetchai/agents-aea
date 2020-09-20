@@ -23,7 +23,7 @@ import logging
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
 from threading import Thread
-from typing import Dict, List, Optional, Tuple, cast
+from typing import cast, Dict, List, Optional, Tuple
 
 from aea.common import Address
 from aea.configurations.base import ProtocolId, PublicId
@@ -32,7 +32,6 @@ from aea.helpers.search.models import Description
 from aea.mail.base import Envelope, Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
 from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,

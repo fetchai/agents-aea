@@ -28,13 +28,12 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.crypto.helpers import create_private_key, PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
-
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
 from packages.fetchai.connections.soef.connection import SOEFConnection

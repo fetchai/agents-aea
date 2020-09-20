@@ -20,11 +20,10 @@
 """This module contains tests for decision_maker."""
 
 from queue import Queue
-from typing import Optional, cast
+from typing import cast, Optional
 from unittest import mock
 
 import eth_account
-
 import pytest
 
 import aea
@@ -51,7 +50,6 @@ from aea.protocols.state_update.dialogues import (
     StateUpdateDialogues as BaseStateUpdateDialogues,
 )
 from aea.protocols.state_update.message import StateUpdateMessage
-
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_PATH,

@@ -22,7 +22,7 @@
 import copy
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
+from typing import cast, Dict, Generic, List, Optional, Set, Tuple, TypeVar
 
 from aea.components.base import Component
 from aea.configurations.base import (

@@ -20,12 +20,11 @@
 """This module contains ml_trade's message definition."""
 
 import logging
-from typing import Set, Tuple, cast
+from typing import cast, Set, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
-
 from packages.fetchai.protocols.ml_trade.custom_types import (
     Description as CustomDescription,
 )

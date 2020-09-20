@@ -36,9 +36,8 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, List, TextIO, Union
 
-from dotenv import load_dotenv
-
 import yaml
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 

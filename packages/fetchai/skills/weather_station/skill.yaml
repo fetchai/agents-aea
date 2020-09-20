@@ -9,11 +9,11 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: Qma72715sXAgDLggNNVkXQoVxCu9hyEEFKbyWTKSavEF2v
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmfPE6zrMmY2QARQt3gNZ2oiV3uAqvAQXSvU3XWnFDUQkG
-  db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
-  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
+  behaviours.py: QmWRboujPwBEJNHqXJcyNbbVvdGiJ2mabvjXS6td3YDb2Q
+  db_communication.py: QmNWfTjZirbmCnx5K75fZLA19gsunt34aicvZniLCmZKxB
+  dialogues.py: QmeYs1FYc1Ud4yXULoyf1nSqornVx2dczFCJbF1BwM2gzD
   dummy_weather_station_data.py: QmeSSsAiCKBfMHfUN4QvoKBTQRNCcGxeJicThkDTGRQE7i
-  handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
+  handlers.py: QmeWzG6R8P7z98M2kfXKzmK5u9vT6ZAp2tG7NcXTwWFSaZ
   strategy.py: QmWZiiNXeXGiduzro1bWdTr6ZLjL45TtvxFtY1dUQNWfYZ
 fingerprint_ignore_patterns:
 - '*.db'

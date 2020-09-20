@@ -26,7 +26,6 @@ from pathlib import Path
 
 from aea.cli import cli
 from aea.crypto.registries import make_crypto
-
 from tests.conftest import (
     CLI_LOG_OPTION,
     CliRunner,

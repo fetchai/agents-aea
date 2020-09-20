@@ -19,7 +19,7 @@
 
 """This module contains the resources class."""
 from contextlib import suppress
-from typing import List, Optional, cast
+from typing import cast, List, Optional
 
 from aea.components.base import Component
 from aea.configurations.base import (

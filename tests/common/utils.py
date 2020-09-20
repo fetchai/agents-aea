@@ -24,14 +24,12 @@ from functools import wraps
 from threading import Thread
 from typing import Any, Callable, Tuple, Type, Union
 
-
 from aea.aea import AEA
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Behaviour, Handler
-
 from tests.conftest import ROOT_DIR
 
 DEFAULT_SLEEP = 0.0001

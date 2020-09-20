@@ -31,51 +31,43 @@ from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from threading import Timer
 from types import FunctionType, MethodType
-from typing import Callable, List, Optional, Sequence, cast
+from typing import Callable, cast, List, Optional, Sequence
 from unittest.mock import patch
 
 import docker as docker
-from docker.models.containers import Container
-
 import gym
-
-from oef.agents import AsyncioCore, OEFAgent
-
 import pytest
+from docker.models.containers import Container
+from oef.agents import AsyncioCore, OEFAgent
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
 from aea.common import Address
-from aea.configurations.base import (
-    ComponentType,
-    ConnectionConfig,
-    ContractConfig,
-    DEFAULT_AEA_CONFIG_FILE as AGENT_YAML,
-    DEFAULT_CONNECTION_CONFIG_FILE as CONNECTION_YAML,
-    DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAML,
-    DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML,
-    DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML,
-    PublicId,
-)
+from aea.configurations.base import ComponentType, ConnectionConfig, ContractConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE as AGENT_YAML
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE as CONNECTION_YAML
+from aea.configurations.base import DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAML
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML
+from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML
+from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.contracts.base import Contract, contract_registry
-from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import _COSMOS
-from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
+from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.ethereum import _ETHEREUM
-from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
+from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.fetchai import _FETCHAI
+from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
-
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.connections.p2p_libp2p.connection import (

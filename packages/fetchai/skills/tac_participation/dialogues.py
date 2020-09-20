@@ -37,7 +37,6 @@ from aea.protocols.state_update.dialogues import (
     StateUpdateDialogues as BaseStateUpdateDialogues,
 )
 from aea.skills.base import Model
-
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -46,7 +45,6 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.tac.dialogues import TacDialogue as BaseTacDialogue
 from packages.fetchai.protocols.tac.dialogues import TacDialogues as BaseTacDialogues
-
 
 OefSearchDialogue = BaseOefSearchDialogue
 

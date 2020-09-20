@@ -32,9 +32,8 @@ from aea.cli.create import create_aea
 from aea.cli.utils.context import Context
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.test_tools.constants import DEFAULT_AUTHOR
-
 from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS
-from tests.test_cli_gui.test_base import TempCWD, create_app
+from tests.test_cli_gui.test_base import create_app, TempCWD
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)

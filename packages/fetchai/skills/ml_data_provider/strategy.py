@@ -20,7 +20,6 @@
 """This module contains the strategy class."""
 
 import numpy as np
-
 from tensorflow import keras
 
 from aea.configurations.constants import DEFAULT_LEDGER

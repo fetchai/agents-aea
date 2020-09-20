@@ -25,7 +25,6 @@ from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.skills.base import Model
-
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_participation.dialogues import (
     StateUpdateDialogue,

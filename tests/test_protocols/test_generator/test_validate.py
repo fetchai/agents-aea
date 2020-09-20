@@ -18,14 +18,10 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for generator/validate.py module."""
 import logging
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from aea.configurations.base import CRUDCollection, SpeechActContentConfig
 from aea.protocols.generator.validate import (
-    CONTENT_NAME_REGEX_PATTERN,
-    END_STATE_REGEX_PATTERN,
-    PERFORMATIVE_REGEX_PATTERN,
-    ROLE_REGEX_PATTERN,
     _has_brackets,
     _is_reserved_name,
     _is_valid_content_type_format,
@@ -48,6 +44,10 @@ from aea.protocols.generator.validate import (
     _validate_roles,
     _validate_speech_acts_section,
     _validate_termination,
+    CONTENT_NAME_REGEX_PATTERN,
+    END_STATE_REGEX_PATTERN,
+    PERFORMATIVE_REGEX_PATTERN,
+    ROLE_REGEX_PATTERN,
     validate,
 )
 

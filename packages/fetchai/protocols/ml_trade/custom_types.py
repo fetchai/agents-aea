@@ -22,7 +22,6 @@
 from aea.helpers.search.models import Description as BaseDescription
 from aea.helpers.search.models import Query as BaseQuery
 
-
 Description = BaseDescription
 
 Query = BaseQuery

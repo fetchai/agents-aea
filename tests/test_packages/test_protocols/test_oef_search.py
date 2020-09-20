@@ -25,29 +25,22 @@ from unittest import mock
 
 import pytest
 
+import packages
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
-from aea.helpers.search.models import (
-    Constraint,
-    ConstraintType,
-    Description,
-    Query,
-)
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
-
-import packages
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue,
     OefSearchDialogues,
 )
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.message import (
     logger as oef_search_message_logger,
 )
-
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)

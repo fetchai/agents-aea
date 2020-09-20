@@ -21,10 +21,7 @@
 import logging
 from typing import List, Optional
 
-from aea.configurations.base import (
-    PublicId,
-    SkillId,
-)
+from aea.configurations.base import PublicId, SkillId
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.protocols.base import Message
 from aea.registries.resources import Resources

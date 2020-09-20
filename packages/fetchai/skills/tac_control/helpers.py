@@ -22,7 +22,7 @@
 
 import math
 import random
-from typing import Dict, List, Tuple, cast
+from typing import cast, Dict, List, Tuple
 
 import numpy as np
 

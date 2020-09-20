@@ -27,28 +27,21 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from traceback import format_exc
-from typing import Dict, Optional, Set, cast
+from typing import cast, Dict, Optional, Set
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from aiohttp import web
 from aiohttp.web_request import BaseRequest
-
 from openapi_core import create_spec
-from openapi_core.validation.request.datatypes import (
-    OpenAPIRequest,
-    RequestParameters,
-)
+from openapi_core.validation.request.datatypes import OpenAPIRequest, RequestParameters
 from openapi_core.validation.request.shortcuts import validate_request
 from openapi_core.validation.request.validators import RequestValidator
-
 from openapi_spec_validator.exceptions import (  # pylint: disable=wrong-import-order
     OpenAPIValidationError,
 )
 from openapi_spec_validator.schemas import (  # pylint: disable=wrong-import-order
     read_yaml_file,
 )
-
-
 from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
     ImmutableMultiDict,
 )
@@ -59,7 +52,6 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope, EnvelopeContext, Message, URI
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
-
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage

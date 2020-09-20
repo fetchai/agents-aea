@@ -18,10 +18,9 @@
 # ------------------------------------------------------------------------------
 """Test module for Registry publish methods."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from aea.cli.registry.publish import _compress, publish_agent
-
 from tests.test_cli.tools_for_testing import ContextMock
 
 

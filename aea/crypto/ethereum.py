@@ -24,16 +24,13 @@ import logging
 import time
 import warnings
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Tuple, Union, cast
+from typing import Any, BinaryIO, cast, Dict, Optional, Tuple, Union
 
+import requests
 from eth_account import Account
 from eth_account.datastructures import SignedTransaction
 from eth_account.messages import encode_defunct
-
 from eth_keys import keys
-
-import requests
-
 from web3 import HTTPProvider, Web3
 from web3.types import TxParams
 

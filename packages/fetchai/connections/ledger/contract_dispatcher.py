@@ -19,7 +19,7 @@
 
 """This module contains the implementation of the contract API request dispatcher."""
 import inspect
-from typing import Callable, Optional, cast
+from typing import Callable, cast, Optional
 
 from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi
@@ -27,15 +27,9 @@ from aea.crypto.registries import Registry
 from aea.exceptions import AEAException
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.protocols.base import Address, Message
-from aea.protocols.dialogue.base import (
-    Dialogue as BaseDialogue,
-    Dialogues as BaseDialogues,
-)
-
-from packages.fetchai.connections.ledger.base import (
-    CONNECTION_ID,
-    RequestDispatcher,
-)
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import Dialogues as BaseDialogues
+from packages.fetchai.connections.ledger.base import CONNECTION_ID, RequestDispatcher
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue
 from packages.fetchai.protocols.contract_api.dialogues import (

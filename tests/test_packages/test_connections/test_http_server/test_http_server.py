@@ -23,20 +23,18 @@ import asyncio
 import logging
 import os
 from traceback import print_exc
-from typing import Tuple, cast
+from typing import cast, Tuple
 from unittest.mock import Mock, patch
 
 import aiohttp
-from aiohttp.client_reqrep import ClientResponse
-
 import pytest
+from aiohttp.client_reqrep import ClientResponse
 
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
 from packages.fetchai.connections.http_server.connection import (
     APISpec,
     HTTPServerConnection,
@@ -45,14 +43,13 @@ from packages.fetchai.connections.http_server.connection import (
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
-
 from tests.common.mocks import RegexComparator
 from tests.conftest import (
+    get_host,
+    get_unused_tcp_port,
     HTTP_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
-    get_host,
-    get_unused_tcp_port,
 )
 
 logger = logging.getLogger(__name__)

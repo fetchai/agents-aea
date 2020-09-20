@@ -31,8 +31,6 @@ from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialog
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
-
-
 from packages.fetchai.protocols.gym.dialogues import GymDialogue as BaseGymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
 

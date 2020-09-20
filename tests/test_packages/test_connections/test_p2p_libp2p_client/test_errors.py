@@ -29,15 +29,13 @@ from aea.configurations.base import ConnectionConfig
 from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
-
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
-
 from tests.conftest import (
-    COSMOS,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
+    COSMOS,
     libp2p_log_on_failure,
 )
 

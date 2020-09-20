@@ -22,7 +22,7 @@
 import pprint
 import subprocess  # nosec
 import sys
-from typing import List, Optional, cast
+from typing import cast, List, Optional
 
 import click
 

@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.generate_wealth module."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 import pytest
 
@@ -26,7 +26,6 @@ from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseMany
-
 from tests.conftest import (
     CLI_LOG_OPTION,
     CliRunner,

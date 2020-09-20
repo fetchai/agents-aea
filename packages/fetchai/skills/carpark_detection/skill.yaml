@@ -9,11 +9,11 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmcwNhv5N8m4ZtWvXY5eMDeL5ciivryDZPtGWXMFfTbYR7
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: QmTNboU3YH8DehWnpZmoiDUCncpNmqoSVt1Yp4j7NsgY2S
+  behaviours.py: QmaPS7Q3jJMASLRzGBpM5nzw3qQfkEwa9AW6kRv8nAjDo7
   database.py: QmQv79qDxNk8v9chNYq7AxxChAJVGs4B8Y9we35rjzaonP
-  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
-  handlers.py: QmbkmEP9K4Qu2MsRtnkdx3PGNbSW46qi48bCHVCUJHpcQF
-  strategy.py: QmTHW32BzzYrBF1YkmftAMuyx6cKKGrp554qeKiFBJieJJ
+  dialogues.py: QmeYs1FYc1Ud4yXULoyf1nSqornVx2dczFCJbF1BwM2gzD
+  handlers.py: QmZ7r1LaYnjjkW6T7XLdmWdHjmyd9DsBjnFDvf5zoa6U6V
+  strategy.py: QmX2LcvY3yHDeKH4VeCCJM9JFihj5Hwwii6zZi3efMXSpV
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []

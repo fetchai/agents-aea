@@ -21,12 +21,11 @@
 import logging
 import time
 from threading import Thread
-from typing import Any, Dict, Optional, Tuple, cast
+from typing import Any, cast, Dict, Optional, Tuple
 from urllib.parse import urlencode
 
-from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
-
 import pytest
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -42,10 +41,8 @@ from aea.helpers.search.models import (
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
-
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-
 from tests.common.utils import wait_for_condition
 
 from . import models

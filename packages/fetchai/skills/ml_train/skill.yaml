@@ -9,13 +9,13 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmeHcYRhDJi6gqAHpK29UJz3doiyaicoqeTrPddqM3gh64
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
-  behaviours.py: QmQiBzKV5rEFpMQbSjfjzAJ7SqwwGmso6TozWkjdytucLR
-  dialogues.py: QmccMjTxTrTaDyXFTTfAWHmA3xBiPCmKwBfiDSCW428Xie
-  handlers.py: QmSZR738THX7bCaXkuuoPDgwF3fo6DSD3hDt7EY2pRGxBm
+  behaviours.py: QmbJtAxgudXA35gERW14gMnCA9q79iRNQmKfgTTY9e2Bif
+  dialogues.py: Qma7uAuHWEdohLKMxGXHk34tRqXaS3FjFpyWCxpWtwRwEK
+  handlers.py: QmY2rbcg4agZYuTX5zfLEnpSFAfqqWHsW1hFFw4o58xk5A
   ml_model.py: QmXp667GwVRrGsLxtqricnnyrBUUDn6efem22UCBd2g1y8
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
   strategy.py: QmY8z1DW6PqQuiEpgXAhwasSk1CgvvTNZQH1LtExupif9g
-  tasks.py: QmTb7kCt2UheQ8kwPewkzgfX8m2DF4KtnYCugWdmERJnTU
+  tasks.py: QmahJRCf6V61FsqrKgMMUyJ8F7PRd6C2bjunZg2XtM9fpF
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:

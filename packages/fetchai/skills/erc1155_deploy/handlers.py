@@ -19,7 +19,7 @@
 
 """This package contains the handlers of the erc1155 deploy skill AEA."""
 
-from typing import Optional, cast
+from typing import cast, Optional
 
 from aea.configurations.base import ProtocolId
 from aea.crypto.ethereum import EthereumHelper
@@ -27,7 +27,6 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
-
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -46,7 +45,6 @@ from packages.fetchai.skills.erc1155_deploy.dialogues import (
     SigningDialogues,
 )
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
-
 
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 

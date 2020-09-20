@@ -26,13 +26,12 @@ from asyncio import CancelledError
 from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
-from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
+from typing import Callable, cast, Dict, List, Optional, Set, Type, Union
 from urllib import parse
 from uuid import uuid4
 
-from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
-
 import requests
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -49,7 +48,6 @@ from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
-
 from packages.fetchai.protocols.oef_search.custom_types import (
     AgentsInfo,
     OefErrorOperation,

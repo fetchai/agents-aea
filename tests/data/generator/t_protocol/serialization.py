@@ -19,11 +19,9 @@
 
 """Serialization module for t_protocol protocol."""
 
-from typing import Any, Dict, cast
+from typing import Any, cast, Dict
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
-
+from aea.protocols.base import Message, Serializer
 from tests.data.generator.t_protocol import t_protocol_pb2
 from tests.data.generator.t_protocol.custom_types import DataModel
 from tests.data.generator.t_protocol.message import TProtocolMessage

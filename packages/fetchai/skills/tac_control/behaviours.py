@@ -20,11 +20,10 @@
 """This package contains a the behaviours."""
 
 import datetime
-from typing import Optional, cast
+from typing import cast, Optional
 
 from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
-
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.dialogues import (

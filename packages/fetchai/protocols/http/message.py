@@ -20,7 +20,7 @@
 """This module contains http's message definition."""
 
 import logging
-from typing import Set, Tuple, cast
+from typing import cast, Set, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce

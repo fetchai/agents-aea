@@ -23,7 +23,6 @@ import pytest
 
 from aea.decision_maker.default import OwnershipState
 from aea.helpers.transaction.base import Terms
-
 from tests.conftest import ETHEREUM
 
 

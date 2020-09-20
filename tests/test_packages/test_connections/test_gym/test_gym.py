@@ -24,7 +24,6 @@ from typing import cast
 from unittest.mock import patch
 
 import gym
-
 import pytest
 
 from aea.common import Address
@@ -32,13 +31,10 @@ from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
-
 from packages.fetchai.connections.gym.connection import GymConnection
 from packages.fetchai.protocols.gym.dialogues import GymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
-
 from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
 
 logger = logging.getLogger(__name__)

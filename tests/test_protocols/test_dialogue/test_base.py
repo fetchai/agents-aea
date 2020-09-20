@@ -19,7 +19,7 @@
 
 """This module contains the tests for the dialogue/base.py module."""
 
-from typing import FrozenSet, Tuple, Type, cast
+from typing import cast, FrozenSet, Tuple, Type
 
 import pytest
 
@@ -28,9 +28,9 @@ from aea.exceptions import AEAEnforceError
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel, DialogueStats
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
-from aea.protocols.dialogue.base import InvalidDialogueMessage
+from aea.protocols.dialogue.base import DialogueStats, InvalidDialogueMessage
 from aea.protocols.state_update.message import StateUpdateMessage
 
 

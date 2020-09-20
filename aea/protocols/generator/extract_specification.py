@@ -19,15 +19,15 @@
 """This module extracts a valid protocol specification into pythonic objects."""
 
 import re
-from typing import Dict, List, cast
+from typing import cast, Dict, List
 
 from aea.configurations.base import (
     ProtocolSpecification,
     ProtocolSpecificationParseError,
 )
 from aea.protocols.generator.common import (
-    SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
+    SPECIFICATION_PRIMITIVE_TYPES,
 )
 from aea.protocols.generator.validate import validate
 

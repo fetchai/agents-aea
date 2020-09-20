@@ -19,13 +19,12 @@
 
 """This test module contains the tests for the aea.cli.generate sub-module."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from click import ClickException
 
 from aea.cli.generate import _generate_item
 from aea.configurations.base import ProtocolSpecificationParseError
-
 from tests.test_cli.tools_for_testing import ContextMock
 
 

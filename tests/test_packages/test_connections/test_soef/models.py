@@ -19,9 +19,7 @@
 """This module contains models for soef connection tests."""
 
 from aea.helpers.search.models import Attribute, DataModel, Location
-
 from packages.fetchai.connections.soef.connection import ModelNames
-
 
 AGENT_LOCATION_MODEL = DataModel(
     ModelNames.location_agent,

@@ -19,10 +19,9 @@
 
 """Serialization module for state_update protocol."""
 
-from typing import Any, Dict, cast
+from typing import Any, cast, Dict
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.protocols.base import Message, Serializer
 from aea.protocols.state_update import state_update_pb2
 from aea.protocols.state_update.message import StateUpdateMessage
 

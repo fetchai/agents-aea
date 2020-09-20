@@ -26,7 +26,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Tuple, Union, cast
+from typing import Any, cast, Optional, Set, Tuple, Union
 
 import aiohttp
 from aiohttp.client_reqrep import ClientResponse
@@ -37,11 +37,9 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.mail.base import Envelope, EnvelopeContext, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
-
 
 SUCCESS = 200
 NOT_FOUND = 404

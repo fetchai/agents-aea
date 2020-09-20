@@ -19,13 +19,13 @@
 """Test module for utils of CLI GUI."""
 
 from subprocess import TimeoutExpired  # nosec
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from aea.cli_gui.utils import (
-    ProcessState,
     _call_subprocess,
     _terminate_process,
     get_process_status,
+    ProcessState,
     read_error,
     read_tty,
 )

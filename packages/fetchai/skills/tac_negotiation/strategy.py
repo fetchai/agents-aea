@@ -22,7 +22,7 @@
 import copy
 import random
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, cast
+from typing import cast, Dict, List, Optional, Tuple
 
 from aea.decision_maker.default import OwnershipState, Preferences
 from aea.helpers.search.generic import (
@@ -39,14 +39,12 @@ from aea.helpers.search.models import (
 )
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
-
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
     build_goods_query,
 )
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
-
 
 ROUNDING_ADJUSTMENT = 1
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}

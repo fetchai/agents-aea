@@ -30,19 +30,14 @@ from aea.configurations.base import ConnectionConfig
 from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
-
 from packages.fetchai.connections.p2p_libp2p.connection import (
+    _golang_module_build_async,
+    _golang_module_run,
     AwaitableProc,
     LIBP2P_NODE_MODULE_NAME,
     P2PLibp2pConnection,
-    _golang_module_build_async,
-    _golang_module_run,
 )
-
-from tests.conftest import (
-    COSMOS,
-    _make_libp2p_connection,
-)
+from tests.conftest import _make_libp2p_connection, COSMOS
 
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4

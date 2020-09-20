@@ -31,6 +31,7 @@ from enum import Enum
 from pathlib import Path
 from typing import (
     Any,
+    cast,
     Collection,
     Dict,
     Generic,
@@ -42,14 +43,12 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
 )
 
 import packaging
+import semver
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-
-import semver
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce

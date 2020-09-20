@@ -22,7 +22,7 @@
 import datetime
 import os.path
 import sqlite3
-from typing import Dict, cast
+from typing import cast, Dict
 
 my_path = os.path.dirname(__file__)
 

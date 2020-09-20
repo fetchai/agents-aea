@@ -24,7 +24,6 @@ from pathlib import Path
 
 from aea.configurations.constants import DEFAULT_PRIVATE_KEY_FILE
 from aea.test_tools.test_cases import BaseAEATestCase
-
 from tests.conftest import CUR_PATH, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 

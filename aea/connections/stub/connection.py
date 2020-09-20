@@ -35,7 +35,6 @@ from aea.helpers import file_lock
 from aea.helpers.base import exception_log_and_reraise
 from aea.mail.base import Envelope
 
-
 logger = logging.getLogger(__name__)
 
 INPUT_FILE_KEY = "input_file"

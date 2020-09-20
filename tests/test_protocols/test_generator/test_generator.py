@@ -24,7 +24,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import cast
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 import pytest
 
@@ -33,17 +33,13 @@ from aea.configurations.base import (
     ProtocolSpecificationParseError,
 )
 from aea.protocols.generator.base import ProtocolGenerator
-
 from tests.conftest import ROOT_DIR
-from tests.data.generator.t_protocol.message import (  # type: ignore
-    TProtocolMessage,
-)
+from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
 from tests.test_protocols.test_generator.common import (
     PATH_TO_T_PROTOCOL,
     PATH_TO_T_PROTOCOL_SPECIFICATION,
     T_PROTOCOL_NAME,
 )
-
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)

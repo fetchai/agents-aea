@@ -31,7 +31,6 @@ from aea.mail.base import Envelope
 from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
-
 from packages.fetchai.connections.ledger.contract_dispatcher import (
     ContractApiRequestDispatcher,
 )
@@ -40,7 +39,6 @@ from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
-
 from tests.conftest import ETHEREUM, ETHEREUM_ADDRESS_ONE
 
 

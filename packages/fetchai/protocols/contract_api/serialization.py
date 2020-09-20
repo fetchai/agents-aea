@@ -19,16 +19,16 @@
 
 """Serialization module for contract_api protocol."""
 
-from typing import Any, Dict, cast
+from typing import Any, cast, Dict
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
-
+from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.contract_api import contract_api_pb2
-from packages.fetchai.protocols.contract_api.custom_types import Kwargs
-from packages.fetchai.protocols.contract_api.custom_types import RawMessage
-from packages.fetchai.protocols.contract_api.custom_types import RawTransaction
-from packages.fetchai.protocols.contract_api.custom_types import State
+from packages.fetchai.protocols.contract_api.custom_types import (
+    Kwargs,
+    RawMessage,
+    RawTransaction,
+    State,
+)
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 
 

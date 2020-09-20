@@ -18,12 +18,11 @@
 # ------------------------------------------------------------------------------
 """Test module for aea.cli.remove.remove_item method."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 from click import ClickException
 
 from aea.cli.remove import remove_item
-
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 

@@ -21,31 +21,21 @@
 
 import logging
 
-from oef.query import (
-    And as OEFAnd,
-    Constraint as OEFConstraint,
-    ConstraintExpr as OEFConstraintExpr,
-    ConstraintType as OEFConstraintType,
-    Distance,
-    Eq,
-    Gt,
-    GtEq,
-    In,
-    Location as OEFLocation,
-    Lt,
-    LtEq,
-    Not as OEFNot,
-    NotEq,
-    NotIn,
-    Or as OEFOr,
-    Query as OEFQuery,
-    Range,
-)
-from oef.schema import (
-    AttributeSchema as OEFAttribute,
-    DataModel as OEFDataModel,
-    Description as OEFDescription,
-)
+from oef.query import And as OEFAnd
+from oef.query import Constraint as OEFConstraint
+from oef.query import ConstraintExpr as OEFConstraintExpr
+from oef.query import ConstraintType as OEFConstraintType
+from oef.query import Distance, Eq, Gt, GtEq, In
+from oef.query import Location as OEFLocation
+from oef.query import Lt, LtEq
+from oef.query import Not as OEFNot
+from oef.query import NotEq, NotIn
+from oef.query import Or as OEFOr
+from oef.query import Query as OEFQuery
+from oef.query import Range
+from oef.schema import AttributeSchema as OEFAttribute
+from oef.schema import DataModel as OEFDataModel
+from oef.schema import Description as OEFDescription
 
 from aea.helpers.search.models import (
     And,
@@ -61,7 +51,6 @@ from aea.helpers.search.models import (
     Or,
     Query,
 )
-
 
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 

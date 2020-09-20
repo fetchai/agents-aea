@@ -22,9 +22,7 @@ import logging
 from asyncio import CancelledError
 from unittest.mock import Mock, patch
 
-
 import aiohttp
-
 import pytest
 
 from aea.common import Address
@@ -32,18 +30,12 @@ from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
-
 from tests.common.mocks import AnyStringWith
-from tests.conftest import (
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
-    get_host,
-    get_unused_tcp_port,
-)
+from tests.conftest import get_host, get_unused_tcp_port, UNKNOWN_PROTOCOL_PUBLIC_ID
 
 logger = logging.getLogger(__name__)
 

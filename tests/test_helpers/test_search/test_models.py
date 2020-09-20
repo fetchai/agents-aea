@@ -32,11 +32,11 @@ from aea.helpers.search.models import (
     ConstraintTypes,
     DataModel,
     Description,
+    generate_data_model,
     Location,
     Not,
     Or,
     Query,
-    generate_data_model,
 )
 
 

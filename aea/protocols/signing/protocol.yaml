@@ -9,9 +9,9 @@ fingerprint:
   README.md: QmSoa5dnxz53GWpWT2VvcRG4asVbzA8JzguiVgwqiLtguM
   __init__.py: QmcCL3TTdvd8wxYKzf2d3cgKEtY9RzLjPCn4hex4wmb6h6
   custom_types.py: Qmc7sAyCQbAaVs5dZf9hFkTrB2BG8VAioWzbyKBAybrQ1J
-  dialogues.py: QmQ1WKs3Dn15oDSwpc4N8hdADLxrn76U4X5SiLAmyGiPPY
-  message.py: QmRLWAYfjCQmdg2hH8R5R63DKYaDrzuX4dVTFqNHuyjawq
-  serialization.py: QmZrztNBaWA6B5wJHQWfM2g6opPtvsEXtqytzmxjKWm7Sb
+  dialogues.py: QmaURpsd9ERiJ9CRnrfR1o94PGtMXaCb7k1SU2qyDG1q6x
+  message.py: QmVtRBy5LGTGHXEQSc9Br1gcpA7mqc7VmKCmmFzERiKqEP
+  serialization.py: QmS7H7WEBTQe4Nzxqz8kc6bXtVKjMzASvCitGdtFc2nyfT
   signing.proto: QmcxyLzqhTE9xstAEzCVH17osbLxmSdALx9njmuPjhjrvZ
   signing_pb2.py: QmY3Ak5ih5zGvKjeZ5EnzrGX4tMYn5dWpjPArQwFeJpVKu
 fingerprint_ignore_patterns: []

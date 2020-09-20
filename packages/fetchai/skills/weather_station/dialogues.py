@@ -39,7 +39,6 @@ from packages.fetchai.skills.generic_seller.dialogues import (
     OefSearchDialogues as GenericOefSearchDialogues,
 )
 
-
 DefaultDialogues = GenericDefaultDialogues
 FipaDialogues = GenericFipaDialogues
 LedgerApiDialogues = GenericLedgerApiDialogues

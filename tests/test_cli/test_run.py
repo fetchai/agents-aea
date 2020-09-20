@@ -25,15 +25,12 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from unittest import TestCase, mock
-
-from click import ClickException
-
-from pexpect.exceptions import EOF  # type: ignore
+from unittest import mock, TestCase
 
 import pytest
-
 import yaml
+from click import ClickException
+from pexpect.exceptions import EOF  # type: ignore
 
 from aea.cli import cli
 from aea.cli.run import _build_aea, run_aea
@@ -44,7 +41,6 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
-
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import (
     AUTHOR,

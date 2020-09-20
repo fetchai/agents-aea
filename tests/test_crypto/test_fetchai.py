@@ -21,12 +21,11 @@
 import logging
 import time
 from unittest import mock
-from unittest.mock import MagicMock, call
+from unittest.mock import call, MagicMock
 
 import pytest
 
 from aea.crypto.fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
-
 from tests.conftest import (
     FETCHAI_PRIVATE_KEY_PATH,
     FETCHAI_TESTNET_CONFIG,

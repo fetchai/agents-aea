@@ -26,14 +26,13 @@ from unittest import mock
 
 import pytest
 
+import packages
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
-
-import packages
 from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
@@ -42,7 +41,6 @@ from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.contract_api.message import (
     logger as contract_api_message_logger,
 )
-
 from tests.conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)

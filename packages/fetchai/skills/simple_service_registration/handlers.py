@@ -19,12 +19,11 @@
 
 """This package contains the handlers of a generic seller AEA."""
 
-from typing import Optional, cast
+from typing import cast, Optional
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogue,

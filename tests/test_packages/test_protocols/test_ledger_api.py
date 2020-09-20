@@ -25,14 +25,13 @@ from unittest import mock
 
 import pytest
 
+import packages
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
-
-import packages
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
@@ -41,7 +40,6 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ledger_api.message import (
     logger as ledger_api_message_logger,
 )
-
 from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)

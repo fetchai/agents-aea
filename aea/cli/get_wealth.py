@@ -19,7 +19,7 @@
 
 """Implementation of the 'aea get_wealth' subcommand."""
 
-from typing import Dict, Optional, cast
+from typing import cast, Dict, Optional
 
 import click
 

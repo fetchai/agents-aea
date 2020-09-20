@@ -19,7 +19,7 @@
 """Logging helpers."""
 import logging
 from logging import Logger, LoggerAdapter
-from typing import Any, MutableMapping, Optional, Tuple, cast
+from typing import Any, cast, MutableMapping, Optional, Tuple
 
 
 class AgentLoggerAdapter(LoggerAdapter):

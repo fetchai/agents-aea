@@ -26,7 +26,6 @@ from packages.fetchai.skills.generic_buyer.handlers import (
     GenericSigningHandler,
 )
 
-
 FipaHandler = GenericFipaHandler
 LedgerApiHandler = GenericLedgerApiHandler
 OefSearchHandler = GenericOefSearchHandler

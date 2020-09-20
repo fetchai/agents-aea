@@ -25,18 +25,16 @@ from unittest import mock
 
 import pytest
 
+import packages
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
-
-import packages
 from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.message import logger as gym_message_logger
-
 from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)

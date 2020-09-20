@@ -19,7 +19,7 @@
 
 """Implementation of the 'aea delete' subcommand."""
 
-from typing import List, cast
+from typing import cast, List
 
 import click
 

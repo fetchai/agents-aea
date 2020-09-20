@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains tests for iteract command."""
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 import pytest
 
@@ -29,7 +29,6 @@ from aea.cli.interact import (
 from aea.helpers.base import send_control_c
 from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
-
 from tests.conftest import MAX_FLAKY_RERUNS
 
 

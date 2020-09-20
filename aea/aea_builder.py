@@ -29,6 +29,7 @@ from copy import copy, deepcopy
 from pathlib import Path
 from typing import (
     Any,
+    cast,
     Collection,
     Deque,
     Dict,
@@ -38,11 +39,9 @@ from typing import (
     Tuple,
     Type,
     Union,
-    cast,
 )
 
 import jsonschema
-
 from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR

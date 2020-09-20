@@ -22,7 +22,7 @@ import sys
 import time
 from queue import Queue
 from threading import Thread
-from typing import Any, Optional, Tuple, cast
+from typing import Any, cast, Optional, Tuple
 
 import gym
 
@@ -31,11 +31,6 @@ from aea.helpers.base import locate
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
-sys.modules["packages.fetchai.connections.gym"] = locate(
-    "packages.fetchai.connections.gym"
-)
-sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
 from packages.fetchai.protocols.gym.dialogues import (  # noqa: E402  # pylint: disable=wrong-import-position
     GymDialogue as BaseGymDialogue,
 )
@@ -47,6 +42,12 @@ from packages.fetchai.protocols.gym.message import (  # noqa: E402  # pylint: di
 )
 
 from .agent import ProxyAgent  # noqa: E402  # pylint: disable=wrong-import-position
+
+sys.modules["packages.fetchai.connections.gym"] = locate(
+    "packages.fetchai.connections.gym"
+)
+sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
+
 
 Action = Any
 Observation = Any

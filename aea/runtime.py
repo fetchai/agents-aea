@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from contextlib import suppress
 from enum import Enum
-from typing import Dict, Optional, Type, cast
+from typing import cast, Dict, Optional, Type
 
 from aea.abstract_agent import AbstractAgent
 from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
@@ -35,7 +35,6 @@ from aea.helpers.async_utils import ensure_loop
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.multiplexer import AsyncMultiplexer, Multiplexer
 from aea.skills.tasks import TaskManager
-
 
 logger = logging.getLogger(__name__)
 

@@ -24,9 +24,9 @@ import os
 
 # needs win32all to work on Windows
 if os.name == "nt":  # pragma: nocover  # cause platform dependent!
+    import pywintypes  # pylint: disable=import-error
     import win32con  # pylint: disable=import-error
     import win32file  # pylint: disable=import-error
-    import pywintypes  # pylint: disable=import-error
 
     LOCK_EX = win32con.LOCKFILE_EXCLUSIVE_LOCK
     LOCK_SH = 0  # the default
@@ -49,8 +49,8 @@ if os.name == "nt":  # pragma: nocover  # cause platform dependent!
 
 
 elif os.name == "posix":  # pragma: nocover  # cause platform dependent!
-    from fcntl import LOCK_EX, LOCK_SH, LOCK_NB  # noqa # pylint: disable=unused-import
     import fcntl
+    from fcntl import LOCK_EX, LOCK_NB, LOCK_SH  # noqa # pylint: disable=unused-import
 
     def lock(file, flags):
         """Lock a file with flags."""

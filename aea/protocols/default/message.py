@@ -20,7 +20,7 @@
 """This module contains default's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import cast, Dict, Set, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce

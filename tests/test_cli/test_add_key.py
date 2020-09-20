@@ -22,7 +22,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import mock, TestCase
 
 import yaml
 
@@ -30,12 +30,11 @@ import aea
 from aea.cli import cli
 from aea.cli.add_key import _try_add_key
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
-
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
-    CUR_PATH,
     CliRunner,
+    CUR_PATH,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI,

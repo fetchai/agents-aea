@@ -24,7 +24,7 @@ import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Optional, Tuple, Union, cast
+from typing import cast, Optional, Tuple, Union
 
 import gym
 
@@ -35,11 +35,9 @@ from aea.exceptions import enforce
 from aea.helpers.base import locate
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
 from packages.fetchai.protocols.gym.dialogues import GymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
-
 
 logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 

@@ -33,7 +33,6 @@ from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialog
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue
 from aea.skills.base import Model
-
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -42,7 +41,6 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.tac.dialogues import TacDialogue as BaseTacDialogue
 from packages.fetchai.protocols.tac.dialogues import TacDialogues as BaseTacDialogues
-
 
 DefaultDialogue = BaseDefaultDialogue
 

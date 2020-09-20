@@ -24,7 +24,6 @@ import mistune
 
 from aea.skills.behaviours import OneShotBehaviour
 from aea.skills.tasks import Task
-
 from tests.conftest import ROOT_DIR
 from tests.test_docs.helper import compile_and_exec
 

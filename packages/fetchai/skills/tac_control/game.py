@@ -23,7 +23,7 @@ import copy
 import datetime
 import pprint
 from enum import Enum
-from typing import Dict, List, Optional, cast
+from typing import cast, Dict, List, Optional
 
 from aea.common import Address
 from aea.crypto.ledger_apis import LedgerApis
@@ -40,7 +40,6 @@ from aea.helpers.search.generic import (
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
-
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.helpers import (
     determine_scaling_factor,

@@ -29,7 +29,6 @@ from unittest.mock import patch
 import yaml
 
 from aea.cli import cli
-
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 
 

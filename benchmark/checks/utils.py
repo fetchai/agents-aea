@@ -29,17 +29,12 @@ from typing import Any, Callable, List, Optional, Tuple
 from unittest.mock import MagicMock
 
 import click
-
 import psutil  # type: ignore
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
-from aea.configurations.constants import (
-    DEFAULT_LEDGER,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
-)
+from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PROTOCOL, DEFAULT_SKILL
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity

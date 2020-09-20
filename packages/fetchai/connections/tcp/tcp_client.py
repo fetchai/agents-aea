@@ -27,11 +27,10 @@ from asyncio import (  # pylint: disable=unused-import
     StreamReader,
     StreamWriter,
 )
-from typing import Optional, cast
+from typing import cast, Optional
 
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
-
 from packages.fetchai.connections.tcp.base import TCPConnection
 
 logger = logging.getLogger("aea.packages.fetchai.connections.tcp.tcp_client")

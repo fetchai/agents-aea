@@ -24,7 +24,7 @@ from typing import Optional
 
 import click
 
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.crypto.helpers import create_private_key, PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.registries import crypto_registry
 
 

@@ -20,12 +20,11 @@
 """This module contains tac's message definition."""
 
 import logging
-from typing import Dict, Optional, Set, Tuple, cast
+from typing import cast, Dict, Optional, Set, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
-
 from packages.fetchai.protocols.tac.custom_types import ErrorCode as CustomErrorCode
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.tac.message")

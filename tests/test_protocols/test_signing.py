@@ -30,7 +30,6 @@ from aea.helpers.transaction.base import (
     Terms,
 )
 from aea.protocols.signing.message import SigningMessage
-
 from tests.conftest import COSMOS
 
 

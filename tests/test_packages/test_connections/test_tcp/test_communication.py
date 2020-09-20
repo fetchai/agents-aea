@@ -28,7 +28,6 @@ import pytest
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
-
 from tests.conftest import (
     _make_tcp_client_connection,
     _make_tcp_server_connection,

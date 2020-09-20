@@ -19,14 +19,11 @@
 
 """Serialization module for ml_trade protocol."""
 
-from typing import Any, Dict, cast
+from typing import Any, cast, Dict
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
-
+from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.ml_trade import ml_trade_pb2
-from packages.fetchai.protocols.ml_trade.custom_types import Description
-from packages.fetchai.protocols.ml_trade.custom_types import Query
+from packages.fetchai.protocols.ml_trade.custom_types import Description, Query
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 
 

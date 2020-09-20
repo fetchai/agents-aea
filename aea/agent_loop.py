@@ -32,13 +32,12 @@ from aea.abstract_agent import AbstractAgent
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import (
     AsyncState,
+    ensure_loop,
     HandlerItemGetter,
     PeriodicCaller,
-    ensure_loop,
 )
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.helpers.logging import WithLogger
-
 
 logger = logging.getLogger(__name__)
 

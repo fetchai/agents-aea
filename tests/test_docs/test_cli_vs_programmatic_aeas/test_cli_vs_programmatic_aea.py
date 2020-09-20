@@ -27,7 +27,6 @@ from random import uniform
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
-
 from tests.conftest import (
     CUR_PATH,
     FETCHAI,

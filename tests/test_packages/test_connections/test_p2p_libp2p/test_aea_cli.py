@@ -22,7 +22,6 @@
 import os
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
-
 from tests.conftest import libp2p_log_on_failure
 
 DEFAULT_PORT = 10234

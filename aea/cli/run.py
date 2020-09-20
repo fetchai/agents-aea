@@ -20,7 +20,7 @@
 """Implementation of the 'aea run' subcommand."""
 
 from pathlib import Path
-from typing import List, Optional, cast
+from typing import cast, List, Optional
 
 import click
 

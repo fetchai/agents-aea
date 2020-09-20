@@ -27,9 +27,8 @@ from itertools import chain
 from pathlib import Path
 from typing import Set
 
-from click.testing import CliRunner
-
 import yaml
+from click.testing import CliRunner
 
 from aea.cli import cli
 from aea.configurations.base import PackageId, PackageType, PublicId

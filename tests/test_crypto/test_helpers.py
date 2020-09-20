@@ -25,7 +25,6 @@ from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import pytest
-
 import requests
 
 from aea.crypto.cosmos import CosmosCrypto
@@ -37,7 +36,6 @@ from aea.crypto.helpers import (
     try_validate_private_key_path,
     verify_or_create_private_keys,
 )
-
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE,
     CUR_PATH,
