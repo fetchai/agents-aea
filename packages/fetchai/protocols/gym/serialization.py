@@ -19,7 +19,7 @@
 
 """Serialization module for gym protocol."""
 
-from typing import Any, cast, Dict
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.gym import gym_pb2

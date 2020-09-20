@@ -20,7 +20,7 @@
 """This package contains a the behaviours."""
 
 import datetime
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour

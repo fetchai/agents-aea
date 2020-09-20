@@ -23,7 +23,7 @@ import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
-from typing import Callable, cast, Collection, Dict, List, Optional, Sequence, Tuple
+from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates

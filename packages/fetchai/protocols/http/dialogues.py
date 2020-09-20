@@ -25,7 +25,7 @@ This module contains the classes required for http dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, cast, FrozenSet, Type
+from typing import Callable, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message

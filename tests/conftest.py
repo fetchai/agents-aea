@@ -31,7 +31,7 @@ from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from threading import Timer
 from types import FunctionType, MethodType
-from typing import Callable, cast, List, Optional, Sequence
+from typing import Callable, List, Optional, Sequence, cast
 from unittest.mock import patch
 
 import docker as docker
@@ -44,13 +44,17 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
 from aea.common import Address
-from aea.configurations.base import ComponentType, ConnectionConfig, ContractConfig
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE as AGENT_YAML
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE as CONNECTION_YAML
 from aea.configurations.base import DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAML
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML
-from aea.configurations.base import PublicId
+from aea.configurations.base import (
+    ComponentType,
+    ConnectionConfig,
+    ContractConfig,
+    PublicId,
+)
 from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection

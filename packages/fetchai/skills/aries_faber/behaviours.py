@@ -20,7 +20,7 @@
 """This package contains the behaviour for the aries_faber skill."""
 
 import json
-from typing import cast, Dict
+from typing import Dict, cast
 
 from aea.skills.behaviours import TickerBehaviour
 from packages.fetchai.protocols.http.message import HttpMessage
@@ -30,8 +30,8 @@ from packages.fetchai.skills.aries_faber.dialogues import (
     OefSearchDialogues,
 )
 from packages.fetchai.skills.aries_faber.strategy import (
-    FaberStrategy,
     HTTP_COUNTERPARTY,
+    FaberStrategy,
 )
 
 DEFAULT_SEARCH_INTERVAL = 5.0

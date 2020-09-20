@@ -19,7 +19,7 @@
 
 """This package contains the handlers of a generic seller AEA."""
 
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.crypto.ledger_apis import LedgerApis

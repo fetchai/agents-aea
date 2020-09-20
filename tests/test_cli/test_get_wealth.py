@@ -18,11 +18,11 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.generate_wealth module."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from aea.cli import cli
 from aea.cli.get_wealth import _try_get_wealth
-from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
+from tests.conftest import CLI_LOG_OPTION, FETCHAI, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock
 
 

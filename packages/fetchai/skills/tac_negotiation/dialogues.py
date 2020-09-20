@@ -23,7 +23,7 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import cast, Optional, Type
+from typing import Optional, Type, cast
 
 from aea.common import Address
 from aea.exceptions import enforce

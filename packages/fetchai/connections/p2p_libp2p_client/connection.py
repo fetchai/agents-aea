@@ -25,7 +25,7 @@ import random
 import struct
 from asyncio import CancelledError
 from random import randint
-from typing import cast, List, Optional, Union
+from typing import List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER

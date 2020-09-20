@@ -22,7 +22,7 @@
 import copy
 import logging
 from enum import Enum
-from typing import Any, cast, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from aea.common import Address
 from aea.crypto.wallet import Wallet

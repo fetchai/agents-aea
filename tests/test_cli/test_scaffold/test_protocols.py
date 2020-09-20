@@ -38,9 +38,9 @@ from aea.configurations.loader import make_jsonschema_base_uri
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
-    CliRunner,
     CONFIGURATION_SCHEMA_DIR,
     PROTOCOL_CONFIGURATION_SCHEMA,
+    CliRunner,
 )
 
 

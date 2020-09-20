@@ -20,7 +20,7 @@
 """This module contains ledger_api's message definition."""
 
 import logging
-from typing import cast, Optional, Set, Tuple
+from typing import Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce

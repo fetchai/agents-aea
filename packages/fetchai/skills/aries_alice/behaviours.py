@@ -20,7 +20,7 @@
 """This package contains the behaviour of a generic seller AEA."""
 
 import json
-from typing import cast, Dict
+from typing import Dict, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -34,8 +34,8 @@ from packages.fetchai.skills.aries_alice.dialogues import (
     OefSearchDialogues,
 )
 from packages.fetchai.skills.aries_alice.strategy import (
-    AliceStrategy,
     HTTP_COUNTERPARTY,
+    AliceStrategy,
 )
 
 DEFAULT_SERVICES_INTERVAL = 60.0

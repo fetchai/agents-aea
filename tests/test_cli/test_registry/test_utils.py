@@ -20,7 +20,7 @@
 
 import os
 from json.decoder import JSONDecodeError
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from click import ClickException
 from requests.exceptions import ConnectionError

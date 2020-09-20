@@ -23,7 +23,7 @@ import asyncio
 import logging
 import os
 from traceback import print_exc
-from typing import cast, Tuple
+from typing import Tuple, cast
 from unittest.mock import Mock, patch
 
 import aiohttp
@@ -45,11 +45,11 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpD
 from packages.fetchai.protocols.http.message import HttpMessage
 from tests.common.mocks import RegexComparator
 from tests.conftest import (
-    get_host,
-    get_unused_tcp_port,
     HTTP_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
+    get_host,
+    get_unused_tcp_port,
 )
 
 logger = logging.getLogger(__name__)

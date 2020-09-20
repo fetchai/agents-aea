@@ -53,7 +53,7 @@ from aea.registries.base import (
 )
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
-from tests.conftest import _make_dummy_connection, CUR_PATH, ROOT_DIR
+from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
 
 class TestContractRegistry:

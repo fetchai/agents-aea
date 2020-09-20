@@ -37,10 +37,10 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue,
     OefSearchDialogues,
 )
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.message import (
     logger as oef_search_message_logger,
 )
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)

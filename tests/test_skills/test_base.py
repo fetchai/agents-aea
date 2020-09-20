@@ -23,7 +23,7 @@ import unittest.mock
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -39,22 +39,22 @@ from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
 from aea.registries.resources import Resources
 from aea.skills.base import (
-    _check_duplicate_classes,
-    _print_warning_message_for_non_declared_skill_components,
     Behaviour,
     Handler,
     Model,
     Skill,
     SkillComponent,
     SkillContext,
+    _check_duplicate_classes,
+    _print_warning_message_for_non_declared_skill_components,
 )
 from tests.conftest import (
-    _make_dummy_connection,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
+    _make_dummy_connection,
 )
 
 

@@ -24,7 +24,7 @@ import logging
 import time
 import warnings
 from pathlib import Path
-from typing import Any, BinaryIO, cast, Dict, Optional, Tuple, Union
+from typing import Any, BinaryIO, Dict, Optional, Tuple, Union, cast
 
 import requests
 from eth_account import Account

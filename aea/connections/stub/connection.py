@@ -27,7 +27,7 @@ from asyncio.tasks import Task
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
-from typing import AsyncIterable, IO, List, Optional, Union
+from typing import IO, AsyncIterable, List, Optional, Union
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates

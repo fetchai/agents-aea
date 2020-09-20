@@ -19,7 +19,7 @@
 
 """Serialization module for tac protocol."""
 
-from typing import Any, cast, Dict
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.tac import tac_pb2

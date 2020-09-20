@@ -20,7 +20,7 @@
 """This package contains handlers for the generic buyer skill."""
 
 import pprint
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message

@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from copy import copy
 from enum import Enum
 from pathlib import Path
-from typing import Any, cast, Dict, Optional, Tuple, Type
+from typing import Any, Dict, Optional, Tuple, Type, cast
 
 from google.protobuf.struct_pb2 import Struct
 

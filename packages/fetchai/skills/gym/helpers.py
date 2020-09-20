@@ -22,7 +22,7 @@
 
 from abc import ABC, abstractmethod
 from queue import Queue
-from typing import Any, cast, Optional, Tuple
+from typing import Any, Optional, Tuple, cast
 
 import gym
 

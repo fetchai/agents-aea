@@ -25,15 +25,15 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
-from aea.mail.base import Envelope, EnvelopeContext, ProtobufEnvelopeSerializer, URI
+from aea.mail.base import URI, Envelope, EnvelopeContext, ProtobufEnvelopeSerializer
 from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from packages.fetchai.connections.local.connection import LocalNode
 from tests.conftest import (
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,
     _make_local_connection,
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
 )
 
 

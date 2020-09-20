@@ -29,7 +29,6 @@ from copy import copy, deepcopy
 from pathlib import Path
 from typing import (
     Any,
-    cast,
     Collection,
     Deque,
     Dict,
@@ -39,6 +38,7 @@ from typing import (
     Tuple,
     Type,
     Union,
+    cast,
 )
 
 import jsonschema
@@ -49,13 +49,13 @@ from aea.aea import AEA
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
+    DEFAULT_AEA_CONFIG_FILE,
     AgentConfig,
     ComponentConfiguration,
     ComponentId,
     ComponentType,
     ConnectionConfig,
     ContractConfig,
-    DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
     PackageType,
     ProtocolConfig,

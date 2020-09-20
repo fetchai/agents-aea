@@ -19,13 +19,13 @@
 """This test module contains the tests for the `aea add contract` sub-command."""
 
 import os
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 import pytest
 
 from aea.cli import cli
 from aea.test_tools.test_cases import AEATestCaseEmpty
-from tests.conftest import CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS
+from tests.conftest import CLI_LOG_OPTION, MAX_FLAKY_RERUNS, CliRunner
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")

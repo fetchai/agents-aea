@@ -27,7 +27,7 @@ from typing import Any, Callable, Dict, Optional
 
 from aea.configurations.base import PublicId
 from aea.crypto.base import LedgerApi
-from aea.crypto.registries import ledger_apis_registry, Registry
+from aea.crypto.registries import Registry, ledger_apis_registry
 from aea.helpers.async_utils import AsyncState
 from aea.mail.base import Envelope
 from aea.protocols.base import Message

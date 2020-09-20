@@ -27,7 +27,7 @@ import unittest.mock
 from pathlib import Path
 from threading import Thread
 from unittest import mock
-from unittest.mock import call, MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -44,12 +44,12 @@ from packages.fetchai.connections.local.connection import LocalNode
 from tests.common.utils import wait_for_condition
 
 from .conftest import (
+    UNKNOWN_CONNECTION_PUBLIC_ID,
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,
     _make_local_connection,
     _make_stub_connection,
     logger,
-    UNKNOWN_CONNECTION_PUBLIC_ID,
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
 )
 
 

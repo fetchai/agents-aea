@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains tests for iteract command."""
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 import pytest
 

@@ -19,7 +19,7 @@
 
 """This module contains the implementation of the contract API request dispatcher."""
 import inspect
-from typing import Callable, cast, Optional
+from typing import Callable, Optional, cast
 
 from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi

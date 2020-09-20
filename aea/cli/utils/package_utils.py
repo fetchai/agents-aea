@@ -33,12 +33,12 @@ from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
-    _compute_fingerprint,
-    _get_default_configuration_file_name_from_type,
-    AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
+    AgentConfig,
     PackageType,
     PublicId,
+    _compute_fingerprint,
+    _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys

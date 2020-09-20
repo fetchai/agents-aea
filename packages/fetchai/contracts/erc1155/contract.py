@@ -22,7 +22,7 @@
 import json
 import logging
 import random
-from typing import Any, cast, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from vyper.utils import keccak256
 

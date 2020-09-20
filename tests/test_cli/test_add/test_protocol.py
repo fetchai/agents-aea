@@ -36,10 +36,10 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
-    CliRunner,
     CUR_PATH,
-    double_escape_windows_path_separator,
     MAX_FLAKY_RERUNS,
+    CliRunner,
+    double_escape_windows_path_separator,
 )
 
 

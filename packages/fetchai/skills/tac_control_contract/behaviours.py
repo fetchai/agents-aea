@@ -20,7 +20,7 @@
 """This package contains the behaviours."""
 
 import datetime
-from typing import cast, List, Optional
+from typing import List, Optional, cast
 
 from aea.crypto.base import LedgerApi
 from aea.helpers.search.models import Attribute, DataModel, Description

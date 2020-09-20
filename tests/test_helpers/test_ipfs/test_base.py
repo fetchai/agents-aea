@@ -22,7 +22,7 @@
 import os
 from unittest.mock import patch
 
-from aea.helpers.ipfs.base import _is_text, IPFSHashOnly
+from aea.helpers.ipfs.base import IPFSHashOnly, _is_text
 from tests.conftest import CUR_PATH
 
 FILE_PATH = "__init__.py"

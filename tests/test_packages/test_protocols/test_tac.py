@@ -33,8 +33,8 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 from packages.fetchai.protocols.tac.dialogues import TacDialogue, TacDialogues
-from packages.fetchai.protocols.tac.message import logger as tac_message_logger
 from packages.fetchai.protocols.tac.message import TacMessage
+from packages.fetchai.protocols.tac.message import logger as tac_message_logger
 from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)

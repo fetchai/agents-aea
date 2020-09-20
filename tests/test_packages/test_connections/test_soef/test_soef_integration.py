@@ -21,7 +21,7 @@
 import logging
 import time
 from threading import Thread
-from typing import Any, cast, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, cast
 from urllib.parse import urlencode
 
 import pytest

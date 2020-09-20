@@ -19,7 +19,7 @@
 """Test module for Registry push methods."""
 
 import os
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from click import ClickException
 

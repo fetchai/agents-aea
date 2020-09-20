@@ -22,7 +22,7 @@
 import copy
 import random
 from enum import Enum
-from typing import cast, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 from aea.decision_maker.default import OwnershipState, Preferences
 from aea.helpers.search.generic import (

@@ -21,7 +21,7 @@
 """This module contains a checker for PyPI version consistency."""
 import operator
 from collections import defaultdict
-from typing import cast, Dict, Set
+from typing import Dict, Set, cast
 
 from packaging.specifiers import Specifier, SpecifierSet
 from packaging.version import InvalidVersion, Version

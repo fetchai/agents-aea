@@ -8,11 +8,11 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmY7fxhyNBgwU7uc6LKtCN4aSQ4bym5BwqtwRAfwPokULN
   __init__.py: QmRWie4QPiFJE8nK4fFJ6prqoG3u36cPo7st5JUZAGpVWv
-  dialogues.py: QmbLrJoAwsdDMuZkFnkbDSH2xJ1JZjmwUn7BfzGcEw9VvE
+  dialogues.py: Qmf69mXWZQU1jaPAKqdyFujgp2LmXu37RJYqzvgYttPfDS
   http.proto: QmdTUTvvxGxMxSTB67AXjMUSDLdsxBYiSuJNVxHuLKB1jS
   http_pb2.py: QmYYKqdwiueq54EveL9WXn216FXLSQ6XGJJHoiJxwJjzHC
-  message.py: QmZ54hhAZXbj5K1eJ23GDhkGVbsG76hnDfon9qG8Pm3dB7
-  serialization.py: Qmbx7TrAXy4TCJzxM2fMWfKod7Bgx51FMYU9eVGYBcbP11
+  message.py: QmYSmd2xLU8TsLLorxxNnaHj1cVLztgrKtQnaqJ1USFkPY
+  serialization.py: QmUdYL9PqDEbbjLaotxMSNEoVnEAdvFewffw2CV5SgG7sp
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

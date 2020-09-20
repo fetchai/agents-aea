@@ -30,7 +30,7 @@ import secrets
 from abc import ABC
 from enum import Enum
 from inspect import signature
-from typing import Callable, cast, Dict, FrozenSet, List, Optional, Set, Tuple, Type
+from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
 
 from aea.common import Address
 from aea.exceptions import enforce

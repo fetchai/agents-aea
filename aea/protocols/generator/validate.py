@@ -19,14 +19,14 @@
 """This module validates a protocol specification."""
 
 import re
-from typing import cast, Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolSpecification
 from aea.protocols.generator.common import (
-    _get_sub_types_of_compositional_types,
-    _has_matched_brackets,
     SPECIFICATION_COMPOSITIONAL_TYPES,
     SPECIFICATION_PRIMITIVE_TYPES,
+    _get_sub_types_of_compositional_types,
+    _has_matched_brackets,
 )
 
 # The following names are reserved for standard message fields and cannot be

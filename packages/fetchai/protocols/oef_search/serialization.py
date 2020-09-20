@@ -19,7 +19,7 @@
 
 """Serialization module for oef_search protocol."""
 
-from typing import Any, cast, Dict
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.oef_search import oef_search_pb2

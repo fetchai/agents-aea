@@ -31,20 +31,20 @@ from jsonschema import Draft4Validator  # type: ignore
 
 from aea.configurations.loader import make_jsonschema_base_uri
 from tests.conftest import (
-    agent_config_files,
     AGENT_CONFIGURATION_SCHEMA,
     CONFIGURATION_SCHEMA_DIR,
-    connection_config_files,
     CONNECTION_CONFIGURATION_SCHEMA,
-    contract_config_files,
     CONTRACT_CONFIGURATION_SCHEMA,
-    protocol_config_files,
     PROTOCOL_CONFIGURATION_SCHEMA,
     PROTOCOL_SPEC_CONFIGURATION_SCHEMA,
-    protocol_specification_files,
     ROOT_DIR,
-    skill_config_files,
     SKILL_CONFIGURATION_SCHEMA,
+    agent_config_files,
+    connection_config_files,
+    contract_config_files,
+    protocol_config_files,
+    protocol_specification_files,
+    skill_config_files,
 )
 
 

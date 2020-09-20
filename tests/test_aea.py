@@ -56,12 +56,12 @@ from tests.common.utils import (
 )
 
 from .conftest import (
-    _make_local_connection,
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
+    _make_local_connection,
 )
 from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore

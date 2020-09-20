@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI logout command."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from aea.cli import cli
 from tests.conftest import CLI_LOG_OPTION, CliRunner

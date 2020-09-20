@@ -21,7 +21,7 @@
 
 import json
 import random
-from typing import cast, Dict, Optional
+from typing import Dict, Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import EnvelopeContext
@@ -46,8 +46,8 @@ from packages.fetchai.skills.aries_faber.strategy import (
     ADMIN_COMMAND_SCEHMAS,
     ADMIN_COMMAND_STATUS,
     FABER_ACA_IDENTITY,
-    FaberStrategy,
     LEDGER_COMMAND_REGISTER_DID,
+    FaberStrategy,
 )
 
 SUPPORT_REVOCATION = False

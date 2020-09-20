@@ -23,7 +23,7 @@ import copy
 import datetime
 import pprint
 from enum import Enum
-from typing import cast, Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce

@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI scaffold generic methods and commands."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from click import ClickException
 

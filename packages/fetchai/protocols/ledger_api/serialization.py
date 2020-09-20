@@ -19,7 +19,7 @@
 
 """Serialization module for ledger_api protocol."""
 
-from typing import Any, cast, Dict
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.ledger_api import ledger_api_pb2

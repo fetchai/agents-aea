@@ -22,24 +22,24 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 import yaml
 
 import aea
 from aea.cli import cli
 from aea.cli.add_key import _try_add_key
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
-    CliRunner,
     CUR_PATH,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     ROOT_DIR,
+    CliRunner,
 )
 from tests.test_cli.tools_for_testing import ContextMock
 

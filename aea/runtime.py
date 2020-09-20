@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from contextlib import suppress
 from enum import Enum
-from typing import cast, Dict, Optional, Type
+from typing import Dict, Optional, Type, cast
 
 from aea.abstract_agent import AbstractAgent
 from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop

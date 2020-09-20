@@ -32,20 +32,20 @@ from jsonschema import ValidationError
 import aea
 from aea.cli import cli
 from aea.configurations.base import (
-    AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+    AgentConfig,
     PublicId,
 )
 from aea.test_tools.test_cases import AEATestCaseEmpty
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
-    CliRunner,
     CUR_PATH,
-    double_escape_windows_path_separator,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
+    CliRunner,
+    double_escape_windows_path_separator,
 )
 
 

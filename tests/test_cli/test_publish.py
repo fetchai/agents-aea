@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Test module for Registry publish methods."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from click import ClickException
 

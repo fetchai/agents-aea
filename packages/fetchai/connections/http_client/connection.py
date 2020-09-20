@@ -26,7 +26,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, cast, Optional, Set, Tuple, Union
+from typing import Any, Optional, Set, Tuple, Union, cast
 
 import aiohttp
 from aiohttp.client_reqrep import ClientResponse

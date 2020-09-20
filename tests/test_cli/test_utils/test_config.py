@@ -20,7 +20,7 @@
 """This test module contains the tests for aea.cli.utils.config module."""
 
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from aea.cli.utils.config import validate_item_config
 from aea.cli.utils.exceptions import AEAConfigException

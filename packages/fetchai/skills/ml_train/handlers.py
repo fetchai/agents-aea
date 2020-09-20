@@ -21,7 +21,7 @@
 
 import pickle  # nosec
 import uuid
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.transaction.base import Terms

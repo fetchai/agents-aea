@@ -20,7 +20,7 @@
 """Module wrapping all the public and private keys cryptography."""
 
 import logging
-from typing import Any, cast, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto

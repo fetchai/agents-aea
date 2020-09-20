@@ -19,7 +19,7 @@
 
 """This package contains a tac search behaviour."""
 
-from typing import Any, cast, Dict
+from typing import Any, Dict, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour

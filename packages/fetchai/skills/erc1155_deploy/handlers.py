@@ -19,7 +19,7 @@
 
 """This package contains the handlers of the erc1155 deploy skill AEA."""
 
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.crypto.ethereum import EthereumHelper

@@ -19,7 +19,7 @@
 
 """Serialization module for http protocol."""
 
-from typing import Any, cast, Dict
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
 from packages.fetchai.protocols.http import http_pb2

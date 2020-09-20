@@ -27,7 +27,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from traceback import format_exc
-from typing import cast, Dict, Optional, Set
+from typing import Dict, Optional, Set, cast
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from aiohttp import web
@@ -49,7 +49,7 @@ from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Envelope, EnvelopeContext, Message, URI
+from aea.mail.base import URI, Envelope, EnvelopeContext, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 from packages.fetchai.protocols.http.dialogues import HttpDialogue

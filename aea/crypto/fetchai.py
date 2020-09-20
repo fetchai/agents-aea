@@ -19,7 +19,7 @@
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
 
-from aea.crypto.cosmos import _CosmosApi, CosmosCrypto, CosmosFaucetApi, CosmosHelper
+from aea.crypto.cosmos import CosmosCrypto, CosmosFaucetApi, CosmosHelper, _CosmosApi
 
 _FETCHAI = "fetchai"
 _FETCH = "fetch"

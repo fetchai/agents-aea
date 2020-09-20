@@ -22,7 +22,7 @@
 import base64
 import binascii
 import json
-from typing import cast, Dict, Optional
+from typing import Dict, Optional, cast
 from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId

@@ -20,7 +20,7 @@
 """This module contains tests for decision_maker."""
 
 from queue import Queue
-from typing import cast, Optional
+from typing import Optional, cast
 from unittest import mock
 
 import eth_account

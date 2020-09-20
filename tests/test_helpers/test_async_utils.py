@@ -26,11 +26,11 @@ import pytest
 from aea.helpers.async_utils import (
     AsyncState,
     AwaitableProc,
-    ensure_list,
-    ensure_loop,
     HandlerItemGetter,
     PeriodicCaller,
     ThreadedAsyncRunner,
+    ensure_list,
+    ensure_loop,
 )
 
 

@@ -19,7 +19,7 @@
 
 """Serialization module for signing protocol."""
 
-from typing import Any, cast, Dict
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
 from aea.protocols.signing import signing_pb2

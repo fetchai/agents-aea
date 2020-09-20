@@ -19,7 +19,7 @@
 
 """This package contains the handlers."""
 
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage

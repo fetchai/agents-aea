@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI core methods."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from click import ClickException
 

@@ -27,7 +27,7 @@ from asyncio import (  # pylint: disable=unused-import
     StreamReader,
     StreamWriter,
 )
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope

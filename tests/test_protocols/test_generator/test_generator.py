@@ -24,7 +24,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import cast
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 import pytest
 

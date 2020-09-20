@@ -23,7 +23,7 @@ import os
 import shutil
 from functools import update_wrapper
 from pathlib import Path
-from typing import Callable, cast, Dict, Union
+from typing import Callable, Dict, Union, cast
 
 import click
 from jsonschema import ValidationError
@@ -31,11 +31,11 @@ from jsonschema import ValidationError
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.configurations.base import (
+    PackageType,
+    PublicId,
     _check_aea_version,
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
-    PackageType,
-    PublicId,
 )
 from aea.configurations.loader import ConfigLoaders
 from aea.exceptions import AEAException, enforce

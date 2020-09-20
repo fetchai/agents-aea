@@ -38,10 +38,10 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.generic import load_yaml
 from aea.configurations.base import (
-    _get_default_configuration_file_name_from_type,
     DEFAULT_AEA_CONFIG_FILE,
     PackageConfiguration,
     PackageType,
+    _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import AEAException

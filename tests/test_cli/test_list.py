@@ -24,7 +24,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -33,9 +33,9 @@ from aea.cli import cli
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,
-    CliRunner,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
+    CliRunner,
 )
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 

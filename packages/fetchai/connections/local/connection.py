@@ -23,7 +23,7 @@ import logging
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
 from threading import Thread
-from typing import cast, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 from aea.common import Address
 from aea.configurations.base import ProtocolId, PublicId

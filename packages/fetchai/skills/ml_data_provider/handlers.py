@@ -20,7 +20,7 @@
 """This module contains the handler for the 'ml_data_provider' skill."""
 
 import pickle  # nosec
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message

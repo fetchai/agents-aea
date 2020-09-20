@@ -31,7 +31,6 @@ from enum import Enum
 from pathlib import Path
 from typing import (
     Any,
-    cast,
     Collection,
     Dict,
     Generic,
@@ -43,6 +42,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
 )
 
 import packaging

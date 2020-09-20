@@ -35,7 +35,7 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 from tests.common.mocks import AnyStringWith
-from tests.conftest import get_host, get_unused_tcp_port, UNKNOWN_PROTOCOL_PUBLIC_ID
+from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)
 

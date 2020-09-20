@@ -47,9 +47,9 @@ from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     AUTHOR,
     CLI_LOG_OPTION,
-    CliRunner,
     CONFIGURATION_SCHEMA_DIR,
     ROOT_DIR,
+    CliRunner,
 )
 
 

@@ -31,9 +31,9 @@ import pytest
 import aea
 from aea.configurations.base import PublicId
 from aea.connections.stub.connection import (
+    StubConnection,
     _process_line,
     lock_file,
-    StubConnection,
     write_envelope,
     write_with_lock,
 )
@@ -42,7 +42,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
-from tests.conftest import _make_stub_connection, ROOT_DIR
+from tests.conftest import ROOT_DIR, _make_stub_connection
 
 SEPARATOR = ","
 

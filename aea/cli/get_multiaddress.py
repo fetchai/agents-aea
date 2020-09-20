@@ -21,7 +21,7 @@
 import re
 import typing
 from pathlib import Path
-from typing import cast, Optional, Tuple
+from typing import Optional, Tuple, cast
 
 import click
 from click import ClickException

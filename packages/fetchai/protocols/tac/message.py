@@ -20,7 +20,7 @@
 """This module contains tac's message definition."""
 
 import logging
-from typing import cast, Dict, Optional, Set, Tuple
+from typing import Dict, Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce

@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI register command."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from aea.cli import cli
 from aea.cli.register import do_register

@@ -19,7 +19,7 @@
 
 """This test module contains the tests for the aea.cli.generate sub-module."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from click import ClickException
 

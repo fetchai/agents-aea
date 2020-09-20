@@ -34,10 +34,10 @@ from aea.configurations.loader import make_jsonschema_base_uri
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,
-    CliRunner,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
     MAX_FLAKY_RERUNS,
+    CliRunner,
 )
 
 

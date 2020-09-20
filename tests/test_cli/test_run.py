@@ -25,7 +25,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 import pytest
 import yaml
@@ -45,10 +45,10 @@ from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
-    CliRunner,
     FETCHAI_PRIVATE_KEY_FILE,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
+    CliRunner,
 )
 
 

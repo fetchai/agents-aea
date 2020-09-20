@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains tests for CLI Registry login methods."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from aea.cli.registry.login import registry_login
 

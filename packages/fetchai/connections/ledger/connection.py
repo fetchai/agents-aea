@@ -21,7 +21,7 @@
 import asyncio
 from asyncio import Task
 from collections import deque
-from typing import cast, Deque, Dict, List, Optional
+from typing import Deque, Dict, List, Optional, cast
 
 from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope

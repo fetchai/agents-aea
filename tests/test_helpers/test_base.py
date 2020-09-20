@@ -32,12 +32,12 @@ from unittest.mock import patch
 import pytest
 
 from aea.helpers.base import (
+    MaxRetriesError,
+    RegexConstrainedString,
     exception_log_and_reraise,
     load_env_file,
     load_module,
     locate,
-    MaxRetriesError,
-    RegexConstrainedString,
     retry_decorator,
     send_control_c,
     try_decorator,

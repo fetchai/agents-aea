@@ -22,7 +22,7 @@ import sys
 import time
 from queue import Queue
 from threading import Thread
-from typing import Any, cast, Optional, Tuple
+from typing import Any, Optional, Tuple, cast
 
 import gym
 

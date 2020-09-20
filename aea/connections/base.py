@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
-from typing import cast, Generator, Optional, Set, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator, Optional, Set, cast
 
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ConnectionConfig, PublicId

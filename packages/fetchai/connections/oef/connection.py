@@ -23,7 +23,7 @@ import logging
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import cycle
-from typing import cast, Dict, List, Optional, Set, Type
+from typing import Dict, List, Optional, Set, Type, cast
 
 import oef
 from oef.agents import OEFAgent

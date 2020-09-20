@@ -21,7 +21,7 @@
 
 import os
 from distutils.dir_util import copy_tree
-from typing import cast, Optional
+from typing import Optional, cast
 
 import click
 

@@ -29,8 +29,8 @@ from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.common import Address
 from aea.configurations.base import (
-    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
+    ConnectionConfig,
     PackageType,
 )
 from aea.configurations.loader import ConfigLoader

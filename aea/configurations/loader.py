@@ -25,7 +25,7 @@ import os
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import cast, Dict, Generic, List, TextIO, Tuple, Type, TypeVar, Union
+from typing import Dict, Generic, List, TextIO, Tuple, Type, TypeVar, Union, cast
 
 import jsonschema
 import yaml

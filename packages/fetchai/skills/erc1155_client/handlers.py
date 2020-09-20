@@ -19,7 +19,7 @@
 
 """This package contains handlers for the erc1155-client skill."""
 
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.transaction.base import RawMessage, Terms

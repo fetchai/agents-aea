@@ -25,7 +25,7 @@ from binascii import unhexlify
 from typing import Dict, List, Optional
 
 from base58 import b58decode
-from ecdsa import curves, SigningKey
+from ecdsa import SigningKey, curves
 from multihash import decode as multihashdecode  # type: ignore
 
 # following imports needed only if checks are enabled

@@ -43,10 +43,10 @@ from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
 from aea.cli_gui.utils import (
+    ProcessState,
     call_aea_async,
     get_process_status,
     is_agent_dir,
-    ProcessState,
     read_error,
     read_tty,
     stop_agent_process,

@@ -38,13 +38,12 @@ import sys
 import time
 import traceback
 from pathlib import Path
-from typing import cast, Collection, Dict, List, Optional, Tuple, Type
+from typing import Collection, Dict, List, Optional, Tuple, Type, cast
 
 import ipfshttpclient
 import yaml
 
 from aea.configurations.base import (
-    _compute_fingerprint,
     AgentConfig,
     ConnectionConfig,
     ContractConfig,
@@ -52,6 +51,7 @@ from aea.configurations.base import (
     PackageType,
     ProtocolConfig,
     SkillConfig,
+    _compute_fingerprint,
 )
 from aea.helpers.base import yaml_dump, yaml_dump_all
 

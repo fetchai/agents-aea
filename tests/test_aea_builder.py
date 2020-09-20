@@ -30,13 +30,13 @@ import pytest
 import yaml
 
 from aea.aea import AEA
-from aea.aea_builder import _DependenciesManager, AEABuilder
+from aea.aea_builder import AEABuilder, _DependenciesManager
 from aea.components.base import Component
 from aea.configurations.base import (
+    DEFAULT_AEA_CONFIG_FILE,
     ComponentId,
     ComponentType,
     ConnectionConfig,
-    DEFAULT_AEA_CONFIG_FILE,
     ProtocolConfig,
     PublicId,
     SkillConfig,
@@ -53,10 +53,10 @@ from aea.registries.resources import Resources
 from aea.skills.base import Skill
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 from tests.conftest import (
-    _make_dummy_connection,
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,
     ROOT_DIR,
+    _make_dummy_connection,
 )
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")

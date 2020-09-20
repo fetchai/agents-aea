@@ -19,7 +19,7 @@
 
 """This module contains the tests for the dialogue/base.py module."""
 
-from typing import cast, FrozenSet, Tuple, Type
+from typing import FrozenSet, Tuple, Type, cast
 
 import pytest
 

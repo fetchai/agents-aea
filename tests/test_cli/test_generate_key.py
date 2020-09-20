@@ -28,11 +28,11 @@ from aea.cli import cli
 from aea.crypto.registries import make_crypto
 from tests.conftest import (
     CLI_LOG_OPTION,
-    CliRunner,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    CliRunner,
 )
 
 

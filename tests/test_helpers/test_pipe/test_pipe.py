@@ -25,12 +25,12 @@ import pytest
 
 from aea.helpers.pipe import (
     IPCChannelClient,
-    make_ipc_channel,
-    make_ipc_channel_client,
     PosixNamedPipeChannel,
     PosixNamedPipeChannelClient,
     TCPSocketChannel,
     TCPSocketChannelClient,
+    make_ipc_channel,
+    make_ipc_channel_client,
 )
 from tests.conftest import skip_test_windows
 

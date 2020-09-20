@@ -23,7 +23,7 @@ import logging
 import sys
 from pathlib import Path
 
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, PackageType
 from aea.configurations.loader import ConfigLoaders
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 

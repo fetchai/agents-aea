@@ -19,7 +19,7 @@
 
 """Implementation of the 'aea list' subcommand."""
 
-from typing import cast, Dict, List
+from typing import Dict, List, cast
 
 import click
 

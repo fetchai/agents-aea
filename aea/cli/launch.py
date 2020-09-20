@@ -20,7 +20,7 @@
 import sys
 from collections import OrderedDict
 from pathlib import Path
-from typing import cast, List
+from typing import List, cast
 
 import click
 

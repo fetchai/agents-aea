@@ -20,7 +20,7 @@
 """This class contains the helpers for FIPA negotiation."""
 
 import copy
-from typing import cast, Dict, List, Union
+from typing import Dict, List, Union, cast
 
 from aea.helpers.search.models import (
     Attribute,

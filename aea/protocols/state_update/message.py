@@ -20,7 +20,7 @@
 """This module contains state_update's message definition."""
 
 import logging
-from typing import cast, Dict, Set, Tuple
+from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce

@@ -22,7 +22,7 @@
 import logging
 import time
 from threading import Thread
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ProtocolId, SkillConfig

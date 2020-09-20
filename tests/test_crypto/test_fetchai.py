@@ -21,7 +21,7 @@
 import logging
 import time
 from unittest import mock
-from unittest.mock import call, MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 

@@ -20,7 +20,7 @@
 """This module contains t_protocol's message definition."""
 
 import logging
-from typing import cast, Dict, FrozenSet, Optional, Set, Tuple, Union
+from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce

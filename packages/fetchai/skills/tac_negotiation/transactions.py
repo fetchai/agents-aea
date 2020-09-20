@@ -22,7 +22,7 @@
 import copy
 import datetime
 from collections import defaultdict, deque
-from typing import cast, Deque, Dict, List, Tuple
+from typing import Deque, Dict, List, Tuple, cast
 
 from aea.common import Address
 from aea.decision_maker.default import OwnershipState

@@ -24,7 +24,7 @@ import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import cast, Optional, Tuple, Union
+from typing import Optional, Tuple, Union, cast
 
 import gym
 

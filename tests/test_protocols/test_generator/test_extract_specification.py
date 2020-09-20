@@ -21,11 +21,12 @@ import logging
 import os
 import shutil
 import tempfile
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from aea.configurations.base import ProtocolSpecificationParseError
 from aea.protocols.generator.common import load_protocol_specification
 from aea.protocols.generator.extract_specification import (
+    PythonicProtocolSpecification,
     _ct_specification_type_to_python_type,
     _mt_specification_type_to_python_type,
     _optional_specification_type_to_python_type,
@@ -34,7 +35,6 @@ from aea.protocols.generator.extract_specification import (
     _pt_specification_type_to_python_type,
     _specification_type_to_python_type,
     extract,
-    PythonicProtocolSpecification,
 )
 from tests.test_protocols.test_generator.common import PATH_TO_T_PROTOCOL_SPECIFICATION
 

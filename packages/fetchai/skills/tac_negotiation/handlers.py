@@ -21,7 +21,7 @@
 
 import pprint
 import time
-from typing import cast, Optional, Tuple
+from typing import Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.search.models import Query

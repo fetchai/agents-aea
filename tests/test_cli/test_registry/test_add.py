@@ -19,7 +19,7 @@
 """This test module contains tests for CLI Registry add methods."""
 
 import os
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from aea.cli.registry.add import fetch_package
 from aea.configurations.base import PublicId

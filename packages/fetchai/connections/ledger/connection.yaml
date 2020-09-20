@@ -8,9 +8,9 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmfQN7UK1M4pBUzKVzPannPLVi8iiULKHNtJ7XpoWpjqfc
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmXHmxdtk2Bp5RUG7VZb8rTAShtnnePj8rzS2HLEp14xTx
-  connection.py: QmdpsBY8SeYmxj8ijv7BuRKwjseoNXMX7gRP9ufLPoTFUM
-  contract_dispatcher.py: QmVaDEyhBFwf48iLYqeEXijpjDbeoNgsptXWFQ3DWSau5K
+  base.py: Qmec23f5Be6AkNvjwujzrRJExeXkjhD6fPzhRmGiPgwPLC
+  connection.py: QmaRg6kLFsSERL4gExFfnXTK3ZAj6Kx4nTVcVL4Yh67ECs
+  contract_dispatcher.py: QmZnytzjMMgJeACQRgVvhH4iijgvvW4nmP7AD6Fz4rAKjr
   ledger_dispatcher.py: QmRXSuhgHqRgqkTtcBwdvjPd4QRpVuZWfBubgNeQSh9FJJ
 fingerprint_ignore_patterns: []
 protocols:

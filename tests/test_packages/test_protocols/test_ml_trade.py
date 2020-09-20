@@ -38,10 +38,10 @@ from packages.fetchai.protocols.ml_trade.dialogues import (
     MlTradeDialogue,
     MlTradeDialogues,
 )
+from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 from packages.fetchai.protocols.ml_trade.message import (
     logger as ml_trade_message_logger,
 )
-from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 from tests.conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)

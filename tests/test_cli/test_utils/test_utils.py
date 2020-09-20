@@ -21,7 +21,7 @@
 
 from builtins import FileNotFoundError
 from typing import cast
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 import pytest
 from click import BadParameter, ClickException
@@ -55,8 +55,8 @@ from tests.test_cli.tools_for_testing import (
     ConfigLoaderMock,
     ContextMock,
     PublicIdMock,
-    raise_stoptest,
     StopTest,
+    raise_stoptest,
 )
 
 AUTHOR = "author"
