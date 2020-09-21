@@ -24,9 +24,9 @@ from pathlib import Path
 
 from aea.test_tools.test_cases import BaseAEATestCase
 
-from .multiplexer_standalone import run
 from tests.conftest import CUR_PATH, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
+from tests.test_docs.test_multiplexer_standalone.multiplexer_standalone import run
 
 
 MD_FILE = "docs/multiplexer-standalone.md"

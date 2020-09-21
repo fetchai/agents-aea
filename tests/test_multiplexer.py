@@ -43,7 +43,8 @@ from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
 
-from .conftest import (
+from tests.common.utils import wait_for_condition
+from tests.conftest import (
     UNKNOWN_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,
@@ -51,7 +52,6 @@ from .conftest import (
     _make_stub_connection,
     logger,
 )
-from tests.common.utils import wait_for_condition
 
 
 @pytest.mark.asyncio

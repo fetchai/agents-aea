@@ -22,7 +22,7 @@
 import aea
 from aea.cli import cli
 
-from ..conftest import CliRunner
+from tests.conftest import CliRunner
 
 
 def test_no_argument():

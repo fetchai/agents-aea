@@ -48,16 +48,6 @@ from aea.skills.base import Skill, SkillContext
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
-from .conftest import (
-    CUR_PATH,
-    DUMMY_SKILL_PUBLIC_ID,
-    FETCHAI_PRIVATE_KEY_PATH,
-    ROOT_DIR,
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
-    _make_local_connection,
-)
-from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
-from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 from tests.common.utils import (
     AeaTool,
     make_behaviour_cls_from_funcion,
@@ -66,6 +56,16 @@ from tests.common.utils import (
     timeit_context,
     wait_for_condition,
 )
+from tests.conftest import (
+    CUR_PATH,
+    DUMMY_SKILL_PUBLIC_ID,
+    FETCHAI_PRIVATE_KEY_PATH,
+    ROOT_DIR,
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
+    _make_local_connection,
+)
+from tests.data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
+from tests.data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
 def test_setup_aea():

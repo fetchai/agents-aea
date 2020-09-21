@@ -27,9 +27,12 @@ import pytest
 
 from aea.test_tools.test_cases import BaseAEATestCase
 
-from .standalone_transaction import logger, run
 from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS_INTEGRATION, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
+from tests.test_docs.test_standalone_transaction.standalone_transaction import (
+    logger,
+    run,
+)
 
 
 MD_FILE = "docs/standalone-transaction.md"

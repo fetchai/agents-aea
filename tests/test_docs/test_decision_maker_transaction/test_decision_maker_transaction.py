@@ -25,9 +25,9 @@ from unittest.mock import patch
 
 from aea.test_tools.test_cases import BaseAEATestCase
 
-from ...conftest import CUR_PATH, ROOT_DIR
 from ..helper import extract_code_blocks, extract_python_code
 from .decision_maker_transaction import logger, run
+from tests.conftest import CUR_PATH, ROOT_DIR
 
 
 MD_FILE = "docs/decision-maker-transaction.md"

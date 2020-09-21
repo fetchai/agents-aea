@@ -45,9 +45,9 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from . import models
 from .test_soef import OefSearchDialogues
 from tests.common.utils import wait_for_condition
+from tests.test_packages.test_connections.test_soef import models
 
 
 logging.basicConfig(level=logging.DEBUG)

@@ -24,7 +24,7 @@ from unittest.mock import Mock
 
 from aea.skills.base import Skill
 
-from .conftest import CUR_PATH
+from tests.conftest import CUR_PATH
 
 
 def test_loading():
