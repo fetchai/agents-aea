@@ -27,6 +27,7 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
+
 from packages.fetchai.connections.oef.object_translator import OEFObjectTranslator
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 

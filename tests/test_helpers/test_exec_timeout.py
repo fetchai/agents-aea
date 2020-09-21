@@ -32,6 +32,7 @@ from aea.helpers.exec_timeout import (
     ExecTimeoutThreadGuard,
     TimeoutException,
 )
+
 from tests.common.utils import timeit_context
 
 if os.name == "nt":

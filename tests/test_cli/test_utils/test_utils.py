@@ -50,6 +50,7 @@ from aea.cli.utils.package_utils import (
     validate_author_name,
     validate_package_name,
 )
+
 from tests.conftest import FETCHAI
 from tests.test_cli.tools_for_testing import (
     ConfigLoaderMock,

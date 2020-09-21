@@ -25,6 +25,7 @@ from typing import Dict, Optional, Set, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
+
 from packages.fetchai.protocols.tac.custom_types import ErrorCode as CustomErrorCode
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.tac.message")

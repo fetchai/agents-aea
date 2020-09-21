@@ -31,6 +31,7 @@ from aea.mail.base import Envelope
 from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
+
 from packages.fetchai.connections.ledger.contract_dispatcher import (
     ContractApiRequestDispatcher,
 )

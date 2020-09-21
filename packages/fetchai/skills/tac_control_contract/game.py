@@ -33,6 +33,7 @@ from aea.helpers.preference_representations.base import (
 )
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
+
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control_contract.helpers import (
     determine_scaling_factor,

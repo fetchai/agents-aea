@@ -29,6 +29,7 @@ from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_alice.dialogues import (

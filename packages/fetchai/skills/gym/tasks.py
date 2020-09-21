@@ -24,6 +24,7 @@ from threading import Thread
 
 from aea.skills.base import SkillContext
 from aea.skills.tasks import Task
+
 from packages.fetchai.skills.gym.helpers import ProxyEnv
 from packages.fetchai.skills.gym.rl_agent import DEFAULT_NB_STEPS, NB_GOODS, MyRLAgent
 

@@ -29,6 +29,7 @@ from aea.mail.base import URI, Envelope, EnvelopeContext, ProtobufEnvelopeSerial
 from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+
 from packages.fetchai.connections.local.connection import LocalNode
 from tests.conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,

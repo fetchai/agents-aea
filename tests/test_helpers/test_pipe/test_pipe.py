@@ -32,6 +32,7 @@ from aea.helpers.pipe import (
     make_ipc_channel,
     make_ipc_channel_client,
 )
+
 from tests.conftest import skip_test_windows
 
 

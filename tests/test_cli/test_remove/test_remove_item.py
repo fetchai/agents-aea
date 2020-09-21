@@ -23,6 +23,7 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli.remove import remove_item
+
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 

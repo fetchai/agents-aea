@@ -23,6 +23,7 @@ from typing import Any, Dict, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_participation.dialogues import OefSearchDialogues

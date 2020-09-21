@@ -21,6 +21,7 @@
 from unittest.mock import MagicMock
 
 from aea.crypto.cosmos import CosmosApi, CosmosCrypto
+
 from tests.conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG
 
 

@@ -48,6 +48,7 @@ from aea.skills.base import (
     _check_duplicate_classes,
     _print_warning_message_for_non_declared_skill_components,
 )
+
 from tests.conftest import (
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,

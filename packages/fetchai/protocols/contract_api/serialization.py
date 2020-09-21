@@ -22,6 +22,7 @@
 from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
+
 from packages.fetchai.protocols.contract_api import contract_api_pb2
 from packages.fetchai.protocols.contract_api.custom_types import (
     Kwargs,

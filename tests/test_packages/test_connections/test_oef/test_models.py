@@ -36,6 +36,7 @@ from aea.helpers.search.models import (
     Or,
     Query,
 )
+
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 
 

@@ -40,6 +40,7 @@ from aea.protocols.state_update.dialogues import (
     StateUpdateDialogue,
     StateUpdateDialogues,
 )
+
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 

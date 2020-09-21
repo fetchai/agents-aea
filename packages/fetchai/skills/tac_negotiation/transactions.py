@@ -32,6 +32,7 @@ from aea.helpers.transaction.base import RawMessage, Terms
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
+
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     FipaDialogue,
     SigningDialogue,

@@ -23,6 +23,7 @@ from unittest import TestCase, mock
 from aea.cli import cli
 from aea.cli.register import do_register
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
+
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 
 

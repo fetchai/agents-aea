@@ -24,6 +24,7 @@ import logging
 import pytest
 
 import aea.crypto
+
 from tests.conftest import (
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,

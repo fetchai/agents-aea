@@ -36,6 +36,7 @@ from aea.crypto.helpers import (
     try_validate_private_key_path,
     verify_or_create_private_keys,
 )
+
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE,
     CUR_PATH,

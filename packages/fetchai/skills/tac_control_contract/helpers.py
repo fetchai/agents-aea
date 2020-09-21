@@ -26,6 +26,7 @@ from typing import Dict, List, Tuple, cast
 import numpy as np
 
 from aea.exceptions import enforce
+
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.

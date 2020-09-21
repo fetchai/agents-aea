@@ -33,6 +33,7 @@ from aea.configurations.base import (
     ProtocolSpecificationParseError,
 )
 from aea.protocols.generator.base import ProtocolGenerator
+
 from tests.conftest import ROOT_DIR
 from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
 from tests.test_protocols.test_generator.common import (

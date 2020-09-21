@@ -28,6 +28,7 @@ from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )

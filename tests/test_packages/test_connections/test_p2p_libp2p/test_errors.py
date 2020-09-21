@@ -30,6 +30,7 @@ from aea.configurations.base import ConnectionConfig
 from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
+
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     AwaitableProc,

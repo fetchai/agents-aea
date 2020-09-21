@@ -27,6 +27,7 @@ from unittest.mock import patch
 from aea.cli.create import create_aea
 from aea.cli.utils.context import Context
 from aea.test_tools.constants import DEFAULT_AUTHOR
+
 from tests.conftest import CUR_PATH
 from tests.test_cli.tools_for_testing import raise_click_exception
 from tests.test_cli_gui.test_base import TempCWD, create_app

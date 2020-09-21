@@ -22,6 +22,7 @@
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage

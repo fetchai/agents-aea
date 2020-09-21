@@ -24,6 +24,7 @@ import pytest
 
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ConnectionConfig, ProtocolConfig
+
 from tests.conftest import ROOT_DIR
 
 

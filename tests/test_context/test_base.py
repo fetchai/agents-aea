@@ -22,6 +22,7 @@
 
 from aea.context.base import AgentContext
 from aea.identity.base import Identity
+
 from tests.conftest import FETCHAI
 
 

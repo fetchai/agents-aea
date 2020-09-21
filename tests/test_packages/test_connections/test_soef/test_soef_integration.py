@@ -41,12 +41,12 @@ from aea.helpers.search.models import (
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
-from packages.fetchai.connections.soef.connection import SOEFConnection
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from tests.common.utils import wait_for_condition
 
 from . import models
 from .test_soef import OefSearchDialogues
+from packages.fetchai.connections.soef.connection import SOEFConnection
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from tests.common.utils import wait_for_condition
 
 logging.basicConfig(level=logging.DEBUG)
 

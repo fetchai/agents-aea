@@ -31,6 +31,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
+
 from tests.conftest import FETCHAI
 from tests.test_cli import test_generate_wealth, test_interact
 

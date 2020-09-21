@@ -24,6 +24,7 @@ from typing import Optional, cast
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.dialogues import (

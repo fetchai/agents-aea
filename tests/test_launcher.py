@@ -33,6 +33,7 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.helpers.base import cd
 from aea.launcher import AEALauncher, _run_agent
 from aea.test_tools.test_cases import CLI_LOG_OPTION
+
 from tests.common.utils import wait_for_condition
 from tests.conftest import AUTHOR, CUR_PATH, CliRunner
 

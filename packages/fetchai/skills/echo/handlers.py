@@ -23,6 +23,7 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.skills.echo.dialogues import DefaultDialogue, DefaultDialogues
 
 

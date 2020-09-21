@@ -24,6 +24,7 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli.registry.push import _compress_dir, _remove_pycache, push_item
+
 from tests.conftest import AUTHOR
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 

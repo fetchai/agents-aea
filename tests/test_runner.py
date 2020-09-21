@@ -29,6 +29,7 @@ from aea.helpers.multiple_executor import ExecutorExceptionPolicies
 from aea.helpers.multiple_executor import logger as executor_logger
 from aea.runner import AEARunner
 from aea.skills.base import Skill, SkillContext
+
 from tests.common.utils import make_behaviour_cls_from_funcion, wait_for_condition
 from tests.conftest import FETCHAI_PRIVATE_KEY_PATH
 

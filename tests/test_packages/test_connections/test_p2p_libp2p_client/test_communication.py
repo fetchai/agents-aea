@@ -29,6 +29,7 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
 from packages.fetchai.connections.p2p_libp2p_client.connection import Uri
 from tests.conftest import (
     _make_libp2p_client_connection,

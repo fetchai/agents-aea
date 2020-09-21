@@ -29,6 +29,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import (

@@ -35,6 +35,7 @@ from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage

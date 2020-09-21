@@ -29,6 +29,7 @@ from aea.configurations.base import ConnectionConfig
 from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
+
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )

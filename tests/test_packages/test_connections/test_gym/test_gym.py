@@ -31,6 +31,7 @@ from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+
 from packages.fetchai.connections.gym.connection import GymConnection
 from packages.fetchai.protocols.gym.dialogues import GymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues

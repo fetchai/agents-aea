@@ -31,6 +31,7 @@ from aea.cli import cli
 from aea.cli.install import _install_dependency
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.exceptions import AEAException
+
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 

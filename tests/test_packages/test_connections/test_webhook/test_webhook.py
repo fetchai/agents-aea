@@ -35,6 +35,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
+
 from packages.fetchai.connections.webhook.connection import WebhookConnection
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues

@@ -30,6 +30,7 @@ from typing import Callable, FrozenSet, Type, cast
 from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
+
 from tests.data.generator.t_protocol.message import TProtocolMessage
 
 

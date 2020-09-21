@@ -22,6 +22,7 @@
 from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
+
 from packages.fetchai.protocols.ledger_api import ledger_api_pb2
 from packages.fetchai.protocols.ledger_api.custom_types import (
     RawTransaction,

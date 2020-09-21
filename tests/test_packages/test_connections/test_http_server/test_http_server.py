@@ -35,6 +35,7 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+
 from packages.fetchai.connections.http_server.connection import (
     APISpec,
     HTTPServerConnection,

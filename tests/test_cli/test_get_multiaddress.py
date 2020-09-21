@@ -23,6 +23,7 @@ import base58
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
 from tests.conftest import FETCHAI
 
 

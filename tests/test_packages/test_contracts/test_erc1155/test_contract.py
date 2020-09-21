@@ -30,6 +30,7 @@ from aea.crypto.registries import (
     faucet_apis_registry,
     ledger_apis_registry,
 )
+
 from tests.conftest import (
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,

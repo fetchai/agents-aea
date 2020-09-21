@@ -27,6 +27,7 @@ from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage

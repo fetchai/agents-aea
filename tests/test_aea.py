@@ -44,16 +44,6 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
-from packages.fetchai.connections.local.connection import LocalNode
-from packages.fetchai.protocols.fipa.message import FipaMessage
-from tests.common.utils import (
-    AeaTool,
-    make_behaviour_cls_from_funcion,
-    make_handler_cls_from_funcion,
-    run_in_thread,
-    timeit_context,
-    wait_for_condition,
-)
 
 from .conftest import (
     CUR_PATH,
@@ -65,6 +55,16 @@ from .conftest import (
 )
 from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
+from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from tests.common.utils import (
+    AeaTool,
+    make_behaviour_cls_from_funcion,
+    make_handler_cls_from_funcion,
+    run_in_thread,
+    timeit_context,
+    wait_for_condition,
+)
 
 
 def test_setup_aea():

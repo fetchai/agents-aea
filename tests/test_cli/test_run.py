@@ -41,6 +41,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
+
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import (
     AUTHOR,

@@ -35,6 +35,7 @@ from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialo
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
+
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage

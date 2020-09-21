@@ -35,6 +35,7 @@ from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import make_jsonschema_base_uri
+
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,

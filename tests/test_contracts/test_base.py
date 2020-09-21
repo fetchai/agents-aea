@@ -34,6 +34,7 @@ from aea.contracts.scaffold.contract import MyScaffoldContract
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
+
 from tests.conftest import ETHEREUM, FETCHAI, ROOT_DIR
 
 

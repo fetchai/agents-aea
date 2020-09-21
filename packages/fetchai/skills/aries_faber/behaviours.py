@@ -23,6 +23,7 @@ import json
 from typing import Dict, cast
 
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_faber.dialogues import (

@@ -23,6 +23,7 @@ import os
 import shutil
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
 from tests.conftest import ROOT_DIR
 
 

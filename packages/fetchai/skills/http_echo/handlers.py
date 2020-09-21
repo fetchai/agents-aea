@@ -25,6 +25,7 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.protocols.default import DefaultMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.http_echo.dialogues import (
     DefaultDialogues,

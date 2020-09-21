@@ -43,6 +43,7 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
+
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     AUTHOR,

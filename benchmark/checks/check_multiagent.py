@@ -40,6 +40,7 @@ from benchmark.checks.utils import (
     print_results,
     wait_for_condition,
 )
+
 from packages.fetchai.connections.local.connection import (  # noqa: E402 # pylint: disable=C0413
     LocalNode,
     OEFLocalConnection,

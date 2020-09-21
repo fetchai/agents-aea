@@ -29,6 +29,7 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
 from tests.conftest import (
     PUBLIC_DHT_DELEGATE_URI_1,
     PUBLIC_DHT_DELEGATE_URI_2,

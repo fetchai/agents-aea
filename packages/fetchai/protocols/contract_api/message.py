@@ -25,6 +25,7 @@ from typing import Optional, Set, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
+
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs as CustomKwargs
 from packages.fetchai.protocols.contract_api.custom_types import (
     RawMessage as CustomRawMessage,

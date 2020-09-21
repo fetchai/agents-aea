@@ -29,6 +29,7 @@ import pytest
 from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
 from aea.test_tools.test_cases import AEATestCaseMany
+
 from tests.conftest import (
     AUTHOR,
     COSMOS,

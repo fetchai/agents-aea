@@ -46,6 +46,7 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Handler, Skill, SkillContext
+
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from tests.conftest import HTTP_PROTOCOL_PUBLIC_ID

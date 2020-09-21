@@ -47,6 +47,7 @@ from aea.helpers.base import (
     yaml_load,
     yaml_load_all,
 )
+
 from packages.fetchai.connections.oef.connection import OEFConnection
 from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 

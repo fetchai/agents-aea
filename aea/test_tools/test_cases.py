@@ -57,6 +57,7 @@ from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
 )
+
 from tests.conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)

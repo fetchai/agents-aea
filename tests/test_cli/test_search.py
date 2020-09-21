@@ -32,6 +32,7 @@ from jsonschema import Draft4Validator
 from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import PublicId
+
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     AUTHOR,

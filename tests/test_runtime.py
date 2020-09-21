@@ -27,6 +27,7 @@ import pytest
 from aea.aea_builder import AEABuilder
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
+
 from tests.common.utils import run_in_thread, wait_for_condition
 from tests.conftest import CUR_PATH
 

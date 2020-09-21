@@ -24,6 +24,7 @@ from typing import Dict, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_CLIENT_CONNECTION_PUBLIC_ID,
 )

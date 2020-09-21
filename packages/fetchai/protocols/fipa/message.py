@@ -25,6 +25,7 @@ from typing import Dict, Set, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
+
 from packages.fetchai.protocols.fipa.custom_types import (
     Description as CustomDescription,
 )

@@ -52,6 +52,7 @@ from aea.protocols.default import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
+
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,

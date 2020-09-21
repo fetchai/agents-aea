@@ -26,6 +26,7 @@ from aea.crypto.base import LedgerApi
 from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.behaviours import SimpleBehaviour, TickerBehaviour
+
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage

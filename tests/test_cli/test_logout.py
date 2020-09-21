@@ -21,6 +21,7 @@
 from unittest import TestCase, mock
 
 from aea.cli import cli
+
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 
 

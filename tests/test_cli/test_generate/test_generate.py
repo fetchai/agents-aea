@@ -24,6 +24,7 @@ from click import ClickException
 
 from aea.cli.generate import _generate_item
 from aea.configurations.base import ProtocolSpecificationParseError
+
 from tests.test_cli.tools_for_testing import ContextMock
 
 

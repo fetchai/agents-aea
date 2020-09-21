@@ -26,6 +26,7 @@ import pytest
 import yaml
 
 from aea.test_tools.test_cases import AEATestCaseMany
+
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,

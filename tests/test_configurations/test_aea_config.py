@@ -39,6 +39,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+
 from tests.conftest import CUR_PATH, ROOT_DIR
 
 

@@ -36,6 +36,7 @@ from aea.protocols.generator.extract_specification import (
     _specification_type_to_python_type,
     extract,
 )
+
 from tests.test_protocols.test_generator.common import PATH_TO_T_PROTOCOL_SPECIFICATION
 
 logger = logging.getLogger("aea")

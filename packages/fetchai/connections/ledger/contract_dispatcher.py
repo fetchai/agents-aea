@@ -29,6 +29,7 @@ from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
+
 from packages.fetchai.connections.ledger.base import CONNECTION_ID, RequestDispatcher
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue

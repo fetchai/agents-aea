@@ -26,6 +26,7 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli.registry.fetch import fetch_agent
+
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 

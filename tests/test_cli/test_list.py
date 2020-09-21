@@ -30,6 +30,7 @@ import jsonschema
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
+
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,

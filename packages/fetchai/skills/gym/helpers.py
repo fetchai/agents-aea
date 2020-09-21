@@ -28,6 +28,7 @@ import gym
 
 from aea.protocols.base import Message
 from aea.skills.base import SkillContext
+
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym.dialogues import GymDialogue, GymDialogues
 

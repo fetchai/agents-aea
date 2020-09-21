@@ -48,6 +48,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
+
 from tests.conftest import (
     AUTHOR,
     ROOT_DIR,

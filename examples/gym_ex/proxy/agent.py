@@ -29,6 +29,7 @@ from aea.configurations.base import ConnectionConfig
 from aea.helpers.base import locate
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+
 from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylint: disable=wrong-import-position
     GymConnection,
 )

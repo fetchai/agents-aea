@@ -28,6 +28,7 @@ import pytest
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
+
 from packages.fetchai.connections.p2p_libp2p.connection import Uri
 from tests.conftest import (
     _make_libp2p_connection,

@@ -33,6 +33,7 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,

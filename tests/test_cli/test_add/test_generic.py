@@ -21,6 +21,7 @@
 from unittest import TestCase, mock
 
 from aea.cli.add import _add_item_deps
+
 from tests.test_cli.tools_for_testing import ContextMock
 
 

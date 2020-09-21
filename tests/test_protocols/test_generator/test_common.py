@@ -43,6 +43,7 @@ from aea.protocols.generator.common import (
     try_run_isort_formatting,
     try_run_protoc,
 )
+
 from tests.test_protocols.test_generator.common import (
     PATH_TO_T_PROTOCOL_SPECIFICATION,
     T_PROTOCOL_NAME,

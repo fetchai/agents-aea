@@ -23,6 +23,7 @@ import os
 from typing import Dict
 
 from aea.exceptions import enforce
+
 from packages.fetchai.skills.carpark_detection.database import DetectionDatabase
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 

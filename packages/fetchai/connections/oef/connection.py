@@ -39,6 +39,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
+
 from packages.fetchai.connections.oef.object_translator import OEFObjectTranslator
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,

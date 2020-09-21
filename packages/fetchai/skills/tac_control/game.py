@@ -40,6 +40,7 @@ from aea.helpers.search.generic import (
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
+
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.helpers import (
     determine_scaling_factor,

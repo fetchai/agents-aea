@@ -37,6 +37,7 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.mail.base import Envelope, EnvelopeContext, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage

@@ -30,6 +30,7 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
 from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,

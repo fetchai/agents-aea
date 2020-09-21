@@ -50,6 +50,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.test_tools.test_cases import UseOef
+
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FipaMessage

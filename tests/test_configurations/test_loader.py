@@ -30,6 +30,7 @@ import aea
 from aea.configurations.base import PackageType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 from aea.protocols.generator.common import load_protocol_specification
+
 from tests.conftest import protocol_specification_files
 
 

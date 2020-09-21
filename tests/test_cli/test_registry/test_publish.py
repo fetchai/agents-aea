@@ -21,6 +21,7 @@
 from unittest import TestCase, mock
 
 from aea.cli.registry.publish import _compress, publish_agent
+
 from tests.test_cli.tools_for_testing import ContextMock
 
 

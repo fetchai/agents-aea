@@ -24,6 +24,7 @@ from unittest import TestCase, mock
 
 from aea.cli.utils.config import validate_item_config
 from aea.cli.utils.exceptions import AEAConfigException
+
 from tests.test_cli.tools_for_testing import AgentConfigMock, ConfigLoaderMock
 
 

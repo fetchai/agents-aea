@@ -29,6 +29,7 @@ from aea.protocols.signing import SigningMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
+
 from tests.data.dummy_skill.behaviours import DummyBehaviour
 from tests.data.dummy_skill.handlers import DummyHandler
 

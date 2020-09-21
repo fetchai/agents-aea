@@ -24,6 +24,7 @@ from click import ClickException
 
 from aea.cli import cli
 from aea.cli.fingerprint import _fingerprint_item
+
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ConfigLoaderMock, ContextMock, PublicIdMock
 

@@ -35,6 +35,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import SkillContext
 from aea.skills.error.handlers import ErrorHandler
+
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from tests.common.utils import wait_for_condition
 from tests.conftest import CUR_PATH, _make_dummy_connection

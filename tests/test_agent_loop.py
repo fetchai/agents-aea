@@ -35,6 +35,7 @@ from aea.registries.filter import Filter
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, SkillContext
 from aea.skills.behaviours import TickerBehaviour
+
 from tests.common.utils import run_in_thread, wait_for_condition
 
 

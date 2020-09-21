@@ -30,6 +30,7 @@ import aea
 from aea.cli import cli
 from aea.cli.add_key import _try_add_key
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,

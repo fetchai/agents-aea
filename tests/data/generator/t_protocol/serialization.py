@@ -22,6 +22,7 @@
 from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
+
 from tests.data.generator.t_protocol import t_protocol_pb2
 from tests.data.generator.t_protocol.custom_types import DataModel
 from tests.data.generator.t_protocol.message import TProtocolMessage

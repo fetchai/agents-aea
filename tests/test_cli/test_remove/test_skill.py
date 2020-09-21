@@ -31,6 +31,7 @@ import aea
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR, CliRunner
 
 

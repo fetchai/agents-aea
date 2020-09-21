@@ -25,6 +25,7 @@ import pytest
 
 from aea.cli import cli
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
 from tests.conftest import CLI_LOG_OPTION, MAX_FLAKY_RERUNS, CliRunner
 
 

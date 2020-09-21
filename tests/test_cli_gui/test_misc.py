@@ -23,9 +23,9 @@ import unittest.mock
 from flask import Flask
 
 import aea.cli_gui
-from tests.common.mocks import ctx_mock_Popen
 
 from .test_base import create_app
+from tests.common.mocks import ctx_mock_Popen
 
 
 def test_home_page_exits():

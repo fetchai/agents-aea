@@ -22,6 +22,7 @@
 from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
+
 from packages.fetchai.protocols.ml_trade import ml_trade_pb2
 from packages.fetchai.protocols.ml_trade.custom_types import Description, Query
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage

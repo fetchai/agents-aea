@@ -72,6 +72,8 @@ from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
+
+from .data.dummy_connection.connection import DummyConnection  # type: ignore
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.connections.p2p_libp2p.connection import (
@@ -83,8 +85,6 @@ from packages.fetchai.connections.p2p_libp2p_client.connection import (
 )
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
-
-from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
 logger = logging.getLogger(__name__)
 

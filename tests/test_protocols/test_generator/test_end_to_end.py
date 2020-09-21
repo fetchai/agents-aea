@@ -34,6 +34,7 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.test_cases import UseOef
+
 from tests.conftest import ROOT_DIR
 from tests.data.generator.t_protocol.dialogues import (
     TProtocolDialogue,

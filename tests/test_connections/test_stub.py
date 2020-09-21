@@ -42,6 +42,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
+
 from tests.conftest import ROOT_DIR, _make_stub_connection
 
 SEPARATOR = ","

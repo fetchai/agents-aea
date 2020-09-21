@@ -38,6 +38,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,

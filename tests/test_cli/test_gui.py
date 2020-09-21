@@ -31,6 +31,7 @@ from jsonschema import Draft4Validator
 from aea.cli import cli
 from aea.configurations.loader import make_jsonschema_base_uri
 from aea.test_tools.click_testing import CliRunner
+
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
