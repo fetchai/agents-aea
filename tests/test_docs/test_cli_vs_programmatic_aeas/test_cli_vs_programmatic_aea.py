@@ -173,7 +173,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 163  # line below: `strategy._is_ledger_tx = False`
+        line_insertion_position = 165  # line below: `strategy._is_ledger_tx = False`
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",
