@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains utility code for generator modules."""
-
+import inspect
 import os
 import re
 import shutil
@@ -64,15 +64,12 @@ PYTHON_TYPE_TO_PROTO_TYPE = {
     "str": "string",
 }
 
+CURRENT_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+ISORT_CONFIGURATION_FILE = os.path.join(CURRENT_DIR, "isort.cfg")
 ISORT_CLI_ARGS = [
-    "--multi-line=3",
-    "--trailing-comma",
-    "--force-grid-wrap=0",
-    "--use-parentheses",
-    "--line-width=88",
+    "--settings-path",
+    ISORT_CONFIGURATION_FILE,
     "--quiet",
-    "--sg",
-    "**/*_pb2.py",
 ]
 
 
