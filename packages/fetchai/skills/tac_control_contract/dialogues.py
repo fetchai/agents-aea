@@ -28,6 +28,7 @@ This module contains the classes required for dialogue management.
 - TacDialogues: The dialogues class keeps track of all dialogues of type tac.
 """
 
+from enum import Enum
 from typing import Optional, Type
 
 from aea.common import Address
@@ -89,6 +90,13 @@ TacDialogues = BaseTacDialogues
 class ContractApiDialogue(BaseContractApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    class Callable(Enum):
+        """Contract callable."""
+
+        GET_DEPLOY_TRANSACTION = "get_deploy_transaction"
+        GET_CREATE_BATCH_TRANSACTION = "get_create_batch_transaction"
+        GET_MINT_BATCH_TRANSACTION = "get_mint_batch_transaction"
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -113,6 +121,14 @@ class ContractApiDialogue(BaseContractApiDialogue):
             message_class=message_class,
         )
         self._terms = None  # type: Optional[Terms]
+        self._callable = None  # type: Optional[ContractApiDialogue.Callable]
+
+    @property
+    def callable(self) -> Callable:
+        """Get the callable."""
+        if self._callable is None:
+            raise ValueError("Callable not set!")
+        return self._callable
 
     @property
     def terms(self) -> Terms:

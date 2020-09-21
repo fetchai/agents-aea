@@ -41,6 +41,7 @@ from packages.fetchai.skills.tac_control_contract.dialogues import (
     SigningDialogue,
     SigningDialogues,
 )
+from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
@@ -329,7 +330,7 @@ class LedgerApiHandler(Handler):
             ledger_api_msg.performative
             is LedgerApiMessage.Performative.TRANSACTION_RECEIPT
         ):
-            self._handle_transaction_receipt(ledger_api_msg)
+            self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -389,16 +390,21 @@ class LedgerApiHandler(Handler):
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 
-    def _handle_transaction_receipt(self, ledger_api_msg: LedgerApiMessage) -> None:
+    def _handle_transaction_receipt(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
         """
         Handle a message of transaction_receipt performative.
 
         :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
         """
         is_transaction_successful = LedgerApis.is_transaction_settled(
             ledger_api_msg.transaction_receipt.ledger_id,
             ledger_api_msg.transaction_receipt.receipt,
         )
+        signing_dialogue = ledger_api_dialogue.associated_signing_dialogue
+        contract_api_dialogue = signing_dialogue.associated_contract_api_dialogue
         if is_transaction_successful:
             self.context.logger.info(
                 "transaction was successfully settled. Transaction receipt={}".format(
@@ -406,21 +412,30 @@ class LedgerApiHandler(Handler):
                 )
             )
             parameters = cast(Parameters, self.context.parameters)
-            if not parameters.contract_manager.is_contract_deployed:
+            game = cast(Game, self.context.game)
+            if (
+                contract_api_dialogue.callable
+                == ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
+            ):
                 contract_address = ledger_api_msg.transaction_receipt.receipt.get(
                     "contractAddress", None
                 )
                 parameters.contract_address = contract_address
-                parameters.contract_manager.is_contract_deployed = is_transaction_successful
-            elif not parameters.contract_manager.is_tokens_created:
-                parameters.contract_manager.is_tokens_created = is_transaction_successful
-            elif not parameters.contract_manager.is_tokens_minted:
-                parameters.is_tokens_minted = is_transaction_successful
-            elif parameters.is_tokens_minted:
-                self.context.is_active = False
-                self.context.logger.info("demo finished!")
+                game.phase = Phase.CONTRACT_DEPLOYED
+            elif (
+                contract_api_dialogue.callable
+                == ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION
+            ):
+                game.phase = Phase.TOKENS_CREATED
+            elif (
+                contract_api_dialogue.callable
+                == ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
+            ):
+                parameters.nb_completed_minting += 1
+                if game.registration.nb_agents == parameters.nb_completed_minting:
+                    game.phase = Phase.TOKENS_MINTED
             else:
-                self.context.logger.error("unexpected transaction receipt!")
+                self.context.logger.error("Unexpected transaction receipt!")
         else:
             self.context.logger.error(
                 "transaction failed. Transaction receipt={}".format(

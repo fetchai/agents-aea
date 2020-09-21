@@ -51,6 +51,8 @@ class TacBehaviour(BaseTacBehaviour):
         super().setup()
         parameters = cast(Parameters, self.context.parameters)
         if not parameters.is_contract_deployed:
+            game = cast(Game, self.context.game)
+            game.phase = Phase.CONTRACT_DEPLOYMENT_PROPOSAL
             self._request_contract_deploy_transaction()
 
     def _request_contract_deploy_transaction(self) -> None:
@@ -68,7 +70,7 @@ class TacBehaviour(BaseTacBehaviour):
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ledger_id=parameters.ledger_id,
             contract_id="fetchai/erc1155:0.10.0",
-            callable="get_deploy_transaction",
+            callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION,
             kwargs=ContractApiMessage.Kwargs(
                 {"deployer_address": self.context.agent_address}
             ),
@@ -155,7 +157,7 @@ class TacBehaviour(BaseTacBehaviour):
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=parameters.ledger_id,
             contract_id="fetchai/erc1155:0.10.0",
-            callable="get_create_batch_transaction",
+            callable=ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION,
             kwargs=ContractApiMessage.Kwargs(
                 {"deployer_address": self.context.agent_address, "token_ids": token_ids}
             ),
@@ -191,7 +193,7 @@ class TacBehaviour(BaseTacBehaviour):
                 ledger_id=parameters.ledger_id,
                 contract_id="fetchai/erc1155:0.10.0",
                 contract_address=parameters.contract_address,
-                callable="get_mint_batch_transaction",
+                callable=ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION,
                 kwargs=ContractApiMessage.Kwargs(
                     {
                         "deployer_address": self.context.agent_address,
