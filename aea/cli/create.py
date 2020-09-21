@@ -34,9 +34,9 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
+    AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_VERSION,
-    AgentConfig,
 )
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,

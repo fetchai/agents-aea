@@ -33,10 +33,10 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder, _DependenciesManager
 from aea.components.base import Component
 from aea.configurations.base import (
-    DEFAULT_AEA_CONFIG_FILE,
     ComponentId,
     ComponentType,
     ConnectionConfig,
+    DEFAULT_AEA_CONFIG_FILE,
     ProtocolConfig,
     PublicId,
     SkillConfig,

@@ -35,8 +35,8 @@ from packages.fetchai.skills.aries_alice.dialogues import (
     OefSearchDialogues,
 )
 from packages.fetchai.skills.aries_alice.strategy import (
-    HTTP_COUNTERPARTY,
     AliceStrategy,
+    HTTP_COUNTERPARTY,
 )
 
 DEFAULT_SERVICES_INTERVAL = 60.0

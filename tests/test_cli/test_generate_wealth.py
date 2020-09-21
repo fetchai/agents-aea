@@ -29,9 +29,9 @@ from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
     CLI_LOG_OPTION,
+    CliRunner,
     FETCHAI,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    CliRunner,
 )
 from tests.test_cli.tools_for_testing import ContextMock
 

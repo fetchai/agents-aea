@@ -38,8 +38,8 @@ from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CUR_PATH,
-    MAX_FLAKY_RERUNS,
     CliRunner,
+    MAX_FLAKY_RERUNS,
     double_escape_windows_path_separator,
 )
 

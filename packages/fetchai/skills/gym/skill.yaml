@@ -12,7 +12,7 @@ fingerprint:
   handlers.py: QmagqBdQaGuGbVS5dFqxFtEww2e1YF2NprBNPtt5pVA2hZ
   helpers.py: QmbRSMX7UCRAEotS4ocTEcZLo1qietAAU9K5zBtqY1nE82
   rl_agent.py: QmUq3XY9Dd2XZBhNNK9J3S5937d3az4cwP1BmeieHSgJ3m
-  tasks.py: QmW4WBzC2pkcnjnwJZKu63qXXWEbMVV3fwQMozGxjWnEdt
+  tasks.py: QmVf9K7zCkKYduTnS7nS3d8FvUbEVy7s7a26yaCC8Q3rgd
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:

@@ -32,8 +32,8 @@ from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
-    LIBP2P_NODE_MODULE_NAME,
     AwaitableProc,
+    LIBP2P_NODE_MODULE_NAME,
     P2PLibp2pConnection,
     _golang_module_build_async,
     _golang_module_run,

@@ -27,13 +27,13 @@ import semver
 import yaml
 
 from aea.configurations.base import (
-    DEFAULT_SKILL_CONFIG_FILE,
     AgentConfig,
+    CRUDCollection,
     ComponentId,
     ComponentType,
     ConnectionConfig,
     ContractConfig,
-    CRUDCollection,
+    DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
     ProtocolConfig,

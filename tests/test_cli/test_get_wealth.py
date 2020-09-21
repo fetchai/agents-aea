@@ -23,7 +23,7 @@ from unittest import TestCase, mock
 from aea.cli import cli
 from aea.cli.get_wealth import _try_get_wealth
 
-from tests.conftest import CLI_LOG_OPTION, FETCHAI, CliRunner
+from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
 from tests.test_cli.tools_for_testing import ContextMock
 
 

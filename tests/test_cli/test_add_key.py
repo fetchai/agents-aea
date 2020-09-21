@@ -29,18 +29,18 @@ import yaml
 import aea
 from aea.cli import cli
 from aea.cli.add_key import _try_add_key
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CUR_PATH,
+    CliRunner,
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     ROOT_DIR,
-    CliRunner,
 )
 from tests.test_cli.tools_for_testing import ContextMock
 

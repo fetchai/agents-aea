@@ -25,7 +25,7 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
-from aea.mail.base import URI, Envelope, EnvelopeContext, ProtobufEnvelopeSerializer
+from aea.mail.base import Envelope, EnvelopeContext, ProtobufEnvelopeSerializer, URI
 from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage

@@ -35,7 +35,7 @@ from aea.cli.utils.package_utils import (
     try_get_item_source_path,
     try_get_item_target_path,
 )
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, CRUDCollection, PublicId
+from aea.configurations.base import CRUDCollection, DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,

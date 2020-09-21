@@ -38,8 +38,8 @@ from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
-    ROOT_DIR,
     CliRunner,
+    ROOT_DIR,
 )
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 

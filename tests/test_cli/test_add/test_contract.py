@@ -26,7 +26,7 @@ import pytest
 from aea.cli import cli
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import CLI_LOG_OPTION, MAX_FLAKY_RERUNS, CliRunner
+from tests.conftest import CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")

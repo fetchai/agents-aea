@@ -39,7 +39,7 @@ import pytest
 import yaml
 
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, PackageType
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.connections.stub.connection import (

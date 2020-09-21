@@ -33,8 +33,8 @@ from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
-    DEFAULT_AEA_CONFIG_FILE,
     AgentConfig,
+    DEFAULT_AEA_CONFIG_FILE,
     PackageType,
     PublicId,
     _compute_fingerprint,

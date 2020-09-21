@@ -47,8 +47,8 @@ from packages.fetchai.skills.aries_faber.strategy import (
     ADMIN_COMMAND_SCEHMAS,
     ADMIN_COMMAND_STATUS,
     FABER_ACA_IDENTITY,
-    LEDGER_COMMAND_REGISTER_DID,
     FaberStrategy,
+    LEDGER_COMMAND_REGISTER_DID,
 )
 
 SUPPORT_REVOCATION = False

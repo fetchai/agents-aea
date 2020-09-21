@@ -24,8 +24,8 @@ from typing import Any, Dict, Optional, Tuple, Union
 from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.base import LedgerApi
-from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import CosmosApi
+from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.ethereum import DEFAULT_CHAIN_ID, EthereumApi
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS

@@ -31,8 +31,8 @@ from packages.fetchai.skills.aries_faber.dialogues import (
     OefSearchDialogues,
 )
 from packages.fetchai.skills.aries_faber.strategy import (
-    HTTP_COUNTERPARTY,
     FaberStrategy,
+    HTTP_COUNTERPARTY,
 )
 
 DEFAULT_SEARCH_INTERVAL = 5.0

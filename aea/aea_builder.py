@@ -49,13 +49,13 @@ from aea.aea import AEA
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
-    DEFAULT_AEA_CONFIG_FILE,
     AgentConfig,
     ComponentConfiguration,
     ComponentId,
     ComponentType,
     ConnectionConfig,
     ContractConfig,
+    DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
     PackageType,
     ProtocolConfig,

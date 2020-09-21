@@ -46,10 +46,10 @@ from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
+    CliRunner,
     FETCHAI_PRIVATE_KEY_FILE,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
-    CliRunner,
 )
 
 

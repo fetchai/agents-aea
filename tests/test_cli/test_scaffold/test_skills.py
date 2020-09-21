@@ -40,8 +40,8 @@ from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
-    SKILL_CONFIGURATION_SCHEMA,
     CliRunner,
+    SKILL_CONFIGURATION_SCHEMA,
 )
 
 

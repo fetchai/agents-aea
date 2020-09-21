@@ -37,8 +37,8 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
-    MAX_FLAKY_RERUNS,
     CliRunner,
+    MAX_FLAKY_RERUNS,
 )
 
 
