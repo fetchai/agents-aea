@@ -111,6 +111,7 @@ class Configuration:
         self._agent_addr_to_name = agent_addr_to_name
         self._currency_id_to_name = currency_id_to_name
         self._good_id_to_name = good_id_to_name
+        self._contract_address = None  # type: Optional[str]
         self._check_consistency()
 
     @property
@@ -137,6 +138,24 @@ class Configuration:
     def good_id_to_name(self) -> Dict[str, str]:
         """Map good ids to names."""
         return self._good_id_to_name
+
+    @property
+    def has_contract_address(self) -> bool:
+        """Check if contract address is present."""
+        return self._contract_address is not None
+
+    @property
+    def contract_address(self) -> str:
+        """Get the contract address for the game."""
+        if self._contract_address is None:
+            raise AEAEnforceError("Contract_address not set yet!")
+        return self._contract_address
+
+    @contract_address.setter
+    def contract_address(self, contract_address: str) -> None:
+        """Set the contract address for the game."""
+        enforce(self._contract_address is None, "Contract_address already set!")
+        self._contract_address = contract_address
 
     def _check_consistency(self):
         """

@@ -22,31 +22,24 @@
 import datetime
 from typing import List, cast
 
-from aea.skills.behaviours import TickerBehaviour
-
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
-from packages.fetchai.skills.tac_control.behaviours import TacBehaviour
+from packages.fetchai.skills.tac_control.behaviours import (
+    TacBehaviour as BaseTacBehaviour,
+)
 from packages.fetchai.skills.tac_control_contract.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
 )
 from packages.fetchai.skills.tac_control_contract.game import (
-    Configuration,
     Game,
     Phase,
 )
-from packages.fetchai.skills.tac_control_contract.helpers import (
-    generate_currency_id_to_name,
-    generate_currency_ids,
-    generate_good_id_to_name,
-    generate_good_ids,
-)
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
-LEDGER_API_ADDRESS = "///"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
 
-class TacBehaviour(TacBehaviour):
+class TacBehaviour(BaseTacBehaviour):
     """This class implements the TAC control behaviour."""
 
     def setup(self) -> None:
@@ -81,7 +74,7 @@ class TacBehaviour(TacBehaviour):
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
-        contract_api_dialogue.terms = strategy.get_deploy_terms()
+        contract_api_dialogue.terms = parameters.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
 
@@ -101,7 +94,7 @@ class TacBehaviour(TacBehaviour):
             < parameters.registration_end_time
         ):
             game.phase = Phase.GAME_REGISTRATION
-            self._register_tac(parameters)
+            self._register_tac()
             self.context.logger.info(
                 "TAC open for registration until: {}".format(parameters.start_time)
             )
@@ -144,14 +137,6 @@ class TacBehaviour(TacBehaviour):
             self._cancel_tac(game)
             self.context.is_active = False
 
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        super().teardown()
-
     def _request_create_items_transaction(self, game: Game) -> None:
         """
         Request token create transaction
@@ -176,7 +161,7 @@ class TacBehaviour(TacBehaviour):
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-        contract_api_dialogue.terms = strategy.get_create_items_terms()
+        contract_api_dialogue.terms = parameters.get_create_token_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting create items transaction...")
 
@@ -217,105 +202,5 @@ class TacBehaviour(TacBehaviour):
                 ),
             )
             contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-            contract_api_dialogue.terms = strategy.get_mint_token_terms()
+            contract_api_dialogue.terms = parameters.get_mint_token_terms()
             self.context.outbox.put_message(message=contract_api_msg)
-
-
-class ContractBehaviour(TickerBehaviour):
-    """This class implements the TAC control behaviour."""
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        game = cast(Game, self.context.game)
-        parameters = cast(Parameters, self.context.parameters)
-        ledger_api = self.context.ledger_apis.get_api(parameters.ledger)
-        if game.phase.value == Phase.CONTRACT_DEPLOYING.value:
-            tx_receipt = ledger_api.get_transaction_receipt(
-                tx_digest=game.contract_manager.deploy_tx_digest
-            )
-            if tx_receipt is None:
-                self.context.logger.info(
-                    "cannot verify whether contract deployment was successful. Retrying..."
-                )
-            elif tx_receipt.status != 1:
-                self.context.is_active = False
-                self.context.warning(
-                    "the contract did not deployed successfully. Transaction hash: {}. Aborting!".format(
-                        tx_receipt.transactionHash.hex()
-                    )
-                )
-            else:
-                self.context.logger.info(
-                    "the contract was successfully deployed. Contract address: {}. Transaction hash: {}".format(
-                        tx_receipt.contractAddress, tx_receipt.transactionHash.hex(),
-                    )
-                )
-                configuration = Configuration(parameters.version_id, parameters.tx_fee,)
-                currency_ids = generate_currency_ids(parameters.nb_currencies)
-                configuration.currency_id_to_name = generate_currency_id_to_name(
-                    currency_ids
-                )
-                good_ids = generate_good_ids(parameters.nb_goods)
-                configuration.good_id_to_name = generate_good_id_to_name(good_ids)
-                configuration.contract_address = tx_receipt.contractAddress
-                game.conf = configuration
-                game.phase = Phase.CONTRACT_DEPLOYED
-        elif game.phase.value == Phase.TOKENS_CREATING.value:
-            tx_receipt = ledger_api.get_transaction_receipt(
-                tx_digest=game.contract_manager.create_tokens_tx_digest
-            )
-            if tx_receipt is None:
-                self.context.logger.info(
-                    "cannot verify whether token creation was successful. Retrying..."
-                )
-            elif tx_receipt.status != 1:
-                self.context.is_active = False
-                self.context.warning(
-                    "the token creation wasn't successful. Transaction hash: {}. Aborting!".format(
-                        tx_receipt.transactionHash.hex()
-                    )
-                )
-            else:
-                self.context.logger.info(
-                    "successfully created the tokens. Transaction hash: {}".format(
-                        tx_receipt.transactionHash.hex()
-                    )
-                )
-                game.phase = Phase.TOKENS_CREATED
-        elif game.phase.value == Phase.TOKENS_MINTING.value:
-            for (
-                agent_addr,
-                tx_digest,
-            ) in game.contract_manager.mint_tokens_tx_digests.items():
-                if agent_addr in game.contract_manager.confirmed_mint_tokens_agents:
-                    continue
-                tx_receipt = ledger_api.get_transaction_receipt(tx_digest=tx_digest)
-                if tx_receipt is None:
-                    self.context.logger.info(
-                        "cannot verify whether token minting for agent_addr={} was successful. Retrying...".format(
-                            agent_addr
-                        )
-                    )
-                elif tx_receipt.status != 1:
-                    self.context.is_active = False
-                    self.context.logger.warning(
-                        "the token minting for agent_addr={} wasn't successful. Transaction hash: {}. Aborting!".format(
-                            agent_addr, tx_receipt.transactionHash.hex(),
-                        )
-                    )
-                else:
-                    self.context.logger.info(
-                        "successfully minted the tokens for agent_addr={}. Transaction hash: {}".format(
-                            agent_addr, tx_receipt.transactionHash.hex(),
-                        )
-                    )
-                    game.contract_manager.add_confirmed_mint_tokens_agents(agent_addr)
-                    if len(game.contract_manager.confirmed_mint_tokens_agents) == len(
-                        game.initial_agent_states
-                    ):
-                        self.context.logger.info("All tokens minted!")
-                        game.phase = Phase.TOKENS_MINTED

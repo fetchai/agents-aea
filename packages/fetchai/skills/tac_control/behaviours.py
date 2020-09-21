@@ -193,6 +193,11 @@ class TacBehaviour(Behaviour):
             if last_msg is None:
                 raise ValueError("Error when retrieving last message.")
             agent_state = game.current_agent_states[agent_address]
+            info = (
+                {"contract_address": game.conf.contract_address}
+                if game.conf.has_contract_address
+                else {}
+            )
             tac_msg = tac_dialogue.reply(
                 performative=TacMessage.Performative.GAME_DATA,
                 target_message=last_msg,
@@ -205,7 +210,7 @@ class TacBehaviour(Behaviour):
                 agent_addr_to_name=game.conf.agent_addr_to_name,
                 good_id_to_name=game.conf.good_id_to_name,
                 version_id=game.conf.version_id,
-                info={"contract_address": game.conf.contract_address},
+                info=info,
             )
             self.context.outbox.put_message(message=tac_msg)
             self.context.logger.debug(

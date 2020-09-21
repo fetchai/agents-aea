@@ -8,14 +8,15 @@ This skill is part of the Fetch.ai TAC demo. It manages the smart contract (cont
 
 ## Behaviours
 
-* contract: manages the contract (deploying the contract, creating tokens, minting tokens) 
 * tac:  deploys smart contract, manages progression of the competition
 
 ## Handlers
 
-* tac: handles TAC messages for registering/unregistering agents in the TAC
+* contract_api: handles contract_api messages for interaction with contract
+* ledger_api: handles ledger_api messages for interaction with ledger
 * oef: handles oef_search messages if (un)registration on SOEF is unsuccessful
-* transaction: handles signing messages for communication with the ledger
+* signing: handles signing messages for interaction with decision maker
+* tac: handles TAC messages for registering/unregistering agents in the TAC
 
 ## Links
 

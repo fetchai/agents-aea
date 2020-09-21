@@ -22,7 +22,7 @@
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.crypto.ethereum import EthereumHelper
+from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
@@ -329,8 +329,9 @@ class LedgerApiHandler(Handler):
 
         :param ledger_api_message: the ledger api message
         """
-        is_transaction_successful = EthereumHelper.is_transaction_settled(
-            ledger_api_msg.transaction_receipt.receipt
+        is_transaction_successful = LedgerApis.is_transaction_settled(
+            ledger_api_msg.transaction_receipt.ledger_id,
+            ledger_api_msg.transaction_receipt.receipt,
         )
         if is_transaction_successful:
             self.context.logger.info(

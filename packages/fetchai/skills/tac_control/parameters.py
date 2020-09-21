@@ -23,12 +23,13 @@ import datetime
 from typing import Dict, List, Optional, Set
 
 from aea.exceptions import AEAEnforceError, enforce
-from aea.helpers.search.models import (
-    Location,
-)
+from aea.helpers.search.models import Location
 from aea.skills.base import Model
 
-from packages.fetchai.skills.tac_control.helpers import generate_currency_id_to_name, generate_good_id_to_name
+from packages.fetchai.skills.tac_control.helpers import (
+    generate_currency_id_to_name,
+    generate_good_id_to_name,
+)
 
 DEFAULT_LEDGER_ID = "ethereum"
 DEFAULT_MIN_NB_AGENTS = 2
@@ -52,7 +53,7 @@ class Parameters(Model):
     """This class contains the parameters of the game."""
 
     def __init__(self, **kwargs):
-        """Instantiate the search class."""
+        """Instantiate the parameter class."""
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._contract_address = kwargs.pop(
             "contract_adress", None
@@ -154,6 +155,13 @@ class Parameters(Model):
         if self._contract_address is None:
             raise AEAEnforceError("No contract address provided.")
         return self._contract_address
+
+    @contract_address.setter
+    def contract_address(self, contract_address: str) -> None:
+        """Set contract address of an already deployed smart-contract."""
+        if self._contract_address is not None:
+            raise AEAEnforceError("Contract address already provided.")
+        self._contract_address = contract_address
 
     @property
     def is_contract_deployed(self) -> bool:
@@ -282,10 +290,11 @@ class Parameters(Model):
     def _check_consistency(self) -> None:
         """Check the parameters are consistent."""
         if self._contract_address is not None and (
-            self._good_ids is not None
-            or self._currency_ids is not None
-            or len(self._good_ids) != self._nb_goods
-            or len(self._currency_ids) != self._nb_currencies
+            (self._good_ids is not None and len(self._good_ids) != self._nb_goods)
+            or (
+                self._currency_ids is not None
+                and len(self._currency_ids) != self._nb_currencies
+            )
         ):
             raise ValueError(
                 "If the contract address is set, then good ids and currency id must be provided and consistent."
