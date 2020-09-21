@@ -38,6 +38,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
+    PackageVersion,
     ProtocolConfig,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
@@ -480,6 +481,14 @@ def test_pubic_id_repr():
     assert repr(public_id) == "<author/name:0.1.0>"
 
 
+def test_pubic_id_to_latest():
+    """Test PublicId.to_latest"""
+    public_id = PublicId("author", "name", "0.1.0")
+    expected_public_id = PublicId("author", "name", "latest")
+    actual_public_id = public_id.to_latest()
+    assert expected_public_id == actual_public_id
+
+
 def test_pubic_id_same_prefix():
     """Test PublicId.same_prefix"""
     same_1 = PublicId("author", "name", "0.1.0")
@@ -663,6 +672,7 @@ def test_agent_config_to_json_with_optional_configurations():
         max_reactions=100,
         decision_maker_handler=dict(dotted_path="", file_path=""),
         skill_exception_policy="propagate",
+        connection_exception_policy="propagate",
         default_routing={"author/name:0.1.0": "author/name:0.1.0"},
         loop_mode="sync",
         runtime_mode="async",
@@ -690,3 +700,18 @@ def test_contract_config_component_type():
     """Test ContractConfig.component_type"""
     config = ContractConfig("name", "author", "0.1.0")
     assert config.component_type == ComponentType.CONTRACT
+
+
+def test_package_version_eq_negative():
+    """Test package version __eq__."""
+    v1 = PackageVersion("0.1.0")
+    v2 = PackageVersion("0.2.0")
+    assert v1 != v2
+
+
+def test_package_version_lt():
+    """Test package version __lt__."""
+    v1 = PackageVersion("0.1.0")
+    v2 = PackageVersion("0.2.0")
+    v3 = PackageVersion("latest")
+    assert v1 < v2 < v3

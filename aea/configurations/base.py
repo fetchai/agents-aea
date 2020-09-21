@@ -1569,7 +1569,7 @@ class AgentConfig(PackageConfiguration):
         if self.skill_exception_policy is not None:
             config["skill_exception_policy"] = self.skill_exception_policy
         if self.connection_exception_policy is not None:
-            config["connection_exception_policy"] = self.skill_exception_policy
+            config["connection_exception_policy"] = self.connection_exception_policy
         if self.default_routing != {}:
             config["default_routing"] = {
                 str(key): str(value) for key, value in self.default_routing.items()
