@@ -291,19 +291,22 @@ class AsyncMultiplexer(Runnable, WithLogger):
     async def _stop_receive_send_loops(self) -> None:
         """Stop receive and send loops."""
         self.logger.debug("Stopping recv loop...")
+
         if self._recv_loop_task:
             self._recv_loop_task.cancel()
-            with suppress(Exception):
+            with suppress(Exception, asyncio.CancelledError):
                 await self._recv_loop_task
+
         self._recv_loop_task = None
         self.logger.debug("Recv loop stopped.")
 
         self.logger.debug("Stopping send loop...")
+
         if self._send_loop_task:
             # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing envelopes.
             await self.out_queue.put(None)
             self._send_loop_task.cancel()
-            with suppress(Exception):
+            with suppress(Exception, asyncio.CancelledError):
                 await self._send_loop_task
 
         self._send_loop_task = None
@@ -415,8 +418,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
             )
             return
 
-        while self.is_connected:
-            try:
+        try:
+            while self.is_connected:
                 self.logger.debug("Waiting for outgoing envelopes...")
                 envelope = await self.out_queue.get()
                 if envelope is None:  # pragma: nocover
@@ -424,17 +427,18 @@ class AsyncMultiplexer(Runnable, WithLogger):
                         "Received empty envelope. Quitting the sending loop..."
                     )
                     return None
-
                 self.logger.debug("Sending envelope {}".format(str(envelope)))
-                await self._send(envelope)
-            except asyncio.CancelledError:
-                self.logger.debug("Sending loop cancelled.")
-                return
-            except AEAConnectionError as e:
-                self.logger.error(str(e))
-            except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-                self.logger.error("Error in the sending loop: {}".format(str(e)))
-                raise
+                try:
+                    await self._send(envelope)
+                except AEAConnectionError as e:
+                    self.logger.error(str(e))
+
+        except asyncio.CancelledError:
+            self.logger.debug("Sending loop cancelled.")
+            raise
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+            self.logger.error("Error in the sending loop: {}".format(str(e)))
+            raise
 
     async def _receiving_loop(self) -> None:
         """Process incoming envelopes."""
@@ -443,8 +447,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
             asyncio.ensure_future(conn.receive()): conn for conn in self.connections
         }
 
-        while self.connection_status.is_connected and len(task_to_connection) > 0:
-            try:
+        try:
+            while self.connection_status.is_connected and len(task_to_connection) > 0:
                 done, _pending = await asyncio.wait(
                     task_to_connection.keys(), return_when=asyncio.FIRST_COMPLETED
                 )
@@ -461,17 +465,17 @@ class AsyncMultiplexer(Runnable, WithLogger):
                         new_task = asyncio.ensure_future(connection.receive())
                         task_to_connection[new_task] = connection
 
-            except asyncio.CancelledError:  # pragma: nocover
-                self.logger.debug("Receiving loop cancelled.")
-                break
-            except Exception as e:  # pylint: disable=broad-except
-                self.logger.exception("Error in the receiving loop: {}".format(str(e)))
-                break
-
-        # cancel all the receiving tasks.
-        for t in task_to_connection.keys():
-            t.cancel()
-        self.logger.debug("Receiving loop terminated.")
+        except asyncio.CancelledError:  # pragma: nocover
+            self.logger.debug("Receiving loop cancelled.")
+            raise
+        except Exception as e:  # pylint: disable=broad-except
+            self.logger.exception("Error in the receiving loop: {}".format(str(e)))
+            raise
+        finally:
+            # cancel all the receiving tasks.
+            for t in task_to_connection.keys():
+                t.cancel()
+            self.logger.debug("Receiving loop terminated.")
 
     async def _send(self, envelope: Envelope) -> None:
         """
