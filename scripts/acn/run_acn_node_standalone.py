@@ -24,11 +24,10 @@ import subprocess  # nosec
 from binascii import unhexlify
 from typing import Dict, List, Optional
 
+# following imports needed only if checks are enabled  # isort:skip
 from base58 import b58decode
 from ecdsa import SigningKey, curves
 from multihash import decode as multihashdecode  # type: ignore
-
-# following imports needed only if checks are enabled
 
 
 class AcnNodeConfig:
