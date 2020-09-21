@@ -7,13 +7,13 @@ description: The tac control skill implements the logic for an AEA to control an
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmV6mToyVnQL9squVJntDPrHvtxFk7sfEYJ61Fyoiy9wsE
+  README.md: QmUiw6Dt97mXLzSizbnMNTsfLy3edGXKdYTNR5bke6sFsm
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmcLSggJr1XpiDEwefCGGpfwUp282J4i97ziCNFH7X1M9C
-  game.py: Qmdz91tAYzEFDsvN4hNBawK7D7beTfocps1hpQc3RgavUK
-  handlers.py: QmWyibFRxcunBLqb7FJEkx9RpS6fNZpAvNDkG6cCfK7mQd
-  helpers.py: QmQ36tdx5itzz189tUgmyR74Q63vSRUcPTsg9qEwBUYdNU
-  parameters.py: QmRU9gxsWcxy25g69jbrKve2f8kFxNBjFfRjPZNKsYoYCP
+  behaviours.py: QmYsRchFNceEuwxkHFopENAR7nMFfZ5JLwtVXceM1jVkk3
+  dialogues.py: QmPNoMrAPBQb8ib5uwxxMXd8U8nG81uXt4no6WStS3pNob
+  game.py: QmQwskD5DBVNv1ouRpqGNLb3zQ5krLUcR6XXHUcJ5EVc8L
+  handlers.py: QmSXVdtLYeHkabpp8ZqSrqwywhQvT4EwfiYqWyWoF52GNr
+  parameters.py: QmVMNP52fPxkzEbXPhXtQXspnaj2f4ErZNcNdPAqv4cvwq
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.10.0
