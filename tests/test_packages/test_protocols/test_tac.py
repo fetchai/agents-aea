@@ -36,6 +36,7 @@ import packages
 from packages.fetchai.protocols.tac.dialogues import TacDialogue, TacDialogues
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.message import logger as tac_message_logger
+
 from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)

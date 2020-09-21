@@ -40,6 +40,7 @@ from packages.fetchai.connections.webhook.connection import WebhookConnection
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
+
 from tests.common.mocks import RegexComparator
 from tests.conftest import get_host, get_unused_tcp_port
 

@@ -33,6 +33,7 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
+
 from tests.conftest import (
     COSMOS,
     _make_libp2p_client_connection,

@@ -35,6 +35,7 @@ from packages.fetchai.connections.http_client.connection import HTTPClientConnec
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
+
 from tests.common.mocks import AnyStringWith
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
 

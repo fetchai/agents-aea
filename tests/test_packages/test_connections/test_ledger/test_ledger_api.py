@@ -51,6 +51,7 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+
 from tests.conftest import (
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,

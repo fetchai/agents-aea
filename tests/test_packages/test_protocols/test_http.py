@@ -36,6 +36,7 @@ import packages
 from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.message import logger as http_message_logger
+
 from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)

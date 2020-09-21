@@ -44,6 +44,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+
 from tests.common.mocks import AnyStringWith
 from tests.common.utils import wait_for_condition
 from tests.conftest import MAX_FLAKY_RERUNS, _make_local_connection

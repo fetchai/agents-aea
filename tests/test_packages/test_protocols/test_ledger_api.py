@@ -41,6 +41,7 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ledger_api.message import (
     logger as ledger_api_message_logger,
 )
+
 from tests.conftest import ROOT_DIR
 
 sys.path.append(ROOT_DIR)

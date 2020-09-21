@@ -34,6 +34,7 @@ from packages.fetchai.connections.http_client.connection import HTTPClientConnec
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
+
 from tests.conftest import get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)

@@ -45,6 +45,9 @@ from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
 
+from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.protocols.fipa.message import FipaMessage
+
 from .conftest import (
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
@@ -55,8 +58,6 @@ from .conftest import (
 )
 from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
-from packages.fetchai.connections.local.connection import LocalNode
-from packages.fetchai.protocols.fipa.message import FipaMessage
 from tests.common.utils import (
     AeaTool,
     make_behaviour_cls_from_funcion,

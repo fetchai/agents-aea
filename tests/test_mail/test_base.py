@@ -31,6 +31,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
+
 from tests.conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,

@@ -42,13 +42,14 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
-from . import models
 from packages.fetchai.connections.soef.connection import SOEFConnection, SOEFException
 from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+
+from . import models
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 

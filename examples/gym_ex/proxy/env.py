@@ -32,7 +32,6 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
-from .agent import ProxyAgent  # noqa: E402  # pylint: disable=wrong-import-position
 from packages.fetchai.protocols.gym.dialogues import (  # noqa: E402  # pylint: disable=wrong-import-position
     GymDialogue as BaseGymDialogue,
 )
@@ -42,6 +41,8 @@ from packages.fetchai.protocols.gym.dialogues import (  # noqa: E402  # pylint: 
 from packages.fetchai.protocols.gym.message import (  # noqa: E402  # pylint: disable=wrong-import-position
     GymMessage,
 )
+
+from .agent import ProxyAgent  # noqa: E402  # pylint: disable=wrong-import-position
 
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"

@@ -40,6 +40,7 @@ from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+
 from tests.conftest import ETHEREUM, ETHEREUM_ADDRESS_ONE
 
 

@@ -42,6 +42,7 @@ from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.contract_api.message import (
     logger as contract_api_message_logger,
 )
+
 from tests.conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)

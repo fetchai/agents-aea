@@ -38,6 +38,7 @@ import packages
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.message import logger as fipa_message_logger
+
 from tests.conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)

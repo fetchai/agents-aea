@@ -44,6 +44,7 @@ from packages.fetchai.connections.http_server.connection import (
 from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
+
 from tests.common.mocks import RegexComparator
 from tests.conftest import (
     HTTP_PROTOCOL_PUBLIC_ID,

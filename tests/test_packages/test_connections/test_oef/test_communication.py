@@ -59,6 +59,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+
 from tests.conftest import (
     FETCHAI_ADDRESS_ONE,
     FETCHAI_ADDRESS_TWO,

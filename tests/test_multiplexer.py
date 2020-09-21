@@ -41,6 +41,8 @@ from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
+from packages.fetchai.connections.local.connection import LocalNode
+
 from .conftest import (
     UNKNOWN_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
@@ -49,7 +51,6 @@ from .conftest import (
     _make_stub_connection,
     logger,
 )
-from packages.fetchai.connections.local.connection import LocalNode
 from tests.common.utils import wait_for_condition
 
 
