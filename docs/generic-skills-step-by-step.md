@@ -94,6 +94,7 @@ Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviou
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_seller.dialogues import (
@@ -101,6 +102,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
     OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
+
 
 DEFAULT_SERVICES_INTERVAL = 60.0
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
@@ -296,6 +298,7 @@ from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -309,6 +312,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
     OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
+
 
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
@@ -849,6 +853,7 @@ from aea.helpers.search.models import Description, Location, Query
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
@@ -1054,6 +1059,7 @@ from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialo
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
+
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -1070,6 +1076,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+
 
 DefaultDialogue = BaseDefaultDialogue
 
@@ -1406,6 +1413,7 @@ Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`)
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
@@ -1413,6 +1421,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
+
 
 DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
@@ -1490,6 +1499,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -1505,6 +1515,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     SigningDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
+
 
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
@@ -2196,6 +2207,7 @@ from aea.helpers.search.models import (
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
@@ -2419,6 +2431,7 @@ from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialog
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
+
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -2435,6 +2448,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+
 
 DefaultDialogue = BaseDefaultDialogue
 

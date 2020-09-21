@@ -80,10 +80,12 @@ from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
+
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
+
 
 API_KEY = "TwiCIriSl0mLahw17pyqoA"
 SOEF_ADDR = "soef.fetch.ai"
