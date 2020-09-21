@@ -129,7 +129,7 @@ class IsVersionCorrectTestCase(TestCase):
     def test__is_version_correct_positive(self):
         """Test for _is_version_correct method positive result."""
         public_id = PublicId("author", "package", "0.1.0")
-        ctx_mock = ContextMock()
+        ctx_mock = ContextMock(version=public_id.version)
         ctx_mock.agent_config.public_id = public_id
         result = _is_version_correct(ctx_mock, public_id)
         self.assertTrue(result)
@@ -138,7 +138,7 @@ class IsVersionCorrectTestCase(TestCase):
         """Test for _is_version_correct method negative result."""
         public_id_a = PublicId("author", "package", "0.1.0")
         public_id_b = PublicId("author", "package", "0.1.1")
-        ctx_mock = ContextMock()
+        ctx_mock = ContextMock(version=public_id_b.version)
         ctx_mock.agent_config.public_id = public_id_b
         result = _is_version_correct(ctx_mock, public_id_a)
         self.assertFalse(result)
@@ -152,4 +152,13 @@ class TestFetchFromRemoteRegistry(AEATestCaseMany):
     def test_fetch_agent_from_remote_registry_positive(self):
         """Test fetch agent from Registry for positive result."""
         self.run_cli_command("fetch", "fetchai/my_first_aea:0.7.0")
+        assert "my_first_aea" in os.listdir(self.t)
+
+
+class TestFetchLatestVersion(AEATestCaseMany):
+    """Test case for fetch agent, latest version."""
+
+    def test_fetch_agent_latest(self):
+        """Test fetch agent, latest version."""
+        self.run_cli_command("fetch", "--local", "fetchai/my_first_aea:latest")
         assert "my_first_aea" in os.listdir(self.t)
