@@ -436,7 +436,16 @@ def test_public_id_from_string():
 
 
 def test_public_id_from_string_without_version_string():
+    """Test parsing the public id without version string."""
     public_id = PublicId.from_str("author/package")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "latest"
+
+
+def test_public_id_from_string_with_version_string_latest():
+    """Test parsing the public id with version string 'latest'."""
+    public_id = PublicId.from_str("author/package:latest")
     assert public_id.author == "author"
     assert public_id.name == "package"
     assert public_id.version == "latest"

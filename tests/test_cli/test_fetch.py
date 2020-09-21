@@ -27,6 +27,7 @@ import pytest
 
 from aea.cli import cli
 from aea.cli.fetch import _is_version_correct, fetch_agent_locally
+from aea.configurations.base import PackageVersion
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS
@@ -127,17 +128,19 @@ class IsVersionCorrectTestCase(TestCase):
 
     def test__is_version_correct_positive(self):
         """Test for _is_version_correct method positive result."""
-        ctx_mock = ContextMock(version="correct")
+        package_version = PackageVersion("0.1.0")
+        ctx_mock = ContextMock(version=str(package_version))
         public_id_mock = PublicIdMock()
-        public_id_mock.version = "correct"
+        public_id_mock.package_version = package_version
         result = _is_version_correct(ctx_mock, public_id_mock)
         self.assertTrue(result)
 
     def test__is_version_correct_negative(self):
         """Test for _is_version_correct method negative result."""
-        ctx_mock = ContextMock(version="correct")
+        package_version = PackageVersion("0.1.0")
+        ctx_mock = ContextMock(version="0.1.1")
         public_id_mock = PublicIdMock()
-        public_id_mock.version = "incorrect"
+        public_id_mock.package_version = package_version
         result = _is_version_correct(ctx_mock, public_id_mock)
         self.assertFalse(result)
 
