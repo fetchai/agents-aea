@@ -45,6 +45,7 @@ from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 
+
 ROOT = Path(".")
 
 

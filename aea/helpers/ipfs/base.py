@@ -27,6 +27,7 @@ import base58
 
 from aea.helpers.ipfs.pb import merkledag_pb2, unixfs_pb2
 
+
 # https://github.com/multiformats/multicodec/blob/master/table.csv
 SHA256_ID = "12"  # 0x12
 LEN_SHA256 = "20"  # 0x20

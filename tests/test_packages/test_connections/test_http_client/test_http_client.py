@@ -39,6 +39,7 @@ from packages.fetchai.protocols.http.message import HttpMessage
 from tests.common.mocks import AnyStringWith
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
 
+
 logger = logging.getLogger(__name__)
 
 

@@ -21,6 +21,7 @@
 
 from aea.crypto.cosmos import CosmosCrypto, CosmosFaucetApi, CosmosHelper, _CosmosApi
 
+
 _FETCHAI = "fetchai"
 _FETCH = "fetch"
 TESTNET_NAME = "testnet"

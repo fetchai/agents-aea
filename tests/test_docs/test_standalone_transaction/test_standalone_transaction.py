@@ -31,6 +31,7 @@ from .standalone_transaction import logger, run
 from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS_INTEGRATION, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
+
 MD_FILE = "docs/standalone-transaction.md"
 PY_FILE = "test_docs/test_standalone_transaction/standalone_transaction.py"
 

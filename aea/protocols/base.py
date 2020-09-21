@@ -35,6 +35,7 @@ from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.exceptions import enforce
 
+
 logger = logging.getLogger(__name__)
 
 Address = str

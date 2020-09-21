@@ -24,4 +24,5 @@ from packages.fetchai.skills.generic_seller.behaviours import (
     GenericServiceRegistrationBehaviour,
 )
 
+
 ServiceRegistrationBehaviour = GenericServiceRegistrationBehaviour

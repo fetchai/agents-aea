@@ -46,6 +46,7 @@ from packages.fetchai.protocols.ml_trade.message import (
 
 from tests.conftest import ROOT_DIR
 
+
 logger = logging.getLogger(__name__)
 sys.path.append(ROOT_DIR)
 

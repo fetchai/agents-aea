@@ -32,6 +32,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 
+
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
 

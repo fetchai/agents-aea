@@ -42,6 +42,7 @@ from tests.test_protocols.test_generator.common import (
     T_PROTOCOL_NAME,
 )
 
+
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 

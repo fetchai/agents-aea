@@ -24,6 +24,7 @@ from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar
 
 from aea.common import Address
 
+
 EntityClass = TypeVar("EntityClass")
 
 

@@ -44,6 +44,7 @@ from packages.fetchai.protocols.http.message import HttpMessage
 from tests.common.mocks import RegexComparator
 from tests.conftest import get_host, get_unused_tcp_port
 
+
 logger = logging.getLogger(__name__)
 
 

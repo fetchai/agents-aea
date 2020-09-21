@@ -37,6 +37,7 @@ from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
 from aea.helpers.multiaddr.base import MultiAddr
 
+
 URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
 
 

@@ -60,6 +60,7 @@ from aea.test_tools.generic import (
 
 from tests.conftest import ROOT_DIR
 
+
 logger = logging.getLogger(__name__)
 
 CLI_LOG_OPTION = ["-v", "OFF"]

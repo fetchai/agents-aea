@@ -35,6 +35,7 @@ from aea.skills.base import Model
 from packages.fetchai.protocols.gym.dialogues import GymDialogue as BaseGymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
 
+
 DefaultDialogue = BaseDefaultDialogue
 
 

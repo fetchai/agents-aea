@@ -36,6 +36,7 @@ import yaml
 
 from aea.configurations.base import PackageId, PackageType, PublicId
 
+
 DEFAULT_CONFIG_FILE_PATHS = [
     Path("aea", "connections", "stub", "connection.yaml"),
     Path("aea", "protocols", "default", "protocol.yaml"),

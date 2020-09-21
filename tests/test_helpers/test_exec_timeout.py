@@ -35,6 +35,7 @@ from aea.helpers.exec_timeout import (
 
 from tests.common.utils import timeit_context
 
+
 if os.name == "nt":
     pytest.skip("signal.settimer non available on Windows.", allow_module_level=True)
 

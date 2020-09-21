@@ -54,6 +54,7 @@ from aea.protocols.generator.common import (
 )
 from aea.protocols.generator.extract_specification import extract
 
+
 logger = logging.getLogger(__name__)
 
 

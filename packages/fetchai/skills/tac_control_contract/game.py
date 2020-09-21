@@ -45,6 +45,7 @@ from packages.fetchai.skills.tac_control_contract.helpers import (
 )
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
+
 GoodId = str
 CurrencyId = str
 Quantity = int

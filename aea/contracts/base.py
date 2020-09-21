@@ -32,6 +32,7 @@ from aea.crypto.registries import Registry
 from aea.exceptions import AEAException, enforce
 from aea.helpers.base import load_module
 
+
 contract_registry: Registry["Contract"] = Registry["Contract"]()
 logger = logging.getLogger(__name__)
 

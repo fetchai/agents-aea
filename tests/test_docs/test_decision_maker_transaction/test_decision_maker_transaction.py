@@ -29,6 +29,7 @@ from ...conftest import CUR_PATH, ROOT_DIR
 from ..helper import extract_code_blocks, extract_python_code
 from .decision_maker_transaction import logger, run
 
+
 MD_FILE = "docs/decision-maker-transaction.md"
 PY_FILE = "test_docs/test_decision_maker_transaction/decision_maker_transaction.py"
 

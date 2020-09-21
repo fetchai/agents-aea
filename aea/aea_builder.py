@@ -83,6 +83,7 @@ from aea.helpers.logging import AgentLoggerAdapter
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 
+
 PathLike = Union[os.PathLike, Path, str]
 
 logger = logging.getLogger(__name__)

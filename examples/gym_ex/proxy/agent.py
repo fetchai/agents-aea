@@ -34,6 +34,7 @@ from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylin
     GymConnection,
 )
 
+
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
 )

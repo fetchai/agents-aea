@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmaGSTqxvQFKccBnLovhBbfSH3C3Sorrj7kFyZqW9qptLa
-  __init__.py: QmRvTtynKcd7shmzgf8aZdcA5witjNL5cL2a7WPgscp7wq
-  custom_types.py: QmPSAWKkH7R8XCfPUCRmuEqVxCnp8L5PTUq4DBt59AzFUC
+  __init__.py: Qmdr5ks5X4YtnpH6yKUcNu9uouyv3EGmrKFhyvNH7ZBjvT
+  custom_types.py: QmYAkKYj9gGHaij7uTejoJe9KRhNcsU4sJC1utMfhUYhg3
   dialogues.py: QmQPLnW3jAs6tLLmhkX4C7texGRHM9bfdjs83dUH5TkJ4v
-  message.py: QmU8jH94qxrcr9eUtXWn5PzqmHT7NBc62gs53HPXKVk1Ts
+  message.py: QmWFvjX7spNHQx6QQevBRXmFyJBuenyAPYAjxVLYvKdC7B
   oef_search.proto: QmNU8WsxT6XNFFneKKeDaZkNn3CEFDfZQkmKv9TyhyxzDB
   oef_search_pb2.py: QmSAFT1xxYRzJU6h1aFVDuYcx672sZ2vzV6c2ico7f4BLK
   serialization.py: QmU3ipyvogbpkFuQki6xqscdiPahDVYw4sBaPHaH3LVvwJ

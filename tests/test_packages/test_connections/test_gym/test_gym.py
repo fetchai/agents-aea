@@ -39,6 +39,7 @@ from packages.fetchai.protocols.gym.message import GymMessage
 
 from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
 
+
 logger = logging.getLogger(__name__)
 
 

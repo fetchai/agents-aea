@@ -31,6 +31,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
+
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 

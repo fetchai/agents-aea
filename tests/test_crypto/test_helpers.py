@@ -45,6 +45,7 @@ from tests.conftest import (
     FETCHAI_PRIVATE_KEY_PATH,
 )
 
+
 logger = logging.getLogger(__name__)
 
 

@@ -30,6 +30,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
 )
 
+
 AEA_DIR = str(Path("."))
 
 ITEM_TYPES = ("connection", "contract", "protocol", "skill")

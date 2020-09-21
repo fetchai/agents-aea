@@ -52,6 +52,7 @@ from aea.helpers.search.models import (
     Query,
 )
 
+
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
 

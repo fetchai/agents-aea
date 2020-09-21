@@ -44,6 +44,7 @@ from packages.fetchai.skills.tac_control_contract.helpers import (
 )
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
+
 CONTROLLER_DATAMODEL = DataModel(
     "tac",
     [Attribute("version", str, True, "Version number of the TAC Controller Agent.")],

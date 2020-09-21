@@ -43,6 +43,7 @@ from tests.data.generator.t_protocol.dialogues import (
 from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
 from tests.test_protocols.test_generator.common import PATH_TO_T_PROTOCOL
 
+
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 

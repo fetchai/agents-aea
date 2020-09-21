@@ -41,6 +41,7 @@ from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
 
+
 logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"

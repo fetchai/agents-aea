@@ -39,6 +39,7 @@ from tests.conftest import (
     wait_for_localhost_ports_to_close,
 )
 
+
 seller_strategy_replacement = """models:
   default_dialogues:
     args: {}

@@ -44,6 +44,7 @@ from tests.conftest import (
 )
 from tests.test_docs.helper import extract_code_blocks
 
+
 MD_FILE = "docs/skill-guide.md"
 
 

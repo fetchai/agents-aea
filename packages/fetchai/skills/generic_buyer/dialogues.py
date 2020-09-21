@@ -58,6 +58,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 
+
 DefaultDialogue = BaseDefaultDialogue
 
 

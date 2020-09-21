@@ -52,6 +52,7 @@ from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.conftest import HTTP_PROTOCOL_PUBLIC_ID
 
+
 logger = logging.getLogger(__name__)
 
 

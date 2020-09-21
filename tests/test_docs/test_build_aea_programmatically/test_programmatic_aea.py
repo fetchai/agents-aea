@@ -29,6 +29,7 @@ from .programmatic_aea import run
 from tests.conftest import CUR_PATH, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
+
 MD_FILE = "docs/build-aea-programmatically.md"
 PY_FILE = "test_docs/test_build_aea_programmatically/programmatic_aea.py"
 

@@ -48,6 +48,7 @@ from aea.configurations.base import (
 from aea.exceptions import enforce
 from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
+
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 

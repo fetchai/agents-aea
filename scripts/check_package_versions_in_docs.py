@@ -35,6 +35,7 @@ import yaml
 
 from aea.configurations.base import ComponentType, PackageId, PackageType, PublicId
 
+
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
 """This regex removes the '^' and '$' respectively, at the beginning and at the end."""
 

@@ -33,6 +33,7 @@ from click.testing import CliRunner
 from aea.cli import cli
 from aea.configurations.base import PackageId, PackageType, PublicId
 
+
 CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_CONFIG_FILE_PATHS = [

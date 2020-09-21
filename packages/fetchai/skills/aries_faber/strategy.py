@@ -24,6 +24,7 @@ from aea.exceptions import enforce
 from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.skills.base import Model
 
+
 # Default Config
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021

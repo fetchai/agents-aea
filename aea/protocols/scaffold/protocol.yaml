@@ -6,7 +6,7 @@ description: The scaffold protocol scaffolds a protocol to be implemented by the
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  __init__.py: QmedGZfo1UqT6UJoRkHys9kmquia9BQcK17y2touwSENDU
+  __init__.py: Qmc9Ln8THrWmwou4nr3Acag7vcZ1fv8v5oRSkCWtv1aH6t
   message.py: QmQRGUakU9MGVAXy8Hmte5DEAvNYuzw8znt1h9Jg62ZEpM
   serialization.py: QmaAf5fppirUWe8JaeBbsqfbeofTHe8DDGHJooe2X389qo
 fingerprint_ignore_patterns: []

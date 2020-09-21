@@ -39,6 +39,7 @@ from aea.helpers.async_utils import (
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.helpers.logging import WithLogger
 
+
 logger = logging.getLogger(__name__)
 
 

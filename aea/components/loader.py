@@ -30,6 +30,7 @@ from aea.exceptions import AEAPackageLoadingError, enforce
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
 
+
 logger = logging.getLogger(__name__)
 
 

@@ -27,6 +27,7 @@ from tests.conftest import (
     libp2p_log_on_failure_all,
 )
 
+
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_HOST = "127.0.0.1"

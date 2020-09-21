@@ -36,6 +36,7 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.multiplexer import AsyncMultiplexer, Multiplexer
 from aea.skills.tasks import TaskManager
 
+
 logger = logging.getLogger(__name__)
 
 

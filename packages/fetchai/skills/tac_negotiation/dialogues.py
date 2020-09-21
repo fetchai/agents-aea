@@ -51,6 +51,7 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
     SUPPLY_DATAMODEL_NAME,
 )
 
+
 DefaultDialogue = BaseDefaultDialogue
 
 

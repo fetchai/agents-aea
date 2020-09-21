@@ -44,6 +44,7 @@ from packages.fetchai.protocols.gym.message import (  # noqa: E402  # pylint: di
 
 from .agent import ProxyAgent  # noqa: E402  # pylint: disable=wrong-import-position
 
+
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
 )

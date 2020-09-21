@@ -33,6 +33,7 @@ from aea.skills.base import Behaviour, Handler
 
 from tests.conftest import ROOT_DIR
 
+
 DEFAULT_SLEEP = 0.0001
 DEFAULT_TIMEOUT = 3
 

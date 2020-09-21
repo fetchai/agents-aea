@@ -22,6 +22,7 @@
 
 import os
 
+
 # needs win32all to work on Windows
 if os.name == "nt":  # pragma: nocover  # cause platform dependent!
     import pywintypes  # pylint: disable=import-error

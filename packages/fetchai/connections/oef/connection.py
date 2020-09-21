@@ -49,6 +49,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+
 logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
 TARGET = 0

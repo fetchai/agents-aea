@@ -35,6 +35,7 @@ from aea.skills.base import Model
 from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 
+
 DefaultDialogue = BaseDefaultDialogue
 
 

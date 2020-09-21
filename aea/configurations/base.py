@@ -54,6 +54,7 @@ from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
 from aea.helpers.ipfs.base import IPFSHashOnly
 
+
 T = TypeVar("T")
 DEFAULT_VERSION = "0.1.0"
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"

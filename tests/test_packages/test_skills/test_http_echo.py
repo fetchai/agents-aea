@@ -27,6 +27,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import ROOT_DIR
 
+
 API_SPEC_PATH = Path(ROOT_DIR, "examples", "http_ex", "petstore.yaml").absolute()
 
 

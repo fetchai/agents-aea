@@ -83,6 +83,7 @@ from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
 from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
+
 logger = logging.getLogger(__name__)
 
 CliRunner = ImportedCliRunner

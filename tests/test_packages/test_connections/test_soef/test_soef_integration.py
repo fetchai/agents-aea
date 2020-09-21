@@ -49,6 +49,7 @@ from . import models
 from .test_soef import OefSearchDialogues
 from tests.common.utils import wait_for_condition
 
+
 logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)

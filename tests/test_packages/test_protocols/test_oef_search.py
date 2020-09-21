@@ -45,6 +45,7 @@ from packages.fetchai.protocols.oef_search.message import (
 
 from tests.conftest import ROOT_DIR
 
+
 sys.path.append(ROOT_DIR)
 
 

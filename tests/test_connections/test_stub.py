@@ -45,6 +45,7 @@ from aea.protocols.default.message import DefaultMessage
 
 from tests.conftest import ROOT_DIR, _make_stub_connection
 
+
 SEPARATOR = ","
 
 

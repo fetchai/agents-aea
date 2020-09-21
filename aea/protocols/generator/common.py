@@ -28,6 +28,7 @@ from typing import Tuple
 from aea.configurations.base import ProtocolSpecification
 from aea.configurations.loader import ConfigLoader
 
+
 SPECIFICATION_PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
 SPECIFICATION_COMPOSITIONAL_TYPES = [
     "pt:set",

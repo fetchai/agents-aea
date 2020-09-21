@@ -55,6 +55,7 @@ from aea.configurations.base import (
 )
 from aea.helpers.base import yaml_dump, yaml_dump_all
 
+
 AUTHOR = "fetchai"
 CORE_PATH = Path("aea")
 TEST_PATH = Path("tests") / "data"

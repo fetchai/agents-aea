@@ -46,6 +46,7 @@ from packages.fetchai.connections.local.connection import (  # noqa: E402 # pyli
     OEFLocalConnection,
 )
 
+
 ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")
 sys.path.append(ROOT_PATH)
 

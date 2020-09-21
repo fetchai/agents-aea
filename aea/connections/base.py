@@ -37,6 +37,7 @@ from aea.helpers.async_utils import AsyncState
 from aea.helpers.base import load_module
 from aea.identity.base import Identity
 
+
 if TYPE_CHECKING:
     from aea.mail.base import Address, Envelope  # pragma: no cover
 

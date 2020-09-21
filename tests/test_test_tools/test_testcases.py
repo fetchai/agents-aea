@@ -35,6 +35,7 @@ from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 from tests.conftest import FETCHAI
 from tests.test_cli import test_generate_wealth, test_interact
 
+
 TestWealthCommandsPositive = test_generate_wealth.TestWealthCommandsPositive
 TestInteractCommand = test_interact.TestInteractCommand
 

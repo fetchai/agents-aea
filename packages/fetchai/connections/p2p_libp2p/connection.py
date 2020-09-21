@@ -41,6 +41,7 @@ from aea.helpers.async_utils import AwaitableProc
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
 
+
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))

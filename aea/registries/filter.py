@@ -27,6 +27,7 @@ from aea.protocols.base import Message
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler
 
+
 logger = logging.getLogger(__name__)
 
 

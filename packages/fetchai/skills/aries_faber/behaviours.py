@@ -35,6 +35,7 @@ from packages.fetchai.skills.aries_faber.strategy import (
     HTTP_COUNTERPARTY,
 )
 
+
 DEFAULT_SEARCH_INTERVAL = 5.0
 
 

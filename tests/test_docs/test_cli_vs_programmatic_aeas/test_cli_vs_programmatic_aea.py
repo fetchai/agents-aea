@@ -40,6 +40,7 @@ from tests.conftest import (
 )
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
+
 MD_FILE = "docs/cli-vs-programmatic-aeas.md"
 PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 DEST = "programmatic_aea.py"

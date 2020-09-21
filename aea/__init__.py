@@ -33,4 +33,5 @@ from aea.__version__ import (
     __version__,
 )
 
+
 AEA_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore

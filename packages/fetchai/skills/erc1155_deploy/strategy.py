@@ -36,6 +36,7 @@ from aea.skills.base import Model
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 
+
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_NFT = 1
 DEFAULT_FT = 2

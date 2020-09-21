@@ -60,6 +60,7 @@ from tests.conftest import (
     _make_dummy_connection,
 )
 
+
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
 

@@ -44,6 +44,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
 
+
 ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
 
 

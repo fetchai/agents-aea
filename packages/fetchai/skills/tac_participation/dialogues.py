@@ -47,6 +47,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.tac.dialogues import TacDialogue as BaseTacDialogue
 from packages.fetchai.protocols.tac.dialogues import TacDialogues as BaseTacDialogues
 
+
 OefSearchDialogue = BaseOefSearchDialogue
 
 

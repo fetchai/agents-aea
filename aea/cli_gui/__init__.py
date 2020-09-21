@@ -54,6 +54,7 @@ from aea.cli_gui.utils import (
 )
 from aea.configurations.base import PublicId
 
+
 elements = [
     ["local", "agent", "localAgents"],
     ["registered", "protocol", "registeredProtocols"],

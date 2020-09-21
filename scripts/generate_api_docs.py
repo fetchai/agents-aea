@@ -25,6 +25,7 @@ import subprocess  # nosec
 import sys
 from pathlib import Path
 
+
 DOCS_DIR = "docs/"
 MODULES_TO_PATH = {
     "aea.abstract_agent": "api/abstract_agent.md",

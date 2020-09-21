@@ -40,6 +40,7 @@ from aea.configurations.base import (
 from aea.configurations.loader import ConfigLoaders
 from aea.exceptions import AEAException, enforce
 
+
 pass_ctx = click.make_pass_decorator(Context)
 
 
