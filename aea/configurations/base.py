@@ -439,6 +439,10 @@ class PublicId(JSONSerializable):
         """Check if the other public id has the same author and name of this."""
         return self.name == other.name and self.author == other.author
 
+    def to_latest(self) -> "PublicId":
+        """Return the same public id, but with latest version."""
+        return PublicId(self.author, self.name, self.LATEST_VERSION)
+
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
         """

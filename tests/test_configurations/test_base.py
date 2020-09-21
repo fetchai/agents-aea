@@ -480,6 +480,22 @@ def test_pubic_id_repr():
     assert repr(public_id) == "<author/name:0.1.0>"
 
 
+def test_pubic_id_same_prefix():
+    """Test PublicId.same_prefix"""
+    same_1 = PublicId("author", "name", "0.1.0")
+    same_2 = PublicId("author", "name", "0.1.1")
+    different = PublicId("author", "different_name", "0.1.0")
+
+    assert same_1.same_prefix(same_2)
+    assert same_2.same_prefix(same_1)
+
+    assert not different.same_prefix(same_1)
+    assert not same_1.same_prefix(different)
+
+    assert not different.same_prefix(same_2)
+    assert not same_2.same_prefix(different)
+
+
 def test_public_id_comparator_when_author_is_different():
     """Test PublicId.__lt__ when author is different."""
     pid1 = PublicId("author_1", "name", "0.1.0")

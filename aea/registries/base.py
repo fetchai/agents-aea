@@ -543,7 +543,6 @@ class HandlerRegistry(ComponentRegistry[Handler]):
             protocol_handlers_by_skill is not None
             and skill_id in protocol_handlers_by_skill.ids()
         ):
-            # clean up previous modifications done by super().register
             raise ValueError(
                 "A handler already registered with pair of protocol id {} and skill id {}".format(
                     protocol_id, skill_id

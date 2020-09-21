@@ -61,7 +61,7 @@ def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
 
     :return: bool is version correct.
     """
-    return (
+    return ctx.agent_config.public_id.same_prefix(agent_public_id) and (
         agent_public_id.package_version.is_latest
         or ctx.agent_config.version == agent_public_id.version
     )
