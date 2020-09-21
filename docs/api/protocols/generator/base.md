@@ -58,7 +58,7 @@ a) validates the protocol specification.
 b) creates the protocol buffer schema file.
 c) generates python modules.
 d) applies black formatting
-d) applies isort formatting
+e) applies isort formatting
 
 **Returns**:
 
@@ -76,7 +76,7 @@ a) validates the protocol specification.
 b) creates the protocol buffer schema file.
 c) generates python modules.
 d) applies black formatting
-d) applies isort formatting
+e) applies isort formatting
 
 If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
 
