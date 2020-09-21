@@ -85,6 +85,7 @@ Commands:
   push              Push item to Registry or save it in local packages.
   register          Register a new Registry account.
   remove            Remove a resource from the agent.
+  reset_password    Reset password of Registry account.
   run               Run the agent.
   scaffold          Scaffold a resource for the agent.
   search            Search for components in the registry.
