@@ -9,11 +9,11 @@ fingerprint:
   README.md: QmSoo6ds8mKhtoG8CBbu9rb9yj7sqeeuBfcU7CLj584uRX
   __init__.py: Qmct8jVx6ndWwaa5HXJAJgMraVuZ8kMeyx6rnEeHAYHwDJ
   custom_types.py: QmQJnWQvtj1D9zqGWM3XrpNtZPmzr4rLgKxoG1MzM5udNA
-  dialogues.py: QmVCWMYaVVhtAoJVfzdpBz3bhGvXZH3XEY3KqbFGhwRx6b
+  dialogues.py: QmRtWkAfR9WTvygMJ36R758RzdY2mGQs2fgtHCfjxmeaHy
   ledger_api.proto: QmfLcv7jJcGJ1gAdCMqsyxJcRud7RaTWteSXHL5NvGuViP
   ledger_api_pb2.py: QmQhM848REJTDKDoiqxkTniChW8bNNm66EtwMRkvVdbMry
-  message.py: QmSoC4Vt4CFWGbZB6rsXn7jLho3CiuvHTTEnKS2RBRg1LZ
-  serialization.py: QmWnjRaZBpUtErSTGGR6uQmatXy1xcbfhSvsFzYKjRNzM5
+  message.py: QmcLuy4YcL22qs3jHf5KHZ7vZueiTDrEmbWjfRTbyzwc5m
+  serialization.py: QmRuTqH9t9JtsnpWX5wpC438DdRxWKiqAB2u9fvQ2oy1GE
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

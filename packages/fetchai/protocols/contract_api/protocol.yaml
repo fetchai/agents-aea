@@ -11,9 +11,9 @@ fingerprint:
   contract_api.proto: QmNwngtcYFSuqL8yeTGVXmrHjfebCybdUa9BnTDKXn8odk
   contract_api_pb2.py: QmVT6Fv53KyFhshNFEo38seHypd7Y62psBaF8NszV8iRHK
   custom_types.py: QmbLjpiTcGNfvdBsu8pgQH6PK5y6ujdNnZ53JSk1GZDRCA
-  dialogues.py: QmSDg2B75CTZ3y8hyZgEsCMPseu6XFzcB7QX8XtMXJDWbn
-  message.py: QmUccjMF97WqBZNuDrsYRMofAsfZ2vZFEHnyoiicNuY73K
-  serialization.py: QmfGrQURxWxrYQMYATbseN3pggTbJbYccy1kXFkqKSrLeK
+  dialogues.py: QmTjXH8JUtziUFDawKsSTYE5dxn1n1FmMPeWexyxiPYd6k
+  message.py: Qmbxqt2TauoUkP6bqeYz1LZ7FukMvW3szs26HU87QCEFya
+  serialization.py: QmQzS931wTQNt758wvnB81aD16hUMQ19WVK6f1p1XuEwUp
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

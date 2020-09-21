@@ -8,11 +8,11 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmUpD7PeLHS8nH7HJ48hBafSFhLn8Yrh571RCmxnStpNwq
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
-  dialogues.py: QmQik8PG4xfuvbDwxocfRHygLHDbHkeqxHEGToAM2EooQz
-  handlers.py: QmbqpPWc3N6MFSpJq2DaPcu78mJG3S9iJuJBuPproSnXHf
-  helpers.py: Qmf48TPcPXxZDVRjFtcJAHAbNJu1qGn8Hju1T1sqnwcL9C
+  dialogues.py: QmWQrpkx9GP3E1a9STqDQtKfXmKEUtrVkCEQjXh8YTeL8U
+  handlers.py: QmagqBdQaGuGbVS5dFqxFtEww2e1YF2NprBNPtt5pVA2hZ
+  helpers.py: QmbRSMX7UCRAEotS4ocTEcZLo1qietAAU9K5zBtqY1nE82
   rl_agent.py: QmUq3XY9Dd2XZBhNNK9J3S5937d3az4cwP1BmeieHSgJ3m
-  tasks.py: QmR6XMqp4uwHyZ4MgJWdgmcUHjk92jWkRjskknZ1Zjji6i
+  tasks.py: QmW4WBzC2pkcnjnwJZKu63qXXWEbMVV3fwQMozGxjWnEdt
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
