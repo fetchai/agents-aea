@@ -9,7 +9,7 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmUiw6Dt97mXLzSizbnMNTsfLy3edGXKdYTNR5bke6sFsm
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmYsRchFNceEuwxkHFopENAR7nMFfZ5JLwtVXceM1jVkk3
+  behaviours.py: QmbvhAKsmhr1aYdrKtcN3P1PpihSFxpTQXrRyGoFnTFqPa
   dialogues.py: QmPNoMrAPBQb8ib5uwxxMXd8U8nG81uXt4no6WStS3pNob
   game.py: QmQwskD5DBVNv1ouRpqGNLb3zQ5krLUcR6XXHUcJ5EVc8L
   handlers.py: QmSXVdtLYeHkabpp8ZqSrqwywhQvT4EwfiYqWyWoF52GNr
@@ -69,7 +69,7 @@ models:
       good_ids: []
       inactivity_timeout: 60
       item_setup_timeout: 120
-      ledger: ethereum
+      ledger_id: ethereum
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -77,14 +77,13 @@ models:
       min_nb_agents: 2
       money_endowment: 2000000
       nb_goods: 10
+      registration_start_time: 01 01 2020  00:01
       registration_timeout: 60
       service_data:
         key: tac
         value: v1
-      start_time: 09 03 2020 15:15
       tx_fee: 1
       upper_bound_factor: 1
-      version_id: v1
       whitelist: []
     class_name: Parameters
   signing_dialogues:

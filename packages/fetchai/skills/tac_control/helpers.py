@@ -21,7 +21,7 @@
 """This module contains the helpers methods for the controller agent."""
 
 import random
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Tuple, cast
 
 import numpy as np
 
@@ -64,7 +64,7 @@ def generate_currency_ids(nb_currencies: int) -> List[int]:
 
 
 def generate_currency_id_to_name(
-    nb_currencies: int, currency_ids: Optional[List[int]] = None
+    nb_currencies: int, currency_ids: List[int]
 ) -> Dict[str, str]:
     """
     Generate a dictionary mapping good ids to names.
@@ -73,7 +73,7 @@ def generate_currency_id_to_name(
     :param currency_ids: the currency ids
     :return: a dictionary mapping currency's ids to names.
     """
-    if currency_ids is not None:
+    if currency_ids != []:
         enforce(
             len(currency_ids) == nb_currencies,
             "Length of currency_ids does not match nb_currencies.",
@@ -87,9 +87,7 @@ def generate_currency_id_to_name(
     return currency_id_to_name
 
 
-def generate_good_id_to_name(
-    nb_goods: int, good_ids: Optional[List[int]] = None
-) -> Dict[str, str]:
+def generate_good_id_to_name(nb_goods: int, good_ids: List[int]) -> Dict[str, str]:
     """
     Generate a dictionary mapping good ids to names.
 
@@ -97,7 +95,7 @@ def generate_good_id_to_name(
     :param good_ids: a list of good ids
     :return: a dictionary mapping goods' ids to names.
     """
-    if good_ids is not None:
+    if good_ids != []:
         enforce(
             len(good_ids) == nb_goods, "Length of good_ids does not match nb_goods."
         )

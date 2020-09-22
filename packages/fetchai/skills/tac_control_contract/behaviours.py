@@ -70,7 +70,7 @@ class TacBehaviour(BaseTacBehaviour):
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ledger_id=parameters.ledger_id,
             contract_id="fetchai/erc1155:0.10.0",
-            callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION,
+            callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(
                 {"deployer_address": self.context.agent_address}
             ),
@@ -157,7 +157,7 @@ class TacBehaviour(BaseTacBehaviour):
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=parameters.ledger_id,
             contract_id="fetchai/erc1155:0.10.0",
-            callable=ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION,
+            callable=ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(
                 {"deployer_address": self.context.agent_address, "token_ids": token_ids}
             ),
@@ -193,7 +193,7 @@ class TacBehaviour(BaseTacBehaviour):
                 ledger_id=parameters.ledger_id,
                 contract_id="fetchai/erc1155:0.10.0",
                 contract_address=parameters.contract_address,
-                callable=ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION,
+                callable=ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION.value,
                 kwargs=ContractApiMessage.Kwargs(
                     {
                         "deployer_address": self.context.agent_address,

@@ -40,7 +40,7 @@ DEFAULT_TX_FEE = 1
 DEFAULT_BASE_GOOD_ENDOWMENT = 2
 DEFAULT_LOWER_BOUND_FACTOR = 1
 DEFAULT_UPPER_BOUND_FACTOR = 1
-DEFAULT_START_TIME = "01 01 2020  00:01"
+DEFAULT_REGISTRATION_START_TIME = "01 01 2020  00:01"
 DEFAULT_REGISTRATION_TIMEOUT = 60
 DEFAULT_ITEM_SETUP_TIMEOUT = 60
 DEFAULT_COMPETITION_TIMEOUT = 300
@@ -58,10 +58,8 @@ class Parameters(Model):
         self._contract_address = kwargs.pop(
             "contract_adress", None
         )  # type: Optional[str]
-        self._good_ids = kwargs.pop("good_ids", None)  # type: Optional[List[int]]
-        self._currency_ids = kwargs.pop(
-            "currency_ids", None
-        )  # type: Optional[List[int]]
+        self._good_ids = kwargs.pop("good_ids", [])  # type: List[int]
+        self._currency_ids = kwargs.pop("currency_ids", [])  # type: List[int]
         self._min_nb_agents = kwargs.pop(
             "min_nb_agents", DEFAULT_MIN_NB_AGENTS
         )  # type: int
@@ -82,9 +80,11 @@ class Parameters(Model):
         self._upper_bound_factor = kwargs.pop(
             "upper_bound_factor", DEFAULT_UPPER_BOUND_FACTOR
         )  # type: int
-        start_time = kwargs.pop("start_time", DEFAULT_START_TIME)  # type: str
-        self._start_time = datetime.datetime.strptime(
-            start_time, "%d %m %Y %H:%M"
+        registration_start_time = kwargs.pop(
+            "registration_start_time", DEFAULT_REGISTRATION_START_TIME
+        )  # type: str
+        self._registration_start_time = datetime.datetime.strptime(
+            registration_start_time, "%d %m %Y %H:%M"
         )  # type: datetime.datetime
         self._registration_timeout = kwargs.pop(
             "registration_timeout", DEFAULT_REGISTRATION_TIMEOUT
@@ -125,6 +125,16 @@ class Parameters(Model):
             self.nb_currencies, self.currency_ids
         )
         self._good_id_to_name = generate_good_id_to_name(self.nb_goods, self.good_ids)
+        self._registration_end_time = (
+            self._registration_start_time
+            + datetime.timedelta(seconds=self._registration_timeout)
+        )
+        self._start_time = self._registration_end_time + datetime.timedelta(
+            seconds=self._item_setup_timeout
+        )
+        self._end_time = self._start_time + datetime.timedelta(
+            seconds=self._competition_timeout
+        )
         now = datetime.datetime.now()
         if now > self.registration_start_time:
             self.context.logger.warning(
@@ -169,12 +179,12 @@ class Parameters(Model):
         return self._contract_address is not None
 
     @property
-    def good_ids(self) -> Optional[List[int]]:
+    def good_ids(self) -> List[int]:
         """The item ids of an already deployed smart-contract."""
         return self._good_ids
 
     @property
-    def currency_ids(self) -> Optional[List[int]]:
+    def currency_ids(self) -> List[int]:
         """The currency ids of an already deployed smart-contract."""
         return self._currency_ids
 
@@ -231,16 +241,12 @@ class Parameters(Model):
     @property
     def registration_start_time(self) -> datetime.datetime:
         """TAC registration start time."""
-        return (
-            self._start_time
-            - datetime.timedelta(seconds=self._item_setup_timeout)
-            - datetime.timedelta(seconds=self._registration_timeout)
-        )
+        return self._registration_start_time
 
     @property
     def registration_end_time(self) -> datetime.datetime:
         """TAC registration end time."""
-        return self._start_time - datetime.timedelta(seconds=self._item_setup_timeout)
+        return self._registration_end_time
 
     @property
     def start_time(self) -> datetime.datetime:
@@ -250,7 +256,7 @@ class Parameters(Model):
     @property
     def end_time(self) -> datetime.datetime:
         """TAC end time."""
-        return self._start_time + datetime.timedelta(seconds=self._competition_timeout)
+        return self._end_time
 
     @property
     def inactivity_timeout(self):

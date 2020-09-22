@@ -13,8 +13,8 @@ fingerprint:
   dialogues.py: QmcVYVTZ95UKBnXzmKyGLo5LwSVcGYUTrifosQMSpzNnCX
   game.py: QmNt16GHaJHtsw3tSS165RLU8pNtvdMbKJqEkMRdjZn3rS
   handlers.py: QmSjwPKEN83C2gQS4WVH8uaHMv5ze7EJ9S8ugmRcKnSwnW
-  helpers.py: QmSh5DfkfsdAHQ7RnR5MHZaeJacVSPQqHMzESZg5mcUbFC
-  parameters.py: QmQkA45jEp5EK5GoD7TaVrckozGY8uTr9f3j4E6pzg72af
+  helpers.py: QmZC2qWz5RW7HEHQiUAH48a8awomtzsm6PBZvaGTHEHwxy
+  parameters.py: QmNsjTrXyXezUrdtwRb9tCiEULSgHeFxmemqxFn5bW3Hqn
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.10.0
@@ -47,7 +47,11 @@ models:
     args:
       base_good_endowment: 2
       competition_timeout: 180
+      currency_ids: []
+      good_ids: []
       inactivity_timeout: 60
+      item_setup_timeout: 0
+      ledger_id: ethereum
       location:
         latitude: 0.127
         longitude: 51.5194
@@ -55,11 +59,11 @@ models:
       min_nb_agents: 2
       money_endowment: 2000000
       nb_goods: 10
+      registration_start_time: 01 01 2020  00:01
       registration_timeout: 60
       service_data:
         key: tac
         value: v1
-      start_time: 01 01 2020  00:01
       tx_fee: 1
       upper_bound_factor: 1
       whitelist: []
@@ -69,3 +73,4 @@ models:
     class_name: TacDialogues
 dependencies:
   numpy: {}
+is_abstract: true
