@@ -40,6 +40,7 @@ from packages.fetchai.protocols.ledger_api.custom_types import (
     TransactionReceipt as CustomTransactionReceipt,
 )
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.ledger_api.message")
 
 DEFAULT_BODY_SIZE = 4

@@ -22,4 +22,5 @@
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ledger_api.serialization import LedgerApiSerializer
 
+
 LedgerApiMessage.serializer = LedgerApiSerializer

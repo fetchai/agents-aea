@@ -28,6 +28,7 @@ from aea.protocols.base import Message
 
 from packages.fetchai.protocols.gym.custom_types import AnyObject as CustomAnyObject
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.gym.message")
 
 DEFAULT_BODY_SIZE = 4

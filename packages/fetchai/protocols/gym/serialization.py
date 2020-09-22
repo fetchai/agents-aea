@@ -21,9 +21,9 @@
 
 from typing import Any, Dict, cast
 
-from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
+from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.gym import gym_pb2
 from packages.fetchai.protocols.gym.custom_types import AnyObject

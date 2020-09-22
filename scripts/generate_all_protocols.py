@@ -47,6 +47,7 @@ from typing import Match, Optional, cast
 from aea.configurations.base import ComponentType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 
+
 SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"

@@ -21,16 +21,18 @@
 
 from typing import Any, Dict, cast
 
-from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
+from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.ledger_api import ledger_api_pb2
-from packages.fetchai.protocols.ledger_api.custom_types import RawTransaction
-from packages.fetchai.protocols.ledger_api.custom_types import SignedTransaction
-from packages.fetchai.protocols.ledger_api.custom_types import Terms
-from packages.fetchai.protocols.ledger_api.custom_types import TransactionDigest
-from packages.fetchai.protocols.ledger_api.custom_types import TransactionReceipt
+from packages.fetchai.protocols.ledger_api.custom_types import (
+    RawTransaction,
+    SignedTransaction,
+    Terms,
+    TransactionDigest,
+    TransactionReceipt,
+)
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 

@@ -22,4 +22,5 @@
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.contract_api.serialization import ContractApiSerializer
 
+
 ContractApiMessage.serializer = ContractApiSerializer

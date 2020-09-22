@@ -34,7 +34,8 @@ from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.exceptions import enforce
-from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 
 
 logger = logging.getLogger(__name__)

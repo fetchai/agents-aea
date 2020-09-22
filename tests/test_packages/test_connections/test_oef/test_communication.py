@@ -45,7 +45,8 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.mail.base import Envelope
-from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.multiplexer import Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage

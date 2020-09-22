@@ -8,11 +8,11 @@ license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmVhm6VBbggxjTe3PEhCBfTomWekNa5buYy3sY7YYN6Er6
-  __init__.py: QmZYdAjm3o44drRiY3MT4RtG2fFLxtaL8h898DmjoJwJzV
+  __init__.py: QmSAC7PGra9fig8RhhF1j3XEVpgie9UZNNYPc2AB9Kx9xJ
   custom_types.py: QmXQATfnvuCpt4FicF4QcqCcLj9PQNsSHjCBvVQknWpyaN
   dialogues.py: QmTxHrcGujP1RUYvfJygZyQoUwmDg2GBWfmbR3tWUSbyop
-  message.py: QmfNdmYk3wssDJvHwMsMxXaiWCjm3fSH9Su4KmsYDZJoWg
-  serialization.py: QmZYhkHa6wW5T4fSUSHar67C76ascfKLsevWEfkff3uVvU
+  message.py: QmfNRtqEpLyAf4knnTecsiNxzehqwWjk8agfg9oe2XvCt3
+  serialization.py: Qmani4DjtVVNYF1DDUSWAnQu7pC2v1DPvEW6ZQwmp2nMSA
   tac.proto: QmUXk2kwqp1vo22oZdvLbWKirojeqkXdGSmiz6r14bMqSE
   tac_pb2.py: QmQYbDoEWt4cthXQTLYozRTAb5CFWEDMFptfvryze2Reqa
 fingerprint_ignore_patterns: []
