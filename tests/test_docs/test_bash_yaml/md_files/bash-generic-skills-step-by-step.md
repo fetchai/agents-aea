@@ -49,19 +49,19 @@ aea generate-wealth fetchai --sync
 ```
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.8.0
+aea add connection fetchai/soef:0.9.0
 aea add connection fetchai/ledger:0.6.0
-aea add protocol fetchai/fipa:0.6.0
+aea add protocol fetchai/fipa:0.7.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 aea run
 ```
 ``` bash 
 aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.8.0
+aea add connection fetchai/soef:0.9.0
 aea add connection fetchai/ledger:0.6.0
-aea add protocol fetchai/fipa:0.6.0
-aea add protocol fetchai/signing:0.3.0
+aea add protocol fetchai/fipa:0.7.0
+aea add protocol fetchai/signing:0.4.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 ```
@@ -91,10 +91,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.5.0
-- fetchai/fipa:0.6.0
-- fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.6.0
+- fetchai/default:0.6.0
+- fetchai/fipa:0.7.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
 skills: []
 behaviours:
   service_registration:
@@ -160,11 +160,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.5.0
-- fetchai/fipa:0.6.0
-- fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.6.0
-- fetchai/signing:0.3.0
+- fetchai/default:0.6.0
+- fetchai/fipa:0.7.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
+- fetchai/signing:0.4.0
 skills: []
 behaviours:
   search:
@@ -225,8 +225,8 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.6.0
-  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
+  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
+  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
 ```
 ``` yaml
 config:

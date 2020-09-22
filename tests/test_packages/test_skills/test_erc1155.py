@@ -56,9 +56,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.6.0",
+            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
             "fetchai/contract_api:0.5.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.6.0": "fetchai/soef:0.8.0",
+            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
         }
 
         # generate random location
@@ -71,7 +71,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_agent_context(deploy_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
         self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.8.0")
+        self.add_item("connection", "fetchai/soef:0.9.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
@@ -115,7 +115,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_agent_context(client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
         self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("connection", "fetchai/soef:0.8.0")
+        self.add_item("connection", "fetchai/soef:0.9.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"

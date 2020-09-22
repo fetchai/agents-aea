@@ -61,15 +61,15 @@ class TestTacSkills(AEATestCaseMany):
         )
 
         default_routing = {
-            "fetchai/oef_search:0.6.0": "fetchai/soef:0.8.0",
+            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
         }
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.8.0")
-        self.add_item("skill", "fetchai/tac_control:0.7.0")
+        self.add_item("connection", "fetchai/soef:0.9.0")
+        self.add_item("skill", "fetchai/tac_control:0.8.0")
         self.set_config("agent.default_ledger", FETCHAI)
         setting_path = "agent.default_routing"
         self.force_set_config(setting_path, default_routing)
@@ -96,8 +96,8 @@ class TestTacSkills(AEATestCaseMany):
         self.force_set_config(setting_path, COSMOS)
 
         default_routing = {
-            "fetchai/ledger_api:0.3.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.6.0": "fetchai/soef:0.8.0",
+            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
+            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
         }
 
         # prepare agents for test
@@ -108,7 +108,7 @@ class TestTacSkills(AEATestCaseMany):
             self.set_agent_context(agent_name)
             self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-            self.add_item("connection", "fetchai/soef:0.8.0")
+            self.add_item("connection", "fetchai/soef:0.9.0")
             self.add_item("connection", "fetchai/ledger:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.9.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.10.0")

@@ -53,7 +53,7 @@ class TestClientServer:
         self.host = get_host()
         self.port = get_unused_tcp_port()
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.5.0")
+        self.protocol_id = PublicId.from_str("fetchai/http:0.6.0")
 
         self.configuration = ConnectionConfig(
             host=self.host,

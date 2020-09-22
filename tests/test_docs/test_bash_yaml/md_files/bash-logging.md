@@ -15,9 +15,9 @@ connections:
 - fetchai/stub:0.9.0
 contracts: []
 protocols:
-- fetchai/default:0.5.0
+- fetchai/default:0.6.0
 skills:
-- fetchai/error:0.5.0
+- fetchai/error:0.6.0
 default_connection: fetchai/stub:0.9.0
 default_ledger: fetchai
 logging_config:

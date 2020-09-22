@@ -40,7 +40,7 @@ Create the AEA that will deploy the contract.
 aea create erc1155_deployer
 cd erc1155_deployer
 aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.8.0
+aea add connection fetchai/soef:0.9.0
 aea add connection fetchai/ledger:0.6.0
 aea add skill fetchai/erc1155_deploy:0.14.0
 aea install
@@ -51,8 +51,8 @@ Then update the agent config (`aea-config.yaml`) with the default routing:
 ``` yaml
 default_routing:
   fetchai/contract_api:0.5.0: fetchai/ledger:0.6.0
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.6.0
-  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
+  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
+  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
 ```
 
 And change the default ledger:
@@ -95,7 +95,7 @@ Create the AEA that will get some tokens from the deployer.
 aea create erc1155_client
 cd erc1155_client
 aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.8.0
+aea add connection fetchai/soef:0.9.0
 aea add connection fetchai/ledger:0.6.0
 aea add skill fetchai/erc1155_client:0.13.0
 aea install
@@ -106,8 +106,8 @@ Then update the agent config (`aea-config.yaml`) with the default routing:
 ``` yaml
 default_routing:
   fetchai/contract_api:0.5.0: fetchai/ledger:0.6.0
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.6.0
-  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
+  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
+  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
 ```
 
 And change the default ledger:
