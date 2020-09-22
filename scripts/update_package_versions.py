@@ -313,7 +313,7 @@ def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
     return sorted(
         package_ids,
         key=lambda x: (
-            semver.VersionInfo(x.public_id.version),
+            semver.VersionInfo.parse(x.public_id.version),
             x.public_id,
             x.package_type,
         ),
