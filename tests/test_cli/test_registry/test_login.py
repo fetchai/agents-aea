@@ -20,7 +20,7 @@
 
 from unittest import TestCase, mock
 
-from aea.cli.registry.login import registry_login
+from aea.cli.registry.login import registry_login, registry_reset_password
 
 
 @mock.patch("aea.cli.registry.login.request_api", return_value={"key": "key"})
@@ -32,4 +32,16 @@ class RegistryLoginTestCase(TestCase):
         result = registry_login("username", "password")
         expected_result = "key"
         self.assertEqual(result, expected_result)
+        request_api_mock.assert_called_once()
+
+
+@mock.patch(
+    "aea.cli.registry.login.request_api", return_value={"message": "Email was sent."}
+)
+class RegistryResetPasswordTestCase(TestCase):
+    """Test case for registry_reset_password method."""
+
+    def test_registry_reset_password_positive(self, request_api_mock):
+        """Test for registry_reset_password method positive result."""
+        registry_reset_password("email@example.com")
         request_api_mock.assert_called_once()

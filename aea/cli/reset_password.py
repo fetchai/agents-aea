@@ -16,32 +16,28 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Registry utils used for CLI login command."""
 
-from aea.cli.registry.utils import request_api
+"""Implementation of the 'aea reset_password' subcommand."""
 
+import click
 
-def registry_login(username: str, password: str) -> str:
-    """
-    Login into Registry account.
-
-    :param username: str username.
-    :param password: str password.
-
-    :return: str token
-    """
-    resp = request_api(
-        "POST", "/rest-auth/login/", data={"username": username, "password": password}
-    )
-    return resp["key"]
+from aea.cli.registry.login import registry_reset_password
 
 
-def registry_reset_password(email: str) -> None:
+@click.command(name="reset_password", help="Reset password of Registry account.")
+@click.argument("email", type=str, required=True)
+def reset_password(email):
+    """Command to request Registry to reset password."""
+    _do_password_reset(email)
+
+
+def _do_password_reset(email: str) -> None:
     """
     Request Registry to reset password.
 
-    :param email: user email.
+    :param email: str email.
 
-    :return: None.
+    :return:
     """
-    request_api("POST", "/rest-auth/password/reset/", data={"email": email})
+    registry_reset_password(email)
+    click.echo("An email with a password reset link was sent to {}".format(email))
