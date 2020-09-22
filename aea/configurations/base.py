@@ -1105,7 +1105,7 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
-    configurable_fields = {"handlers", "behaviours", "models"}
+    configurable_fields = {"handlers", "behaviours", "models", "is_abstract"}
 
     def __init__(
         self,

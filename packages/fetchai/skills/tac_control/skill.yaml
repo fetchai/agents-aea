@@ -73,4 +73,3 @@ models:
     class_name: TacDialogues
 dependencies:
   numpy: {}
-is_abstract: true

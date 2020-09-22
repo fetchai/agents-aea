@@ -820,7 +820,7 @@ class SOEFChannel:
                 unique_token = child.text
         if not (len(unique_page_address) > 0 and len(unique_token) > 0):
             raise SOEFException.error(
-                "Agent registration error - page address or token not received"
+                f"Agent registration error - page address or token not received. Response text: {response_text}"
             )
         self.logger.debug("Registering agent")
         params = {"token": unique_token}
