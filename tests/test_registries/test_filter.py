@@ -98,7 +98,7 @@ class TestFilter:
     def test_handle_internal_message_when_invalid_to(self):
         """Test handle internal message when the message has an invalid to."""
         msg = MagicMock()
-        msg.to = "author/name"
+        msg.to = "author!name"
         with unittest.mock.patch.object(
             aea.registries.filter.logger, "warning"
         ) as mock_logger_warning:

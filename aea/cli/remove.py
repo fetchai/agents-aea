@@ -112,9 +112,8 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
         )
     )
 
-    if (
-        item_id not in existing_items_name_to_ids.keys()
-        and item_id not in existing_item_ids
+    if item_name not in existing_items_name_to_ids.keys() and not any(
+        item_id.same_prefix(existing_id) for existing_id in existing_item_ids
     ):
         raise click.ClickException(
             "The {} '{}' is not supported.".format(item_type, item_id)
@@ -144,7 +143,7 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     except BaseException:
         raise click.ClickException("An error occurred.")
 
-    # removing the protocol to the configurations.
+    # removing the item from the configurations.
     item_public_id = existing_items_name_to_ids[item_name]
     logger.debug("Removing the {} from {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
     existing_item_ids.remove(item_public_id)

@@ -467,3 +467,16 @@ class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
         items_folders = os.listdir(items_path)
         item_name = "fipa"
         assert item_name in items_folders
+
+
+class TestAddProtocolWithLatestVersion(AEATestCaseEmpty):
+    """Test case for add protocol with latest version."""
+
+    def test_add_protocol_latest_version(self):
+        """Test add protocol with latest version."""
+        self.add_item("protocol", "fetchai/fipa:latest", local=True)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
+        items_folders = os.listdir(items_path)
+        item_name = "fipa"
+        assert item_name in items_folders

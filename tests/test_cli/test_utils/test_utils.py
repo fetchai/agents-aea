@@ -44,11 +44,20 @@ from aea.cli.utils.package_utils import (
     get_package_path_unified,
     is_fingerprint_correct,
     is_item_present_unified,
+    is_local_item,
     try_get_balance,
     try_get_item_source_path,
     try_get_item_target_path,
     validate_author_name,
     validate_package_name,
+)
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
 )
 
 from tests.conftest import FETCHAI
@@ -452,3 +461,27 @@ def test_is_item_present_unified(mock_, vendor):
     public_id_mock = mock.MagicMock(author="some_author")
     result = is_item_present_unified(contex_mock, "some_component_type", public_id_mock)
     assert not result
+
+
+@pytest.mark.parametrize(
+    ["public_id", "expected_outcome"],
+    [
+        (PublicId.from_str("author/package:0.1.0"), False),
+        (PublicId.from_str("author/package:latest"), False),
+        (PublicId.from_str("fetchai/oef:0.1.0"), False),
+        (PublicId.from_str("fetchai/oef:latest"), False),
+        (DEFAULT_CONNECTION, True),
+        (DEFAULT_SKILL, True),
+        (DEFAULT_PROTOCOL, True),
+        (SIGNING_PROTOCOL, True),
+        (STATE_UPDATE_PROTOCOL, True),
+        (DEFAULT_CONNECTION.to_latest(), True),
+        (DEFAULT_SKILL.to_latest(), True),
+        (DEFAULT_PROTOCOL.to_latest(), True),
+        (SIGNING_PROTOCOL.to_latest(), True),
+        (STATE_UPDATE_PROTOCOL.to_latest(), True),
+    ],
+)
+def test_is_local_item(public_id, expected_outcome):
+    """Test the 'is_local_item' CLI utility function."""
+    assert is_local_item(public_id) is expected_outcome

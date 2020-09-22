@@ -495,3 +495,16 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
         items_folders = os.listdir(items_path)
         item_name = "echo"
         assert item_name in items_folders
+
+
+class TestAddSkillWithLatestVersion(AEATestCaseEmpty):
+    """Test case for add skill with latest version."""
+
+    def test_add_skill_latest_version(self):
+        """Test add skill with latest version."""
+        self.add_item("skill", "fetchai/echo:latest", local=True)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
+        items_folders = os.listdir(items_path)
+        item_name = "echo"
+        assert item_name in items_folders
