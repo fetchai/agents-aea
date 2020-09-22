@@ -35,7 +35,7 @@ import subprocess  # nosec
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 
 import semver
 import yaml
@@ -282,11 +282,6 @@ def get_public_ids_to_update() -> Set[PackageId]:
     return result
 
 
-def _extract_prefix(public_id: PublicId) -> Tuple[str, str]:
-    """Extract (author, package_name) from public id."""
-    return public_id.author, public_id.name
-
-
 def _get_ambiguous_public_ids(
     all_package_ids_to_update: Set[PackageId],
 ) -> Set[PublicId]:
@@ -296,11 +291,33 @@ def _get_ambiguous_public_ids(
             operator.itemgetter(0),
             filter(
                 lambda x: x[1] > 1,
-                Counter(
-                    _extract_prefix(id_.public_id) for id_ in all_package_ids_to_update
-                ).items(),
+                Counter(id_.public_id for id_ in all_package_ids_to_update).items(),
             ),
         )
+    )
+
+
+def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
+    """
+    Sort the set of package id in the order of update.
+
+    In particular, they are sorted from the greatest version number to the lowest.
+
+    The reason is to avoid that consecutive package ids (i.e. whose minors difference is 1)
+    gets updated in ascending order, resulting in all the updates collapsing to the greatest version.
+    For example, consider two package ids with prefix 'author/package' and with versions
+    0.1.0 and 0.2.0, respectively. If we bump first the former and then the latter,
+    the new replacements associated to the first updated are taken into account in
+    the second update.
+    """
+    return sorted(
+        package_ids,
+        key=lambda x: (
+            semver.VersionInfo(x.public_id.version),
+            x.public_id,
+            x.package_type,
+        ),
+        reverse=True,
     )
 
 
@@ -311,12 +328,13 @@ def process_packages(all_package_ids_to_update: Set[PackageId]) -> bool:
     print("*" * 100)
     print("Start processing.")
     print(
-        f"Ambiguous public ids: {pprint.pformat(map(lambda x: '/'.join(str(x)), ambiguous_public_ids))}"
+        f"Ambiguous public ids: {pprint.pformat(list(map(lambda x: '/'.join(str(x)), ambiguous_public_ids)))}"
     )
-    for package_id in all_package_ids_to_update:
+    sorted_package_ids_list = _sort_in_update_order(all_package_ids_to_update)
+    for package_id in sorted_package_ids_list:
         print("#" * 50)
         print(f"Processing {package_id}")
-        is_ambiguous = _extract_prefix(package_id.public_id) in ambiguous_public_ids
+        is_ambiguous = package_id.public_id in ambiguous_public_ids
         process_package(package_id, is_ambiguous)
         is_bumped = True
     return is_bumped
@@ -350,11 +368,7 @@ def bump_package_version(
         for path in Path(rootdir).glob("**/*"):
             if path.is_file() and str(path).endswith((".py", ".yaml", ".md")):
                 inplace_change(
-                    path,
-                    str(current_public_id),
-                    str(new_public_id),
-                    type_,
-                    is_ambiguous,
+                    path, current_public_id, new_public_id, type_, is_ambiguous,
                 )
 
     bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
@@ -381,7 +395,13 @@ def _can_disambiguate_from_context(
     if re.search(fr"aea +fetch +{old_string}", line) is not None:
         return type_ == "agents"
     match = re.search(
-        f"(skill|protocol|connection|contract|agent)s?.*{old_string}", line
+        "(skill|SKILL|"
+        + "protocol|PROTOCOL|"
+        + "connection|CONNECTION|"
+        + "contract|CONTRACT|"
+        + "agent|AGENT"
+        + f")s?.*{old_string}",
+        line,
     )
     if match is not None:
         return (match.group(1) + "s") == type_
@@ -460,16 +480,18 @@ def replace_type_and_public_id_occurrences(line, old_string, new_string, type_) 
     return line
 
 
-def replace_in_yamls(content, old_string, new_string, type_) -> str:
+def replace_in_yamls(
+    content, old_public_id: PublicId, new_public_id: PublicId, type_
+) -> str:
     """
     Replace the public id in configuration files (also nested in .md files).
 
-    1) replace in cases like:
+    1) replace package dependencies:
         |protocols:
         |- author/name:version
         |...
         |- old_string
-    2) replace in cases like:
+    2) replace in configuration headers:
         |name: package_name
         |author: package_author
         |version: package_version -> bump up
@@ -477,12 +499,10 @@ def replace_in_yamls(content, old_string, new_string, type_) -> str:
     """
 
     # case 1:
-    regex = re.compile(f"({type_}:\n(-.*\n)*)(- *{old_string})", re.MULTILINE)
-    content = regex.sub(rf"\g<1>- {new_string}", content)
+    regex = re.compile(f"({type_}:\n(-.*\n)*)(- *{str(old_public_id)})", re.MULTILINE)
+    content = regex.sub(rf"\g<1>- {str(new_public_id)}", content)
 
-    # case 1:
-    old_public_id = PublicId.from_str(old_string)
-    new_public_id = PublicId.from_str(new_string)
+    # case 2:
     regex = re.compile(
         rf"(name: {old_public_id.name}\nauthor: {old_public_id.author}\n)version: {old_public_id.version}\n(type: {type_[:-1]})",
         re.MULTILINE,
@@ -491,12 +511,51 @@ def replace_in_yamls(content, old_string, new_string, type_) -> str:
     return content
 
 
+def replace_in_protocol_readme(
+    fp: Path, content: str, old_public_id: PublicId, new_public_id: PublicId, type_: str
+) -> str:
+    """
+    Replace the version id in the protocol specification in the protcol's README.
+
+    That is, bump the version in cases like:
+
+        |name: package_name
+        |author: package_author
+        |version: package_version -> bump up
+        ...
+
+    :param fp: path to the file being edited.
+    :param content: the content of the file.
+    :param old_public_id: the old public id.
+    :param new_public_id: the new public id.
+    :param type_: the type of the package.
+    :return: the new content.
+    """
+    if (
+        type_ == fp.parent.parent == "protocols"
+        and fp.name == "README.md"
+        and fp.parent == old_public_id.name
+    ):
+        regex = re.compile(
+            rf"(name: {old_public_id.name}\nauthor: {old_public_id.author}\n)version: {old_public_id.version}\n(description:)",
+            re.MULTILINE,
+        )
+        content = regex.sub(rf"\g<1>version: {new_public_id.version}\n\g<2>", content)
+    return content
+
+
 def inplace_change(
-    fp: Path, old_string: str, new_string: str, type_: str, is_ambiguous: bool
+    fp: Path,
+    old_public_id: PublicId,
+    new_public_id: PublicId,
+    type_: str,
+    is_ambiguous: bool,
 ) -> None:
     """Replace the occurrence of a string with a new one in the provided file."""
 
     content = fp.read_text()
+    old_string = str(old_public_id)
+    new_string = str(new_public_id)
     if old_string not in content:
         return
 
@@ -504,10 +563,13 @@ def inplace_change(
         f"Processing file {fp} for replacing {old_string} with {new_string} (is_ambiguous: {is_ambiguous})"
     )
 
+    content = replace_in_yamls(content, old_public_id, new_public_id, type_)
+    content = replace_in_protocol_readme(
+        fp, content, old_public_id, new_public_id, type_
+    )
     if not is_ambiguous:
         content = content.replace(old_string, new_string)
     else:
-        content = replace_in_yamls(content, old_string, new_string, type_)
         content = _ask_to_user_and_replace_if_allowed(
             content, old_string, new_string, type_
         )
@@ -532,7 +594,7 @@ def process_package(package_id: PackageId, is_ambiguous: bool) -> None:
 
     - check version in registry
     - make sure, version is exactly one above the one in registry
-    - change all occurences in packages/tests/aea/examples/benchmark/docs to new reference
+    - change all occurrences in packages/tests/aea/examples/benchmark/docs to new reference
     - change yaml version number
 
     :param package_id: the id of the package
