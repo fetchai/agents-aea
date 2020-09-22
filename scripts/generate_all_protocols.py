@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """
+Generate all the protocols from their specifications.
+
 This script takes all the protocol specification (scraped from the protocol README)
 and calls the `aea generate protocol` command.
 
@@ -28,6 +30,7 @@ the desired outcomes.
 
 It requires the `aea` package, `black` and `isort` tools.
 """
+
 import logging
 import operator
 import os
