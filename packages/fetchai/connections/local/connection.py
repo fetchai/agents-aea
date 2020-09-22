@@ -39,6 +39,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.local")
 
 TARGET = 0
@@ -423,7 +424,7 @@ class OEFLocalConnection(Connection):
             if self._reader is None:
                 raise ValueError("No reader set!")  # pragma: nocover
             envelope = await self._reader.get()
-            if envelope is None:
+            if envelope is None:  # pragma: no cover
                 self.logger.debug("Receiving task terminated.")
                 return None
             self.logger.debug("Received envelope {}".format(envelope))

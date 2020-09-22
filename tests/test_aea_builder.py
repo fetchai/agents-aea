@@ -27,7 +27,6 @@ from typing import Collection
 from unittest.mock import Mock, patch
 
 import pytest
-
 import yaml
 
 from aea.aea import AEA
@@ -60,6 +59,7 @@ from tests.conftest import (
     ROOT_DIR,
     _make_dummy_connection,
 )
+
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
@@ -655,8 +655,7 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
 
 
 class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmpty):
-    """Test builder set from project dir with custom component config fails
-    when the component is not declared in the agent configuration."""
+    """Test builder set from project dir with custom component config fails when the component is not declared in the agent configuration."""
 
     def _add_stub_connection_config(self):
         """Add custom stub connection config."""

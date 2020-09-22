@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the aea.cli.generate sub-module."""
-
 from unittest import TestCase, mock
 
 from click import ClickException
@@ -40,6 +39,13 @@ def _which_mock(arg):
         return None
 
 
+def _which_mock_isort(arg):
+    if arg == "isort":
+        return None
+    else:
+        return True
+
+
 def _raise_psperror(*args, **kwargs):
     raise ProtocolSpecificationParseError()
 
@@ -51,14 +57,14 @@ def _raise_psperror(*args, **kwargs):
 class GenerateItemTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
 
-    def test__generate_item_file_exists(self, *mocks):
+    def test__generate_item_file_exists(self, *_mocks):
         """Test for fetch_agent_locally method file exists result."""
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException):
             _generate_item(ctx_mock, "protocol", "path")
 
     @mock.patch("aea.protocols.generator.base.shutil.which", _which_mock)
-    def test__generate_item_no_res(self, *mocks):
+    def test__generate_item_no_res(self, *_mocks):
         """Test for fetch_agent_locally method no black."""
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException) as cm:
@@ -67,6 +73,19 @@ class GenerateItemTestCase(TestCase):
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             "Cannot find black code formatter! To install, please follow this link: "
             "https://black.readthedocs.io/en/stable/installation_and_usage.html"
+        )
+        self.assertEqual(cm.exception.message, expected_msg)
+
+    @mock.patch("aea.protocols.generator.base.shutil.which", _which_mock_isort)
+    def test__generate_item_no_res_isort_missing(self, *_mocks):
+        """Test for fetch_agent_locally method no isort."""
+        ctx_mock = ContextMock()
+        with self.assertRaises(ClickException) as cm:
+            _generate_item(ctx_mock, "protocol", "path")
+        expected_msg = (
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            "Cannot find isort code formatter! To install, please follow this link: "
+            "https://pycqa.github.io/isort/#installing-isort"
         )
         self.assertEqual(cm.exception.message, expected_msg)
 

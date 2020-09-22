@@ -1,6 +1,6 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.8.0
+version: 0.10.0
 type: connection
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
@@ -8,26 +8,26 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmWNt8r4sZPwkvy8vf7A5a23aUdeLU2BpXJ6qLJYtG8syf
+  README.md: QmWefvnDUHPCCZqe8BseAj6EuJWc4RrKKRL8Y8bT5ip3hy
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmWvBDjtc3MEWZnQFmg8JkFaNvUyRQMJnYeatMvBqLSB5d
+  aea/api.go: QmYRSRJL5jUTU8eBUFDot5inhmpZPZLykCRM32LVQHauVS
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
-  connection.py: QmfGEnMhu46JRUu1X9zcYMKSqToK6D2wcUBzWBBWq6sh72
+  connection.py: QmXR4qF92gJDMvphLX14GwnPbGdYYWr3f7oM6dWjMScgzy
   dht/dhtclient/dhtclient.go: QmasA3GrgswTnUJoffBzeeqxeT3GjLu6foN6PHJhWNpMMa
   dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  dht/dhtpeer/dhtpeer.go: QmZyKodcR832YVR3MWxm71G7Bfqx9gwkPQSiFdJx53TrzV
+  dht/dhtpeer/dhtpeer.go: QmScT5pyzFaDV7KWxe8AVzsU1jCi4TNKrkyh22ziXjMjcc
   dht/dhtpeer/dhtpeer_test.go: QmeCWUddyT8Bk9gXaafvksExj8ceMUmcdP8dLEcp7P2UFF
   dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
   dht/dhttests/dhttests.go: QmZpYRCiVARGL1n4nDwqjhzHA95Y4ACNWoa3HSDnB6PitK
   go.mod: QmacqAAxC3dkydmfbEyVWVkMDmZECTWKZcBoPyRSnheQzD
   go.sum: Qmbu57aSPSqanJ1xHNmMHAqLL8nvCV61URknizsKJDvenG
-  libp2p_node.go: QmbHFZ7yWkXzP4LXRUyQqyNT1hMetaecT5PgnkoCpSBL5y
+  libp2p_node.go: QmYczbp9C62ykF4pUG2onF8nkYvfKsEsqwWxcLWcWwcP9u
   utils/utils.go: QmSdLqVNwtupDKxvE2qbCEEoACCaRG2ccNPq6p34YtrDqA
 fingerprint_ignore_patterns: []
 protocols: []

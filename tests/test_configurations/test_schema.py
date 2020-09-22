@@ -25,11 +25,9 @@ from itertools import zip_longest
 from pathlib import Path
 
 import jsonschema
-from jsonschema import Draft4Validator  # type: ignore
-
 import pytest
-
 import yaml
+from jsonschema import Draft4Validator  # type: ignore
 
 from aea.configurations.loader import make_jsonschema_base_uri
 

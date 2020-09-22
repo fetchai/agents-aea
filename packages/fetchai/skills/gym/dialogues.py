@@ -32,9 +32,9 @@ from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialo
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
 
-
 from packages.fetchai.protocols.gym.dialogues import GymDialogue as BaseGymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
+
 
 DefaultDialogue = BaseDefaultDialogue
 

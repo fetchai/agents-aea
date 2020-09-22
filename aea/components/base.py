@@ -35,6 +35,7 @@ from aea.configurations.base import (
 from aea.exceptions import AEAEnforceError
 from aea.helpers.logging import WithLogger
 
+
 logger = logging.getLogger(__name__)
 
 

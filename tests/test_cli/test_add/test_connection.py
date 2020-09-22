@@ -25,11 +25,9 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from jsonschema import ValidationError
-
 import pytest
-
 import yaml
+from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli
@@ -483,6 +481,19 @@ class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""
         self.add_item("connection", "fetchai/local:0.4.0", local=False)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
+        items_folders = os.listdir(items_path)
+        item_name = "local"
+        assert item_name in items_folders
+
+
+class TestAddConnectionWithLatestVersion(AEATestCaseEmpty):
+    """Test case for add connection with latest version."""
+
+    def test_add_connection_latest_version(self):
+        """Test add connection with latest version."""
+        self.add_item("connection", "fetchai/local:latest", local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
         items_folders = os.listdir(items_path)

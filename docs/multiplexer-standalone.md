@@ -14,6 +14,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
+
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 ```
@@ -124,11 +125,14 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
+
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 
 
 def run():
+    """Run demo."""
+
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
         os.remove(INPUT_FILE)

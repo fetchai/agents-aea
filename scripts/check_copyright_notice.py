@@ -20,6 +20,7 @@
 
 """
 This script checks that all the Python files of the repository have:
+
 - (optional) the Python shebang
 - the encoding header;
 - the copyright notice;
@@ -31,6 +32,7 @@ import itertools
 import re
 import sys
 from pathlib import Path
+
 
 HEADER_REGEX = r"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-

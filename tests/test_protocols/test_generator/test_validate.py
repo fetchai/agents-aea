@@ -51,6 +51,7 @@ from aea.protocols.generator.validate import (
     validate,
 )
 
+
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 

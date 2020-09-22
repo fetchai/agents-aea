@@ -86,7 +86,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.6.0
+v0.6.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -101,7 +101,7 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
 The echo skill is a simple demo that introduces you to the main business logic components of an AEA. The fastest way to create your first AEA is to fetch it!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.10.0
+aea fetch fetchai/my_first_aea:0.11.0
 cd my_first_aea
 ```
 
@@ -121,9 +121,9 @@ cd my_first_aea
 <br>
 Second, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.6.0
+aea add skill fetchai/echo:0.7.0
 ```
-This copies the `fetchai/echo:0.6.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.6.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `fetchai/echo:0.7.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.7.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ## Communication via envelopes and messages
@@ -175,7 +175,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.6.0
+v0.6.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

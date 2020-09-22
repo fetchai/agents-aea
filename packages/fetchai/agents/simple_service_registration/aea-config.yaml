@@ -1,13 +1,13 @@
 agent_name: simple_service_registration
 author: fetchai
-version: 0.11.0
+version: 0.13.0
 description: A simple example of service registration.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint: ''
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/p2p_libp2p:0.8.0
+- fetchai/p2p_libp2p:0.10.0
 - fetchai/soef:0.8.0
 - fetchai/stub:0.9.0
 contracts: []
@@ -17,8 +17,8 @@ protocols:
 - fetchai/oef_search:0.6.0
 skills:
 - fetchai/error:0.5.0
-- fetchai/simple_service_registration:0.8.0
-default_connection: fetchai/p2p_libp2p:0.8.0
+- fetchai/simple_service_registration:0.10.0
+default_connection: fetchai/p2p_libp2p:0.10.0
 default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false

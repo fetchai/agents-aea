@@ -28,6 +28,7 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
 
+
 logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
 PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.7.0")

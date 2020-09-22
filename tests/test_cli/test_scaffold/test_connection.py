@@ -28,9 +28,8 @@ import unittest.mock
 from pathlib import Path
 
 import jsonschema
-from jsonschema import Draft4Validator, ValidationError
-
 import yaml
+from jsonschema import Draft4Validator, ValidationError
 
 from aea import AEA_DIR
 from aea.cli import cli

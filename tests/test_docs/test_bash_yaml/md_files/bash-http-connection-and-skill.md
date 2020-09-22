@@ -18,7 +18,7 @@ aea install
 aea scaffold skill http_echo
 ```
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.5.0
+aea fingerprint skill fetchai/http_echo:0.6.0
 ```
 ``` bash
 aea run

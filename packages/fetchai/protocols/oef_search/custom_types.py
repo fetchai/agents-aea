@@ -88,6 +88,12 @@ class AgentsInfo:
         )
         return agents_info_object
 
+    def __eq__(self, other):
+        """Compare with another object."""
+        if not isinstance(other, AgentsInfo):
+            return False  # pragma: nocover
+        return self.body == other.body
+
 
 class OefErrorOperation(Enum):
     """This class represents an instance of OefErrorOperation."""

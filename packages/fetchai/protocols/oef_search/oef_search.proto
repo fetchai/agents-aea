@@ -52,7 +52,9 @@ message OefSearchMessage{
         AgentsInfo agents_info = 2;
     }
 
-    message Success_Performative{}
+    message Success_Performative{
+        AgentsInfo agents_info = 1;
+    }
 
     message Oef_Error_Performative{
         OefErrorOperation oef_error_operation = 1;

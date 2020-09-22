@@ -41,7 +41,6 @@ from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialo
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
-
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -58,6 +57,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+
 
 DefaultDialogue = BaseDefaultDialogue
 

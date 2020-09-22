@@ -21,6 +21,7 @@ import os
 
 from tests.conftest import ROOT_DIR
 
+
 T_PROTOCOL_NAME = "t_protocol"
 PATH_TO_T_PROTOCOL_SPECIFICATION = os.path.join(
     ROOT_DIR, "tests", "data", "sample_specification.yaml"
@@ -31,4 +32,5 @@ PATH_TO_T_PROTOCOL = os.path.join(
 
 
 def black_is_not_installed(*args, **kwargs):
+    """Check black is not installed."""
     return not args[0] == "black"

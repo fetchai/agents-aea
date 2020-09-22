@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, **kwargs)
+ | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, **kwargs)
 ```
 
 Initialize an agent context.
@@ -29,6 +29,10 @@ Initialize an agent context.
 - `decision_maker_message_queue`: the (in) queue of the decision maker
 - `decision_maker_handler_context`: the decision maker's name space
 - `task_manager`: the task manager
+- `default_connection`: the default connection
+- `default_routing`: the default routing
+- `search_service_address`: the address of the search service
+- `decision_maker_address`: the address of the decision maker
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
 <a name="aea.context.base.AgentContext.shared_state"></a>
@@ -144,6 +148,16 @@ Get the task manager.
 ```
 
 Get the address of the search service.
+
+<a name="aea.context.base.AgentContext.decision_maker_address"></a>
+#### decision`_`maker`_`address
+
+```python
+ | @property
+ | decision_maker_address() -> Address
+```
+
+Get the address of the decision maker.
 
 <a name="aea.context.base.AgentContext.default_connection"></a>
 #### default`_`connection

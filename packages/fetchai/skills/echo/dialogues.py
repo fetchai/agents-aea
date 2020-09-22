@@ -25,6 +25,7 @@ from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialo
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
 
+
 DefaultDialogue = BaseDefaultDialogue
 
 

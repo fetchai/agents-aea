@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains utility code for generator modules."""
-
+import inspect
 import os
 import re
 import shutil
@@ -27,6 +27,7 @@ from typing import Tuple
 
 from aea.configurations.base import ProtocolSpecification
 from aea.configurations.loader import ConfigLoader
+
 
 SPECIFICATION_PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
 SPECIFICATION_COMPOSITIONAL_TYPES = [
@@ -62,6 +63,14 @@ PYTHON_TYPE_TO_PROTO_TYPE = {
     "bool": "bool",
     "str": "string",
 }
+
+CURRENT_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+ISORT_CONFIGURATION_FILE = os.path.join(CURRENT_DIR, "isort.cfg")
+ISORT_CLI_ARGS = [
+    "--settings-path",
+    ISORT_CONFIGURATION_FILE,
+    "--quiet",
+]
 
 
 def _to_camel_case(text: str) -> str:
@@ -294,13 +303,19 @@ def check_prerequisites() -> None:
 
     :return: None
     """
-    # check protocol buffer compiler is installed
+    # check black code formatter is installed
     if not is_installed("black"):
         raise FileNotFoundError(
             "Cannot find black code formatter! To install, please follow this link: https://black.readthedocs.io/en/stable/installation_and_usage.html"
         )
 
-    # check black code formatter is installed
+    # check isort code formatter is installed
+    if not is_installed("isort"):
+        raise FileNotFoundError(
+            "Cannot find isort code formatter! To install, please follow this link: https://pycqa.github.io/isort/#installing-isort"
+        )
+
+    # check protocol buffer compiler is installed
     if not is_installed("protoc"):
         raise FileNotFoundError(
             "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
@@ -348,6 +363,19 @@ def try_run_black_formatting(path_to_protocol_package: str) -> None:
     """
     subprocess.run(  # nosec
         [sys.executable, "-m", "black", path_to_protocol_package, "--quiet"],
+        check=True,
+    )
+
+
+def try_run_isort_formatting(path_to_protocol_package: str) -> None:
+    """
+    Run Isort code formatting via subprocess.
+
+    :param path_to_protocol_package: a path where formatting should be applied.
+    :return: None
+    """
+    subprocess.run(  # nosec
+        [sys.executable, "-m", "isort", *ISORT_CLI_ARGS, path_to_protocol_package],
         check=True,
     )
 

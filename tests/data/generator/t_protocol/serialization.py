@@ -22,8 +22,7 @@
 from typing import Any, Dict, cast
 
 from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.protocols.base import Message, Serializer
 
 from tests.data.generator.t_protocol import t_protocol_pb2
 from tests.data.generator.t_protocol.custom_types import DataModel

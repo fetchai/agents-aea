@@ -22,4 +22,5 @@
 from tests.data.generator.t_protocol.message import TProtocolMessage
 from tests.data.generator.t_protocol.serialization import TProtocolSerializer
 
+
 TProtocolMessage.serializer = TProtocolSerializer

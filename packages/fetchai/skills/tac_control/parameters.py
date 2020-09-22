@@ -26,6 +26,7 @@ from aea.exceptions import enforce
 from aea.helpers.search.models import Location
 from aea.skills.base import Model
 
+
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SERVICE_DATA = {"key": "tac", "value": "v1"}
 

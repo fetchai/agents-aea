@@ -32,6 +32,7 @@ from packages.fetchai.skills.tac_negotiation.dialogues import (
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
+
 DEFAULT_REGISTER_AND_SEARCH_INTERVAL = 5.0
 
 

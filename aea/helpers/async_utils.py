@@ -26,7 +26,7 @@ import time
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
-from asyncio.tasks import FIRST_COMPLETED, Task
+from asyncio.tasks import FIRST_COMPLETED
 from collections.abc import Iterable
 from contextlib import contextmanager, suppress
 from threading import Thread
@@ -44,11 +44,14 @@ from typing import (
     Union,
 )
 
+
 try:
     from asyncio import create_task  # pylint: disable=ungrouped-imports,unused-import
 except ImportError:  # pragma: no cover
     # for python3.6!
-    from asyncio import ensure_future as create_task  # type: ignore # noqa: F401 # pylint: disable=ungrouped-imports,unused-import
+    from asyncio import (  # type: ignore # noqa: F401 # pylint: disable=ungrouped-imports,unused-import
+        ensure_future as create_task,
+    )
 
 
 logger = logging.getLogger(__file__)
@@ -377,24 +380,8 @@ class ThreadedAsyncRunner(Thread):
         logger.debug("Stopped.")
 
 
-async def cancel_and_wait(task: Optional[Task]) -> Any:
-    """Wait cancelled task and skip CancelledError."""
-    if not task:  # pragma: nocover
-        return
-    try:
-        if task.done():
-            return await task
-
-        task.cancel()
-        return await task
-    except CancelledError as e:
-        return e
-
-
 class AwaitableProc:
-    """
-    Async-friendly subprocess.Popen
-    """
+    """Async-friendly subprocess.Popen."""
 
     def __init__(self, *args, **kwargs):
         """Initialise awaitable proc."""

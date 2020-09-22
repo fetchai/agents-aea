@@ -34,7 +34,6 @@ from typing import Set
 
 import yaml
 
-
 from aea.configurations.base import PackageId, PackageType, PublicId
 
 

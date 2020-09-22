@@ -27,6 +27,7 @@ from typing import Pattern, Set
 
 import requests
 
+
 LINK_PATTERN_MD = re.compile(r"\[([^]]+)]\(\s*([^]]+)\s*\)")
 LINK_PATTERN = re.compile(r'(?<=<a href=")[^"]*')
 IMAGE_PATTERN = re.compile(r'<img[^>]+src="([^">]+)"')

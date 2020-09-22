@@ -29,10 +29,8 @@ from aea.configurations.base import (  # noqa: F401 # pylint: disable=unused-imp
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
-    _compute_fingerprint,
-)
-from aea.configurations.base import (
     PublicId,
+    _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader

@@ -24,7 +24,6 @@ from typing import Optional, cast
 from unittest import mock
 
 import eth_account
-
 import pytest
 
 import aea

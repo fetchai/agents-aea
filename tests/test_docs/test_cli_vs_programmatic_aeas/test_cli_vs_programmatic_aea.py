@@ -40,6 +40,7 @@ from tests.conftest import (
 )
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 
+
 MD_FILE = "docs/cli-vs-programmatic-aeas.md"
 PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 DEST = "programmatic_aea.py"
@@ -62,7 +63,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.11.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.13.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -172,7 +173,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 163  # line below: `strategy._is_ledger_tx = False`
+        line_insertion_position = 165  # line below: `strategy._is_ledger_tx = False`
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",

@@ -80,6 +80,8 @@ class OefSearchSerializer(Serializer):
             oef_search_msg.search_result.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.SUCCESS:
             performative = oef_search_pb2.OefSearchMessage.Success_Performative()  # type: ignore
+            agents_info = msg.agents_info
+            AgentsInfo.encode(performative.agents_info, agents_info)
             oef_search_msg.success.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
             performative = oef_search_pb2.OefSearchMessage.Oef_Error_Performative()  # type: ignore
@@ -141,7 +143,9 @@ class OefSearchSerializer(Serializer):
             agents_info = AgentsInfo.decode(pb2_agents_info)
             performative_content["agents_info"] = agents_info
         elif performative_id == OefSearchMessage.Performative.SUCCESS:
-            pass
+            pb2_agents_info = oef_search_pb.success.agents_info
+            agents_info = AgentsInfo.decode(pb2_agents_info)
+            performative_content["agents_info"] = agents_info
         elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
             pb2_oef_error_operation = oef_search_pb.oef_error.oef_error_operation
             oef_error_operation = OefErrorOperation.decode(pb2_oef_error_operation)

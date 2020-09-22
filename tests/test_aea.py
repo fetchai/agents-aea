@@ -56,8 +56,7 @@ from tests.common.utils import (
     timeit_context,
     wait_for_condition,
 )
-
-from .conftest import (
+from tests.conftest import (
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
     FETCHAI_PRIVATE_KEY_PATH,
@@ -65,8 +64,8 @@ from .conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_local_connection,
 )
-from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
-from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
+from tests.data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
+from tests.data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
 def test_setup_aea():

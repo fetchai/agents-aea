@@ -166,7 +166,7 @@ handlers:
 
 Finally, we run the fingerprinter:
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.5.0
+aea fingerprint skill fetchai/http_echo:0.6.0
 ```
 Note, you will have to replace the author name with your author handle.
 

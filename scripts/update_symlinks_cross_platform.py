@@ -19,9 +19,7 @@
 # ------------------------------------------------------------------------------
 # pylint: disable=cyclic-import
 
-"""
-This script will update the symlinks of the project, cross-platform compatible.
-"""
+"""This script will update the symlinks of the project, cross-platform compatible."""
 
 import contextlib
 import inspect
@@ -31,6 +29,7 @@ import traceback
 from functools import reduce
 from pathlib import Path
 from typing import List, Tuple
+
 
 SCRIPTS_PATH = Path(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
 ROOT_PATH = SCRIPTS_PATH.parent.absolute()

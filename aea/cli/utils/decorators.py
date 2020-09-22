@@ -26,7 +26,6 @@ from pathlib import Path
 from typing import Callable, Dict, Union, cast
 
 import click
-
 from jsonschema import ValidationError
 
 from aea.cli.utils.config import try_to_load_agent_config

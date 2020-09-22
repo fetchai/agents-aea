@@ -42,7 +42,6 @@ from typing import (
 )
 
 import jsonschema
-
 from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
@@ -83,6 +82,7 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
+
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -287,7 +287,7 @@ class AEABuilder:
         DecisionMakerHandler
     ] = DefaultDecisionMakerHandler
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
-    DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.just_log
+    DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"

@@ -22,8 +22,6 @@ import uuid
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, Union
 
-from benchmark.framework.fake_connection import FakeConnection
-
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.components.base import Component
@@ -34,6 +32,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler, Skill, SkillContext
+from benchmark.framework.fake_connection import FakeConnection
 
 
 class AEATestWrapper:

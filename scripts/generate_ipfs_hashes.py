@@ -41,7 +41,6 @@ from pathlib import Path
 from typing import Collection, Dict, List, Optional, Tuple, Type, cast
 
 import ipfshttpclient
-
 import yaml
 
 from aea.configurations.base import (
@@ -55,6 +54,7 @@ from aea.configurations.base import (
     _compute_fingerprint,
 )
 from aea.helpers.base import yaml_dump, yaml_dump_all
+
 
 AUTHOR = "fetchai"
 CORE_PATH = Path("aea")
@@ -225,7 +225,7 @@ class IPFSDaemon:
         self.process = None  # type: Optional[subprocess.Popen]
 
     def __enter__(self):
-        # run the ipfs daemon
+        """Run the ipfs daemon."""
         self.process = subprocess.Popen(  # nosec
             ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
@@ -233,7 +233,7 @@ class IPFSDaemon:
         time.sleep(self.timeout)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # terminate the ipfs daemon
+        """Terminate the ipfs daemon."""
         self.process.send_signal(signal.SIGTERM)
         self.process.wait(timeout=10)
         poll = self.process.poll()
@@ -268,8 +268,7 @@ def assert_hash_consistency(
     fingerprint, path_prefix, client: ipfshttpclient.Client
 ) -> None:
     """
-    Check that our implementation of IPFS hashing for a package is correct
-    against the true IPFS.
+    Check that our implementation of IPFS hashing for a package is correct against the true IPFS.
 
     :param fingerprint: the fingerprint dictionary.
     :param path_prefix: the path prefix to prepend.

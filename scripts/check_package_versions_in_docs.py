@@ -33,7 +33,6 @@ from typing import Callable, Set
 
 import yaml
 
-
 from aea.configurations.base import ComponentType, PackageId, PackageType, PublicId
 
 
@@ -140,8 +139,7 @@ def _checks(
 
 def check_add_commands(file: Path):
     """
-    Check that 'aea add' commands of the documentation file contains
-    known package ids.
+    Check that 'aea add' commands of the documentation file contains known package ids.
 
     :param file: path to the file.
     :return: None
@@ -158,8 +156,7 @@ def check_add_commands(file: Path):
 
 def check_fetch_commands(file: Path):
     """
-    Check that 'aea fetch' commands of the documentation file contains
-    known package ids.
+    Check that 'aea fetch' commands of the documentation file contains known package ids.
 
     :param file: path to the file.
     :return: None

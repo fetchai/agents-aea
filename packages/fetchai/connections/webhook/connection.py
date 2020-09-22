@@ -37,6 +37,7 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
+
 SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408

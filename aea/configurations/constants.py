@@ -25,6 +25,7 @@ from aea.configurations.base import PublicId
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 
+
 DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.9.0")
 DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.5.0")
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.5.0")

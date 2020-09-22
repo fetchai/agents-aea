@@ -27,28 +27,29 @@ Run this script from the root of the project directory:
 """
 
 import argparse
+import operator
 import os
+import pprint
 import re
 import subprocess  # nosec
 import sys
+from collections import Counter
 from pathlib import Path
-from typing import Dict
-
-from click.testing import CliRunner
+from typing import Dict, Optional, Set, Tuple
 
 import semver
-
 import yaml
+from click.testing import CliRunner
 
 from aea.cli import cli
-from aea.configurations.base import PublicId
+from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.loader import ConfigLoader
-
 from scripts.generate_ipfs_hashes import update_hashes
+
 
 DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples", "tests"]
 CLI_LOG_OPTION = ["-v", "OFF"]
-TYPES = ["protocols", "contracts", "connections", "skills", "agents"]
+TYPES = set(map(lambda x: x.to_plural(), PackageType))
 HASHES_CSV = "hashes.csv"
 TYPE_TO_CONFIG_FILE = {
     "connections": "connection.yaml",
@@ -184,7 +185,7 @@ def get_public_id_from_yaml(configuration_file_path: Path) -> PublicId:
     """
     Get the public id from yaml.
 
-    :param configuration_file: the path to the config yaml
+    :param configuration_file_path: the path to the config yaml
     """
     data = yaml.safe_load(configuration_file_path.open())
     author = data["author"]
@@ -218,32 +219,106 @@ def public_id_in_registry(type_: str, name: str) -> PublicId:
     return highest
 
 
-def process_packages(
-    last_by_type: Dict[str, Dict[str, str]], now_by_type: Dict[str, Dict[str, str]]
-) -> bool:
-    """Process the package versions."""
-    is_bumped = False
+def get_public_ids_to_update() -> Set[PackageId]:
+    """
+    Get all the public ids to be updated.
+
+    In particular, a package DOES NOT NEED a version bump if:
+    - the package is a "scaffold" package;
+    - the package is no longer present
+    - the package hasn't change since the last release;
+    - the public ids of the local package and the package in the registry
+      are already the same.
+    """
+    result: Set[PackageId] = set()
+    last = get_hashes_from_last_release()
+    now = get_hashes_from_current_release()
+    last_by_type = split_hashes_by_type(last)
+    now_by_type = split_hashes_by_type(now)
     for type_ in TYPES:
         for key, value in last_by_type[type_].items():
+            # if the package is a "scaffold" package, skip;
             if key == "scaffold":
                 print("Package `{}` of type `{}` is never bumped!".format(key, type_))
                 continue
+            # if the package is no longer present, skip;
             if key not in now_by_type[type_]:
                 print("Package `{}` of type `{}` no longer present!".format(key, type_))
                 continue
+            # if the package hasn't change since the last release, skip;
             if now_by_type[type_][key] == value:
                 print(
                     "Package `{}` of type `{}` has not changed since last release!".format(
                         key, type_
                     )
                 )
+                continue
+            # load public id in the registry if any
+            name = key
+            configuration_file_path = get_configuration_file_path(type_, name)
+            current_public_id = get_public_id_from_yaml(configuration_file_path)
+            deployed_public_id = public_id_in_registry(type_, name)
+            difference = minor_version_difference(current_public_id, deployed_public_id)
+            # check if the public ids of the local package and the package in the registry are already the same.
+            if difference == 0:
+                print(
+                    "Package `{}` of type `{}` needs to be bumped!".format(name, type_)
+                )
+                result.add(PackageId(type_[:-1], current_public_id))
+            elif difference == 1:
+                print(
+                    "Package `{}` of type `{}` already at correct version!".format(
+                        name, type_
+                    )
+                )
+                continue
             else:
-                is_bumped = process_package(type_, key)
-            if is_bumped:
-                break
-        else:
-            continue
-        break
+                print(
+                    "Package `{}` of type `{}` has current id `{}` and deployed id `{}`. Error!".format(
+                        name, type_, current_public_id, deployed_public_id
+                    )
+                )
+                sys.exit(1)
+    return result
+
+
+def _extract_prefix(public_id: PublicId) -> Tuple[str, str]:
+    """Extract (author, package_name) from public id."""
+    return public_id.author, public_id.name
+
+
+def _get_ambiguous_public_ids(
+    all_package_ids_to_update: Set[PackageId],
+) -> Set[PublicId]:
+    """Get the public ids that are the public ids of more than one package id."""
+    return set(
+        map(
+            operator.itemgetter(0),
+            filter(
+                lambda x: x[1] > 1,
+                Counter(
+                    _extract_prefix(id_.public_id) for id_ in all_package_ids_to_update
+                ).items(),
+            ),
+        )
+    )
+
+
+def process_packages(all_package_ids_to_update: Set[PackageId]) -> bool:
+    """Process the package versions."""
+    is_bumped = False
+    ambiguous_public_ids = _get_ambiguous_public_ids(all_package_ids_to_update)
+    print("*" * 100)
+    print("Start processing.")
+    print(
+        f"Ambiguous public ids: {pprint.pformat(map(lambda x: '/'.join(str(x)), ambiguous_public_ids))}"
+    )
+    for package_id in all_package_ids_to_update:
+        print("#" * 50)
+        print(f"Processing {package_id}")
+        is_ambiguous = _extract_prefix(package_id.public_id) in ambiguous_public_ids
+        process_package(package_id, is_ambiguous)
+        is_bumped = True
     return is_bumped
 
 
@@ -256,7 +331,10 @@ def minor_version_difference(
 
 
 def bump_package_version(
-    current_public_id: PublicId, configuration_file_path: Path, type_: str
+    current_public_id: PublicId,
+    configuration_file_path: Path,
+    type_: str,
+    is_ambiguous: bool = False,
 ) -> None:
     """
     Bump the version references of the package in the repo.
@@ -271,9 +349,54 @@ def bump_package_version(
     for rootdir in DIRECTORIES:
         for path in Path(rootdir).glob("**/*"):
             if path.is_file() and str(path).endswith((".py", ".yaml", ".md")):
-                inplace_change(path, str(current_public_id), str(new_public_id), type_)
+                inplace_change(
+                    path,
+                    str(current_public_id),
+                    str(new_public_id),
+                    type_,
+                    is_ambiguous,
+                )
 
     bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
+
+
+def _can_disambiguate_from_context(
+    line: str, old_string: str, type_: str
+) -> Optional[bool]:
+    """
+    Check whether we can disambiguate the public id given contextual information.
+
+    For example:
+    - whether the public id appears in a line of the form 'aea fetch ...' (we know it's an agent)
+    - whether the public id appears in a line of the form 'aea add ...' (we know the component type)
+    - whether the type appears in the same line where the public id occurs.
+
+    :return: if True/False, the old string can/cannot be replaced. If None, we don't know.
+    """
+    match = re.search(
+        fr"aea +add +(skill|protocol|connection|contract) +{old_string}", line
+    )
+    if match is not None:
+        return match.group(1) == type_[:-1]
+    if re.search(fr"aea +fetch +{old_string}", line) is not None:
+        return type_ == "agents"
+    match = re.search(
+        f"(skill|protocol|connection|contract|agent)s?.*{old_string}", line
+    )
+    if match is not None:
+        return (match.group(1) + "s") == type_
+    return None
+
+
+def _ask_to_user(lines, line, idx, old_string, type_):
+    print("=" * 50)
+    above_rows = lines[idx - arguments.context : idx]
+    below_rows = lines[idx + 1 : idx + arguments.context]
+    print("".join(above_rows))
+    print(line.rstrip().replace(old_string, "\033[91m" + old_string + "\033[0m"))
+    print("".join(below_rows))
+    answer = input(f"Replace for component ({type_}, {old_string})? [y/N]: ",)  # nosec
+    return answer
 
 
 def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_) -> str:
@@ -290,43 +413,51 @@ def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_) 
         content = content.replace(old_string, new_string)
         return content
 
-    lines = content.splitlines()
+    lines = content.splitlines(keepends=True)
     for idx, line in enumerate(lines[:]):
         if old_string not in line:
             continue
-        above_rows = lines[idx - arguments.context : idx]
-        below_rows = lines[idx + 1 : idx + arguments.context]
-        print("\n".join(above_rows))
-        print(line.replace(old_string, "\033[91m" + old_string + "\033[0m"))
-        print("\n".join(below_rows))
-        answer = input(  # nosec
-            f"Replace for component ({type_}, {old_string})? [y/N]: ",
-        )
+
+        can_replace = _can_disambiguate_from_context(line, old_string, type_)
+        # if we managed to replace all the occurrences, then save this line and continue
+        if can_replace is not None:
+            lines[idx] = line.replace(old_string, new_string) if can_replace else line
+            continue
+
+        # otherwise, forget the attempts and ask to the user.
+        answer = _ask_to_user(lines, line, idx, old_string, type_)
         if answer == "y":
             lines[idx] = line.replace(old_string, new_string)
-    return "\n".join(lines)
+    return "".join(lines)
 
 
 def replace_aea_fetch_statements(content, old_string, new_string, type_) -> str:
     """Replace statements of the type: 'aea fetch <old_string>'."""
-    if type_ == "agent":
+    if type_ == "agents":
         content = re.sub(
             fr"aea +fetch +{old_string}", f"aea fetch {new_string}", content
         )
     return content
 
 
-def replace_type_and_public_id_occurrences(
-    content, old_string, new_string, type_
-) -> str:
-    """Replace the public id whenever the type and the id occur in the same row."""
-    lines = content.splitlines(keepends=False)
-    for idx, line in enumerate(lines[:]):
-        if old_string not in line:
-            continue
-        if re.match(f"{type_}.*{old_string}", line):
-            lines[idx] = line.replace(old_string, new_string)
-    return "\n".join(lines)
+def replace_aea_add_statements(content, old_string, new_string, type_) -> str:
+    """Replace statements of the type: 'aea add <type> <old_string>'."""
+    if type_ != "agents":
+        content = re.sub(
+            fr"aea +add +{type_} +{old_string}",
+            f"aea add {type_} {new_string}",
+            content,
+        )
+    return content
+
+
+def replace_type_and_public_id_occurrences(line, old_string, new_string, type_) -> str:
+    """Replace the public id whenever the type and the id occur in the same row, and NOT when other type names occur."""
+    if re.match(f"{type_}.*{old_string}", line) and all(
+        _type not in line for _type in TYPES.difference({type_})
+    ):
+        line = line.replace(old_string, new_string)
+    return line
 
 
 def replace_in_yamls(content, old_string, new_string, type_) -> str:
@@ -360,21 +491,26 @@ def replace_in_yamls(content, old_string, new_string, type_) -> str:
     return content
 
 
-def inplace_change(fp: Path, old_string: str, new_string: str, type_: str) -> None:
+def inplace_change(
+    fp: Path, old_string: str, new_string: str, type_: str, is_ambiguous: bool
+) -> None:
     """Replace the occurrence of a string with a new one in the provided file."""
 
     content = fp.read_text()
     if old_string not in content:
         return
 
-    content = replace_aea_fetch_statements(content, old_string, new_string, type_)
-    content = replace_type_and_public_id_occurrences(
-        content, old_string, new_string, type_
+    print(
+        f"Processing file {fp} for replacing {old_string} with {new_string} (is_ambiguous: {is_ambiguous})"
     )
-    content = replace_in_yamls(content, old_string, new_string, type_)
-    content = _ask_to_user_and_replace_if_allowed(
-        content, old_string, new_string, type_
-    )
+
+    if not is_ambiguous:
+        content = content.replace(old_string, new_string)
+    else:
+        content = replace_in_yamls(content, old_string, new_string, type_)
+        content = _ask_to_user_and_replace_if_allowed(
+            content, old_string, new_string, type_
+        )
 
     with fp.open(mode="w") as f:
         f.write(content)
@@ -390,7 +526,7 @@ def bump_version_in_yaml(
     loader.dump(config, open(configuration_file_path, "w"))
 
 
-def process_package(type_: str, name: str) -> bool:
+def process_package(package_id: PackageId, is_ambiguous: bool) -> None:
     """
     Process a package.
 
@@ -399,38 +535,21 @@ def process_package(type_: str, name: str) -> bool:
     - change all occurences in packages/tests/aea/examples/benchmark/docs to new reference
     - change yaml version number
 
-    :return: whether a package was bumped or not
+    :param package_id: the id of the package
+    :param is_ambiguous: whether the public id is ambiguous.
     """
-    configuration_file_path = get_configuration_file_path(type_, name)
+    type_plural = package_id.package_type.to_plural()
+    configuration_file_path = get_configuration_file_path(type_plural, package_id.name)
     current_public_id = get_public_id_from_yaml(configuration_file_path)
-    deployed_public_id = public_id_in_registry(type_, name)
-    difference = minor_version_difference(current_public_id, deployed_public_id)
-    is_bumped = False
-    if difference == 0:
-        print("Bumping package `{}` of type `{}`!".format(name, type_))
-        bump_package_version(current_public_id, configuration_file_path, type_)
-        is_bumped = True
-    elif difference == 1:
-        print(
-            "Package `{}` of type `{}` already at correct version!".format(name, type_)
-        )
-    else:
-        print(
-            "Package `{}` of type `{}` has current id `{}` and deployed id `{}`. Error!".format(
-                name, type_, current_public_id, deployed_public_id
-            )
-        )
-        sys.exit(1)
-    return is_bumped
+    bump_package_version(
+        current_public_id, configuration_file_path, type_plural, is_ambiguous
+    )
 
 
 def run_once() -> bool:
     """Run the upgrade logic once."""
-    last = get_hashes_from_last_release()
-    now = get_hashes_from_current_release()
-    last_by_type = split_hashes_by_type(last)
-    now_by_type = split_hashes_by_type(now)
-    is_bumped = process_packages(last_by_type, now_by_type)
+    all_package_ids_to_update = get_public_ids_to_update()
+    is_bumped = process_packages(all_package_ids_to_update)
     return is_bumped
 
 

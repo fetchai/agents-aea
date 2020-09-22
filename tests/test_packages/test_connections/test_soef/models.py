@@ -25,7 +25,10 @@ from packages.fetchai.connections.soef.connection import ModelNames
 
 AGENT_LOCATION_MODEL = DataModel(
     ModelNames.location_agent,
-    [Attribute("location", Location, True, "The location where the agent is.")],
+    [
+        Attribute("location", Location, True, "The location where the agent is."),
+        Attribute("disclosure_accuracy", str, False, "Optional disclosure accuracy."),
+    ],
     "A data model to describe location of an agent.",
 )
 
@@ -63,4 +66,14 @@ SEARCH_MODEL = DataModel(
     ModelNames.search_model,
     [Attribute("location", Location, True, "The location where the agent is.")],
     "A data model to perform search.",
+)
+
+
+AGENT_GENERIC_COMMAND_MODEL = DataModel(
+    ModelNames.generic_command,
+    [
+        Attribute("command", str, True, "Command name to execute."),
+        Attribute("parameters", str, False, "Url encoded parameters string."),
+    ],
+    "A data model to describe the generic soef command.",
 )

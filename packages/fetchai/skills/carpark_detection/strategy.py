@@ -27,6 +27,7 @@ from aea.exceptions import enforce
 from packages.fetchai.skills.carpark_detection.database import DetectionDatabase
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
+
 DEFAULT_DB_IS_REL_TO_CWD = False
 DEFAULT_DB_REL_DIR = "temp_files_placeholder"
 

@@ -24,7 +24,6 @@ import shutil
 from pathlib import Path
 
 import click
-
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
@@ -32,12 +31,14 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import validate_package_name
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
 from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-import
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_VERSION,
+    PublicId,
 )
 
 

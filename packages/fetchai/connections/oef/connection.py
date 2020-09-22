@@ -621,7 +621,7 @@ class OEFConnection(Connection):
         """
         try:
             envelope = await self.channel.get()
-            if envelope is None:
+            if envelope is None:  # pragma: no cover
                 self.logger.debug("Received None.")
                 return None
             self.logger.debug("Received envelope: {}".format(envelope))
