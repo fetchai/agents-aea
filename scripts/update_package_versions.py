@@ -35,7 +35,7 @@ import subprocess  # nosec
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Pattern, Set
 
 import semver
 import yaml
@@ -61,13 +61,13 @@ TYPE_TO_CONFIG_FILE = {
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
 
 
-def get_protocol_specification_header_regex(public_id: PublicId) -> re.Pattern:
+def get_protocol_specification_header_regex(public_id: PublicId) -> Pattern:
     """Get the regex to match."""
     return re.compile(
         rf"(name: {public_id.name}\n"
         + rf"author: {public_id.author}\n)"
         + rf"version: {public_id.version}\n"
-        + rf"(description:)",
+        + r"(description:)",
         re.MULTILINE,
     )
 
