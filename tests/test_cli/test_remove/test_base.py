@@ -20,9 +20,8 @@
 import os
 from unittest import TestCase, mock
 
-from click import ClickException
-
 import pytest
+from click import ClickException
 
 from aea.cli.remove import remove_item
 from aea.configurations.base import PublicId
