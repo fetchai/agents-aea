@@ -17,8 +17,8 @@ fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.10.0
 protocols:
-- fetchai/oef_search:0.6.0
-- fetchai/tac:0.6.0
+- fetchai/oef_search:0.7.0
+- fetchai/tac:0.7.0
 skills: []
 behaviours:
   tac_search:
