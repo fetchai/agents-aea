@@ -128,7 +128,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
     _add_item_deps(ctx, item_type, item_config)
-    register_item(ctx, item_type, item_public_id)
+    register_item(ctx, item_type, item_config.public_id)
 
 
 def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
