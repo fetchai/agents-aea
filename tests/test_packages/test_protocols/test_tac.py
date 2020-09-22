@@ -39,6 +39,7 @@ from packages.fetchai.protocols.tac.message import logger as tac_message_logger
 
 from tests.conftest import ROOT_DIR
 
+
 sys.path.append(ROOT_DIR)
 
 

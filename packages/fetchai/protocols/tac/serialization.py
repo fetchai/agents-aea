@@ -21,8 +21,7 @@
 
 from typing import Any, Dict, cast
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.tac import tac_pb2
 from packages.fetchai.protocols.tac.custom_types import ErrorCode

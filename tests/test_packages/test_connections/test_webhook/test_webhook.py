@@ -26,9 +26,8 @@ from typing import cast
 from unittest.mock import patch
 
 import aiohttp
-from aiohttp.client_reqrep import ClientResponse
-
 import pytest
+from aiohttp.client_reqrep import ClientResponse
 
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
@@ -43,10 +42,8 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpD
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
-from tests.conftest import (
-    get_host,
-    get_unused_tcp_port,
-)
+from tests.conftest import get_host, get_unused_tcp_port
+
 
 logger = logging.getLogger(__name__)
 

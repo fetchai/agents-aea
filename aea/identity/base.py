@@ -24,6 +24,7 @@ from typing import Dict, Optional
 from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 
+
 DEFAULT_ADDRESS_KEY = DEFAULT_LEDGER
 
 

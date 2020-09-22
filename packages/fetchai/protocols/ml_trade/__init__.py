@@ -22,4 +22,5 @@
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 
+
 MlTradeMessage.serializer = MlTradeSerializer

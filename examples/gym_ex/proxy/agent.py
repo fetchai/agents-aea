@@ -30,12 +30,16 @@ from aea.helpers.base import locate
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-sys.modules["packages.fetchai.connections.gym"] = locate(
+
+sys.modules["packages.fetchai.connections.gym"] = locate(  # isort:skip
     "packages.fetchai.connections.gym"
 )
+
+
 from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylint: disable=wrong-import-position
     GymConnection,
 )
+
 
 ADDRESS = "some_address"
 

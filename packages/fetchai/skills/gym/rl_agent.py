@@ -27,6 +27,7 @@ import numpy as np
 
 from packages.fetchai.skills.gym.helpers import ProxyEnv, RLAgent
 
+
 DEFAULT_NB_STEPS = 4000
 NB_GOODS = 10
 

@@ -21,8 +21,7 @@
 
 from typing import Any, Dict, cast
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.protocols.base import Message, Serializer
 
 from tests.data.generator.t_protocol_no_ct import t_protocol_no_ct_pb2
 from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage

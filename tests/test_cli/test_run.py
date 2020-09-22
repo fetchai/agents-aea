@@ -27,13 +27,10 @@ import time
 from pathlib import Path
 from unittest import TestCase, mock
 
-from click import ClickException
-
-from pexpect.exceptions import EOF  # type: ignore
-
 import pytest
-
 import yaml
+from click import ClickException
+from pexpect.exceptions import EOF  # type: ignore
 
 from aea.cli import cli
 from aea.cli.run import _build_aea, run_aea

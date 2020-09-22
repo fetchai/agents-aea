@@ -33,6 +33,7 @@ from aea.helpers.search.models import (
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 

@@ -22,4 +22,5 @@
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.serialization import TacSerializer
 
+
 TacMessage.serializer = TacSerializer

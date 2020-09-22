@@ -27,12 +27,7 @@ from threading import Thread
 from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import (
-    ComponentType,
-    ProtocolId,
-    PublicId,
-    SkillConfig,
-)
+from aea.configurations.base import ComponentType, ProtocolId, PublicId, SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.helpers import create_private_key
 from aea.protocols.base import Address, Message
@@ -45,10 +40,9 @@ from tests.data.generator.t_protocol.dialogues import (
     TProtocolDialogue,
     TProtocolDialogues,
 )
-from tests.data.generator.t_protocol.message import (  # type: ignore
-    TProtocolMessage,
-)
+from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
 from tests.test_protocols.test_generator.common import PATH_TO_T_PROTOCOL
+
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)

@@ -27,6 +27,7 @@ from tensorflow import keras
 
 from aea.skills.base import Model
 
+
 DEFAULT_MODEL_CONFIG_PATH = str(Path("..", "..", "model.config").resolve())
 
 

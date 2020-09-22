@@ -21,14 +21,15 @@
 
 from typing import Any, Dict, cast
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.oef_search import oef_search_pb2
-from packages.fetchai.protocols.oef_search.custom_types import AgentsInfo
-from packages.fetchai.protocols.oef_search.custom_types import Description
-from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
-from packages.fetchai.protocols.oef_search.custom_types import Query
+from packages.fetchai.protocols.oef_search.custom_types import (
+    AgentsInfo,
+    Description,
+    OefErrorOperation,
+    Query,
+)
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 

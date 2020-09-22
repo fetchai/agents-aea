@@ -23,6 +23,7 @@ import argparse  # pragma: no cover
 
 import aea.cli_gui  # pragma: no cover
 
+
 parser = argparse.ArgumentParser(
     description="Launch the gui through python"
 )  # pragma: no cover

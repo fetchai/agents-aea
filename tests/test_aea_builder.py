@@ -27,7 +27,6 @@ from typing import Collection
 from unittest.mock import Mock, patch
 
 import pytest
-
 import yaml
 
 from aea.aea import AEA
@@ -60,6 +59,7 @@ from tests.conftest import (
     ROOT_DIR,
     _make_dummy_connection,
 )
+
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")

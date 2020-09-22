@@ -22,12 +22,11 @@
 from binascii import unhexlify
 
 import base58
-
+import multihash  # type: ignore
 from ecdsa import VerifyingKey, curves, keys
 
-import multihash  # type: ignore
-
 from aea.helpers.multiaddr.crypto_pb2 import KeyType, PublicKey
+
 
 # NOTE:
 # - Reference: https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md#keys

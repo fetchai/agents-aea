@@ -30,6 +30,7 @@ from aea.helpers.search.models import (
 )
 from aea.skills.base import Model
 
+
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_CURRENCY_ID = "FET"

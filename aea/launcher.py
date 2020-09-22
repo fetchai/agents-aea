@@ -64,7 +64,7 @@ def _set_logger(
     log_level: Optional[str],
 ):  # pragma: nocover # used in spawned process and pytest does not see this code
     from aea.cli.utils.loggers import (  # pylint: disable=import-outside-toplevel
-        default_logging_config,  # pylint: disable=import-outside-toplevel
+        default_logging_config,
     )
 
     logger_ = logging.getLogger("aea")

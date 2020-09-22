@@ -24,7 +24,6 @@ import struct
 import sys
 import time
 
-
 import click
 
 from aea.configurations.base import ConnectionConfig
@@ -32,23 +31,24 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.runner import AEARunner
 from aea.skills.base import Handler
-
-from benchmark.checks.utils import (  # noqa: I100
-    get_mem_usage_in_mb,
+from benchmark.checks.utils import get_mem_usage_in_mb  # noqa: I100
+from benchmark.checks.utils import (
     make_agent,
     make_envelope,
+    make_skill,
     multi_run,
     print_results,
+    wait_for_condition,
 )
-from benchmark.checks.utils import make_skill, wait_for_condition
-
-ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")
-sys.path.append(ROOT_PATH)
 
 from packages.fetchai.connections.local.connection import (  # noqa: E402 # pylint: disable=C0413
     LocalNode,
     OEFLocalConnection,
 )
+
+
+ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")
+sys.path.append(ROOT_PATH)
 
 
 class TestHandler(Handler):

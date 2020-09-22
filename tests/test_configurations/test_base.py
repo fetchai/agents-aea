@@ -23,9 +23,7 @@ from pathlib import Path
 from unittest import TestCase, mock
 
 import pytest
-
 import semver
-
 import yaml
 
 from aea.configurations.base import (

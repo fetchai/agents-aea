@@ -22,7 +22,6 @@ from datetime import datetime
 from statistics import mean, stdev
 from typing import Any, List, Optional, Tuple
 
-
 from .executor import ExecReport
 from .func_details import BaseFuncDetails
 

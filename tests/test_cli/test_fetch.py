@@ -21,9 +21,8 @@
 import os
 from unittest import TestCase, mock
 
-from click import ClickException
-
 import pytest
+from click import ClickException
 
 from aea.cli import cli
 from aea.cli.fetch import _is_version_correct, fetch_agent_locally

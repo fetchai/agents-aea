@@ -313,6 +313,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
+
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
 
@@ -852,6 +853,7 @@ from aea.helpers.search.models import Description, Location, Query
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
@@ -1074,6 +1076,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+
 
 DefaultDialogue = BaseDefaultDialogue
 
@@ -1419,6 +1422,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
+
 DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
@@ -1511,6 +1515,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     SigningDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
+
 
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
@@ -2202,6 +2207,7 @@ from aea.helpers.search.models import (
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
@@ -2426,7 +2432,6 @@ from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialo
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
-
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -2443,6 +2448,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+
 
 DefaultDialogue = BaseDefaultDialogue
 

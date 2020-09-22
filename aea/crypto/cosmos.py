@@ -31,17 +31,16 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
+import requests
 from bech32 import bech32_encode, convertbits
-
 from ecdsa import SECP256k1, SigningKey, VerifyingKey
 from ecdsa.util import sigencode_string_canonize
-
-import requests
 
 from aea.common import Address
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
+
 
 logger = logging.getLogger(__name__)
 

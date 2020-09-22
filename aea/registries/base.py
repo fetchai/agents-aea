@@ -35,6 +35,7 @@ from aea.configurations.base import (
 from aea.helpers.logging import WithLogger
 from aea.skills.base import Behaviour, Handler, Model
 
+
 logger = logging.getLogger(__name__)
 
 Item = TypeVar("Item")

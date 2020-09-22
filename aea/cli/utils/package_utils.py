@@ -26,7 +26,6 @@ from pathlib import Path
 from typing import Optional
 
 import click
-
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
@@ -45,6 +44,7 @@ from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
+
 
 ROOT = Path(".")
 

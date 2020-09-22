@@ -49,6 +49,7 @@ from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
+
 _default_logger = logging.getLogger(__name__)
 
 

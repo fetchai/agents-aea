@@ -28,6 +28,7 @@ import numpy as np
 
 from aea.exceptions import enforce
 
+
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 DEFAULT_CURRENCY_ID_TO_NAME = {"0": "FET"}
 

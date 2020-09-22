@@ -29,7 +29,6 @@ from threading import Thread
 from typing import Optional
 
 import pytest
-
 import yaml
 
 from aea import AEA_DIR

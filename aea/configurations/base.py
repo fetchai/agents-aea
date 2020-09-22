@@ -46,14 +46,14 @@ from typing import (
 )
 
 import packaging
+import semver
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-
-import semver
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
 from aea.helpers.ipfs.base import IPFSHashOnly
+
 
 T = TypeVar("T")
 DEFAULT_VERSION = "0.1.0"

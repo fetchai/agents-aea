@@ -86,6 +86,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnecti
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
 
+
 API_KEY = "TwiCIriSl0mLahw17pyqoA"
 SOEF_ADDR = "soef.fetch.ai"
 SOEF_PORT = 9002

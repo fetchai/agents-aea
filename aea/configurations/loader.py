@@ -27,11 +27,9 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Generic, List, TextIO, Tuple, Type, TypeVar, Union, cast
 
-
 import jsonschema
-from jsonschema import Draft4Validator
-
 import yaml
+from jsonschema import Draft4Validator
 from yaml import SafeLoader
 
 from aea.configurations.base import (
@@ -49,6 +47,7 @@ from aea.configurations.base import (
 )
 from aea.exceptions import enforce
 from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
+
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")

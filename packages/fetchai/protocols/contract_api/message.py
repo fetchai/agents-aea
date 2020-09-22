@@ -35,6 +35,7 @@ from packages.fetchai.protocols.contract_api.custom_types import (
 )
 from packages.fetchai.protocols.contract_api.custom_types import State as CustomState
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.contract_api.message")
 
 DEFAULT_BODY_SIZE = 4

@@ -23,6 +23,7 @@ from typing import Callable, Type
 from aea.crypto.base import Crypto, FaucetApi, LedgerApi
 from aea.crypto.registries.base import Registry
 
+
 crypto_registry: Registry[Crypto] = Registry[Crypto]()
 register_crypto = crypto_registry.register
 make_crypto: Callable[..., Crypto] = crypto_registry.make

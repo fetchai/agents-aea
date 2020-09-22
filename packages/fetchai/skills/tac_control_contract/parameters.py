@@ -25,6 +25,7 @@ from typing import List, Optional, Set
 from aea.exceptions import AEAEnforceError, enforce
 from aea.skills.base import Model
 
+
 DEFAULT_MIN_NB_AGENTS = 5
 DEFAULT_MONEY_ENDOWMENT = 200
 DEFAULT_NB_GOODS = 9  # ERC1155 vyper contract only accepts 10 tokens per mint/create

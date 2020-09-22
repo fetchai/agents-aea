@@ -24,11 +24,9 @@ from textwrap import dedent
 from typing import Any, List, Sequence
 from unittest import TestCase
 
-from jsonschema.exceptions import ValidationError  # type: ignore
-
 import pytest
-
 import yaml
+from jsonschema.exceptions import ValidationError  # type: ignore
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder

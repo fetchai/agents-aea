@@ -25,11 +25,9 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from jsonschema import ValidationError
-
 import pytest
-
 import yaml
+from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli

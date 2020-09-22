@@ -42,7 +42,6 @@ from typing import (
 )
 
 import jsonschema
-
 from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
@@ -83,6 +82,7 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
+
 
 PathLike = Union[os.PathLike, Path, str]
 

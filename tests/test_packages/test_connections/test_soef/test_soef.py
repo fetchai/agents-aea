@@ -50,8 +50,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
-
-from . import models
+from tests.test_packages.test_connections.test_soef import models
 
 
 def make_async(return_value: Any) -> Callable:

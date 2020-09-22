@@ -30,9 +30,8 @@ from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
 
-from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
-
 import requests
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -61,6 +60,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 

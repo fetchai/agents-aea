@@ -22,4 +22,5 @@
 from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
 from tests.data.generator.t_protocol_no_ct.serialization import TProtocolNoCtSerializer
 
+
 TProtocolNoCtMessage.serializer = TProtocolNoCtSerializer

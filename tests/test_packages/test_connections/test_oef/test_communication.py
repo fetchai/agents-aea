@@ -29,10 +29,9 @@ from typing import Dict, cast
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
 from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
-
-import pytest
 
 from aea.common import Address
 from aea.helpers.search.models import (
@@ -66,6 +65,7 @@ from tests.conftest import (
     FETCHAI_ADDRESS_TWO,
     _make_oef_connection,
 )
+
 
 logger = logging.getLogger(__name__)
 

@@ -25,7 +25,6 @@ from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import pytest
-
 import requests
 
 from aea.crypto.cosmos import CosmosCrypto
@@ -45,6 +44,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_PRIVATE_KEY_PATH,
 )
+
 
 logger = logging.getLogger(__name__)
 

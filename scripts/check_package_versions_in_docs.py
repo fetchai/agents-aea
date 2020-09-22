@@ -33,7 +33,6 @@ from typing import Callable, Set
 
 import yaml
 
-
 from aea.configurations.base import ComponentType, PackageId, PackageType, PublicId
 
 

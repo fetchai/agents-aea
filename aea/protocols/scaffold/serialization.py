@@ -20,8 +20,7 @@
 """Serialization for the scaffold protocol."""
 
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.protocols.base import Message, Serializer
 
 
 class MyScaffoldSerializer(Serializer):  # pragma: no cover

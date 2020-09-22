@@ -23,7 +23,6 @@ from json.decoder import JSONDecodeError
 from unittest import TestCase, mock
 
 from click import ClickException
-
 from requests.exceptions import ConnectionError
 
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL

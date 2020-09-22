@@ -22,9 +22,7 @@ from pathlib import Path
 from random import uniform
 
 import mistune
-
 import pytest
-
 import yaml
 
 from aea.test_tools.test_cases import AEATestCaseMany
@@ -40,6 +38,7 @@ from tests.conftest import (
     ROOT_DIR,
     wait_for_localhost_ports_to_close,
 )
+
 
 seller_strategy_replacement = """models:
   default_dialogues:

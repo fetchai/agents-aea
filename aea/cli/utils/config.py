@@ -26,9 +26,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import click
-
 import jsonschema
-
 import yaml
 
 from aea.cli.utils.constants import (

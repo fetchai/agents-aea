@@ -22,7 +22,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-
 import aea
 from aea.configurations.base import PublicId, SkillConfig
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue

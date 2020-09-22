@@ -23,12 +23,9 @@ from builtins import FileNotFoundError
 from typing import cast
 from unittest import TestCase, mock
 
-from click import BadParameter, ClickException
-
-from jsonschema import ValidationError
-
 import pytest
-
+from click import BadParameter, ClickException
+from jsonschema import ValidationError
 from yaml import YAMLError
 
 from aea.cli.utils.click_utils import AEAJsonPathType, PublicIdParameter
@@ -62,6 +59,7 @@ from tests.test_cli.tools_for_testing import (
     StopTest,
     raise_stoptest,
 )
+
 
 AUTHOR = "author"
 

@@ -28,7 +28,6 @@ from statistics import mean
 from typing import Callable, List, Tuple
 
 import memory_profiler  # type: ignore
-
 import psutil  # type: ignore
 
 from benchmark.framework.benchmark import BenchmarkControl  # noqa: I100

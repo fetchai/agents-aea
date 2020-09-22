@@ -33,6 +33,7 @@ from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.p2p_stub.connection import P2PStubConnection
 
+
 SEPARATOR = ","
 
 

@@ -26,9 +26,8 @@ import click
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
-
-from benchmark.checks.utils import (  # noqa: I100
-    SyncedGeneratorConnection,
+from benchmark.checks.utils import SyncedGeneratorConnection  # noqa: I100
+from benchmark.checks.utils import (
     get_mem_usage_in_mb,
     make_agent,
     make_envelope,
