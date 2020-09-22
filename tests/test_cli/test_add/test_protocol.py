@@ -25,11 +25,9 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from jsonschema import ValidationError
-
 import pytest
-
 import yaml
+from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli
@@ -464,6 +462,19 @@ class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
     def test_add_protocol_from_remote_registry_positive(self):
         """Test add protocol from Registry positive result."""
         self.add_item("protocol", "fetchai/fipa:0.4.0", local=False)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
+        items_folders = os.listdir(items_path)
+        item_name = "fipa"
+        assert item_name in items_folders
+
+
+class TestAddProtocolWithLatestVersion(AEATestCaseEmpty):
+    """Test case for add protocol with latest version."""
+
+    def test_add_protocol_latest_version(self):
+        """Test add protocol with latest version."""
+        self.add_item("protocol", "fetchai/fipa:latest", local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
         items_folders = os.listdir(items_path)

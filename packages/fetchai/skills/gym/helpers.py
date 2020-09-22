@@ -32,6 +32,7 @@ from aea.skills.base import SkillContext
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym.dialogues import GymDialogue, GymDialogues
 
+
 Action = Any
 Observation = Any
 Reward = float

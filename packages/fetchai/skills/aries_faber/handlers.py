@@ -51,6 +51,7 @@ from packages.fetchai.skills.aries_faber.strategy import (
     LEDGER_COMMAND_REGISTER_DID,
 )
 
+
 SUPPORT_REVOCATION = False
 
 

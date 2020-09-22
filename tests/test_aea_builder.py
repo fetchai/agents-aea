@@ -27,7 +27,6 @@ from typing import Collection
 from unittest.mock import Mock, patch
 
 import pytest
-
 import yaml
 
 from aea.aea import AEA
@@ -60,6 +59,7 @@ from tests.conftest import (
     ROOT_DIR,
     _make_dummy_connection,
 )
+
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
@@ -96,7 +96,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.6.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.7.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -106,12 +106,12 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.9.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/oef_search:0.6.0)']"
+        "Package 'fetchai/oef:0.10.0' of type 'connection' cannot be added. "
+        "Missing dependencies: ['(protocol, fetchai/oef_search:0.7.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef:0.9.0" requires
-        # "fetchai/oef_search:0.6.0" and "fetchai/fipa:0.6.0" protocols.
+        # connection "fetchai/oef:0.10.0" requires
+        # "fetchai/oef_search:0.7.0" and "fetchai/fipa:0.7.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",

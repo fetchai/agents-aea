@@ -24,8 +24,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
-from packages.fetchai.skills.echo.dialogues import DefaultDialogue
-from packages.fetchai.skills.echo.dialogues import DefaultDialogues
+from packages.fetchai.skills.echo.dialogues import DefaultDialogue, DefaultDialogues
 
 
 class EchoHandler(Handler):

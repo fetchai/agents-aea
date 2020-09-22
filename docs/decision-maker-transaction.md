@@ -23,6 +23,7 @@ from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialo
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler, Model, Skill, SkillContext
 
+
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
@@ -310,6 +311,7 @@ from aea.protocols.signing.dialogues import SigningDialogue
 from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler, Model, Skill, SkillContext
+
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)

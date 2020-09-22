@@ -50,6 +50,7 @@ from aea.registries.base import (
     AgentComponentRegistry,
     ComponentRegistry,
     HandlerRegistry,
+    PublicIdRegistry,
 )
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
@@ -153,7 +154,7 @@ class TestProtocolRegistry:
 
         cls.expected_protocol_ids = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/fipa:0.6.0"),
+            PublicId.from_str("fetchai/fipa:0.7.0"),
         }
 
     def test_fetch_all(self):
@@ -545,6 +546,10 @@ class TestAgentComponentRegistry:
         """Set up the test."""
         self.registry = AgentComponentRegistry()
 
+    def test_ids(self):
+        """Test all ids getter."""
+        assert self.registry.ids() == set()
+
     def test_register_when_component_is_already_registered(self):
         """Test AgentComponentRegistry.register when the component is already registered."""
         component_id = ComponentId(
@@ -609,6 +614,23 @@ class TestComponentRegistry:
         """Set up the tests."""
         self.registry = ComponentRegistry()
 
+    def test_ids(self):
+        """Test the getter of all ids."""
+        assert self.registry.ids() == set()
+
+    def test_ids_non_empty(self):
+        """Test ids, non-empty case."""
+        dummy_skill = Skill.from_dir(
+            Path(CUR_PATH, "data", "dummy_skill"), agent_context=MagicMock(),
+        )
+        behaviour = next(iter(dummy_skill.behaviours.values()))
+        skill_component_id = (dummy_skill.public_id, behaviour.name)
+        self.registry.register(skill_component_id, behaviour)
+
+        assert self.registry.ids() == {skill_component_id}
+
+        self.registry.unregister(skill_component_id)
+
     def test_unregister_when_item_not_registered(self):
         """Test 'unregister' in case the item is not registered."""
         with pytest.raises(ValueError):
@@ -639,6 +661,26 @@ class TestComponentRegistry:
                     f"Ignoring setup() of component {mock_item.name} of skill {mock_item.skill_id}, because the skill is not active."
                 )
 
+    def test_fetch_with_latest_version(self):
+        """Test fetch with public id :latest version."""
+        item_id_1 = PublicId("author", "package", "0.1.0")
+        item_id_2 = PublicId("author", "package", "0.2.0")
+        item_id_3 = PublicId("author", "package", "0.3.0")
+        item_id_latest = PublicId("author", "package")
+        name = "name"
+        self.registry.register((item_id_1, name), MagicMock(id=1))
+        self.registry.register((item_id_3, name), MagicMock(id=3))
+        self.registry.register((item_id_2, name), MagicMock(id=2))
+
+        latest = self.registry.fetch((item_id_latest, name))
+        assert latest is not None
+        assert latest.id == 3
+
+        # restore previous state
+        self.registry.unregister((item_id_1, name))
+        self.registry.unregister((item_id_2, name))
+        self.registry.unregister((item_id_3, name))
+
 
 class TestHandlerRegistry:
     """Test handler registry."""
@@ -648,12 +690,29 @@ class TestHandlerRegistry:
         """Set up the tests."""
         cls.registry = HandlerRegistry()
 
+    def test_fetch_skill_id_not_present(self):
+        """Test fetch, negative case for skill id.."""
+        # register an item
+        protocol_id = MagicMock()
+        protocol_id.package_version.is_latest = False
+        skill_id = MagicMock()
+        skill_id.package_version.is_latest = False
+        handler_name = "handler"
+        handler_mock = MagicMock(name=handler_name, SUPPORTED_PROTOCOL=protocol_id)
+        self.registry.register((skill_id, handler_name), handler_mock)
+
+        # fetch an item with right protocol but unknown skill id
+        result = self.registry.fetch_by_protocol_and_skill(protocol_id, MagicMock())
+        assert result is None
+
+        self.registry.unregister((skill_id, handler_name))
+
     def test_register_and_unregister_dynamically(self):
         """Test register when protocol id is None."""
         assert len(self.registry._dynamically_added) == 0
         self.registry.register(
             (PublicId.from_str("author/name:0.1.0"), "name"),
-            MagicMock(SUPPORTED_PROTOCOL="author/protocol:0.1.0"),
+            MagicMock(SUPPORTED_PROTOCOL=PublicId.from_str("author/protocol:0.1.0")),
             is_dynamically_added=True,
         )
         assert len(self.registry._dynamically_added) == 1
@@ -665,7 +724,7 @@ class TestHandlerRegistry:
         assert len(self.registry._dynamically_added) == 0
         self.registry.register(
             (PublicId.from_str("author/name:0.1.0"), "name"),
-            MagicMock(SUPPORTED_PROTOCOL="author/protocol:0.1.0"),
+            MagicMock(SUPPORTED_PROTOCOL=PublicId.from_str("author/protocol:0.1.0")),
             is_dynamically_added=True,
         )
         assert len(self.registry._dynamically_added) == 1
@@ -686,7 +745,9 @@ class TestHandlerRegistry:
         """Test register when protocol id is None."""
         skill_id = PublicId.from_str("author/name:0.1.0")
         protocol_id = PublicId.from_str("author/name:0.1.0")
-        self.registry._items_by_protocol_and_skill[protocol_id] = {skill_id: object()}
+        self.registry.register(
+            (skill_id, "name"), MagicMock(SUPPORTED_PROTOCOL=protocol_id)
+        )
         with pytest.raises(
             ValueError,
             match="A handler already registered with pair of protocol id .* and skill id .*",
@@ -694,7 +755,7 @@ class TestHandlerRegistry:
             self.registry.register(
                 (skill_id, "name"), MagicMock(SUPPORTED_PROTOCOL=protocol_id)
             )
-        self.registry._items_by_protocol_and_skill = {}
+        self.registry.unregister((skill_id, "name"))
 
     def test_unregister_when_no_item_is_registered(self):
         """Test unregister when there is no item with that item id."""
@@ -711,3 +772,43 @@ class TestHandlerRegistry:
             ValueError, match="No component of skill .* present in the registry."
         ):
             self.registry.unregister_by_skill(skill_id)
+
+
+class TestPublicIdRegistry:
+    """Tests for the public id registry class."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        cls.registry = PublicIdRegistry()
+
+    def test_register_fails_when_version_latest(self):
+        """Test that version 'latest' are not allowed for registration."""
+        public_id = PublicId("author", "package", "latest")
+        with pytest.raises(
+            ValueError,
+            match=f"Cannot register item with public id 'latest': {public_id}",
+        ):
+            self.registry.register(public_id, MagicMock())
+
+    def test_register_fails_when_already_registered(self):
+        """Test that register fails when the same public id is already registered."""
+        public_id = PublicId("author", "package", "0.1.0")
+        self.registry._public_id_to_item[public_id] = MagicMock()
+        with pytest.raises(
+            ValueError, match=f"Item already registered with item id '{public_id}'"
+        ):
+            self.registry.register(public_id, MagicMock())
+        self.registry._public_id_to_item.pop(public_id)
+
+    def test_unregister_fails_when_item_not_registered(self):
+        """Test that unregister fails when the item is not registered.."""
+        public_id = PublicId("author", "package", "0.1.0")
+        with pytest.raises(
+            ValueError, match=f"No item registered with item id '{public_id}'"
+        ):
+            self.registry.unregister(public_id)
+
+    def test_fetch_none(self):
+        """Test fetch, negative case."""
+        assert self.registry.fetch(MagicMock()) is None

@@ -27,6 +27,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 
+
 Address = str
 
 

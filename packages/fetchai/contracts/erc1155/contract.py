@@ -33,6 +33,7 @@ from aea.crypto.cosmos import CosmosApi
 from aea.crypto.ethereum import EthereumApi
 from aea.crypto.fetchai import FetchAIApi
 
+
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 

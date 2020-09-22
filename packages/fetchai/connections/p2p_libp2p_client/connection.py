@@ -34,6 +34,7 @@ from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
 from aea.mail.base import Envelope
 
+
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
 PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.7.0")

@@ -29,6 +29,7 @@ from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 from tests.test_docs.test_agent_vs_aea.agent_code_block import run
 
+
 MD_FILE = "docs/agent-vs-aea.md"
 PY_FILE = "test_docs/test_agent_vs_aea/agent_code_block.py"
 
@@ -60,7 +61,7 @@ class TestAgentVsAEA(BaseAEATestCase):
         assert os.path.exists(Path(self.t, "input_file"))
 
         message_text = (
-            b"other_agent,my_agent,fetchai/default:0.5.0,\x08\x01*\x07\n\x05hello,"
+            b"other_agent,my_agent,fetchai/default:0.6.0,\x08\x01*\x07\n\x05hello,"
         )
         path = os.path.join(self.t, "output_file")
         with open(path, "rb") as file:

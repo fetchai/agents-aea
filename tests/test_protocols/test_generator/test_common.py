@@ -40,6 +40,7 @@ from aea.protocols.generator.common import (
     is_installed,
     load_protocol_specification,
     try_run_black_formatting,
+    try_run_isort_formatting,
     try_run_protoc,
 )
 
@@ -47,6 +48,7 @@ from tests.test_protocols.test_generator.common import (
     PATH_TO_T_PROTOCOL_SPECIFICATION,
     T_PROTOCOL_NAME,
 )
+
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
@@ -397,6 +399,12 @@ class TestCommon(TestCase):
     def test_try_run_black_formatting(self, mocked_subprocess):
         """Test the 'try_run_black_formatting' method"""
         try_run_black_formatting("some_path")
+        mocked_subprocess.assert_called_once()
+
+    @mock.patch("subprocess.run")
+    def test_try_run_isort_formatting(self, mocked_subprocess):
+        """Test the 'try_run_isort_formatting' method"""
+        try_run_isort_formatting("some_path")
         mocked_subprocess.assert_called_once()
 
     @mock.patch("subprocess.run")

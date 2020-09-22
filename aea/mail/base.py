@@ -29,6 +29,7 @@ from aea.exceptions import enforce
 from aea.mail import base_pb2
 from aea.protocols.base import Message
 
+
 logger = logging.getLogger(__name__)
 
 

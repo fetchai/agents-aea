@@ -1,6 +1,6 @@
 name: tac_control
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
@@ -11,16 +11,16 @@ fingerprint:
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
   behaviours.py: QmcznM3tsmEDNx9Vbhv48o3PNtBEz5W1MVQ7SxJFGkH7di
   dialogues.py: QmcVYVTZ95UKBnXzmKyGLo5LwSVcGYUTrifosQMSpzNnCX
-  game.py: QmNt16GHaJHtsw3tSS165RLU8pNtvdMbKJqEkMRdjZn3rS
+  game.py: QmTovmW5vuhUcnvW4wQQcbPpiUFLLvMH7LaeTZYVvjqLcF
   handlers.py: QmSjwPKEN83C2gQS4WVH8uaHMv5ze7EJ9S8ugmRcKnSwnW
-  helpers.py: QmZC2qWz5RW7HEHQiUAH48a8awomtzsm6PBZvaGTHEHwxy
-  parameters.py: QmNsjTrXyXezUrdtwRb9tCiEULSgHeFxmemqxFn5bW3Hqn
+  helpers.py: QmQXrtqV3h4oU5cDwWKhtNiTTAGLNZGhjoVnDvGj7mGwpe
+  parameters.py: QmbdCERZFXWjP4ov7uLvmFGxvrTep3RwiQauXevLcJNLbY
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.10.0
 protocols:
-- fetchai/oef_search:0.6.0
-- fetchai/tac:0.6.0
+- fetchai/oef_search:0.7.0
+- fetchai/tac:0.7.0
 skills: []
 behaviours:
   tac:

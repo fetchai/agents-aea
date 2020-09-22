@@ -34,6 +34,7 @@ from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 
+
 logger = logging.getLogger(__name__)
 
 

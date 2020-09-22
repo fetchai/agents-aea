@@ -25,6 +25,7 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
 from aea.helpers.multiaddr.base import MultiAddr
 
+
 HOST = "127.0.0.1"
 PORT = 13000
 

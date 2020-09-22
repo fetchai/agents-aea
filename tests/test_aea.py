@@ -56,8 +56,7 @@ from tests.common.utils import (
     timeit_context,
     wait_for_condition,
 )
-
-from .conftest import (
+from tests.conftest import (
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
     FETCHAI_PRIVATE_KEY_PATH,
@@ -65,8 +64,8 @@ from .conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_local_connection,
 )
-from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
-from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
+from tests.data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
+from tests.data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
 def test_setup_aea():
@@ -161,10 +160,10 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.8.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.9.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.8.0")])
+        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.9.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = agent.resources.get_connection(local_connection_id)
@@ -213,10 +212,10 @@ def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.8.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.9.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.8.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.9.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = aea.resources.get_connection(local_connection_id)
@@ -311,10 +310,10 @@ def test_initialize_aea_programmatically():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.8.0")
+        local_connection_id = PublicId.from_str("fetchai/local:0.9.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.8.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.9.0")])
         local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 

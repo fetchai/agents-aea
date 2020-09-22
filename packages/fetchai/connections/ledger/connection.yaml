@@ -6,16 +6,16 @@ description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmfQN7UK1M4pBUzKVzPannPLVi8iiULKHNtJ7XpoWpjqfc
+  README.md: QmY6YCoxyUXSwQzFvNPKd3nfHaoMsjCLCZAvTGSGwZnZbP
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   base.py: QmNnSBVmVgdDFwzqDUncwLHeyDfMEfmvujJdKbdGNGH4Be
-  connection.py: QmS3CJwjgzZ5SrAeJjCnC5ChZDfTsDuV6ndgMsGV1bidnf
-  contract_dispatcher.py: QmRegSPqqkns7xp5zr6xiuTxjGLiGGG2qLkwunpFCbzEwX
-  ledger_dispatcher.py: QmarLEyR2Je6NtXSJmPy9NbGL7J85FVAZJPkFKqCotEKjc
+  connection.py: Qmdibf99GzdFjFCcoTX7AiiBVWznKvPZWvur8cngSRNdye
+  contract_dispatcher.py: QmXMPf7Mekyfo8SofcVYWWgMwADQZw68cXbmtf1pyKchVc
+  ledger_dispatcher.py: QmTGvnN5W7VHZ9McQSyDQ1jPQoFWmQmuR2a3y8LL6J7aiM
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/contract_api:0.5.0
-- fetchai/ledger_api:0.3.0
+- fetchai/ledger_api:0.4.0
 class_name: LedgerConnection
 config:
   ledger_apis:
@@ -27,5 +27,5 @@ config:
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:0.5.0
-- fetchai/ledger_api:0.3.0
+- fetchai/ledger_api:0.4.0
 dependencies: {}

@@ -27,6 +27,7 @@ from typing import Optional
 
 import skimage  # type: ignore
 
+
 _logger = logging.getLogger(
     "aea.packages.fetchai.skills.carpark_detection.detection_database"
 )

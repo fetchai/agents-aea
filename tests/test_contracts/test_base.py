@@ -24,13 +24,9 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-
 import web3
 
-from aea.configurations.base import (
-    ComponentType,
-    ContractConfig,
-)
+from aea.configurations.base import ComponentType, ContractConfig
 from aea.configurations.loader import load_component_configuration
 from aea.contracts import contract_registry
 from aea.contracts.base import Contract

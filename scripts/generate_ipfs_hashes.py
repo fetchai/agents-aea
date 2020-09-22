@@ -41,7 +41,6 @@ from pathlib import Path
 from typing import Collection, Dict, List, Optional, Tuple, Type, cast
 
 import ipfshttpclient
-
 import yaml
 
 from aea.configurations.base import (
@@ -55,6 +54,7 @@ from aea.configurations.base import (
     _compute_fingerprint,
 )
 from aea.helpers.base import yaml_dump, yaml_dump_all
+
 
 AUTHOR = "fetchai"
 CORE_PATH = Path("aea")

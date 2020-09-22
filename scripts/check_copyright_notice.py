@@ -33,6 +33,7 @@ import re
 import sys
 from pathlib import Path
 
+
 HEADER_REGEX = r"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------

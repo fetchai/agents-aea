@@ -38,19 +38,13 @@ from aea.exceptions import AEAEnforceError
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
-from aea.multiplexer import (
-    AsyncMultiplexer,
-    InBox,
-    Multiplexer,
-    OutBox,
-)
+from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
 
 from tests.common.utils import wait_for_condition
-
-from .conftest import (
+from tests.conftest import (
     UNKNOWN_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,

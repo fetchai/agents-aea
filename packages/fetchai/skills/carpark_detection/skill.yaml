@@ -10,18 +10,18 @@ fingerprint:
   README.md: QmcwNhv5N8m4ZtWvXY5eMDeL5ciivryDZPtGWXMFfTbYR7
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
   behaviours.py: QmTNboU3YH8DehWnpZmoiDUCncpNmqoSVt1Yp4j7NsgY2S
-  database.py: QmQv79qDxNk8v9chNYq7AxxChAJVGs4B8Y9we35rjzaonP
+  database.py: QmcZ7zomRfpVakRQBaDFzkuAN8noEWkHo2LLxUMNpF1xUp
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   handlers.py: QmbkmEP9K4Qu2MsRtnkdx3PGNbSW46qi48bCHVCUJHpcQF
-  strategy.py: QmTHW32BzzYrBF1YkmftAMuyx6cKKGrp554qeKiFBJieJJ
+  strategy.py: QmUCmsvvKqRsM4nFuhsUUTfCnZ6zPffXytD3PjMjFdqHdU
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
 protocols:
-- fetchai/default:0.5.0
-- fetchai/fipa:0.6.0
-- fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.6.0
+- fetchai/default:0.6.0
+- fetchai/fipa:0.7.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
 skills:
 - fetchai/generic_seller:0.13.0
 behaviours:

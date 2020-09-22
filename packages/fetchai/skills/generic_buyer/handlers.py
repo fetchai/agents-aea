@@ -44,6 +44,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
+
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
 

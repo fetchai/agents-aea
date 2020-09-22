@@ -26,6 +26,7 @@ from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.http.message")
 
 DEFAULT_BODY_SIZE = 4
@@ -34,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = ProtocolId.from_str("fetchai/http:0.5.0")
+    protocol_id = ProtocolId.from_str("fetchai/http:0.6.0")
 
     class Performative(Message.Performative):
         """Performatives for the http protocol."""

@@ -313,6 +313,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
+
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
 
@@ -852,6 +853,7 @@ from aea.helpers.search.models import Description, Location, Query
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
@@ -1074,6 +1076,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+
 
 DefaultDialogue = BaseDefaultDialogue
 
@@ -1311,10 +1314,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.5.0
-- fetchai/fipa:0.6.0
-- fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.6.0
+- fetchai/default:0.6.0
+- fetchai/fipa:0.7.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
 skills: []
 behaviours:
   service_registration:
@@ -1419,6 +1422,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
+
 DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
@@ -1511,6 +1515,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     SigningDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
+
 
 LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
@@ -2202,6 +2207,7 @@ from aea.helpers.search.models import (
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
@@ -2426,7 +2432,6 @@ from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialo
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
-
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -2443,6 +2448,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+
 
 DefaultDialogue = BaseDefaultDialogue
 
@@ -2770,11 +2776,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.5.0
-- fetchai/fipa:0.6.0
-- fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.6.0
-- fetchai/signing:0.3.0
+- fetchai/default:0.6.0
+- fetchai/fipa:0.7.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
+- fetchai/signing:0.4.0
 skills: []
 behaviours:
   search:
@@ -2875,8 +2881,8 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.6.0
-  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
+  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
+  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
 ```
 
 ### Fund the buyer AEA
@@ -2893,9 +2899,9 @@ Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.8.0
+aea add connection fetchai/soef:0.9.0
 aea add connection fetchai/ledger:0.6.0
-aea add protocol fetchai/fipa:0.6.0
+aea add protocol fetchai/fipa:0.7.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 aea run
@@ -2909,10 +2915,10 @@ Add the remaining packages for the buyer AEA:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.8.0
+aea add connection fetchai/soef:0.9.0
 aea add connection fetchai/ledger:0.6.0
-aea add protocol fetchai/fipa:0.6.0
-aea add protocol fetchai/signing:0.3.0
+aea add protocol fetchai/fipa:0.7.0
+aea add protocol fetchai/signing:0.4.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 ```

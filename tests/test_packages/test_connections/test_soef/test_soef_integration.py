@@ -24,9 +24,8 @@ from threading import Thread
 from typing import Any, Dict, Optional, Tuple, cast
 from urllib.parse import urlencode
 
-from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
-
 import pytest
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -46,10 +45,10 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from tests.common.utils import wait_for_condition
-
-from . import models
 from .test_soef import OefSearchDialogues
+from tests.common.utils import wait_for_condition
+from tests.test_packages.test_connections.test_soef import models
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -67,7 +66,7 @@ def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, C
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.6.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)

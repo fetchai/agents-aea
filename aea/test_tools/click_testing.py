@@ -33,7 +33,8 @@ import shlex
 import sys
 
 from click._compat import string_types  # type: ignore
-from click.testing import CliRunner as ClickCliRunner, Result
+from click.testing import CliRunner as ClickCliRunner
+from click.testing import Result
 
 
 class CliRunner(ClickCliRunner):

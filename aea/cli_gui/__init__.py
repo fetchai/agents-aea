@@ -25,11 +25,9 @@ import sys
 import threading
 from typing import Any, Dict, List, Tuple
 
-from click import ClickException
-
 import connexion
-
 import flask
+from click import ClickException
 
 from aea.cli.add import add_item as cli_add_item
 from aea.cli.create import create_aea as cli_create_aea
@@ -39,10 +37,8 @@ from aea.cli.list import list_agent_items as cli_list_agent_items
 from aea.cli.registry.fetch import fetch_agent as cli_fetch_agent
 from aea.cli.remove import remove_item as cli_remove_item
 from aea.cli.scaffold import scaffold_item as cli_scaffold_item
-from aea.cli.search import (
-    search_items as cli_search_items,
-    setup_search_ctx as cli_setup_search_ctx,
-)
+from aea.cli.search import search_items as cli_search_items
+from aea.cli.search import setup_search_ctx as cli_setup_search_ctx
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
@@ -57,6 +53,7 @@ from aea.cli_gui.utils import (
     terminate_processes,
 )
 from aea.configurations.base import PublicId
+
 
 elements = [
     ["local", "agent", "localAgents"],

@@ -31,7 +31,8 @@ from packages.fetchai.skills.tac_control.helpers import (
     generate_good_id_to_name,
 )
 
-DEFAULT_LEDGER_ID = "ethereum"
+
+DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_MIN_NB_AGENTS = 2
 DEFAULT_MONEY_ENDOWMENT = 200
 DEFAULT_NB_GOODS = 9  # ERC1155 vyper contract only accepts 10 tokens per mint/create

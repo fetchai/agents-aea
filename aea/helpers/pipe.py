@@ -33,6 +33,7 @@ from typing import IO, Optional
 
 from aea.exceptions import enforce
 
+
 _default_logger = logging.getLogger(__name__)
 
 PIPE_CONN_TIMEOUT = 10.0

@@ -36,7 +36,6 @@ from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import pytest
-
 import yaml
 
 from aea.cli import cli
@@ -60,6 +59,7 @@ from aea.test_tools.generic import (
 )
 
 from tests.conftest import ROOT_DIR
+
 
 logger = logging.getLogger(__name__)
 

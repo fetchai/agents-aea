@@ -40,6 +40,7 @@ from tests.conftest import (
     FETCHAI_TESTNET_CONFIG,
 )
 
+
 ledger = [
     (ETHEREUM, ETHEREUM_TESTNET_CONFIG),
 ]

@@ -22,9 +22,8 @@
 import os
 from typing import Dict, List
 
-from click import ClickException
-
 import yaml
+from click import ClickException
 
 
 def get_parent_object(obj: Dict, dotted_path: List[str]):

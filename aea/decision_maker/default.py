@@ -47,6 +47,7 @@ from aea.protocols.state_update.dialogues import (
 )
 from aea.protocols.state_update.message import StateUpdateMessage
 
+
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity
 UtilityParams = Dict[str, float]  # a map from identifier to quantity

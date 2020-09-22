@@ -43,6 +43,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     SigningDialogues as GenericSigningDialogues,
 )
 
+
 DefaultDialogues = GenericDefaultDialogues
 FipaDialogues = GenericFipaDialogues
 LedgerApiDialogues = GenericLedgerApiDialogues

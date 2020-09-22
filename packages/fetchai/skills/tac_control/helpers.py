@@ -29,6 +29,7 @@ from aea.exceptions import enforce
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 
+
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 FT_NAME = "FT"
 FT_ID = 2

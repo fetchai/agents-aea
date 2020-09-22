@@ -9,20 +9,20 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmZLsx2wJE762rqDqfeqLMg9RBczvALxy3H2U9kfRvgK3s
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: QmaCak7V3jYEWdj4fLdd2tEG4fiSazbLBC5WKjDeSAQhrh
+  behaviours.py: QmZwfSsHuCquNXfWaj2y4x5iTS7hhborRkkcaSCf83ELNo
   dialogues.py: QmPb2odXbXxuY5Ygm9mfCufM2mtMZ23oapsAzsWHC2x2k4
-  handlers.py: QmSahx4wij2w9X6Zm9wAHyeJVRifpKGkstwYKDzcosqkfe
-  strategy.py: QmNg87LgfLPoPyokFrmvrNghQD7JkWehRNAdRNyB3YogeN
+  handlers.py: QmNPXo4j4tZDSGBfufz6xocH6yJiCAfqw2bo7L2nhBSTiL
+  strategy.py: QmNroEjE9CZ5VKdCK3ojeEzknPdum2A2XjoYAGQRuFSjZS
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.10.0
 protocols:
 - fetchai/contract_api:0.5.0
-- fetchai/default:0.5.0
-- fetchai/fipa:0.6.0
-- fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.6.0
-- fetchai/signing:0.3.0
+- fetchai/default:0.6.0
+- fetchai/fipa:0.7.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
+- fetchai/signing:0.4.0
 skills: []
 behaviours:
   search:

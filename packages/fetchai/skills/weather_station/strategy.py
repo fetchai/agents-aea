@@ -26,6 +26,7 @@ from typing import Any, Dict
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 from packages.fetchai.skills.weather_station.db_communication import DBCommunication
 
+
 DEFAULT_DATE_ONE = "3/10/2019"
 DEFAULT_DATE_TWO = "15/10/2019"
 
