@@ -155,3 +155,32 @@ message = OefSearchMessage(
 ```
 
 In case of error you will received a message with `OefSearchMessage.Performative.OEF_ERROR`. In case of successful search you will receive a message with performative `OefSearchMessage.Performative.SEARCH_RESULT` and the list of matched agents addresses.
+
+## Generic command
+
+To send a generic command request to the SOEF use the following (here on the example of setting a declared name):
+``` python
+import urllib
+
+AGENT_GENERIC_COMMAND_MODEL = DataModel(
+    "generic_command",
+    [
+        Attribute("command", str, True, "Command name to execute."),
+        Attribute("parameters", str, False, "Url encoded parameters string."),
+    ],
+    "A data model to describe the generic soef command.",
+)
+
+declared_name = "new_declared_name"
+service_description = Description(
+    {
+        "command": "set_declared_name",
+        "parameters": urllib.parse.urlencode({"name": declared_name}),
+    },
+    data_model=AGENT_GENERIC_COMMAND_MODEL,
+)
+message = OefSearchMessage(
+    performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+    service_description=service_description,
+)
+```

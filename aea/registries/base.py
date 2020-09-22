@@ -142,13 +142,17 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
             raise ValueError(f"Item already registered with item id '{public_id}'")
         self._public_id_to_item[public_id] = item
 
-    def unregister(self, public_id: PublicId) -> None:
+    def unregister(  # pylint: disable=arguments-differ
+        self, public_id: PublicId
+    ) -> None:
         """Unregister an item."""
         if public_id not in self._public_id_to_item:
             raise ValueError(f"No item registered with item id '{public_id}'")
         self._public_id_to_item.pop(public_id)
 
-    def fetch(self, public_id: PublicId) -> Optional[Item]:
+    def fetch(  # pylint: disable=arguments-differ
+        self, public_id: PublicId
+    ) -> Optional[Item]:
         """
         Fetch an item associated with a public id.
 
