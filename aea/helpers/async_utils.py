@@ -474,6 +474,6 @@ class HandlerItemGetter(ItemGetter):
 
         :param getters: List of tuples of handler and couroutine to be awaiteed for an item.
         """
-        super(HandlerItemGetter, self).__init__(
+        super().__init__(
             [self._make_getter(handler, getter) for handler, getter in getters]
         )

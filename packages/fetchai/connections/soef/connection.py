@@ -26,6 +26,7 @@ from asyncio import CancelledError
 from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
+from enum import Enum
 from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
@@ -80,16 +81,16 @@ PERSONALITY_PIECES_KEYS = [
 ]
 
 
-class ModelNames:
+class ModelNames(Enum):
     """Enum of supported data models."""
 
-    location_agent = "location_agent"
-    set_service_key = "set_service_key"
-    remove_service_key = "remove_service_key"
-    personality_agent = "personality_agent"
-    search_model = "search_model"
-    ping = "ping"
-    generic_command = "generic_command"
+    LOCATION_AGENT = "location_agent"
+    SET_SERVICE_KEY = "set_service_key"
+    REMOVE_SERVICE_KEY = "remove_service_key"
+    PERSONALITY_AGENT = "personality_agent"
+    SEARCH_MODEL = "search_model"
+    PING = "ping"
+    GENERIC_COMMAND = "generic_command"
 
 
 class SOEFException(Exception):
@@ -511,7 +512,7 @@ class SOEFChannel:
 
         :return None
         """
-        self._check_data_model(service_description, ModelNames.ping)
+        self._check_data_model(service_description, ModelNames.PING.value)
         await self._ping_command()
 
     async def _generic_command_handler(
@@ -531,7 +532,7 @@ class SOEFChannel:
             """not connected."""
             return
 
-        self._check_data_model(service_description, ModelNames.generic_command)
+        self._check_data_model(service_description, ModelNames.GENERIC_COMMAND.value)
         command = service_description.values.get("command", None)
         params = service_description.values.get("parameters", {})
 
@@ -593,7 +594,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._check_data_model(service_description, ModelNames.set_service_key)
+        self._check_data_model(service_description, ModelNames.SET_SERVICE_KEY.value)
 
         key = service_description.values.get("key", None)
         value = service_description.values.get("value", NOT_SPECIFIED)
@@ -654,7 +655,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._check_data_model(service_description, ModelNames.remove_service_key)
+        self._check_data_model(service_description, ModelNames.REMOVE_SERVICE_KEY.value)
         key = service_description.values.get("key", None)
 
         if key is None:  # pragma: nocover
@@ -683,7 +684,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._check_data_model(service_description, ModelNames.location_agent)
+        self._check_data_model(service_description, ModelNames.LOCATION_AGENT.value)
 
         agent_location = service_description.values.get("location", None)
 
@@ -761,7 +762,7 @@ class SOEFChannel:
         :param piece: the piece to be set
         :param value: the value to be set
         """
-        self._check_data_model(service_description, ModelNames.personality_agent)
+        self._check_data_model(service_description, ModelNames.PERSONALITY_AGENT.value)
         piece = service_description.values.get("piece", None)
         value = service_description.values.get("value", None)
 

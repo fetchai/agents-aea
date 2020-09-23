@@ -341,7 +341,7 @@ class AEA(Agent, WithLogger):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-        return super(AEA, self).get_message_handlers() + [
+        return super().get_message_handlers() + [
             (self.filter.handle_internal_message, self.filter.get_internal_message,),
         ]
 

@@ -136,7 +136,7 @@ class BaseExecTimeout(ABC):
         raise NotImplementedError  # pragma: nocover
 
 
-class ExecTimeoutSigAlarm(BaseExecTimeout):
+class ExecTimeoutSigAlarm(BaseExecTimeout):  # pylint: disable=too-few-public-methods
     """
     ExecTimeout context manager implementation using signals and SIGALARM.
 
