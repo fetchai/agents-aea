@@ -208,7 +208,6 @@ Navigate to the tac controller project, then use the command line to get and set
 ``` bash
 aea config get vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time '01 01 2020  00:01'
-aea config set vendor.fetchai.skills.tac_control.is_abstract false --type bool
 ```
 
 ### Update the connection params

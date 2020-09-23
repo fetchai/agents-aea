@@ -666,7 +666,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
         configuration = aea_config_file.read_text()
         # here we change all the dummy skill configurations
         configuration += dedent(
-            f"""
+            """
         ---
         name: dummy
         author: dummy_author

@@ -124,7 +124,7 @@ class ContractApiDialogue(BaseContractApiDialogue):
         self._callable = None  # type: Optional[ContractApiDialogue.Callable]
 
     @property
-    def callable(self) -> Callable:
+    def callable(self) -> "Callable":
         """Get the callable."""
         if self._callable is None:
             raise ValueError("Callable not set!")
