@@ -207,7 +207,7 @@ class Parameters(Model):
     @property
     def nb_currencies(self) -> int:
         """Currency number for a TAC instance."""
-        return self._nb_goods
+        return self._nb_currencies
 
     @property
     def currency_id_to_name(self) -> Dict[str, str]:

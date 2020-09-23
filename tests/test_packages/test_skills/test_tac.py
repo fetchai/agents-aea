@@ -47,7 +47,7 @@ class TestTacSkills(AEATestCaseMany):
 
     @pytest.mark.integration
     @pytest.mark.flaky(
-        reruns=MAX_FLAKY_RERUNS_INTEGRATION
+        reruns=0
     )  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
@@ -143,10 +143,10 @@ class TestTacSkills(AEATestCaseMany):
         self.set_agent_context(tac_controller_name)
         now = datetime.datetime.now().strftime("%d %m %Y %H:%M")
         now_min = datetime.datetime.strptime(now, "%d %m %Y %H:%M")
-        fut = now_min + datetime.timedelta(0, 120)
+        fut = now_min  # + datetime.timedelta(0, 120)
         start_time = fut.strftime("%d %m %Y %H:%M")
         setting_path = (
-            "vendor.fetchai.skills.tac_control.models.parameters.args.start_time"
+            "vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time"
         )
         self.set_config(setting_path, start_time)
         tac_controller_process = self.run_agent()

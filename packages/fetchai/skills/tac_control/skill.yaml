@@ -14,7 +14,7 @@ fingerprint:
   game.py: QmTovmW5vuhUcnvW4wQQcbPpiUFLLvMH7LaeTZYVvjqLcF
   handlers.py: QmSjwPKEN83C2gQS4WVH8uaHMv5ze7EJ9S8ugmRcKnSwnW
   helpers.py: QmQXrtqV3h4oU5cDwWKhtNiTTAGLNZGhjoVnDvGj7mGwpe
-  parameters.py: QmbdCERZFXWjP4ov7uLvmFGxvrTep3RwiQauXevLcJNLbY
+  parameters.py: QmeviKY6o3H2FYNFaB9PibZGZc1CwMgLbrCbPoSmZDsikv
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.10.0
@@ -58,7 +58,8 @@ models:
       lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
-      nb_goods: 10
+      nb_currencies: 1
+      nb_goods: 9
       registration_start_time: 01 01 2020  00:01
       registration_timeout: 60
       service_data:
