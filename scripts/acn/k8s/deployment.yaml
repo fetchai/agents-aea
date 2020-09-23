@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: ph-deployment-name-here
-  namespace: ph-cluster-namespace-here
+  namespace: agents-p2p-dht
   labels:
     app: ph-deployment-name-here
 spec:
@@ -29,7 +29,7 @@ spec:
      
       containers:
       - image: ph-gcr-image-with-tag-here
-        name: ph-container-name-here
+        name: agents-p2p-dht
         ports:
         - containerPort: ph-node-port-number-here
         - containerPort: ph-node-delegate-port-number-here
@@ -56,6 +56,11 @@ spec:
             value: ph-node-delegate-uri-here
           - name: AEA_P2P_ENTRY_URIS
             value: ph-node-entry-peers-list-here
+          - name: NODE_PRIV_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ph-node-priv-key-name-here
+                key: priv-key
 
       restartPolicy: Always
 ---
@@ -63,7 +68,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ph-deployment-name-here
-  namespace: ph-cluster-namespace-here
+  namespace: agents-p2p-dht
 spec:
   selector:
     app: ph-deployment-name-here

@@ -3,7 +3,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: ph-deployment-name-here
-  namespace: ph-cluster-namspace-here
+  namespace: agents-p2p-dht
 spec:
   selector:
     app: istio-fetchpubig
@@ -11,13 +11,13 @@ spec:
   servers:
   - port:
       name: libp2p
-      number: node-port-number-here
+      number: ph-node-port-number-here
       protocol: TCP
     hosts:
     - agents-p2p-dht.sandbox.fetch-ai.com
   - port:
       name: tcp
-      number: node-delegate-port-number-here
+      number: ph-node-delegate-port-number-here
       protocol: TCP
     hosts:
     - agents-p2p-dht.sandbox.fetch-ai.com
@@ -26,7 +26,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: ph-deployment-name-here
-  namespace: ph-cluster-namespace-here
+  namespace: agents-p2p-dht
 spec:
   gateways:
   - ph-deployment-name-here
@@ -34,16 +34,16 @@ spec:
   - agents-p2p-dht.sandbox.fetch-ai.com
   tcp:
   - match:
-    - port: node-port-number-here
+    - port: ph-node-port-number-here
     route:
     - destination:
         host: ph-deployment-name-here
         port:
-          number: node-port-number-here
+          number: ph-node-port-number-here
   - match:
-    - port: node-delegate-port-number-here
+    - port: ph-node-delegate-port-number-here
     route:
     - destination:
         host: ph-deployment-name-here
         port:
-          number: node-delegate-port-number-here
+          number: ph-node-delegate-port-number-here
