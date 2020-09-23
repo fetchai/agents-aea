@@ -63,7 +63,7 @@ PING_MODEL = DataModel(ModelNames.PING.value, [], "A data model for ping command
 
 
 SEARCH_MODEL = DataModel(
-    ModelNames.search_model,
+    ModelNames.SEARCH_MODEL.value,
     [Attribute("location", Location, True, "The location where the agent is.")],
     "A data model to perform search.",
 )

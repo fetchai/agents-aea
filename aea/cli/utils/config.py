@@ -82,7 +82,7 @@ def try_to_load_agent_config(
                 )
             )
     except AEAEnforceError as e:
-        raise click.ClickException(str(e))
+        raise click.ClickException(str(e))  # pragma: nocover
 
 
 def _init_cli_config() -> None:
