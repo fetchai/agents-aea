@@ -654,6 +654,43 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         assert dummy_model.config == self.expected_model_args
 
 
+class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
+    """Test builder set from project dir, to make a skill 'abstract'."""
+
+    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+
+    def _add_dummy_skill_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        # here we change all the dummy skill configurations
+        configuration += dedent(
+            f"""
+        ---
+        name: dummy
+        author: dummy_author
+        version: 0.1.0
+        type: skill
+        is_abstract: true
+        ...
+        """
+        )
+        aea_config_file.write_text(configuration)
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        self._add_dummy_skill_config()
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self._get_cwd()):
+            aea = builder.build()
+
+        dummy_skill = aea.resources.get_skill(
+            PublicId("dummy_author", "dummy", "0.1.0")
+        )
+        assert dummy_skill is None, "Shouldn't have found the skill in Resources."
+
+
 class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmpty):
     """Test builder set from project dir with custom component config fails when the component is not declared in the agent configuration."""
 
