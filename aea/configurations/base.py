@@ -1333,6 +1333,8 @@ class SkillConfig(ComponentConfiguration):
             model_config = SkillComponentConfiguration.from_json(model_data)
             self.models.update(model_id, model_config)
 
+        self.is_abstract = data.get("is_abstract", self.is_abstract)
+
 
 class AgentConfig(PackageConfiguration):
     """Class to represent the agent configuration file."""
