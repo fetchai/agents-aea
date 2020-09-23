@@ -33,7 +33,7 @@ _logger = logging.getLogger(
 )
 
 
-class DetectionDatabase:
+class DetectionDatabase:  # pylint: disable=too-many-public-methods
     """Communicate between the database and the python objects."""
 
     def __init__(
