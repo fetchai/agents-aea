@@ -1365,16 +1365,6 @@ class AEABuilder:
         for configuration in self._package_dependency_manager.get_components_by_type(
             component_type
         ).values():
-            configuration = deepcopy(configuration)
-            configuration.update(
-                self._custom_component_configurations.get(
-                    configuration.component_id, {}
-                )
-            )
-            if configuration.is_abstract_component:
-                load_aea_package(configuration)
-                continue
-
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
                 if configuration.component_type != ComponentType.SKILL:
@@ -1382,6 +1372,15 @@ class AEABuilder:
                         logging.Logger, make_logger(configuration, agent_name)
                     )
             else:
+                configuration = deepcopy(configuration)
+                configuration.update(
+                    self._custom_component_configurations.get(
+                        configuration.component_id, {}
+                    )
+                )
+                if configuration.is_abstract_component:
+                    load_aea_package(configuration)
+                    continue
                 _logger = make_logger(configuration, agent_name)
                 component = load_component_from_config(
                     configuration, logger=_logger, **kwargs
