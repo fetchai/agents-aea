@@ -251,6 +251,9 @@ class StubConnection(Connection):
 
         try:
             return await self.in_queue.get()
+        except CancelledError:  # pragma: no cover
+            self.logger.debug("Receive cancelled.")
+            return None
         except Exception:  # pylint: disable=broad-except
             logger.exception("Stub connection receive error:")
             return None
