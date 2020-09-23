@@ -42,7 +42,7 @@ Protocol specific `Messages`, wrapped in `Envelopes`, are sent and received to o
 
 A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an SDK or API and provides an interface to network, ledgers and other services. Where necessary, a `Connection` is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service or third-party protocol (e.g. `HTTP`).
 
-The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.9.0`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
+The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.10.0`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
 
 Additional `Connections` can be added as packages. For more details on `Connections` also read the `Connection` guide <a href="../connection">here</a>.
 

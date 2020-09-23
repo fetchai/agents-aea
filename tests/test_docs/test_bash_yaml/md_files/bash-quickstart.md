@@ -61,7 +61,7 @@ recipient_aea,sender_aea,fetchai/default:0.6.0,\x08\x01\x12\x011*\x07\n\x05hello
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.9.0
+aea run --connections fetchai/stub:0.10.0
 ```
 ``` bash
     _     _____     _

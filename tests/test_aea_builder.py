@@ -588,7 +588,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
             aea = builder.build()
         assert aea.name == self.agent_name
         stub_connection = aea.resources.get_connection(
-            PublicId.from_str("fetchai/stub:0.9.0")
+            PublicId.from_str("fetchai/stub:0.10.0")
         )
         assert stub_connection.configuration.config == dict(
             input_file=self.expected_input_file, output_file=self.expected_output_file
