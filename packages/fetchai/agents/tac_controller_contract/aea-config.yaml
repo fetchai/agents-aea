@@ -36,10 +36,9 @@ default_routing:
   fetchai/contract_api:0.5.0: fetchai/ledger:0.6.0
   fetchai/ledger_api:0.5.0: fetchai/ledger:0.6.0
   fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
-...
 ---
-author: fetchai
 name: soef
+author: fetchai
 version: 0.8.0
 type: connection
 config:
@@ -47,12 +46,9 @@ config:
   chain_identifier: ethereum
   soef_addr: soef.fetch.ai
   soef_port: 9002
-...
 ---
-author: fetchai
 name: tac_control
+author: fetchai
 version: 0.7.0
 type: skill
 is_abstract: true
-...
-    
