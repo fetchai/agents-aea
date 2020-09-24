@@ -434,10 +434,11 @@ class LedgerApiHandler(Handler):
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
             ):
+                self.context.logger.info("tokens minted.")
                 parameters.nb_completed_minting += 1
                 if game.registration.nb_agents == parameters.nb_completed_minting:
                     game.phase = Phase.TOKENS_MINTED
-                    self.context.logger.info("tokens minted.")
+                    self.context.logger.info("all tokens minted.")
             else:
                 self.context.logger.error("unexpected transaction receipt!")
         else:

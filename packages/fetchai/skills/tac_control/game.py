@@ -742,6 +742,7 @@ class Game(Model):
         self._initial_agent_states = None  # type: Optional[Dict[str, AgentState]]
         self._current_agent_states = None  # type: Optional[Dict[str, AgentState]]
         self._transactions = Transactions()
+        self._already_minted_agents = []  # type: List[str]
 
     @property
     def phase(self) -> Phase:
@@ -797,6 +798,17 @@ class Game(Model):
         enforce(self.phase != Phase.GAME, "A game phase is already active.")
         self._phase = Phase.GAME_SETUP
         self._generate()
+
+    def get_next_agent_state_for_minting(self) -> Optional[AgentState]:
+        """Get next agent state for token minting."""
+        result = None
+        for agent_addr, agent_state in self.initial_agent_states.items():
+            if agent_addr in self._already_minted_agents:
+                continue
+            self._already_minted_agents.append(agent_addr)
+            result = agent_state
+            break
+        return result
 
     def _generate(self):
         """Generate a TAC game."""

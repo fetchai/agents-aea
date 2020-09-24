@@ -131,6 +131,8 @@ class TacBehaviour(BaseTacBehaviour):
         elif game.phase.value == Phase.TOKENS_CREATED.value:
             game.phase = Phase.TOKENS_MINTING_PROPOSAL
             self._request_mint_items_transaction(game)
+        elif game.phase.value == Phase.TOKENS_MINTING_PROPOSAL.value:
+            self._request_mint_items_transaction(game)
         elif (
             game.phase.value == Phase.TOKENS_MINTED.value
             and parameters.start_time < now < parameters.end_time
@@ -160,6 +162,7 @@ class TacBehaviour(BaseTacBehaviour):
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=parameters.ledger_id,
             contract_id="fetchai/erc1155:0.10.0",
+            contract_address=parameters.contract_address,
             callable=ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(
                 {"deployer_address": self.context.agent_address, "token_ids": token_ids}
@@ -179,39 +182,44 @@ class TacBehaviour(BaseTacBehaviour):
 
         :return: None
         """
-        self.context.logger.info("requesting mint_items transactions.")
-        for agent_state in game.initial_agent_states.values():
-            parameters = cast(Parameters, self.context.parameters)
-            token_ids = []  # type: List[int]
-            mint_quantities = []  # type: List[int]
-            for good_id, quantity in agent_state.quantities_by_good_id.items():
-                token_ids.append(int(good_id))
-                mint_quantities.append(quantity)
-            for currency_id, amount in agent_state.amount_by_currency_id.items():
-                token_ids.append(int(currency_id))
-                mint_quantities.append(amount)
-            contract_api_dialogues = cast(
-                ContractApiDialogues, self.context.contract_api_dialogues
-            )
-            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
-                ledger_id=parameters.ledger_id,
-                contract_id="fetchai/erc1155:0.10.0",
-                contract_address=parameters.contract_address,
-                callable=ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION.value,
-                kwargs=ContractApiMessage.Kwargs(
-                    {
-                        "deployer_address": self.context.agent_address,
-                        "recipient_address": self.context.agent_address,
-                        "token_ids": token_ids,
-                        "mint_quantities": mint_quantities,
-                    }
-                ),
-            )
-            contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-            contract_api_dialogue.terms = parameters.get_mint_token_terms()
-            contract_api_dialogue.callable = (
-                ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
-            )
-            self.context.outbox.put_message(message=contract_api_msg)
+        agent_state = game.get_next_agent_state_for_minting()
+        if agent_state is None:
+            return
+        name = game.registration.agent_addr_to_name[agent_state.agent_address]
+        self.context.logger.info(
+            f"requesting mint_items transactions for agent={name}."
+        )
+        parameters = cast(Parameters, self.context.parameters)
+        token_ids = []  # type: List[int]
+        mint_quantities = []  # type: List[int]
+        for good_id, quantity in agent_state.quantities_by_good_id.items():
+            token_ids.append(int(good_id))
+            mint_quantities.append(quantity)
+        for currency_id, amount in agent_state.amount_by_currency_id.items():
+            token_ids.append(int(currency_id))
+            mint_quantities.append(amount)
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            ledger_id=parameters.ledger_id,
+            contract_id="fetchai/erc1155:0.10.0",
+            contract_address=parameters.contract_address,
+            callable=ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION.value,
+            kwargs=ContractApiMessage.Kwargs(
+                {
+                    "deployer_address": self.context.agent_address,
+                    "recipient_address": self.context.agent_address,
+                    "token_ids": token_ids,
+                    "mint_quantities": mint_quantities,
+                }
+            ),
+        )
+        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+        contract_api_dialogue.terms = parameters.get_mint_token_terms()
+        contract_api_dialogue.callable = (
+            ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
+        )
+        self.context.outbox.put_message(message=contract_api_msg)
