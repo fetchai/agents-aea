@@ -94,7 +94,7 @@ class SkillBehaviourTestCase(BaseSkillTestCase):
     # CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
     # ROOT_DIR = os.path.join(CUR_PATH, "../..")
     # path_to_skill = Path(ROOT_DIR, "agent/skills/geenric_buyer")
-    path_to_skill = Path("/Users/ali/Projects/agents-aea/agent/skills/generic_buyer")
+    path_to_skill = Path("path_to_generic_buyer_skill")
 
     def test_search_behaviour_setup(self):
         ###########################
