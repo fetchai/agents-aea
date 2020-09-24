@@ -229,10 +229,7 @@ class ConfigLoader(Generic[T]):
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
         return configuration_obj
 
-    def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
-        """Load an agent configuration."""
-        configuration_file_jsons = yaml_load_all(file_pointer)
-
+    def _load_agent_config_from_json(self, configuration_file_jsons) -> AgentConfig:
         if len(configuration_file_jsons) == 0:
             raise ValueError("Agent configuration file was empty.")
         agent_config_json = configuration_file_jsons[0]
@@ -259,6 +256,11 @@ class ConfigLoader(Generic[T]):
 
         agent_configuration_obj.component_configurations = component_configurations
         return agent_configuration_obj
+
+    def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
+        """Load an agent configuration."""
+        configuration_file_jsons = yaml_load_all(file_pointer)
+        return self._load_agent_config_from_json(configuration_file_jsons)
 
     def _dump_agent_config(
         self, configuration: AgentConfig, file_pointer: TextIO
