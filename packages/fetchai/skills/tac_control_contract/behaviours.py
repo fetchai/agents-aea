@@ -75,6 +75,9 @@ class TacBehaviour(BaseTacBehaviour):
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
         contract_api_dialogue.terms = parameters.get_deploy_terms()
+        contract_api_dialogue.callable = (
+            ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
+        )
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
 
@@ -162,6 +165,9 @@ class TacBehaviour(BaseTacBehaviour):
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = parameters.get_create_token_terms()
+        contract_api_dialogue.callable = (
+            ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION
+        )
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting create items transaction...")
 
@@ -203,4 +209,7 @@ class TacBehaviour(BaseTacBehaviour):
             )
             contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
             contract_api_dialogue.terms = parameters.get_mint_token_terms()
+            contract_api_dialogue.callable = (
+                ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
+            )
             self.context.outbox.put_message(message=contract_api_msg)

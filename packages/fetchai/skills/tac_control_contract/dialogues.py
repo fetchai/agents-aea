@@ -130,6 +130,12 @@ class ContractApiDialogue(BaseContractApiDialogue):
             raise ValueError("Callable not set!")
         return self._callable
 
+    @callable.setter
+    def callable(self, callable: "Callable") -> None:
+        """Set the callable."""
+        enforce(self._callable is None, "Callable already set!")
+        self._callable = callable
+
     @property
     def terms(self) -> Terms:
         """Get the terms."""
