@@ -1,0 +1,76 @@
+name: generic_buyer
+author: ali
+version: 0.12.0
+type: skill
+description: The weather client skill implements the skill to purchase weather data.
+license: Apache-2.0
+aea_version: '>=0.6.0, <0.7.0'
+fingerprint:
+  README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
+  __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
+  behaviours.py: QmNnRBCuf9ZdE4ZLHSfsuYof5WyE4gMNmto4M76rQiT37L
+  dialogues.py: QmY3uJpB2UpWsa9SipZQzMjYr7WtSycuF5YS3SLyCuh78N
+  handlers.py: QmTHw6Eg4zga1yzeskxu3qUKYcj56kLeogpJSYUwsvs29o
+  strategy.py: QmchU21Gb1pmNoGmFTDass7zhNE8rCvWGNh1UYFK5DzhoK
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/default:0.6.0
+- fetchai/fipa:0.7.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
+skills: []
+behaviours:
+  search:
+    args:
+      search_interval: 5
+    class_name: GenericSearchBehaviour
+handlers:
+  fipa:
+    args: {}
+    class_name: GenericFipaHandler
+  ledger_api:
+    args: {}
+    class_name: GenericLedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: GenericOefSearchHandler
+  signing:
+    args: {}
+    class_name: GenericSigningHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      currency_id: FET
+      is_ledger_tx: true
+      ledger_id: fetchai
+      location:
+        latitude: 0.127
+        longitude: 51.5194
+      max_negotiations: 1
+      max_tx_fee: 1
+      max_unit_price: 20
+      search_query:
+        constraint_type: ==
+        search_key: seller_service
+        search_value: generic_service
+      search_radius: 5.0
+      service_id: generic_service
+    class_name: GenericStrategy
+dependencies: {}
+is_abstract: true

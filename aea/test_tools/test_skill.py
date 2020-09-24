@@ -17,159 +17,202 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
-import copy
+import asyncio
+import inspect
 import logging
 import os
-import random
-import shutil
-import string
-import subprocess  # nosec
-import sys
-import tempfile
-import time
-from abc import ABC
-from contextlib import suppress
-from filecmp import dircmp
-from io import TextIOWrapper
 from pathlib import Path
-from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
-from unittest import TestCase
+from queue import Queue
+import time
+from typing import Union, cast
+from types import SimpleNamespace
+from unittest import mock, TestCase
 
-import pytest
-import yaml
+# import pytest
 
-from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
-from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
-from aea.configurations.loader import ConfigLoader
-from aea.connections.stub.connection import (
-    DEFAULT_INPUT_FILE_NAME,
-    DEFAULT_OUTPUT_FILE_NAME,
-)
-from aea.exceptions import enforce
-from aea.helpers.base import cd, send_control_c, win_popen_kwargs
-from aea.mail.base import Envelope
-from aea.test_tools.click_testing import CliRunner, Result
-from aea.test_tools.constants import DEFAULT_AUTHOR
-from aea.test_tools.exceptions import AEATestingException
-from aea.test_tools.generic import (
-    force_set_config,
-    read_envelope_from_file,
-    write_envelope_to_file,
-)
+from aea.configurations.base import PublicId
+from aea.context.base import AgentContext
+from aea.identity.base import Identity
+from aea.multiplexer import Multiplexer, MultiplexerStatus, OutBox
+from aea.skills.base import Skill
+from aea.skills.tasks import TaskManager
 
-from tests.conftest import ROOT_DIR
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from agent.skills.generic_buyer.strategy import GenericStrategy
 
 
 logger = logging.getLogger(__name__)
 
 
+# @pytest.fixture(autouse=True)
+# def cleanup_tests():
+#     """Fixture to cleanup the state of a skill"""
+#     # cleanup the skill
+#     yield  # this is where the testing happens
+#     # Teardown : fill with any logic you want
+
+
 class BaseSkillTestCase(TestCase):
 
     path_to_skill: Union[Path, str] = Path(".")
-    packages_dir_path: Path = Path("..", "packages")
 
     @classmethod
     def setup_class(cls) -> None:
-        """
-        Set up the skill test case.
+        """Set up the skill test case."""
+        # dummy agent context
+        dummy_connection_id = PublicId("fetchai", "dummy", "0.1.0")
+        dummy_protocol_id = PublicId("fetchai", "dummy_protocol", "0.1.0")
+        identity = Identity("dummy_agent_name", "dummy_some_address")
 
-        - create a dummy agent context
+        multiplexer = Multiplexer()
+        multiplexer._out_queue = asyncio.Queue()
 
-        - load skill from dir
-        - make agent context accessible
-        """
-        pass
+        cls.context = AgentContext(
+            identity=identity,
+            connection_status=MultiplexerStatus(),
+            outbox=OutBox(multiplexer),
+            decision_maker_message_queue=Queue(),
+            decision_maker_handler_context=SimpleNamespace(),
+            task_manager=TaskManager(),
+            default_connection=dummy_connection_id,
+            default_routing={dummy_protocol_id: dummy_connection_id},
+            search_service_address="dummy_search_service_address",
+            decision_maker_address="dummy_decision_maker_address",
+        )
 
-    def setup(self) -> None:
-        pass
+        # load skill
+        cls.skill = Skill.from_dir(cls.path_to_skill, cls.context)
 
     @classmethod
     def teardown_class(cls):
-        # delete the dummy agent
+        # cleanup
         pass
 
 
 class SkillBehaviourTestCase(BaseSkillTestCase):
 
-    path_to_skill = Path("packages/fetchai/skills/generic_buyer")
+    # CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+    # ROOT_DIR = os.path.join(CUR_PATH, "../..")
+    # path_to_skill = Path(ROOT_DIR, "agent/skills/geenric_buyer")
+    path_to_skill = Path("/Users/ali/Projects/agents-aea/agent/skills/generic_buyer")
 
-    @mock.patch.object("strategy.is_ledger_tx", return_value="True")
-    def test_search_behaviour_setup_is_ledger_tx(self):
-        assert outbox._multiplexer.out_queue.qsize == 0
+    def test_search_behaviour_setup(self):
+        ###########################
+        # Version 1: works
+        ###########################
+        # assert self.skill.models.get("strategy").is_searching is False
+        # self.skill.behaviours["search"].setup()
+        # assert self.skill.models.get("strategy").is_searching is True
+        ###########################
+        # Version 2: Does not work
+        ###########################
+        outbox = self.skill.skill_context.outbox
+
+        assert outbox._multiplexer.out_queue.qsize() == 0
         expected_performative = LedgerApiMessage.Performative.GET_BALANCE
         expected_counterparty = "fetchai/ledger:0.6.0"
-        expected_ledger_id = "blah_blah",
-        expected_address = "some_address",
+        expected_ledger_id = ("fetchai",)
+        expected_address = ("some_address",)
 
-        self.context.behaviours.search.setup()
+        self.skill.behaviours.get("search").setup()
+        # time.sleep(5)
 
-        outbox = self.skill.context.outbox
-        assert outbox._multiplexer.out_queue.qsize == 1
-        actual_message = outbox._multiplexer.out_queue.get()
+        assert outbox._multiplexer.out_queue.qsize() == 1
+        actual_message = cast(LedgerApiMessage, outbox._multiplexer.out_queue.get())
         assert actual_message.performative == expected_performative
         assert actual_message.to == expected_counterparty
         assert actual_message.ledger_id == expected_ledger_id
         assert actual_message.address == expected_address
 
 
-    @mock.patch.object("strategy.is_ledger_tx", return_value="False")
-    def test_search_behaviour_setup_not_is_ledger_tx(self):
-        self.context.behaviours.search.setup()
-        assert self.context.strategy.is_searching is True
-
-    def test_search_behaviour_act(self):
-        pass
-
-    def test_search_behaviour_teardown(self):
-        pass
-
-
-class SkillHandlerTestCase(TestCase):
-
-    path_to_skill = Path("packages/fetchai/skills/generic_buyer")
-
-    def test_fipa_handler_setup(self):
-        pass
-
-    def test_fipa_handler_handle(self):
-        pass
-
-    def test_fipa_handler_teardown(self):
-        pass
-
-    def test_ledger_api_handler_setup(self):
-        pass
-
-    def test_ledger_api_handler_handle(self):
-        pass
-
-    def test_ledger_api_handler_teardown(self):
-        pass
-
-    def test_oef_search_handler_setup(self):
-        pass
-
-    def test_oef_search_handler_handle(self):
-        pass
-
-    def test_oef_search_handler_teardown(self):
-        pass
-
-    def test_signing_handler_setup(self):
-        pass
-
-    def test_signing_handler_handle(self):
-        pass
-
-    def test_signing_handler_teardown(self):
-        pass
-
-
-class SkillModelTestCase(TestCase):
-
-    path_to_skill = Path("packages/fetchai/skills/generic_buyer")
-
-    def test_strategy(self):
-        pass
+#     def test_search_behaviour_setup_original(self):
+#         with mock.patch.object(self.skill.skill_context.strategy, "is_ledger_tx", return_value="False"):
+#             assert self.skill.models.get("strategy").is_searching is False
+#             self.skill.behaviours["search"].setup()
+#             assert self.skill.models.get("strategy").is_searching is True
+#
+#
+# class GenericBuyerSkillBehaviourTestCase(BaseSkillTestCase):
+#
+#     CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+#     ROOT_DIR = os.path.join(CUR_PATH, "../..")
+#     path_to_skill = Path(ROOT_DIR, "packages/fetchai/skills/test_generic_buyer")
+#
+#     def test_search_behaviour_setup_is_ledger_tx(self):
+#         with mock.patch.object(self.skill.models.get("strategy"), "is_ledger_tx", return_value="True"):
+#             outbox = self.skill.skill_context.outbox
+#
+#             assert outbox._multiplexer.out_queue.qsize == 0
+#             expected_performative = LedgerApiMessage.Performative.GET_BALANCE
+#             expected_counterparty = "fetchai/ledger:0.6.0"
+#             expected_ledger_id = "fetchai",
+#             expected_address = "some_address",
+#
+#             self.skill.behaviours["search"].setup()
+#
+#             assert outbox._multiplexer.out_queue.qsize == 1
+#             actual_message = cast(LedgerApiMessage, outbox._multiplexer.out_queue.get())
+#             assert actual_message.performative == expected_performative
+#             assert actual_message.to == expected_counterparty
+#             assert actual_message.ledger_id == expected_ledger_id
+#             assert actual_message.address == expected_address
+#
+#     # @mock.patch.object("strategy.is_ledger_tx", return_value="False")
+#     def test_search_behaviour_setup_not_is_ledger_tx(self):
+#         self.context.behaviours.search.setup()
+#         assert self.context.strategy.is_searching is True
+#
+#     def test_search_behaviour_act(self):
+#         pass
+#
+#     def test_search_behaviour_teardown(self):
+#         pass
+#
+#
+# class SkillHandlerTestCase(TestCase):
+#
+#     path_to_skill = Path("packages/fetchai/skills/generic_buyer")
+#
+#     def test_fipa_handler_setup(self):
+#         pass
+#
+#     def test_fipa_handler_handle(self):
+#         pass
+#
+#     def test_fipa_handler_teardown(self):
+#         pass
+#
+#     def test_ledger_api_handler_setup(self):
+#         pass
+#
+#     def test_ledger_api_handler_handle(self):
+#         pass
+#
+#     def test_ledger_api_handler_teardown(self):
+#         pass
+#
+#     def test_oef_search_handler_setup(self):
+#         pass
+#
+#     def test_oef_search_handler_handle(self):
+#         pass
+#
+#     def test_oef_search_handler_teardown(self):
+#         pass
+#
+#     def test_signing_handler_setup(self):
+#         pass
+#
+#     def test_signing_handler_handle(self):
+#         pass
+#
+#     def test_signing_handler_teardown(self):
+#         pass
+#
+#
+# class SkillModelTestCase(TestCase):
+#
+#     path_to_skill = Path("packages/fetchai/skills/generic_buyer")
+#
+#     def test_strategy(self):
+#         pass
