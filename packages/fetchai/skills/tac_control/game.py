@@ -45,11 +45,9 @@ from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.helpers import (
     determine_scaling_factor,
     generate_currency_endowments,
-    generate_currency_id_to_name,
     generate_equilibrium_prices_and_holdings,
     generate_exchange_params,
     generate_good_endowments,
-    generate_good_id_to_name,
     generate_utility_params,
 )
 from packages.fetchai.skills.tac_control.parameters import Parameters
@@ -73,10 +71,20 @@ class Phase(Enum):
     """This class defines the phases of the game."""
 
     PRE_GAME = "pre_game"
+    CONTRACT_DEPLOYMENT_PROPOSAL = "contract_deployment_proposal"
+    CONTRACT_DEPLOYING = "contract_deploying"
+    CONTRACT_DEPLOYED = "contract_deployed"
     GAME_REGISTRATION = "game_registration"
     GAME_SETUP = "game_setup"
+    TOKENS_CREATION_PROPOSAL = "token_creation_proposal"  # nosec
+    TOKENS_CREATING = "tokens_creating"
+    TOKENS_CREATED = "tokens_created"  # nosec
+    TOKENS_MINTING_PROPOSAL = "token_minting_proposal"
+    TOKENS_MINTING = "token_minting"  # nosec
+    TOKENS_MINTED = "tokens_minted"  # nosec
     GAME = "game"
     POST_GAME = "post_game"
+    CANCELLED_GAME = "cancelled_game"
 
 
 class Configuration:
@@ -87,7 +95,8 @@ class Configuration:
         version_id: str,
         tx_fee: int,
         agent_addr_to_name: Dict[Address, str],
-        nb_goods: int,
+        currency_id_to_name: Dict[str, str],
+        good_id_to_name: Dict[str, str],
     ):
         """
         Instantiate a game configuration.
@@ -96,12 +105,14 @@ class Configuration:
         :param tx_fee: the fee for a transaction.
         :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
         :param nb_goods: the number of goods.
+        :param nb_currencies: the number of currencies.
         """
         self._version_id = version_id
         self._tx_fee = tx_fee
         self._agent_addr_to_name = agent_addr_to_name
-        self._currency_id_to_name = generate_currency_id_to_name()
-        self._good_id_to_name = generate_good_id_to_name(nb_goods)
+        self._currency_id_to_name = currency_id_to_name
+        self._good_id_to_name = good_id_to_name
+        self._contract_address = None  # type: Optional[str]
         self._check_consistency()
 
     @property
@@ -128,6 +139,24 @@ class Configuration:
     def good_id_to_name(self) -> Dict[str, str]:
         """Map good ids to names."""
         return self._good_id_to_name
+
+    @property
+    def has_contract_address(self) -> bool:
+        """Check if contract address is present."""
+        return self._contract_address is not None
+
+    @property
+    def contract_address(self) -> str:
+        """Get the contract address for the game."""
+        if self._contract_address is None:
+            raise AEAEnforceError("Contract_address not set yet!")
+        return self._contract_address
+
+    @contract_address.setter
+    def contract_address(self, contract_address: str) -> None:
+        """Set the contract address for the game."""
+        enforce(self._contract_address is None, "Contract_address already set!")
+        self._contract_address = contract_address
 
     def _check_consistency(self):
         """
@@ -725,6 +754,7 @@ class Game(Model):
     @phase.setter
     def phase(self, phase: Phase) -> None:
         """Set the game phase."""
+        self.context.logger.debug("Game phase set to: {}".format(phase))
         self._phase = phase
 
     @property
@@ -779,7 +809,8 @@ class Game(Model):
             parameters.version_id,
             parameters.tx_fee,
             self.registration.agent_addr_to_name,
-            parameters.nb_goods,
+            parameters.currency_id_to_name,
+            parameters.good_id_to_name,
         )
 
         scaling_factor = determine_scaling_factor(parameters.money_endowment)

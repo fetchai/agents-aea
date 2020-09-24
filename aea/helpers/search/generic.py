@@ -28,7 +28,7 @@ from aea.helpers.search.models import Attribute, DataModel, Location
 SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 
 
-class GenericDataModel(DataModel):
+class GenericDataModel(DataModel):  # pylint: disable=too-few-public-methods
     """Generic data model."""
 
     def __init__(self, data_model_name: str, data_model_attributes: Dict[str, Any]):

@@ -798,7 +798,7 @@ class BaseAEATestCase(ABC):
 
 
 @pytest.mark.integration
-class UseOef:
+class UseOef:  # pylint: disable=too-few-public-methods
     """Inherit from this class to launch an OEF node."""
 
     @pytest.fixture(autouse=True)

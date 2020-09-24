@@ -568,7 +568,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         ---
         name: stub
         author: fetchai
-        version: 0.9.0
+        version: 0.10.0
         type: connection
         config:
             input_file: "{self.expected_input_file}"
@@ -588,7 +588,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
             aea = builder.build()
         assert aea.name == self.agent_name
         stub_connection = aea.resources.get_connection(
-            PublicId.from_str("fetchai/stub:0.9.0")
+            PublicId.from_str("fetchai/stub:0.10.0")
         )
         assert stub_connection.configuration.config == dict(
             input_file=self.expected_input_file, output_file=self.expected_output_file
@@ -652,6 +652,43 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         assert dummy_handler.config == self.expected_handler_args
         dummy_model = dummy_skill.models["dummy"]
         assert dummy_model.config == self.expected_model_args
+
+
+class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
+    """Test builder set from project dir, to make a skill 'abstract'."""
+
+    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+
+    def _add_dummy_skill_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        # here we change all the dummy skill configurations
+        configuration += dedent(
+            """
+        ---
+        name: dummy
+        author: dummy_author
+        version: 0.1.0
+        type: skill
+        is_abstract: true
+        ...
+        """
+        )
+        aea_config_file.write_text(configuration)
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        self._add_dummy_skill_config()
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self._get_cwd()):
+            aea = builder.build()
+
+        dummy_skill = aea.resources.get_skill(
+            PublicId("dummy_author", "dummy", "0.1.0")
+        )
+        assert dummy_skill is None, "Shouldn't have found the skill in Resources."
 
 
 class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmpty):

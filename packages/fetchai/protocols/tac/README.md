@@ -71,7 +71,7 @@ initiation: [register]
 reply:
   register: [tac_error, game_data, cancelled]
   unregister: [tac_error]
-  transaction: [transaction_confirmation, tac_error, cancelled]
+  transaction: [transaction, transaction_confirmation, tac_error, cancelled]
   cancelled: []
   game_data: [transaction, transaction_confirmation, cancelled]
   transaction_confirmation: [transaction, transaction_confirmation, cancelled]
