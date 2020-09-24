@@ -11,10 +11,10 @@ fingerprint:
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
   behaviours.py: QmcznM3tsmEDNx9Vbhv48o3PNtBEz5W1MVQ7SxJFGkH7di
   dialogues.py: QmcVYVTZ95UKBnXzmKyGLo5LwSVcGYUTrifosQMSpzNnCX
-  game.py: QmTovmW5vuhUcnvW4wQQcbPpiUFLLvMH7LaeTZYVvjqLcF
+  game.py: QmPabHgmR3vmhWLJh4BE1GUHPb7GkBwprpUq8mRcCtXdNN
   handlers.py: QmSjwPKEN83C2gQS4WVH8uaHMv5ze7EJ9S8ugmRcKnSwnW
   helpers.py: QmQXrtqV3h4oU5cDwWKhtNiTTAGLNZGhjoVnDvGj7mGwpe
-  parameters.py: QmeviKY6o3H2FYNFaB9PibZGZc1CwMgLbrCbPoSmZDsikv
+  parameters.py: QmefuFt5DPCBciu4z17UJWcXxtb4vwA879pNwh4DoMKPUm
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.10.0

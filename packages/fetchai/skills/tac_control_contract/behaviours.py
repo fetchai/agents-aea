@@ -99,7 +99,9 @@ class TacBehaviour(BaseTacBehaviour):
             game.phase = Phase.GAME_REGISTRATION
             self._register_tac()
             self.context.logger.info(
-                "TAC open for registration until: {}".format(parameters.start_time)
+                "TAC open for registration until: {}".format(
+                    parameters.registration_end_time
+                )
             )
         elif (
             game.phase.value == Phase.GAME_REGISTRATION.value

@@ -423,11 +423,13 @@ class LedgerApiHandler(Handler):
                 )
                 parameters.contract_address = contract_address
                 game.phase = Phase.CONTRACT_DEPLOYED
+                self.context.logger.info("contract deployed.")
             elif (
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION
             ):
                 game.phase = Phase.TOKENS_CREATED
+                self.context.logger.info("TOKENS_CREATED created.")
             elif (
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
@@ -435,8 +437,9 @@ class LedgerApiHandler(Handler):
                 parameters.nb_completed_minting += 1
                 if game.registration.nb_agents == parameters.nb_completed_minting:
                     game.phase = Phase.TOKENS_MINTED
+                    self.context.logger.info("tokens minted.")
             else:
-                self.context.logger.error("Unexpected transaction receipt!")
+                self.context.logger.error("unexpected transaction receipt!")
         else:
             self.context.logger.error(
                 "transaction failed. Transaction receipt={}".format(

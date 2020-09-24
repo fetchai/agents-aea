@@ -131,7 +131,9 @@ class ContractApiDialogue(BaseContractApiDialogue):
         return self._callable
 
     @callable.setter
-    def callable(self, callable: "Callable") -> None:
+    def callable(  # pylint: disable=redefined-builtin
+        self, callable: "Callable"
+    ) -> None:
         """Set the callable."""
         enforce(self._callable is None, "Callable already set!")
         self._callable = callable

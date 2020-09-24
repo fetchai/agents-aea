@@ -72,15 +72,12 @@ class Phase(Enum):
 
     PRE_GAME = "pre_game"
     CONTRACT_DEPLOYMENT_PROPOSAL = "contract_deployment_proposal"
-    CONTRACT_DEPLOYING = "contract_deploying"
     CONTRACT_DEPLOYED = "contract_deployed"
     GAME_REGISTRATION = "game_registration"
     GAME_SETUP = "game_setup"
     TOKENS_CREATION_PROPOSAL = "token_creation_proposal"  # nosec
-    TOKENS_CREATING = "tokens_creating"
     TOKENS_CREATED = "tokens_created"  # nosec
     TOKENS_MINTING_PROPOSAL = "token_minting_proposal"
-    TOKENS_MINTING = "token_minting"  # nosec
     TOKENS_MINTED = "tokens_minted"  # nosec
     GAME = "game"
     POST_GAME = "post_game"
