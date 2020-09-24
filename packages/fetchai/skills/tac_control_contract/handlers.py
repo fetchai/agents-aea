@@ -429,7 +429,7 @@ class LedgerApiHandler(Handler):
                 == ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION
             ):
                 game.phase = Phase.TOKENS_CREATED
-                self.context.logger.info("TOKENS_CREATED created.")
+                self.context.logger.info("tokens created.")
             elif (
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
