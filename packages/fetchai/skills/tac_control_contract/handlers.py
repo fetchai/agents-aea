@@ -436,6 +436,7 @@ class LedgerApiHandler(Handler):
             ):
                 self.context.logger.info("tokens minted.")
                 parameters.nb_completed_minting += 1
+                game.is_allowed_to_mint = True
                 if game.registration.nb_agents == parameters.nb_completed_minting:
                     game.phase = Phase.TOKENS_MINTED
                     self.context.logger.info("all tokens minted.")

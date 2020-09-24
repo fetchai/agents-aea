@@ -743,6 +743,7 @@ class Game(Model):
         self._current_agent_states = None  # type: Optional[Dict[str, AgentState]]
         self._transactions = Transactions()
         self._already_minted_agents = []  # type: List[str]
+        self._is_allowed_to_mint = True
 
     @property
     def phase(self) -> Phase:
@@ -798,6 +799,16 @@ class Game(Model):
         enforce(self.phase != Phase.GAME, "A game phase is already active.")
         self._phase = Phase.GAME_SETUP
         self._generate()
+
+    @property
+    def is_allowed_to_mint(self):
+        """Get is allowed to mint."""
+        return self._is_allowed_to_mint
+
+    @is_allowed_to_mint.setter
+    def is_allowed_to_mint(self, is_allowed_to_mint: bool):
+        """Get is allowed to mint."""
+        self._is_allowed_to_mint = is_allowed_to_mint
 
     def get_next_agent_state_for_minting(self) -> Optional[AgentState]:
         """Get next agent state for token minting."""

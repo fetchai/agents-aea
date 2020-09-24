@@ -121,6 +121,7 @@ class TacBehaviour(BaseTacBehaviour):
             else:
                 game.phase = Phase.GAME_SETUP
                 game.create()
+                game.conf.contract_address = parameters.contract_address
                 self._unregister_tac()
         elif (
             game.phase.value == Phase.GAME_SETUP.value
@@ -182,6 +183,9 @@ class TacBehaviour(BaseTacBehaviour):
 
         :return: None
         """
+        if not game.is_allowed_to_mint:
+            return
+        game.is_allowed_to_mint = False
         agent_state = game.get_next_agent_state_for_minting()
         if agent_state is None:
             return
