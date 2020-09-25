@@ -29,11 +29,7 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
-from aea.helpers.async_utils import (
-    AsyncState,
-    Runnable,
-    ThreadedAsyncRunner,
-)
+from aea.helpers.async_utils import AsyncState, Runnable, ThreadedAsyncRunner
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger
 from aea.mail.base import AEAConnectionError, Empty, Envelope, EnvelopeContext

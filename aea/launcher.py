@@ -86,6 +86,15 @@ def _run_agent(
 
     :return: None
     """
+    import asyncio  # pylint: disable=import-outside-toplevel
+    import select  # pylint: disable=import-outside-toplevel
+    import selectors  # pylint: disable=import-outside-toplevel
+
+    if hasattr(select, "kqueue"):
+        selector = selectors.SelectSelector()
+        loop = asyncio.SelectorEventLoop(selector)  # type: ignore
+        asyncio.set_event_loop(loop)
+
     _set_logger(log_level=log_level)
 
     agent = load_agent(agent_dir)
