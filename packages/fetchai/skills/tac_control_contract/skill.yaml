@@ -9,10 +9,10 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmUiw6Dt97mXLzSizbnMNTsfLy3edGXKdYTNR5bke6sFsm
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmYcW84nnvCuv2HeDntixfWnFuJA2k9xqrhCWdmVFerLPv
-  dialogues.py: QmPJyBPETi7MggXLMKHWeYsAZbckxK2UFpci19dw3xwHDn
+  behaviours.py: QmSfxtgDawQai52wzoYp58KHEVjXPsFiHQpyv4cYCcBo28
+  dialogues.py: QmWvhTeUnDimhQQTzuSfJJ6d2ViqgBNooCMfRiVzvzApw3
   game.py: QmQwskD5DBVNv1ouRpqGNLb3zQ5krLUcR6XXHUcJ5EVc8L
-  handlers.py: QmSzNcZ3s3RjVm7mCXBhGjA379nwv3Tm9viEmw193WcNTd
+  handlers.py: QmUevEFLkj94XQDPKqkWxRRRZJnY3XQBZFKXDK69xpwabB
   helpers.py: QmX3iv37Z5CmGupCtikc4muTpJyQ9zvjeLbNKDLF7iPhSZ
   parameters.py: QmVMNP52fPxkzEbXPhXtQXspnaj2f4ErZNcNdPAqv4cvwq
 fingerprint_ignore_patterns: []
@@ -77,7 +77,8 @@ models:
       lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
-      nb_goods: 10
+      nb_currencies: 1
+      nb_goods: 9
       registration_start_time: 01 01 2020  00:01
       registration_timeout: 60
       service_data:

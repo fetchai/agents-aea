@@ -72,15 +72,12 @@ class Phase(Enum):
 
     PRE_GAME = "pre_game"
     CONTRACT_DEPLOYMENT_PROPOSAL = "contract_deployment_proposal"
-    CONTRACT_DEPLOYING = "contract_deploying"
     CONTRACT_DEPLOYED = "contract_deployed"
     GAME_REGISTRATION = "game_registration"
     GAME_SETUP = "game_setup"
     TOKENS_CREATION_PROPOSAL = "token_creation_proposal"  # nosec
-    TOKENS_CREATING = "tokens_creating"
     TOKENS_CREATED = "tokens_created"  # nosec
     TOKENS_MINTING_PROPOSAL = "token_minting_proposal"
-    TOKENS_MINTING = "token_minting"  # nosec
     TOKENS_MINTED = "tokens_minted"  # nosec
     GAME = "game"
     POST_GAME = "post_game"
@@ -745,6 +742,8 @@ class Game(Model):
         self._initial_agent_states = None  # type: Optional[Dict[str, AgentState]]
         self._current_agent_states = None  # type: Optional[Dict[str, AgentState]]
         self._transactions = Transactions()
+        self._already_minted_agents = []  # type: List[str]
+        self._is_allowed_to_mint = True
 
     @property
     def phase(self) -> Phase:
@@ -800,6 +799,27 @@ class Game(Model):
         enforce(self.phase != Phase.GAME, "A game phase is already active.")
         self._phase = Phase.GAME_SETUP
         self._generate()
+
+    @property
+    def is_allowed_to_mint(self):
+        """Get is allowed to mint."""
+        return self._is_allowed_to_mint
+
+    @is_allowed_to_mint.setter
+    def is_allowed_to_mint(self, is_allowed_to_mint: bool):
+        """Get is allowed to mint."""
+        self._is_allowed_to_mint = is_allowed_to_mint
+
+    def get_next_agent_state_for_minting(self) -> Optional[AgentState]:
+        """Get next agent state for token minting."""
+        result = None
+        for agent_addr, agent_state in self.initial_agent_states.items():
+            if agent_addr in self._already_minted_agents:
+                continue
+            self._already_minted_agents.append(agent_addr)
+            result = agent_state
+            break
+        return result
 
     def _generate(self):
         """Generate a TAC game."""
