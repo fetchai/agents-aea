@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
 import os
+import time
 from contextlib import suppress
 from shutil import rmtree
-from typing import Dict, List, Optional, Set
 
 import pytest
 
@@ -30,7 +30,7 @@ from aea.manager import Manager
 
 def test_manager():
     """Perform some tests."""
-
+    # pydocsyle
     try:
         working_dir = "manager_dir"
         project_public_id = PublicId("fetchai", "my_first_aea", "0.11.0")
@@ -41,7 +41,7 @@ def test_manager():
         manager = Manager(working_dir)
         manager.start_manager()
         assert os.path.exists(working_dir)
-        assert manager.is_started
+        assert manager.is_running
 
         manager.add_project(project_public_id)
 
@@ -84,13 +84,24 @@ def test_manager():
                 project_public_id, agent_name,
             )
         assert agent_name in manager.list_agents()
+        manager.start_all_agents()
+        assert agent_name in manager.list_agents(running_only=True)
+        manager.start_all_agents()
+
+        with pytest.raises(ValueError, match="is already started!"):
+            manager.start_agents(manager.list_agents())
+
+        with pytest.raises(ValueError, match="Agent is running. stop it first!"):
+            manager.remove_agent(agent_name)
+
+        time.sleep(2)
+        manager.stop_all_agents()
 
         manager.remove_agent(agent_name)
         assert agent_name not in manager.list_agents()
 
         with pytest.raises(ValueError, match="does not exist!"):
             manager.remove_agent(agent_name)
-
         manager.remove_project(project_public_id)
         assert project_public_id not in manager._projects
         assert not os.path.exists(project_path)
@@ -98,10 +109,9 @@ def test_manager():
 
         with pytest.raises(ValueError, match=r"was not added"):
             manager.remove_project(project_public_id)
-
         manager.stop_manager()
         assert not os.path.exists(working_dir)
-        assert not manager.is_started
+        assert not manager.is_running
     finally:
         with suppress(FileNotFoundError):
             rmtree(working_dir)
