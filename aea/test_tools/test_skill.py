@@ -51,7 +51,7 @@ class BaseSkillTestCase:
 
     def get_quantity_in_outbox(self) -> int:
         """Get the quantity of envelopes in the outbox."""
-        return self._outbox._multiplexer.out_queue.qsize()
+        return self._multiplexer.out_queue.qsize()
 
     def get_message_from_outbox(self) -> Optional[Message]:
         """Get message from outbox."""
@@ -66,7 +66,7 @@ class BaseSkillTestCase:
         identity = Identity("test_agent_name", "test_agent_address")
 
         cls._multiplexer = AsyncMultiplexer()
-        cls._multiplexer._out_queue = asyncio.Queue()
+        cls._multiplexer._out_queue = asyncio.Queue()  # pylint: disable=protected-access
         cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
 
         agent_context = AgentContext(
