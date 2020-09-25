@@ -50,6 +50,10 @@ import (
 	"libp2p_node/aea"
 )
 
+const (
+	maxMessageSizeDelegateConnection = 1024 * 1024 * 3 // 3Mb
+)
+
 var logger zerolog.Logger = NewDefaultLogger()
 
 /*
@@ -247,7 +251,11 @@ func ReadBytesConn(conn net.Conn) ([]byte, error) {
 	if err != nil {
 		return buf, err
 	}
+
 	size := binary.BigEndian.Uint32(buf)
+	if size > maxMessageSizeDelegateConnection {
+		return nil, errors.New("Expected message size larger than maximum allowed")
+	}
 
 	buf = make([]byte, size)
 	_, err = conn.Read(buf)

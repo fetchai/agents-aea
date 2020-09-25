@@ -50,6 +50,7 @@ import (
 
 	aea "libp2p_node/aea"
 	"libp2p_node/dht/dhtnode"
+	monitoring "libp2p_node/dht/monitoring"
 	utils "libp2p_node/utils"
 )
 
@@ -71,6 +72,7 @@ const (
 	routingTableConnectionUpdateTimeout = 5 * time.Second
 	newStreamTimeout                    = 5 * time.Second
 	addressRegisterTimeout              = 3 * time.Second
+	monitoringNamespace                 = "acn"
 )
 
 // DHTPeer A full libp2p node for the Agents Communication Network.
@@ -78,12 +80,13 @@ const (
 // and can acts as a relay for `DHTClient`.
 // Optionally, it provides delegate service for tcp clients.
 type DHTPeer struct {
-	host         string
-	port         uint16
-	publicHost   string
-	publicPort   uint16
-	delegatePort uint16
-	enableRelay  bool
+	host           string
+	port           uint16
+	publicHost     string
+	publicPort     uint16
+	delegatePort   uint16
+	monitoringPort uint16
+	enableRelay    bool
 
 	key             crypto.PrivKey
 	publicKey       crypto.PubKey
@@ -102,6 +105,7 @@ type DHTPeer struct {
 	tcpAddresses     map[string]net.Conn
 	processEnvelope  func(*aea.Envelope) error
 
+	monitor    monitoring.MonitoringService
 	closing    chan struct{}
 	goroutines *sync.WaitGroup
 	logger     zerolog.Logger
@@ -262,7 +266,34 @@ func New(opts ...Option) (*DHTPeer, error) {
 		ready.Wait()
 	}
 
+	// setup monitoring
+	dhtPeer.setupMonitoring()
+	go dhtPeer.startMonitoring()
+
 	return dhtPeer, nil
+}
+
+func (dhtPeer *DHTPeer) setupMonitoring() {
+	if dhtPeer.monitoringPort != 0 {
+		dhtPeer.monitor = monitoring.NewPrometheusMonitoring(monitoringNamespace, dhtPeer.monitoringPort)
+	} else {
+		dhtPeer.monitor = monitoring.NewFileMonitoring(monitoringNamespace)
+	}
+
+	dhtPeer.addMonitoringMetrics()
+}
+
+func (dhtPeer *DHTPeer) startMonitoring() {
+	_, _, linfo, _ := dhtPeer.getLoggers()
+	linfo().Msg("Starting monitoring service: " + dhtPeer.monitor.Info())
+	dhtPeer.monitor.Start()
+}
+
+func (dhtPeer *DHTPeer) addMonitoringMetrics() {
+	dhtPeer.monitor.NewGauge("delegate_connections_nbr",
+		"Number of active delagate connections")
+	dhtPeer.monitor.NewGauge("delegate_clients_total",
+		"Number of all delagate clients, connected or disconnected")
 }
 
 func (dhtPeer *DHTPeer) setupLogger() {
@@ -375,6 +406,12 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 
 func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	defer dhtPeer.goroutines.Done()
+	defer conn.Close()
+
+	nbrConns, _ := dhtPeer.monitor.GetGauge("delegate_connections_nbr")
+	nbrClients, _ := dhtPeer.monitor.GetGauge("delegate_clients_total")
+	nbrConns.Inc()
+	nbrClients.Inc()
 
 	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
@@ -384,6 +421,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	buf, err := utils.ReadBytesConn(conn)
 	if err != nil {
 		lerror(err).Msg("while receiving agent's Address")
+		nbrConns.Dec()
 		return
 	}
 
@@ -415,6 +453,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			} else {
 				lerror(err).Msg("while reading envelope from client connection, aborting...")
 			}
+			nbrConns.Dec()
 			break
 		}
 
