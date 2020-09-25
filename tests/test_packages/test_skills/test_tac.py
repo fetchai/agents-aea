@@ -256,10 +256,11 @@ class TestTacSkills(AEATestCaseMany):
         ), "Agents weren't successfully terminated."
 
 
-@pytest.mark.ledger
 class TestTacSkillsContract(AEATestCaseMany):
     """Test that tac skills work."""
 
+    @pytest.mark.integration
+    @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
@@ -371,6 +372,8 @@ class TestTacSkillsContract(AEATestCaseMany):
             self.force_set_config(setting_path, config)
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
             self.force_set_config(setting_path, COSMOS)
+            setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+            self.force_set_config(setting_path, ETHEREUM)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
