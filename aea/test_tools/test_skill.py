@@ -66,9 +66,9 @@ class BaseSkillTestCase:
         identity = Identity("test_agent_name", "test_agent_address")
 
         cls._multiplexer = AsyncMultiplexer()
-        cls._multiplexer._out_queue = (
+        cls._multiplexer._out_queue = (  # pylint: disable=protected-access
             asyncio.Queue()
-        )  # pylint: disable=protected-access
+        )
         cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
 
         agent_context = AgentContext(
