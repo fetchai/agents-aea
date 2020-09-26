@@ -143,11 +143,9 @@ class TestTacSkills(AEATestCaseMany):
         self.set_agent_context(tac_controller_name)
         now = datetime.datetime.now().strftime("%d %m %Y %H:%M")
         now_min = datetime.datetime.strptime(now, "%d %m %Y %H:%M")
-        fut = now_min + datetime.timedelta(0, 120)
+        fut = now_min + datetime.timedelta(0, 60)
         start_time = fut.strftime("%d %m %Y %H:%M")
-        setting_path = (
-            "vendor.fetchai.skills.tac_control.models.parameters.args.start_time"
-        )
+        setting_path = "vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time"
         self.set_config(setting_path, start_time)
         tac_controller_process = self.run_agent()
 
@@ -258,29 +256,39 @@ class TestTacSkills(AEATestCaseMany):
         ), "Agents weren't successfully terminated."
 
 
-@pytest.mark.ledger
 class TestTacSkillsContract(AEATestCaseMany):
     """Test that tac skills work."""
 
-    @pytest.mark.unstable
+    @pytest.mark.integration
+    @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
         tac_aea_one = "tac_participant_one"
         tac_aea_two = "tac_participant_two"
-        tac_controller_name = "tac_controller"
+        tac_controller_name = "tac_controller_contract"
 
         # create tac controller, agent one and agent two
         self.create_agents(
             tac_aea_one, tac_aea_two, tac_controller_name,
         )
 
+        default_routing = {
+            "fetchai/contract_api:0.5.0": "fetchai/ledger:0.6.0",
+            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
+            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+        }
+
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
+        self.add_item("connection", "fetchai/soef:0.9.0")
+        self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.9.0")
         self.set_config("agent.default_ledger", ETHEREUM)
+        setting_path = "agent.default_routing"
+        self.force_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -290,23 +298,46 @@ class TestTacSkillsContract(AEATestCaseMany):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
+        # add keys
         self.generate_private_key(ETHEREUM)
+        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+        self.add_private_key(
+            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_1, ETHEREUM_PRIVATE_KEY_FILE
         )
+        self.replace_private_key_in_file(
+            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+        )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+        self.force_set_config(setting_path, COSMOS)
+        setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+        self.force_set_config(setting_path, ETHEREUM)
+        setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
+        self.force_set_config(setting_path, True)
+
+        default_routing = {
+            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
+            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+        }
 
         # prepare agents for test
-        for agent_name, eth_private_key in zip(
-            (tac_aea_one, tac_aea_two),
-            (FUNDED_ETH_PRIVATE_KEY_2, FUNDED_ETH_PRIVATE_KEY_3),
+        for agent_name, config, private_key in (
+            (tac_aea_one, NON_GENESIS_CONFIG, FUNDED_ETH_PRIVATE_KEY_2),
+            (tac_aea_two, NON_GENESIS_CONFIG_TWO, FUNDED_ETH_PRIVATE_KEY_3),
         ):
             self.set_agent_context(agent_name)
             self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
+            self.add_item("connection", "fetchai/soef:0.9.0")
+            self.add_item("connection", "fetchai/ledger:0.6.0")
             self.add_item("skill", "fetchai/tac_participation:0.9.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.10.0")
             self.set_config("agent.default_ledger", ETHEREUM)
+            setting_path = "agent.default_routing"
+            self.force_set_config(setting_path, default_routing)
             self.set_config(
                 "vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract",
                 True,
@@ -319,34 +350,61 @@ class TestTacSkillsContract(AEATestCaseMany):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.11.0", agent_name
+                "fetchai/tac_participant_contract:0.1.0", agent_name
             )
             assert (
                 diff == []
             ), "Difference between created and fetched project for files={}".format(
                 diff
             )
+
+            # add keys
             self.generate_private_key(ETHEREUM)
+            self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
             self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
-            self.replace_private_key_in_file(eth_private_key, ETHEREUM_PRIVATE_KEY_FILE)
+            self.add_private_key(
+                COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            )
+            self.replace_private_key_in_file(private_key, ETHEREUM_PRIVATE_KEY_FILE)
+
+            # set p2p configs
+            setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+            self.force_set_config(setting_path, config)
+            setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
+            self.force_set_config(setting_path, COSMOS)
+            setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+            self.force_set_config(setting_path, ETHEREUM)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
         now = datetime.datetime.now().strftime("%d %m %Y %H:%M")
         now_min = datetime.datetime.strptime(now, "%d %m %Y %H:%M")
-        fut = now_min + datetime.timedelta(0, 360)
+        fut = now_min + datetime.timedelta(
+            0, 180
+        )  # we provide 3 minutes time for contract deployment
         start_time = fut.strftime("%d %m %Y %H:%M")
-        setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time"
+        setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time"
         self.set_config(setting_path, start_time)
-        tac_controller_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.10.0"
-        )
+        tac_controller_process = self.run_agent()
 
         check_strings = (
-            "Sending deploy transaction to decision maker.",
-            "Sending deployment transaction to the ledger...",
-            "The contract was successfully deployed. Contract address:",
-            "Registering TAC data model",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+            "registering agent on SOEF.",
+            "requesting contract deployment transaction...",
+            "Start processing messages...",
+            "received raw transaction=",
+            "transaction signing was successful.",
+            "sending transaction to ledger.",
+            "transaction was successfully submitted. Transaction digest=",
+            "requesting transaction receipt.",
+            "transaction was successfully settled. Transaction receipt=",
+            "contract deployed.",
+            "registering TAC data model on SOEF.",
             "TAC open for registration until:",
         )
         missing_strings = self.missing_from_output(
@@ -356,64 +414,106 @@ class TestTacSkillsContract(AEATestCaseMany):
             missing_strings == []
         ), "Strings {} didn't appear in tac_controller output.".format(missing_strings)
 
-        # run two participants as well
+        # run two agents (participants)
         self.set_agent_context(tac_aea_one)
-        tac_aea_one_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.10.0"
-        )
+        tac_aea_one_process = self.run_agent()
 
         self.set_agent_context(tac_aea_two)
-        tac_aea_two_process = self.run_agent(
-            "--connections", "fetchai/p2p_libp2p:0.10.0"
-        )
+        tac_aea_two_process = self.run_agent()
 
         check_strings = (
-            "Agent registered:",
-            "Closing registration!",
-            "Setting Up the TAC game.",
-            "Unregistering TAC data model",
-            "Registering TAC data model",
-            "Sending create_items transaction to decision maker.",
-            "Sending creation transaction to the ledger..",
-            "Successfully created the tokens. Transaction hash:",
-            "Sending mint_items transactions to decision maker.",
-            "Sending minting transaction to the ledger...",
-            "Successfully minted the tokens for agent_addr=",
-            "All tokens minted!",
-            "Starting competition with configuration:",
-            "Current good & money allocation & score:",
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+            "Start processing messages...",
+            "searching for TAC, search_id=",
+            "found the TAC controller. Registering...",
         )
         missing_strings = self.missing_from_output(
-            tac_controller_process, check_strings, timeout=300, is_terminating=False
+            tac_aea_one_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            "My libp2p addresses:",
+            "Start processing messages...",
+            "searching for TAC, search_id=",
+            "found the TAC controller. Registering...",
+        )
+        missing_strings = self.missing_from_output(
+            tac_aea_two_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in tac_aea_two output.".format(missing_strings)
+
+        check_strings = (
+            "agent registered:",
+            "closing registration!",
+            "unregistering TAC data model from SOEF.",
+            "requesting create items transaction...",
+            "received raw transaction=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "transaction signing was successful.",
+            "transaction was successfully submitted. Transaction digest=",
+            "requesting transaction receipt.",
+            "transaction was successfully settled. Transaction receipt=",
+            "tokens created.",
+            "requesting mint_items transactions for agent=",
+            "tokens minted.",
+            "requesting mint_items transactions for agent=",
+            "tokens minted.",
+            "all tokens minted.",
+            "started competition:",
+        )
+        missing_strings = self.missing_from_output(
+            tac_controller_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in tac_controller output.".format(missing_strings)
 
         check_strings = (
-            "Searching for TAC, search_id=",
-            "Found the TAC controller. Registering...",
-            "Received start event from the controller. Starting to compete...",
-            "Searching for sellers which match the demand of the agent, search_id=",
-            "Searching for buyers which match the supply of the agent, search_id=",
+            "received start event from the controller. Starting to compete..."
+            "received a contract address:",
+            "registering agent on SOEF.",
+            "searching for sellers, search_id=",
+            "searching for buyers, search_id=",
             "found potential sellers agents=",
             "sending CFP to agent=",
-            "Accepting propose",
-            "sending match accept to",
-            "sending atomic swap tx to ledger.",
-            "tx_digest=",
-            "waiting for tx to confirm. Sleeping for 3 seconds ...",
-            "Successfully conducted atomic swap. Transaction digest:",
-            "found potential buyers agents=",
-            "sending CFP to agent=",
-            "Declining propose",
         )
         missing_strings = self.missing_from_output(
-            tac_aea_one_process, check_strings, timeout=360, is_terminating=False
+            tac_aea_one_process, check_strings, timeout=300, is_terminating=False
         )
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
+
+        check_strings = (
+            "received start event from the controller. Starting to compete..."
+            "received a contract address:",
+            "registering agent on SOEF.",
+            "searching for sellers, search_id=",
+            "searching for buyers, search_id=",
+            "found potential sellers agents=",
+            "sending CFP to agent=",
+        )
+        missing_strings = self.missing_from_output(
+            tac_aea_two_process, check_strings, timeout=360, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in tac_aea_two output.".format(missing_strings)
 
         # Note, we do not need to check std output of the other participant as it is implied
 

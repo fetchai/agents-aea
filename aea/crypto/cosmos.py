@@ -864,10 +864,6 @@ class CosmosApi(_CosmosApi, CosmosHelper):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""
 
 
-class CosmWasmCLIWrapper:
-    """Wrapper of the CosmWasm CLI."""
-
-
 """ Equivalent to:
 
 @dataclass

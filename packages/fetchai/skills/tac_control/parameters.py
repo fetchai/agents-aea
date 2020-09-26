@@ -20,13 +20,32 @@
 """This package contains a class representing the game parameters."""
 
 import datetime
-from typing import Dict, Set
+from typing import Dict, List, Optional, Set
 
-from aea.exceptions import enforce
+from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.search.models import Location
 from aea.skills.base import Model
 
+from packages.fetchai.skills.tac_control.helpers import (
+    generate_currency_id_to_name,
+    generate_good_id_to_name,
+)
 
+
+DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_MIN_NB_AGENTS = 2
+DEFAULT_MONEY_ENDOWMENT = 200
+DEFAULT_NB_GOODS = 9  # ERC1155 vyper contract only accepts 10 tokens per mint/create
+DEFAULT_NB_CURRENCIES = 1
+DEFAULT_TX_FEE = 1
+DEFAULT_BASE_GOOD_ENDOWMENT = 2
+DEFAULT_LOWER_BOUND_FACTOR = 1
+DEFAULT_UPPER_BOUND_FACTOR = 1
+DEFAULT_REGISTRATION_START_TIME = "01 01 2020  00:01"
+DEFAULT_REGISTRATION_TIMEOUT = 60
+DEFAULT_ITEM_SETUP_TIMEOUT = 60
+DEFAULT_COMPETITION_TIMEOUT = 300
+DEFAULT_INACTIVITY_TIMEOUT = 30
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SERVICE_DATA = {"key": "tac", "value": "v1"}
 
@@ -35,21 +54,51 @@ class Parameters(Model):
     """This class contains the parameters of the game."""
 
     def __init__(self, **kwargs):
-        """Instantiate the search class."""
-        self._min_nb_agents = kwargs.pop("min_nb_agents", 5)  # type: int
-        self._money_endowment = kwargs.pop("money_endowment", 200)  # type: int
-        self._nb_goods = kwargs.pop("nb_goods", 5)  # type: int
-        self._tx_fee = kwargs.pop("tx_fee", 1)
-        self._base_good_endowment = kwargs.pop("base_good_endowment", 2)  # type: int
-        self._lower_bound_factor = kwargs.pop("lower_bound_factor", 1)  # type: int
-        self._upper_bound_factor = kwargs.pop("upper_bound_factor", 1)  # type: int
-        start_time = kwargs.pop("start_time", "01 01 2020  00:01")  # type: str
-        self._start_time = datetime.datetime.strptime(
-            start_time, "%d %m %Y %H:%M"
+        """Instantiate the parameter class."""
+        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        self._contract_address = kwargs.pop(
+            "contract_address", None
+        )  # type: Optional[str]
+        self._good_ids = kwargs.pop("good_ids", [])  # type: List[int]
+        self._currency_ids = kwargs.pop("currency_ids", [])  # type: List[int]
+        self._min_nb_agents = kwargs.pop(
+            "min_nb_agents", DEFAULT_MIN_NB_AGENTS
+        )  # type: int
+        self._money_endowment = kwargs.pop(
+            "money_endowment", DEFAULT_MONEY_ENDOWMENT
+        )  # type: int
+        self._nb_goods = kwargs.pop("nb_goods", DEFAULT_NB_GOODS)  # type: int
+        self._nb_currencies = kwargs.pop(
+            "nb_currencies", DEFAULT_NB_CURRENCIES
+        )  # type: int
+        self._tx_fee = kwargs.pop("tx_fee", DEFAULT_TX_FEE)  # type: int
+        self._base_good_endowment = kwargs.pop(
+            "base_good_endowment", DEFAULT_BASE_GOOD_ENDOWMENT
+        )  # type: int
+        self._lower_bound_factor = kwargs.pop(
+            "lower_bound_factor", DEFAULT_LOWER_BOUND_FACTOR
+        )  # type: int
+        self._upper_bound_factor = kwargs.pop(
+            "upper_bound_factor", DEFAULT_UPPER_BOUND_FACTOR
+        )  # type: int
+        registration_start_time = kwargs.pop(
+            "registration_start_time", DEFAULT_REGISTRATION_START_TIME
+        )  # type: str
+        self._registration_start_time = datetime.datetime.strptime(
+            registration_start_time, "%d %m %Y %H:%M"
         )  # type: datetime.datetime
-        self._registration_timeout = kwargs.pop("registration_timeout", 10)  # type: int
-        self._competition_timeout = kwargs.pop("competition_timeout", 20)  # type: int
-        self._inactivity_timeout = kwargs.pop("inactivity_timeout", 10)  # type: int
+        self._registration_timeout = kwargs.pop(
+            "registration_timeout", DEFAULT_REGISTRATION_TIMEOUT
+        )  # type: int
+        self._item_setup_timeout = kwargs.pop(
+            "item_setup_timeout", DEFAULT_ITEM_SETUP_TIMEOUT
+        )  # type: int
+        self._competition_timeout = kwargs.pop(
+            "competition_timeout", DEFAULT_COMPETITION_TIMEOUT
+        )  # type: int
+        self._inactivity_timeout = kwargs.pop(
+            "inactivity_timeout", DEFAULT_INACTIVITY_TIMEOUT
+        )  # type: int
         self._whitelist = set(kwargs.pop("whitelist", []))  # type: Set[str]
         self._location = kwargs.pop("location", DEFAULT_LOCATION)
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
@@ -73,19 +122,72 @@ class Parameters(Model):
         }
 
         super().__init__(**kwargs)
+        self._currency_id_to_name = generate_currency_id_to_name(
+            self.nb_currencies, self.currency_ids
+        )
+        self._good_id_to_name = generate_good_id_to_name(self.nb_goods, self.good_ids)
+        self._registration_end_time = (
+            self._registration_start_time
+            + datetime.timedelta(seconds=self._registration_timeout)
+        )
+        self._start_time = self._registration_end_time + datetime.timedelta(
+            seconds=self._item_setup_timeout
+        )
+        self._end_time = self._start_time + datetime.timedelta(
+            seconds=self._competition_timeout
+        )
         now = datetime.datetime.now()
         if now > self.registration_start_time:
             self.context.logger.warning(
-                "TAC registration start time {} is in the past!".format(
+                "TAC registration start time {} is in the past! Deregistering skill.".format(
                     self.registration_start_time
                 )
             )
+            self.context.is_active = False
         else:
             self.context.logger.info(
-                "TAC registation start time: {}, and start time: {}, and end time: {}".format(
-                    self.registration_start_time, self.start_time, self.end_time,
+                "TAC registation start time: {}, and registration end time: {}, and start time: {}, and end time: {}".format(
+                    self.registration_start_time,
+                    self.registration_end_time,
+                    self.start_time,
+                    self.end_time,
                 )
             )
+        self._check_consistency()
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger identifier."""
+        return self._ledger_id
+
+    @property
+    def contract_address(self) -> str:
+        """The contract address of an already deployed smart-contract."""
+        if self._contract_address is None:
+            raise AEAEnforceError("No contract address provided.")
+        return self._contract_address
+
+    @contract_address.setter
+    def contract_address(self, contract_address: str) -> None:
+        """Set contract address of an already deployed smart-contract."""
+        if self._contract_address is not None:
+            raise AEAEnforceError("Contract address already provided.")
+        self._contract_address = contract_address
+
+    @property
+    def is_contract_deployed(self) -> bool:
+        """Check if there is a deployed instance of the contract."""
+        return self._contract_address is not None
+
+    @property
+    def good_ids(self) -> List[int]:
+        """The item ids of an already deployed smart-contract."""
+        return self._good_ids
+
+    @property
+    def currency_ids(self) -> List[int]:
+        """The currency ids of an already deployed smart-contract."""
+        return self._currency_ids
 
     @property
     def min_nb_agents(self) -> int:
@@ -101,6 +203,21 @@ class Parameters(Model):
     def nb_goods(self) -> int:
         """Good number for a TAC instance."""
         return self._nb_goods
+
+    @property
+    def nb_currencies(self) -> int:
+        """Currency number for a TAC instance."""
+        return self._nb_currencies
+
+    @property
+    def currency_id_to_name(self) -> Dict[str, str]:
+        """Mapping of currency ids to names"""
+        return self._currency_id_to_name
+
+    @property
+    def good_id_to_name(self) -> Dict[str, str]:
+        """Mapping of good ids to names."""
+        return self._good_id_to_name
 
     @property
     def tx_fee(self) -> int:
@@ -125,7 +242,12 @@ class Parameters(Model):
     @property
     def registration_start_time(self) -> datetime.datetime:
         """TAC registration start time."""
-        return self._start_time - datetime.timedelta(seconds=self._registration_timeout)
+        return self._registration_start_time
+
+    @property
+    def registration_end_time(self) -> datetime.datetime:
+        """TAC registration end time."""
+        return self._registration_end_time
 
     @property
     def start_time(self) -> datetime.datetime:
@@ -135,7 +257,7 @@ class Parameters(Model):
     @property
     def end_time(self) -> datetime.datetime:
         """TAC end time."""
-        return self._start_time + datetime.timedelta(seconds=self._competition_timeout)
+        return self._end_time
 
     @property
     def inactivity_timeout(self):
@@ -171,3 +293,16 @@ class Parameters(Model):
     def simple_service_data(self) -> Dict[str, str]:
         """Get the simple service data."""
         return self._simple_service_data
+
+    def _check_consistency(self) -> None:
+        """Check the parameters are consistent."""
+        if self._contract_address is not None and (
+            (self._good_ids is not None and len(self._good_ids) != self._nb_goods)
+            or (
+                self._currency_ids is not None
+                and len(self._currency_ids) != self._nb_currencies
+            )
+        ):
+            raise ValueError(
+                "If the contract address is set, then good ids and currency id must be provided and consistent."
+            )

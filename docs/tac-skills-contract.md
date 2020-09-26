@@ -217,8 +217,8 @@ Similar to how you funded the controller, fund both tac participants.
 Navigate to the tac controller project, then use the command line to get and set the start time (set it to at least five minutes - better 10 - in the future):
 
 ``` bash
-aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time
-aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time '01 01 2020  00:01'
+aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time
+aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
 
 ### Run the AEAs

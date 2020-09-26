@@ -9,14 +9,15 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmdWECpRXZXH5JPV6wVHqeUtvjBhieUFTEoT2e7EY16N8M
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
-  behaviours.py: QmTVCXtTpH1A55vWnynz1PjM4VCrQ6EDy5XfcJpT93doEq
+  behaviours.py: QmPtGBEFGEdQCzeXC3ZkJuNTrSe217JupP1wtP8DMnm6cK
   dialogues.py: QmcVYVTZ95UKBnXzmKyGLo5LwSVcGYUTrifosQMSpzNnCX
-  game.py: QmUALtQyMid2o58DjbJ7uHR5Vx3ZnTxP6dyPHMLJWUo8SN
+  game.py: QmU3jm1yqhtnW1XK9EGZAMx9iWeCiX8Cdvb55kQQKDXav1
   handlers.py: QmSjwPKEN83C2gQS4WVH8uaHMv5ze7EJ9S8ugmRcKnSwnW
-  helpers.py: QmQxT9wX8KLEMudJci9ST5M9RswmdZoiKSS5RY5UgRvrAP
-  parameters.py: QmNwnsG5um2E56ymc4y7akCwXLof94Y9wxe5bqkygk3VAa
+  helpers.py: QmQXrtqV3h4oU5cDwWKhtNiTTAGLNZGhjoVnDvGj7mGwpe
+  parameters.py: QmefuFt5DPCBciu4z17UJWcXxtb4vwA879pNwh4DoMKPUm
 fingerprint_ignore_patterns: []
-contracts: []
+contracts:
+- fetchai/erc1155:0.10.0
 protocols:
 - fetchai/oef_search:0.7.0
 - fetchai/tac:0.7.0
@@ -46,19 +47,24 @@ models:
     args:
       base_good_endowment: 2
       competition_timeout: 180
+      currency_ids: []
+      good_ids: []
       inactivity_timeout: 60
+      item_setup_timeout: 0
+      ledger_id: ethereum
       location:
         latitude: 0.127
         longitude: 51.5194
       lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
-      nb_goods: 10
+      nb_currencies: 1
+      nb_goods: 9
+      registration_start_time: 01 01 2020  00:01
       registration_timeout: 60
       service_data:
         key: tac
         value: v1
-      start_time: 01 01 2020  00:01
       tx_fee: 1
       upper_bound_factor: 1
       whitelist: []

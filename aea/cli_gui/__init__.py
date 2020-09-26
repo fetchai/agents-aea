@@ -70,7 +70,7 @@ elements = [
 max_log_lines = 100
 
 
-class AppContext:
+class AppContext:  # pylint: disable=too-few-public-methods
     """Store useful global information about the app.
 
     Can't add it into the app object itself because mypy complains.

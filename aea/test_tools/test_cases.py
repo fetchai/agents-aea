@@ -269,11 +269,11 @@ class BaseAEATestCase(ABC):
             with open(
                 os.path.join(path_to_fetched_aea, "aea-config.yaml"), "r"
             ) as file:
-                content1 = yaml.full_load(file)
+                content1 = list(yaml.safe_load_all(file))[0]  # only load first page
             with open(
                 os.path.join(path_to_manually_created_aea, "aea-config.yaml"), "r"
             ) as file:
-                content2 = yaml.full_load(file)
+                content2 = list(yaml.safe_load_all(file))[0]
             content1c = copy.deepcopy(content1)
             for key, value in content1c.items():
                 if content2[key] == value:
@@ -798,7 +798,7 @@ class BaseAEATestCase(ABC):
 
 
 @pytest.mark.integration
-class UseOef:
+class UseOef:  # pylint: disable=too-few-public-methods
     """Inherit from this class to launch an OEF node."""
 
     @pytest.fixture(autouse=True)

@@ -1166,7 +1166,7 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
-    configurable_fields = {"handlers", "behaviours", "models"}
+    configurable_fields = {"handlers", "behaviours", "models", "is_abstract"}
 
     def __init__(
         self,
@@ -1332,6 +1332,8 @@ class SkillConfig(ComponentConfiguration):
         for model_id, model_data in data.get("models", {}).items():
             model_config = SkillComponentConfiguration.from_json(model_data)
             self.models.update(model_id, model_config)
+
+        self.is_abstract = data.get("is_abstract", self.is_abstract)
 
 
 class AgentConfig(PackageConfiguration):

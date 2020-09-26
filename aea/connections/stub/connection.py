@@ -44,7 +44,7 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.9.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.10.0")
 
 
 def _encode(e: Envelope, separator: bytes = SEPARATOR):
@@ -251,6 +251,9 @@ class StubConnection(Connection):
 
         try:
             return await self.in_queue.get()
+        except CancelledError:  # pragma: no cover
+            self.logger.debug("Receive cancelled.")
+            return None
         except Exception:  # pylint: disable=broad-except
             logger.exception("Stub connection receive error:")
             return None

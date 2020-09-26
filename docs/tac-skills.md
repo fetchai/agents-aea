@@ -206,8 +206,8 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Navigate to the tac controller project, then use the command line to get and set the start time (set it to at least two minutes in the future):
 
 ``` bash
-aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
+aea config get vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
 
 ### Update the connection params

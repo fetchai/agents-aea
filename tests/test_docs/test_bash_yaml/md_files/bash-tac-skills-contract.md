@@ -67,8 +67,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 ```
 ``` bash
-aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time
-aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time '01 01 2020  00:01'
+aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time
+aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time '01 01 2020  00:01'
+```
 ```
 ``` bash
 aea launch tac_controller_contract tac_participant_one tac_participant_two

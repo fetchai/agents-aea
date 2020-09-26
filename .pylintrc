@@ -2,22 +2,19 @@
 ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0902,R0913,R0914,R0801,R0904,R0903,R0911,R0912,R0901,R0916,R1702,R0915,R1725
+disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0902,R0913,R0914,R0801,R0911,R0912,R0901,R0916,R1702,R0915
 
 ## Eventually resolve these:
 # W0707: raise-missing-from
 # R0902: too-many-instance-attributes
 # R0913: too-many-arguments
 # R0914: too-many-locals
-# R0904: too-many-public-methods
-# R0903: too-few-public-methods
 # R0911: too-many-return-statements
 # R0912: too-many-branches
 # R0901: too-many-ancestors
 # R0916: too-many-boolean-expressions
 # R1702: too-many-nested-blocks
 # R0915: too-many-statements
-# R1725: super-with-arguments
 # decide on a logging policy:
 # W1202: logging-format-interpolation
 # W1203: logging-fstring-interpolation
@@ -34,3 +31,7 @@ disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0902,R0913,
 
 [IMPORTS]
 ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,vyper,web3
+
+[DESIGN]
+min-public-methods=1
+max-public-methods=35
