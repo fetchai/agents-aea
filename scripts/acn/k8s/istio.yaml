@@ -1,0 +1,49 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ph-deployment-name-here
+  namespace: agents-p2p-dht
+spec:
+  selector:
+    app: istio-fetchpubig
+    istio: ingressgateway
+  servers:
+  - port:
+      name: libp2p
+      number: ph-node-port-number-here
+      protocol: TCP
+    hosts:
+    - agents-p2p-dht.sandbox.fetch-ai.com
+  - port:
+      name: tcp
+      number: ph-node-delegate-port-number-here
+      protocol: TCP
+    hosts:
+    - agents-p2p-dht.sandbox.fetch-ai.com
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ph-deployment-name-here
+  namespace: agents-p2p-dht
+spec:
+  gateways:
+  - ph-deployment-name-here
+  hosts:
+  - agents-p2p-dht.sandbox.fetch-ai.com
+  tcp:
+  - match:
+    - port: ph-node-port-number-here
+    route:
+    - destination:
+        host: ph-deployment-name-here
+        port:
+          number: ph-node-port-number-here
+  - match:
+    - port: ph-node-delegate-port-number-here
+    route:
+    - destination:
+        host: ph-deployment-name-here
+        port:
+          number: ph-node-delegate-port-number-here
