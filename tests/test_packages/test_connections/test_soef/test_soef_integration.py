@@ -16,15 +16,17 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the soef connection module."""
 
 import logging
 import time
+import urllib
 from threading import Thread
 from typing import Any, Dict, Optional, Tuple, cast
+from urllib.parse import urlencode
 
 import pytest
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -44,10 +46,10 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from tests.common.utils import wait_for_condition
-
-from . import models
 from .test_soef import OefSearchDialogues
+from tests.common.utils import wait_for_condition
+from tests.test_packages.test_connections.test_soef import models
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -65,7 +67,7 @@ def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, C
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.6.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
@@ -187,15 +189,43 @@ class Instance:
         )
         logger.info(f"Searching for agents with query: {query}")
         self.multiplexer.put(search_envelope)
-        wait_for_condition(lambda: not self.multiplexer.in_queue.empty(), timeout=20)
 
         # check for search results
-        envelope = self.multiplexer.get()
+        envelope = self.get()
         assert envelope
         message = cast(OefSearchMessage, envelope.message)
         receiving_dialogue = self.oef_search_dialogues.update(message)
         assert sending_dialogue == receiving_dialogue
         return message
+
+    def get(self):
+        """Get an instance."""
+        wait_for_condition(lambda: not self.multiplexer.in_queue.empty(), timeout=20)
+        return self.multiplexer.get()
+
+    def generic_command(self, command: str, parameters: Optional[dict] = None) -> None:
+        """Register personality pieces."""
+        service_instance = {"command": command}
+
+        if parameters:
+            service_instance["parameters"] = urlencode(parameters)
+
+        service_description = Description(
+            service_instance, data_model=models.AGENT_GENERIC_COMMAND_MODEL
+        )
+        message, _ = self.oef_search_dialogues.create(
+            counterparty=SOEFConnection.connection_id.latest,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=service_description,
+        )
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            protocol_id=message.protocol_id,
+            message=message,
+        )
+        logger.info(f"Send generic command {command} {parameters}")
+        self.multiplexer.put(envelope)
 
 
 class TestRealNetwork:
@@ -206,7 +236,6 @@ class TestRealNetwork:
     @pytest.mark.integration
     def test_search_no_filters(self):
         """Perform tests over real networ with no filters."""
-
         agent_location = Location(*self.LOCATION)
         agent = Instance(agent_location)
         agent2 = Instance(agent_location)
@@ -328,3 +357,84 @@ class TestRealNetwork:
 
         finally:
             agent.stop()
+
+    @pytest.mark.integration
+    def test_generic_command(self):
+        """Test generic command."""
+        agent_location = Location(*self.LOCATION)
+        agent = Instance(agent_location)
+        agent.start()
+
+        try:
+            agent.generic_command("set_service_key", {"key": "test", "value": "test"})
+            envelope = agent.get()
+            assert (
+                envelope.message.performative == OefSearchMessage.Performative.SUCCESS
+            )
+            ET.fromstring(envelope.message.agents_info.body["response"]["content"])
+
+            agent.generic_command("bad_command")
+            envelope = agent.get()
+            assert (
+                envelope.message.performative == OefSearchMessage.Performative.OEF_ERROR
+            )
+
+        finally:
+            agent.stop()
+
+    @pytest.mark.integration
+    def test_generic_command_set_declared_name(self):
+        """Test generic command."""
+        agent_location = Location(*self.LOCATION)
+        agent1 = Instance(agent_location)
+        agent1.start()
+        agent2 = Instance(agent_location)
+        agent2.start()
+
+        declared_name = "new_declared_name"
+        try:
+            # send generic command."""
+            service_description = Description(
+                {
+                    "command": "set_declared_name",
+                    "parameters": urllib.parse.urlencode({"name": declared_name}),
+                },
+                data_model=models.AGENT_GENERIC_COMMAND_MODEL,
+            )
+            message, _ = agent1.oef_search_dialogues.create(
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+                service_description=service_description,
+                counterparty=SOEFConnection.connection_id.latest,
+            )
+
+            envelope = Envelope(
+                to=message.to,
+                sender=message.sender,
+                protocol_id=message.protocol_id,
+                message=message,
+            )
+            agent1.multiplexer.put(envelope)
+
+            envelope = agent1.get()
+            assert (
+                envelope.message.performative == OefSearchMessage.Performative.SUCCESS
+            )
+
+            radius = 0.1
+            close_to_my_service = Constraint(
+                "location", ConstraintType("distance", (agent_location, radius))
+            )
+            closeness_query = Query(
+                [close_to_my_service], model=models.AGENT_LOCATION_MODEL
+            )
+
+            message = agent2.search(closeness_query)
+            assert message.performative == OefSearchMessage.Performative.SEARCH_RESULT
+            assert len(message.agents) >= 1
+
+            assert agent1.address in message.agents_info.body
+            assert message.agents_info.body[agent1.address]["name"] == declared_name
+
+        finally:
+            agent1.stop()
+            agent2.stop()

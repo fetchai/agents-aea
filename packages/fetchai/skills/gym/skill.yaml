@@ -1,6 +1,6 @@
 name: gym
 author: fetchai
-version: 0.6.0
+version: 0.8.0
 type: skill
 description: The gym skill wraps an RL agent.
 license: Apache-2.0
@@ -8,15 +8,15 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmUpD7PeLHS8nH7HJ48hBafSFhLn8Yrh571RCmxnStpNwq
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
-  dialogues.py: QmdGo2TGJTjRXhGngZPNCBvpNqwv3B581DFmaxEMDyswrd
+  dialogues.py: QmTETCiWFK7vu8PMM9AaY64xHZhHivafmX33n4FXVKSub6
   handlers.py: QmagqBdQaGuGbVS5dFqxFtEww2e1YF2NprBNPtt5pVA2hZ
-  helpers.py: QmaZMcmzZRfR1UCHbiBJejD8ut5XmEBTY4GgtvXA7VY6jV
-  rl_agent.py: QmUq3XY9Dd2XZBhNNK9J3S5937d3az4cwP1BmeieHSgJ3m
+  helpers.py: QmeYUyhPUeR6umfUGwMuE9nH6QCPhwkBpGxRG6P3s1avHu
+  rl_agent.py: QmQMrewAKFZn7EmmHajm1wn1NJHvVUgxosaGR5zapWt13s
   tasks.py: QmVf9K7zCkKYduTnS7nS3d8FvUbEVy7s7a26yaCC8Q3rgd
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/gym:0.5.0
+- fetchai/gym:0.6.0
 skills: []
 behaviours: {}
 handlers:

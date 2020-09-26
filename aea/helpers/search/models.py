@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
 
 from aea.exceptions import enforce
 
+
 logger = logging.getLogger(__name__)
 
 

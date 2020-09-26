@@ -49,9 +49,11 @@ from aea.protocols.generator.common import (
     check_protobuf_using_protoc,
     load_protocol_specification,
     try_run_black_formatting,
+    try_run_isort_formatting,
     try_run_protoc,
 )
 from aea.protocols.generator.extract_specification import extract
+
 
 logger = logging.getLogger(__name__)
 
@@ -1904,6 +1906,7 @@ class ProtocolGenerator:
     def generate_protobuf_only_mode(self) -> None:
         """
         Run the generator in "protobuf only" mode:
+
         a) validate the protocol specification.
         b) create the protocol buffer schema file.
 
@@ -1936,10 +1939,12 @@ class ProtocolGenerator:
     def generate_full_mode(self) -> None:
         """
         Run the generator in "full" mode:
+
         a) validates the protocol specification.
         b) creates the protocol buffer schema file.
         c) generates python modules.
         d) applies black formatting
+        e) applies isort formatting
 
         :return: None
         """
@@ -1989,6 +1994,9 @@ class ProtocolGenerator:
         # Run black formatting
         try_run_black_formatting(self.path_to_generated_protocol_package)
 
+        # Run isort formatting
+        try_run_isort_formatting(self.path_to_generated_protocol_package)
+
         # Warn if specification has custom types
         if len(self.spec.all_custom_types) > 0:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
@@ -1999,10 +2007,12 @@ class ProtocolGenerator:
     def generate(self, protobuf_only: bool = False) -> None:
         """
         Run the generator. If in "full" mode (protobuf_only is False), it:
+
         a) validates the protocol specification.
         b) creates the protocol buffer schema file.
         c) generates python modules.
         d) applies black formatting
+        e) applies isort formatting
 
         If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
 

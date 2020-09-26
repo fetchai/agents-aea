@@ -35,9 +35,7 @@ from aea.configurations.base import (
 from aea.protocols.generator.base import ProtocolGenerator
 
 from tests.conftest import ROOT_DIR
-from tests.data.generator.t_protocol.message import (  # type: ignore
-    TProtocolMessage,
-)
+from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
 from tests.test_protocols.test_generator.common import (
     PATH_TO_T_PROTOCOL,
     PATH_TO_T_PROTOCOL_SPECIFICATION,
@@ -1074,6 +1072,7 @@ class ProtocolGeneratorTestCase(TestCase):
 
     @classmethod
     def setup_class(cls):
+        """Setup class."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)

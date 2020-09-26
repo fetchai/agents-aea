@@ -25,7 +25,6 @@ from concurrent.futures._base import CancelledError
 from contextlib import suppress
 from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
 
-
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
@@ -33,13 +32,8 @@ from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.async_utils import AsyncState, ThreadedAsyncRunner
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger
-from aea.mail.base import (
-    AEAConnectionError,
-    Empty,
-    Envelope,
-    EnvelopeContext,
-    logger as default_logger,
-)
+from aea.mail.base import AEAConnectionError, Empty, Envelope, EnvelopeContext
+from aea.mail.base import logger as default_logger
 from aea.protocols.base import Message
 
 
@@ -81,7 +75,7 @@ class AsyncMultiplexer(WithLogger):
         connections: Optional[Sequence[Connection]] = None,
         default_connection_index: int = 0,
         loop: Optional[AbstractEventLoop] = None,
-        exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.just_log,
+        exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
     ):
         """
         Initialize the connection multiplexer.

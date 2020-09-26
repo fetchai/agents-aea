@@ -1,29 +1,29 @@
 agent_name: erc1155_deployer
 author: fetchai
-version: 0.12.0
+version: 0.14.0
 description: An AEA to deploy and interact with an ERC1155
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.4.0
-- fetchai/p2p_libp2p:0.8.0
-- fetchai/soef:0.8.0
-- fetchai/stub:0.9.0
+- fetchai/ledger:0.6.0
+- fetchai/p2p_libp2p:0.10.0
+- fetchai/soef:0.9.0
+- fetchai/stub:0.10.0
 contracts:
-- fetchai/erc1155:0.9.0
+- fetchai/erc1155:0.10.0
 protocols:
-- fetchai/contract_api:0.3.0
-- fetchai/default:0.5.0
-- fetchai/fipa:0.6.0
-- fetchai/ledger_api:0.3.0
-- fetchai/oef_search:0.6.0
-- fetchai/signing:0.3.0
+- fetchai/contract_api:0.5.0
+- fetchai/default:0.6.0
+- fetchai/fipa:0.7.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
+- fetchai/signing:0.4.0
 skills:
-- fetchai/erc1155_deploy:0.13.0
-- fetchai/error:0.5.0
-default_connection: fetchai/p2p_libp2p:0.8.0
+- fetchai/erc1155_deploy:0.14.0
+- fetchai/error:0.6.0
+default_connection: fetchai/p2p_libp2p:0.10.0
 default_ledger: ethereum
 logging_config:
   disable_existing_loggers: false
@@ -31,6 +31,6 @@ logging_config:
 private_key_paths: {}
 registry_path: ../packages
 default_routing:
-  fetchai/contract_api:0.3.0: fetchai/ledger:0.4.0
-  fetchai/ledger_api:0.3.0: fetchai/ledger:0.4.0
-  fetchai/oef_search:0.6.0: fetchai/soef:0.8.0
+  fetchai/contract_api:0.5.0: fetchai/ledger:0.6.0
+  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
+  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0

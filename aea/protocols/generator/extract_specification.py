@@ -143,7 +143,7 @@ def _specification_type_to_python_type(specification_type: str) -> str:
     return python_type
 
 
-class PythonicProtocolSpecification:
+class PythonicProtocolSpecification:  # pylint: disable=too-few-public-methods
     """This class represents a protocol specification in python."""
 
     def __init__(self) -> None:

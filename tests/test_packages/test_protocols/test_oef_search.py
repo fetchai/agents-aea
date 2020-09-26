@@ -27,12 +27,7 @@ import pytest
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
-from aea.helpers.search.models import (
-    Constraint,
-    ConstraintType,
-    Description,
-    Query,
-)
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -49,6 +44,7 @@ from packages.fetchai.protocols.oef_search.message import (
 )
 
 from tests.conftest import ROOT_DIR
+
 
 sys.path.append(ROOT_DIR)
 
@@ -179,7 +175,15 @@ def test_search_result_serialization():
 
 def test_success_serialization():
     """Test the serialization for 'success' speech-act works."""
-    msg = OefSearchMessage(performative=OefSearchMessage.Performative.SUCCESS,)
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.SUCCESS,
+        agents_info=OefSearchMessage.AgentsInfo(
+            {
+                "key_1": {"key_1": b"value_1", "key_2": b"value_2"},
+                "key_2": {"key_3": b"value_3", "key_4": b"value_4"},
+            }
+        ),
+    )
     msg.to = "receiver"
     envelope = Envelope(
         to=msg.to,

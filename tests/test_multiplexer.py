@@ -38,19 +38,13 @@ from aea.exceptions import AEAEnforceError
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
-from aea.multiplexer import (
-    AsyncMultiplexer,
-    InBox,
-    Multiplexer,
-    OutBox,
-)
+from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
 
 from tests.common.utils import wait_for_condition
-
-from .conftest import (
+from tests.conftest import (
     UNKNOWN_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,
@@ -612,19 +606,19 @@ class TestExceptionHandlingOnConnectionSend:
         """Tear down test case."""
         self.multiplexer.disconnect()
 
-    def test_default_policy(self):
+    def test_log_policy(self):
         """Test just log exception."""
-        assert self.multiplexer._exception_policy == ExceptionPolicyEnum.just_log
-
         with patch.object(self.connection, "send", side_effect=self.exception):
+            self.multiplexer._exception_policy = ExceptionPolicyEnum.just_log
             self.multiplexer.put(self.envelope)
             time.sleep(1)
             assert not self.multiplexer._send_loop_task.done()
 
     def test_propagate_policy(self):
         """Test propagate exception."""
+        assert self.multiplexer._exception_policy == ExceptionPolicyEnum.propagate
+
         with patch.object(self.connection, "send", side_effect=self.exception):
-            self.multiplexer._exception_policy = ExceptionPolicyEnum.propagate
             self.multiplexer.put(self.envelope)
             time.sleep(1)
             wait_for_condition(

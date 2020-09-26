@@ -22,4 +22,5 @@
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
 
+
 GymMessage.serializer = GymSerializer

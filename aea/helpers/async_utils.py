@@ -44,11 +44,14 @@ from typing import (
     Union,
 )
 
+
 try:
     from asyncio import create_task  # pylint: disable=ungrouped-imports,unused-import
 except ImportError:  # pragma: no cover
     # for python3.6!
-    from asyncio import ensure_future as create_task  # type: ignore # noqa: F401 # pylint: disable=ungrouped-imports,unused-import
+    from asyncio import (  # type: ignore # noqa: F401 # pylint: disable=ungrouped-imports,unused-import
+        ensure_future as create_task,
+    )
 
 
 logger = logging.getLogger(__file__)
@@ -378,9 +381,7 @@ class ThreadedAsyncRunner(Thread):
 
 
 class AwaitableProc:
-    """
-    Async-friendly subprocess.Popen
-    """
+    """Async-friendly subprocess.Popen."""
 
     def __init__(self, *args, **kwargs):
         """Initialise awaitable proc."""
@@ -473,6 +474,6 @@ class HandlerItemGetter(ItemGetter):
 
         :param getters: List of tuples of handler and couroutine to be awaiteed for an item.
         """
-        super(HandlerItemGetter, self).__init__(
+        super().__init__(
             [self._make_getter(handler, getter) for handler, getter in getters]
         )

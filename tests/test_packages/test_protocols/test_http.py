@@ -39,6 +39,7 @@ from packages.fetchai.protocols.http.message import logger as http_message_logge
 
 from tests.conftest import ROOT_DIR
 
+
 sys.path.append(ROOT_DIR)
 
 

@@ -44,9 +44,11 @@ class MockRequestsResponse:
 
     @property
     def status_code(self):
+        """Get status code."""
         return 200
 
     def json(self):
+        """Get json."""
         return self._data
 
 
@@ -222,6 +224,7 @@ def test_get_wealth_positive(caplog):
 @mock.patch("requests.get")
 @mock.patch("requests.post")
 def test_successful_faucet_operation(mock_post, mock_get):
+    """Test successful faucet operation."""
     address = "a normal cosmos address would be here"
     mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
 
@@ -258,6 +261,7 @@ def test_successful_faucet_operation(mock_post, mock_get):
 @mock.patch("requests.get")
 @mock.patch("requests.post")
 def test_successful_realistic_faucet_operation(mock_post, mock_get):
+    """Test successful realistic faucet operation."""
     address = "a normal cosmos address would be here"
     mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
 

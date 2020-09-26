@@ -22,9 +22,8 @@
 import os
 from typing import Dict, List
 
-from click import ClickException
-
 import yaml
+from click import ClickException
 
 
 def get_parent_object(obj: Dict, dotted_path: List[str]):
@@ -73,6 +72,7 @@ def load_yaml(filepath: str) -> Dict:
 def is_readme_present(readme_path: str) -> bool:
     """
     Check is readme file present.
+
     This method is needed for proper testing.
 
     :param readme_path: path to readme file.

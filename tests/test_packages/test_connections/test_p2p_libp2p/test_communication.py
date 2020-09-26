@@ -37,6 +37,7 @@ from tests.conftest import (
     libp2p_log_on_failure_all,
 )
 
+
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
 
@@ -56,6 +57,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
 
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect(self):
+        """Test connect then disconnect."""
         assert self.connection.is_connected is False
         try:
             await self.connection.connect()
@@ -113,10 +115,12 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.connection1.is_connected is True
         assert self.connection2.is_connected is True
 
     def test_envelope_routed(self):
+        """Test envelope routed."""
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
 
@@ -148,6 +152,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert envelope.message == msg
 
     def test_envelope_echoed_back(self):
+        """Test envelope echoed back."""
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
 
@@ -237,11 +242,13 @@ class TestP2PLibp2pConnectionRouting:
             raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.connection_genesis.is_connected is True
         for conn in self.connections:
             assert conn.is_connected is True
 
     def test_star_routing_connectivity(self):
+        """Test star routing connectivity."""
         addrs = [conn.node.address for conn in self.connections]
 
         for source in range(len(self.multiplexers)):
@@ -333,11 +340,13 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.relay.is_connected is True
         assert self.connection1.is_connected is True
         assert self.connection2.is_connected is True
 
     def test_envelope_routed(self):
+        """Test envelope routed."""
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
 
@@ -369,6 +378,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert envelope.message == msg
 
     def test_envelope_echoed_back(self):
+        """Test envelope echoed back."""
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
 
@@ -481,12 +491,14 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.connection_relay_1.is_connected is True
         assert self.connection_relay_2.is_connected is True
         for conn in self.connections:
             assert conn.is_connected is True
 
     def test_star_routing_connectivity(self):
+        """Test star routing connectivity."""
         addrs = [conn.node.address for conn in self.connections]
 
         for source in range(len(self.multiplexers)):
@@ -535,6 +547,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
 
 
 def test_libp2pconnection_uri():
+    """Test uri."""
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)
     assert uri.host == "127.0.0.1" and uri.port == 10000

@@ -142,6 +142,10 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
       tox -e black
 
+- To run isort code formatter:
+
+      tox -e isort
+
 - To run bandit security checks:
 
       tox -e bandit

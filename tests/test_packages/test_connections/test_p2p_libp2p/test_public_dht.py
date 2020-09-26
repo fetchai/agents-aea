@@ -41,13 +41,10 @@ from tests.conftest import (
     libp2p_log_on_failure_all,
 )
 
+
 DEFAULT_PORT = 10234
-#PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
-PUBLIC_DHT_MADDRS = ["/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9008/p2p/16Uiu2HAkxwwYLu5L1r9XXfdkKKmBT2NjF6HgndCQ2mB2PYefS2Q4", "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9009/p2p/16Uiu2HAmSFKTyFfuzRHhtb2m4rRdUFLweuonywTqZpuPZkF2aTWW"]
-#PUBLIC_DHT_MADDRS = ["/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9008/p2p/16Uiu2HAkxwwYLu5L1r9XXfdkKKmBT2NjF6HgndCQ2mB2PYefS2Q4"]
-#PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
-PUBLIC_DHT_DELEGATE_URIS = ["agents-p2p-dht.sandbox.fetch-ai.com:11008", "agents-p2p-dht.sandbox.fetch-ai.com:11009"]
-#PUBLIC_DHT_DELEGATE_URIS = ["agents-p2p-dht.sandbox.fetch-ai.com:11008"]
+PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
+PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
 AEA_DEFAULT_LAUNCH_TIMEOUT = 15
 AEA_LIBP2P_LAUNCH_TIMEOUT = 660  # may download up to ~66Mb
 
@@ -67,6 +64,7 @@ class TestLibp2pConnectionPublicDHTRelay:
         cls.log_files = []
 
     def test_connectivity(self):
+        """Test connectivity."""
         for maddr in PUBLIC_DHT_MADDRS:
             connection = _make_libp2p_connection(
                 DEFAULT_PORT + 1, relay=False, entry_peers=[maddr]
@@ -85,6 +83,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 multiplexer.disconnect()
 
     def test_communication_direct(self):
+        """Test communication direct."""
         for maddr in PUBLIC_DHT_MADDRS:
             multiplexers = []
             try:
@@ -139,7 +138,8 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    def skip_test_communication_indirect(self):
+    def test_communication_indirect(self):
+        """Test communication indirect."""
         assert len(PUBLIC_DHT_MADDRS) > 1, "Test requires at least 2 public dht node"
 
         for i in range(len(PUBLIC_DHT_MADDRS)):
@@ -219,6 +219,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
     """Test that public DHT's delegate service is working properly"""
 
     def test_connectivity(self):
+        """Test connectivity."""
         for uri in PUBLIC_DHT_DELEGATE_URIS:
             connection = _make_libp2p_client_connection(uri=uri)
             multiplexer = Multiplexer([connection])
@@ -234,6 +235,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 multiplexer.disconnect()
 
     def test_communication_direct(self):
+        """Test communication direct."""
         for uri in PUBLIC_DHT_DELEGATE_URIS:
             multiplexers = []
             try:
@@ -282,7 +284,8 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    def skip_test_communication_indirect(self):
+    def test_communication_indirect(self):
+        """Test communication indirect."""
         assert (
             len(PUBLIC_DHT_DELEGATE_URIS) > 1
         ), "Test requires at least 2 public dht node"
@@ -352,8 +355,9 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
 
     @libp2p_log_on_failure
     def test_connectivity(self):
-        self.add_item("connection", "fetchai/p2p_libp2p:0.8.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.8.0")
+        """Test connectivity."""
+        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
 
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.set_config(
@@ -397,7 +401,8 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
     def test_connectivity(self):
-        self.add_item("connection", "fetchai/p2p_libp2p_client:0.6.0")
+        """Test connectivity."""
+        self.add_item("connection", "fetchai/p2p_libp2p_client:0.7.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.force_set_config(
             "{}.nodes".format(config_path),

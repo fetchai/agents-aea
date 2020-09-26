@@ -24,13 +24,9 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-
 import web3
 
-from aea.configurations.base import (
-    ComponentType,
-    ContractConfig,
-)
+from aea.configurations.base import ComponentType, ContractConfig
 from aea.configurations.loader import load_component_configuration
 from aea.contracts import contract_registry
 from aea.contracts.base import Contract
@@ -88,6 +84,7 @@ def test_non_implemented_class_methods():
 
 @pytest.fixture()
 def dummy_contract(request):
+    """Dummy contract fixture."""
     directory = Path(ROOT_DIR, "tests", "data", "dummy_contract")
     configuration = load_component_configuration(ComponentType.CONTRACT, directory)
     configuration._directory = directory

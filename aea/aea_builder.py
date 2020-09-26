@@ -42,7 +42,6 @@ from typing import (
 )
 
 import jsonschema
-
 from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
@@ -83,6 +82,7 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
+
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -287,7 +287,7 @@ class AEABuilder:
         DecisionMakerHandler
     ] = DefaultDecisionMakerHandler
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
-    DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.just_log
+    DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
@@ -1365,10 +1365,6 @@ class AEABuilder:
         for configuration in self._package_dependency_manager.get_components_by_type(
             component_type
         ).values():
-            if configuration.is_abstract_component:
-                load_aea_package(configuration)
-                continue
-
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
                 if configuration.component_type != ComponentType.SKILL:
@@ -1382,6 +1378,9 @@ class AEABuilder:
                         configuration.component_id, {}
                     )
                 )
+                if configuration.is_abstract_component:
+                    load_aea_package(configuration)
+                    continue
                 _logger = make_logger(configuration, agent_name)
                 component = load_component_from_config(
                     configuration, logger=_logger, **kwargs

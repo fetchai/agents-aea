@@ -29,6 +29,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
 )
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
+
 DEFAULT_SERVICES_INTERVAL = 30.0
 
 

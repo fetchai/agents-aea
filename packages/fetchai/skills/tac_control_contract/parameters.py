@@ -19,215 +19,63 @@
 
 """This package contains a class representing the game parameters."""
 
-import datetime
-from typing import List, Optional, Set
+from aea.helpers.transaction.base import Terms
 
-from aea.exceptions import AEAEnforceError, enforce
-from aea.skills.base import Model
-
-DEFAULT_MIN_NB_AGENTS = 5
-DEFAULT_MONEY_ENDOWMENT = 200
-DEFAULT_NB_GOODS = 9  # ERC1155 vyper contract only accepts 10 tokens per mint/create
-DEFAULT_NB_CURRENCIES = 1
-DEFAULT_TX_FEE = 1
-DEFAULT_BASE_GOOD_ENDOWMENT = 2
-DEFAULT_LOWER_BOUND_FACTOR = 1
-DEFAULT_UPPER_BOUND_FACTOR = 1
-DEFAULT_START_TIME = "01 01 2020  00:01"
-DEFAULT_REGISTRATION_TIMEOUT = 60
-DEFAULT_ITEM_SETUP_TIMEOUT = 60
-DEFAULT_COMPETITION_TIMEOUT = 300
-DEFAULT_INACTIVITY_TIMEOUT = 30
-DEFAULT_VERSION = "v1"
-DEFAULT_LEDGER_ID = "ethereum"
+from packages.fetchai.skills.tac_control.parameters import Parameters as BaseParameters
 
 
-class Parameters(Model):
+class Parameters(BaseParameters):
     """This class contains the parameters of the game."""
 
     def __init__(self, **kwargs):
-        """Instantiate the search class."""
-
-        self._ledger = kwargs.pop("ledger", DEFAULT_LEDGER_ID)
-        self._contract_address = kwargs.pop(
-            "contract_adress", None
-        )  # type: Optional[str]
-        self._good_ids = kwargs.pop("good_ids", [])  # type: List[int]
-        self._currency_ids = kwargs.pop("currency_ids", [])  # type: List[int]
-        self._min_nb_agents = kwargs.pop(
-            "min_nb_agents", DEFAULT_MIN_NB_AGENTS
-        )  # type: int
-        self._money_endowment = kwargs.pop(
-            "money_endowment", DEFAULT_MONEY_ENDOWMENT
-        )  # type: int
-        self._nb_goods = DEFAULT_NB_GOODS
-        self._nb_currencies = DEFAULT_NB_CURRENCIES
-        self._tx_fee = kwargs.pop("tx_fee", DEFAULT_TX_FEE)
-        self._base_good_endowment = kwargs.pop(
-            "base_good_endowment", DEFAULT_BASE_GOOD_ENDOWMENT
-        )  # type: int
-        self._lower_bound_factor = kwargs.pop(
-            "lower_bound_factor", DEFAULT_LOWER_BOUND_FACTOR
-        )  # type: int
-        self._upper_bound_factor = kwargs.pop(
-            "upper_bound_factor", DEFAULT_UPPER_BOUND_FACTOR
-        )  # type: int
-        start_time = kwargs.pop("start_time", DEFAULT_START_TIME)  # type: str
-        self._start_time = datetime.datetime.strptime(
-            start_time, "%d %m %Y %H:%M"
-        )  # type: datetime.datetime
-        self._registration_timeout = kwargs.pop(
-            "registration_timeout", DEFAULT_REGISTRATION_TIMEOUT
-        )  # type: int
-        self._item_setup_timeout = kwargs.pop(
-            "item_setup_timeout", DEFAULT_ITEM_SETUP_TIMEOUT
-        )  # type: int
-        self._competition_timeout = kwargs.pop(
-            "competition_timeout", DEFAULT_COMPETITION_TIMEOUT
-        )  # type: int
-        self._inactivity_timeout = kwargs.pop(
-            "inactivity_timeout", DEFAULT_INACTIVITY_TIMEOUT
-        )  # type: int
-        self._whitelist = set(kwargs.pop("whitelist", []))  # type: Set[str]
-        self._version_id = kwargs.pop("version_id", DEFAULT_VERSION)  # type: str
+        """Instantiate the parameter class."""
         super().__init__(**kwargs)
-        now = datetime.datetime.now()
-        if now > self.registration_start_time:
-            self.context.logger.warning(
-                "TAC registration start time {} is in the past! Deregistering skill.".format(
-                    self.registration_start_time
-                )
-            )
-            self.context.is_active = False
-        else:
-            self.context.logger.info(
-                "TAC registation start time: {}, and registration end time: {}, and start time: {}, and end time: {}".format(
-                    self.registration_start_time,
-                    self.registration_end_time,
-                    self.start_time,
-                    self.end_time,
-                )
-            )
-        self._check_consistency()
+        self.nb_completed_minting = 0
 
-    @property
-    def ledger(self) -> str:
-        """Get the ledger identifier."""
-        return self._ledger
+    def get_deploy_terms(self) -> Terms:
+        """
+        Get deploy terms of deployment.
 
-    @property
-    def contract_address(self) -> str:
-        """The contract address of an already deployed smart-contract."""
-        if self._contract_address is None:
-            raise AEAEnforceError("No contract address provided.")
-        return self._contract_address
-
-    @property
-    def is_contract_deployed(self) -> bool:
-        """Check if there is a deployed instance of the contract."""
-        return self._contract_address is not None
-
-    @property
-    def good_ids(self) -> List[int]:
-        """The item ids of an already deployed smart-contract."""
-        enforce(self.is_contract_deployed, "There is no deployed contract.")
-        enforce(self._good_ids != [], "No good_ids provided.")
-        return self._good_ids
-
-    @property
-    def currency_ids(self) -> List[int]:
-        """The currency ids of an already deployed smart-contract."""
-        enforce(self.is_contract_deployed, "There is no deployed contract.")
-        enforce(self._currency_ids != [], "No currency_ids provided.")
-        return self._currency_ids
-
-    @property
-    def min_nb_agents(self) -> int:
-        """Minimum number of agents required for a TAC instance."""
-        return self._min_nb_agents
-
-    @property
-    def money_endowment(self) -> int:
-        """Money endowment per agent for a TAC instance."""
-        return self._money_endowment
-
-    @property
-    def nb_goods(self) -> int:
-        """Good number for a TAC instance."""
-        return self._nb_goods
-
-    @property
-    def nb_currencies(self) -> int:
-        """Currency number for a TAC instance."""
-        return self._nb_currencies
-
-    @property
-    def tx_fee(self) -> int:
-        """Transaction fee for a TAC instance."""
-        return self._tx_fee
-
-    @property
-    def base_good_endowment(self) -> int:
-        """Minimum endowment of each agent for each good."""
-        return self._base_good_endowment
-
-    @property
-    def lower_bound_factor(self) -> int:
-        """Lower bound of a uniform distribution."""
-        return self._lower_bound_factor
-
-    @property
-    def upper_bound_factor(self) -> int:
-        """Upper bound of a uniform distribution."""
-        return self._upper_bound_factor
-
-    @property
-    def registration_start_time(self) -> datetime.datetime:
-        """TAC registration start time."""
-        return (
-            self._start_time
-            - datetime.timedelta(seconds=self._item_setup_timeout)
-            - datetime.timedelta(seconds=self._registration_timeout)
+        :return: terms
+        """
+        terms = Terms(
+            ledger_id=self.ledger_id,
+            sender_address=self.context.agent_address,
+            counterparty_address=self.context.agent_address,
+            amount_by_currency_id={},
+            quantities_by_good_id={},
+            nonce="",
         )
+        return terms
 
-    @property
-    def registration_end_time(self) -> datetime.datetime:
-        """TAC registration end time."""
-        return self._start_time - datetime.timedelta(seconds=self._item_setup_timeout)
+    def get_create_token_terms(self) -> Terms:
+        """
+        Get create token terms of deployment.
 
-    @property
-    def start_time(self) -> datetime.datetime:
-        """TAC start time."""
-        return self._start_time
+        :return: terms
+        """
+        terms = Terms(
+            ledger_id=self.ledger_id,
+            sender_address=self.context.agent_address,
+            counterparty_address=self.context.agent_address,
+            amount_by_currency_id={},
+            quantities_by_good_id={},
+            nonce="",
+        )
+        return terms
 
-    @property
-    def end_time(self) -> datetime.datetime:
-        """TAC end time."""
-        return self._start_time + datetime.timedelta(seconds=self._competition_timeout)
+    def get_mint_token_terms(self) -> Terms:
+        """
+        Get mint token terms of deployment.
 
-    @property
-    def inactivity_timeout(self):
-        """Timeout of agent inactivity from controller perspective (no received transactions)."""
-        return self._inactivity_timeout
-
-    @property
-    def whitelist(self) -> Set[str]:
-        """Whitelist of agent addresses allowed into the TAC instance."""
-        return self._whitelist
-
-    @property
-    def version_id(self) -> str:
-        """Version id."""
-        return self._version_id
-
-    def _check_consistency(self) -> None:
-        """Check the parameters are consistent."""
-        if self._contract_address is not None and (
-            self._good_ids == []
-            or self._currency_ids == []
-            or len(self._good_ids) != self._nb_goods
-            or len(self._currency_ids) != self._nb_currencies
-        ):
-            raise ValueError(
-                "If the contract address is set, then good ids and currency id must be provided and consistent."
-            )
+        :return: terms
+        """
+        terms = Terms(
+            ledger_id=self.ledger_id,
+            sender_address=self.context.agent_address,
+            counterparty_address=self.context.agent_address,
+            amount_by_currency_id={},
+            quantities_by_good_id={},
+            nonce="",
+        )
+        return terms

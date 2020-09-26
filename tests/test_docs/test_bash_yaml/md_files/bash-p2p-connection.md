@@ -1,18 +1,18 @@
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
-aea run --connections fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea run --connections fetchai/p2p_libp2p:0.10.0
 ```
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_libp2p:0.8.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.8.0
+aea add connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 ```
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.8.0
+aea run --connections fetchai/p2p_libp2p:0.10.0
 ```
   ``` bash
   svn export https://github.com/fetchai/agents-aea.git/trunk/packages/fetchai/connections/p2p_libp2p
@@ -54,8 +54,8 @@ config:
 ```
 ``` yaml
 default_routing:
-  ? "fetchai/oef_search:0.6.0"
-  : "fetchai/oef:0.9.0"
+  ? "fetchai/oef_search:0.7.0"
+  : "fetchai/oef:0.10.0"
 ```
 ``` yaml
 config:

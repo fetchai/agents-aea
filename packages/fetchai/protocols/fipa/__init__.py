@@ -22,4 +22,5 @@
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
+
 FipaMessage.serializer = FipaSerializer

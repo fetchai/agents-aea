@@ -34,6 +34,7 @@ from tests.conftest import (
     FETCHAI_TESTNET_CONFIG,
 )
 
+
 logger = logging.getLogger(__name__)
 
 

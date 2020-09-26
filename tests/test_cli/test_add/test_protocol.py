@@ -25,11 +25,9 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from jsonschema import ValidationError
-
 import pytest
-
 import yaml
+from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli
@@ -56,7 +54,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = PublicId.from_str("fetchai/gym:0.5.0")
+        cls.protocol_id = PublicId.from_str("fetchai/gym:0.6.0")
         cls.protocol_name = cls.protocol_id.name
         cls.protocol_author = cls.protocol_id.author
         cls.protocol_version = cls.protocol_id.version
@@ -124,7 +122,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = PublicId.from_str("fetchai/gym:0.5.0")
+        cls.protocol_id = PublicId.from_str("fetchai/gym:0.6.0")
         cls.protocol_name = cls.protocol_id.name
         cls.protocol_author = cls.protocol_id.author
         cls.protocol_version = cls.protocol_id.version
@@ -336,7 +334,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.5.0"
+        cls.protocol_id = "fetchai/gym:0.6.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -402,7 +400,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.5.0"
+        cls.protocol_id = "fetchai/gym:0.6.0"
         cls.protocol_name = "gym"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -464,6 +462,19 @@ class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
     def test_add_protocol_from_remote_registry_positive(self):
         """Test add protocol from Registry positive result."""
         self.add_item("protocol", "fetchai/fipa:0.4.0", local=False)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
+        items_folders = os.listdir(items_path)
+        item_name = "fipa"
+        assert item_name in items_folders
+
+
+class TestAddProtocolWithLatestVersion(AEATestCaseEmpty):
+    """Test case for add protocol with latest version."""
+
+    def test_add_protocol_latest_version(self):
+        """Test add protocol with latest version."""
+        self.add_item("protocol", "fetchai/fipa:latest", local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
         items_folders = os.listdir(items_path)

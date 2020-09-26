@@ -44,6 +44,7 @@ from packages.fetchai.protocols.ledger_api.message import (
 
 from tests.conftest import ROOT_DIR
 
+
 sys.path.append(ROOT_DIR)
 
 

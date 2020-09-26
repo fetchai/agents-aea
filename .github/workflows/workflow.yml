@@ -52,6 +52,7 @@ jobs:
       - name: Code style check
         run: |
           tox -e black-check
+          tox -e isort-check
           tox -e flake8
       - name: Unused code check
         run: tox -e vulture

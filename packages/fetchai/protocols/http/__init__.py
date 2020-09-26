@@ -22,4 +22,5 @@
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
+
 HttpMessage.serializer = HttpSerializer

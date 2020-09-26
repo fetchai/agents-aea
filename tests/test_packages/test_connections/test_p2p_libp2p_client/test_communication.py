@@ -39,6 +39,7 @@ from tests.conftest import (
     libp2p_log_on_failure_all,
 )
 
+
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_HOST = "127.0.0.1"
@@ -61,6 +62,7 @@ class TestLibp2pClientConnectionConnectDisconnect:
 
     @pytest.mark.asyncio
     async def test_libp2pclientconnection_connect_disconnect(self):
+        """Test connnect then disconnect."""
         assert self.connection.is_connected is False
         try:
             await self.connection_node.connect()
@@ -116,10 +118,12 @@ class TestLibp2pClientConnectionEchoEnvelope:
             raise
 
     def test_connection_is_established(self):
+        """Test connection is established."""
         assert self.connection_client_1.is_connected is True
         assert self.connection_client_2.is_connected is True
 
     def test_envelope_routed(self):
+        """Test the envelope is routed."""
         addr_1 = self.connection_client_1.address
         addr_2 = self.connection_client_2.address
 
@@ -147,6 +151,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
+        """Test the envelope is echoed back."""
         addr_1 = self.connection_client_1.address
         addr_2 = self.connection_client_2.address
 
@@ -181,6 +186,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
+        """Test the envelope is echoed back."""
         addr_1 = self.connection_client_1.address
         addr_n = self.connection_node.address
 
@@ -285,12 +291,14 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             raise
 
     def test_connection_is_established(self):
+        """Test the connection is established."""
         assert self.connection_node_1.is_connected is True
         assert self.connection_node_2.is_connected is True
         assert self.connection_client_1.is_connected is True
         assert self.connection_client_2.is_connected is True
 
     def test_envelope_routed(self):
+        """Test the envelope is routed."""
         addr_1 = self.connection_client_1.address
         addr_2 = self.connection_client_2.address
 
@@ -318,6 +326,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
+        """Test the envelope is echoed back."""
         addr_1 = self.connection_client_1.address
         addr_2 = self.connection_client_2.address
 
@@ -352,6 +361,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
+        """Test the envelope is echoed back node agent."""
         addr_1 = self.connection_client_1.address
         addr_n = self.connection_node_2.address
 
@@ -457,10 +467,12 @@ class TestLibp2pClientConnectionRouting:
             raise
 
     def test_connection_is_established(self):
+        """Test connection is established."""
         for conn in self.connections:
             assert conn.is_connected is True
 
     def test_star_routing_connectivity(self):
+        """Test routing with star connectivity."""
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -504,6 +516,7 @@ class TestLibp2pClientConnectionRouting:
 
 
 def test_libp2pclientconnection_uri():
+    """Test the uri."""
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)
     assert uri.host == "127.0.0.1" and uri.port == 10000

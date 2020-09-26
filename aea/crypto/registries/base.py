@@ -26,6 +26,7 @@ from typing import Any, Dict, Generic, Optional, Set, Type, TypeVar, Union
 from aea.exceptions import AEAException
 from aea.helpers.base import RegexConstrainedString
 
+
 """A regex to match a Python identifier (i.e. a module/class name)."""
 PY_ID_REGEX = r"[^\d\W]\w*"
 ITEM_ID_REGEX = r"[:/._A-Za-z0-9]+"

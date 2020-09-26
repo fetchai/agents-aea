@@ -35,6 +35,7 @@ from aea.exceptions import AEAException
 from tests.conftest import COSMOS, ETHEREUM, FETCHAI
 from tests.data.custom_crypto import CustomCrypto
 
+
 logger = logging.getLogger(__name__)
 
 forbidden_special_characters = "".join(

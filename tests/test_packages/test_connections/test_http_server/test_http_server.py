@@ -27,9 +27,8 @@ from typing import Tuple, cast
 from unittest.mock import Mock, patch
 
 import aiohttp
-from aiohttp.client_reqrep import ClientResponse
-
 import pytest
+from aiohttp.client_reqrep import ClientResponse
 
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig, PublicId
@@ -54,6 +53,7 @@ from tests.conftest import (
     get_host,
     get_unused_tcp_port,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ class TestHTTPServer:
             ROOT_DIR, "tests", "data", "petstore_sim.yaml"
         )
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.5.0")
+        self.protocol_id = PublicId.from_str("fetchai/http:0.6.0")
 
         self.configuration = ConnectionConfig(
             host=self.host,

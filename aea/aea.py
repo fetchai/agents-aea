@@ -81,7 +81,7 @@ class AEA(Agent, WithLogger):
             DecisionMakerHandler
         ] = DefaultDecisionMakerHandler,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
-        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.just_log,
+        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         default_connection: Optional[PublicId] = None,
@@ -341,7 +341,7 @@ class AEA(Agent, WithLogger):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-        return super(AEA, self).get_message_handlers() + [
+        return super().get_message_handlers() + [
             (self.filter.handle_internal_message, self.filter.get_internal_message,),
         ]
 

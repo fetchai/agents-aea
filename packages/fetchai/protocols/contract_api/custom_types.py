@@ -27,6 +27,7 @@ from aea.helpers.transaction.base import RawMessage as BaseRawMessage
 from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
 from aea.helpers.transaction.base import State as BaseState
 
+
 RawMessage = BaseRawMessage
 RawTransaction = BaseRawTransaction
 State = BaseState
@@ -85,7 +86,9 @@ class Kwargs:
         return kwargs
 
     def __eq__(self, other):
+        """Check equality."""
         return isinstance(other, Kwargs) and self.body == other.body
 
     def __str__(self):
+        """Get string representation."""
         return "Kwargs: body={}".format(self.body)

@@ -39,6 +39,7 @@ from packages.fetchai.skills.aries_alice.strategy import (
     HTTP_COUNTERPARTY,
 )
 
+
 DEFAULT_SERVICES_INTERVAL = 60.0
 
 

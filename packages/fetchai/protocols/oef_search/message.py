@@ -37,6 +37,7 @@ from packages.fetchai.protocols.oef_search.custom_types import (
 )
 from packages.fetchai.protocols.oef_search.custom_types import Query as CustomQuery
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.oef_search.message")
 
 DEFAULT_BODY_SIZE = 4
@@ -45,7 +46,7 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = ProtocolId.from_str("fetchai/oef_search:0.6.0")
+    protocol_id = ProtocolId.from_str("fetchai/oef_search:0.7.0")
 
     AgentsInfo = CustomAgentsInfo
 
@@ -255,7 +256,13 @@ class OefSearchMessage(Message):
                     ),
                 )
             elif self.performative == OefSearchMessage.Performative.SUCCESS:
-                expected_nb_of_contents = 0
+                expected_nb_of_contents = 1
+                enforce(
+                    type(self.agents_info) == CustomAgentsInfo,
+                    "Invalid type for content 'agents_info'. Expected 'AgentsInfo'. Found '{}'.".format(
+                        type(self.agents_info)
+                    ),
+                )
             elif self.performative == OefSearchMessage.Performative.OEF_ERROR:
                 expected_nb_of_contents = 1
                 enforce(

@@ -68,3 +68,18 @@ class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
         items_folders = os.listdir(items_path)
         item_name = "erc1155"
         assert item_name in items_folders
+
+
+class TestAddContractWithLatestVersion(AEATestCaseEmpty):
+    """Test case for add contract with latest version."""
+
+    @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    def test_add_contract_latest_version(self):
+        """Test add contract with latest version."""
+        self.add_item("contract", "fetchai/erc1155:latest", local=True)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
+        items_folders = os.listdir(items_path)
+        item_name = "erc1155"
+        assert item_name in items_folders

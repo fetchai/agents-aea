@@ -33,6 +33,7 @@ from aea.crypto.cosmos import CosmosApi
 from aea.crypto.ethereum import EthereumApi
 from aea.crypto.fetchai import FetchAIApi
 
+
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
@@ -133,6 +134,7 @@ class ERC1155Contract(Contract):
     ) -> Dict[str, Any]:
         """
         Get the transaction to create a single token.
+
         :param ledger_api: the ledger API
         :param contract_address: the address of the contract
         :param deployer_address: the address of the deployer
@@ -752,6 +754,7 @@ class ERC1155Contract(Contract):
     def get_last_code_id(ledger_api: LedgerApi) -> int:
         """
         Uses wasmcli to get ID of latest deployed .wasm bytecode
+
         :param ledger_api: the ledger API
 
         :return: code id of last deployed .wasm bytecode
@@ -765,6 +768,7 @@ class ERC1155Contract(Contract):
     def get_contract_address(ledger_api: LedgerApi, code_id: int) -> str:
         """
         Uses wasmcli to get contract address of latest initialised contract by its ID
+
         :param ledger_api: the ledger API
         :param code_id: the ID of stored contract CosmWasm
 

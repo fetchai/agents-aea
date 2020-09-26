@@ -24,7 +24,6 @@ import tarfile
 from json.decoder import JSONDecodeError
 
 import click
-
 import requests
 
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL

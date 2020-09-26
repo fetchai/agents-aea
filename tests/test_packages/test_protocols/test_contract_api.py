@@ -45,6 +45,7 @@ from packages.fetchai.protocols.contract_api.message import (
 
 from tests.conftest import ROOT_DIR
 
+
 logger = logging.getLogger(__name__)
 sys.path.append(ROOT_DIR)
 

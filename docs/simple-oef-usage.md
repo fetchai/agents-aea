@@ -1,12 +1,12 @@
 You can use the <a href="../simple-oef">SOEF</a> in the agent framework by using the SOEF connection as a package in your agent project.
 
 ## Add the SOEF package
-Check out the <a href="../cli-commands">CLI guide</a> on details how to add a connection. You will want to add the `fetchai/soef:0.8.0` connection package. 
+Check out the <a href="../cli-commands">CLI guide</a> on details how to add a connection. You will want to add the `fetchai/soef:0.9.0` connection package. 
 
 ## Register your agent and its services
 
 ### Register agent location
-To register your agent's location, you have to send a message in the `fetchai/oef_search:0.6.0` protocol to the SOEF connection.
+To register your agent's location, you have to send a message in the `fetchai/oef_search:0.7.0` protocol to the SOEF connection.
 
 First, define a data model for location data:
 ``` python
@@ -155,3 +155,32 @@ message = OefSearchMessage(
 ```
 
 In case of error you will received a message with `OefSearchMessage.Performative.OEF_ERROR`. In case of successful search you will receive a message with performative `OefSearchMessage.Performative.SEARCH_RESULT` and the list of matched agents addresses.
+
+## Generic command
+
+To send a generic command request to the SOEF use the following (here on the example of setting a declared name):
+``` python
+import urllib
+
+AGENT_GENERIC_COMMAND_MODEL = DataModel(
+    "generic_command",
+    [
+        Attribute("command", str, True, "Command name to execute."),
+        Attribute("parameters", str, False, "Url encoded parameters string."),
+    ],
+    "A data model to describe the generic soef command.",
+)
+
+declared_name = "new_declared_name"
+service_description = Description(
+    {
+        "command": "set_declared_name",
+        "parameters": urllib.parse.urlencode({"name": declared_name}),
+    },
+    data_model=AGENT_GENERIC_COMMAND_MODEL,
+)
+message = OefSearchMessage(
+    performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+    service_description=service_description,
+)
+```

@@ -27,6 +27,7 @@ import sqlite3
 import time
 from typing import Dict, Union
 
+
 logger = logging.getLogger(
     "aea.packages.fetchai.skills.weather_station.dummy_weather_station_data"
 )

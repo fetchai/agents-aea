@@ -20,7 +20,6 @@
 
 """This module contains the helpers methods for the controller agent."""
 
-import math
 import random
 from typing import Dict, List, Tuple, cast
 
@@ -28,29 +27,85 @@ import numpy as np
 
 from aea.exceptions import enforce
 
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
+
+
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
-DEFAULT_CURRENCY_ID_TO_NAME = {"0": "FET"}
+FT_NAME = "FT"
+FT_ID = 2
 
 
-def generate_currency_id_to_name() -> Dict[str, str]:
-    """
-    Generate ids for currencies.
-
-    :return: a dictionary mapping currency' ids to names.
-    """
-    return DEFAULT_CURRENCY_ID_TO_NAME
-
-
-def generate_good_id_to_name(nb_goods: int) -> Dict[str, str]:
+def generate_good_ids(nb_goods: int) -> List[int]:
     """
     Generate ids for things.
 
     :param nb_goods: the number of things.
+    :param contract: the instance of the contract
+    """
+    good_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_goods)
+    enforce(
+        len(good_ids) == nb_goods, "Length of good ids and number of goods must match."
+    )
+    return good_ids
+
+
+def generate_currency_ids(nb_currencies: int) -> List[int]:
+    """
+    Generate currency ids.
+
+    :param nb_currencies: the number of currencies.
+    :param contract: the instance of the contract.
+    """
+    currency_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_currencies)
+    enforce(
+        len(currency_ids) == nb_currencies,
+        "Length of currency ids and number of currencies must match.",
+    )
+    return currency_ids
+
+
+def generate_currency_id_to_name(
+    nb_currencies: int, currency_ids: List[int]
+) -> Dict[str, str]:
+    """
+    Generate a dictionary mapping good ids to names.
+
+    :param nb_currencies: the number of currencies.
+    :param currency_ids: the currency ids
+    :return: a dictionary mapping currency's ids to names.
+    """
+    if currency_ids != []:
+        enforce(
+            len(currency_ids) == nb_currencies,
+            "Length of currency_ids does not match nb_currencies.",
+        )
+    else:
+        currency_ids = generate_currency_ids(nb_currencies)
+    currency_id_to_name = {
+        str(currency_id): "{}_{}".format(FT_NAME, currency_id)
+        for currency_id in currency_ids
+    }
+    return currency_id_to_name
+
+
+def generate_good_id_to_name(nb_goods: int, good_ids: List[int]) -> Dict[str, str]:
+    """
+    Generate a dictionary mapping good ids to names.
+
+    :param nb_goods: the number of things.
+    :param good_ids: a list of good ids
     :return: a dictionary mapping goods' ids to names.
     """
-    max_number_of_digits = math.ceil(math.log10(nb_goods))
-    string_format = "tac_good_{:0" + str(max_number_of_digits) + "}"
-    return {str(i + 1): string_format.format(i + 1) for i in range(nb_goods)}
+    if good_ids != []:
+        enforce(
+            len(good_ids) == nb_goods, "Length of good_ids does not match nb_goods."
+        )
+    else:
+        good_ids = generate_good_ids(nb_goods)
+    good_id_to_name = {
+        str(good_id): "{}_{}".format(FT_NAME, good_id) for good_id in good_ids
+    }
+    return good_id_to_name
 
 
 def determine_scaling_factor(money_endowment: int) -> float:

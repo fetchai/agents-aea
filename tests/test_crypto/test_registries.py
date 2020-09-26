@@ -26,6 +26,7 @@ from aea.crypto.cosmos import CosmosApi, CosmosCrypto
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.crypto.registries.base import ItemId, Registry
 
+
 COSMOS = CosmosCrypto.identifier
 
 

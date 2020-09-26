@@ -1,48 +1,67 @@
 name: tac_control_contract
 author: fetchai
-version: 0.7.0
+version: 0.9.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmV6mToyVnQL9squVJntDPrHvtxFk7sfEYJ61Fyoiy9wsE
+  README.md: QmUiw6Dt97mXLzSizbnMNTsfLy3edGXKdYTNR5bke6sFsm
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmcLSggJr1XpiDEwefCGGpfwUp282J4i97ziCNFH7X1M9C
-  game.py: Qmdz91tAYzEFDsvN4hNBawK7D7beTfocps1hpQc3RgavUK
-  handlers.py: QmWyibFRxcunBLqb7FJEkx9RpS6fNZpAvNDkG6cCfK7mQd
-  helpers.py: QmQ36tdx5itzz189tUgmyR74Q63vSRUcPTsg9qEwBUYdNU
-  parameters.py: QmRU9gxsWcxy25g69jbrKve2f8kFxNBjFfRjPZNKsYoYCP
+  behaviours.py: QmSfxtgDawQai52wzoYp58KHEVjXPsFiHQpyv4cYCcBo28
+  dialogues.py: QmWvhTeUnDimhQQTzuSfJJ6d2ViqgBNooCMfRiVzvzApw3
+  game.py: QmQwskD5DBVNv1ouRpqGNLb3zQ5krLUcR6XXHUcJ5EVc8L
+  handlers.py: QmUevEFLkj94XQDPKqkWxRRRZJnY3XQBZFKXDK69xpwabB
+  helpers.py: QmX3iv37Z5CmGupCtikc4muTpJyQ9zvjeLbNKDLF7iPhSZ
+  parameters.py: QmVMNP52fPxkzEbXPhXtQXspnaj2f4ErZNcNdPAqv4cvwq
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.9.0
+- fetchai/erc1155:0.10.0
 protocols:
-- fetchai/oef_search:0.6.0
-- fetchai/tac:0.6.0
-skills: []
+- fetchai/contract_api:0.5.0
+- fetchai/ledger_api:0.4.0
+- fetchai/oef_search:0.7.0
+- fetchai/signing:0.4.0
+- fetchai/tac:0.7.0
+skills:
+- fetchai/tac_control:0.8.0
 behaviours:
-  contract:
-    args:
-      tick_interval: 5
-    class_name: ContractBehaviour
   tac:
     args: {}
-    class_name: TACBehaviour
+    class_name: TacBehaviour
 handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
   oef:
     args: {}
-    class_name: OEFRegistrationHandler
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
   tac:
     args: {}
-    class_name: TACHandler
-  transaction:
-    args: {}
-    class_name: TransactionHandler
+    class_name: TacHandler
 models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   game:
     args: {}
     class_name: Game
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
   parameters:
     args:
       base_good_endowment: 4
@@ -51,17 +70,30 @@ models:
       good_ids: []
       inactivity_timeout: 60
       item_setup_timeout: 120
-      ledger: ethereum
+      ledger_id: ethereum
+      location:
+        latitude: 0.127
+        longitude: 51.5194
       lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
+      nb_currencies: 1
+      nb_goods: 9
+      registration_start_time: 01 01 2020  00:01
       registration_timeout: 60
-      start_time: 09 03 2020 15:15
+      service_data:
+        key: tac
+        value: v1
       tx_fee: 1
       upper_bound_factor: 1
-      version_id: v1
       whitelist: []
     class_name: Parameters
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  tac_dialogues:
+    args: {}
+    class_name: TacDialogues
 dependencies:
   numpy: {}
   vyper:
