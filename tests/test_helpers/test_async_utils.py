@@ -263,6 +263,17 @@ class TestRunnable:
         with pytest.raises(ValueError,):
             RunAndExit(loop=asyncio.get_event_loop(), threaded=True)
 
+    def test_task_cancel_not_set(self):
+        """Test task cancel."""
+
+        class TestRun(Runnable):
+            async def run(self):
+                while True:
+                    await asyncio.sleep(1)
+
+        run = TestRun()
+        run._task_cancel()
+
     @pytest.mark.asyncio
     async def test_runnable_async(self):
         """Test runnable async methods."""

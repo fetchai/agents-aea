@@ -114,6 +114,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self.set_loop(asyncio.get_event_loop())
         try:
             await self.connect()
+
             if not self._recv_loop_task or not self._send_loop_task:
                 raise ValueError("Multiplexer is not connected properly.")
 

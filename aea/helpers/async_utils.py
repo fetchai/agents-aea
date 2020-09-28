@@ -530,7 +530,7 @@ class Runnable(ABC):
 
     async def _run_wrapper(self) -> None:
         """Wrap run() method."""
-        if not self._completed_event:
+        if not self._completed_event:  # pragma: nocover
             raise ValueError("Start was not called!")
 
         try:
@@ -540,7 +540,7 @@ class Runnable(ABC):
             self._loop.call_soon_threadsafe(self._completed_event.set)
 
     @property
-    def is_running(self) -> bool:
+    def is_running(self) -> bool:  # pragma: nocover
         """Get running state."""
         return self._is_running
 
@@ -576,7 +576,7 @@ class Runnable(ABC):
 
     def _wait_sync(self, timeout: Optional[float] = None) -> None:
         """Wait task completed in sync manner."""
-        if self._task is None:
+        if self._task is None:  # pragma: nocover
             raise ValueError("task is not set!")
 
         if self._threaded or self._loop.is_running():

@@ -80,7 +80,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
 
         self._agent: AbstractAgent = agent
         self._tasks: List[asyncio.Task] = []
-        self._state: AsyncState = AsyncState()
+        self._state: AsyncState = AsyncState(AgentLoopStates.initial)
         self._exceptions: List[Exception] = []
 
     @property

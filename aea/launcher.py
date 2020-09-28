@@ -90,7 +90,7 @@ def _run_agent(
     import select  # pylint: disable=import-outside-toplevel
     import selectors  # pylint: disable=import-outside-toplevel
 
-    if hasattr(select, "kqueue"):
+    if hasattr(select, "kqueue"):  # pragma: nocover  # cause platform specific
         selector = selectors.SelectSelector()
         loop = asyncio.SelectorEventLoop(selector)  # type: ignore
         asyncio.set_event_loop(loop)

@@ -208,6 +208,20 @@ class TestAsyncAgentLoop:
         agent_loop.wait_completed(sync=True)
         assert not agent_loop.is_running, agent_loop.state
 
+    def test_set_loop(self):
+        """Test set loop."""
+        agent_loop = self.AGENT_LOOP_CLASS(self.FAKE_AGENT_CLASS())
+
+        loop = asyncio.new_event_loop()
+        agent_loop.set_loop(loop=loop)
+        assert agent_loop._loop == loop
+
+    def test_state_property(self):
+        """Test state property."""
+        agent_loop = self.AGENT_LOOP_CLASS(self.FAKE_AGENT_CLASS())
+
+        assert agent_loop.state == AgentLoopStates.initial
+
     def test_handle_envelope(self):
         """Test one envelope handling."""
         handler = CountHandler.make()
