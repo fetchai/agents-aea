@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of AEA agents manager."""
 import asyncio
 import copy
@@ -24,38 +25,15 @@ import threading
 from asyncio.tasks import FIRST_COMPLETED
 from shutil import rmtree
 from threading import Thread
-from typing import Callable, Dict, List, Optional, Set
+from typing import Callable, Dict, List, Optional
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.cli.registry.fetch import fetch_agent
-from aea.cli.utils.context import Context
 from aea.configurations.base import ComponentId, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.project import Project
 from aea.crypto.helpers import create_private_key
 from aea.helpers.base import yaml_load_all
-
-
-class Project:
-    """Agent project representation."""
-
-    def __init__(self, public_id: PublicId, path: str):
-        """Init project with public_id and project's path."""
-        self.public_id = public_id
-        self.path = path
-        self.agents: Set[str] = set()
-
-    @classmethod
-    def load(cls, working_dir, public_id) -> "Project":
-        """Load project with given pubblic_id to working_dir."""
-        ctx = Context(cwd=working_dir)
-        path = os.path.join(working_dir, public_id.author, public_id.name)
-        fetch_agent(ctx, public_id, dir=os.path.join(public_id.author, public_id.name))
-        return cls(public_id, path)
-
-    def remove(self):
-        """Remove project, do cleanup."""
-        rmtree(self.path)
 
 
 class AgentAlias:
@@ -116,7 +94,7 @@ class AsyncTask:
             self.caller_loop.call_soon_threadsafe(self._done_future.set_result, None)
         except asyncio.CancelledError:
             self.caller_loop.call_soon_threadsafe(self._done_future.set_result, None)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             self.caller_loop.call_soon_threadsafe(self._done_future.set_exception, e)
 
     async def run(self) -> None:
@@ -232,21 +210,20 @@ class Manager:
                 else:
                     await task
 
-    def start_manager(self) -> None:
+    def start_manager(self) -> "Manager":
         """Start manager."""
         self._ensure_working_dir()
         self._started_event.clear()
         self._is_running = True
         self._thread.start()
         self._started_event.wait(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+        return self
 
-    def stop_manager(self, cleanup: bool = False) -> None:
+    def stop_manager(self) -> "Manager":
         """
         Stop manager.
 
         Stops all running agents and stop agent.
-
-        :param cleanup: remove agents_dir and purge in memory registry.
 
         :return: None
         """
@@ -260,14 +237,16 @@ class Manager:
         self._is_running = False
         self._loop.call_soon_threadsafe(self._event.set)
         self._thread.join(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+        return self
 
-    def add_project(self, public_id: PublicId) -> None:
+    def add_project(self, public_id: PublicId) -> "Manager":
         """Fetch agent project and all dependencies to working_dir."""
         if public_id in self._projects:
             raise ValueError(f"Project {public_id} was already added!")
         self._projects[public_id] = Project.load(self.working_dir, public_id)
+        return self
 
-    def remove_project(self, public_id: PublicId) -> None:
+    def remove_project(self, public_id: PublicId) -> "Manager":
         """Remove agent project."""
         if public_id not in self._projects:
             raise ValueError(f"Project {public_id} was not added!")
@@ -278,6 +257,7 @@ class Manager:
             )
 
         self._projects.pop(public_id).remove()
+        return self
 
     def list_projects(self) -> List[PublicId]:
         """
@@ -293,7 +273,7 @@ class Manager:
         agent_name: str,
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
-    ) -> None:
+    ) -> "Manager":
         """
         Create new agent configuration based on project with config overrides applied.
 
@@ -304,7 +284,7 @@ class Manager:
         :param agent_overrides: overrides for agent config.
         :param component_overrides: overrides for component section.
 
-        :return: None
+        :return: manager
         """
         if agent_name in self._agents:
             raise ValueError(f"Agent with name {agent_name} already exists!")
@@ -320,6 +300,7 @@ class Manager:
             component_overrides=component_overrides,
         )
         self._agents[agent_name] = agent_alias
+        return self
 
     def list_agents(self, running_only: bool = False) -> List[str]:
         """
@@ -333,7 +314,7 @@ class Manager:
             return list(self._agents_tasks.keys())
         return list(self._agents.keys())
 
-    def remove_agent(self, agent_name: str) -> None:
+    def remove_agent(self, agent_name: str) -> "Manager":
         """
         Remove agent alias definition from registry.
 
@@ -349,8 +330,9 @@ class Manager:
 
         agent_alias = self._agents.pop(agent_name)
         agent_alias.remove()
+        return self
 
-    def start_agent(self, agent_name: str) -> None:
+    def start_agent(self, agent_name: str) -> "Manager":
         """
         Start selected agent.
 
@@ -375,6 +357,7 @@ class Manager:
         task.start()
         self._agents_tasks[agent_name] = task
         self._loop.call_soon_threadsafe(self._event.set)
+        return self
 
     def _is_agent_running(self, agent_name):
         if agent_name not in self._agents_tasks:
@@ -386,7 +369,7 @@ class Manager:
         del self._agents_tasks[agent_name]
         return False
 
-    def start_all_agents(self) -> None:
+    def start_all_agents(self) -> "Manager":
         """
         Start all not started agents.
 
@@ -397,7 +380,9 @@ class Manager:
                 continue
             self.start_agent(agent_name)
 
-    def stop_agent(self, agent_name: str) -> None:
+        return self
+
+    def stop_agent(self, agent_name: str) -> "Manager":
         """
         Stop running agent.
 
@@ -410,13 +395,15 @@ class Manager:
         if self._thread.ident == threading.get_ident():
             # In same thread do not perform blocking operations!
             self._agents_tasks[agent_name].stop()
-            return
+            return self
         event = threading.Event()
         self._agents_tasks[agent_name].wait().add_done_callback(lambda x: event.set())
         self._agents_tasks[agent_name].stop()
         event.wait(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
-    def stop_all_agents(self) -> None:
+        return self
+
+    def stop_all_agents(self) -> "Manager":
         """
         Stop all agents running.
 
@@ -425,7 +412,9 @@ class Manager:
         for agent_name in self.list_agents(running_only=True):
             self.stop_agent(agent_name)
 
-    def stop_agents(self, agent_names: List[str]) -> None:
+        return self
+
+    def stop_agents(self, agent_names: List[str]) -> "Manager":
         """
         Stop specified agents.
 
@@ -438,7 +427,9 @@ class Manager:
         for agent_name in agent_names:
             self.stop_agent(agent_name)
 
-    def start_agents(self, agent_names: List[str]) -> None:
+        return self
+
+    def start_agents(self, agent_names: List[str]) -> "Manager":
         """
         Stop specified agents.
 
@@ -447,9 +438,11 @@ class Manager:
         for agent_name in agent_names:
             self.start_agent(agent_name)
 
-    def get_agent_details(self, agent_name: str) -> AgentAlias:
+        return self
+
+    def get_agent_alias(self, agent_name: str) -> AgentAlias:
         """
-        Return details about agent definition.
+        Return details about agent alias definition.
 
         :return: AgentAlias
         """
@@ -491,7 +484,8 @@ class Manager:
         agent = builder.build()
         return AgentAlias(project, agent_name, json_config, agent)
 
-    def _update_dict(self, base: dict, override: dict) -> dict:
+    @staticmethod
+    def _update_dict(base: dict, override: dict) -> dict:
         """Apply overrides for dict."""
         base = copy.deepcopy(base)
         base.update(override)

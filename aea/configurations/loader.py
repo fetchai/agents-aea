@@ -229,10 +229,19 @@ class ConfigLoader(Generic[T]):
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
         return configuration_obj
 
-    def _load_agent_config_from_json(self, configuration_file_jsons) -> AgentConfig:
-        if len(configuration_file_jsons) == 0:
+    def load_agent_config_from_json(
+        self, configuration_json: List[Dict]
+    ) -> AgentConfig:
+        """
+        Load agent configuration from configuration json data.
+
+        :param configuration_json: list of dicts with aea configuration
+
+        :return: AgentConfig instance
+        """
+        if len(configuration_json) == 0:
             raise ValueError("Agent configuration file was empty.")
-        agent_config_json = configuration_file_jsons[0]
+        agent_config_json = configuration_json[0]
         self._validate(agent_config_json)
         key_order = list(agent_config_json.keys())
         agent_configuration_obj = cast(
@@ -244,7 +253,7 @@ class ConfigLoader(Generic[T]):
 
         component_configurations: Dict[ComponentId, Dict] = {}
         # load the other components.
-        for i, component_configuration_json in enumerate(configuration_file_jsons[1:]):
+        for i, component_configuration_json in enumerate(configuration_json[1:]):
             component_id, component_config = self._process_component_section(
                 i, component_configuration_json
             )
@@ -260,7 +269,7 @@ class ConfigLoader(Generic[T]):
     def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
         """Load an agent configuration."""
         configuration_file_jsons = yaml_load_all(file_pointer)
-        return self._load_agent_config_from_json(configuration_file_jsons)
+        return self.load_agent_config_from_json(configuration_file_jsons)
 
     def _dump_agent_config(
         self, configuration: AgentConfig, file_pointer: TextIO

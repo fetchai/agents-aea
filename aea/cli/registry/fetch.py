@@ -16,12 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-from aea.helpers.base import cd
-import shutil
-
 """Methods for CLI fetch functionality."""
 
 import os
+import shutil
 from typing import Optional
 
 import click
@@ -39,7 +37,7 @@ def fetch_agent(
     ctx: Context,
     public_id: PublicId,
     alias: Optional[str] = None,
-    dir: Optional[str] = None,
+    target_dir: Optional[str] = None,
 ) -> None:
     """
     Fetch Agent from Registry.
@@ -57,14 +55,13 @@ def fetch_agent(
 
     filepath = download_file(file_url, ctx.cwd)
 
-    folder_name = dir or (name if alias is None else alias)
+    folder_name = target_dir or (name if alias is None else alias)
     aea_folder = os.path.join(ctx.cwd, folder_name)
-    print(aea_folder)
     ctx.clean_paths.append(aea_folder)
 
     extract(filepath, ctx.cwd)
 
-    if alias or dir:
+    if alias or target_dir:
         shutil.move(
             os.path.join(ctx.cwd, name), aea_folder,
         )
