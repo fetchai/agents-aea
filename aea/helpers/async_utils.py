@@ -486,7 +486,7 @@ class Runnable(ABC):
         """
         if loop and threaded:
             raise ValueError(
-                "You can not set a loop in threaded mode, cause own loop will be created"
+                "You can not set a loop in threaded mode. A separate loop will be created in each thread."
             )
         self._loop = loop
         self._threaded = threaded
