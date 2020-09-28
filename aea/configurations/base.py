@@ -753,7 +753,6 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
-    configurable_fields: Set[str] = set()
 
     def __init__(
         self,
@@ -930,7 +929,6 @@ class ConnectionConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
-    configurable_fields = {"config"}
 
     def __init__(
         self,
@@ -1166,7 +1164,6 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
-    configurable_fields = {"handlers", "behaviours", "models", "is_abstract"}
 
     def __init__(
         self,
@@ -1518,16 +1515,7 @@ class AgentConfig(PackageConfiguration):
 
     def component_configurations_json(self) -> List[OrderedDict]:
         """Get the component configurations in JSON format."""
-        return [
-            OrderedDict(
-                name=component_id.name,
-                author=component_id.author,
-                version=component_id.version,
-                type=component_id.component_type.value,
-                **obj,
-            )
-            for component_id, obj in self.component_configurations.items()
-        ]
+        return list(map(OrderedDict, self.component_configurations.values()))
 
     @property
     def json(self) -> Dict:

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Schema for the configurable part of a skill configuration in the agent configuration file.",
+  "description": "Schema for the configurable part of a connection configuration in the agent configuration file.",
   "additionalProperties": false,
   "required": [
     "name",
@@ -21,17 +21,8 @@
     "type": {
       "$ref": "definitions.json#/definitions/component_type"
     },
-    "handlers": {
-      "$ref": "skill-config_schema.json#/definitions/handlers"
-    },
-    "behaviours": {
-      "$ref": "skill-config_schema.json#/definitions/behaviours"
-    },
-    "models": {
-      "$ref": "skill-config_schema.json#/definitions/models"
-    },
-    "is_abstract": {
-      "$ref": "skill-config_schema.json#/properties/is_abstract"
+    "config": {
+      "type": "object"
     }
   }
 }
