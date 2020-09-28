@@ -92,12 +92,12 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """Set event loop and all event loopp related objects."""
         self._loop: AbstractEventLoop = loop
 
-    def setup(self) -> None:  # pylint: disable=no-self-use
+    def _setup(self) -> None:  # pylint: disable=no-self-use
         """Set up loop before started."""
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.start()
 
-    def teardown(self):  # pylint: disable=no-self-use
+    def _teardown(self):  # pylint: disable=no-self-use
         """Tear down loop on stop."""
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.stop()
@@ -106,7 +106,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """Run agent loop."""
         self.logger.debug("agent loop started")
         self._state.set(AgentLoopStates.starting)
-        self.setup()
+        self._setup()
         self._set_tasks()
         try:
             await self._gather_tasks()
@@ -117,7 +117,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
 
     async def _stop(self) -> None:
         """Stop and cleanup."""
-        self.teardown()
+        self._teardown()
         self._stop_tasks()
         for t in self._tasks:
             with suppress(BaseException):

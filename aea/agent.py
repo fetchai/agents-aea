@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of a generic agent."""
 import datetime
 import logging
@@ -24,6 +25,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from aea.abstract_agent import AbstractAgent
 from aea.connections.base import Connection
+from aea.exceptions import AEAException
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import InBox, OutBox
@@ -196,7 +198,7 @@ class Agent(AbstractAgent):
         if was_started:
             self.runtime.wait_completed(sync=True)
         else:
-            raise ValueError("Failed to start runtime! Was it already started?")
+            raise AEAException("Failed to start runtime! Was it already started?")
 
     def stop(self) -> None:
         """

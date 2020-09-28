@@ -320,7 +320,7 @@ class TestRunnable:
 
     @pytest.mark.asyncio
     async def test_run_in_thread(self):
-        """Test runnable async methods."""
+        """Test runnable in thread mode."""
         # for pydocstyle
         class TestRun(Runnable):
             async def run(self):

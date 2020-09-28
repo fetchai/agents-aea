@@ -465,9 +465,17 @@ ready_future.set_result(None)
 
 
 class Runnable(ABC):
-    """Abstract Runnable class."""
+    """
+    Abstract Runnable class.
 
-    def __init__(self, loop=None, threaded=False) -> None:
+    Use to run async task in same event loop or in dedicated thread.
+    Provides: start, stop sync methods to start and stop task
+    Use wait_completed to await task was completed.
+    """
+
+    def __init__(
+        self, loop: asyncio.AbstractEventLoop = None, threaded: bool = False
+    ) -> None:
         """
         Init runnable.
 
@@ -496,8 +504,9 @@ class Runnable(ABC):
         :return: bool started or not.
         """
         if self._task and not self._task.done():
-            logger.debug("already running")
+            logger.debug(f"{self} already running")
             return False
+
         self._is_running = False
         self._got_result = False
         self._set_loop()
@@ -507,7 +516,7 @@ class Runnable(ABC):
 
         if self._threaded:
             self._thread = Thread(
-                target=self._loop.run_until_complete, args=[self._task]
+                target=self._loop.run_until_complete, args=[self._task]  # type: ignore # loop was set in set_loop
             )
             self._thread.start()
 
@@ -526,11 +535,13 @@ class Runnable(ABC):
 
     def _set_task(self) -> None:
         """Create task."""
+        if not self._loop:  # pragma: nocover
+            raise ValueError("Loop was not set.")
         self._task = self._loop.create_task(self._run_wrapper())
 
     async def _run_wrapper(self) -> None:
         """Wrap run() method."""
-        if not self._completed_event:  # pragma: nocover
+        if not self._completed_event or not self._loop:  # pragma: nocover
             raise ValueError("Start was not called!")
 
         try:
@@ -561,11 +572,10 @@ class Runnable(ABC):
         :return: awaitable if sync is False, otherise None
         """
         if not self._task:
-            logger.warning("Runnable is not no started")
+            logger.warning("Runnable is not started")
             return ready_future
 
         if self._got_result and not force_result:
-            logger.warning("Already got result, skip")
             return ready_future
 
         if sync:
@@ -576,7 +586,7 @@ class Runnable(ABC):
 
     def _wait_sync(self, timeout: Optional[float] = None) -> None:
         """Wait task completed in sync manner."""
-        if self._task is None:  # pragma: nocover
+        if self._task is None or not self._loop:  # pragma: nocover
             raise ValueError("task is not set!")
 
         if self._threaded or self._loop.is_running():
@@ -638,12 +648,12 @@ class Runnable(ABC):
     def stop(self, force: bool = False) -> None:
         """Stop runnable."""
         logger.debug(f"{self} is going to be stopped {self._task}")
-        if not self._task:
-            logger.debug("not running!")
+        if not self._task or not self._loop:
             return
+
         if self._task.done():
-            logger.debug("already completed")
             return
+
         self._loop.call_soon_threadsafe(self._task_cancel, force)
 
     def _task_cancel(self, force: bool = False) -> None:

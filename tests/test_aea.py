@@ -43,7 +43,7 @@ from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
-from aea.runtime import RuntimeStates, StopRuntime
+from aea.runtime import RuntimeStates, _StopRuntime
 from aea.skills.base import Skill, SkillContext
 
 from packages.fetchai.connections.local.connection import LocalNode
@@ -184,9 +184,7 @@ def test_react():
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
             wait_for_condition(lambda: agent.is_running, timeout=20)
-            time.sleep(1)
             agent.outbox.put(envelope)
-            print("111 msg put", flush=True)
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
             handler = agent.resources.get_handler(
@@ -534,7 +532,7 @@ def test_error_handler_is_not_set():
         message=msg,
     )
 
-    with pytest.raises(StopRuntime):
+    with pytest.raises(_StopRuntime):
         agent.handle_envelope(envelope)
 
 
@@ -809,7 +807,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
-        self.aea_tool.aea.runtime.main_loop.teardown()
+        self.aea_tool.aea.runtime.main_loop._teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -848,7 +846,7 @@ class BaseTimeExecutionCase(TestCase):
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
         self.envelope = AeaTool.dummy_envelope()
-        self.aea_tool.aea.runtime.main_loop.setup()
+        self.aea_tool.aea.runtime.main_loop._setup()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""

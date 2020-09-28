@@ -41,12 +41,17 @@ from aea.skills.tasks import TaskManager
 logger = logging.getLogger(__name__)
 
 
-class StopRuntime(Exception):
-    """Exception to stop runtime."""
+class _StopRuntime(Exception):
+    """
+    Exception to stop runtime.
+
+    For internal usage only!
+    Used to perform asyncio call from sync callbacks.
+    """
 
     def __init__(self, reraise: Optional[Exception] = None):
         """
-        Init StopRuntime exception.
+        Init _StopRuntime exception.
 
         :param reraise: exception to reraise.
 
@@ -119,7 +124,7 @@ class BaseRuntime(Runnable):
         return self._task_manager
 
     @property
-    def loop(self) -> AbstractEventLoop:
+    def loop(self) -> Optional[AbstractEventLoop]:
         """Get event loop."""
         return self._loop
 
@@ -250,11 +255,15 @@ class AsyncRuntime(BaseRuntime):
         BaseRuntime.set_loop(self, loop)
 
     async def run(self) -> None:
-        """Start multiplexeor task."""
+        """
+        Start runtime task.
+
+        Starts multiplexer and agent loop.
+        """
         terminal_state = RuntimeStates.error
         try:
             await self.run_runtime()
-        except StopRuntime as e:
+        except _StopRuntime as e:
             self._state.set(RuntimeStates.stopping)
             terminal_state = RuntimeStates.stopped
             if e.reraise:
@@ -271,11 +280,11 @@ class AsyncRuntime(BaseRuntime):
         Stop runtime coroutine.
 
         Stop main loop.
-        Agent teardown.
+        Tear down the agent..
         Disconnect multiplexer.
         """
         self.main_loop.stop()
-        with suppress(StopRuntime):
+        with suppress(_StopRuntime):
             await self.main_loop.wait_completed()
         self._teardown()
 
@@ -291,6 +300,8 @@ class AsyncRuntime(BaseRuntime):
     async def _start_multiplexer(self) -> None:
         """Call multiplexer connect asynchronous way."""
         self.setup_multiplexer()
+        if not self._loop:
+            raise ValueError("no loop is set for runtime.")
         self.multiplexer.set_loop(self._loop)
         self.multiplexer.start()
         await self.multiplexer.wait_completed()

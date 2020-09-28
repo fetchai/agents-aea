@@ -88,7 +88,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
         :param agent_name: the name of the agent that owns the multiplexer, for logging purposes.
         """
-        super().__init__(default_logger)
         self._exception_policy: ExceptionPolicyEnum = exception_policy
         WithLogger.__init__(self, default_logger)
         Runnable.__init__(self, loop=loop, threaded=threaded)
