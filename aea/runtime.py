@@ -299,9 +299,11 @@ class AsyncRuntime(BaseRuntime):
 
     async def _start_multiplexer(self) -> None:
         """Call multiplexer connect asynchronous way."""
-        self.setup_multiplexer()
-        if not self._loop:
+        if not self._loop:  # pragma: nocover
             raise ValueError("no loop is set for runtime.")
+
+        self.setup_multiplexer()
+
         self.multiplexer.set_loop(self._loop)
         self.multiplexer.start()
         await self.multiplexer.wait_completed()
