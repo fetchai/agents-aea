@@ -19,8 +19,9 @@
 """This module contains the implementation of AEA agents project configuiration."""
 import os
 from shutil import rmtree
-from typing import Set
+from typing import Dict, List, Set
 
+from aea.aea import AEA
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
@@ -48,3 +49,21 @@ class Project:
     def remove(self) -> None:
         """Remove project, do cleanup."""
         rmtree(self.path)
+
+
+class AgentAlias:
+    """Agent alias representation."""
+
+    def __init__(
+        self, project: Project, agent_name: str, config: List[Dict], agent: AEA
+    ):
+        """Init agent alias with project, config, name, agent."""
+        self.project = project
+        self.config = config
+        self.agent_name = agent_name
+        self.agent = agent
+        self.project.agents.add(self.agent_name)
+
+    def remove_from_project(self):
+        """Remove agent alias from project."""
+        self.project.agents.remove(self.agent_name)

@@ -23,13 +23,13 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.configurations.base import PublicId
-from aea.manager import Manager
+from aea.manager import MultiAgentManager
 
 from tests.common.utils import wait_for_condition
 
 
-class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
-    """Tests for manager in async mode."""
+class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
+    """Tests for MultiAgentManager in async mode."""
 
     MODE = "async"
 
@@ -38,28 +38,28 @@ class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,
     def setup(self):
         """Set test case."""
         self.agent_name = "test_what_ever12"
-        self.working_dir = "manager_dir"
+        self.working_dir = "MultiAgentManager_dir"
         self.project_public_id = PublicId("fetchai", "my_first_aea", "0.11.0")
         self.project_path = os.path.join(
             self.working_dir, self.project_public_id.author, self.project_public_id.name
         )
         assert not os.path.exists(self.working_dir)
-        self.manager = Manager(self.working_dir, mode=self.MODE)
+        self.manager = MultiAgentManager(self.working_dir, mode=self.MODE)
 
     def teardown(self):
         """Tear down test case."""
         self.manager.stop_manager()
 
     def test_workdir_created_removed(self):
-        """Check work dit created removed on manager start and stop."""
+        """Check work dit created removed on MultiAgentManager start and stop."""
         assert not os.path.exists(self.working_dir)
         self.manager.start_manager()
         assert os.path.exists(self.working_dir)
         self.manager.stop_manager()
         assert not os.path.exists(self.working_dir)
 
-    def test_manager_is_running(self):
-        """Check manager is running property reflects state."""
+    def test_MultiAgentManager_is_running(self):
+        """Check MultiAgentManager is running property reflects state."""
         assert not self.manager.is_running
         self.manager.start_manager()
         assert self.manager.is_running
@@ -81,7 +81,7 @@ class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,
         self.manager.remove_project(self.project_public_id)
         assert self.project_public_id not in self.manager.list_projects()
 
-        with pytest.raises(ValueError, match=r"was not added"):
+        with pytest.raises(ValueError, match=r"is not present"):
             self.manager.remove_project(self.project_public_id)
 
         self.manager.add_project(self.project_public_id)
@@ -113,7 +113,7 @@ class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,
             ],
         )
         agent_alias = self.manager.get_agent_alias(self.agent_name)
-        assert agent_alias.name == self.agent_name
+        assert agent_alias.agent_name == self.agent_name
         assert (
             agent_alias.agent.resources.get_behaviour(
                 self.echo_skill_id, "echo"
@@ -150,7 +150,7 @@ class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,
             self.manager.add_agent(PublicId("test", "test", "0.1.0"), "another_agent")
 
     def test_agent_acually_running(self):
-        """Test manager starts agent correctly and agent perform acts."""
+        """Test MultiAgentManager starts agent correctly and agent perform acts."""
         self.test_add_agent()
         agent_alias = self.manager.get_agent_alias(self.agent_name)
         behaviour = agent_alias.agent.resources.get_behaviour(
@@ -178,7 +178,7 @@ class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,
             wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
 
     def test_stop_from_exception_handling(self):
-        """Test stop manager from erro callback."""
+        """Test stop MultiAgentManager from erro callback."""
         self.test_add_agent()
         agent_alias = self.manager.get_agent_alias(self.agent_name)
         behaviour = agent_alias.agent.resources.get_behaviour(
@@ -197,7 +197,7 @@ class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,
             wait_for_condition(lambda: not self.manager.is_running, timeout=10)
 
     def test_start_all(self):
-        """Test manager start all agents."""
+        """Test MultiAgentManager start all agents."""
         self.test_add_agent()
         assert self.agent_name in self.manager.list_agents()
         assert self.agent_name not in self.manager.list_agents(running_only=True)
@@ -249,24 +249,24 @@ class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,
 
     @staticmethod
     def test_invalid_mode():
-        """Test manager fails on invalid mode."""
+        """Test MultiAgentManager fails on invalid mode."""
         with pytest.raises(ValueError, match="Invalid mode"):
-            Manager("test_dir", mode="invalid_mode")
+            MultiAgentManager("test_dir", mode="invalid_mode")
 
     def test_double_start(self):
-        """Test double manager start."""
+        """Test double MultiAgentManager start."""
         self.manager.start_manager()
         self.manager.start_manager()
 
     def test_double_stop(self):
-        """Test double manager stop."""
+        """Test double MultiAgentManager stop."""
         self.manager.start_manager()
         self.manager.stop_manager()
         self.manager.stop_manager()
 
     @pytest.mark.asyncio
     async def test_run_loop_direct_call(self):
-        """Test do not allow to run manager_loop directly."""
+        """Test do not allow to run MultiAgentManager_loop directly."""
         with pytest.raises(
             ValueError, match="Do not use this method directly, use start_manager"
         ):
@@ -287,7 +287,7 @@ class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,
         assert self.agent_name not in self.manager.list_agents()
 
 
-class TestManagerThreadedMode(TestManagerAsyncMode):
-    """Tests for manager in threaded mode."""
+class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
+    """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"

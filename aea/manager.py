@@ -31,28 +31,12 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ComponentId, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.configurations.project import Project
+from aea.configurations.project import AgentAlias, Project
 from aea.crypto.helpers import create_private_key
 from aea.helpers.base import yaml_load_all
 
 
-class AgentAlias:
-    """Agent alias representation."""
-
-    def __init__(self, project: Project, name: str, config: List[Dict], agent: AEA):
-        """Init agent alias with project, config, name, agent."""
-        self.project = project
-        self.config = config
-        self.name = name
-        self.agent = agent
-        self.project.agents.add(self.name)
-
-    def remove(self):
-        """Remove agent alias from project."""
-        self.project.agents.remove(self.name)
-
-
-class AsyncTask:
+class AgentRunAsyncTask:
     """Async task wrapper for agent."""
 
     def __init__(self, agent: AEA, loop: asyncio.AbstractEventLoop) -> None:
@@ -119,12 +103,12 @@ class AsyncTask:
         return not self.wait().done()
 
 
-class ThreadedTask(AsyncTask):
-    """Threaded task."""
+class AgentRunThreadTask(AgentRunAsyncTask):
+    """Threaded wrapper to run agent."""
 
     def __init__(self, agent: AEA, loop: asyncio.AbstractEventLoop) -> None:
         """Init task with agent and loop."""
-        AsyncTask.__init__(self, agent, loop)
+        AgentRunAsyncTask.__init__(self, agent, loop)
         self._thread: Optional[Thread] = None
 
     def create_run_loop(self) -> None:
@@ -140,12 +124,12 @@ class ThreadedTask(AsyncTask):
         self._thread.start()
 
 
-class Manager:
-    """Abstract agents manager."""
+class MultiAgentManager:
+    """Multi agents manager."""
 
     AGENT_DO_NOT_OVERRIDE_VALUES = ["skills", "connections", "protocols", "contracts"]
     MODES = ["async", "threaded"]
-    DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
+    DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
 
     def __init__(self, working_dir: str, mode: str = "async") -> None:
         """
@@ -159,7 +143,7 @@ class Manager:
         self._projects: Dict[PublicId, Project] = {}
         self._keys_dir = os.path.abspath(os.path.join(self.working_dir, "keys"))
         self._agents: Dict[str, AgentAlias] = {}
-        self._agents_tasks: Dict[str, AsyncTask] = {}
+        self._agents_tasks: Dict[str, AgentRunAsyncTask] = {}
 
         self._thread: Optional[Thread] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
@@ -186,28 +170,30 @@ class Manager:
         self._loop.run_until_complete(self._manager_loop())
 
     async def _manager_loop(self) -> None:
-        """Perform manager stop."""
+        """Await and control running manager."""
         if not self._event:
             raise ValueError("Do not use this method directly, use start_manager.")
 
         self._started_event.set()
 
         while self._is_running:
-            tasks_for_agents = {
+            agents_run_tasks_futures = {
                 task.wait(): agent_name
                 for agent_name, task in self._agents_tasks.items()
             }
-            wait_tasks = list(tasks_for_agents.keys()) + [self._event.wait()]  # type: ignore
+            wait_tasks = list(agents_run_tasks_futures.keys()) + [self._event.wait()]  # type: ignore
             done, _ = await asyncio.wait(wait_tasks, return_when=FIRST_COMPLETED)
 
             if self._event.is_set():
                 self._event.clear()
 
             for task in done:
-                if task not in tasks_for_agents:
+                if task not in agents_run_tasks_futures:
+                    # task not in agents_run_tasks_futures, so it's event_wait, skip it
                     await task
                     continue
-                agent_name = tasks_for_agents[task]
+
+                agent_name = agents_run_tasks_futures[task]
                 self._agents_tasks.pop(agent_name)
                 if task.exception():
                     for callback in self._error_callbacks:
@@ -221,7 +207,7 @@ class Manager:
         """Add error callback to call on error raised."""
         self._error_callbacks.append(error_callback)
 
-    def start_manager(self) -> "Manager":
+    def start_manager(self) -> "MultiAgentManager":
         """Start manager."""
         if self._is_running:
             return self
@@ -231,10 +217,10 @@ class Manager:
         self._is_running = True
         self._thread = Thread(target=self._run_thread, daemon=True)
         self._thread.start()
-        self._started_event.wait(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+        self._started_event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
         return self
 
-    def stop_manager(self) -> "Manager":
+    def stop_manager(self) -> "MultiAgentManager":
         """
         Stop manager.
 
@@ -266,7 +252,7 @@ class Manager:
         self._loop.call_soon_threadsafe(self._event.set)
 
         if self._thread.ident != threading.get_ident():
-            self._thread.join(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+            self._thread.join(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
         self._thread = None
         return self
@@ -276,17 +262,17 @@ class Manager:
         if self._was_working_dir_created and os.path.exists(self.working_dir):
             rmtree(self.working_dir)
 
-    def add_project(self, public_id: PublicId) -> "Manager":
+    def add_project(self, public_id: PublicId) -> "MultiAgentManager":
         """Fetch agent project and all dependencies to working_dir."""
         if public_id in self._projects:
             raise ValueError(f"Project {public_id} was already added!")
         self._projects[public_id] = Project.load(self.working_dir, public_id)
         return self
 
-    def remove_project(self, public_id: PublicId) -> "Manager":
+    def remove_project(self, public_id: PublicId) -> "MultiAgentManager":
         """Remove agent project."""
         if public_id not in self._projects:
-            raise ValueError(f"Project {public_id} was not added!")
+            raise ValueError(f"Project {public_id} is not present!")
 
         if self._projects[public_id].agents:
             raise ValueError(
@@ -307,10 +293,10 @@ class Manager:
     def add_agent(
         self,
         public_id: PublicId,
-        agent_name: str,
+        agent_name: Optional[str] = None,
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
-    ) -> "Manager":
+    ) -> "MultiAgentManager":
         """
         Create new agent configuration based on project with config overrides applied.
 
@@ -323,6 +309,8 @@ class Manager:
 
         :return: manager
         """
+        agent_name = agent_name or public_id.name
+
         if agent_name in self._agents:
             raise ValueError(f"Agent with name {agent_name} already exists!")
 
@@ -352,7 +340,7 @@ class Manager:
             return [i for i in self._agents.keys() if self._is_agent_running(i)]
         return list(self._agents.keys())
 
-    def remove_agent(self, agent_name: str) -> "Manager":
+    def remove_agent(self, agent_name: str) -> "MultiAgentManager":
         """
         Remove agent alias definition from registry.
 
@@ -367,10 +355,10 @@ class Manager:
             raise ValueError("Agent is running. stop it first!")
 
         agent_alias = self._agents.pop(agent_name)
-        agent_alias.remove()
+        agent_alias.remove_from_project()
         return self
 
-    def start_agent(self, agent_name: str) -> "Manager":
+    def start_agent(self, agent_name: str) -> "MultiAgentManager":
         """
         Start selected agent.
 
@@ -390,9 +378,9 @@ class Manager:
             raise ValueError(f"{agent_name} is already started!")
 
         if self._mode == "async":
-            task = AsyncTask(agent_alias.agent, self._loop)
+            task = AgentRunAsyncTask(agent_alias.agent, self._loop)
         elif self._mode == "threaded":
-            task = ThreadedTask(agent_alias.agent, self._loop)
+            task = AgentRunThreadTask(agent_alias.agent, self._loop)
 
         task.start()
         self._agents_tasks[agent_name] = task
@@ -407,7 +395,7 @@ class Manager:
         task = self._agents_tasks[agent_name]
         return task.is_running
 
-    def start_all_agents(self) -> "Manager":
+    def start_all_agents(self) -> "MultiAgentManager":
         """
         Start all not started agents.
 
@@ -423,7 +411,7 @@ class Manager:
 
         return self
 
-    def stop_agent(self, agent_name: str) -> "Manager":
+    def stop_agent(self, agent_name: str) -> "MultiAgentManager":
         """
         Stop running agent.
 
@@ -456,11 +444,11 @@ class Manager:
 
         self._loop.call_soon_threadsafe(_add_cb)
         agent_task.stop()
-        event.wait(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+        event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
         return self
 
-    def stop_all_agents(self) -> "Manager":
+    def stop_all_agents(self) -> "MultiAgentManager":
         """
         Stop all agents running.
 
@@ -471,7 +459,7 @@ class Manager:
 
         return self
 
-    def stop_agents(self, agent_names: List[str]) -> "Manager":
+    def stop_agents(self, agent_names: List[str]) -> "MultiAgentManager":
         """
         Stop specified agents.
 
@@ -486,7 +474,7 @@ class Manager:
 
         return self
 
-    def start_agents(self, agent_names: List[str]) -> "Manager":
+    def start_agents(self, agent_names: List[str]) -> "MultiAgentManager":
         """
         Stop specified agents.
 
