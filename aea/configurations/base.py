@@ -1344,7 +1344,9 @@ class SkillConfig(ComponentConfiguration):
                 )
 
             for component_name, component_data in data.get(type_plural, {}).items():
-                component_config = registry.read(component_name)
+                component_config = cast(
+                    SkillComponentConfiguration, registry.read(component_name)
+                )
                 merge_update(component_config.args, component_data.get("args", {}))
 
         _update_skill_component_config("behaviours", data)

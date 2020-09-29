@@ -51,6 +51,11 @@ from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
+_PREFIX_BASE_CONFIGURABLE_PARTS = "base"
+_SCHEMAS_CONFIGURABLE_PARTS_DIRNAME = "configurable_parts"
+_POSTFIX_CUSTOM_CONFIG = "-custom_config.json"
+STARTING_INDEX_CUSTOM_CONFIGS = 1
+
 T = TypeVar(
     "T",
     AgentConfig,
@@ -83,12 +88,12 @@ def _get_path_to_custom_config_schema_from_type(component_type: ComponentType) -
     :param component_type: a component type.
     :return: the path to the JSON schema file.
     """
-    path_prefix: Path = Path(_SCHEMAS_DIR) / "configurable_parts"
+    path_prefix: Path = Path(_SCHEMAS_DIR) / _SCHEMAS_CONFIGURABLE_PARTS_DIRNAME
     if component_type in {ComponentType.SKILL, ComponentType.CONNECTION}:
         filename_prefix = component_type.value
     else:
-        filename_prefix = "base"
-    full_path = path_prefix / (filename_prefix + "-custom_config.json")
+        filename_prefix = _PREFIX_BASE_CONFIGURABLE_PARTS
+    full_path = path_prefix / (filename_prefix + _POSTFIX_CUSTOM_CONFIG)
     return str(full_path)
 
 
@@ -298,7 +303,9 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """
         component_configurations: Dict[ComponentId, Dict] = {}
         # load the other components.
-        for i, component_configuration_json in enumerate(configuration_file_jsons[1:]):
+        for i, component_configuration_json in enumerate(
+            configuration_file_jsons[STARTING_INDEX_CUSTOM_CONFIGS:]
+        ):
             component_id = self._process_component_section(
                 i, component_configuration_json
             )
