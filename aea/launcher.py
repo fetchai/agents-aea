@@ -86,6 +86,15 @@ def _run_agent(
 
     :return: None
     """
+    import asyncio  # pylint: disable=import-outside-toplevel
+    import select  # pylint: disable=import-outside-toplevel
+    import selectors  # pylint: disable=import-outside-toplevel
+
+    if hasattr(select, "kqueue"):  # pragma: nocover  # cause platform specific
+        selector = selectors.SelectSelector()
+        loop = asyncio.SelectorEventLoop(selector)  # type: ignore
+        asyncio.set_event_loop(loop)
+
     _set_logger(log_level=log_level)
 
     agent = load_agent(agent_dir)
@@ -98,7 +107,8 @@ def _run_agent(
                 f"Exception raised in stop_event_thread {e} {type(e)}. Skip it, looks process is closed."
             )
         finally:
-            agent.stop()
+            logger.debug("_run_agent: stop event raised. call agent.stop")
+            agent.runtime.stop()
 
     Thread(target=stop_event_thread, daemon=True).start()
     try:
@@ -111,6 +121,7 @@ def _run_agent(
         exc.__traceback__ = e.__traceback__
         raise exc
     finally:
+        logger.debug("_run_agent: call agent.stop")
         agent.stop()
 
 
@@ -144,7 +155,7 @@ class AEADirTask(AbstractExecutorTask):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(self._agent.runtime.run_runtime())
+        return loop.create_task(self._agent.runtime.start_and_wait_completed())
 
     @property
     def id(self) -> Union[PathLike, str]:

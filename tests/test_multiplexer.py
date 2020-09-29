@@ -20,7 +20,9 @@
 
 import asyncio
 import logging
+import os
 import shutil
+import sys
 import tempfile
 import time
 import unittest.mock
@@ -30,8 +32,10 @@ from unittest import mock
 from unittest.mock import MagicMock, call, patch
 
 import pytest
+from pexpect.exceptions import EOF  # type: ignore
 
 import aea
+from aea.cli.core import cli
 from aea.configurations.base import PublicId
 from aea.connections.base import ConnectionStates
 from aea.exceptions import AEAEnforceError
@@ -40,11 +44,17 @@ from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
+from aea.test_tools.click_testing import CliRunner
 
 from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_PUBLIC_ID,
+)
 
-from tests.common.utils import wait_for_condition
-from tests.conftest import (
+from .conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    ROOT_DIR,
     UNKNOWN_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,
@@ -52,6 +62,8 @@ from tests.conftest import (
     _make_stub_connection,
     logger,
 )
+from tests.common.pexpect_popen import PexpectWrapper
+from tests.common.utils import wait_for_condition
 
 
 @pytest.mark.asyncio
@@ -132,6 +144,18 @@ async def test_connect_twice_a_single_connection():
             "Connection fetchai/dummy:0.1.0 already established."
         )
         await multiplexer._disconnect_one(connection.connection_id)
+
+
+@pytest.mark.asyncio
+async def test_run_bad_conneect():
+    """Test that connecting twice a single connection behaves correctly."""
+    connection = _make_dummy_connection()
+    multiplexer = AsyncMultiplexer([connection])
+    f = asyncio.Future()
+    f.set_result(None)
+    with unittest.mock.patch.object(multiplexer, "connect", return_value=f):
+        with pytest.raises(ValueError, match="Multiplexer is not connected properly."):
+            await multiplexer.run()
 
 
 def test_multiplexer_connect_all_raises_error():
@@ -661,3 +685,82 @@ class TestExceptionHandlingOnConnectionSend:
                 call.disconnect_all(),
                 call.check_and_set_disconnected_state(),
             ]
+
+
+class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defined-outside-init
+    """Test multiplexer disconnects on  agent process keyboard interrupted."""
+
+    def setup(self):
+        """Set the test up."""
+        self.proc = None
+        self.runner = CliRunner()
+        self.agent_name = "myagent"
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(self.t, "packages"))
+        os.chdir(self.t)
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", "--local", self.agent_name]
+        )
+        assert result.exit_code == 0
+
+        os.chdir(Path(self.t, self.agent_name))
+
+    def test_multiplexer_disconnected_on_early_interruption(self):
+        """Test multiplexer disconnected properly on termination before connected."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
+        )
+        assert result.exit_code == 0, result.stdout_bytes
+
+        self.proc = PexpectWrapper(  # nosec
+            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
+            env=os.environ,
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
+        )
+
+        self.proc.expect_all(
+            ["Finished downloading golang dependencies"], timeout=20,
+        )
+        self.proc.control_c()
+        self.proc.expect_all(
+            ["Multiplexer disconnecting...", "Multiplexer disconnected.", EOF],
+            timeout=20,
+        )
+
+    def test_multiplexer_disconnected_on_termination_after_connected(self):
+        """Test multiplexer disconnected properly on termination after connected."""
+        self.proc = PexpectWrapper(  # nosec
+            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
+            env=os.environ,
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
+        )
+
+        self.proc.expect_all(
+            ["Start processing messages..."], timeout=20,
+        )
+        self.proc.control_c()
+        self.proc.expect_all(
+            ["Multiplexer disconnecting...", "Multiplexer disconnected.", EOF],
+            timeout=20,
+        )
+
+    def teardown(self):
+        """Tear the test down."""
+        if self.proc:
+            self.proc.wait_to_complete(10)
+        os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except (OSError, IOError):
+            pass
