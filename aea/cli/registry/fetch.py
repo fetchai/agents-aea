@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Methods for CLI fetch functionality."""
-
 import os
 import shutil
 from typing import Optional
@@ -57,6 +56,7 @@ def fetch_agent(
 
     folder_name = target_dir or (name if alias is None else alias)
     aea_folder = os.path.join(ctx.cwd, folder_name)
+    print(aea_folder)
     ctx.clean_paths.append(aea_folder)
 
     extract(filepath, ctx.cwd)
