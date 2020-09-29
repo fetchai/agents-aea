@@ -52,10 +52,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
         search_behaviour = cast(
             GenericSearchBehaviour, self.skill.skill_context.behaviours.search
         )
-        expected_performative = LedgerApiMessage.Performative.GET_BALANCE
-        expected_counterparty = str(LEDGER_PUBLIC_ID)
-        expected_ledger_id = FETCHAI
-        expected_address = self.skill.skill_context.agent_address
 
         # before
         assert self.get_quantity_in_outbox() == 0
@@ -65,12 +61,16 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # after
         assert self.get_quantity_in_outbox() == 1
-        actual_message = cast(LedgerApiMessage, self.get_message_from_outbox())
-        assert type(actual_message) == LedgerApiMessage
-        assert actual_message.performative == expected_performative
-        assert actual_message.to == expected_counterparty
-        assert actual_message.ledger_id == expected_ledger_id
-        assert actual_message.address == expected_address
+        res_bool, res_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            to=str(LEDGER_PUBLIC_ID),
+            sender=self.skill.skill_context.agent_address,
+            ledger_id=FETCHAI,
+            address=self.skill.skill_context.agent_address,
+        )
+        assert res_bool is True, res_str
 
     def test_search_behaviour_setup_not_is_ledger_tx(self):
         """Test the setup method of the search behaviour where is_ledger_tx is False."""
@@ -98,11 +98,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
         strategy._is_searching = True
-        expected_performative = OefSearchMessage.Performative.SEARCH_SERVICES
-        expected_counterparty = "dummy_search_service_address"
-        expected_query = (
-            self.skill.skill_context.strategy.get_location_and_service_query()
-        )
 
         # before
         assert self.get_quantity_in_outbox() == 0
@@ -112,11 +107,16 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # after
         assert self.get_quantity_in_outbox() == 1
-        actual_message = cast(LedgerApiMessage, self.get_message_from_outbox())
-        assert type(actual_message) == OefSearchMessage
-        assert actual_message.performative == expected_performative
-        assert actual_message.to == expected_counterparty
-        assert actual_message.query == expected_query
+
+        res_bool, res_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            to=self.skill.skill_context.search_service_address,
+            sender=self.skill.skill_context.agent_address,
+            query=self.skill.skill_context.strategy.get_location_and_service_query(),
+        )
+        assert res_bool is True, res_str
 
     def test_search_behaviour_act_not_is_searching(self):
         """Test the act method of the search behaviour where is_searching is False."""
@@ -146,44 +146,37 @@ class TestSkillHandler(BaseSkillTestCase):
         """Test the _handle_unidentified_dialogue method of the fipa handler."""
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
-
-        incoming_message = FipaMessage(
+        incoming_message = self.build_incoming_message(
+            message_type=FipaMessage,
             dialogue_reference=("1", "0"),
-            message_id=1,
-            target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        incoming_message.sender = "counterparty"
-        incoming_message.to = "me"
-
-        expected_performative = DefaultMessage.Performative.ERROR
-        expected_counterparty = incoming_message.sender
-        expected_error_code = DefaultMessage.ErrorCode.INVALID_DIALOGUE
-        expected_error_msg = "Invalid dialogue."
-        expected_error_data = {"fipa_message": incoming_message.encode()}
 
         # before
         assert self.get_quantity_in_outbox() == 0
 
         # operation
-        fipa_handler._handle_unidentified_dialogue(incoming_message)
+        fipa_handler._handle_unidentified_dialogue(cast(FipaMessage, incoming_message))
 
         # after
         assert self.get_quantity_in_outbox() == 1
-        actual_message = cast(DefaultMessage, self.get_message_from_outbox())
-        assert type(actual_message) == DefaultMessage
-        assert actual_message.performative == expected_performative
-        assert actual_message.to == expected_counterparty
-        assert actual_message.error_code == expected_error_code
-        assert actual_message.error_msg == expected_error_msg
-        assert actual_message.error_data == expected_error_data
+        res_bool, res_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=DefaultMessage,
+            performative=DefaultMessage.Performative.ERROR,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
+            error_msg="Invalid dialogue.",
+            error_data={"fipa_message": incoming_message.encode()},
+        )
+        assert res_bool is True, res_str
 
     def test_fipa_handler_handle_propose(self):
         """Test the _handle_propose method of the fipa handler."""
         # ToDo need to mock affordable and acceptable values
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
-
         proposal = Description(
             {
                 "ledger_id": "some_ledger_id",
@@ -194,27 +187,21 @@ class TestSkillHandler(BaseSkillTestCase):
                 "tx_nonce": "some_tx_nonce",
             }
         )
-
-        incoming_message = FipaMessage(
+        incoming_message = self.build_incoming_message(
+            message_type=FipaMessage,
             dialogue_reference=("1", "0"),
             message_id=2,
             target=1,
             performative=FipaMessage.Performative.PROPOSE,
             proposal=proposal,
         )
-        incoming_message.sender = "counterparty"
-        incoming_message.to = "me"
-
-        expected_performative = FipaMessage.Performative.ACCEPT
-        expected_counterparty = incoming_message.sender
-        expected_target = 1
 
         # before
         assert self.get_quantity_in_outbox() == 0
 
         # operation
         fipa_handler._handle_propose(
-            incoming_message,
+            cast(FipaMessage, incoming_message),
             FipaDialogue(
                 DialogueLabel(("1", "1"), "counterparty", "me"),
                 "me",
@@ -224,25 +211,27 @@ class TestSkillHandler(BaseSkillTestCase):
 
         # after
         assert self.get_quantity_in_outbox() == 1
-        actual_message = cast(FipaMessage, self.get_message_from_outbox())
-        assert type(actual_message) == FipaMessage
-        assert actual_message.performative == expected_performative
-        assert actual_message.to == expected_counterparty
-        assert actual_message.target == expected_target
+        res_bool, res_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.ACCEPT,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=1,
+        )
+        assert res_bool is True, res_str
 
     def test_fipa_handler_handle_decline_decline_cfp(self):
         """Test the _handle_decline method of the fipa handler where the end state is decline_cfp."""
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
-
-        incoming_message = FipaMessage(
+        incoming_message = self.build_incoming_message(
+            message_type=FipaMessage,
             dialogue_reference=("1", "1"),
             message_id=2,
             target=1,
             performative=FipaMessage.Performative.DECLINE,
         )
-        incoming_message.sender = "counterparty"
-        incoming_message.to = "me"
         fipa_dialogue = FipaDialogue(
             DialogueLabel(("1", "1"), "counterparty", "me"),
             "me",
@@ -257,7 +246,9 @@ class TestSkillHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        fipa_handler._handle_decline(incoming_message, fipa_dialogue, fipa_dialogues)
+        fipa_handler._handle_decline(
+            cast(FipaMessage, incoming_message), fipa_dialogue, fipa_dialogues
+        )
 
         # after
         for end_state_numbers in fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -276,14 +267,14 @@ class TestSkillHandler(BaseSkillTestCase):
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
 
-        incoming_message = FipaMessage(
+        incoming_message = self.build_incoming_message(
+            message_type=FipaMessage,
             dialogue_reference=("1", "1"),
             message_id=4,
             target=3,
             performative=FipaMessage.Performative.DECLINE,
         )
-        incoming_message.sender = "counterparty"
-        incoming_message.to = "me"
+
         fipa_dialogue = FipaDialogue(
             DialogueLabel(("1", "1"), "counterparty", "me"),
             "me",
@@ -298,7 +289,9 @@ class TestSkillHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        fipa_handler._handle_decline(incoming_message, fipa_dialogue, fipa_dialogues)
+        fipa_handler._handle_decline(
+            cast(FipaMessage, incoming_message), fipa_dialogue, fipa_dialogues
+        )
 
         # after
         for end_state_numbers in fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -314,32 +307,20 @@ class TestSkillHandler(BaseSkillTestCase):
 
     def test_fipa_handler_handle_match_accept(self):
         """Test the _handle_match_accept method of the fipa handler."""
-        # ToDo does not work; fails on dialogues.update(). Investigate why.
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
         strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
         strategy._is_ledger_tx = False
-
-        info = {"address": "some_term_sender_address"}
         counterparty_address = "counterparty"
-        my_address = self.skill.skill_context.agent_address
-        incoming_message = FipaMessage(
-            dialogue_reference=("1", "1"),
-            message_id=2,
-            target=1,
-            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            info=info,
-        )
-        incoming_message.sender = my_address
-        incoming_message.to = my_address
 
         fipa_dialogues = cast(FipaDialogues, self.skill.skill_context.fipa_dialogues)
         _, fipa_dialogue = fipa_dialogues.create(
-            counterparty=my_address,
+            counterparty=counterparty_address,
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("foo", ConstraintType("==", "bar"))], model=None),
         )
-        proposal_msg = FipaMessage(
+        proposal_msg = self.build_incoming_message(
+            message_type=FipaMessage,
             dialogue_reference=(
                 fipa_dialogue.dialogue_label.dialogue_starter_reference,
                 FipaDialogues._generate_dialogue_nonce(),
@@ -358,32 +339,43 @@ class TestSkillHandler(BaseSkillTestCase):
                 }
             ),
         )
-        proposal_msg.sender = counterparty_address
-        proposal_msg.to = my_address
         fipa_dialogue = fipa_dialogues.update(proposal_msg)
         assert fipa_dialogue is not None
         fipa_dialogue.reply(
             performative=FipaMessage.Performative.ACCEPT, target_message=proposal_msg,
         )
+        incoming_message = self.build_incoming_message(
+            message_type=FipaMessage,
+            dialogue_reference=(
+                fipa_dialogue.dialogue_label.dialogue_starter_reference,
+                fipa_dialogue.dialogue_label.dialogue_responder_reference,
+            ),
+            message_id=4,
+            target=3,
+            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            info={"address": "some_term_sender_address"},
+        )
 
-        expected_performative = FipaMessage.Performative.INFORM
-        expected_counterparty = incoming_message.sender
-        expected_target = incoming_message.message_id
-        expected_info = {"Done": "Sending payment via bank transfer"}
+        fipa_dialogue = fipa_dialogues.update(incoming_message)
+        assert fipa_dialogue is not None
 
         # before
         assert self.get_quantity_in_outbox() == 0
 
         # operation
         fipa_handler._handle_match_accept(
-            incoming_message, cast(FipaDialogue, fipa_dialogue)
+            cast(FipaMessage, incoming_message), cast(FipaDialogue, fipa_dialogue)
         )
 
         # after
         assert self.get_quantity_in_outbox() == 1
-        actual_message = cast(FipaMessage, self.get_message_from_outbox())
-        assert type(actual_message) == FipaMessage
-        assert actual_message.performative == expected_performative
-        assert actual_message.to == expected_counterparty
-        assert actual_message.target == expected_target
-        assert actual_message.info == expected_info
+        res_bool, res_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.INFORM,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+            info={"Done": "Sending payment via bank transfer"},
+        )
+        assert res_bool is True, res_str

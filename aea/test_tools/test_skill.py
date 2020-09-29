@@ -19,13 +19,15 @@
 """This module contains test case classes based on pytest for AEA skill testing."""
 
 import asyncio
+import inspect
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Optional, Union, cast
+from typing import Optional, Tuple, Type, Union, cast
 
 from aea.context.base import AgentContext
 from aea.identity.base import Identity
+from aea.mail.base import Address
 from aea.multiplexer import AsyncMultiplexer, Multiplexer, OutBox
 from aea.protocols.base import Message
 from aea.skills.base import Skill
@@ -59,6 +61,88 @@ class BaseSkillTestCase:
             return None
         envelope = self._multiplexer.out_queue.get_nowait()
         return envelope.message
+
+    @staticmethod
+    def message_has_attributes(
+        actual_message: Message, message_type: Type[Message], **kwargs,
+    ) -> Tuple[bool, str]:
+        """
+        Evaluates whether a message's attributes match the expected attributes provided.
+
+        :param actual_message: the actual message
+        :param message_type: the expected message type
+        :param kwargs: other expected message attributes
+
+        :return: boolean result of the evaluation and accompanied message
+        """
+        if type(actual_message) != message_type:
+            return (
+                False,
+                "The message types do not match. Actual type: {}. Expected type: {}".format(
+                    type(actual_message), message_type
+                ),
+            )
+
+        for attribute_name, expected_value in kwargs.items():
+            attribute = getattr(actual_message, attribute_name)
+            if callable(attribute):
+                if attribute != expected_value:
+                    return (
+                        False,
+                        "The '{}' fields do not match. Actual '{}': {}. Expected '{}': {}".format(
+                            attribute_name,
+                            attribute_name,
+                            attribute,
+                            attribute_name,
+                            expected_value,
+                        ),
+                    )
+
+        return True, "The message has the provided expected attributes."
+
+    def build_incoming_message(
+        self,
+        message_type: Type[Message],
+        dialogue_reference: Optional[Tuple[str, str]] = None,
+        message_id: Optional[int] = None,
+        target: Optional[int] = None,
+        performative: Optional[Message.Performative] = None,
+        to: Optional[Address] = None,
+        sender: Address = "counterparty",
+        **kwargs,
+    ) -> Message:
+        """
+        Quickly create an incoming message with the provided attributes.
+
+        For any attribute not provided, the corresponding default value in message is used.
+
+        :param message_type: the type of the message
+        :param dialogue_reference: the dialogue_reference
+        :param message_id: the message_id
+        :param target: the target
+        :param performative: the performative
+        :param to: the 'to' address
+        :param sender: the 'sender' address
+        :param kwargs: other attributes
+
+        :return: the created incoming message
+        """
+        d = dict()
+        for arg_name in inspect.getfullargspec(self.build_incoming_message)[0][1:]:
+            if (
+                arg_name not in {"message_type", "to", "sender"}
+                and locals()[arg_name] is not None
+            ):
+                d[arg_name] = locals()[arg_name]
+        d.update(kwargs)
+
+        incoming_message = message_type(**d)
+        incoming_message.sender = sender
+        incoming_message.to = (
+            self.skill.skill_context.agent_address if to is None else to
+        )
+
+        return incoming_message
 
     @classmethod
     def setup(cls) -> None:
