@@ -18,50 +18,91 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
 import os
-import time
-from contextlib import suppress
-from shutil import rmtree
+from unittest.mock import Mock, patch
 
 import pytest
 
 from aea.configurations.base import PublicId
 from aea.manager import Manager
 
+from tests.common.utils import wait_for_condition
 
-def test_manager():
-    """Perform some tests."""
-    # pydocsyle
-    try:
-        working_dir = "manager_dir"
-        project_public_id = PublicId("fetchai", "my_first_aea", "0.11.0")
-        project_path = os.path.join(
-            working_dir, project_public_id.author, project_public_id.name
+
+class TestManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
+    """Tests for manager in async mode."""
+
+    MODE = "async"
+
+    echo_skill_id = PublicId("fetchai", "echo", "0.7.0")
+
+    def setup(self):
+        """Set test case."""
+        self.agent_name = "test_what_ever12"
+        self.working_dir = "manager_dir"
+        self.project_public_id = PublicId("fetchai", "my_first_aea", "0.11.0")
+        self.project_path = os.path.join(
+            self.working_dir, self.project_public_id.author, self.project_public_id.name
         )
-        assert not os.path.exists(working_dir)
-        manager = Manager(working_dir)
-        manager.start_manager()
-        assert os.path.exists(working_dir)
-        assert manager.is_running
+        assert not os.path.exists(self.working_dir)
+        self.manager = Manager(self.working_dir, mode=self.MODE)
 
-        manager.add_project(project_public_id)
+    def teardown(self):
+        """Tear down test case."""
+        self.manager.stop_manager()
 
-        assert project_public_id in manager.list_projects()
-        assert os.path.exists(project_path)
-        assert manager._projects[project_public_id].path == project_path
+    def test_workdir_created_removed(self):
+        """Check work dit created removed on manager start and stop."""
+        assert not os.path.exists(self.working_dir)
+        self.manager.start_manager()
+        assert os.path.exists(self.working_dir)
+        self.manager.stop_manager()
+        assert not os.path.exists(self.working_dir)
+
+    def test_manager_is_running(self):
+        """Check manager is running property reflects state."""
+        assert not self.manager.is_running
+        self.manager.start_manager()
+        assert self.manager.is_running
+        self.manager.stop_manager()
+        assert not self.manager.is_running
+
+    def test_add_remove_project(self):
+        """Test add and remove project."""
+        self.manager.start_manager()
+
+        self.manager.add_project(self.project_public_id)
+
+        assert self.project_public_id in self.manager.list_projects()
+        assert os.path.exists(self.project_path)
 
         with pytest.raises(ValueError, match=r".*was already added.*"):
-            manager.add_project(project_public_id)
+            self.manager.add_project(self.project_public_id)
 
-        echo_skill_id = PublicId("fetchai", "echo", "0.7.0")
-        new_tick_interval = 1.1111
-        agent_name = "test_what_ever12"
-        manager.add_agent(
-            project_public_id,
-            agent_name,
+        self.manager.remove_project(self.project_public_id)
+        assert self.project_public_id not in self.manager.list_projects()
+
+        with pytest.raises(ValueError, match=r"was not added"):
+            self.manager.remove_project(self.project_public_id)
+
+        self.manager.add_project(self.project_public_id)
+        assert self.project_public_id in self.manager.list_projects()
+        assert os.path.exists(self.project_path)
+
+    def test_add_agent(self):
+        """Test add agent alias."""
+        self.manager.start_manager()
+
+        self.manager.add_project(self.project_public_id)
+
+        new_tick_interval = 0.2111
+
+        self.manager.add_agent(
+            self.project_public_id,
+            self.agent_name,
             component_overrides=[
                 {
                     "type": "skill",
-                    **echo_skill_id.json,
+                    **self.echo_skill_id.json,
                     "behaviours": {
                         "echo": {
                             "args": {"tick_interval": new_tick_interval},
@@ -71,47 +112,182 @@ def test_manager():
                 }
             ],
         )
-        agent_alias = manager.get_agent_details(agent_name)
-        assert agent_alias.name == agent_name
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        assert agent_alias.name == self.agent_name
         assert (
             agent_alias.agent.resources.get_behaviour(
-                echo_skill_id, "echo"
+                self.echo_skill_id, "echo"
             ).tick_interval
             == new_tick_interval
         )
         with pytest.raises(ValueError, match="already exists"):
-            manager.add_agent(
-                project_public_id, agent_name,
+            self.manager.add_agent(
+                self.project_public_id, self.agent_name,
             )
-        assert agent_name in manager.list_agents()
-        manager.start_all_agents()
-        assert agent_name in manager.list_agents(running_only=True)
-        manager.start_all_agents()
 
-        with pytest.raises(ValueError, match="is already started!"):
-            manager.start_agents(manager.list_agents())
-
-        with pytest.raises(ValueError, match="Agent is running. stop it first!"):
-            manager.remove_agent(agent_name)
-
-        time.sleep(2)
-        manager.stop_all_agents()
-
-        manager.remove_agent(agent_name)
-        assert agent_name not in manager.list_agents()
+    def test_remove_agent(self):
+        """Test remove agent alias."""
+        self.test_add_agent()
+        assert self.agent_name in self.manager.list_agents()
+        self.manager.remove_agent(self.agent_name)
+        assert self.agent_name not in self.manager.list_agents()
 
         with pytest.raises(ValueError, match="does not exist!"):
-            manager.remove_agent(agent_name)
-        manager.remove_project(project_public_id)
-        assert project_public_id not in manager._projects
-        assert not os.path.exists(project_path)
-        assert project_public_id not in manager.list_projects()
+            self.manager.remove_agent(self.agent_name)
 
-        with pytest.raises(ValueError, match=r"was not added"):
-            manager.remove_project(project_public_id)
-        manager.stop_manager()
-        assert not os.path.exists(working_dir)
-        assert not manager.is_running
-    finally:
-        with suppress(FileNotFoundError):
-            rmtree(working_dir)
+    def test_remove_project_with_alias(self):
+        """Test remove project with alias presents."""
+        self.test_add_agent()
+
+        with pytest.raises(
+            ValueError, match="Can not remove projects with aliases exists"
+        ):
+            self.manager.remove_project(self.project_public_id)
+
+    def test_add_agent_for_non_exist_project(self):
+        """Test add agent when no project added."""
+        with pytest.raises(ValueError, match=" project is not added"):
+            self.manager.add_agent(PublicId("test", "test", "0.1.0"), "another_agent")
+
+    def test_agent_acually_running(self):
+        """Test manager starts agent correctly and agent perform acts."""
+        self.test_add_agent()
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        behaviour = agent_alias.agent.resources.get_behaviour(
+            self.echo_skill_id, "echo"
+        )
+        assert behaviour
+        with patch.object(behaviour, "act") as act_mock:
+            self.manager.start_all_agents()
+            wait_for_condition(lambda: act_mock.call_count > 0, timeout=10)
+
+    def test_exception_handling(self):
+        """Test erro callback works."""
+        self.test_add_agent()
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        behaviour = agent_alias.agent.resources.get_behaviour(
+            self.echo_skill_id, "echo"
+        )
+        callback_mock = Mock()
+
+        self.manager.add_error_callback(callback_mock)
+        assert behaviour
+
+        with patch.object(behaviour, "act", side_effect=ValueError("expected")):
+            self.manager.start_all_agents()
+            wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+
+    def test_stop_from_exception_handling(self):
+        """Test stop manager from erro callback."""
+        self.test_add_agent()
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        behaviour = agent_alias.agent.resources.get_behaviour(
+            self.echo_skill_id, "echo"
+        )
+
+        def handler(*args, **kwargs):
+            self.manager.stop_manager()
+
+        self.manager.add_error_callback(handler)
+
+        assert behaviour
+
+        with patch.object(behaviour, "act", side_effect=ValueError("expected")):
+            self.manager.start_all_agents()
+            wait_for_condition(lambda: not self.manager.is_running, timeout=10)
+
+    def test_start_all(self):
+        """Test manager start all agents."""
+        self.test_add_agent()
+        assert self.agent_name in self.manager.list_agents()
+        assert self.agent_name not in self.manager.list_agents(running_only=True)
+        self.manager.start_all_agents()
+        assert self.agent_name in self.manager.list_agents(running_only=True)
+
+        self.manager.start_all_agents()
+
+        with pytest.raises(ValueError, match="is already started!"):
+            self.manager.start_agents(self.manager.list_agents())
+
+        with pytest.raises(ValueError, match="is already started!"):
+            self.manager.start_agent(self.agent_name)
+
+        with pytest.raises(ValueError, match="is not registered!"):
+            self.manager.start_agent("non_exists_agent")
+
+    def test_stop_agent(self):
+        """Test stop agent."""
+        self.test_start_all()
+        wait_for_condition(
+            lambda: self.manager.list_agents(running_only=True), timeout=10
+        )
+        self.manager.stop_all_agents()
+
+        assert not self.manager.list_agents(running_only=True)
+
+        with pytest.raises(ValueError, match=" is not running!"):
+            self.manager.stop_agent(self.agent_name)
+
+        with pytest.raises(ValueError, match=" is not running!"):
+            self.manager.stop_agents([self.agent_name])
+
+    def test_do_no_allow_override_some_fields(self):
+        """Do not allo to override some values in agent config."""
+        self.manager.start_manager()
+
+        self.manager.add_project(self.project_public_id)
+
+        BAD_OVERRIDES = ["skills", "connections", "contracts", "protocols"]
+
+        for bad_override in BAD_OVERRIDES:
+            with pytest.raises(ValueError, match="Do not override any"):
+                self.manager.add_agent(
+                    self.project_public_id,
+                    self.agent_name,
+                    agent_overrides={bad_override: "some value"},
+                )
+
+    @staticmethod
+    def test_invalid_mode():
+        """Test manager fails on invalid mode."""
+        with pytest.raises(ValueError, match="Invalid mode"):
+            Manager("test_dir", mode="invalid_mode")
+
+    def test_double_start(self):
+        """Test double manager start."""
+        self.manager.start_manager()
+        self.manager.start_manager()
+
+    def test_double_stop(self):
+        """Test double manager stop."""
+        self.manager.start_manager()
+        self.manager.stop_manager()
+        self.manager.stop_manager()
+
+    @pytest.mark.asyncio
+    async def test_run_loop_direct_call(self):
+        """Test do not allow to run manager_loop directly."""
+        with pytest.raises(
+            ValueError, match="Do not use this method directly, use start_manager"
+        ):
+            await self.manager._manager_loop()
+
+    def test_remove_running_agent(self):
+        """Test fail on remove running agent."""
+        self.test_start_all()
+        with pytest.raises(ValueError, match="Agent is running. stop it first!"):
+            self.manager.remove_agent(self.agent_name)
+
+        self.manager.stop_all_agents()
+        wait_for_condition(
+            lambda: self.agent_name not in self.manager.list_agents(running_only=True),
+            timeout=5,
+        )
+        self.manager.remove_agent(self.agent_name)
+        assert self.agent_name not in self.manager.list_agents()
+
+
+class TestManagerThreadedMode(TestManagerAsyncMode):
+    """Tests for manager in threaded mode."""
+
+    MODE = "threaded"

@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of AEA agents manager."""
 import asyncio
 import copy
@@ -74,37 +75,43 @@ class AsyncTask:
 
     def wait(self) -> asyncio.Future:
         """Return future to wait task completed."""
-        if not self._done_future:
+        if not self._done_future:  # pragma: nocover
             raise ValueError("Task not started!")
         return self._done_future
 
     def stop(self) -> None:
         """Stop task."""
-        if not self.run_loop or not self.task:
+        if not self.run_loop or not self.task:  # pragma: nocover
             raise ValueError("Task was not started!")
         self.run_loop.call_soon_threadsafe(self.task.cancel)
 
     async def _run_wrapper(self) -> None:
         """Run task internals."""
-        if not self._done_future:
+        if not self._done_future:  # pragma: nocover
             raise ValueError("Task was not started! please use start method")
+        exc = None
         try:
             await self.run()
-            self.caller_loop.call_soon_threadsafe(self._done_future.set_result, None)
-        except asyncio.CancelledError:
-            self.caller_loop.call_soon_threadsafe(self._done_future.set_result, None)
+        except asyncio.CancelledError:  # pragma: nocover
+            pass
         except Exception as e:  # pylint: disable=broad-except
-            self.caller_loop.call_soon_threadsafe(self._done_future.set_exception, e)
+            exc = e
+        finally:
+            self.caller_loop.call_soon_threadsafe(self._set_result, exc)
+
+    def _set_result(self, exc: Optional[BaseException]) -> None:
+        """Set result of task execution."""
+        if not self._done_future:  # pragma: nocover
+            return
+        if exc:
+            self._done_future.set_exception(exc)
+        else:
+            self._done_future.set_result(None)
 
     async def run(self) -> None:
         """Run task body."""
         self.agent.runtime.set_loop(self.run_loop)
-        try:
-            self.agent.runtime.start()
-            while True:
-                await asyncio.sleep(1)
-        finally:
-            self.agent.runtime.stop()
+        await self.agent.runtime.run()
 
     @property
     def is_running(self) -> bool:
@@ -154,7 +161,7 @@ class Manager:
         self._agents: Dict[str, AgentAlias] = {}
         self._agents_tasks: Dict[str, AsyncTask] = {}
 
-        self._thread = Thread(target=self._run_thread, daemon=True)
+        self._thread: Optional[Thread] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._event: Optional[asyncio.Event] = None
 
@@ -203,17 +210,26 @@ class Manager:
                 agent_name = tasks_for_agents[task]
                 self._agents_tasks.pop(agent_name)
                 if task.exception():
-                    print(agent_name, "exceptioned", task.exception())
                     for callback in self._error_callbacks:
                         callback(agent_name, task.exception())
                 else:
                     await task
 
+    def add_error_callback(
+        self, error_callback: Callable[[str, BaseException], None]
+    ) -> None:
+        """Add error callback to call on error raised."""
+        self._error_callbacks.append(error_callback)
+
     def start_manager(self) -> "Manager":
         """Start manager."""
+        if self._is_running:
+            return self
+
         self._ensure_working_dir()
         self._started_event.clear()
         self._is_running = True
+        self._thread = Thread(target=self._run_thread, daemon=True)
         self._thread.start()
         self._started_event.wait(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
         return self
@@ -226,17 +242,39 @@ class Manager:
 
         :return: None
         """
-        if not self._loop or not self._event:
-            raise ValueError("Manager was not started!")
-        if self._was_working_dir_created:
-            rmtree(self.working_dir)
+        if not self._is_running:
+            return self
 
-        if self._thread.is_alive():
-            self.stop_all_agents()
+        if not self._loop or not self._event or not self._thread:  # pragma: nocover
+            raise ValueError("Manager was not started!")
+
+        if not self._thread.is_alive():  # pragma: nocover
+            return self
+
+        self.stop_all_agents()
+
+        for agent_name in self.list_agents():
+            self.remove_agent(agent_name)
+
+        for project in list(self._projects.keys()):
+            self.remove_project(project)
+
+        self._cleanup()
+
         self._is_running = False
+
         self._loop.call_soon_threadsafe(self._event.set)
-        self._thread.join(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+
+        if self._thread.ident != threading.get_ident():
+            self._thread.join(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+
+        self._thread = None
         return self
+
+    def _cleanup(self) -> None:
+        """Remove workdir if was created."""
+        if self._was_working_dir_created and os.path.exists(self.working_dir):
+            rmtree(self.working_dir)
 
     def add_project(self, public_id: PublicId) -> "Manager":
         """Fetch agent project and all dependencies to working_dir."""
@@ -290,6 +328,7 @@ class Manager:
 
         if public_id not in self._projects:
             raise ValueError(f"{public_id} project is not added!")
+
         project = self._projects[public_id]
 
         agent_alias = self._build_agent_alias(
@@ -310,7 +349,7 @@ class Manager:
         :return: list of agents names
         """
         if running_only:
-            return list(self._agents_tasks.keys())
+            return [i for i in self._agents.keys() if self._is_agent_running(i)]
         return list(self._agents.keys())
 
     def remove_agent(self, agent_name: str) -> "Manager":
@@ -339,12 +378,14 @@ class Manager:
 
         :return: None
         """
-        if not self._loop or not self._event:
+        if not self._loop or not self._event:  # pragma: nocover
             raise ValueError("agent is not started!")
 
         agent_alias = self._agents.get(agent_name)
+
         if not agent_alias:
             raise ValueError(f"{agent_name} is not registered!")
+
         if self._is_agent_running(agent_name):
             raise ValueError(f"{agent_name} is already started!")
 
@@ -358,15 +399,13 @@ class Manager:
         self._loop.call_soon_threadsafe(self._event.set)
         return self
 
-    def _is_agent_running(self, agent_name):
+    def _is_agent_running(self, agent_name: str) -> bool:
+        """Return is agent running state."""
         if agent_name not in self._agents_tasks:
             return False
 
         task = self._agents_tasks[agent_name]
-        if task.is_running:
-            return True
-        del self._agents_tasks[agent_name]
-        return False
+        return task.is_running
 
     def start_all_agents(self) -> "Manager":
         """
@@ -374,10 +413,13 @@ class Manager:
 
         :return: None
         """
-        for agent_name in self.list_agents():
-            if self._is_agent_running(agent_name):
-                continue
-            self.start_agent(agent_name)
+        self.start_agents(
+            [
+                agent_name
+                for agent_name in self.list_agents()
+                if not self._is_agent_running(agent_name)
+            ]
+        )
 
         return self
 
@@ -389,15 +431,31 @@ class Manager:
 
         :return: None
         """
-        if not self._is_agent_running(agent_name):
+        if not self._is_agent_running(agent_name) or not self._thread or not self._loop:
             raise ValueError(f"{agent_name} is not running!")
-        if self._thread.ident == threading.get_ident():
+
+        agent_task = self._agents_tasks[agent_name]
+
+        if self._thread.ident == threading.get_ident():  # pragma: nocover
             # In same thread do not perform blocking operations!
-            self._agents_tasks[agent_name].stop()
+            agent_task.stop()
             return self
+
+        wait_future = agent_task.wait()
+
         event = threading.Event()
-        self._agents_tasks[agent_name].wait().add_done_callback(lambda x: event.set())
-        self._agents_tasks[agent_name].stop()
+
+        def event_set(*args):  # pylint: disable=unused-argument
+            event.set()
+
+        def _add_cb():
+            if wait_future.done():
+                event_set()  # pragma: nocover
+            else:
+                wait_future.add_done_callback(event_set)  # pramga: nocover
+
+        self._loop.call_soon_threadsafe(_add_cb)
+        agent_task.stop()
         event.wait(self.DEFALUT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
         return self
@@ -408,8 +466,8 @@ class Manager:
 
         :return: None
         """
-        for agent_name in self.list_agents(running_only=True):
-            self.stop_agent(agent_name)
+        agents_list = self.list_agents(running_only=True)
+        self.stop_agents(agents_list)
 
         return self
 
@@ -445,7 +503,7 @@ class Manager:
 
         :return: AgentAlias
         """
-        if agent_name not in self._agents:
+        if agent_name not in self._agents:  # pragma: nocover
             raise ValueError(f"Agent with name {agent_name} does not exist!")
         return self._agents[agent_name]
 
@@ -455,7 +513,7 @@ class Manager:
             os.makedirs(self.working_dir)
             self._was_working_dir_created = True
 
-        if not os.path.isdir(self.working_dir):
+        if not os.path.isdir(self.working_dir):  # pragma: nocover
             raise ValueError(f"{self.working_dir} is not a directory!")
         os.makedirs(self._keys_dir)
 
@@ -473,7 +531,7 @@ class Manager:
 
         builder = AEABuilder.from_config_json(json_config, project.path)
         builder.set_name(agent_name)
-        # builder.set_runtime_mode("async")
+        builder.set_runtime_mode("threaded")
 
         if not builder.private_key_paths:
             default_ledger = json_config[0].get("default_ledger", DEFAULT_LEDGER)
