@@ -1372,10 +1372,10 @@ class AEABuilder:
                         logging.Logger, make_logger(configuration, agent_name)
                     )
             else:
-                if configuration.is_abstract_component:
+                new_configuration = self._overwrite_custom_configuration(configuration)
+                if new_configuration.is_abstract_component:
                     load_aea_package(configuration)
                     continue
-                new_configuration = self._overwrite_custom_configuration(configuration)
                 _logger = make_logger(new_configuration, agent_name)
                 component = load_component_from_config(
                     new_configuration, logger=_logger, **kwargs

@@ -208,20 +208,20 @@ class TestSkillConfig:
 
         dummy_behaviour = skill_config.behaviours.read("dummy")
         expected_dummy_behaviour_args = copy(dummy_behaviour.args)
-        expected_dummy_behaviour_args["new_arg"] = 1
+        expected_dummy_behaviour_args["behaviour_arg_1"] = 42
 
         dummy_handler = skill_config.handlers.read("dummy")
         expected_dummy_handler_args = copy(dummy_handler.args)
-        expected_dummy_handler_args["new_arg"] = 1
+        expected_dummy_handler_args["handler_arg_1"] = 42
 
         dummy_model = skill_config.models.read("dummy")
         expected_dummy_model_args = copy(dummy_model.args)
-        expected_dummy_model_args["new_arg"] = 1
+        expected_dummy_model_args["model_arg_1"] = 42
 
         new_configurations = {
-            "behaviours": {"dummy": {"args": dict(new_arg=1)}},
-            "handlers": {"dummy": {"args": dict(new_arg=1)}},
-            "models": {"dummy": {"args": dict(new_arg=1)}},
+            "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
+            "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
+            "models": {"dummy": {"args": dict(model_arg_1=42)}},
         }
         skill_config.update(new_configurations)
 
@@ -744,3 +744,12 @@ def test_package_version_lt():
     v2 = PackageVersion("0.2.0")
     v3 = PackageVersion("latest")
     assert v1 < v2 < v3
+
+
+def test_configuration_class():
+    """Test the attribute 'configuration class' of PackageType."""
+    assert PackageType.PROTOCOL.configuration_class() == ProtocolConfig
+    assert PackageType.CONNECTION.configuration_class() == ConnectionConfig
+    assert PackageType.CONTRACT.configuration_class() == ContractConfig
+    assert PackageType.SKILL.configuration_class() == SkillConfig
+    assert PackageType.AGENT.configuration_class() == AgentConfig

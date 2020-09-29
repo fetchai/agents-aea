@@ -392,36 +392,37 @@ def exception_log_and_reraise(log_method: Callable, message: str):
         raise
 
 
-def merge_update(to_update: Dict, new_values: Dict):
+def recursive_update(to_update: Dict, new_values: Dict):
     """
-    Merge two dictionaries by replacing conflicts with the new values.
+    Update a dictionary by replacing conflicts with the new values.
 
     It does side-effects to the first dictionary.
 
     >>> to_update = dict(a=1, b=2, subdict=dict(subfield1=1))
-    >>> new_values = dict(b=3, c=4, subdict=dict(subfield2=2))
-    >>> merge_update(to_update, new_values)
+    >>> new_values = dict(b=3, subdict=dict(subfield1=2))
+    >>> recursive_update(to_update, new_values)
     >>> to_update
-    {'a': 1, 'b': 3, 'subdict': {'subfield1': 1, 'subfield2': 2}, 'c': 4}
+    {'a': 1, 'b': 3, 'subdict': {'subfield1': 2}}
 
     :param to_update: the dictionary to update.
-    :param new_values: the dictionary of new values to add/replace.
-    :return: the merged dictionary.
+    :param new_values: the dictionary of new values to replace.
+    :return: the updated dictionary.
     """
     for key, value in new_values.items():
         if key not in to_update:
-            to_update[key] = value
-            continue
+            raise ValueError(
+                f"Key '{key}' is not contained in the dictionary to update."
+            )
 
         value_to_update = to_update[key]
         value_type = type(value)
         value_to_update_type = type(value_to_update)
         if value_type != value_to_update_type:
             raise ValueError(
-                f"Trying to replace value '{value}' with value '{value_to_update}' which is of different type."
+                f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."
             )
 
         if value_type == value_to_update_type == dict:
-            merge_update(value_to_update, value)
+            recursive_update(value_to_update, value)
         else:
             to_update[key] = value

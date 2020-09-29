@@ -53,7 +53,7 @@ from packaging.version import Version
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
-from aea.helpers.base import merge_update
+from aea.helpers.base import recursive_update
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -1065,7 +1065,7 @@ class ConnectionConfig(ComponentConfiguration):
         :return: None
         """
         new_config = data.get("config", {})
-        merge_update(self.config, new_config)
+        recursive_update(self.config, new_config)
 
 
 class ProtocolConfig(ComponentConfiguration):
@@ -1347,7 +1347,7 @@ class SkillConfig(ComponentConfiguration):
                 component_config = cast(
                     SkillComponentConfiguration, registry.read(component_name)
                 )
-                merge_update(component_config.args, component_data.get("args", {}))
+                recursive_update(component_config.args, component_data.get("args", {}))
 
         _update_skill_component_config("behaviours", data)
         _update_skill_component_config("handlers", data)
