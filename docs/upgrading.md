@@ -1,5 +1,9 @@
 This page provides some tipps of how to upgrade between versions.
 
+## v0.6.0 to v0.6.1
+
+The `soef` connection and `oef_search` protocol have backward incompatible changes.
+
 ## v0.5.4 to v0.6.0
 
 ### `Dialogue` and `Dialogues` API updates

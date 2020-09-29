@@ -1,5 +1,23 @@
 # Release History
 
+## 0.6.1 (2020-09-17)
+
+- Adds a standalone script to deploy an ACN node
+- Adds filtering of out-dated addresses in DHT lookups
+- Updates multiple developer scripts
+- Increases code coverage of all protocols to 100%
+- Fixes a disconnection issue of the multiplexer
+- Extends soef connection to support additional registration commands and search responses
+- Extends oef_search protocol to include success performative and agent info in search response
+- Adds README.mds to all skills
+- Adds configurable exception policy handling for multiplexer
+- Fixes support for http headers in http server connection
+- Adds additional consistency checks on addresses in dialogues
+- Exposes decision maker address on skill context
+- Adds comprehensive benchmark scripts
+- Multiple docs updates including additional explanations of soef usage
+- Multiple additional tests and test stability fixes
+
 ## 0.6.0 (2020-09-01)
 
 - Makes FetchAICrypto default again

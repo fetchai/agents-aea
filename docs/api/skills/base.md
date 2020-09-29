@@ -223,6 +223,16 @@ Get behaviours of the skill.
 
 Get the address of the search service.
 
+<a name="aea.skills.base.SkillContext.decision_maker_address"></a>
+#### decision`_`maker`_`address
+
+```python
+ | @property
+ | decision_maker_address() -> Address
+```
+
+Get the address of the decision maker.
+
 <a name="aea.skills.base.SkillContext.handlers"></a>
 #### handlers
 

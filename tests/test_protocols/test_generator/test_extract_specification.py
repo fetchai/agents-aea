@@ -39,6 +39,7 @@ from aea.protocols.generator.extract_specification import (
 
 from tests.test_protocols.test_generator.common import PATH_TO_T_PROTOCOL_SPECIFICATION
 
+
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
@@ -48,6 +49,7 @@ class TestExtractSpecification(TestCase):
 
     @classmethod
     def setup_class(cls):
+        """Setup class."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)

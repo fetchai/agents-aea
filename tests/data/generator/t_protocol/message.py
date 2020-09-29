@@ -28,6 +28,7 @@ from aea.protocols.base import Message
 
 from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
 
 DEFAULT_BODY_SIZE = 4

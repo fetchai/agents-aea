@@ -24,10 +24,7 @@ from typing import Dict, List, cast
 import click
 
 from aea.cli.utils.click_utils import AEAJsonPathType
-from aea.cli.utils.constants import (
-    FALSE_EQUIVALENTS,
-    FROM_STRING_TO_TYPE,
-)
+from aea.cli.utils.constants import FALSE_EQUIVALENTS, FROM_STRING_TO_TYPE
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.generic import get_parent_object, load_yaml

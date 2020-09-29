@@ -26,6 +26,7 @@ from temper import Temper
 
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
+
 MAX_RETRIES = 10
 
 

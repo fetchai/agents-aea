@@ -18,14 +18,13 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This tool generates the API docs.
-"""
+"""This tool generates the API docs."""
 
 import shutil
 import subprocess  # nosec
 import sys
 from pathlib import Path
+
 
 DOCS_DIR = "docs/"
 MODULES_TO_PATH = {

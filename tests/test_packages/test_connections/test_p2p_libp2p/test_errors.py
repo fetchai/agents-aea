@@ -39,10 +39,8 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
     _golang_module_run,
 )
 
-from tests.conftest import (
-    COSMOS,
-    _make_libp2p_connection,
-)
+from tests.conftest import COSMOS, _make_libp2p_connection
+
 
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
@@ -64,6 +62,7 @@ class TestP2PLibp2pConnectionFailureGolangBuild:
 
     @pytest.mark.asyncio
     async def test_timeout(self):
+        """Test the timeout."""
         log_file_desc = open("log", "a", 1)
         with pytest.raises(Exception):
             await _golang_module_build_async(
@@ -72,6 +71,7 @@ class TestP2PLibp2pConnectionFailureGolangBuild:
 
     @pytest.mark.asyncio
     async def test_wrong_path(self):
+        """Test the wrong path."""
         self.connection.node.source = self.wrong_path
         with pytest.raises(Exception):
             await self.connection.connect()
@@ -101,6 +101,7 @@ class TestP2PLibp2pConnectionFailureGolangRun:
         cls.wrong_path = tempfile.mkdtemp()
 
     def test_wrong_path(self):
+        """Test the wrong path."""
         log_file_desc = open("log", "a", 1)
         with pytest.raises(Exception):
             _golang_module_run(
@@ -108,6 +109,7 @@ class TestP2PLibp2pConnectionFailureGolangRun:
             )
 
     def test_timeout(self):
+        """Test the timeout."""
         self.connection.node._connection_timeout = 0
         muxer = Multiplexer([self.connection])
         with pytest.raises(Exception):
@@ -138,6 +140,7 @@ class TestP2PLibp2pConnectionFailureNodeDisconnect:
         cls.connection = _make_libp2p_connection()
 
     def test_node_disconnect(self):
+        """Test node disconnect."""
         muxer = Multiplexer([self.connection])
         muxer.connect()
         self.connection.node.proc.terminate()
@@ -174,6 +177,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
         key_file_desc.close()
 
     def test_entry_peers_when_no_public_uri_provided(self):
+        """Test entry peers when no public uri provided."""
         configuration = ConnectionConfig(
             libp2p_key_file=None,
             local_uri="{}:{}".format(self.host, self.port),
@@ -186,7 +190,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             P2PLibp2pConnection(configuration=configuration, identity=self.identity)
 
     def test_local_uri_provided_when_public_uri_provided(self):
-
+        """Test local uri provided when public uri provided."""
         configuration = ConnectionConfig(
             node_key_file=self.key_file,
             public_uri="{}:{}".format(self.host, self.port),
@@ -208,6 +212,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
 
 
 def test_libp2pconnection_awaitable_proc_cancelled():
+    """Test awaitable proc cancelled."""
     proc = AwaitableProc(["sleep", "100"], shell=False)
     proc_task = asyncio.ensure_future(proc.start())
     proc_task.cancel()

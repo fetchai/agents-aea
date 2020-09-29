@@ -24,6 +24,7 @@ import os.path
 import sqlite3
 from typing import Dict, cast
 
+
 my_path = os.path.dirname(__file__)
 
 DB_SOURCE = os.path.join(my_path, "dummy_weather_station_data.db")

@@ -37,6 +37,7 @@ from tests.conftest import (
     libp2p_log_on_failure_all,
 )
 
+
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
 
@@ -56,6 +57,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
 
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect(self):
+        """Test connect then disconnect."""
         assert self.connection.is_connected is False
         try:
             await self.connection.connect()
@@ -90,26 +92,35 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         os.chdir(cls.t)
 
         cls.log_files = []
+        cls.multiplexers = []
 
-        cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 1)
-        cls.multiplexer1 = Multiplexer([cls.connection1])
-        cls.log_files.append(cls.connection1.node.log_file)
-        cls.multiplexer1.connect()
+        try:
+            cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 1)
+            cls.multiplexer1 = Multiplexer([cls.connection1])
+            cls.log_files.append(cls.connection1.node.log_file)
+            cls.multiplexer1.connect()
+            cls.multiplexers.append(cls.multiplexer1)
 
-        genesis_peer = cls.connection1.node.multiaddrs[0]
+            genesis_peer = cls.connection1.node.multiaddrs[0]
 
-        cls.connection2 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2, entry_peers=[genesis_peer]
-        )
-        cls.multiplexer2 = Multiplexer([cls.connection2])
-        cls.log_files.append(cls.connection2.node.log_file)
-        cls.multiplexer2.connect()
+            cls.connection2 = _make_libp2p_connection(
+                port=DEFAULT_PORT + 2, entry_peers=[genesis_peer]
+            )
+            cls.multiplexer2 = Multiplexer([cls.connection2])
+            cls.log_files.append(cls.connection2.node.log_file)
+            cls.multiplexer2.connect()
+            cls.multiplexers.append(cls.multiplexer2)
+        except Exception as e:
+            cls.teardown_class()
+            raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.connection1.is_connected is True
         assert self.connection2.is_connected is True
 
     def test_envelope_routed(self):
+        """Test envelope routed."""
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
 
@@ -141,6 +152,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert envelope.message == msg
 
     def test_envelope_echoed_back(self):
+        """Test envelope echoed back."""
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
 
@@ -178,8 +190,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        cls.multiplexer1.disconnect()
-        cls.multiplexer2.disconnect()
+        for mux in cls.multiplexers:
+            mux.disconnect()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -200,36 +212,43 @@ class TestP2PLibp2pConnectionRouting:
         os.chdir(cls.t)
 
         cls.log_files = []
+        cls.multiplexers = []
 
-        port_genesis = DEFAULT_PORT + 10
-        cls.connection_genesis = _make_libp2p_connection(port_genesis)
-        cls.multiplexer_genesis = Multiplexer([cls.connection_genesis])
-        cls.log_files.append(cls.connection_genesis.node.log_file)
-        cls.multiplexer_genesis.connect()
+        try:
+            port_genesis = DEFAULT_PORT + 10
+            cls.connection_genesis = _make_libp2p_connection(port_genesis)
+            cls.multiplexer_genesis = Multiplexer([cls.connection_genesis])
+            cls.log_files.append(cls.connection_genesis.node.log_file)
+            cls.multiplexer_genesis.connect()
+            cls.multiplexers.append(cls.multiplexer_genesis)
 
-        genesis_peer = cls.connection_genesis.node.multiaddrs[0]
+            genesis_peer = cls.connection_genesis.node.multiaddrs[0]
 
-        cls.connections = [cls.connection_genesis]
-        cls.multiplexers = [cls.multiplexer_genesis]
+            cls.connections = [cls.connection_genesis]
 
-        port = port_genesis
-        for _ in range(DEFAULT_NET_SIZE):
-            port += 1
-            conn = _make_libp2p_connection(port=port, entry_peers=[genesis_peer])
-            muxer = Multiplexer([conn])
+            port = port_genesis
+            for _ in range(DEFAULT_NET_SIZE):
+                port += 1
+                conn = _make_libp2p_connection(port=port, entry_peers=[genesis_peer])
+                mux = Multiplexer([conn])
 
-            cls.connections.append(conn)
-            cls.multiplexers.append(muxer)
+                cls.connections.append(conn)
 
-            cls.log_files.append(conn.node.log_file)
-            muxer.connect()
+                cls.log_files.append(conn.node.log_file)
+                mux.connect()
+                cls.multiplexers.append(mux)
+        except Exception as e:
+            cls.teardown_class()
+            raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.connection_genesis.is_connected is True
         for conn in self.connections:
             assert conn.is_connected is True
 
     def test_star_routing_connectivity(self):
+        """Test star routing connectivity."""
         addrs = [conn.node.address for conn in self.connections]
 
         for source in range(len(self.multiplexers)):
@@ -268,9 +287,8 @@ class TestP2PLibp2pConnectionRouting:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        for multiplexer in cls.multiplexers:
-            multiplexer.disconnect()
-        cls.multiplexer_genesis.disconnect()
+        for mux in cls.multiplexers:
+            mux.disconnect()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -291,34 +309,44 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         os.chdir(cls.t)
 
         cls.log_files = []
+        cls.multiplexers = []
 
-        cls.relay = _make_libp2p_connection(DEFAULT_PORT + 1)
-        cls.multiplexer = Multiplexer([cls.relay])
-        cls.log_files.append(cls.relay.node.log_file)
-        cls.multiplexer.connect()
+        try:
+            cls.relay = _make_libp2p_connection(DEFAULT_PORT + 1)
+            cls.multiplexer = Multiplexer([cls.relay])
+            cls.log_files.append(cls.relay.node.log_file)
+            cls.multiplexer.connect()
+            cls.multiplexers.append(cls.multiplexer)
 
-        relay_peer = cls.relay.node.multiaddrs[0]
+            relay_peer = cls.relay.node.multiaddrs[0]
 
-        cls.connection1 = _make_libp2p_connection(
-            DEFAULT_PORT + 2, relay=False, entry_peers=[relay_peer]
-        )
-        cls.multiplexer1 = Multiplexer([cls.connection1])
-        cls.log_files.append(cls.connection1.node.log_file)
-        cls.multiplexer1.connect()
+            cls.connection1 = _make_libp2p_connection(
+                DEFAULT_PORT + 2, relay=False, entry_peers=[relay_peer]
+            )
+            cls.multiplexer1 = Multiplexer([cls.connection1])
+            cls.log_files.append(cls.connection1.node.log_file)
+            cls.multiplexer1.connect()
+            cls.multiplexers.append(cls.multiplexer1)
 
-        cls.connection2 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 3, entry_peers=[relay_peer]
-        )
-        cls.multiplexer2 = Multiplexer([cls.connection2])
-        cls.log_files.append(cls.connection2.node.log_file)
-        cls.multiplexer2.connect()
+            cls.connection2 = _make_libp2p_connection(
+                port=DEFAULT_PORT + 3, entry_peers=[relay_peer]
+            )
+            cls.multiplexer2 = Multiplexer([cls.connection2])
+            cls.log_files.append(cls.connection2.node.log_file)
+            cls.multiplexer2.connect()
+            cls.multiplexers.append(cls.multiplexer2)
+        except Exception as e:
+            cls.teardown_class()
+            raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.relay.is_connected is True
         assert self.connection1.is_connected is True
         assert self.connection2.is_connected is True
 
     def test_envelope_routed(self):
+        """Test envelope routed."""
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
 
@@ -350,6 +378,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert envelope.message == msg
 
     def test_envelope_echoed_back(self):
+        """Test envelope echoed back."""
         addr_1 = self.connection1.node.address
         addr_2 = self.connection2.node.address
 
@@ -387,9 +416,8 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        cls.multiplexer1.disconnect()
-        cls.multiplexer2.disconnect()
-        cls.multiplexer.disconnect()
+        for mux in cls.multiplexers:
+            mux.disconnect()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -410,59 +438,67 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         os.chdir(cls.t)
 
         cls.log_files = []
+        cls.multiplexers = []
 
-        port_relay_1 = DEFAULT_PORT + 10
-        cls.connection_relay_1 = _make_libp2p_connection(port_relay_1)
-        cls.multiplexer_relay_1 = Multiplexer([cls.connection_relay_1])
-        cls.log_files.append(cls.connection_relay_1.node.log_file)
-        cls.multiplexer_relay_1.connect()
+        try:
+            port_relay_1 = DEFAULT_PORT + 10
+            cls.connection_relay_1 = _make_libp2p_connection(port_relay_1)
+            cls.multiplexer_relay_1 = Multiplexer([cls.connection_relay_1])
+            cls.log_files.append(cls.connection_relay_1.node.log_file)
+            cls.multiplexer_relay_1.connect()
+            cls.multiplexers.append(cls.multiplexer_relay_1)
 
-        relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
+            relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
 
-        port_relay_2 = DEFAULT_PORT + 100
-        cls.connection_relay_2 = _make_libp2p_connection(
-            port=port_relay_2, entry_peers=[relay_peer_1]
-        )
-        cls.multiplexer_relay_2 = Multiplexer([cls.connection_relay_2])
-        cls.log_files.append(cls.connection_relay_2.node.log_file)
-        cls.multiplexer_relay_2.connect()
-
-        relay_peer_2 = cls.connection_relay_2.node.multiaddrs[0]
-
-        cls.connections = [cls.connection_relay_1, cls.connection_relay_2]
-        cls.multiplexers = [cls.multiplexer_relay_1, cls.multiplexer_relay_2]
-
-        port = port_relay_1
-        for _ in range(int(DEFAULT_NET_SIZE / 2) + 1):
-            port += 1
-            conn = _make_libp2p_connection(
-                port=port, relay=False, entry_peers=[relay_peer_1]
+            port_relay_2 = DEFAULT_PORT + 100
+            cls.connection_relay_2 = _make_libp2p_connection(
+                port=port_relay_2, entry_peers=[relay_peer_1]
             )
-            muxer = Multiplexer([conn])
-            cls.connections.append(conn)
-            cls.multiplexers.append(muxer)
-            cls.log_files.append(conn.node.log_file)
-            muxer.connect()
+            cls.multiplexer_relay_2 = Multiplexer([cls.connection_relay_2])
+            cls.log_files.append(cls.connection_relay_2.node.log_file)
+            cls.multiplexer_relay_2.connect()
+            cls.multiplexers.append(cls.multiplexer_relay_2)
 
-        port = port_relay_2
-        for _ in range(int(DEFAULT_NET_SIZE / 2) + 1):
-            port += 1
-            conn = _make_libp2p_connection(
-                port=port, relay=False, entry_peers=[relay_peer_2]
-            )
-            muxer = Multiplexer([conn])
-            cls.connections.append(conn)
-            cls.multiplexers.append(muxer)
-            cls.log_files.append(conn.node.log_file)
-            muxer.connect()
+            relay_peer_2 = cls.connection_relay_2.node.multiaddrs[0]
+
+            cls.connections = [cls.connection_relay_1, cls.connection_relay_2]
+
+            port = port_relay_1
+            for _ in range(int(DEFAULT_NET_SIZE / 2) + 1):
+                port += 1
+                conn = _make_libp2p_connection(
+                    port=port, relay=False, entry_peers=[relay_peer_1]
+                )
+                mux = Multiplexer([conn])
+                cls.connections.append(conn)
+                cls.log_files.append(conn.node.log_file)
+                mux.connect()
+                cls.multiplexers.append(mux)
+
+            port = port_relay_2
+            for _ in range(int(DEFAULT_NET_SIZE / 2) + 1):
+                port += 1
+                conn = _make_libp2p_connection(
+                    port=port, relay=False, entry_peers=[relay_peer_2]
+                )
+                mux = Multiplexer([conn])
+                cls.connections.append(conn)
+                cls.log_files.append(conn.node.log_file)
+                mux.connect()
+                cls.multiplexers.append(mux)
+        except Exception as e:
+            cls.teardown_class()
+            raise e
 
     def test_connection_is_established(self):
+        """Test connection established."""
         assert self.connection_relay_1.is_connected is True
         assert self.connection_relay_2.is_connected is True
         for conn in self.connections:
             assert conn.is_connected is True
 
     def test_star_routing_connectivity(self):
+        """Test star routing connectivity."""
         addrs = [conn.node.address for conn in self.connections]
 
         for source in range(len(self.multiplexers)):
@@ -501,8 +537,8 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        for multiplexer in cls.multiplexers:
-            multiplexer.disconnect()
+        for mux in cls.multiplexers:
+            mux.disconnect()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -511,6 +547,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
 
 
 def test_libp2pconnection_uri():
+    """Test uri."""
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)
     assert uri.host == "127.0.0.1" and uri.port == 10000

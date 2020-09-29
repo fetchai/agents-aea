@@ -22,7 +22,6 @@
 from unittest import TestCase
 
 import eth_account
-
 import pytest
 
 from aea.crypto.cosmos import CosmosCrypto

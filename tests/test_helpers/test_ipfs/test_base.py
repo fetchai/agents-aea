@@ -26,6 +26,7 @@ from aea.helpers.ipfs.base import IPFSHashOnly, _is_text
 
 from tests.conftest import CUR_PATH
 
+
 FILE_PATH = "__init__.py"
 
 

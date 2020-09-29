@@ -33,6 +33,7 @@ from aea.helpers.search.models import (
     Query,
 )
 
+
 SUPPLY_DATAMODEL_NAME = "supply"
 DEMAND_DATAMODEL_NAME = "demand"
 

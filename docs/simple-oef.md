@@ -1,4 +1,4 @@
-This documentation has been produced for the Simple-OEF version `0.1.20`.
+This documentation has been produced for the Simple-OEF version `0.1.30`.
 
 ## Concepts
 
@@ -35,7 +35,7 @@ Agents can have a number of personality peices. These describe how an agent appe
 | Piece               | Description                                                  |
 | ------------------- | ------------------------------------------------------------ |
 | `genus`             | Coarse type of agent, includes things such as `vehicle`, `building`, `iot`. See the genus table below. |
-| `classification`    | An agent's classification, typically in the form `mobility.railway.train`. See note below on classifications. No fixed classifications are specified. |
+| `classification`    | An agent's classification, typically in the form `mobility.railway.train`. See note below on classifications. No fixed classifications are specified. Classifications can contain alphanumeric characters, the period, underscore and colon (`_.:`). |
 | `architecture` | Agent's architecture. See the architecture table below. Introduced in version `0.1.20`. The vast majority of agents should set this to `agentframework`. |
 | `dynamics.moving`   | Boolean, indicates if the agent is moving or not.            |
 | `dynamics.heading`  | Indicates the heading of the agent, in radians, with 0.0 pointing due north. |
@@ -57,6 +57,7 @@ A genus is a coarse agent class. It is the roughest description of what an agent
 | `furniture` | Small fixed location items such as signs, mobile masts       |
 | `building`  | Large fixed location item such as house, railway station, school |
 | `buyer`     | Indicates the agent is a buyer _only_ and does not have value to deliver |
+| `viewer` |The agent is a view in the world, acting as a "camera" to view content |
 
 The best way to use genus is to pick the *best fit* choice. If there isn't one for you, then do not specify it. If you feel that a high-level genus is missing, please make the suggestion in our Developer Slack (see <a href="https://community.fetch.ai" target="_blank">here</a> for the instructions on joining, or the "Further Information" section below). 
 
@@ -115,7 +116,7 @@ The soef returns XML that includes information about all found agents. An exampl
   <total>1</total>
   <capped>0</capped>
   <results>
-    <agent name="Alice" genus="vehicle" classification="mobility.railway.train">
+    <agent name="TrainNumber1234" genus="vehicle" classification="mobility.railway.train" user_context="18:00 to Berlin">
       <identities>
         <identity chain_identifier="fetchai">2h6fi8oCkMz9GCpL7EUYMHjzgdRFGmDP5V4Ls97jZpzjg523yY</identity>
       </identities>
@@ -129,7 +130,7 @@ The soef returns XML that includes information about all found agents. An exampl
 </response>
 ```
 
-**The `<location>` block is only returned if the agent has set itself to disclose its position in a find.** Normally, the default is not to, and agents will then only return the `<range_in_km>` item. This is because agents may deliver their precise location as part of the value that they deliver, and therefore it would need to be negotiated and potentially paid for. However, sometimes, it is desirable for agents to always deliver their position when found but specify the accuracy. Because of this, the soef supports four levels of accuracy:
+**The `<location>` block is only returned if the agent has set itself to disclose its position in a find.** Likewise, **the `user_context=""` is only returned if enabled**. Normally, the default is not to, and agents will then only return the `<range_in_km>` item. This is because agents may deliver their precise location as part of the value that they deliver, and therefore it would need to be negotiated and potentially paid for. However, sometimes, it is desirable for agents to always deliver their position when found but specify the accuracy. Because of this, the soef supports four levels of accuracy:
 
 | Level     | Accuracy                                            |
 | --------- | --------------------------------------------------- |
@@ -152,7 +153,7 @@ Agents register at the `/register` page on the soef. They are expected to provid
 1. An API key
 2. A chain identifier, which can be either `fetchai` for the Fetch native network (testnet or mainnet), `fetchai_cosmos` for the Fetch Cosmos testnet or `ethereum` for the ethereum network
 3. An address, which must be a valid address for the specified chain identifier
-4. A "given name" (see "Concepts", above), which can be anything from Alice to Bob, or a flight number, or any other user-given context
+4. A "given name" (see "Concepts", above), which can be anything from Alice to Bob, or a flight number, or any other user-given context. It must not exceed 128 characters. 
 
 If registration is successful, the soef will return a result like this:
 
@@ -199,6 +200,9 @@ The soef has a number of commands that can be used to set or update personality 
 | `set_find_position_disclosure_accuracy` | Sets the find disclosure accuracy. See the table in "Finding Agents", above, for the accepted values for the parameter `accuracy`. |
 | `find_around_me`                        | Find agents around me. This allows various filters, such as personality pieces and service keys, to be specified. See below, as this is more complex. |
 | `set_position`                          | This is a direct internal mapping to `set_personality_piece` with a piece of `dynamics.position`. It existed in the earliest versions of the soef and remains as a short-cut. It expects `longitude` and `latitude` as parameters. |
+| `set_declared_name`                     | This allows an agent's declared name to be changed after registration. It takes one parameter, `name`, to specify the replacement name. Names cannot exceed 128 characters and must not contain illegal characters. |
+| `set_user_context`                      | Sets an __optional__ user-context for an agent. This can be optionally disclosed in `find_around_me` if enabled. See `set_disclose_user_context`, below. The user context must not contain illegal characters and is limited to 160 maximum. |
+| `set_disclose_user_context`             | If set to `true`, the optional user context is disclosed if set. Default is `false`. |
 
 #### Find around me in detail
 
@@ -214,4 +218,4 @@ The soef has a number of commands that can be used to set or update personality 
 
 You can find further information, or talk to us, in the #s-oef channel on our official developer Slack. You can find that <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY" target="_blank">here</a>.
 
-We welcome your feedback and strive to deliver the best decentralised search and discovery service for agents that is possible. There are many upcoming features, including the operation incentive mechanisms, additional security and encryption, active searches (where results happen without `find_around_me` being issued), non-geographic searches across one and many soef nodes and dimensional-reduction based approximate searches. 
+We welcome your feedback and strive to deliver the best decentralised search and discovery service for agents that is possible. There are many upcoming features, including the operation incentive mechanisms, additional security and encryption, active searches (where results happen without `find_around_me` being issued), non-geographic searches across one and many soef nodes and dimensional-reduction based approximate searches.  

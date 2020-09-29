@@ -23,10 +23,9 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import click
-
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
@@ -41,10 +40,16 @@ from aea.configurations.base import (
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_SKILL,
+    LOCAL_PROTOCOLS,
+)
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
+
 
 ROOT = Path(".")
 
@@ -258,7 +263,10 @@ def find_item_locally(ctx, item_type, item_public_id) -> Path:
     # check that the configuration file of the found package matches the expected author and version.
     version = item_configuration.version
     author = item_configuration.author
-    if item_public_id.author != author or item_public_id.version != version:
+    if item_public_id.author != author or (
+        not item_public_id.package_version.is_latest
+        and item_public_id.version != version
+    ):
         raise click.ClickException(
             "Cannot find {} with author and version specified.".format(item_type)
         )
@@ -267,7 +275,7 @@ def find_item_locally(ctx, item_type, item_public_id) -> Path:
 
 
 def find_item_in_distribution(  # pylint: disable=unused-argument
-    ctx, item_type, item_public_id
+    ctx, item_type, item_public_id: PublicId
 ) -> Path:
     """
     Find an item in the AEA directory.
@@ -307,7 +315,10 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
     # check that the configuration file of the found package matches the expected author and version.
     version = item_configuration.version
     author = item_configuration.author
-    if item_public_id.author != author or item_public_id.version != version:
+    if item_public_id.author != author or (
+        not item_public_id.package_version.is_latest
+        and item_public_id.version != version
+    ):
         raise click.ClickException(
             "Cannot find {} with author and version specified.".format(item_type)
         )
@@ -437,6 +448,23 @@ def is_item_present(
     return (item_public_id.author, item_public_id.name,) in items_in_config and Path(
         item_path
     ).exists()
+
+
+def is_local_item(item_public_id: PublicId) -> bool:
+    """
+    Check whether the item public id correspond to a local package.
+
+    If the provided item has version 'latest', only the prefixes are compared.
+    Otherwise, the function will try to match the exact version occurrence among the local packages.
+    """
+    local_packages: List[PublicId] = [
+        DEFAULT_CONNECTION,
+        *LOCAL_PROTOCOLS,
+        DEFAULT_SKILL,
+    ]
+    if item_public_id.package_version.is_latest:
+        return any(item_public_id.same_prefix(other) for other in local_packages)
+    return item_public_id in local_packages
 
 
 def try_get_balance(  # pylint: disable=unused-argument

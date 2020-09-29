@@ -55,6 +55,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
+from aea.runtime import _StopRuntime
 from aea.skills.base import Behaviour, Handler
 from aea.skills.error.handlers import ErrorHandler
 
@@ -81,7 +82,7 @@ class AEA(Agent, WithLogger):
             DecisionMakerHandler
         ] = DefaultDecisionMakerHandler,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
-        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.just_log,
+        connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         default_connection: Optional[PublicId] = None,
@@ -241,8 +242,8 @@ class AEA(Agent, WithLogger):
 
         if error_handler is None:
             self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
-            self.stop()
-            return None, []
+            raise _StopRuntime()
+
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
@@ -341,7 +342,7 @@ class AEA(Agent, WithLogger):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-        return super(AEA, self).get_message_handlers() + [
+        return super().get_message_handlers() + [
             (self.filter.handle_internal_message, self.filter.get_internal_message,),
         ]
 
@@ -363,9 +364,10 @@ class AEA(Agent, WithLogger):
 
         if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
             log_exception(exception, function)
-            self.stop()
-            raise AEAException(
-                f"AEA was terminated cause exception `{exception}` in skills {function}! Please check logs."
+            raise _StopRuntime(
+                AEAException(
+                    f"AEA was terminated cause exception `{exception}` in skills {function}! Please check logs."
+                )
             )
 
         if self._skills_exception_policy == ExceptionPolicyEnum.just_log:

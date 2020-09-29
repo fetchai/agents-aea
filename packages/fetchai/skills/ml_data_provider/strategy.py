@@ -20,7 +20,6 @@
 """This module contains the strategy class."""
 
 import numpy as np
-
 from tensorflow import keras
 
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -33,6 +32,7 @@ from aea.helpers.search.generic import (
 )
 from aea.helpers.search.models import Description, Location, Query
 from aea.skills.base import Model
+
 
 DEFAULT_PRICE_PER_DATA_BATCH = 10
 DEFAULT_BATCH_SIZE = 32

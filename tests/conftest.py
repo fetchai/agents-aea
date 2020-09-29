@@ -35,29 +35,22 @@ from typing import Callable, List, Optional, Sequence, cast
 from unittest.mock import patch
 
 import docker as docker
-from docker.models.containers import Container
-
 import gym
-
-from oef.agents import AsyncioCore, OEFAgent
-
 import pytest
+from docker.models.containers import Container
+from oef.agents import AsyncioCore, OEFAgent
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
 from aea.common import Address
-from aea.configurations.base import (
-    ComponentType,
-    ConnectionConfig,
-    ContractConfig,
-    DEFAULT_AEA_CONFIG_FILE as AGENT_YAML,
-    DEFAULT_CONNECTION_CONFIG_FILE as CONNECTION_YAML,
-    DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAML,
-    DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML,
-    DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML,
-    PublicId,
-)
+from aea.configurations.base import ComponentType, ConnectionConfig, ContractConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE as AGENT_YAML
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE as CONNECTION_YAML
+from aea.configurations.base import DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAML
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML
+from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML
+from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
@@ -88,7 +81,8 @@ from packages.fetchai.connections.p2p_libp2p_client.connection import (
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
-from .data.dummy_connection.connection import DummyConnection  # type: ignore
+from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
+
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +198,7 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.8.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.9.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -793,12 +787,15 @@ def _make_libp2p_connection(
     delegate_port: int = 11234,
     delegate_host: str = "127.0.0.1",
     node_key_file: Optional[str] = None,
+    agent_address: Optional[Address] = None,
 ) -> P2PLibp2pConnection:
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
         os.remove(log_file)
-    crypto = make_crypto(COSMOS)
-    identity = Identity("", address=crypto.address)
+    address = agent_address
+    if address is None:
+        address = make_crypto(COSMOS).address
+    identity = Identity("", address=address)
     if relay and delegate:
         configuration = ConnectionConfig(
             node_key_file=node_key_file,

@@ -32,23 +32,16 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 from aiohttp import web
 from aiohttp.web_request import BaseRequest
-
 from openapi_core import create_spec
-from openapi_core.validation.request.datatypes import (
-    OpenAPIRequest,
-    RequestParameters,
-)
+from openapi_core.validation.request.datatypes import OpenAPIRequest, RequestParameters
 from openapi_core.validation.request.shortcuts import validate_request
 from openapi_core.validation.request.validators import RequestValidator
-
 from openapi_spec_validator.exceptions import (  # pylint: disable=wrong-import-order
     OpenAPIValidationError,
 )
 from openapi_spec_validator.schemas import (  # pylint: disable=wrong-import-order
     read_yaml_file,
 )
-
-
 from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
     ImmutableMultiDict,
 )
@@ -64,6 +57,7 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
+
 SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
@@ -72,7 +66,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.9.0")
 
 
 class HttpDialogues(BaseHttpDialogues):

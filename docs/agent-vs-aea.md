@@ -51,12 +51,20 @@ class MyAgent(Agent):
         super().__init__(identity, connections)
 
     def setup(self):
+        """Setup the agent."""
         pass
 
     def act(self):
+        """Act implementation."""
         print("Act called for tick {}".format(self.tick))
 
     def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle envelope.
+
+        :param envelope: the envelope received
+        :return: None
+        """
         print("React called for tick {}".format(self.tick))
         if envelope is not None and envelope.protocol_id == DefaultMessage.protocol_id:
             sender = envelope.sender
@@ -74,6 +82,7 @@ class MyAgent(Agent):
             self.outbox.put(envelope)
 
     def teardown(self):
+        """Teardown the agent."""
         pass
 ```
 
@@ -118,7 +127,7 @@ We use the input and output text files to send an envelope to our agent and rece
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            b"my_agent,other_agent,fetchai/default:0.5.0,\x08\x01*\x07\n\x05hello,"
+            b"my_agent,other_agent,fetchai/default:0.6.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
@@ -177,12 +186,20 @@ class MyAgent(Agent):
         super().__init__(identity, connections)
 
     def setup(self):
+        """Setup the agent."""
         pass
 
     def act(self):
+        """Act implementation."""
         print("Act called for tick {}".format(self.tick))
 
     def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle envelope.
+
+        :param envelope: the envelope received
+        :return: None
+        """
         print("React called for tick {}".format(self.tick))
         if envelope is not None and envelope.protocol_id == DefaultMessage.protocol_id:
             sender = envelope.sender
@@ -200,10 +217,13 @@ class MyAgent(Agent):
             self.outbox.put(envelope)
 
     def teardown(self):
+        """Teardown the agent."""
         pass
 
 
 def run():
+    """Run demo."""
+
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
         os.remove(INPUT_FILE)
@@ -234,7 +254,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
         message_text = (
-            b"my_agent,other_agent,fetchai/default:0.5.0,\x08\x01*\x07\n\x05hello,"
+            b"my_agent,other_agent,fetchai/default:0.6.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)

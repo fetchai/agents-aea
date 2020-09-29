@@ -27,6 +27,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import ROOT_DIR
 
+
 API_SPEC_PATH = Path(ROOT_DIR, "examples", "http_ex", "petstore.yaml").absolute()
 
 
@@ -35,9 +36,9 @@ class TestHttpEchoSkill(AEATestCaseEmpty):
 
     def test_echo(self):
         """Run the echo skill sequence."""
-        self.add_item("connection", "fetchai/http_server:0.7.0")
-        self.add_item("skill", "fetchai/http_echo:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.7.0")
+        self.add_item("connection", "fetchai/http_server:0.9.0")
+        self.add_item("skill", "fetchai/http_echo:0.7.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.9.0")
         self.set_config(
             "vendor.fetchai.connections.http_server.config.api_spec_path", API_SPEC_PATH
         )

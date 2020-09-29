@@ -31,6 +31,7 @@ from packages.fetchai.protocols.ml_trade.custom_types import (
 )
 from packages.fetchai.protocols.ml_trade.custom_types import Query as CustomQuery
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.ml_trade.message")
 
 DEFAULT_BODY_SIZE = 4
@@ -39,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = ProtocolId.from_str("fetchai/ml_trade:0.5.0")
+    protocol_id = ProtocolId.from_str("fetchai/ml_trade:0.6.0")
 
     Description = CustomDescription
 

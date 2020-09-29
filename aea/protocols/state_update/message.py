@@ -26,6 +26,7 @@ from aea.configurations.base import ProtocolId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.state_update.message")
 
 DEFAULT_BODY_SIZE = 4
@@ -34,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = ProtocolId.from_str("fetchai/state_update:0.3.0")
+    protocol_id = ProtocolId.from_str("fetchai/state_update:0.4.0")
 
     class Performative(Message.Performative):
         """Performatives for the state_update protocol."""

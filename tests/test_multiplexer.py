@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the Multiplexer."""
 
 import asyncio
@@ -30,11 +29,10 @@ import unittest.mock
 from pathlib import Path
 from threading import Thread
 from unittest import mock
-from unittest.mock import patch
-
-from pexpect.exceptions import EOF  # type: ignore
+from unittest.mock import MagicMock, call, patch
 
 import pytest
+from pexpect.exceptions import EOF  # type: ignore
 
 import aea
 from aea.cli.core import cli
@@ -44,21 +42,14 @@ from aea.exceptions import AEAEnforceError
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
-from aea.multiplexer import (
-    AsyncMultiplexer,
-    InBox,
-    Multiplexer,
-    OutBox,
-)
+from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.click_testing import CliRunner
 
 from packages.fetchai.connections.local.connection import LocalNode
-
-
-from tests.common.pexpect_popen import PexpectWrapper
-from tests.common.utils import wait_for_condition
-
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_PUBLIC_ID,
+)
 
 from .conftest import (
     AUTHOR,
@@ -71,6 +62,8 @@ from .conftest import (
     _make_stub_connection,
     logger,
 )
+from tests.common.pexpect_popen import PexpectWrapper
+from tests.common.utils import wait_for_condition
 
 
 @pytest.mark.asyncio
@@ -151,6 +144,18 @@ async def test_connect_twice_a_single_connection():
             "Connection fetchai/dummy:0.1.0 already established."
         )
         await multiplexer._disconnect_one(connection.connection_id)
+
+
+@pytest.mark.asyncio
+async def test_run_bad_conneect():
+    """Test that connecting twice a single connection behaves correctly."""
+    connection = _make_dummy_connection()
+    multiplexer = AsyncMultiplexer([connection])
+    f = asyncio.Future()
+    f.set_result(None)
+    with unittest.mock.patch.object(multiplexer, "connect", return_value=f):
+        with pytest.raises(ValueError, match="Multiplexer is not connected properly."):
+            await multiplexer.run()
 
 
 def test_multiplexer_connect_all_raises_error():
@@ -625,19 +630,19 @@ class TestExceptionHandlingOnConnectionSend:
         """Tear down test case."""
         self.multiplexer.disconnect()
 
-    def test_default_policy(self):
+    def test_log_policy(self):
         """Test just log exception."""
-        assert self.multiplexer._exception_policy == ExceptionPolicyEnum.just_log
-
         with patch.object(self.connection, "send", side_effect=self.exception):
+            self.multiplexer._exception_policy = ExceptionPolicyEnum.just_log
             self.multiplexer.put(self.envelope)
             time.sleep(1)
             assert not self.multiplexer._send_loop_task.done()
 
     def test_propagate_policy(self):
         """Test propagate exception."""
+        assert self.multiplexer._exception_policy == ExceptionPolicyEnum.propagate
+
         with patch.object(self.connection, "send", side_effect=self.exception):
-            self.multiplexer._exception_policy = ExceptionPolicyEnum.propagate
             self.multiplexer.put(self.envelope)
             time.sleep(1)
             wait_for_condition(
@@ -655,8 +660,34 @@ class TestExceptionHandlingOnConnectionSend:
                 lambda: self.multiplexer.connection_status.is_disconnected, timeout=5
             )
 
+    def test_disconnect_order(self):
+        """Test disconnect order: tasks first, disconnect_all next."""
+        parent = MagicMock()
 
-class TestMultiplexerDscionnectsOnTermination:  # pylint: disable=attribute-defined-outside-init
+        async def fn():
+            return
+
+        with patch.object(
+            self.multiplexer, "_stop_receive_send_loops", return_value=fn()
+        ) as stop_loops, patch.object(
+            self.multiplexer, "_disconnect_all", return_value=fn()
+        ) as disconnect_all, patch.object(
+            self.multiplexer, "_check_and_set_disconnected_state"
+        ) as check_and_set_disconnected_state:
+            parent.attach_mock(stop_loops, "stop_loops")
+            parent.attach_mock(disconnect_all, "disconnect_all")
+            parent.attach_mock(
+                check_and_set_disconnected_state, "check_and_set_disconnected_state"
+            )
+            self.multiplexer.disconnect()
+            assert parent.mock_calls == [
+                call.stop_loops(),
+                call.disconnect_all(),
+                call.check_and_set_disconnected_state(),
+            ]
+
+
+class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defined-outside-init
     """Test multiplexer disconnects on  agent process keyboard interrupted."""
 
     def setup(self):
@@ -684,14 +715,7 @@ class TestMultiplexerDscionnectsOnTermination:  # pylint: disable=attribute-defi
     def test_multiplexer_disconnected_on_early_interruption(self):
         """Test multiplexer disconnected properly on termination before connected."""
         result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "add",
-                "--local",
-                "connection",
-                "fetchai/p2p_libp2p:0.8.0",
-            ],
+            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
         )
         assert result.exit_code == 0, result.stdout_bytes
 

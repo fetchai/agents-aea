@@ -34,3 +34,14 @@ def registry_login(username: str, password: str) -> str:
         "POST", "/rest-auth/login/", data={"username": username, "password": password}
     )
     return resp["key"]
+
+
+def registry_reset_password(email: str) -> None:
+    """
+    Request Registry to reset password.
+
+    :param email: user email.
+
+    :return: None.
+    """
+    request_api("POST", "/rest-auth/password/reset/", data={"email": email})

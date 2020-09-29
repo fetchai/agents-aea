@@ -39,6 +39,7 @@ from packages.fetchai.skills.tac_negotiation.dialogues import (
     SigningDialogues,
 )
 
+
 MessageId = int
 
 

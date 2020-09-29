@@ -27,12 +27,13 @@ from typing import Optional
 
 import skimage  # type: ignore
 
+
 _logger = logging.getLogger(
     "aea.packages.fetchai.skills.carpark_detection.detection_database"
 )
 
 
-class DetectionDatabase:
+class DetectionDatabase:  # pylint: disable=too-many-public-methods
     """Communicate between the database and the python objects."""
 
     def __init__(

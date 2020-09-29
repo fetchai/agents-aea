@@ -29,8 +29,7 @@ from aea.runtime import RuntimeStates
 from packages.fetchai.connections.local.connection import LocalNode
 
 from tests.common.utils import wait_for_condition
-
-from .conftest import _make_local_connection
+from tests.conftest import _make_local_connection
 
 
 class DummyAgent(Agent):
@@ -62,6 +61,7 @@ class DummyAgent(Agent):
 
     @property
     def resources(self):
+        """Get resources."""
         return Mock()
 
 
@@ -81,11 +81,6 @@ def test_run_agent():
         assert agent.state == RuntimeStates.stopped
         agent_thread.start()
         try:
-            wait_for_condition(
-                lambda: agent.state == RuntimeStates.starting,
-                timeout=10,
-                error_msg="Agent state must be 'starting'",
-            )
             wait_for_condition(
                 lambda: agent.state == RuntimeStates.running,
                 timeout=10,

@@ -30,10 +30,9 @@ import sys
 from functools import partial
 from itertools import chain
 from pathlib import Path
-from typing import Set
+from typing import Dict, Set
 
 import yaml
-
 
 from aea.configurations.base import PackageId, PackageType, PublicId
 
@@ -89,7 +88,7 @@ def get_public_id_from_yaml(configuration_file: Path):
 
     :param configuration_file: the path to the config yaml
     """
-    data = yaml.safe_load(configuration_file.open())
+    data = unified_yaml_load(configuration_file)
     author = data["author"]
     # handle the case when it's a package or agent config file.
     name = data["name"] if "name" in data else data["agent_name"]
@@ -119,6 +118,24 @@ def handle_dependency_not_found(e: DependencyNotFound):
     print(f"Missing: {pprint.pformat(sorted_missing)}")
 
 
+def unified_yaml_load(configuration_file: Path) -> Dict:
+    """
+    Load YAML file, unified (both single- and multi-paged).
+
+    :param configuration_file: the configuration file path.
+    :return: the data.
+    """
+    package_type = configuration_file.parent.parent.name
+    with configuration_file.open() as fp:
+        if package_type != "agents":
+            return yaml.safe_load(fp)
+        # when it is an agent configuration file,
+        # we are interested only in the first page of the YAML,
+        # because the dependencies are contained only there.
+        data = yaml.safe_load_all(fp)
+        return list(data)[0]
+
+
 def check_dependencies(configuration_file: Path, all_packages_ids: Set[PackageId]):
     """
     Check dependencies of configuration file.
@@ -127,7 +144,7 @@ def check_dependencies(configuration_file: Path, all_packages_ids: Set[PackageId
     :param all_packages_ids: all the package ids.
     :return: None
     """
-    data = yaml.safe_load(configuration_file.open())
+    data = unified_yaml_load(configuration_file)
 
     def _add_package_type(package_type, public_id_str):
         return PackageId(package_type, PublicId.from_str(public_id_str))

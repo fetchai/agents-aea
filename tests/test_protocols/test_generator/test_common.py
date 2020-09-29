@@ -40,6 +40,7 @@ from aea.protocols.generator.common import (
     is_installed,
     load_protocol_specification,
     try_run_black_formatting,
+    try_run_isort_formatting,
     try_run_protoc,
 )
 
@@ -48,15 +49,18 @@ from tests.test_protocols.test_generator.common import (
     T_PROTOCOL_NAME,
 )
 
+
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
 
 def black_is_not_installed_side_effect(*args, **kwargs):
+    """Black not installed."""
     return not args[0] == "black"
 
 
 def protoc_is_not_installed_side_effect(*args, **kwargs):
+    """Protoco not installed."""
     return not args[0] == "protoc"
 
 
@@ -65,6 +69,7 @@ class TestCommon(TestCase):
 
     @classmethod
     def setup_class(cls):
+        """Setup test."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
@@ -394,6 +399,12 @@ class TestCommon(TestCase):
     def test_try_run_black_formatting(self, mocked_subprocess):
         """Test the 'try_run_black_formatting' method"""
         try_run_black_formatting("some_path")
+        mocked_subprocess.assert_called_once()
+
+    @mock.patch("subprocess.run")
+    def test_try_run_isort_formatting(self, mocked_subprocess):
+        """Test the 'try_run_isort_formatting' method"""
+        try_run_isort_formatting("some_path")
         mocked_subprocess.assert_called_once()
 
     @mock.patch("subprocess.run")

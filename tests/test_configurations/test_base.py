@@ -23,9 +23,7 @@ from pathlib import Path
 from unittest import TestCase, mock
 
 import pytest
-
 import semver
-
 import yaml
 
 from aea.configurations.base import (
@@ -38,6 +36,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
+    PackageVersion,
     ProtocolConfig,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
@@ -256,7 +255,7 @@ class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
 class PublicIdTestCase(TestCase):
     """Test case for PublicId class."""
 
-    @mock.patch("aea.configurations.base.re.match", return_value=False)
+    @mock.patch("aea.configurations.base.re.match", return_value=None)
     def test_public_id_from_str_not_matching(self, *mocks):
         """Test case for from_str method regex not matching."""
         with self.assertRaises(ValueError):
@@ -427,6 +426,30 @@ def test_public_id_invalid_version():
         PublicId("author", "name", object())
 
 
+def test_public_id_from_string():
+    """Test parsing the public id from string."""
+    public_id = PublicId.from_str("author/package:0.1.0")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "0.1.0"
+
+
+def test_public_id_from_string_without_version_string():
+    """Test parsing the public id without version string."""
+    public_id = PublicId.from_str("author/package")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "latest"
+
+
+def test_public_id_from_string_with_version_string_latest():
+    """Test parsing the public id with version string 'latest'."""
+    public_id = PublicId.from_str("author/package:latest")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "latest"
+
+
 def test_public_id_from_uri_path():
     """Test PublicId.from_uri_path"""
     result = PublicId.from_uri_path("author/package_name/0.1.0")
@@ -436,8 +459,7 @@ def test_public_id_from_uri_path():
 
 
 def test_public_id_from_uri_path_wrong_input():
-    """Test that when a bad formatted path is passed in input of PublicId.from_uri_path
-    an exception is raised."""
+    """Test that when a bad formatted path is passed in input of PublicId.from_uri_path an exception is raised."""
     with pytest.raises(
         ValueError, match="Input 'bad/formatted:input' is not well formatted."
     ):
@@ -454,6 +476,30 @@ def test_pubic_id_repr():
     """Test PublicId.__repr__"""
     public_id = PublicId("author", "name", "0.1.0")
     assert repr(public_id) == "<author/name:0.1.0>"
+
+
+def test_pubic_id_to_latest():
+    """Test PublicId.to_latest"""
+    public_id = PublicId("author", "name", "0.1.0")
+    expected_public_id = PublicId("author", "name", "latest")
+    actual_public_id = public_id.to_latest()
+    assert expected_public_id == actual_public_id
+
+
+def test_pubic_id_same_prefix():
+    """Test PublicId.same_prefix"""
+    same_1 = PublicId("author", "name", "0.1.0")
+    same_2 = PublicId("author", "name", "0.1.1")
+    different = PublicId("author", "different_name", "0.1.0")
+
+    assert same_1.same_prefix(same_2)
+    assert same_2.same_prefix(same_1)
+
+    assert not different.same_prefix(same_1)
+    assert not same_1.same_prefix(different)
+
+    assert not different.same_prefix(same_2)
+    assert not same_2.same_prefix(different)
 
 
 def test_public_id_comparator_when_author_is_different():
@@ -623,6 +669,7 @@ def test_agent_config_to_json_with_optional_configurations():
         max_reactions=100,
         decision_maker_handler=dict(dotted_path="", file_path=""),
         skill_exception_policy="propagate",
+        connection_exception_policy="propagate",
         default_routing={"author/name:0.1.0": "author/name:0.1.0"},
         loop_mode="sync",
         runtime_mode="async",
@@ -633,6 +680,7 @@ def test_agent_config_to_json_with_optional_configurations():
 
 
 def test_protocol_specification_attributes():
+    """Test protocol specification attributes."""
     protocol_specification = ProtocolSpecification("name", "author", "0.1.0")
 
     # test getter and setter for 'protobuf_snippets'
@@ -650,3 +698,18 @@ def test_contract_config_component_type():
     """Test ContractConfig.component_type"""
     config = ContractConfig("name", "author", "0.1.0")
     assert config.component_type == ComponentType.CONTRACT
+
+
+def test_package_version_eq_negative():
+    """Test package version __eq__."""
+    v1 = PackageVersion("0.1.0")
+    v2 = PackageVersion("0.2.0")
+    assert v1 != v2
+
+
+def test_package_version_lt():
+    """Test package version __lt__."""
+    v1 = PackageVersion("0.1.0")
+    v2 = PackageVersion("0.2.0")
+    v3 = PackageVersion("latest")
+    assert v1 < v2 < v3

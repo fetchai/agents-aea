@@ -27,15 +27,10 @@ from aea.crypto.registries import Registry
 from aea.exceptions import AEAException
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.protocols.base import Address, Message
-from aea.protocols.dialogue.base import (
-    Dialogue as BaseDialogue,
-    Dialogues as BaseDialogues,
-)
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
-from packages.fetchai.connections.ledger.base import (
-    CONNECTION_ID,
-    RequestDispatcher,
-)
+from packages.fetchai.connections.ledger.base import CONNECTION_ID, RequestDispatcher
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue
 from packages.fetchai.protocols.contract_api.dialogues import (
@@ -266,8 +261,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
     def _get_data(
         self, api: LedgerApi, message: ContractApiMessage, contract: Contract,
     ) -> bytes:
-        """Get the data from the contract method, either from the stub or
-        from the callable specified by the message."""
+        """Get the data from the contract method, either from the stub or from the callable specified by the message."""
         # first, check if the custom handler for this type of request has been implemented.
         data = self._call_stub(api, message, contract)
         if data is not None:
@@ -281,8 +275,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
     def _call_stub(
         ledger_api: LedgerApi, message: ContractApiMessage, contract: Contract
     ) -> Optional[bytes]:
-        """Try to call stub methods associated to the
-        contract API request performative."""
+        """Try to call stub methods associated to the contract API request performative."""
         try:
             method: Callable = getattr(contract, message.performative.value)
             if message.performative in [

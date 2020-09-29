@@ -30,11 +30,9 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import jsonschema
-from jsonschema import Draft4Validator
-
 import pytest
-
 import yaml
+from jsonschema import Draft4Validator
 
 import aea
 from aea.cli import cli

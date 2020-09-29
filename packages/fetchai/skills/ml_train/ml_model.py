@@ -27,6 +27,7 @@ from tensorflow import keras
 
 from aea.skills.base import Model
 
+
 DEFAULT_MODEL_CONFIG_PATH = str(Path("..", "..", "model.config").resolve())
 
 
@@ -52,6 +53,11 @@ class MLModel(Model):
         self.training_thread = threading.Thread(target=self.training_loop)
 
     def setup(self) -> None:
+        """
+        Setup the model.
+
+        :return: None
+        """
         self.training_thread.start()
 
     def training_loop(self):
@@ -128,5 +134,10 @@ class MLModel(Model):
         self.data_queue.put((X, y, dict(epochs=epochs)))
 
     def teardown(self) -> None:
+        """
+        Teardown the model.
+
+        :return: None
+        """
         self.data_queue.put(None)
         self.training_thread.join()

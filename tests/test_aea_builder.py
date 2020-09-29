@@ -27,7 +27,6 @@ from typing import Collection
 from unittest.mock import Mock, patch
 
 import pytest
-
 import yaml
 
 from aea.aea import AEA
@@ -60,6 +59,7 @@ from tests.conftest import (
     ROOT_DIR,
     _make_dummy_connection,
 )
+
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
@@ -96,7 +96,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.6.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.7.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -106,12 +106,12 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.8.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/oef_search:0.5.0)']"
+        "Package 'fetchai/oef:0.10.0' of type 'connection' cannot be added. "
+        "Missing dependencies: ['(protocol, fetchai/oef_search:0.7.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef:0.8.0" requires
-        # "fetchai/oef_search:0.5.0" and "fetchai/fipa:0.6.0" protocols.
+        # connection "fetchai/oef:0.10.0" requires
+        # "fetchai/oef_search:0.7.0" and "fetchai/fipa:0.7.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
@@ -568,7 +568,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         ---
         name: stub
         author: fetchai
-        version: 0.9.0
+        version: 0.10.0
         type: connection
         config:
             input_file: "{self.expected_input_file}"
@@ -588,7 +588,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
             aea = builder.build()
         assert aea.name == self.agent_name
         stub_connection = aea.resources.get_connection(
-            PublicId.from_str("fetchai/stub:0.9.0")
+            PublicId.from_str("fetchai/stub:0.10.0")
         )
         assert stub_connection.configuration.config == dict(
             input_file=self.expected_input_file, output_file=self.expected_output_file
@@ -654,9 +654,45 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         assert dummy_model.config == self.expected_model_args
 
 
+class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
+    """Test builder set from project dir, to make a skill 'abstract'."""
+
+    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+
+    def _add_dummy_skill_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        # here we change all the dummy skill configurations
+        configuration += dedent(
+            """
+        ---
+        name: dummy
+        author: dummy_author
+        version: 0.1.0
+        type: skill
+        is_abstract: true
+        ...
+        """
+        )
+        aea_config_file.write_text(configuration)
+
+    def test_from_project(self):
+        """Test builder set from project dir."""
+        self._add_dummy_skill_config()
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self._get_cwd()):
+            aea = builder.build()
+
+        dummy_skill = aea.resources.get_skill(
+            PublicId("dummy_author", "dummy", "0.1.0")
+        )
+        assert dummy_skill is None, "Shouldn't have found the skill in Resources."
+
+
 class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmpty):
-    """Test builder set from project dir with custom component config fails
-    when the component is not declared in the agent configuration."""
+    """Test builder set from project dir with custom component config fails when the component is not declared in the agent configuration."""
 
     def _add_stub_connection_config(self):
         """Add custom stub connection config."""

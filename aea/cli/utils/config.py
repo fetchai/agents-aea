@@ -26,9 +26,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import click
-
 import jsonschema
-
 import yaml
 
 from aea.cli.utils.constants import (
@@ -46,7 +44,7 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
-from aea.exceptions import AEAException
+from aea.exceptions import AEAEnforceError, AEAException
 
 
 def try_to_load_agent_config(
@@ -83,6 +81,8 @@ def try_to_load_agent_config(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
+    except AEAEnforceError as e:
+        raise click.ClickException(str(e))  # pragma: nocover
 
 
 def _init_cli_config() -> None:

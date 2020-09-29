@@ -25,11 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
 from aea.components.base import Component, load_aea_package
-from aea.configurations.base import (
-    ComponentType,
-    ContractConfig,
-    ContractId,
-)
+from aea.configurations.base import ComponentType, ContractConfig, ContractId
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry

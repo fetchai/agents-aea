@@ -26,8 +26,12 @@ from unittest.case import TestCase
 
 import pytest
 
-from aea.helpers.exec_timeout import BaseExecTimeout, ExecTimeoutSigAlarm
-from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
+from aea.helpers.exec_timeout import (
+    BaseExecTimeout,
+    ExecTimeoutSigAlarm,
+    ExecTimeoutThreadGuard,
+    TimeoutException,
+)
 
 from tests.common.utils import timeit_context
 

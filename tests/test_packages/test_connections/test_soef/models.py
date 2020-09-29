@@ -24,14 +24,17 @@ from packages.fetchai.connections.soef.connection import ModelNames
 
 
 AGENT_LOCATION_MODEL = DataModel(
-    ModelNames.location_agent,
-    [Attribute("location", Location, True, "The location where the agent is.")],
+    ModelNames.LOCATION_AGENT.value,
+    [
+        Attribute("location", Location, True, "The location where the agent is."),
+        Attribute("disclosure_accuracy", str, False, "Optional disclosure accuracy."),
+    ],
     "A data model to describe location of an agent.",
 )
 
 
 AGENT_PERSONALITY_MODEL = DataModel(
-    ModelNames.personality_agent,
+    ModelNames.PERSONALITY_AGENT.value,
     [
         Attribute("piece", str, True, "The personality piece key."),
         Attribute("value", str, True, "The personality piece value."),
@@ -41,7 +44,7 @@ AGENT_PERSONALITY_MODEL = DataModel(
 
 
 SET_SERVICE_KEY_MODEL = DataModel(
-    ModelNames.set_service_key,
+    ModelNames.SET_SERVICE_KEY.value,
     [
         Attribute("key", str, True, "Service key name."),
         Attribute("value", str, True, "Service key value."),
@@ -51,16 +54,26 @@ SET_SERVICE_KEY_MODEL = DataModel(
 
 
 REMOVE_SERVICE_KEY_MODEL = DataModel(
-    ModelNames.remove_service_key,
+    ModelNames.REMOVE_SERVICE_KEY.value,
     [Attribute("key", str, True, "Service key name.")],
     "A data model to remove service key.",
 )
 
-PING_MODEL = DataModel(ModelNames.ping, [], "A data model for ping command.",)
+PING_MODEL = DataModel(ModelNames.PING.value, [], "A data model for ping command.",)
 
 
 SEARCH_MODEL = DataModel(
-    ModelNames.search_model,
+    ModelNames.SEARCH_MODEL.value,
     [Attribute("location", Location, True, "The location where the agent is.")],
     "A data model to perform search.",
+)
+
+
+AGENT_GENERIC_COMMAND_MODEL = DataModel(
+    ModelNames.GENERIC_COMMAND.value,
+    [
+        Attribute("command", str, True, "Command name to execute."),
+        Attribute("parameters", str, False, "Url encoded parameters string."),
+    ],
+    "A data model to describe the generic soef command.",
 )

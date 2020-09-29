@@ -50,8 +50,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
-
-from . import models
+from tests.test_packages.test_connections.test_soef import models
 
 
 def make_async(return_value: Any) -> Callable:
@@ -121,7 +120,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.5.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
@@ -662,7 +661,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.5.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
@@ -680,7 +679,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.5.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )

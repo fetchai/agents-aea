@@ -25,6 +25,7 @@ from typing import Any, Dict, Optional, cast
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 
+
 logger = logging.getLogger(__name__)
 
 
