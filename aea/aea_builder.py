@@ -1372,18 +1372,13 @@ class AEABuilder:
                         logging.Logger, make_logger(configuration, agent_name)
                     )
             else:
-                configuration = deepcopy(configuration)
-                configuration.update(
-                    self._custom_component_configurations.get(
-                        configuration.component_id, {}
-                    )
-                )
                 if configuration.is_abstract_component:
                     load_aea_package(configuration)
                     continue
-                _logger = make_logger(configuration, agent_name)
+                new_configuration = self._overwrite_custom_configuration(configuration)
+                _logger = make_logger(new_configuration, agent_name)
                 component = load_component_from_config(
-                    configuration, logger=_logger, **kwargs
+                    new_configuration, logger=_logger, **kwargs
                 )
 
             resources.add_component(component)
@@ -1396,6 +1391,23 @@ class AEABuilder:
                 "- added a private key manually.\n"
                 "Please call 'reset() if you want to build another agent."
             )
+
+    def _overwrite_custom_configuration(self, configuration: ComponentConfiguration):
+        """
+        Overwrite custom configurations.
+
+        It deep-copies the configuration, to avoid undesired side-effects.
+
+        :param configuration: the configuration object.
+        :param custom_config: the configurations to apply.
+        :return: the new configuration instance.
+        """
+        new_configuration = deepcopy(configuration)
+        custom_config = self._custom_component_configurations.get(
+            new_configuration.component_id, {}
+        )
+        new_configuration.update(custom_config)
+        return new_configuration
 
 
 def make_logger(

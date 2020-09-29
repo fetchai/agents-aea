@@ -22,16 +22,82 @@
       "$ref": "definitions.json#/definitions/component_type"
     },
     "handlers": {
-      "$ref": "skill-config_schema.json#/definitions/handlers"
+      "$ref": "#/definitions/handlers"
     },
     "behaviours": {
-      "$ref": "skill-config_schema.json#/definitions/behaviours"
+      "$ref": "#/definitions/behaviours"
     },
     "models": {
-      "$ref": "skill-config_schema.json#/definitions/models"
+      "$ref": "#/definitions/models"
     },
     "is_abstract": {
-      "$ref": "skill-config_schema.json#/properties/is_abstract"
+      "$ref": "#/properties/is_abstract"
+    }
+  },
+  "definitions": {
+    "handlers": {
+      "type": "object",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/handler"
+        }
+      }
+    },
+    "behaviours": {
+      "type": "object",
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/behaviour"
+        }
+      }
+    },
+    "models": {
+      "type": "object",
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/model"
+        }
+      }
+    },
+    "behaviour": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "args"
+      ],
+      "properties": {
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "handler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "args"
+      ],
+      "properties": {
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "args"
+      ],
+      "properties": {
+        "args": {
+          "type": "object"
+        }
+      }
     }
   }
 }

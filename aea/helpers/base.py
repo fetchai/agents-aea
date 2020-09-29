@@ -390,3 +390,38 @@ def exception_log_and_reraise(log_method: Callable, message: str):
     except BaseException as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
         log_method(message.format(e))
         raise
+
+
+def merge_update(to_update: Dict, new_values: Dict):
+    """
+    Merge two dictionaries by replacing conflicts with the new values.
+
+    It does side-effects to the first dictionary.
+
+    >>> to_update = dict(a=1, b=2, subdict=dict(subfield1=1))
+    >>> new_values = dict(b=3, c=4, subdict=dict(subfield2=2))
+    >>> merge_update(to_update, new_values)
+    >>> to_update
+    {'a': 1, 'b': 3, 'subdict': {'subfield1': 1, 'subfield2': 2}, 'c': 4}
+
+    :param to_update: the dictionary to update.
+    :param new_values: the dictionary of new values to add/replace.
+    :return: the merged dictionary.
+    """
+    for key, value in new_values.items():
+        if key not in to_update:
+            to_update[key] = value
+            continue
+
+        value_to_update = to_update[key]
+        value_type = type(value)
+        value_to_update_type = type(value_to_update)
+        if value_type != value_to_update_type:
+            raise ValueError(
+                f"Trying to replace value '{value}' with value '{value_to_update}' which is of different type."
+            )
+
+        if value_type == value_to_update_type == dict:
+            merge_update(value_to_update, value)
+        else:
+            to_update[key] = value

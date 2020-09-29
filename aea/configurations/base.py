@@ -53,6 +53,7 @@ from packaging.version import Version
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
+from aea.helpers.base import merge_update
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -1058,10 +1059,13 @@ class ConnectionConfig(ComponentConfiguration):
         """
         Update configuration with other data.
 
-        :param data: the data to replace.
+        This method does side-effect on the configuration object.
+
+        :param data: the data to populate or replace.
         :return: None
         """
-        self.config = data.get("config", self.config)
+        new_config = data.get("config", {})
+        merge_update(self.config, new_config)
 
 
 class ProtocolConfig(ComponentConfiguration):
@@ -1318,18 +1322,34 @@ class SkillConfig(ComponentConfiguration):
         :param data: the data to replace.
         :return: None
         """
-        for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
-            behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
-            self.behaviours.update(behaviour_id, behaviour_config)
 
-        for handler_id, handler_data in data.get("handlers", {}).items():
-            handler_config = SkillComponentConfiguration.from_json(handler_data)
-            self.handlers.update(handler_id, handler_config)
+        def _update_skill_component_config(type_plural: str, data: Dict):
+            """
+            Update skill component configurations with new data.
 
-        for model_id, model_data in data.get("models", {}).items():
-            model_config = SkillComponentConfiguration.from_json(model_data)
-            self.models.update(model_id, model_config)
+            Also check that there are not undeclared components.
+            """
+            registry: CRUDCollection[SkillComponentConfiguration] = getattr(
+                self, type_plural
+            )
+            new_component_config = data.get(type_plural, {})
+            all_component_names = dict(registry.read_all())
 
+            new_skill_component_names = set(new_component_config.keys()).difference(
+                set(all_component_names.keys())
+            )
+            if len(new_skill_component_names) > 0:
+                raise ValueError(
+                    f"The custom configuration for skill {self.public_id} includes new {type_plural}: {new_skill_component_names}. This is not allowed."
+                )
+
+            for component_name, component_data in data.get(type_plural, {}).items():
+                component_config = registry.read(component_name)
+                merge_update(component_config.args, component_data.get("args", {}))
+
+        _update_skill_component_config("behaviours", data)
+        _update_skill_component_config("handlers", data)
+        _update_skill_component_config("models", data)
         self.is_abstract = data.get("is_abstract", self.is_abstract)
 
 
@@ -1625,10 +1645,10 @@ class AgentConfig(PackageConfiguration):
         component_configurations = {}
         for config in obj.get("component_configurations", []):
             tmp = deepcopy(config)
-            name = tmp.pop("name")
-            author = tmp.pop("author")
-            version = tmp.pop("version")
-            type_ = tmp.pop("type")
+            name = tmp["name"]
+            author = tmp["author"]
+            version = tmp["version"]
+            type_ = tmp["type"]
             component_id = ComponentId(
                 ComponentType(type_), PublicId(author, name, version)
             )
