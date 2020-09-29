@@ -326,7 +326,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         yaml_dump(result, file_pointer)
 
     def _process_component_section(
-        self, i: int, component_configuration_json: Dict
+        self, component_index: int, component_configuration_json: Dict
     ) -> ComponentId:
         """
         Process a component configuration in an agent configuration file.
@@ -336,12 +336,12 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         - validate the component configuration
         - check that there are only configurable fields
 
-        :param i: the index of the component in the file.
+        :param component_index: the index of the component in the file.
         :param component_configuration_json: the JSON object.
         :return: the processed component configuration.
         """
         component_id = self._split_component_id_and_config(
-            i, component_configuration_json
+            component_index, component_configuration_json
         )
         self._validate_component_configuration(
             component_id, component_configuration_json
@@ -350,12 +350,12 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
     @staticmethod
     def _split_component_id_and_config(
-        i: int, component_configuration_json: Dict
+        component_index: int, component_configuration_json: Dict
     ) -> ComponentId:
         """
         Split component id and configuration.
 
-        :param i: the position of the component configuration in the agent config file..
+        :param component_index: the position of the component configuration in the agent config file..
         :param component_configuration_json: the JSON object to process.
         :return: the component id and the configuration object.
         :raises ValueError: if the component id cannot be extracted.
@@ -366,7 +366,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         )
         if len(missing_fields) > 0:
             raise ValueError(
-                f"There are missing fields in component id {i + 1}: {missing_fields}."
+                f"There are missing fields in component id {component_index + 1}: {missing_fields}."
             )
         component_name = component_configuration_json["name"]
         component_author = component_configuration_json["author"]

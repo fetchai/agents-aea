@@ -31,7 +31,7 @@
       "$ref": "#/definitions/models"
     },
     "is_abstract": {
-      "$ref": "#/properties/is_abstract"
+      "$ref": "skill-config_schema.json#/properties/is_abstract"
     }
   },
   "definitions": {
