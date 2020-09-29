@@ -134,6 +134,18 @@ async def test_connect_twice_a_single_connection():
         await multiplexer._disconnect_one(connection.connection_id)
 
 
+@pytest.mark.asyncio
+async def test_run_bad_conneect():
+    """Test that connecting twice a single connection behaves correctly."""
+    connection = _make_dummy_connection()
+    multiplexer = AsyncMultiplexer([connection])
+    f = asyncio.Future()
+    f.set_result(None)
+    with unittest.mock.patch.object(multiplexer, "connect", return_value=f):
+        with pytest.raises(ValueError, match="Multiplexer is not connected properly."):
+            await multiplexer.run()
+
+
 def test_multiplexer_connect_all_raises_error():
     """Test the case when the multiplexer raises an exception while connecting."""
     multiplexer = Multiplexer([_make_dummy_connection()])
