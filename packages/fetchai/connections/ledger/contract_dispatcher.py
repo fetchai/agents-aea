@@ -81,7 +81,8 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         """Initialize the dispatcher."""
         logger = kwargs.pop("logger", None)
         logger = logger if logger is not None else _default_logger
-        super().__init__(*args, **kwargs, logger=logger)
+
+        super().__init__(logger, *args, **kwargs)
         self._contract_api_dialogues = ContractApiDialogues()
 
     @property
