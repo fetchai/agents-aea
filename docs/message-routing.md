@@ -13,9 +13,11 @@ Message routing can be split up into the routing of incoming and outgoing `Messa
 - `Skills` deposit `Messages` in `OutBox`
 - `OutBox` constructs an `Envelope` from the `Message`
 - `Multiplexer` assigns messages to relevant `Connection` based on three rules:
-1. checks if `EnvelopeContext` exists and specifies a `Connection`, if so uses that else
-2. checks if default routing is specified for the `protocol_id` referenced in the `Envelope`, if so uses that else
-3. sends to default `Connection`.
+
+	1. checks if `EnvelopeContext` exists and specifies a `Connection`, if so uses that else
+	2. checks if default routing is specified for the `protocol_id` referenced in the `Envelope`, if so uses that else
+	3. sends to default `Connection`.
+
 - `Connections` can encode envelopes where necessary or pass them on for transport to another agent
 
 ## Address fields in `Envelopes`/`Messages`

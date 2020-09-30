@@ -4,4 +4,8 @@
   <p>Details coming soon. In the meantime check out <a href="../p2p-connection">this section.</a></p>
 </div>
 
+
+missing:
+- different configurations of setting up peer and client
+
 <br />
