@@ -386,10 +386,10 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
             raise ValueError(
                 f"There are missing fields in component id {component_index + 1}: {missing_fields}."
             )
-        component_name = component_configuration_json["name"]
-        component_author = component_configuration_json["author"]
-        component_version = component_configuration_json["version"]
-        component_type = ComponentType(component_configuration_json["type"])
+        component_name = component_configuration_json.pop("name")
+        component_author = component_configuration_json.pop("author")
+        component_version = component_configuration_json.pop("version")
+        component_type = ComponentType(component_configuration_json.pop("type"))
         component_public_id = PublicId(
             component_author, component_name, component_version
         )
@@ -414,7 +414,9 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
             component_id.component_type
         )
         try:
-            BaseConfigLoader(schema_file).validate(configuration)
+            BaseConfigLoader(schema_file).validate(
+                dict(**component_id.json, **configuration)
+            )
         except jsonschema.ValidationError as e:
             raise ValueError(
                 f"Configuration of component {component_id} is not valid."
