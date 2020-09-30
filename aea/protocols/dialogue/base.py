@@ -611,6 +611,51 @@ class Dialogue(ABC):
 
         return reply
 
+    def reply_with_target(
+        self,
+        performative: Message.Performative,
+        target: Optional[int] = None,
+        **kwargs,
+    ) -> Message:
+        """
+        Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
+
+        Note if no target_message is provided, the last message in the dialogue will be replied to.
+
+        :param target: the id of the message to reply to.
+        :param performative: the performative of the reply message.
+        :param kwargs: the content of the reply message.
+
+        :return: the reply message if it was successfully added as a reply, None otherwise.
+        """
+        last_message = self.last_message
+        if last_message is None:
+            raise ValueError("Cannot reply in an empty dialogue!")
+
+        if target is None:
+            target = last_message.message_id
+        else:
+            enforce(
+                self._has_message_id(
+                    target  # type: ignore
+                ),
+                "The target message does not exist in this dialogue.",
+            )
+
+        reply = self._message_class(
+            dialogue_reference=self.dialogue_label.dialogue_reference,
+            message_id=last_message.message_id + 1,
+            target=target,
+            performative=performative,
+            **kwargs,
+        )
+        reply.sender = self.self_address
+        reply.to = self.dialogue_label.dialogue_opponent_addr
+
+        self._update(reply)
+
+        return reply
+
     def _validate_next_message(self, message: Message) -> Tuple[bool, str]:
         """
         Check whether 'message' is a valid next message in this dialogue.
