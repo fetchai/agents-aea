@@ -292,6 +292,8 @@ class AEABuilder:
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
 
+    loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+
     # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, with_default_packages: bool = True):
@@ -1336,15 +1338,45 @@ class AEABuilder:
         builder = AEABuilder(with_default_packages=False)
 
         # load agent configuration file
-        configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
-
-        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
-        agent_configuration = loader.load(configuration_file.open())
+        configuration_file = cls.get_configuration_file_path(aea_project_path)
+        agent_configuration = cls.loader.load(configuration_file.open())
 
         builder.set_from_configuration(
             agent_configuration, aea_project_path, skip_consistency_check
         )
         return builder
+
+    @classmethod
+    def from_config_json(
+        cls,
+        json_data: List[Dict],
+        aea_project_path: PathLike,
+        skip_consistency_check: bool = False,
+    ) -> "AEABuilder":
+        """
+        Load agent configuration for alreaady provided json data.
+
+        :param json_data: list of dicts with agent configuration
+        :param aea_project_path: path to project root
+        :param skip_consistency_check: skip consistency check on configs load.
+
+        :return: AEABuilder instance
+        """
+        aea_project_path = Path(aea_project_path)
+        builder = AEABuilder(with_default_packages=False)
+
+        # load agent configuration file
+        agent_configuration = cls.loader.load_agent_config_from_json(json_data)
+
+        builder.set_from_configuration(
+            agent_configuration, aea_project_path, skip_consistency_check
+        )
+        return builder
+
+    @staticmethod
+    def get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path:
+        """Return path to aea-config file for the given aea project path."""
+        return Path(aea_project_path) / DEFAULT_AEA_CONFIG_FILE
 
     def _load_and_add_components(
         self,

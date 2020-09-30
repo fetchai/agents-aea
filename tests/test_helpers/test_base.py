@@ -274,7 +274,7 @@ def test_recursive_update_negative_different_type():
 
     with pytest.raises(
         ValueError,
-        match=f"Trying to replace value '1' with value 'False' which is of different type.",
+        match="Trying to replace value '1' with value 'False' which is of different type.",
     ):
         recursive_update(to_update, new_values)
 
@@ -287,6 +287,6 @@ def test_recursive_update_negative_unknown_field():
 
     with pytest.raises(
         ValueError,
-        match=f"Key 'new_field' is not contained in the dictionary to update.",
+        match="Key 'new_field' is not contained in the dictionary to update.",
     ):
         recursive_update(to_update, new_values)
