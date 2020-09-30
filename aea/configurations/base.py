@@ -733,6 +733,11 @@ class ComponentId(PackageId):
             self.public_id.author, self.component_type.to_plural(), self.public_id.name
         )
 
+    @property
+    def json(self) -> Dict:
+        """Get the JSON representation."""
+        return dict(**self.public_id.json, type=str(self.component_type))
+
 
 ProtocolId = PublicId
 ContractId = PublicId
