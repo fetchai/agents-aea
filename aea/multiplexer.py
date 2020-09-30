@@ -277,7 +277,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self.logger.debug("Multiplexer disconnecting...")
         async with self._lock:
             if self.connection_status.is_disconnected:
-                self.logger.debug("Multiplexer disconnected.")
+                self.logger.debug("Multiplexer already disconnected.")
                 return
             try:
                 self.connection_status.set(ConnectionStates.disconnecting)

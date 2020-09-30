@@ -213,11 +213,11 @@ class TestLaunchMultithreaded(BaseLaunchTestCase):
                     f"[{self.agent_name_1}] Start processing messages",
                     f"[{self.agent_name_2}] Start processing messages",
                 ],
-                timeout=20,
+                timeout=30,
             )
             process_launch.control_c()
             process_launch.expect_all(
-                ["Exit cli. code: 0"], timeout=20,
+                ["Exit cli. code: 0"], timeout=30,
             )
 
 

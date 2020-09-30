@@ -728,12 +728,15 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Finished downloading golang dependencies"], timeout=20,
+            ["Finished downloading golang dependencies"], timeout=50,
         )
         self.proc.control_c()
         self.proc.expect_all(
-            ["Multiplexer disconnecting...", "Multiplexer disconnected.", EOF],
-            timeout=20,
+            ["Multiplexer .*disconnected."], timeout=20, strict=False,
+        )
+
+        self.proc.expect_all(
+            [EOF], timeout=20,
         )
 
     def test_multiplexer_disconnected_on_termination_after_connected(self):
