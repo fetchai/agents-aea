@@ -23,17 +23,18 @@ import copy
 import os
 import threading
 from asyncio.tasks import FIRST_COMPLETED
+from pathlib import Path
 from shutil import rmtree
 from threading import Thread
 from typing import Callable, Dict, List, Optional
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ComponentId, PublicId
+from aea.configurations.base import AgentConfig, ComponentId, PackageType, PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.loader import ConfigLoaders
 from aea.configurations.project import AgentAlias, Project
 from aea.crypto.helpers import create_private_key
-from aea.helpers.base import yaml_load_all
 
 
 class AgentRunAsyncTask:
@@ -509,8 +510,8 @@ class MultiAgentManager:
         self,
         project: Project,
         agent_name: str,
-        agent_overrides=None,
-        component_overrides=None,
+        agent_overrides: Optional[dict] = None,
+        component_overrides: Optional[List[dict]] = None,
     ) -> AgentAlias:
         """Create agent alias for project, with given name and overrided values."""
         json_config = self._make_config(
@@ -529,13 +530,6 @@ class MultiAgentManager:
         agent = builder.build()
         return AgentAlias(project, agent_name, json_config, agent)
 
-    @staticmethod
-    def _update_dict(base: dict, override: dict) -> dict:
-        """Apply overrides for dict."""
-        base = copy.deepcopy(base)
-        base.update(override)
-        return base
-
     def _make_config(
         self,
         project_path: str,
@@ -551,20 +545,35 @@ class MultiAgentManager:
                 'Do not override any of {" ".join(self.AGENT_DO_NOT_OVERRIDE_VALUES)}'
             )
 
-        json_data = yaml_load_all(
-            AEABuilder.get_configuration_file_path(project_path).open()
+        agent_configuration_file_path: Path = AEABuilder.get_configuration_file_path(
+            project_path
         )
-        agent_config = self._update_dict(json_data[0], agent_overrides)
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        with agent_configuration_file_path.open() as fp:
+            agent_config: AgentConfig = loader.load(fp)
 
-        components_configs = {PublicId.from_json(obj): obj for obj in json_data[1:]}
-
+        # prepare configuration overrides
+        # - agent part
+        agent_update_dictionary: Dict = dict(**agent_overrides)
+        # - components part
+        components_configs: Dict[ComponentId, Dict] = {}
         for obj in component_overrides:
-            component_id = ComponentId(obj["type"], PublicId.from_json(obj))
-            components_configs[component_id] = self._update_dict(
-                components_configs.get(component_id, {}), obj
+            obj = copy.copy(obj)
+            author, name, version = (
+                obj.pop("author"),
+                obj.pop("name"),
+                obj.pop("version"),
             )
+            component_id = ComponentId(obj.pop("type"), PublicId(author, name, version))
+            components_configs[component_id] = obj
+        agent_update_dictionary["component_configurations"] = components_configs
+        # do the override (and valiation)
+        agent_config.update(agent_update_dictionary)
 
-        return [agent_config] + list(components_configs.values())
+        # return the multi-paged JSON object.
+        json_data = agent_config.ordered_json
+        result: List[Dict] = [json_data] + json_data.pop("component_configurations")
+        return result
 
     def _create_private_key(self, name, ledger) -> str:
         """Create new key for agent alias in working dir keys dir."""

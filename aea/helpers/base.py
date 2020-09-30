@@ -392,7 +392,7 @@ def exception_log_and_reraise(log_method: Callable, message: str):
         raise
 
 
-def recursive_update(to_update: Dict, new_values: Dict):
+def recursive_update(to_update: Dict, new_values: Dict) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.
 
@@ -406,7 +406,7 @@ def recursive_update(to_update: Dict, new_values: Dict):
 
     :param to_update: the dictionary to update.
     :param new_values: the dictionary of new values to replace.
-    :return: the updated dictionary.
+    :return: None
     """
     for key, value in new_values.items():
         if key not in to_update:

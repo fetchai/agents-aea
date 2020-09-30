@@ -101,13 +101,10 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
             self.agent_name,
             component_overrides=[
                 {
-                    "type": "skill",
                     **self.echo_skill_id.json,
+                    "type": "skill",
                     "behaviours": {
-                        "echo": {
-                            "args": {"tick_interval": new_tick_interval},
-                            "class_name": "EchoBehaviour",
-                        }
+                        "echo": {"args": {"tick_interval": new_tick_interval}}
                     },
                 }
             ],
