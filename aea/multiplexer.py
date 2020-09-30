@@ -264,7 +264,10 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 self._recv_loop_task = self._loop.create_task(self._receiving_loop())
                 self._send_loop_task = self._loop.create_task(self._send_loop())
                 self.logger.debug("Multiplexer connected and running.")
-            except (CancelledError, Exception):
+            except (CancelledError, asyncio.CancelledError):
+                await self._stop()
+                raise asyncio.CancelledError()
+            except Exception:
                 self.logger.exception("Exception on connect:")
                 await self._stop()
                 raise AEAConnectionError("Failed to connect the multiplexer.")
@@ -341,14 +344,13 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 await self._connect_one(connection_id)
                 connected.append(connection_id)
             except Exception as e:  # pylint: disable=broad-except
-                self.logger.error(
-                    "Error while connecting {}: {}".format(
-                        str(type(connection)), str(e)
+                if not isinstance(e, (asyncio.CancelledError, CancelledError)):
+                    self.logger.exception(
+                        "Error while connecting {}: {}".format(
+                            str(type(connection)), repr(e)
+                        )
                     )
-                )
-                for c in connected:
-                    await self._disconnect_one(c)
-                break
+                raise
         self.logger.debug("Multiplexer connections are set.")
 
     async def _connect_one(self, connection_id: PublicId) -> None:

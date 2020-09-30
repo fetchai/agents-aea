@@ -270,13 +270,19 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
         return configuration_obj
 
-    def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
-        """Load an agent configuration."""
-        configuration_file_jsons = yaml_load_all(file_pointer)
+    def load_agent_config_from_json(
+        self, configuration_json: List[Dict]
+    ) -> AgentConfig:
+        """
+        Load agent configuration from configuration json data.
 
-        if len(configuration_file_jsons) == 0:
+        :param configuration_json: list of dicts with aea configuration
+
+        :return: AgentConfig instance
+        """
+        if len(configuration_json) == 0:
             raise ValueError("Agent configuration file was empty.")
-        agent_config_json = configuration_file_jsons[0]
+        agent_config_json = configuration_json[0]
         self._validate(agent_config_json)
         key_order = list(agent_config_json.keys())
         agent_configuration_obj = cast(
@@ -287,7 +293,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         )
 
         component_configurations = self._get_component_configurations(
-            configuration_file_jsons
+            configuration_json
         )
         agent_configuration_obj.component_configurations = component_configurations
         return agent_configuration_obj
@@ -315,6 +321,11 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
                 )
             component_configurations[component_id] = component_configuration_json
         return component_configurations
+
+    def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
+        """Load an agent configuration."""
+        configuration_file_jsons = yaml_load_all(file_pointer)
+        return self.load_agent_config_from_json(configuration_file_jsons)
 
     def _dump_agent_config(
         self, configuration: AgentConfig, file_pointer: TextIO
@@ -375,10 +386,10 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
             raise ValueError(
                 f"There are missing fields in component id {component_index + 1}: {missing_fields}."
             )
-        component_name = component_configuration_json["name"]
-        component_author = component_configuration_json["author"]
-        component_version = component_configuration_json["version"]
-        component_type = ComponentType(component_configuration_json["type"])
+        component_name = component_configuration_json.pop("name")
+        component_author = component_configuration_json.pop("author")
+        component_version = component_configuration_json.pop("version")
+        component_type = ComponentType(component_configuration_json.pop("type"))
         component_public_id = PublicId(
             component_author, component_name, component_version
         )
@@ -403,7 +414,9 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
             component_id.component_type
         )
         try:
-            BaseConfigLoader(schema_file).validate(configuration)
+            BaseConfigLoader(schema_file).validate(
+                dict(**component_id.json, **configuration)
+            )
         except jsonschema.ValidationError as e:
             raise ValueError(
                 f"Configuration of component {component_id} is not valid."

@@ -27,7 +27,7 @@ import pprint
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from copy import deepcopy
+from copy import copy, deepcopy
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -733,6 +733,11 @@ class ComponentId(PackageId):
             self.public_id.author, self.component_type.to_plural(), self.public_id.name
         )
 
+    @property
+    def json(self) -> Dict:
+        """Get the JSON representation."""
+        return dict(**self.public_id.json, type=str(self.component_type))
+
 
 ProtocolId = PublicId
 ContractId = PublicId
@@ -833,6 +838,14 @@ class PackageConfiguration(Configuration, ABC):
         """Get the package dependencies."""
         return set()
 
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
+
 
 class ComponentConfiguration(PackageConfiguration, ABC):
     """Class to represent an agent component configuration."""
@@ -915,14 +928,6 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         :raises ValueError if the version of the aea framework falls within a specifier.
         """
         _check_aea_version(self)
-
-    def update(self, data: Dict) -> None:
-        """
-        Update configuration with other data.
-
-        :param data: the data to replace.
-        :return: None
-        """
 
 
 class ConnectionConfig(ComponentConfiguration):
@@ -1537,7 +1542,18 @@ class AgentConfig(PackageConfiguration):
 
     def component_configurations_json(self) -> List[OrderedDict]:
         """Get the component configurations in JSON format."""
-        return list(map(OrderedDict, self.component_configurations.values()))
+        result: List[OrderedDict] = []
+        for component_id, config in self.component_configurations.items():
+            result.append(
+                OrderedDict(
+                    author=component_id.author,
+                    name=component_id.name,
+                    version=component_id.version,
+                    type=str(component_id.component_type),
+                    **config,
+                )
+            )
+        return result
 
     @property
     def json(self) -> Dict:
@@ -1647,10 +1663,10 @@ class AgentConfig(PackageConfiguration):
         component_configurations = {}
         for config in obj.get("component_configurations", []):
             tmp = deepcopy(config)
-            name = tmp["name"]
-            author = tmp["author"]
-            version = tmp["version"]
-            type_ = tmp["type"]
+            name = tmp.pop("name")
+            author = tmp.pop("author")
+            version = tmp.pop("version")
+            type_ = tmp.pop("type")
             component_id = ComponentId(
                 ComponentType(type_), PublicId(author, name, version)
             )
@@ -1664,6 +1680,30 @@ class AgentConfig(PackageConfiguration):
         agent_config.default_ledger = default_ledger_id
 
         return agent_config
+
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        To update the component parts, populate the field "component_configurations" as a
+        mapping from ComponentId to configurations.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        data = copy(data)
+        # update component parts
+        new_component_configurations: Dict = data.pop("component_configurations", {})
+        result: Dict[ComponentId, Dict] = copy(self.component_configurations)
+        for component_id, obj in new_component_configurations.items():
+            if component_id not in result:
+                result[component_id] = obj
+            else:
+                recursive_update(result[component_id], obj)
+        self.component_configurations = result
+
+        # update other fields
+        # currently not supported.
 
 
 class SpeechActContentConfig(Configuration):

@@ -34,6 +34,7 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     ContractConfig,
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
@@ -53,7 +54,9 @@ from aea.configurations.loader import ConfigLoaders, load_component_configuratio
 
 from tests.conftest import (
     AUTHOR,
+    CUR_PATH,
     DUMMY_SKILL_PATH,
+    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     agent_config_files,
     connection_config_files,
@@ -269,6 +272,45 @@ class TestAgentConfig:
         actual_config = AgentConfig.from_json(expected_json)
         actual_json = actual_config.json
         assert expected_json == actual_json
+
+    def test_update(self):
+        """Test the update method."""
+        aea_config_path = Path(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE)
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        aea_config: AgentConfig = loader.load(aea_config_path.open())
+
+        dummy_skill_component_id = ComponentId(
+            ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID
+        )
+
+        new_dummy_skill_config = {
+            "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
+            "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
+            "models": {"dummy": {"args": dict(model_arg_1=42)}},
+        }
+
+        aea_config.update(
+            dict(
+                component_configurations={
+                    dummy_skill_component_id: new_dummy_skill_config
+                }
+            )
+        )
+        assert (
+            aea_config.component_configurations[dummy_skill_component_id]
+            == new_dummy_skill_config
+        )
+        aea_config.update(
+            dict(
+                component_configurations={
+                    dummy_skill_component_id: new_dummy_skill_config
+                }
+            )
+        )
+        assert (
+            aea_config.component_configurations[dummy_skill_component_id]
+            == new_dummy_skill_config
+        )
 
 
 class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
