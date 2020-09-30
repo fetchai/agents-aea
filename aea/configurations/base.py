@@ -1548,8 +1548,8 @@ class AgentConfig(PackageConfiguration):
         for component_id, config in self.component_configurations.items():
             result.append(
                 OrderedDict(
-                    author=component_id.author,
                     name=component_id.name,
+                    author=component_id.author,
                     version=component_id.version,
                     type=str(component_id.component_type),
                     **config,

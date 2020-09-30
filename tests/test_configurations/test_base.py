@@ -292,23 +292,25 @@ class TestAgentConfig:
             "models": {"dummy": {"args": dict(model_arg_1=42)}},
         }
 
+        new_private_key_paths = dict(ethereum="foo", cosmos="bar")
         aea_config.update(
             dict(
                 component_configurations={
                     dummy_skill_component_id: new_dummy_skill_config
                 },
-                private_key_paths=dict(foo="bar"),
-                connection_private_key_paths=dict(foo="bar"),
+                private_key_paths=new_private_key_paths,
+                connection_private_key_paths=new_private_key_paths,
             )
         )
         assert (
             aea_config.component_configurations[dummy_skill_component_id]
             == new_dummy_skill_config
         )
-        assert dict(aea_config.private_key_paths.read_all()) == {"foo": "bar"}
-        assert dict(aea_config.connection_private_key_paths.read_all()) == {
-            "foo": "bar"
-        }
+        assert dict(aea_config.private_key_paths.read_all()) == new_private_key_paths
+        assert (
+            dict(aea_config.connection_private_key_paths.read_all())
+            == new_private_key_paths
+        )
 
         # test idempotence
         aea_config.update(
