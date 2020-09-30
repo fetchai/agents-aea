@@ -1,17 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Schema for the skill configuration file.",
+  "description": "Schema for the configurable part of a skill configuration in the agent configuration file.",
   "additionalProperties": false,
-  "type": "object",
   "required": [
     "name",
     "author",
     "version",
-    "license",
-    "aea_version",
-    "protocols",
-    "contracts",
-    "skills"
+    "type"
   ],
   "properties": {
     "name": {
@@ -26,42 +21,6 @@
     "type": {
       "$ref": "definitions.json#/definitions/component_type"
     },
-    "license": {
-      "$ref": "definitions.json#/definitions/license"
-    },
-    "aea_version": {
-      "$ref": "definitions.json#/definitions/aea_version"
-    },
-    "fingerprint": {
-      "$ref": "definitions.json#/definitions/fingerprint"
-    },
-    "fingerprint_ignore_patterns": {
-      "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
-    },
-    "protocols": {
-      "type": "array",
-      "additionalProperties": false,
-      "uniqueItems": true,
-      "items": {
-        "$ref": "definitions.json#/definitions/public_id"
-      }
-    },
-    "contracts": {
-      "type": "array",
-      "additionalProperties": false,
-      "uniqueItems": true,
-      "items": {
-        "$ref": "definitions.json#/definitions/public_id"
-      }
-    },
-    "skills": {
-      "type": "array",
-      "additionalProperties": false,
-      "uniqueItems": true,
-      "items": {
-        "$ref": "definitions.json#/definitions/public_id"
-      }
-    },
     "handlers": {
       "$ref": "#/definitions/handlers"
     },
@@ -71,14 +30,8 @@
     "models": {
       "$ref": "#/definitions/models"
     },
-    "dependencies": {
-      "$ref": "definitions.json#/definitions/dependencies"
-    },
-    "description": {
-      "$ref": "definitions.json#/definitions/description"
-    },
     "is_abstract": {
-      "type": "boolean"
+      "$ref": "skill-config_schema.json#/properties/is_abstract"
     }
   },
   "definitions": {
@@ -114,12 +67,9 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "class_name"
+        "args"
       ],
       "properties": {
-        "class_name": {
-          "$ref": "definitions.json#/definitions/class_name"
-        },
         "args": {
           "type": "object"
         }
@@ -129,12 +79,9 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "class_name"
+        "args"
       ],
       "properties": {
-        "class_name": {
-          "type": "string"
-        },
         "args": {
           "type": "object"
         }
@@ -144,12 +91,9 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "class_name"
+        "args"
       ],
       "properties": {
-        "class_name": {
-          "type": "string"
-        },
         "args": {
           "type": "object"
         }

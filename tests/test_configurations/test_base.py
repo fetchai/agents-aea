@@ -19,6 +19,7 @@
 
 """This module contains the tests for the aea.configurations.base module."""
 import re
+from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
 
@@ -52,6 +53,7 @@ from aea.configurations.loader import ConfigLoaders, load_component_configuratio
 
 from tests.conftest import (
     AUTHOR,
+    DUMMY_SKILL_PATH,
     ROOT_DIR,
     agent_config_files,
     connection_config_files,
@@ -200,6 +202,37 @@ class TestSkillConfig:
 
     def test_update_method(self):
         """Test the update method."""
+        skill_config_path = Path(DUMMY_SKILL_PATH)
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+        skill_config = loader.load(skill_config_path.open())
+
+        dummy_behaviour = skill_config.behaviours.read("dummy")
+        expected_dummy_behaviour_args = copy(dummy_behaviour.args)
+        expected_dummy_behaviour_args["behaviour_arg_1"] = 42
+
+        dummy_handler = skill_config.handlers.read("dummy")
+        expected_dummy_handler_args = copy(dummy_handler.args)
+        expected_dummy_handler_args["handler_arg_1"] = 42
+
+        dummy_model = skill_config.models.read("dummy")
+        expected_dummy_model_args = copy(dummy_model.args)
+        expected_dummy_model_args["model_arg_1"] = 42
+
+        new_configurations = {
+            "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
+            "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
+            "models": {"dummy": {"args": dict(model_arg_1=42)}},
+        }
+        skill_config.update(new_configurations)
+
+        assert (
+            expected_dummy_behaviour_args == skill_config.behaviours.read("dummy").args
+        )
+        assert expected_dummy_handler_args == skill_config.handlers.read("dummy").args
+        assert expected_dummy_model_args == skill_config.models.read("dummy").args
+
+    def test_update_method_raises_error_if_skill_component_not_allowed(self):
+        """Test that we raise error if the custom configuration contain unexpected skill components."""
         skill_config_path = Path(
             ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
         )
@@ -210,14 +243,12 @@ class TestSkillConfig:
             "handlers": {"new_handler": {"args": {}, "class_name": "SomeClass"}},
             "models": {"new_model": {"args": {}, "class_name": "SomeClass"}},
         }
-        skill_config.update(new_configurations)
 
-        new_behaviour = skill_config.behaviours.read("new_behaviour")
-        assert new_behaviour.json == new_configurations["behaviours"]["new_behaviour"]
-        new_handler = skill_config.handlers.read("new_handler")
-        assert new_handler.json == new_configurations["handlers"]["new_handler"]
-        new_model = skill_config.models.read("new_model")
-        assert new_model.json == new_configurations["models"]["new_model"]
+        with pytest.raises(
+            ValueError,
+            match="The custom configuration for skill fetchai/error:0.6.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+        ):
+            skill_config.update(new_configurations)
 
 
 class TestAgentConfig:
@@ -713,3 +744,12 @@ def test_package_version_lt():
     v2 = PackageVersion("0.2.0")
     v3 = PackageVersion("latest")
     assert v1 < v2 < v3
+
+
+def test_configuration_class():
+    """Test the attribute 'configuration class' of PackageType."""
+    assert PackageType.PROTOCOL.configuration_class() == ProtocolConfig
+    assert PackageType.CONNECTION.configuration_class() == ConnectionConfig
+    assert PackageType.CONTRACT.configuration_class() == ContractConfig
+    assert PackageType.SKILL.configuration_class() == SkillConfig
+    assert PackageType.AGENT.configuration_class() == AgentConfig

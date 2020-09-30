@@ -616,18 +616,15 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         behaviours:
           dummy:
             args:
-            {indent(yaml.dump(self.expected_behaviour_args), "  ")}
-            class_name: DummyBehaviour
+            {indent(yaml.dump(self.new_behaviour_args), "  ")}
         handlers:
           dummy:
             args:
-            {indent(yaml.dump(self.expected_handler_args), "  ")}
-            class_name: DummyHandler
+            {indent(yaml.dump(self.new_handler_args), "  ")}
         models:
           dummy:
             args:
-            {indent(yaml.dump(self.expected_model_args), "  ")}
-            class_name: DummyModel
+            {indent(yaml.dump(self.new_model_args), "  ")}
         ...
         """
         )
@@ -635,9 +632,9 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
 
     def test_from_project(self):
         """Test builder set from project dir."""
-        self.expected_behaviour_args = {"behaviour_arg_1": 42}
-        self.expected_handler_args = {"handler_arg_1": 42}
-        self.expected_model_args = {"model_arg_1": 42}
+        self.new_behaviour_args = {"behaviour_arg_1": 42}
+        self.new_handler_args = {"handler_arg_1": 42}
+        self.new_model_args = {"model_arg_1": 42}
         self._add_dummy_skill_config()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
@@ -647,11 +644,11 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
             PublicId("dummy_author", "dummy", "0.1.0")
         )
         dummy_behaviour = dummy_skill.behaviours["dummy"]
-        assert dummy_behaviour.config == self.expected_behaviour_args
+        assert dummy_behaviour.config == {"behaviour_arg_1": 42, "behaviour_arg_2": "2"}
         dummy_handler = dummy_skill.handlers["dummy"]
-        assert dummy_handler.config == self.expected_handler_args
+        assert dummy_handler.config == {"handler_arg_1": 42, "handler_arg_2": "2"}
         dummy_model = dummy_skill.models["dummy"]
-        assert dummy_model.config == self.expected_model_args
+        assert dummy_model.config == {"model_arg_1": 42, "model_arg_2": "2"}
 
 
 class TestFromAEAProjectMakeSkillAbstract(AEATestCase):

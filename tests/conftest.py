@@ -205,6 +205,8 @@ DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 
+DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
+
 MAX_FLAKY_RERUNS = 3
 MAX_FLAKY_RERUNS_ETH = 1
 MAX_FLAKY_RERUNS_INTEGRATION = 1
@@ -278,7 +280,7 @@ skill_config_files = [
     os.path.join(FETCHAI_PREF, "skills", "thermometer_client", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "weather_client", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "weather_station", SKILL_YAML),
-    os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML),
+    DUMMY_SKILL_PATH,
     os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "dependencies_skill", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "exception_skill", SKILL_YAML),
