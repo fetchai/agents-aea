@@ -536,7 +536,7 @@ class MultiAgentManager:
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
     ) -> List[dict]:
-        """Make new config baseed on proejct's config with overrides applied."""
+        """Make new config based on project's config with overrides applied."""
         agent_overrides = agent_overrides or {}
         component_overrides = component_overrides or []
 

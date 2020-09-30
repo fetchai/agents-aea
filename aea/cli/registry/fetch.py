@@ -42,9 +42,9 @@ def fetch_agent(
     Fetch Agent from Registry.
 
     :param ctx: Context
-    :param public_id: str public ID of desirable Agent.
-    :param ctx: a Context object.
+    :param public_id: str public ID of desirable agent.
     :param alias: an optional alias.
+    :param target_dir: the target directory to which the agent is fetched.
     :return: None
     """
     author, name, version = public_id.author, public_id.name, public_id.version
@@ -56,7 +56,6 @@ def fetch_agent(
 
     folder_name = target_dir or (name if alias is None else alias)
     aea_folder = os.path.join(ctx.cwd, folder_name)
-    print(aea_folder)
     ctx.clean_paths.append(aea_folder)
 
     extract(filepath, ctx.cwd)

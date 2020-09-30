@@ -146,7 +146,7 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         with pytest.raises(ValueError, match=" project is not added"):
             self.manager.add_agent(PublicId("test", "test", "0.1.0"), "another_agent")
 
-    def test_agent_acually_running(self):
+    def test_agent_actually_running(self):
         """Test MultiAgentManager starts agent correctly and agent perform acts."""
         self.test_add_agent()
         agent_alias = self.manager.get_agent_alias(self.agent_name)
@@ -253,13 +253,18 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
     def test_double_start(self):
         """Test double MultiAgentManager start."""
         self.manager.start_manager()
+        assert self.manager.is_running
         self.manager.start_manager()
+        assert self.manager.is_running
 
     def test_double_stop(self):
         """Test double MultiAgentManager stop."""
         self.manager.start_manager()
+        assert self.manager.is_running
         self.manager.stop_manager()
+        assert not self.manager.is_running
         self.manager.stop_manager()
+        assert not self.manager.is_running
 
     @pytest.mark.asyncio
     async def test_run_loop_direct_call(self):
