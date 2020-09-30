@@ -347,6 +347,8 @@ class CRUDCollection(Generic[T]):
         :param item: the item to be added.
         :return: None
         """
+        if item_id not in self._items_by_id:
+            raise ValueError(f"No item registered with id '{item_id}'.")
         self._items_by_id[item_id] = item
 
     def delete(self, item_id: str) -> None:
@@ -1402,8 +1404,8 @@ class AgentConfig(PackageConfiguration):
         self.agent_name = agent_name
         self.registry_path = registry_path
         self.description = description
-        self.private_key_paths: CRUDCollection[str] = CRUDCollection[str]()
-        self.connection_private_key_paths: CRUDCollection[str] = CRUDCollection[str]()
+        self.private_key_paths = CRUDCollection[str]()
+        self.connection_private_key_paths = CRUDCollection[str]()
 
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_ledger = None  # type: Optional[str]
@@ -1703,10 +1705,10 @@ class AgentConfig(PackageConfiguration):
         self.component_configurations = result
 
         # update other fields
-        for item_id, value in data.get("private_key_paths", {}):
+        for item_id, value in data.get("private_key_paths", {}).items():
             self.private_key_paths.update(item_id, value)
 
-        for item_id, value in data.get("connection_private_key_paths", {}):
+        for item_id, value in data.get("connection_private_key_paths", {}).items():
             self.connection_private_key_paths.update(item_id, value)
 
         self.logging_config = data.get("logging_config", self.logging_config)
