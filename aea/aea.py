@@ -47,6 +47,7 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
+from aea.helpers.base import _get_aea_logger_name_prefix
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger
 from aea.identity.base import Identity
@@ -99,7 +100,7 @@ class AEA(Agent, WithLogger):
         :param resources: the resources (protocols and skills) of the agent.
         :param loop: the event loop to run the connections.
         :param period: period to call agent's act
-        :param exeution_timeout: amount of time to limit single act/handle to execute.
+        :param execution_timeout: amount of time to limit single act/handle to execute.
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
         :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
         :param skill_exception_policy: the skill exception policy enum
@@ -127,7 +128,7 @@ class AEA(Agent, WithLogger):
         )
 
         aea_logger = AgentLoggerAdapter(
-            logger=logging.getLogger(__name__), agent_name=identity.name
+            logger=logging.getLogger(_get_aea_logger_name_prefix(__name__, identity.name)), agent_name=identity.name
         )
         WithLogger.__init__(self, logger=cast(logging.Logger, aea_logger))
 

@@ -868,11 +868,11 @@ class AEABuilder:
         :raises ValueError: if we cannot
         """
         self._check_we_can_build()
-        resources = Resources()
         wallet = Wallet(
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
         identity = self._build_identity_from_wallet(wallet)
+        resources = Resources()
         self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)
         self._load_and_add_components(ComponentType.CONTRACT, resources, identity.name)
         self._load_and_add_components(
@@ -1455,6 +1455,6 @@ def make_logger(
     if configuration.component_type == ComponentType.SKILL:
         # skip because skill object already have their own logger from the skill context.
         return None
-    logger_name = f"aea.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
+    logger_name = f"aea.{agent_name}.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
     _logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
     return cast(logging.Logger, _logger)
