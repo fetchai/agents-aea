@@ -93,7 +93,7 @@ Whilst a ledger can, in principle, also be used to store structured data - for i
 The Python version of the AEA Framework currently integrates with three ledgers:
 
 - <a href="https://docs.fetch.ai/ledger/" target="_blank">Fetch.ai ledger</a>
-- <a href="https://ethereum.org/en/build/" target="_blank">Ethereum ledger</a>
+- <a href="https://ethereum.org/en/developers/learning-tools/" target="_blank">Ethereum ledger</a>
 - <a href="https://cosmos.network/sdk" target="_blank">Cosmos ledger</a>
 
 However, the framework makes it straightforward for further ledgers to be added by any developer.

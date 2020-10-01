@@ -785,6 +785,36 @@ Construct the builder from an AEA project.
 
 an AEABuilder.
 
+<a name="aea.aea_builder.AEABuilder.from_config_json"></a>
+#### from`_`config`_`json
+
+```python
+ | @classmethod
+ | from_config_json(cls, json_data: List[Dict], aea_project_path: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
+```
+
+Load agent configuration for alreaady provided json data.
+
+**Arguments**:
+
+- `json_data`: list of dicts with agent configuration
+- `aea_project_path`: path to project root
+- `skip_consistency_check`: skip consistency check on configs load.
+
+**Returns**:
+
+AEABuilder instance
+
+<a name="aea.aea_builder.AEABuilder.get_configuration_file_path"></a>
+#### get`_`configuration`_`file`_`path
+
+```python
+ | @staticmethod
+ | get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path
+```
+
+Return path to aea-config file for the given aea project path.
+
 <a name="aea.aea_builder.make_logger"></a>
 #### make`_`logger
 

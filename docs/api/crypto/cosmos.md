@@ -614,15 +614,6 @@ class CosmosApi(_CosmosApi,  CosmosHelper)
 
 Class to interact with the Cosmos SDK via a HTTP APIs.
 
-<a name="aea.crypto.cosmos.CosmWasmCLIWrapper"></a>
-## CosmWasmCLIWrapper Objects
-
-```python
-class CosmWasmCLIWrapper()
-```
-
-Wrapper of the CosmWasm CLI.
-
 <a name="aea.crypto.cosmos.CosmosFaucetApi"></a>
 ## CosmosFaucetApi Objects
 

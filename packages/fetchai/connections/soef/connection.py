@@ -908,7 +908,9 @@ class SOEFChannel:
         :return: None
         """
         if not self._unregister_lock:
-            raise ValueError("unregistered lock is not set, please call connect!")
+            raise ValueError(  # pragma: nocover
+                "unregistered lock is not set, please call connect!"
+            )
 
         async with self._unregister_lock:
             if self.unique_page_address is None:  # pragma: nocover
