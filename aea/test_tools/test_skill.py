@@ -19,11 +19,10 @@
 """This module contains test case classes based on pytest for AEA skill testing."""
 
 import asyncio
-import inspect
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Tuple, Type, Union, cast
 
 from aea.context.base import AgentContext
 from aea.exceptions import AEAEnforceError
@@ -31,7 +30,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.multiplexer import AsyncMultiplexer, Multiplexer, OutBox
 from aea.protocols.base import Message
-from aea.protocols.dialogue.base import Dialogue, Dialogues
+from aea.protocols.dialogue.base import Dialogues
 from aea.skills.base import Skill
 from aea.skills.tasks import TaskManager
 
@@ -78,7 +77,8 @@ class BaseSkillTestCase:
         :return: boolean result of the evaluation and accompanied message
         """
         if (
-            type(actual_message) != message_type  # pylint: disable=unidiomatic-typecheck
+            type(actual_message)  # pylint: disable=unidiomatic-typecheck
+            != message_type
         ):
             return (
                 False,
@@ -93,7 +93,7 @@ class BaseSkillTestCase:
                 if attribute != expected_value:
                     return (
                         False,
-                        "The '{}' fields do not match. Actual '{}': {}. Expected '{}': {}".format(   # pylint: disable=duplicate-string-formatting-argument
+                        "The '{}' fields do not match. Actual '{}': {}. Expected '{}': {}".format(  # pylint: disable=duplicate-string-formatting-argument
                             attribute_name,
                             attribute_name,
                             attribute,
@@ -107,12 +107,10 @@ class BaseSkillTestCase:
     def build_incoming_message(
         self,
         message_type: Type[Message],
-        performative: Message.Performative,  # pylint: disable=unused-argument
-        dialogue_reference: Optional[  # pylint: disable=unused-argument
-            Tuple[str, str]
-        ] = None,
-        message_id: Optional[int] = None,  # pylint: disable=unused-argument
-        target: Optional[int] = None,  # pylint: disable=unused-argument
+        performative: Message.Performative,
+        dialogue_reference: Optional[Tuple[str, str]] = None,
+        message_id: Optional[int] = None,
+        target: Optional[int] = None,
         to: Optional[Address] = None,
         sender: Address = "counterparty",
         **kwargs,
@@ -133,14 +131,20 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
-        message_attributes = dict()
-        message_attributes["dialogue_reference"] = Dialogues._generate_dialogue_nonce()  # pylint: disable=protected-access
-        for arg_name in inspect.getfullargspec(self.build_incoming_message)[0][1:]:
-            if (
-                arg_name not in {"message_type", "to", "sender"}
-                and locals()[arg_name] is not None
-            ):
-                message_attributes[arg_name] = locals()[arg_name]
+        message_attributes = dict()  # type: Dict[str, Any]
+        message_attributes[
+            "dialogue_reference"
+        ] = Dialogues._generate_dialogue_nonce()  # pylint: disable=protected-access
+        args_dict = {
+            "performative": performative,
+            "dialogue_reference": dialogue_reference,
+            "message_id": message_id,
+            "target": target,
+        }
+
+        for arg_name, arg_value in args_dict.items():
+            if arg_value is not None:
+                message_attributes[arg_name] = arg_value
         message_attributes.update(kwargs)
 
         incoming_message = message_type(**message_attributes)
@@ -166,12 +170,13 @@ class BaseSkillTestCase:
             new_message = tuple(new_message_list)
         return new_message
 
-    def build_dialogue(
+    def prepare_dialogue(
         self,
         dialogues: Dialogues,
         messages: Tuple[Tuple[Any, ...]],
+        incoming_message: Tuple[Any, ...],
         counterparty: Address = "counterparty",
-    ) -> Dialogue:
+    ) -> Message:
         """
         Quickly create a dialogue.
 
@@ -189,31 +194,32 @@ class BaseSkillTestCase:
         :param dialogues: a dialogues class
         :param counterparty: the message_id
         :param messages: the dialogue_reference
+        :param incoming_message: the incoming message expected for the dialogue
 
         :return: the created incoming message
         """
         last_incoming = True  # if 'inc' is not specified for the first message, this line makes it so the first message is outgoing
         for incomplete_message in messages:
-            message = self._complete_compact_message(
+            complete_compact_message = self._complete_compact_message(
                 incomplete_message,
                 last_incoming=last_incoming,
                 message_id=messages.index(incomplete_message) + 1,
             )
-            last_incoming = message[0]
-            is_incoming = message[0]
+            last_incoming = complete_compact_message[0]
+            is_incoming = complete_compact_message[0]
             message_id = messages.index(incomplete_message) + 1
             if message_id == 1:
                 dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
             else:
                 dialogue_reference = dialogue.dialogue_label.dialogue_reference
-            target = message[1]
-            performative = message[2]
-            contents = message[3]
+            target = complete_compact_message[1]
+            performative = complete_compact_message[2]
+            contents = complete_compact_message[3]
             to = self.skill.skill_context.agent_address
             sender = counterparty
 
             if is_incoming:
-                incoming_message = self.build_incoming_message(
+                message = self.build_incoming_message(
                     message_type=dialogues._message_class,  # pylint: disable=protected-access
                     dialogue_reference=dialogue_reference,
                     message_id=message_id,
@@ -223,19 +229,32 @@ class BaseSkillTestCase:
                     sender=sender,
                     **contents,
                 )
-                dialogue = dialogues.update(incoming_message)
+                dialogue = dialogues.update(message)
                 if dialogue is None:
-                    raise AEAEnforceError("Cannot update the dialogue with message number {}".format(message_id))
+                    raise AEAEnforceError(
+                        "Cannot update the dialogue with message number {}".format(
+                            message_id
+                        )
+                    )
             else:
                 if message_id == 1:
                     _, dialogue = dialogues.create(
                         counterparty=sender, performative=performative, **contents
                     )
                 else:
-                    dialogue.reply_with_target(
-                        performative=performative, target=target, **contents,
-                    )
-        return dialogue
+                    dialogue.reply(performative=performative, target=target, **contents)
+
+        complete_incoming_message = self.build_incoming_message(
+            message_type=dialogues._message_class,  # pylint: disable=protected-access
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            message_id=dialogue.last_message.message_id + 1,
+            target=dialogue.last_message.message_id,
+            performative=incoming_message[0],
+            to=self.skill.skill_context.agent_address,
+            sender=counterparty,
+            **incoming_message[1],
+        )
+        return complete_incoming_message
 
     @classmethod
     def setup(cls) -> None:

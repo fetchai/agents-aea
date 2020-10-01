@@ -30,7 +30,18 @@ import secrets
 from abc import ABC
 from enum import Enum
 from inspect import signature
-from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
+from typing import (
+    Callable,
+    Dict,
+    FrozenSet,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from aea.common import Address
 from aea.exceptions import enforce
@@ -569,7 +580,7 @@ class Dialogue(ABC):
     def reply(
         self,
         performative: Message.Performative,
-        target_message: Optional[Message] = None,
+        target: Optional[Union[int, Message]] = None,
         **kwargs,
     ) -> Message:
         """
@@ -577,52 +588,7 @@ class Dialogue(ABC):
 
         Note if no target_message is provided, the last message in the dialogue will be replied to.
 
-        :param target_message: the message to reply to.
-        :param performative: the performative of the reply message.
-        :param kwargs: the content of the reply message.
-
-        :return: the reply message if it was successfully added as a reply, None otherwise.
-        """
-        last_message = self.last_message
-        if last_message is None:
-            raise ValueError("Cannot reply in an empty dialogue!")
-
-        if target_message is None:
-            target_message = last_message
-        else:
-            enforce(
-                self._has_message(
-                    target_message  # type: ignore
-                ),
-                "The target message does not exist in this dialogue.",
-            )
-
-        reply = self._message_class(
-            dialogue_reference=self.dialogue_label.dialogue_reference,
-            message_id=last_message.message_id + 1,
-            target=target_message.message_id,
-            performative=performative,
-            **kwargs,
-        )
-        reply.sender = self.self_address
-        reply.to = self.dialogue_label.dialogue_opponent_addr
-
-        self._update(reply)
-
-        return reply
-
-    def reply_with_target(
-        self,
-        performative: Message.Performative,
-        target: Optional[int] = None,
-        **kwargs,
-    ) -> Message:
-        """
-        Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
-
-        Note if no target_message is provided, the last message in the dialogue will be replied to.
-
-        :param target: the id of the message to reply to.
+        :param target: the message, or id of the message, to reply to.
         :param performative: the performative of the reply message.
         :param kwargs: the content of the reply message.
 
@@ -633,14 +599,25 @@ class Dialogue(ABC):
             raise ValueError("Cannot reply in an empty dialogue!")
 
         if target is None:
-            target = last_message.message_id
+            target = last_message
         else:
-            enforce(
-                self._has_message_id(
-                    target  # type: ignore
-                ),
-                "The target message does not exist in this dialogue.",
-            )
+            if isinstance(target, Message):
+                enforce(
+                    self._has_message(
+                        target  # type: ignore
+                    ),
+                    "The target message does not exist in this dialogue.",
+                )
+            else:
+                enforce(
+                    self._has_message_id(
+                        target  # type: ignore
+                    ),
+                    "The target message does not exist in this dialogue.",
+                )
+
+        if isinstance(target, Message):
+            target = target.message_id
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,

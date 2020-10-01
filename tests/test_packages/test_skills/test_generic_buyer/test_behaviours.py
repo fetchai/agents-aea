@@ -23,7 +23,6 @@ from typing import cast
 
 from aea.helpers.search.models import Description
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.dialogue.base import DialogueLabel
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_PUBLIC_ID
@@ -52,9 +51,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
         search_behaviour = cast(
             GenericSearchBehaviour, self.skill.skill_context.behaviours.search
         )
-
-        # before
-        assert self.get_quantity_in_outbox() == 0
 
         # operation
         search_behaviour.setup()
@@ -99,9 +95,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
         strategy._is_searching = True
 
-        # before
-        assert self.get_quantity_in_outbox() == 0
-
         # operation
         search_behaviour.act()
 
@@ -127,9 +120,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
             GenericSearchBehaviour, self.skill.skill_context.behaviours.search
         )
 
-        # before
-        assert self.get_quantity_in_outbox() == 0
-
         # operation
         search_behaviour.act()
 
@@ -148,15 +138,12 @@ class TestSkillHandler(BaseSkillTestCase):
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
         incoming_message = self.build_incoming_message(
             message_type=FipaMessage,
-            dialogue_reference=("1", "0"),
+            dialogue_reference=("", ""),
             performative=FipaMessage.Performative.ACCEPT,
         )
 
-        # before
-        assert self.get_quantity_in_outbox() == 0
-
         # operation
-        fipa_handler._handle_unidentified_dialogue(cast(FipaMessage, incoming_message))
+        fipa_handler.handle(incoming_message)
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
@@ -178,36 +165,24 @@ class TestSkillHandler(BaseSkillTestCase):
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
         fipa_dialogues = cast(FipaDialogues, self.skill.skill_context.fipa_dialogues)
-        fipa_dialogue = self.build_dialogue(
-            dialogues=fipa_dialogues,
-            messages=(
-                (FipaMessage.Performative.CFP, {"query": "some_query"},),
-                (
-                    FipaMessage.Performative.PROPOSE,
-                    {
-                        "proposal": Description(
-                            {
-                                "ledger_id": "some_ledger_id",
-                                "price": "some_price",
-                                "currency_id": "some_currency_id",
-                                "service_id": "some_service_id",
-                                "quantity": "some_quantity",
-                                "tx_nonce": "some_tx_nonce",
-                            }
-                        )
-                    },
-                ),
-            ),
+        proposal = Description(
+            {
+                "ledger_id": "some_ledger_id",
+                "price": "some_price",
+                "currency_id": "some_currency_id",
+                "service_id": "some_service_id",
+                "quantity": "some_quantity",
+                "tx_nonce": "some_tx_nonce",
+            }
         )
-        incoming_message = fipa_dialogue.last_message
-
-        # before
-        assert self.get_quantity_in_outbox() == 0
+        incoming_message = self.prepare_dialogue(
+            dialogues=fipa_dialogues,
+            messages=((FipaMessage.Performative.CFP, {"query": "some_query"}),),
+            incoming_message=(FipaMessage.Performative.PROPOSE, {"proposal": proposal}),
+        )
 
         # operation
-        fipa_handler._handle_propose(
-            cast(FipaMessage, incoming_message), cast(FipaDialogue, fipa_dialogue)
-        )
+        fipa_handler.handle(incoming_message)
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
@@ -225,19 +200,12 @@ class TestSkillHandler(BaseSkillTestCase):
         """Test the _handle_decline method of the fipa handler where the end state is decline_cfp."""
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
-        incoming_message = self.build_incoming_message(
-            message_type=FipaMessage,
-            dialogue_reference=("1", "1"),
-            message_id=2,
-            target=1,
-            performative=FipaMessage.Performative.DECLINE,
-        )
-        fipa_dialogue = FipaDialogue(
-            DialogueLabel(("1", "1"), "counterparty", "me"),
-            "me",
-            FipaDialogue.Role.BUYER,
-        )
         fipa_dialogues = self.skill.skill_context.fipa_dialogues
+        incoming_message = self.prepare_dialogue(
+            dialogues=fipa_dialogues,
+            messages=((FipaMessage.Performative.CFP, {"query": "some_query"}),),
+            incoming_message=(FipaMessage.Performative.DECLINE, {}),
+        )
 
         # before
         for end_state_numbers in fipa_dialogues.dialogue_stats.self_initiated.values():
@@ -246,9 +214,7 @@ class TestSkillHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        fipa_handler._handle_decline(
-            cast(FipaMessage, incoming_message), fipa_dialogue, fipa_dialogues
-        )
+        fipa_handler.handle(incoming_message)
 
         # after
         for end_state_numbers in fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -266,21 +232,16 @@ class TestSkillHandler(BaseSkillTestCase):
         """Test the _handle_decline method of the fipa handler where the end state is decline_accept."""
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
-
-        incoming_message = self.build_incoming_message(
-            message_type=FipaMessage,
-            dialogue_reference=("1", "1"),
-            message_id=4,
-            target=3,
-            performative=FipaMessage.Performative.DECLINE,
-        )
-
-        fipa_dialogue = FipaDialogue(
-            DialogueLabel(("1", "1"), "counterparty", "me"),
-            "me",
-            FipaDialogue.Role.BUYER,
-        )
         fipa_dialogues = self.skill.skill_context.fipa_dialogues
+        incoming_message = self.prepare_dialogue(
+            dialogues=fipa_dialogues,
+            messages=(
+                (FipaMessage.Performative.CFP, {"query": "some_query"}),
+                (FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}),
+                (FipaMessage.Performative.ACCEPT, {}),
+            ),
+            incoming_message=(FipaMessage.Performative.DECLINE, {}),
+        )
 
         # before
         for end_state_numbers in fipa_dialogues.dialogue_stats.self_initiated.values():
@@ -289,9 +250,7 @@ class TestSkillHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        fipa_handler._handle_decline(
-            cast(FipaMessage, incoming_message), fipa_dialogue, fipa_dialogues
-        )
+        fipa_handler.handle(incoming_message)
 
         # after
         for end_state_numbers in fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -313,27 +272,21 @@ class TestSkillHandler(BaseSkillTestCase):
         strategy._is_ledger_tx = False
 
         fipa_dialogues = cast(FipaDialogues, self.skill.skill_context.fipa_dialogues)
-        fipa_dialogue = self.build_dialogue(
+        incoming_message = self.prepare_dialogue(
             dialogues=fipa_dialogues,
             messages=(
                 (FipaMessage.Performative.CFP, {"query": "some_query"}),
                 (FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}),
                 (FipaMessage.Performative.ACCEPT, {}),
-                (
-                    FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-                    {"info": {"address": "some_term_sender_address"}},
-                ),
+            ),
+            incoming_message=(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                {"info": {"address": "some_term_sender_address"}},
             ),
         )
-        incoming_message = fipa_dialogue.last_message
-
-        # before
-        assert self.get_quantity_in_outbox() == 0
 
         # operation
-        fipa_handler._handle_match_accept(
-            cast(FipaMessage, incoming_message), cast(FipaDialogue, fipa_dialogue)
-        )
+        fipa_handler.handle(incoming_message)
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
