@@ -952,7 +952,6 @@ class SOEFChannel:
         self._find_around_me_processor_task = self._loop.create_task(
             self._find_around_me_processor()
         )
-        self._unregister_lock = asyncio.Lock()
 
     async def disconnect(self) -> None:
         """
@@ -960,6 +959,8 @@ class SOEFChannel:
 
         :return: None
         """
+        await self._stop_periodic_ping_task()
+
         if self.in_queue is None:
             raise ValueError("Queue is not set, use connect first!")  # pragma: nocover
 
