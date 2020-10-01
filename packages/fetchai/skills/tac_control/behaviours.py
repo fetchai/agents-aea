@@ -79,6 +79,7 @@ class TacBehaviour(Behaviour):
                 self._unregister_tac()
             else:
                 game.phase = Phase.GAME_SETUP
+                game.create()
                 self._start_tac(game)
                 self._unregister_tac()
                 game.phase = Phase.GAME
@@ -174,7 +175,6 @@ class TacBehaviour(Behaviour):
 
     def _start_tac(self, game: Game):
         """Create a game and send the game configuration to every registered agent."""
-        game.create()
         self.context.logger.info(
             "started competition:\n{}".format(game.holdings_summary)
         )

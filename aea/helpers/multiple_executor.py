@@ -186,8 +186,6 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
             self._loop.run_until_complete(
                 self._wait_tasks_complete(skip_exceptions=True)
             )
-        if self._executor_pool:
-            self._executor_pool.shutdown(wait=True)
 
         if self._executor_pool:
             self._executor_pool.shutdown(wait=True)
@@ -393,7 +391,6 @@ class AbstractMultipleRunner:  # pragma: nocover
         :return: None
         """
         self._executor.stop()
-
         if self._thread is not None:
             self._thread.join(timeout=timeout)
 
