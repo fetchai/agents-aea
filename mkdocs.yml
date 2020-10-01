@@ -107,6 +107,7 @@ nav:
         - Common: 'api/common.md'
         - Exceptions: 'api/exceptions.md'
         - Launcher: 'api/launcher.md'
+        - Manager: 'api/manager.md'
         - Multiplexer: 'api/multiplexer.md'
         - Runner: 'api/runner.md'
         - Runtime: 'api/runtime.md'
@@ -117,6 +118,7 @@ nav:
           - Base: 'api/configurations/base.md'
           - Constants: 'api/configurations/constants.md'
           - Loader: 'api/configurations/loader.md'
+          - Project: 'api/configurations/project.md'
           - Pypi: 'api/configurations/pypi.md'
         - Connections:
           - Base: 'api/connections/base.md'
