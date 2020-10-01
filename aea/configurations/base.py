@@ -1546,8 +1546,8 @@ class AgentConfig(PackageConfiguration):
         for component_id, config in self.component_configurations.items():
             result.append(
                 OrderedDict(
-                    author=component_id.author,
                     name=component_id.name,
+                    author=component_id.author,
                     version=component_id.version,
                     type=str(component_id.component_type),
                     **config,
@@ -1703,7 +1703,14 @@ class AgentConfig(PackageConfiguration):
         self.component_configurations = result
 
         # update other fields
-        # currently not supported.
+        for item_id, value in data.get("private_key_paths", {}).items():
+            self.private_key_paths.update(item_id, value)
+
+        for item_id, value in data.get("connection_private_key_paths", {}).items():
+            self.connection_private_key_paths.update(item_id, value)
+
+        self.logging_config = data.get("logging_config", self.logging_config)
+        self.registry_path = data.get("registry_path", self.registry_path)
 
 
 class SpeechActContentConfig(Configuration):
