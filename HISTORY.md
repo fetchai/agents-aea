@@ -1,5 +1,22 @@
 # Release History
 
+## 0.6.2 (2020-10-01)
+
+- Adds MultiAgentManager to manage multiple agent projects programmatically
+- Improves SOEF connection reliability on unregister
+- Extends configuration classes to handle overriding configurations programmatically
+- Improves configuration schemas and validations
+- Fixes Multiplexer termination errors
+- Allow finer-grained override of component configurations from aea-config
+- Fixes tac controller to work with Ethereum contracts again
+- Fixes multiple deploy and development scripts
+- Introduces isort to development dependencies for automated import sorting
+- Adds reset password command to CLI
+- Adds support for abbreviated public ids (latest) to CLI and configurations
+- Adds additional docstring linters for improved api documentation checks
+- Multiple docs updates including additional explanations of ACN architecture
+- Multiple additional tests and test stability fixes
+
 ## 0.6.1 (2020-09-17)
 
 - Adds a standalone script to deploy an ACN node
