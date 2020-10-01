@@ -5,10 +5,11 @@
 - Adds MultiAgentManager to manage multiple agent projects programmatically
 - Improves SOEF connection reliability on unregister
 - Extends configuration classes to handle overriding configurations programmatically
+- Improves configuration schemas and validations
 - Fixes Multiplexer termination errors
-- Allow finger-grained override of component configurations from aea-config
+- Allow finer-grained override of component configurations from aea-config
 - Fixes tac controller to work with Ethereum contracts again
-- Fixes to multiple deploy and development scripts
+- Fixes multiple deploy and development scripts
 - Introduces isort to development dependencies for automated import sorting
 - Adds reset password command to CLI
 - Adds support for abbreviated public ids (latest) to CLI and configurations
