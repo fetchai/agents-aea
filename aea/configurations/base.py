@@ -347,8 +347,6 @@ class CRUDCollection(Generic[T]):
         :param item: the item to be added.
         :return: None
         """
-        if item_id not in self._items_by_id:
-            raise ValueError(f"No item registered with id '{item_id}'.")
         self._items_by_id[item_id] = item
 
     def delete(self, item_id: str) -> None:

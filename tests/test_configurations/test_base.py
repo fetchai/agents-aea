@@ -99,9 +99,6 @@ class TestCRUDCollection:
         collection.update("one", 2)
         assert collection.read("one") == 2
 
-        with pytest.raises(ValueError, match=f"No item registered with id 'two'."):
-            collection.update("two", 2)
-
     def test_delete(self):
         """Test that the delete method works correctly."""
         collection = CRUDCollection()
@@ -292,7 +289,10 @@ class TestAgentConfig:
             "models": {"dummy": {"args": dict(model_arg_1=42)}},
         }
 
-        new_private_key_paths = dict(ethereum="foo", cosmos="bar")
+        new_private_key_paths = dict(ethereum="foo")
+        expected_private_key_paths = dict(
+            ethereum="foo", cosmos="cosmos_private_key.txt"
+        )
         aea_config.update(
             dict(
                 component_configurations={
@@ -306,10 +306,12 @@ class TestAgentConfig:
             aea_config.component_configurations[dummy_skill_component_id]
             == new_dummy_skill_config
         )
-        assert dict(aea_config.private_key_paths.read_all()) == new_private_key_paths
+        assert (
+            dict(aea_config.private_key_paths.read_all()) == expected_private_key_paths
+        )
         assert (
             dict(aea_config.connection_private_key_paths.read_all())
-            == new_private_key_paths
+            == expected_private_key_paths
         )
 
         # test idempotence
