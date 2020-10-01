@@ -30,7 +30,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.multiplexer import AsyncMultiplexer, Multiplexer, OutBox
 from aea.protocols.base import Message
-from aea.protocols.dialogue.base import Dialogues
+from aea.protocols.dialogue.base import Dialogue, Dialogues
 from aea.skills.base import Skill
 from aea.skills.tasks import TaskManager
 
@@ -132,25 +132,69 @@ class BaseSkillTestCase:
         :return: the created incoming message
         """
         message_attributes = dict()  # type: Dict[str, Any]
-        message_attributes[
-            "dialogue_reference"
-        ] = Dialogues._generate_dialogue_nonce()  # pylint: disable=protected-access
-        args_dict = {
-            "performative": performative,
-            "dialogue_reference": dialogue_reference,
-            "message_id": message_id,
-            "target": target,
-        }
 
-        for arg_name, arg_value in args_dict.items():
-            if arg_value is not None:
-                message_attributes[arg_name] = arg_value
+        default_dialogue_reference = (
+            Dialogues._generate_dialogue_nonce(),
+            "",  # pylint: disable=protected-access
+        )
+        dialogue_reference = (
+            default_dialogue_reference
+            if dialogue_reference is None
+            else dialogue_reference
+        )
+        message_attributes["dialogue_reference"] = dialogue_reference
+        if message_id is not None:
+            message_attributes["message_id"] = message_id
+        if target is not None:
+            message_attributes["target"] = target
+        message_attributes["performative"] = performative
         message_attributes.update(kwargs)
 
         incoming_message = message_type(**message_attributes)
         incoming_message.sender = sender
         incoming_message.to = (
             self.skill.skill_context.agent_address if to is None else to
+        )
+
+        return incoming_message
+
+    def build_incoming_message_for_dialogue(
+        self,
+        dialogue: Dialogue,
+        performative: Message.Performative,
+        target: Optional[int] = None,
+        **kwargs,
+    ) -> Message:
+        """
+        Quickly create an incoming message with the provided attributes for a dialogue.
+
+        For any attribute not provided, the corresponding default value in message is used.
+
+        :param dialogue: the dialogue to which the incoming message is intended
+        :param target: the target
+        :param performative: the performative
+        :param kwargs: other attributes
+
+        :return: the created incoming message
+        """
+        if dialogue is None:
+            raise AEAEnforceError("dialogue cannot be None.")
+
+        if dialogue.last_message is None:
+            raise AEAEnforceError("dialogue cannot be empty.")
+
+        if target is None:
+            target = dialogue.last_message.message_id
+
+        incoming_message = self.build_incoming_message(
+            message_type=dialogue._message_class,
+            performative=performative,
+            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+            message_id=dialogue.last_message.message_id + 1,
+            target=target,
+            to=self.skill.skill_context.agent_address,
+            sender=dialogue.dialogue_label.dialogue_opponent_addr,
+            **kwargs,
         )
 
         return incoming_message
@@ -174,9 +218,8 @@ class BaseSkillTestCase:
         self,
         dialogues: Dialogues,
         messages: Tuple[Tuple[Any, ...]],
-        incoming_message: Tuple[Any, ...],
         counterparty: Address = "counterparty",
-    ) -> Message:
+    ) -> Dialogue:
         """
         Quickly create a dialogue.
 
@@ -194,7 +237,6 @@ class BaseSkillTestCase:
         :param dialogues: a dialogues class
         :param counterparty: the message_id
         :param messages: the dialogue_reference
-        :param incoming_message: the incoming message expected for the dialogue
 
         :return: the created incoming message
         """
@@ -208,53 +250,54 @@ class BaseSkillTestCase:
             last_incoming = complete_compact_message[0]
             is_incoming = complete_compact_message[0]
             message_id = messages.index(incomplete_message) + 1
-            if message_id == 1:
-                dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
-            else:
-                dialogue_reference = dialogue.dialogue_label.dialogue_reference
             target = complete_compact_message[1]
             performative = complete_compact_message[2]
             contents = complete_compact_message[3]
-            to = self.skill.skill_context.agent_address
-            sender = counterparty
+            dialogue: Dialogue
 
-            if is_incoming:
+            if is_incoming:  # messages from the opponent
+                if message_id == 1:
+                    dialogue_reference = (
+                        dialogues.new_self_initiated_dialogue_reference()
+                    )
+                else:
+                    dialogue_reference = (
+                        dialogue.dialogue_label.dialogue_reference[0],
+                        Dialogues._generate_dialogue_nonce()
+                        if dialogue.dialogue_label.dialogue_reference[1]
+                        == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+                        else dialogue.dialogue_label.dialogue_reference[1],
+                    )
                 message = self.build_incoming_message(
                     message_type=dialogues._message_class,  # pylint: disable=protected-access
                     dialogue_reference=dialogue_reference,
                     message_id=message_id,
                     target=target,
                     performative=performative,
-                    to=to,
-                    sender=sender,
+                    to=self.skill.skill_context.agent_address,
+                    sender=counterparty,
                     **contents,
                 )
-                dialogue = dialogues.update(message)
+                dialogue = cast(Dialogue, dialogues.update(message))
                 if dialogue is None:
                     raise AEAEnforceError(
                         "Cannot update the dialogue with message number {}".format(
                             message_id
                         )
                     )
-            else:
+            else:  # messages from self
                 if message_id == 1:
                     _, dialogue = dialogues.create(
-                        counterparty=sender, performative=performative, **contents
+                        counterparty=counterparty, performative=performative, **contents
                     )
                 else:
                     dialogue.reply(performative=performative, target=target, **contents)
 
-        complete_incoming_message = self.build_incoming_message(
-            message_type=dialogues._message_class,  # pylint: disable=protected-access
-            dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-            message_id=dialogue.last_message.message_id + 1,
-            target=dialogue.last_message.message_id,
-            performative=incoming_message[0],
-            to=self.skill.skill_context.agent_address,
-            sender=counterparty,
-            **incoming_message[1],
-        )
-        return complete_incoming_message
+
+
+            
+
+        return dialogue
 
     @classmethod
     def setup(cls) -> None:

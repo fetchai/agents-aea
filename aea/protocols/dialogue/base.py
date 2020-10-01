@@ -31,6 +31,7 @@ from abc import ABC
 from enum import Enum
 from inspect import signature
 from typing import (
+    Any,
     Callable,
     Dict,
     FrozenSet,
@@ -39,13 +40,53 @@ from typing import (
     Set,
     Tuple,
     Type,
-    Union,
     cast,
 )
 
 from aea.common import Address
-from aea.exceptions import enforce
+from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
+
+
+class CompactMessage:
+    """Representation of a message in a dialogue."""
+
+    def __init__(
+        self,
+        performative: Message.Performative,
+        contents: Dict[str, Any],
+        is_incoming: Optional[bool] = None,
+        target: Optional[int] = None,
+    ) -> None:
+        """Initialise."""
+        self._performative = performative
+        self._contents = contents
+        self._is_incoming = is_incoming
+        self._target = target
+
+    @property
+    def is_incoming(self) -> bool:
+        """Get message's is_incoming."""
+        if self._is_incoming is None:
+            raise AEAEnforceError("is_incoming is None.")
+        return self._is_incoming
+
+    @property
+    def target(self) -> int:
+        """Get message's target."""
+        if self._target is None:
+            raise AEAEnforceError("target is None.")
+        return self._target
+
+    @property
+    def performative(self) -> Message.Performative:
+        """Get message's performative."""
+        return self._performative
+
+    @property
+    def contents(self) -> Dict[str, Any]:
+        """Get message's contents."""
+        return self._contents
 
 
 class InvalidDialogueMessage(Exception):
@@ -580,7 +621,8 @@ class Dialogue(ABC):
     def reply(
         self,
         performative: Message.Performative,
-        target: Optional[Union[int, Message]] = None,
+        target_message: Optional[Message] = None,
+        target: Optional[int] = None,
         **kwargs,
     ) -> Message:
         """
@@ -588,7 +630,8 @@ class Dialogue(ABC):
 
         Note if no target_message is provided, the last message in the dialogue will be replied to.
 
-        :param target: the message, or id of the message, to reply to.
+        :param target_message: the message to reply to.
+        :param target: the id of the message to reply to.
         :param performative: the performative of the reply message.
         :param kwargs: the content of the reply message.
 
@@ -598,26 +641,20 @@ class Dialogue(ABC):
         if last_message is None:
             raise ValueError("Cannot reply in an empty dialogue!")
 
-        if target is None:
-            target = last_message
-        else:
-            if isinstance(target, Message):
-                enforce(
-                    self._has_message(
-                        target  # type: ignore
-                    ),
-                    "The target message does not exist in this dialogue.",
-                )
-            else:
-                enforce(
-                    self._has_message_id(
-                        target  # type: ignore
-                    ),
-                    "The target message does not exist in this dialogue.",
+        if target_message is None and target is None:
+            target = last_message.message_id
+        elif target_message is not None and target is None:
+            target = target_message.message_id
+        elif target_message is not None and target is not None:
+            if target != target_message.message_id:
+                raise AEAEnforceError(
+                    "The provided target and target_message do not match."
                 )
 
-        if isinstance(target, Message):
-            target = target.message_id
+        enforce(
+            self._has_message_id(target),  # type: ignore
+            "The target message does not exist in this dialogue.",
+        )
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,

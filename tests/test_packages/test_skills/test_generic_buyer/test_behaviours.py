@@ -175,10 +175,14 @@ class TestSkillHandler(BaseSkillTestCase):
                 "tx_nonce": "some_tx_nonce",
             }
         )
-        incoming_message = self.prepare_dialogue(
+        fipa_dialogue = self.prepare_dialogue(
             dialogues=fipa_dialogues,
             messages=((FipaMessage.Performative.CFP, {"query": "some_query"}),),
-            incoming_message=(FipaMessage.Performative.PROPOSE, {"proposal": proposal}),
+        )
+        incoming_message = self.build_incoming_message_for_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=proposal,
         )
 
         # operation
@@ -201,10 +205,12 @@ class TestSkillHandler(BaseSkillTestCase):
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
         fipa_dialogues = self.skill.skill_context.fipa_dialogues
-        incoming_message = self.prepare_dialogue(
+        fipa_dialogue = self.prepare_dialogue(
             dialogues=fipa_dialogues,
             messages=((FipaMessage.Performative.CFP, {"query": "some_query"}),),
-            incoming_message=(FipaMessage.Performative.DECLINE, {}),
+        )
+        incoming_message = self.build_incoming_message_for_dialogue(
+            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
         )
 
         # before
@@ -233,14 +239,17 @@ class TestSkillHandler(BaseSkillTestCase):
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
         fipa_dialogues = self.skill.skill_context.fipa_dialogues
-        incoming_message = self.prepare_dialogue(
+
+        fipa_dialogue = self.prepare_dialogue(
             dialogues=fipa_dialogues,
             messages=(
                 (FipaMessage.Performative.CFP, {"query": "some_query"}),
                 (FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}),
                 (FipaMessage.Performative.ACCEPT, {}),
             ),
-            incoming_message=(FipaMessage.Performative.DECLINE, {}),
+        )
+        incoming_message = self.build_incoming_message_for_dialogue(
+            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
         )
 
         # before
@@ -264,25 +273,26 @@ class TestSkillHandler(BaseSkillTestCase):
             else:
                 assert end_state_numbers == 0
 
-    def test_fipa_handler_handle_match_accept(self):
-        """Test the _handle_match_accept method of the fipa handler."""
+    def test_fipa_handler_handle_match_accept_is_ledger_tx(self):
+        """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is True."""
         # setup
         fipa_handler = cast(GenericFipaHandler, self.skill.skill_context.handlers.fipa)
         strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
         strategy._is_ledger_tx = False
 
         fipa_dialogues = cast(FipaDialogues, self.skill.skill_context.fipa_dialogues)
-        incoming_message = self.prepare_dialogue(
+        fipa_dialogue = self.prepare_dialogue(
             dialogues=fipa_dialogues,
             messages=(
                 (FipaMessage.Performative.CFP, {"query": "some_query"}),
                 (FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}),
                 (FipaMessage.Performative.ACCEPT, {}),
             ),
-            incoming_message=(
-                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-                {"info": {"address": "some_term_sender_address"}},
-            ),
+        )
+        incoming_message = self.build_incoming_message_for_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            info={"info": {"address": "some_term_sender_address"}},
         )
 
         # operation
