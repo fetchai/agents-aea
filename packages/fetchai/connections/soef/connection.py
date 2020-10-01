@@ -265,6 +265,7 @@ class SOEFChannel:
         self._find_around_me_queue: Optional[asyncio.Queue] = None
         self._find_around_me_processor_task: Optional[asyncio.Task] = None
         self.logger = logger
+        self._unregister_lock: Optional[asyncio.Lock] = None
 
     async def _find_around_me_processor(self) -> None:
         """Process find me around requests in background task."""
@@ -902,19 +903,24 @@ class SOEFChannel:
 
         :return: None
         """
-        await self._stop_periodic_ping_task()
-        if self.unique_page_address is None:  # pragma: nocover
-            self.logger.debug(
-                "The service is not registered to the simple OEF. Cannot unregister."
-            )
-            return
+        if self._unregister_lock is None:
+            raise ValueError("Lock is not set, use connect first!")  # pragma: nocover
+        async with self._unregister_lock:
+            await self._stop_periodic_ping_task()
+            if self.unique_page_address is None:  # pragma: nocover
+                self.logger.debug(
+                    "The service is not registered to the simple OEF. Cannot unregister."
+                )
+                return
 
-        response = await self._generic_oef_command("unregister", check_success=False)
-        enforce(
-            "<response><message>Goodbye!</message></response>" in response,
-            "No Goodbye response.",
-        )
-        self.unique_page_address = None
+            response = await self._generic_oef_command(
+                "unregister", check_success=False
+            )
+            enforce(
+                "<response><message>Goodbye!</message></response>" in response,
+                "No Goodbye response.",
+            )
+            self.unique_page_address = None
 
     async def _stop_periodic_ping_task(self) -> None:
         """Cancel periodic ping task."""
@@ -934,6 +940,7 @@ class SOEFChannel:
         self._find_around_me_processor_task = self._loop.create_task(
             self._find_around_me_processor()
         )
+        self._unregister_lock = asyncio.Lock()
 
     async def disconnect(self) -> None:
         """
@@ -941,8 +948,6 @@ class SOEFChannel:
 
         :return: None
         """
-        await self._stop_periodic_ping_task()
-
         if self.in_queue is None:
             raise ValueError("Queue is not set, use connect first!")  # pragma: nocover
         await self._unregister_agent()
