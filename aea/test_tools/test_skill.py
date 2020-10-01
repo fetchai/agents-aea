@@ -134,8 +134,8 @@ class BaseSkillTestCase:
         message_attributes = dict()  # type: Dict[str, Any]
 
         default_dialogue_reference = (
-            Dialogues._generate_dialogue_nonce(),
-            "",  # pylint: disable=protected-access
+            Dialogues._generate_dialogue_nonce(),  # pylint: disable=protected-access
+            "",
         )
         dialogue_reference = (
             default_dialogue_reference
@@ -187,7 +187,7 @@ class BaseSkillTestCase:
             target = dialogue.last_message.message_id
 
         incoming_message = self.build_incoming_message(
-            message_type=dialogue._message_class,
+            message_type=dialogue._message_class,  # pylint: disable=protected-access
             performative=performative,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             message_id=dialogue.last_message.message_id + 1,
@@ -240,8 +240,42 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
-        last_incoming = True  # if 'inc' is not specified for the first message, this line makes it so the first message is outgoing
-        for incomplete_message in messages:
+        incomplete_message_1 = messages[0]
+        complete_compact_message_1 = self._complete_compact_message(
+            incomplete_message_1, last_incoming=True, message_id=1,
+        )
+        last_incoming = complete_compact_message_1[0]
+        is_incoming = complete_compact_message_1[0]
+        message_id = messages.index(incomplete_message_1) + 1
+        target = complete_compact_message_1[1]
+        performative = complete_compact_message_1[2]
+        contents = complete_compact_message_1[3]
+
+        if is_incoming:  # messages from the opponent
+            dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
+            message = self.build_incoming_message(
+                message_type=dialogues._message_class,  # pylint: disable=protected-access
+                dialogue_reference=dialogue_reference,
+                message_id=message_id,
+                target=target,
+                performative=performative,
+                to=self.skill.skill_context.agent_address,
+                sender=counterparty,
+                **contents,
+            )
+            dialogue = cast(Dialogue, dialogues.update(message))
+            if dialogue is None:
+                raise AEAEnforceError(
+                    "Cannot update the dialogue with message number {}".format(
+                        message_id
+                    )
+                )
+        else:  # messages from self
+            _, dialogue = dialogues.create(
+                counterparty=counterparty, performative=performative, **contents
+            )
+
+        for incomplete_message in messages[1:]:  # type: ignore
             complete_compact_message = self._complete_compact_message(
                 incomplete_message,
                 last_incoming=last_incoming,
@@ -253,21 +287,15 @@ class BaseSkillTestCase:
             target = complete_compact_message[1]
             performative = complete_compact_message[2]
             contents = complete_compact_message[3]
-            dialogue: Dialogue
 
             if is_incoming:  # messages from the opponent
-                if message_id == 1:
-                    dialogue_reference = (
-                        dialogues.new_self_initiated_dialogue_reference()
-                    )
-                else:
-                    dialogue_reference = (
-                        dialogue.dialogue_label.dialogue_reference[0],
-                        Dialogues._generate_dialogue_nonce()
-                        if dialogue.dialogue_label.dialogue_reference[1]
-                        == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-                        else dialogue.dialogue_label.dialogue_reference[1],
-                    )
+                dialogue_reference = (
+                    dialogue.dialogue_label.dialogue_reference[0],
+                    Dialogues._generate_dialogue_nonce()  # pylint: disable=protected-access
+                    if dialogue.dialogue_label.dialogue_reference[1]
+                    == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+                    else dialogue.dialogue_label.dialogue_reference[1],
+                )
                 message = self.build_incoming_message(
                     message_type=dialogues._message_class,  # pylint: disable=protected-access
                     dialogue_reference=dialogue_reference,
@@ -286,16 +314,7 @@ class BaseSkillTestCase:
                         )
                     )
             else:  # messages from self
-                if message_id == 1:
-                    _, dialogue = dialogues.create(
-                        counterparty=counterparty, performative=performative, **contents
-                    )
-                else:
-                    dialogue.reply(performative=performative, target=target, **contents)
-
-
-
-            
+                dialogue.reply(performative=performative, target=target, **contents)
 
         return dialogue
 
