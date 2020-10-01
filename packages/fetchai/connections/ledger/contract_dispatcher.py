@@ -19,6 +19,7 @@
 
 """This module contains the implementation of the contract API request dispatcher."""
 import inspect
+import logging
 from typing import Callable, Optional, cast
 
 from aea.contracts import Contract, contract_registry
@@ -35,6 +36,11 @@ from packages.fetchai.protocols.contract_api import ContractApiMessage
 from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue
 from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
+)
+
+
+_default_logger = logging.getLogger(
+    "aea.packages.fetchai.connections.ledger.contract_dispatcher"
 )
 
 
@@ -73,7 +79,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 
     def __init__(self, *args, **kwargs):
         """Initialize the dispatcher."""
-        super().__init__(*args, **kwargs)
+        logger = kwargs.pop("logger", None)
+        logger = logger if logger is not None else _default_logger
+
+        super().__init__(logger, *args, **kwargs)
         self._contract_api_dialogues = ContractApiDialogues()
 
     @property

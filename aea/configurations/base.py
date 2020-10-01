@@ -27,7 +27,7 @@ import pprint
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from copy import deepcopy
+from copy import copy, deepcopy
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -53,6 +53,7 @@ from packaging.version import Version
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
+from aea.helpers.base import recursive_update
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -732,6 +733,11 @@ class ComponentId(PackageId):
             self.public_id.author, self.component_type.to_plural(), self.public_id.name
         )
 
+    @property
+    def json(self) -> Dict:
+        """Get the JSON representation."""
+        return dict(**self.public_id.json, type=str(self.component_type))
+
 
 ProtocolId = PublicId
 ContractId = PublicId
@@ -753,7 +759,6 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
-    configurable_fields: Set[str] = set()
 
     def __init__(
         self,
@@ -832,6 +837,14 @@ class PackageConfiguration(Configuration, ABC):
     def package_dependencies(self) -> Set[ComponentId]:
         """Get the package dependencies."""
         return set()
+
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
 
 
 class ComponentConfiguration(PackageConfiguration, ABC):
@@ -916,21 +929,12 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """
         _check_aea_version(self)
 
-    def update(self, data: Dict) -> None:
-        """
-        Update configuration with other data.
-
-        :param data: the data to replace.
-        :return: None
-        """
-
 
 class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
 
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
-    configurable_fields = {"config"}
 
     def __init__(
         self,
@@ -1060,10 +1064,13 @@ class ConnectionConfig(ComponentConfiguration):
         """
         Update configuration with other data.
 
-        :param data: the data to replace.
+        This method does side-effect on the configuration object.
+
+        :param data: the data to populate or replace.
         :return: None
         """
-        self.config = data.get("config", self.config)
+        new_config = data.get("config", {})
+        recursive_update(self.config, new_config)
 
 
 class ProtocolConfig(ComponentConfiguration):
@@ -1166,7 +1173,6 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
-    configurable_fields = {"handlers", "behaviours", "models", "is_abstract"}
 
     def __init__(
         self,
@@ -1321,18 +1327,36 @@ class SkillConfig(ComponentConfiguration):
         :param data: the data to replace.
         :return: None
         """
-        for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
-            behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
-            self.behaviours.update(behaviour_id, behaviour_config)
 
-        for handler_id, handler_data in data.get("handlers", {}).items():
-            handler_config = SkillComponentConfiguration.from_json(handler_data)
-            self.handlers.update(handler_id, handler_config)
+        def _update_skill_component_config(type_plural: str, data: Dict):
+            """
+            Update skill component configurations with new data.
 
-        for model_id, model_data in data.get("models", {}).items():
-            model_config = SkillComponentConfiguration.from_json(model_data)
-            self.models.update(model_id, model_config)
+            Also check that there are not undeclared components.
+            """
+            registry: CRUDCollection[SkillComponentConfiguration] = getattr(
+                self, type_plural
+            )
+            new_component_config = data.get(type_plural, {})
+            all_component_names = dict(registry.read_all())
 
+            new_skill_component_names = set(new_component_config.keys()).difference(
+                set(all_component_names.keys())
+            )
+            if len(new_skill_component_names) > 0:
+                raise ValueError(
+                    f"The custom configuration for skill {self.public_id} includes new {type_plural}: {new_skill_component_names}. This is not allowed."
+                )
+
+            for component_name, component_data in data.get(type_plural, {}).items():
+                component_config = cast(
+                    SkillComponentConfiguration, registry.read(component_name)
+                )
+                recursive_update(component_config.args, component_data.get("args", {}))
+
+        _update_skill_component_config("behaviours", data)
+        _update_skill_component_config("handlers", data)
+        _update_skill_component_config("models", data)
         self.is_abstract = data.get("is_abstract", self.is_abstract)
 
 
@@ -1518,16 +1542,18 @@ class AgentConfig(PackageConfiguration):
 
     def component_configurations_json(self) -> List[OrderedDict]:
         """Get the component configurations in JSON format."""
-        return [
-            OrderedDict(
-                name=component_id.name,
-                author=component_id.author,
-                version=component_id.version,
-                type=component_id.component_type.value,
-                **obj,
+        result: List[OrderedDict] = []
+        for component_id, config in self.component_configurations.items():
+            result.append(
+                OrderedDict(
+                    name=component_id.name,
+                    author=component_id.author,
+                    version=component_id.version,
+                    type=str(component_id.component_type),
+                    **config,
+                )
             )
-            for component_id, obj in self.component_configurations.items()
-        ]
+        return result
 
     @property
     def json(self) -> Dict:
@@ -1654,6 +1680,37 @@ class AgentConfig(PackageConfiguration):
         agent_config.default_ledger = default_ledger_id
 
         return agent_config
+
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        To update the component parts, populate the field "component_configurations" as a
+        mapping from ComponentId to configurations.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        data = copy(data)
+        # update component parts
+        new_component_configurations: Dict = data.pop("component_configurations", {})
+        result: Dict[ComponentId, Dict] = copy(self.component_configurations)
+        for component_id, obj in new_component_configurations.items():
+            if component_id not in result:
+                result[component_id] = obj
+            else:
+                recursive_update(result[component_id], obj)
+        self.component_configurations = result
+
+        # update other fields
+        for item_id, value in data.get("private_key_paths", {}).items():
+            self.private_key_paths.update(item_id, value)
+
+        for item_id, value in data.get("connection_private_key_paths", {}).items():
+            self.connection_private_key_paths.update(item_id, value)
+
+        self.logging_config = data.get("logging_config", self.logging_config)
+        self.registry_path = data.get("registry_path", self.registry_path)
 
 
 class SpeechActContentConfig(Configuration):

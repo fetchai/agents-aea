@@ -97,3 +97,9 @@ The Python version of the AEA Framework currently integrates with three ledgers:
 - <a href="https://cosmos.network/sdk" target="_blank">Cosmos ledger</a>
 
 However, the framework makes it straightforward for further ledgers to be added by any developer.
+
+### AEAs as second layer technology
+
+The following presentation discusses how AEAs can be seen as second layer technology to ledgers.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/gvzYX7CYk-A" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

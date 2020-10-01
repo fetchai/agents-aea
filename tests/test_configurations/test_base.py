@@ -19,6 +19,7 @@
 
 """This module contains the tests for the aea.configurations.base module."""
 import re
+from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
 
@@ -33,6 +34,7 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     ContractConfig,
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
@@ -52,6 +54,9 @@ from aea.configurations.loader import ConfigLoaders, load_component_configuratio
 
 from tests.conftest import (
     AUTHOR,
+    CUR_PATH,
+    DUMMY_SKILL_PATH,
+    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     agent_config_files,
     connection_config_files,
@@ -200,6 +205,37 @@ class TestSkillConfig:
 
     def test_update_method(self):
         """Test the update method."""
+        skill_config_path = Path(DUMMY_SKILL_PATH)
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+        skill_config = loader.load(skill_config_path.open())
+
+        dummy_behaviour = skill_config.behaviours.read("dummy")
+        expected_dummy_behaviour_args = copy(dummy_behaviour.args)
+        expected_dummy_behaviour_args["behaviour_arg_1"] = 42
+
+        dummy_handler = skill_config.handlers.read("dummy")
+        expected_dummy_handler_args = copy(dummy_handler.args)
+        expected_dummy_handler_args["handler_arg_1"] = 42
+
+        dummy_model = skill_config.models.read("dummy")
+        expected_dummy_model_args = copy(dummy_model.args)
+        expected_dummy_model_args["model_arg_1"] = 42
+
+        new_configurations = {
+            "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
+            "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
+            "models": {"dummy": {"args": dict(model_arg_1=42)}},
+        }
+        skill_config.update(new_configurations)
+
+        assert (
+            expected_dummy_behaviour_args == skill_config.behaviours.read("dummy").args
+        )
+        assert expected_dummy_handler_args == skill_config.handlers.read("dummy").args
+        assert expected_dummy_model_args == skill_config.models.read("dummy").args
+
+    def test_update_method_raises_error_if_skill_component_not_allowed(self):
+        """Test that we raise error if the custom configuration contain unexpected skill components."""
         skill_config_path = Path(
             ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
         )
@@ -210,14 +246,12 @@ class TestSkillConfig:
             "handlers": {"new_handler": {"args": {}, "class_name": "SomeClass"}},
             "models": {"new_model": {"args": {}, "class_name": "SomeClass"}},
         }
-        skill_config.update(new_configurations)
 
-        new_behaviour = skill_config.behaviours.read("new_behaviour")
-        assert new_behaviour.json == new_configurations["behaviours"]["new_behaviour"]
-        new_handler = skill_config.handlers.read("new_handler")
-        assert new_handler.json == new_configurations["handlers"]["new_handler"]
-        new_model = skill_config.models.read("new_model")
-        assert new_model.json == new_configurations["models"]["new_model"]
+        with pytest.raises(
+            ValueError,
+            match="The custom configuration for skill fetchai/error:0.6.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+        ):
+            skill_config.update(new_configurations)
 
 
 class TestAgentConfig:
@@ -238,6 +272,60 @@ class TestAgentConfig:
         actual_config = AgentConfig.from_json(expected_json)
         actual_json = actual_config.json
         assert expected_json == actual_json
+
+    def test_update(self):
+        """Test the update method."""
+        aea_config_path = Path(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE)
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        aea_config: AgentConfig = loader.load(aea_config_path.open())
+
+        dummy_skill_component_id = ComponentId(
+            ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID
+        )
+
+        new_dummy_skill_config = {
+            "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
+            "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
+            "models": {"dummy": {"args": dict(model_arg_1=42)}},
+        }
+
+        new_private_key_paths = dict(ethereum="foo")
+        expected_private_key_paths = dict(
+            ethereum="foo", cosmos="cosmos_private_key.txt"
+        )
+        aea_config.update(
+            dict(
+                component_configurations={
+                    dummy_skill_component_id: new_dummy_skill_config
+                },
+                private_key_paths=new_private_key_paths,
+                connection_private_key_paths=new_private_key_paths,
+            )
+        )
+        assert (
+            aea_config.component_configurations[dummy_skill_component_id]
+            == new_dummy_skill_config
+        )
+        assert (
+            dict(aea_config.private_key_paths.read_all()) == expected_private_key_paths
+        )
+        assert (
+            dict(aea_config.connection_private_key_paths.read_all())
+            == expected_private_key_paths
+        )
+
+        # test idempotence
+        aea_config.update(
+            dict(
+                component_configurations={
+                    dummy_skill_component_id: new_dummy_skill_config
+                }
+            )
+        )
+        assert (
+            aea_config.component_configurations[dummy_skill_component_id]
+            == new_dummy_skill_config
+        )
 
 
 class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
@@ -713,3 +801,12 @@ def test_package_version_lt():
     v2 = PackageVersion("0.2.0")
     v3 = PackageVersion("latest")
     assert v1 < v2 < v3
+
+
+def test_configuration_class():
+    """Test the attribute 'configuration class' of PackageType."""
+    assert PackageType.PROTOCOL.configuration_class() == ProtocolConfig
+    assert PackageType.CONNECTION.configuration_class() == ConnectionConfig
+    assert PackageType.CONTRACT.configuration_class() == ContractConfig
+    assert PackageType.SKILL.configuration_class() == SkillConfig
+    assert PackageType.AGENT.configuration_class() == AgentConfig

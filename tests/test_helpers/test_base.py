@@ -38,6 +38,7 @@ from aea.helpers.base import (
     load_env_file,
     load_module,
     locate,
+    recursive_update,
     retry_decorator,
     send_control_c,
     try_decorator,
@@ -209,7 +210,7 @@ def test_send_control_c():
     # because o/w pytest would be stopped.
     process = Popen(  # nosec
         ["timeout" if platform.system() == "Windows" else "sleep", "5"],
-        **win_popen_kwargs()
+        **win_popen_kwargs(),
     )
     time.sleep(0.001)
     send_control_c(process)
@@ -241,3 +242,51 @@ def test_yaml_dump_all_load_all():
 
     f.seek(0)
     assert yaml_load_all(f) == data
+
+
+def test_recursive_update_no_recursion():
+    """Test the 'recursive update' utility, in the case there's no recursion."""
+    to_update = dict(not_updated=0, an_integer=1, a_list=[1, 2, 3], a_tuple=(1, 2, 3))
+
+    new_integer, new_list, new_tuple = 2, [3], (3,)
+    new_values = dict(an_integer=new_integer, a_list=new_list, a_tuple=new_tuple)
+    recursive_update(to_update, new_values)
+    assert to_update == dict(
+        not_updated=0, an_integer=new_integer, a_list=new_list, a_tuple=new_tuple
+    )
+
+
+def test_recursive_update_with_recursion():
+    """Test the 'recursive update' utility with recursion."""
+    # here we try to update an integer and add a new value
+    to_update = dict(subdict=dict(to_update=1))
+    new_values = dict(subdict=dict(to_update=2))
+
+    recursive_update(to_update, new_values)
+    assert to_update == dict(subdict=dict(to_update=2))
+
+
+def test_recursive_update_negative_different_type():
+    """Test the 'recursive update' utility, when the types are different."""
+    # here we try to update an integer with a boolean - it raises error.
+    to_update = dict(subdict=dict(to_update=1))
+    new_values = dict(subdict=dict(to_update=False))
+
+    with pytest.raises(
+        ValueError,
+        match="Trying to replace value '1' with value 'False' which is of different type.",
+    ):
+        recursive_update(to_update, new_values)
+
+
+def test_recursive_update_negative_unknown_field():
+    """Test the 'recursive update' utility, when there are unknown fields."""
+    # here we try to update an integer with a boolean - it raises error.
+    to_update = dict(subdict=dict(field=1))
+    new_values = dict(subdict=dict(new_field=False))
+
+    with pytest.raises(
+        ValueError,
+        match="Key 'new_field' is not contained in the dictionary to update.",
+    ):
+        recursive_update(to_update, new_values)

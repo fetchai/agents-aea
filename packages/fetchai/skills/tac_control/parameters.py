@@ -57,7 +57,7 @@ class Parameters(Model):
         """Instantiate the parameter class."""
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._contract_address = kwargs.pop(
-            "contract_adress", None
+            "contract_address", None
         )  # type: Optional[str]
         self._good_ids = kwargs.pop("good_ids", [])  # type: List[int]
         self._currency_ids = kwargs.pop("currency_ids", [])  # type: List[int]
