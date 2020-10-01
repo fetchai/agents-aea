@@ -37,8 +37,8 @@ default_routing:
   fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
   fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
 ---
-name: soef
 author: fetchai
+name: soef
 version: 0.9.0
 type: connection
 config:
@@ -47,8 +47,8 @@ config:
   soef_addr: soef.fetch.ai
   soef_port: 9002
 ---
-name: tac_control
 author: fetchai
+name: tac_control
 version: 0.8.0
 type: skill
 is_abstract: true

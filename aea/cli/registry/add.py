@@ -28,6 +28,20 @@ from aea.cli.utils.loggers import logger
 from aea.configurations.base import PublicId
 
 
+def _get_package_meta(obj_type: str, public_id: PublicId) -> dict:
+    """
+    Get package meta data from remote registry.
+
+    :param obj_type: str. component type
+    :param public_id: component public id
+
+    :return: dict with package details
+    """
+    api_path = f"/{obj_type}s/{public_id.author}/{public_id.name}/{public_id.version}"
+    resp = request_api("GET", api_path)
+    return resp
+
+
 def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Path:
     """
     Fetch a package (connection/contract/protocol/skill) from Registry.
@@ -44,18 +58,14 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Pa
             public_id=public_id, obj_type=obj_type
         )
     )
-    author, name, version = public_id.author, public_id.name, public_id.version
-    item_type_plural = obj_type + "s"  # used for API and folder paths
-
-    api_path = "/{}/{}/{}/{}".format(item_type_plural, author, name, version)
-    resp = request_api("GET", api_path)
-    file_url = resp["file"]
 
     logger.debug(
         "Downloading {obj_type} {public_id}...".format(
             public_id=public_id, obj_type=obj_type
         )
     )
+    package_meta = _get_package_meta(obj_type, public_id)
+    file_url = package_meta["file"]
     filepath = download_file(file_url, cwd)
 
     # next code line is needed because the items are stored in tarball packages as folders
