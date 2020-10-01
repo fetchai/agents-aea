@@ -11,6 +11,7 @@
 - Fixes to multiple deploy and development scripts
 - Introduces isort to development dependencies for automated import sorting
 - Adds reset password command to CLI
+- Adds support for abbreviated public ids (latest) to CLI and configurations
 - Adds additional docstring linters for improved api documentation checks
 - Multiple docs updates including additional explanations of ACN architecture
 - Multiple additional tests and test stability fixes
