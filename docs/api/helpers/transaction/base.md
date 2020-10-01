@@ -82,6 +82,24 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
 
+<a name="aea.helpers.transaction.base.RawTransaction.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.transaction.base.RawTransaction.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get string representation.
+
 <a name="aea.helpers.transaction.base.RawMessage"></a>
 ## RawMessage Objects
 
@@ -171,6 +189,24 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'raw_message_protobuf_object' argument.
 
+<a name="aea.helpers.transaction.base.RawMessage.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.transaction.base.RawMessage.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get string representation.
+
 <a name="aea.helpers.transaction.base.SignedTransaction"></a>
 ## SignedTransaction Objects
 
@@ -249,6 +285,24 @@ A new instance of this class must be created that matches the protocol buffer ob
 **Returns**:
 
 A new instance of this class that matches the protocol buffer object in the 'signed_transaction_protobuf_object' argument.
+
+<a name="aea.helpers.transaction.base.SignedTransaction.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.transaction.base.SignedTransaction.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get string representation.
 
 <a name="aea.helpers.transaction.base.SignedMessage"></a>
 ## SignedMessage Objects
@@ -339,6 +393,24 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'signed_message_protobuf_object' argument.
 
+<a name="aea.helpers.transaction.base.SignedMessage.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.transaction.base.SignedMessage.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get string representation.
+
 <a name="aea.helpers.transaction.base.State"></a>
 ## State Objects
 
@@ -417,6 +489,24 @@ A new instance of this class must be created that matches the protocol buffer ob
 **Returns**:
 
 A new instance of this class that matches the protocol buffer object in the 'state_protobuf_object' argument.
+
+<a name="aea.helpers.transaction.base.State.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.transaction.base.State.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get string representation.
 
 <a name="aea.helpers.transaction.base.Terms"></a>
 ## Terms Objects
@@ -784,6 +874,24 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'terms_protobuf_object' argument.
 
+<a name="aea.helpers.transaction.base.Terms.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.transaction.base.Terms.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get string representation.
+
 <a name="aea.helpers.transaction.base.TransactionDigest"></a>
 ## TransactionDigest Objects
 
@@ -862,6 +970,24 @@ A new instance of this class must be created that matches the protocol buffer ob
 **Returns**:
 
 A new instance of this class that matches the protocol buffer object in the 'transaction_digest_protobuf_object' argument.
+
+<a name="aea.helpers.transaction.base.TransactionDigest.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.transaction.base.TransactionDigest.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get string representation.
 
 <a name="aea.helpers.transaction.base.TransactionReceipt"></a>
 ## TransactionReceipt Objects
@@ -951,4 +1077,22 @@ A new instance of this class must be created that matches the protocol buffer ob
 **Returns**:
 
 A new instance of this class that matches the protocol buffer object in the 'transaction_receipt_protobuf_object' argument.
+
+<a name="aea.helpers.transaction.base.TransactionReceipt.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.transaction.base.TransactionReceipt.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get string representation.
 
