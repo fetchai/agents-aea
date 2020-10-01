@@ -22,6 +22,7 @@
 from builtins import FileNotFoundError
 from typing import cast
 from unittest import TestCase, mock
+from unittest.mock import MagicMock
 
 import pytest
 from click import BadParameter, ClickException
@@ -410,8 +411,10 @@ class AEAJsonPathTypeTestCase(TestCase):
         """Test for convert method with root "vendor" path not exists."""
         value = "vendor.author.protocols.package_name.attribute_name"
         obj = AEAJsonPathType()
+        ctx = MagicMock()
+        ctx.obj.agent_config.author = "author"
         with self.assertRaises(BadParameter):
-            obj.convert(value, "param", "ctx")
+            obj.convert(value, "param", ctx)
 
 
 @mock.patch("aea.cli.utils.package_utils.LedgerApis", mock.MagicMock())

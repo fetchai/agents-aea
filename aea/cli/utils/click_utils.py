@@ -142,7 +142,8 @@ class AEAJsonPathType(click.ParamType):
                 json_path,
                 path_to_resource_configuration,
                 config_loader,
-            ) = handle_dotted_path(value)
+                component_id,
+            ) = handle_dotted_path(value, ctx.obj.agent_config.author)
         except AEAException as e:
             self.fail(str(e))
         else:
@@ -150,4 +151,5 @@ class AEAJsonPathType(click.ParamType):
                 "configuration_file_path", path_to_resource_configuration
             )
             ctx.obj.set_config("configuration_loader", config_loader)
+            ctx.obj.set_config("component_id", component_id)
             return json_path

@@ -19,15 +19,17 @@
 
 """Implementation of the 'aea list' subcommand."""
 
-from typing import Dict, List, cast
+from typing import Dict, List, Optional, cast
 
 import click
 
 from aea.cli.utils.click_utils import AEAJsonPathType
+from aea.cli.utils.config import _try_get_configuration_object_from_aea_config, _try_get_component_id_from_prefix
 from aea.cli.utils.constants import FALSE_EQUIVALENTS, FROM_STRING_TO_TYPE
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.generic import get_parent_object, load_yaml
+from aea.configurations.base import ComponentId
 from aea.configurations.loader import ConfigLoader
 
 
@@ -70,9 +72,16 @@ def set_command(
 def _get_config_value(ctx: Context, json_path: List[str]):
     config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
     configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
+    component_id = cast(Optional[ComponentId], ctx.config.get("component_id"))
 
-    configuration_object = load_yaml(configuration_file_path)
-    config_loader.validator.validate(instance=configuration_object)
+    configuration_object = None
+    if component_id is not None:
+        configuration_object = _try_get_configuration_object_from_aea_config(
+            ctx, component_id
+        )
+    if configuration_object is None:
+        configuration_object = load_yaml(configuration_file_path)
+        config_loader.validator.validate(instance=configuration_object)
 
     parent_object_path = json_path[:-1]
     attribute_name = json_path[-1]
@@ -84,35 +93,19 @@ def _get_config_value(ctx: Context, json_path: List[str]):
 
 
 def _set_config(ctx: Context, json_path: List[str], value: str, type_str: str) -> None:
-    config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
-    configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
+    component_id = ctx.config.get("component_id")
+    configuration_file_path = ctx.config.get("configuration_file_path")
+    config_loader = ctx.config.get("config_loader")
+    is_main_agent_config = component_id is None
 
-    configuration_object = load_yaml(configuration_file_path)
-    config_loader.validator.validate(instance=configuration_object)
-
+    configuration_object = _get_configuration_object(ctx)
     parent_object_path = json_path[:-1]
     attribute_name = json_path[-1]
     parent_object = _get_and_validate_parent_obj(
         configuration_object, parent_object_path, attribute_name
     )
-
-    type_ = FROM_STRING_TO_TYPE[type_str]
-    try:
-        if type_ != bool:
-            parent_object[attribute_name] = type_(value)
-        else:
-            parent_object[attribute_name] = value not in FALSE_EQUIVALENTS
-    except ValueError:  # pragma: no cover
-        raise click.ClickException("Cannot convert {} to type {}".format(value, type_))
-
-    try:
-        configuration_obj = config_loader.configuration_class.from_json(
-            configuration_object
-        )
-        config_loader.validate(configuration_obj.json)
-        config_loader.dump(configuration_obj, open(configuration_file_path, "w"))
-    except Exception:
-        raise click.ClickException("Attribute or value not valid.")
+    _update_object(parent_object, type_str, attribute_name, value)
+    _dump_object(ctx, configuration_object)
 
 
 def _get_and_validate_parent_obj(
@@ -140,3 +133,54 @@ def _get_and_validate_parent_obj(
             "Attribute '{}' is not of primitive type.".format(attr_name)
         )
     return parent_obj
+
+
+def _get_configuration_object(ctx: Context) -> Dict:
+    """
+    Get the configuration object to update.
+
+    If
+
+    :param ctx: the CLI context.
+    :return: the dictionary representing the configuration to update.
+    """
+
+    is_main_agent_config = component_id is None
+    if is_main_agent_config:
+        configuration_object = load_yaml(configuration_file_path)
+        config_loader.validator.validate(instance=configuration_object)
+        return configuration_object
+    else:
+        true_component_id = _try_get_component_id_from_prefix(
+            # TODO get all component prefixes
+            set(ctx.agent_config)
+        )
+        return dict(
+            author=component_id.author,
+            name=component_id.name,
+        )
+
+
+def _update_object(parent_object, type_str, attribute_name, value):
+    type_ = FROM_STRING_TO_TYPE[type_str]
+    try:
+        if type_ != bool:
+            parent_object[attribute_name] = type_(value)
+        else:
+            parent_object[attribute_name] = value not in FALSE_EQUIVALENTS
+    except ValueError:  # pragma: no cover
+        raise click.ClickException("Cannot convert {} to type {}".format(value, type_))
+
+
+def _dump_object(ctx: Context, configuration_object):
+    config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
+    configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
+    try:
+        configuration_obj = config_loader.configuration_class.from_json(
+            configuration_object
+        )
+        config_loader.validate(configuration_obj.json)
+        with open(configuration_file_path, "w") as file_pointer:
+            config_loader.dump(configuration_obj, file_pointer)
+    except Exception:
+        raise click.ClickException("Attribute or value not valid.")

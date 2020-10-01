@@ -28,6 +28,7 @@ from aea.configurations.base import PublicId
 from aea.connections.stub.connection import write_envelope
 from aea.exceptions import enforce
 from aea.mail.base import Envelope
+from aea.test_tools.constants import DEFAULT_AUTHOR
 
 
 def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
@@ -81,7 +82,9 @@ def _nested_set(dic: Dict, keys: List, value: Any) -> None:
     dic[keys[-1]] = value
 
 
-def force_set_config(dotted_path: str, value: Any) -> None:
+def force_set_config(
+    dotted_path: str, value: Any, author: str = DEFAULT_AUTHOR
+) -> None:
     """
     Set an AEA config without validation.
 
@@ -97,10 +100,11 @@ def force_set_config(dotted_path: str, value: Any) -> None:
 
     :param dotted_path: dotted path to a setting.
     :param value: a value to assign. Must be of yaml serializable type.
+    :param author: the author name, used to parse the dotted path.
 
     :return: None.
     """
-    settings_keys, file_path, _ = handle_dotted_path(dotted_path)
+    settings_keys, file_path, _ = handle_dotted_path(dotted_path, author)
 
     settings = {}
     with open(file_path, "r") as f:
