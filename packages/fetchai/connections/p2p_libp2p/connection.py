@@ -41,6 +41,7 @@ from aea.helpers.async_utils import AwaitableProc
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
 
+
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
@@ -60,7 +61,7 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.9.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.10.0")
 
 MultiAddr = str
 
@@ -111,7 +112,13 @@ def _golang_module_run(
     logger: logging.Logger = _default_logger,
 ) -> subprocess.Popen:
     """
-    Runs a built module located at `path`
+    Runs a built module located at `path`.
+
+    :param path: the path to the go module.
+    :param name: the name of the module.
+    :param args: the args
+    :param log_file_desc: the file descriptor of the log file.
+    :param logger: the logger
     """
     cmd = [os.path.join(path, name)]
 
@@ -139,9 +146,7 @@ def _golang_module_run(
 
 
 class Uri:
-    """
-    Holds a node address in format "host:port"
-    """
+    """Holds a node address in format "host:port"."""
 
     def __init__(
         self,
@@ -162,9 +167,11 @@ class Uri:
             self._port = randint(5000, 10000)  # nosec
 
     def __str__(self):
+        """Get string representation."""
         return "{}:{}".format(self._host, self._port)
 
     def __repr__(self):  # pragma: no cover
+        """Get object representation."""
         return self.__str__()
 
     @property
@@ -179,9 +186,7 @@ class Uri:
 
 
 class Libp2pNode:
-    """
-    Libp2p p2p node as a subprocess with named pipes interface
-    """
+    """Libp2p p2p node as a subprocess with named pipes interface."""
 
     def __init__(
         self,

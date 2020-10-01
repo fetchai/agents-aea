@@ -53,7 +53,7 @@ When it is live you will see the sentence 'A thing of beauty is a joy forever...
 
 To view the `OEF search and communication node` logs for debugging, navigate to `data/oef-logs`.
 
-To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.9.0`).
+To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.10.0`).
 
 If you experience any problems launching the `OEF search and communication node` then consult <a href="https://docs.google.com/document/d/1x_hFwEIXHlr_JCkuIv-izxSz0tN-7kSmSc-g32ImL1U/edit?usp=sharing" target="_blank">this</a> guide.
 
@@ -93,7 +93,13 @@ Whilst a ledger can, in principle, also be used to store structured data - for i
 The Python version of the AEA Framework currently integrates with three ledgers:
 
 - <a href="https://docs.fetch.ai/ledger/" target="_blank">Fetch.ai ledger</a>
-- <a href="https://ethereum.org/en/build/" target="_blank">Ethereum ledger</a>
+- <a href="https://ethereum.org/en/developers/learning-tools/" target="_blank">Ethereum ledger</a>
 - <a href="https://cosmos.network/sdk" target="_blank">Cosmos ledger</a>
 
 However, the framework makes it straightforward for further ledgers to be added by any developer.
+
+### AEAs as second layer technology
+
+The following presentation discusses how AEAs can be seen as second layer technology to ledgers.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/gvzYX7CYk-A" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

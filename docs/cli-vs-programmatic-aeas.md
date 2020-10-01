@@ -28,7 +28,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.12.0
+aea fetch fetchai/weather_station:0.13.0
 cd weather_station
 ```
 
@@ -86,6 +86,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnecti
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
 
+
 API_KEY = "TwiCIriSl0mLahw17pyqoA"
 SOEF_ADDR = "soef.fetch.ai"
 SOEF_PORT = 9002
@@ -103,6 +104,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def run():
+    """Run demo."""
+
     # Create a private key
     create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
     create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
@@ -121,8 +124,8 @@ def run():
 
     # specify the default routing for some protocols
     default_routing = {
-        PublicId.from_str("fetchai/ledger_api:0.3.0"): LedgerConnection.connection_id,
-        PublicId.from_str("fetchai/oef_search:0.6.0"): SOEFConnection.connection_id,
+        PublicId.from_str("fetchai/ledger_api:0.4.0"): LedgerConnection.connection_id,
+        PublicId.from_str("fetchai/oef_search:0.7.0"): SOEFConnection.connection_id,
     }
     default_connection = P2PLibp2pConnection.connection_id
 
@@ -189,7 +192,7 @@ def run():
         api_key=API_KEY,
         soef_addr=SOEF_ADDR,
         soef_port=SOEF_PORT,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.6.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity)

@@ -32,10 +32,15 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
-sys.modules["packages.fetchai.connections.gym"] = locate(
+
+sys.modules["packages.fetchai.connections.gym"] = locate(  # isort:skip
     "packages.fetchai.connections.gym"
 )
-sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
+sys.modules["packages.fetchai.protocols.gym"] = locate(  # isort:skip
+    "packages.fetchai.protocols.gym"
+)
+
+
 from packages.fetchai.protocols.gym.dialogues import (  # noqa: E402  # pylint: disable=wrong-import-position
     GymDialogue as BaseGymDialogue,
 )
@@ -47,6 +52,7 @@ from packages.fetchai.protocols.gym.message import (  # noqa: E402  # pylint: di
 )
 
 from .agent import ProxyAgent  # noqa: E402  # pylint: disable=wrong-import-position
+
 
 Action = Any
 Observation = Any
@@ -87,7 +93,7 @@ class ProxyEnv(gym.Env):
         super().__init__()
         self._queue: Queue = Queue()
         self._action_counter: int = 0
-        self.gym_address = "fetchai/gym:0.7.0"
+        self.gym_address = "fetchai/gym:0.8.0"
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
@@ -219,7 +225,6 @@ class ProxyEnv(gym.Env):
         self._agent.outbox.put_message(message=gym_msg)
 
     def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> GymMessage:
-
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 
@@ -250,7 +255,6 @@ class ProxyEnv(gym.Env):
         raise ValueError("Missing envelope.")
 
     def _decode_status(self, envelope: Envelope) -> None:
-
         """
         Receive the response from the gym environment in the form of an envelope and decode it.
 

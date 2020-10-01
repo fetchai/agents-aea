@@ -31,13 +31,10 @@ from typing import Any, Dict, Optional, Tuple, Type, cast
 from google.protobuf.struct_pb2 import Struct
 
 from aea.components.base import Component, load_aea_package
-from aea.configurations.base import (
-    ComponentType,
-    ProtocolConfig,
-    PublicId,
-)
+from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.exceptions import enforce
+
 
 logger = logging.getLogger(__name__)
 

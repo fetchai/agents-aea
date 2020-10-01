@@ -35,6 +35,7 @@ from packages.fetchai.protocols.contract_api.custom_types import (
 )
 from packages.fetchai.protocols.contract_api.custom_types import State as CustomState
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.contract_api.message")
 
 DEFAULT_BODY_SIZE = 4
@@ -43,7 +44,7 @@ DEFAULT_BODY_SIZE = 4
 class ContractApiMessage(Message):
     """A protocol for contract APIs requests and responses."""
 
-    protocol_id = ProtocolId.from_str("fetchai/contract_api:0.4.0")
+    protocol_id = ProtocolId.from_str("fetchai/contract_api:0.5.0")
 
     Kwargs = CustomKwargs
 

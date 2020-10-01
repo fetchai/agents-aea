@@ -27,6 +27,7 @@ from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, Packag
 from aea.configurations.loader import ConfigLoaders
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 
+
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 
 logger = logging.getLogger(__name__)

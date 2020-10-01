@@ -37,6 +37,7 @@ from aea.crypto.registries import (
 )
 from aea.exceptions import enforce
 
+
 DEFAULT_LEDGER_CONFIGS = {
     CosmosApi.identifier: {"address": COSMOS_DEFAULT_ADDRESS},
     EthereumApi.identifier: {

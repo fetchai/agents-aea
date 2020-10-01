@@ -34,6 +34,7 @@ from aea.protocols.signing.custom_types import (
 )
 from aea.protocols.signing.custom_types import Terms as CustomTerms
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.signing.message")
 
 DEFAULT_BODY_SIZE = 4
@@ -42,7 +43,7 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = ProtocolId.from_str("fetchai/signing:0.3.0")
+    protocol_id = ProtocolId.from_str("fetchai/signing:0.4.0")
 
     ErrorCode = CustomErrorCode
 

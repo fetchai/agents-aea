@@ -31,8 +31,9 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
+
 DEFAULT_SEARCH_INTERVAL = 5.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.5.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
 
 class GenericSearchBehaviour(TickerBehaviour):

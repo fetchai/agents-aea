@@ -10,7 +10,7 @@ This module contains multiaddress class.
 class MultiAddr()
 ```
 
-Protocol Labs' Multiaddress representation of a network address
+Protocol Labs' Multiaddress representation of a network address.
 
 <a name="aea.helpers.multiaddr.base.MultiAddr.__init__"></a>
 #### `__`init`__`
@@ -19,7 +19,7 @@ Protocol Labs' Multiaddress representation of a network address
  | __init__(host: str, port: int, public_key: str)
 ```
 
-Initialize a multiaddress
+Initialize a multiaddress.
 
 **Arguments**:
 
@@ -75,7 +75,7 @@ Get the peer id.
  | format() -> str
 ```
 
-Canonical representation of a multiaddress
+Canonical representation of a multiaddress.
 
 <a name="aea.helpers.multiaddr.base.MultiAddr.__str__"></a>
 #### `__`str`__`

@@ -27,10 +27,7 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
-from packages.fetchai.connections.ledger.base import (
-    CONNECTION_ID,
-    RequestDispatcher,
-)
+from packages.fetchai.connections.ledger.base import CONNECTION_ID, RequestDispatcher
 from packages.fetchai.connections.ledger.contract_dispatcher import (
     ContractApiRequestDispatcher,
 )

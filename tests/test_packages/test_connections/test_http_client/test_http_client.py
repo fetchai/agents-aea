@@ -22,9 +22,7 @@ import logging
 from asyncio import CancelledError
 from unittest.mock import Mock, patch
 
-
 import aiohttp
-
 import pytest
 
 from aea.common import Address
@@ -39,11 +37,8 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpD
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import AnyStringWith
-from tests.conftest import (
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
-    get_host,
-    get_unused_tcp_port,
-)
+from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
+
 
 logger = logging.getLogger(__name__)
 

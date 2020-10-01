@@ -75,6 +75,7 @@ class ContextMock:
         self.obj = self
 
     def set_config(self, key, value):
+        """Set config."""
         setattr(self.config, key, value)
 
 

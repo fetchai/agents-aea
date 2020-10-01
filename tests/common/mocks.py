@@ -32,6 +32,7 @@ class AnyStringWith(str):
     """
 
     def __eq__(self, other):
+        """Check equality."""
         return self in other
 
 
@@ -43,6 +44,7 @@ class RegexComparator(str):
     """
 
     def __eq__(self, other):
+        """Check equality."""
         regex = re.compile(str(self), re.MULTILINE | re.DOTALL)
         s = str(other)
         return bool(regex.match(s))

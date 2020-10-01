@@ -23,13 +23,11 @@ import os
 import subprocess  # nosec
 import sys
 import threading
-from typing import Dict, List
-
-from click import ClickException
+from typing import Any, Dict, List, Tuple
 
 import connexion
-
 import flask
+from click import ClickException
 
 from aea.cli.add import add_item as cli_add_item
 from aea.cli.create import create_aea as cli_create_aea
@@ -39,10 +37,8 @@ from aea.cli.list import list_agent_items as cli_list_agent_items
 from aea.cli.registry.fetch import fetch_agent as cli_fetch_agent
 from aea.cli.remove import remove_item as cli_remove_item
 from aea.cli.scaffold import scaffold_item as cli_scaffold_item
-from aea.cli.search import (
-    search_items as cli_search_items,
-    setup_search_ctx as cli_setup_search_ctx,
-)
+from aea.cli.search import search_items as cli_search_items
+from aea.cli.search import setup_search_ctx as cli_setup_search_ctx
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
@@ -57,6 +53,7 @@ from aea.cli_gui.utils import (
     terminate_processes,
 )
 from aea.configurations.base import PublicId
+
 
 elements = [
     ["local", "agent", "localAgents"],
@@ -73,7 +70,7 @@ elements = [
 max_log_lines = 100
 
 
-class AppContext:
+class AppContext:  # pylint: disable=too-few-public-methods
     """Store useful global information about the app.
 
     Can't add it into the app object itself because mypy complains.
@@ -232,9 +229,13 @@ def remove_local_item(agent_id: str, item_type: str, item_id: str):
         return agent_id, 201  # 200 (OK)
 
 
-def get_local_items(agent_id: str, item_type: str):
+def get_local_items(agent_id: str, item_type: str) -> Tuple[List[Dict[Any, Any]], int]:
+    """
+    Return a list of protocols, skills or connections supported by a local agent.
 
-    """Return a list of protocols, skills or connections supported by a local agent."""
+    :param agent_id: the id of the agent
+    :param item_type: the type of item
+    """
     if agent_id == "NONE":
         return [], 200  # 200 (Success)
 
@@ -244,7 +245,7 @@ def get_local_items(agent_id: str, item_type: str):
         try_to_load_agent_config(ctx)
         result = cli_list_agent_items(ctx, item_type)
     except ClickException:
-        return {"detail": "Failed to list agent items."}, 400  # 400 Bad request
+        return [{"detail": "Failed to list agent items."}], 400  # 400 Bad request
     else:
         sorted_items = sort_items(result)
         return sorted_items, 200  # 200 (Success)

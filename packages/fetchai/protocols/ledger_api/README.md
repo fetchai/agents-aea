@@ -10,7 +10,7 @@ This is a protocol for interacting with ledger APIs.
 ---
 name: ledger_api
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'

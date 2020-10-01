@@ -10,7 +10,7 @@ Portable pipe implementation for Linux, MacOS, and Windows.
 class IPCChannelClient(ABC)
 ```
 
-Multi-platform interprocess communication channel for the client side
+Multi-platform interprocess communication channel for the client side.
 
 <a name="aea.helpers.pipe.IPCChannelClient.connect"></a>
 #### connect
@@ -35,6 +35,7 @@ Connect to communication channel
 ```
 
 Write `data` bytes to the other end of the channel
+
 Will first write the size than the actual data
 
 **Arguments**:
@@ -50,6 +51,7 @@ Will first write the size than the actual data
 ```
 
 Read bytes from the other end of the channel
+
 Will first read the size than the actual data
 
 **Returns**:
@@ -64,7 +66,11 @@ read bytes
  | async close() -> None
 ```
 
-Close the communication channel
+Close the communication channel.
+
+**Returns**:
+
+None
 
 <a name="aea.helpers.pipe.IPCChannel"></a>
 ## IPCChannel Objects
@@ -73,7 +79,7 @@ Close the communication channel
 class IPCChannel(IPCChannelClient)
 ```
 
-Multi-platform interprocess communication channel
+Multi-platform interprocess communication channel.
 
 <a name="aea.helpers.pipe.IPCChannel.in_path"></a>
 #### in`_`path
@@ -84,7 +90,11 @@ Multi-platform interprocess communication channel
  | in_path() -> str
 ```
 
-Rendezvous point for incoming communication
+Rendezvous point for incoming communication.
+
+**Returns**:
+
+path
 
 <a name="aea.helpers.pipe.IPCChannel.out_path"></a>
 #### out`_`path
@@ -95,7 +105,11 @@ Rendezvous point for incoming communication
  | out_path() -> str
 ```
 
-Rendezvous point for outgoing communication
+Rendezvous point for outgoing communication.
+
+**Returns**:
+
+path
 
 <a name="aea.helpers.pipe.PosixNamedPipeProtocol"></a>
 ## PosixNamedPipeProtocol Objects
@@ -104,7 +118,7 @@ Rendezvous point for outgoing communication
 class PosixNamedPipeProtocol()
 ```
 
-Posix named pipes async wrapper communication protocol
+Posix named pipes async wrapper communication protocol.
 
 <a name="aea.helpers.pipe.PosixNamedPipeProtocol.__init__"></a>
 #### `__`init`__`
@@ -113,7 +127,7 @@ Posix named pipes async wrapper communication protocol
  | __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
 ```
 
-Initialize a new posix named pipe
+Initialize a new posix named pipe.
 
 **Arguments**:
 
@@ -170,7 +184,7 @@ read bytes
  | async close() -> None
 ```
 
-Disconnect pipe
+Disconnect pipe.
 
 <a name="aea.helpers.pipe.TCPSocketProtocol"></a>
 ## TCPSocketProtocol Objects
@@ -179,7 +193,7 @@ Disconnect pipe
 class TCPSocketProtocol()
 ```
 
-TCP socket communication protocol
+TCP socket communication protocol.
 
 <a name="aea.helpers.pipe.TCPSocketProtocol.__init__"></a>
 #### `__`init`__`
@@ -188,7 +202,7 @@ TCP socket communication protocol
  | __init__(reader: asyncio.StreamReader, writer: asyncio.StreamWriter, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
 ```
 
-Initialize the tcp socket protocol
+Initialize the tcp socket protocol.
 
 **Arguments**:
 
@@ -228,7 +242,7 @@ read bytes
  | async close() -> None
 ```
 
-Disconnect socket
+Disconnect socket.
 
 <a name="aea.helpers.pipe.TCPSocketChannel"></a>
 ## TCPSocketChannel Objects
@@ -237,7 +251,7 @@ Disconnect socket
 class TCPSocketChannel(IPCChannel)
 ```
 
-Interprocess communication channel implementation using tcp sockets
+Interprocess communication channel implementation using tcp sockets.
 
 <a name="aea.helpers.pipe.TCPSocketChannel.__init__"></a>
 #### `__`init`__`
@@ -246,7 +260,7 @@ Interprocess communication channel implementation using tcp sockets
  | __init__(logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
 ```
 
-Initialize tcp socket interprocess communication channel
+Initialize tcp socket interprocess communication channel.
 
 <a name="aea.helpers.pipe.TCPSocketChannel.connect"></a>
 #### connect
@@ -255,7 +269,7 @@ Initialize tcp socket interprocess communication channel
  | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
 ```
 
-Setup communication channel and wait for other end to connect
+Setup communication channel and wait for other end to connect.
 
 **Arguments**:
 
@@ -294,7 +308,7 @@ Read from channel.
  | async close() -> None
 ```
 
-Disconnect from channel and clean it up
+Disconnect from channel and clean it up.
 
 <a name="aea.helpers.pipe.TCPSocketChannel.in_path"></a>
 #### in`_`path
@@ -304,7 +318,7 @@ Disconnect from channel and clean it up
  | in_path() -> str
 ```
 
-Rendezvous point for incoming communication
+Rendezvous point for incoming communication.
 
 <a name="aea.helpers.pipe.TCPSocketChannel.out_path"></a>
 #### out`_`path
@@ -314,7 +328,7 @@ Rendezvous point for incoming communication
  | out_path() -> str
 ```
 
-Rendezvous point for outgoing communication
+Rendezvous point for outgoing communication.
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannel"></a>
 ## PosixNamedPipeChannel Objects
@@ -323,7 +337,7 @@ Rendezvous point for outgoing communication
 class PosixNamedPipeChannel(IPCChannel)
 ```
 
-Interprocess communication channel implementation using Posix named pipes
+Interprocess communication channel implementation using Posix named pipes.
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannel.__init__"></a>
 #### `__`init`__`
@@ -332,7 +346,7 @@ Interprocess communication channel implementation using Posix named pipes
  | __init__(logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
 ```
 
-Initialize posix named pipe interprocess communication channel
+Initialize posix named pipe interprocess communication channel.
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannel.connect"></a>
 #### connect
@@ -341,11 +355,15 @@ Initialize posix named pipe interprocess communication channel
  | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
 ```
 
-Setup communication channel and wait for other end to connect
+Setup communication channel and wait for other end to connect.
 
 **Arguments**:
 
 - `timeout`: timeout for connection to be established
+
+**Returns**:
+
+bool, indicating sucess
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannel.write"></a>
 #### write
@@ -380,7 +398,7 @@ read bytes
  | async close() -> None
 ```
 
-Close the channel and clean it up
+Close the channel and clean it up.
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannel.in_path"></a>
 #### in`_`path
@@ -390,7 +408,7 @@ Close the channel and clean it up
  | in_path() -> str
 ```
 
-Rendezvous point for incoming communication
+Rendezvous point for incoming communication.
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannel.out_path"></a>
 #### out`_`path
@@ -400,7 +418,7 @@ Rendezvous point for incoming communication
  | out_path() -> str
 ```
 
-Rendezvous point for outgoing communication
+Rendezvous point for outgoing communication.
 
 <a name="aea.helpers.pipe.TCPSocketChannelClient"></a>
 ## TCPSocketChannelClient Objects
@@ -409,7 +427,7 @@ Rendezvous point for outgoing communication
 class TCPSocketChannelClient(IPCChannelClient)
 ```
 
-Interprocess communication channel client using tcp sockets
+Interprocess communication channel client using tcp sockets.
 
 <a name="aea.helpers.pipe.TCPSocketChannelClient.__init__"></a>
 #### `__`init`__`
@@ -418,7 +436,7 @@ Interprocess communication channel client using tcp sockets
  | __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
 ```
 
-Initialize a tcp socket communication channel client
+Initialize a tcp socket communication channel client.
 
 **Arguments**:
 
@@ -432,7 +450,7 @@ Initialize a tcp socket communication channel client
  | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
 ```
 
-Connect to the other end of the communication channel
+Connect to the other end of the communication channel.
 
 **Arguments**:
 
@@ -445,7 +463,7 @@ Connect to the other end of the communication channel
  | async write(data: bytes) -> None
 ```
 
-Write data to channel
+Write data to channel.
 
 **Arguments**:
 
@@ -458,7 +476,7 @@ Write data to channel
  | async read() -> Optional[bytes]
 ```
 
-Read data from channel
+Read data from channel.
 
 **Returns**:
 
@@ -471,7 +489,7 @@ read bytes
  | async close() -> None
 ```
 
-Disconnect from communication channel
+Disconnect from communication channel.
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannelClient"></a>
 ## PosixNamedPipeChannelClient Objects
@@ -480,7 +498,7 @@ Disconnect from communication channel
 class PosixNamedPipeChannelClient(IPCChannelClient)
 ```
 
-Interprocess communication channel client using Posix named pipes
+Interprocess communication channel client using Posix named pipes.
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannelClient.__init__"></a>
 #### `__`init`__`
@@ -489,7 +507,7 @@ Interprocess communication channel client using Posix named pipes
  | __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None)
 ```
 
-Initialize a posix named pipe communication channel client
+Initialize a posix named pipe communication channel client.
 
 **Arguments**:
 
@@ -503,7 +521,7 @@ Initialize a posix named pipe communication channel client
  | async connect(timeout: float = PIPE_CONN_TIMEOUT) -> bool
 ```
 
-Connect to the other end of the communication channel
+Connect to the other end of the communication channel.
 
 **Arguments**:
 
@@ -516,7 +534,7 @@ Connect to the other end of the communication channel
  | async write(data: bytes) -> None
 ```
 
-Write data to channel
+Write data to channel.
 
 **Arguments**:
 
@@ -529,7 +547,7 @@ Write data to channel
  | async read() -> Optional[bytes]
 ```
 
-Read data from channel
+Read data from channel.
 
 **Returns**:
 
@@ -542,7 +560,7 @@ read bytes
  | async close() -> None
 ```
 
-Disconnect from communication channel
+Disconnect from communication channel.
 
 <a name="aea.helpers.pipe.make_ipc_channel"></a>
 #### make`_`ipc`_`channel
@@ -552,6 +570,15 @@ make_ipc_channel(logger: logging.Logger = _default_logger, loop: Optional[Abstra
 ```
 
 Build a portable bidirectional InterProcess Communication channel
+
+**Arguments**:
+
+- `logger`: the logger
+- `loop`: the loop
+
+**Returns**:
+
+IPCChannel
 
 <a name="aea.helpers.pipe.make_ipc_channel_client"></a>
 #### make`_`ipc`_`channel`_`client
@@ -566,4 +593,10 @@ Build a portable bidirectional InterProcess Communication client channel
 
 - `in_path`: rendezvous point for incoming communication
 - `out_path`: rendezvous point for outgoing outgoing
+- `logger`: the logger
+- `loop`: the loop
+
+**Returns**:
+
+IPCChannel
 

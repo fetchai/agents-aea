@@ -35,19 +35,17 @@ import subprocess  # nosec
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
-
-from click.testing import CliRunner
+from typing import Dict, List, Optional, Pattern, Set
 
 import semver
-
 import yaml
+from click.testing import CliRunner
 
 from aea.cli import cli
 from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.loader import ConfigLoader
-
 from scripts.generate_ipfs_hashes import update_hashes
+
 
 DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples", "tests"]
 CLI_LOG_OPTION = ["-v", "OFF"]
@@ -63,6 +61,17 @@ TYPE_TO_CONFIG_FILE = {
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
 
 
+def get_protocol_specification_header_regex(public_id: PublicId) -> Pattern:
+    """Get the regex to match."""
+    return re.compile(
+        rf"(name: {public_id.name}\n"
+        + rf"author: {public_id.author}\n)"
+        + rf"version: {public_id.version}\n"
+        + r"(description:)",
+        re.MULTILINE,
+    )
+
+
 def check_positive(value):
     """Check value is an int."""
     try:
@@ -73,29 +82,33 @@ def check_positive(value):
     return ivalue
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "-n",
-    "--no-interactive",
-    action="store_true",
-    default=False,
-    help="Don't ask user confirmation for replacement.",
-)
-parser.add_argument(
-    "-C",
-    "--context",
-    type=check_positive,
-    default=3,
-    help="The number of above/below rows to display",
-)
+def parse_arguments():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-n",
+        "--no-interactive",
+        action="store_true",
+        default=False,
+        help="Don't ask user confirmation for replacement.",
+    )
+    parser.add_argument(
+        "-C",
+        "--context",
+        type=check_positive,
+        default=3,
+        help="The number of above/below rows to display",
+    )
 
-parser.add_argument(
-    "-r",
-    "--replace-by-default",
-    action="store_true",
-    default=False,
-    help="If --no-interactive is set, apply the replacement (default: False).",
-)
+    parser.add_argument(
+        "-r",
+        "--replace-by-default",
+        action="store_true",
+        default=False,
+        help="If --no-interactive is set, apply the replacement (default: False).",
+    )
+    return parser.parse_args()
+
 
 arguments: argparse.Namespace = None  # type: ignore
 
@@ -183,13 +196,31 @@ def get_configuration_file_path(type_: str, name: str) -> Path:
     sys.exit(1)
 
 
+def unified_yaml_load(configuration_file: Path) -> Dict:
+    """
+    Load YAML file, unified (both single- and multi-paged).
+
+    :param configuration_file: the configuration file path.
+    :return: the data.
+    """
+    package_type = configuration_file.parent.parent.name
+    with configuration_file.open() as fp:
+        if package_type != "agents":
+            return yaml.safe_load(fp)
+        # when it is an agent configuration file,
+        # we are interested only in the first page of the YAML,
+        # because the dependencies are contained only there.
+        data = yaml.safe_load_all(fp)
+        return list(data)[0]
+
+
 def get_public_id_from_yaml(configuration_file_path: Path) -> PublicId:
     """
     Get the public id from yaml.
 
     :param configuration_file_path: the path to the config yaml
     """
-    data = yaml.safe_load(configuration_file_path.open())
+    data = unified_yaml_load(configuration_file_path)
     author = data["author"]
     # handle the case when it's a package or agent config file.
     name = data["name"] if "name" in data else data["agent_name"]
@@ -219,6 +250,20 @@ def public_id_in_registry(type_: str, name: str) -> PublicId:
         if p_id > highest:
             highest = p_id
     return highest
+
+
+def get_all_package_ids() -> Set[PackageId]:
+    """Get all the package ids in the local repository."""
+    result: Set[PackageId] = set()
+    now = get_hashes_from_current_release()
+    now_by_type = split_hashes_by_type(now)
+    for type_, name_to_hashes in now_by_type.items():
+        for name, _ in name_to_hashes.items():
+            configuration_file_path = get_configuration_file_path(type_, name)
+            public_id = get_public_id_from_yaml(configuration_file_path)
+            package_id = PackageId(PackageType(type_[:-1]), public_id)
+            result.add(package_id)
+    return result
 
 
 def get_public_ids_to_update() -> Set[PackageId]:
@@ -262,66 +307,79 @@ def get_public_ids_to_update() -> Set[PackageId]:
             deployed_public_id = public_id_in_registry(type_, name)
             difference = minor_version_difference(current_public_id, deployed_public_id)
             # check if the public ids of the local package and the package in the registry are already the same.
+            package_info = f"Package `{name}` of type `{type_}`"
+            public_id_info = f"current id `{current_public_id}` and deployed id `{deployed_public_id}`"
             if difference == 0:
-                print(
-                    "Package `{}` of type `{}` needs to be bumped!".format(name, type_)
-                )
+                print(f"{package_info} needs to be bumped!")
                 result.add(PackageId(type_[:-1], current_public_id))
             elif difference == 1:
-                print(
-                    "Package `{}` of type `{}` already at correct version!".format(
-                        name, type_
-                    )
-                )
+                print(f"{package_info} already at correct version!")
                 continue
             else:
-                print(
-                    "Package `{}` of type `{}` has current id `{}` and deployed id `{}`. Error!".format(
-                        name, type_, current_public_id, deployed_public_id
-                    )
-                )
+                print(f"{package_info} has {public_id_info}. Error!")
                 sys.exit(1)
     return result
 
 
-def _extract_prefix(public_id: PublicId) -> Tuple[str, str]:
-    """Extract (author, package_name) from public id."""
-    return public_id.author, public_id.name
-
-
-def _get_ambiguous_public_ids(
-    all_package_ids_to_update: Set[PackageId],
-) -> Set[PublicId]:
+def _get_ambiguous_public_ids() -> Set[PublicId]:
     """Get the public ids that are the public ids of more than one package id."""
+    all_package_ids = get_all_package_ids()
     return set(
         map(
             operator.itemgetter(0),
             filter(
-                lambda x: x[1] > 1,
-                Counter(
-                    _extract_prefix(id_.public_id) for id_ in all_package_ids_to_update
-                ).items(),
+                lambda x: x[0].name != "scaffold" and x[1] > 1,
+                Counter(id_.public_id for id_ in all_package_ids).items(),
             ),
         )
     )
 
 
-def process_packages(all_package_ids_to_update: Set[PackageId]) -> bool:
+def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
+    """
+    Sort the set of package id in the order of update.
+
+    In particular, they are sorted from the greatest version number to the lowest.
+
+    The reason is to avoid that consecutive package ids (i.e. whose minors difference is 1)
+    gets updated in ascending order, resulting in all the updates collapsing to the greatest version.
+    For example, consider two package ids with prefix 'author/package' and with versions
+    0.1.0 and 0.2.0, respectively. If we bump first the former and then the latter,
+    the new replacements associated to the first updated are taken into account in
+    the second update.
+    """
+    return sorted(
+        package_ids,
+        key=lambda x: (
+            semver.VersionInfo.parse(x.public_id.version),
+            x.public_id.author,
+            x.public_id.name,
+            x.package_type,
+        ),
+        reverse=True,
+    )
+
+
+def process_packages(
+    all_package_ids_to_update: Set[PackageId], ambiguous_public_ids: Set[PublicId]
+) -> None:
     """Process the package versions."""
-    is_bumped = False
-    ambiguous_public_ids = _get_ambiguous_public_ids(all_package_ids_to_update)
+    print("*" * 100)
+
+    conflicts = {p.public_id for p in all_package_ids_to_update}.intersection(
+        ambiguous_public_ids
+    )
+    print(f"Ambiguous public ids: {pprint.pformat(ambiguous_public_ids)}")
+    print(f"Conflicts with public ids to update: {pprint.pformat(conflicts)}",)
+
     print("*" * 100)
     print("Start processing.")
-    print(
-        f"Ambiguous public ids: {pprint.pformat(map(lambda x: '/'.join(str(x)), ambiguous_public_ids))}"
-    )
-    for package_id in all_package_ids_to_update:
+    sorted_package_ids_list = _sort_in_update_order(all_package_ids_to_update)
+    for package_id in sorted_package_ids_list:
         print("#" * 50)
         print(f"Processing {package_id}")
-        is_ambiguous = _extract_prefix(package_id.public_id) in ambiguous_public_ids
+        is_ambiguous = package_id.public_id in ambiguous_public_ids
         process_package(package_id, is_ambiguous)
-        is_bumped = True
-    return is_bumped
 
 
 def minor_version_difference(
@@ -352,11 +410,7 @@ def bump_package_version(
         for path in Path(rootdir).glob("**/*"):
             if path.is_file() and str(path).endswith((".py", ".yaml", ".md")):
                 inplace_change(
-                    path,
-                    str(current_public_id),
-                    str(new_public_id),
-                    type_,
-                    is_ambiguous,
+                    path, current_public_id, new_public_id, type_, is_ambiguous,
                 )
 
     bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
@@ -383,7 +437,13 @@ def _can_disambiguate_from_context(
     if re.search(fr"aea +fetch +{old_string}", line) is not None:
         return type_ == "agents"
     match = re.search(
-        f"(skill|protocol|connection|contract|agent)s?.*{old_string}", line
+        "(skill|SKILL|"
+        + "protocol|PROTOCOL|"
+        + "connection|CONNECTION|"
+        + "contract|CONTRACT|"
+        + "agent|AGENT"
+        + f")s?.*{old_string}",
+        line,
     )
     if match is not None:
         return (match.group(1) + "s") == type_
@@ -454,8 +514,7 @@ def replace_aea_add_statements(content, old_string, new_string, type_) -> str:
 
 
 def replace_type_and_public_id_occurrences(line, old_string, new_string, type_) -> str:
-    """Replace the public id whenever the type and the id occur in the same row,
-    and NOT when other type names occur."""
+    """Replace the public id whenever the type and the id occur in the same row, and NOT when other type names occur."""
     if re.match(f"{type_}.*{old_string}", line) and all(
         _type not in line for _type in TYPES.difference({type_})
     ):
@@ -463,16 +522,18 @@ def replace_type_and_public_id_occurrences(line, old_string, new_string, type_) 
     return line
 
 
-def replace_in_yamls(content, old_string, new_string, type_) -> str:
+def replace_in_yamls(
+    content, old_public_id: PublicId, new_public_id: PublicId, type_
+) -> str:
     """
     Replace the public id in configuration files (also nested in .md files).
 
-    1) replace in cases like:
+    1) replace package dependencies:
         |protocols:
         |- author/name:version
         |...
         |- old_string
-    2) replace in cases like:
+    2) replace in configuration headers:
         |name: package_name
         |author: package_author
         |version: package_version -> bump up
@@ -480,12 +541,10 @@ def replace_in_yamls(content, old_string, new_string, type_) -> str:
     """
 
     # case 1:
-    regex = re.compile(f"({type_}:\n(-.*\n)*)(- *{old_string})", re.MULTILINE)
-    content = regex.sub(rf"\g<1>- {new_string}", content)
+    regex = re.compile(f"({type_}:\n(-.*\n)*)(- *{str(old_public_id)})", re.MULTILINE)
+    content = regex.sub(rf"\g<1>- {str(new_public_id)}", content)
 
-    # case 1:
-    old_public_id = PublicId.from_str(old_string)
-    new_public_id = PublicId.from_str(new_string)
+    # case 2:
     regex = re.compile(
         rf"(name: {old_public_id.name}\nauthor: {old_public_id.author}\n)version: {old_public_id.version}\n(type: {type_[:-1]})",
         re.MULTILINE,
@@ -494,23 +553,72 @@ def replace_in_yamls(content, old_string, new_string, type_) -> str:
     return content
 
 
+def replace_in_protocol_readme(
+    fp: Path, content: str, old_public_id: PublicId, new_public_id: PublicId, type_: str
+) -> str:
+    """
+    Replace the version id in the protocol specification in the protcol's README.
+
+    That is, bump the version in cases like:
+
+        |name: package_name
+        |author: package_author
+        |version: package_version -> bump up
+        ...
+
+    :param fp: path to the file being edited.
+    :param content: the content of the file.
+    :param old_public_id: the old public id.
+    :param new_public_id: the new public id.
+    :param type_: the type of the package.
+    :return: the new content.
+    """
+    if (
+        type_ == fp.parent.parent.name == "protocols"
+        and fp.name == "README.md"
+        and fp.parent.name == old_public_id.name
+    ):
+        regex = get_protocol_specification_header_regex(old_public_id)
+        content = regex.sub(rf"\g<1>version: {new_public_id.version}\n\g<2>", content)
+    return content
+
+
+def file_should_be_processed(content: str, old_public_id: PublicId):
+    """Check if the file should be processed."""
+    old_string = str(old_public_id)
+    return (
+        old_string in content
+        or get_protocol_specification_header_regex(old_public_id).search(content)
+        is not None
+    )
+
+
 def inplace_change(
-    fp: Path, old_string: str, new_string: str, type_: str, is_ambiguous: bool
+    fp: Path,
+    old_public_id: PublicId,
+    new_public_id: PublicId,
+    type_: str,
+    is_ambiguous: bool,
 ) -> None:
     """Replace the occurrence of a string with a new one in the provided file."""
 
     content = fp.read_text()
-    if old_string not in content:
+    if not file_should_be_processed(content, old_public_id):
         return
 
+    old_string = str(old_public_id)
+    new_string = str(new_public_id)
     print(
         f"Processing file {fp} for replacing {old_string} with {new_string} (is_ambiguous: {is_ambiguous})"
     )
 
+    content = replace_in_yamls(content, old_public_id, new_public_id, type_)
+    content = replace_in_protocol_readme(
+        fp, content, old_public_id, new_public_id, type_
+    )
     if not is_ambiguous:
         content = content.replace(old_string, new_string)
     else:
-        content = replace_in_yamls(content, old_string, new_string, type_)
         content = _ask_to_user_and_replace_if_allowed(
             content, old_string, new_string, type_
         )
@@ -535,7 +643,7 @@ def process_package(package_id: PackageId, is_ambiguous: bool) -> None:
 
     - check version in registry
     - make sure, version is exactly one above the one in registry
-    - change all occurences in packages/tests/aea/examples/benchmark/docs to new reference
+    - change all occurrences in packages/tests/aea/examples/benchmark/docs to new reference
     - change yaml version number
 
     :param package_id: the id of the package
@@ -552,8 +660,12 @@ def process_package(package_id: PackageId, is_ambiguous: bool) -> None:
 def run_once() -> bool:
     """Run the upgrade logic once."""
     all_package_ids_to_update = get_public_ids_to_update()
-    is_bumped = process_packages(all_package_ids_to_update)
-    return is_bumped
+    if len(all_package_ids_to_update) == 0:
+        print("No packages to update. Done!")
+        return False
+    ambiguous_public_ids = _get_ambiguous_public_ids()
+    process_packages(all_package_ids_to_update, ambiguous_public_ids)
+    return True
 
 
 if __name__ == "__main__":
@@ -561,7 +673,7 @@ if __name__ == "__main__":
     First, check all hashes are up to date, exit if not.
     Then, run the bumping algo, re-hashing upon each bump.
     """
-    arguments = parser.parse_args()
+    arguments = parse_arguments()
     run_hashing()
     check_if_running_allowed()
     while run_once():

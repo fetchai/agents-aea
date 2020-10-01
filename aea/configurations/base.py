@@ -20,13 +20,14 @@
 """Classes to handle AEA configurations."""
 
 import base64
+import functools
 import gzip
 import json
 import pprint
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from copy import deepcopy
+from copy import copy, deepcopy
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -46,14 +47,15 @@ from typing import (
 )
 
 import packaging
+import semver
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
-import semver
-
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
+from aea.helpers.base import recursive_update
 from aea.helpers.ipfs.base import IPFSHashOnly
+
 
 T = TypeVar("T")
 DEFAULT_VERSION = "0.1.0"
@@ -98,8 +100,54 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 
-PackageVersion = Type[semver.VersionInfo]
+VersionInfoClass = semver.VersionInfo
 PackageVersionLike = Union[str, semver.VersionInfo]
+
+
+@functools.total_ordering
+class PackageVersion:
+    """A package version."""
+
+    _version: PackageVersionLike
+
+    def __init__(self, version_like: PackageVersionLike):
+        """
+        Initialize a package version.
+
+        :param version_like: a string, os a semver.VersionInfo object.
+        """
+        if isinstance(version_like, str) and version_like == "latest":
+            self._version = version_like
+        elif isinstance(version_like, str):
+            self._version = VersionInfoClass.parse(version_like)
+        elif isinstance(version_like, VersionInfoClass):
+            self._version = version_like
+        else:
+            raise ValueError("Version type not valid.")
+
+    @property
+    def is_latest(self) -> bool:
+        """Check whether the version is 'latest'."""
+        return isinstance(self._version, str) and self._version == "latest"
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        return str(self._version)
+
+    def __eq__(self, other) -> bool:
+        """Check equality."""
+        return isinstance(other, PackageVersion) and self._version == other._version
+
+    def __lt__(self, other):
+        """Compare with another object."""
+        enforce(
+            isinstance(other, PackageVersion),
+            f"Cannot compare {type(self)} with type {type(other)}.",
+        )
+        other = cast(PackageVersion, other)
+        if self.is_latest or other.is_latest:
+            return self.is_latest < other.is_latest
+        return str(self) < str(other)
 
 
 class PackageType(Enum):
@@ -332,31 +380,36 @@ class PublicId(JSONSerializable):
     >>> another_public_id = PublicId("author", "my_package", "0.1.0")
     >>> assert hash(public_id) == hash(another_public_id)
     >>> assert public_id == another_public_id
+    >>> latest_public_id = PublicId("author", "my_package", "latest")
+    >>> latest_public_id
+    <author/my_package:latest>
+    >>> latest_public_id.package_version.is_latest
+    True
     """
 
     AUTHOR_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
-    VERSION_REGEX = r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
-    PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(
+    VERSION_REGEX = r"(latest|(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+    PUBLIC_ID_REGEX = r"^({})/({})(:({}))?$".format(
         AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
     )
     PUBLIC_ID_URI_REGEX = r"^({})/({})/({})$".format(
         AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
     )
 
-    def __init__(self, author: str, name: str, version: PackageVersionLike):
+    LATEST_VERSION = "latest"
+
+    def __init__(
+        self, author: str, name: str, version: Optional[PackageVersionLike] = None
+    ):
         """Initialize the public identifier."""
         self._author = author
         self._name = name
-        self._version, self._version_info = self._process_version(version)
-
-    @staticmethod
-    def _process_version(version_like: PackageVersionLike) -> Tuple[Any, Any]:
-        if isinstance(version_like, str):
-            return version_like, semver.VersionInfo.parse(version_like)
-        if isinstance(version_like, semver.VersionInfo):
-            return str(version_like), version_like
-        raise ValueError("Version type not valid.")
+        self._package_version = (
+            PackageVersion(version)
+            if version is not None
+            else PackageVersion(self.LATEST_VERSION)
+        )
 
     @property
     def author(self) -> str:
@@ -370,18 +423,26 @@ class PublicId(JSONSerializable):
 
     @property
     def version(self) -> str:
-        """Get the version."""
-        return self._version
+        """Get the version string."""
+        return str(self._package_version)
 
     @property
-    def version_info(self) -> PackageVersion:
-        """Get the package version."""
-        return self._version_info
+    def package_version(self) -> PackageVersion:
+        """Get the package version object."""
+        return self._package_version
 
     @property
     def latest(self) -> str:
         """Get the public id in `latest` form."""
         return "{author}/{name}:*".format(author=self.author, name=self.name)
+
+    def same_prefix(self, other: "PublicId") -> bool:
+        """Check if the other public id has the same author and name of this."""
+        return self.name == other.name and self.author == other.author
+
+    def to_latest(self) -> "PublicId":
+        """Return the same public id, but with latest version."""
+        return PublicId(self.author, self.name, self.LATEST_VERSION)
 
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
@@ -401,13 +462,14 @@ class PublicId(JSONSerializable):
         :return: the public id object.
         :raises ValueError: if the string in input is not well formatted.
         """
-        if not re.match(cls.PUBLIC_ID_REGEX, public_id_string):
+        match = re.match(cls.PUBLIC_ID_REGEX, public_id_string)
+        if match is None:
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_string)
             )
-        username, package_name, version = re.findall(
-            cls.PUBLIC_ID_REGEX, public_id_string
-        )[0][:3]
+        username = match.group(1)
+        package_name = match.group(2)
+        version = match.group(3)[1:] if ":" in public_id_string else None
         return PublicId(username, package_name, version)
 
     @classmethod
@@ -504,7 +566,7 @@ class PublicId(JSONSerializable):
             and self.author == other.author
             and self.name == other.name
         ):
-            return self.version_info < other.version_info
+            return self.package_version < other.package_version
         raise ValueError(
             "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
                 self, other
@@ -671,6 +733,11 @@ class ComponentId(PackageId):
             self.public_id.author, self.component_type.to_plural(), self.public_id.name
         )
 
+    @property
+    def json(self) -> Dict:
+        """Get the JSON representation."""
+        return dict(**self.public_id.json, type=str(self.component_type))
+
 
 ProtocolId = PublicId
 ContractId = PublicId
@@ -692,7 +759,6 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
-    configurable_fields: Set[str] = set()
 
     def __init__(
         self,
@@ -771,6 +837,14 @@ class PackageConfiguration(Configuration, ABC):
     def package_dependencies(self) -> Set[ComponentId]:
         """Get the package dependencies."""
         return set()
+
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        :param data: the data to replace.
+        :return: None
+        """
 
 
 class ComponentConfiguration(PackageConfiguration, ABC):
@@ -855,21 +929,12 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """
         _check_aea_version(self)
 
-    def update(self, data: Dict) -> None:
-        """
-        Update configuration with other data.
-
-        :param data: the data to replace.
-        :return: None
-        """
-
 
 class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
 
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
-    configurable_fields = {"config"}
 
     def __init__(
         self,
@@ -999,10 +1064,13 @@ class ConnectionConfig(ComponentConfiguration):
         """
         Update configuration with other data.
 
-        :param data: the data to replace.
+        This method does side-effect on the configuration object.
+
+        :param data: the data to populate or replace.
         :return: None
         """
-        self.config = data.get("config", self.config)
+        new_config = data.get("config", {})
+        recursive_update(self.config, new_config)
 
 
 class ProtocolConfig(ComponentConfiguration):
@@ -1105,7 +1173,6 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
-    configurable_fields = {"handlers", "behaviours", "models"}
 
     def __init__(
         self,
@@ -1260,17 +1327,37 @@ class SkillConfig(ComponentConfiguration):
         :param data: the data to replace.
         :return: None
         """
-        for behaviour_id, behaviour_data in data.get("behaviours", {}).items():
-            behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
-            self.behaviours.update(behaviour_id, behaviour_config)
 
-        for handler_id, handler_data in data.get("handlers", {}).items():
-            handler_config = SkillComponentConfiguration.from_json(handler_data)
-            self.handlers.update(handler_id, handler_config)
+        def _update_skill_component_config(type_plural: str, data: Dict):
+            """
+            Update skill component configurations with new data.
 
-        for model_id, model_data in data.get("models", {}).items():
-            model_config = SkillComponentConfiguration.from_json(model_data)
-            self.models.update(model_id, model_config)
+            Also check that there are not undeclared components.
+            """
+            registry: CRUDCollection[SkillComponentConfiguration] = getattr(
+                self, type_plural
+            )
+            new_component_config = data.get(type_plural, {})
+            all_component_names = dict(registry.read_all())
+
+            new_skill_component_names = set(new_component_config.keys()).difference(
+                set(all_component_names.keys())
+            )
+            if len(new_skill_component_names) > 0:
+                raise ValueError(
+                    f"The custom configuration for skill {self.public_id} includes new {type_plural}: {new_skill_component_names}. This is not allowed."
+                )
+
+            for component_name, component_data in data.get(type_plural, {}).items():
+                component_config = cast(
+                    SkillComponentConfiguration, registry.read(component_name)
+                )
+                recursive_update(component_config.args, component_data.get("args", {}))
+
+        _update_skill_component_config("behaviours", data)
+        _update_skill_component_config("handlers", data)
+        _update_skill_component_config("models", data)
+        self.is_abstract = data.get("is_abstract", self.is_abstract)
 
 
 class AgentConfig(PackageConfiguration):
@@ -1455,16 +1542,18 @@ class AgentConfig(PackageConfiguration):
 
     def component_configurations_json(self) -> List[OrderedDict]:
         """Get the component configurations in JSON format."""
-        return [
-            OrderedDict(
-                name=component_id.name,
-                author=component_id.author,
-                version=component_id.version,
-                type=component_id.component_type.value,
-                **obj,
+        result: List[OrderedDict] = []
+        for component_id, config in self.component_configurations.items():
+            result.append(
+                OrderedDict(
+                    name=component_id.name,
+                    author=component_id.author,
+                    version=component_id.version,
+                    type=str(component_id.component_type),
+                    **config,
+                )
             )
-            for component_id, obj in self.component_configurations.items()
-        ]
+        return result
 
     @property
     def json(self) -> Dict:
@@ -1508,7 +1597,7 @@ class AgentConfig(PackageConfiguration):
         if self.skill_exception_policy is not None:
             config["skill_exception_policy"] = self.skill_exception_policy
         if self.connection_exception_policy is not None:
-            config["connection_exception_policy"] = self.skill_exception_policy
+            config["connection_exception_policy"] = self.connection_exception_policy
         if self.default_routing != {}:
             config["default_routing"] = {
                 str(key): str(value) for key, value in self.default_routing.items()
@@ -1591,6 +1680,37 @@ class AgentConfig(PackageConfiguration):
         agent_config.default_ledger = default_ledger_id
 
         return agent_config
+
+    def update(self, data: Dict) -> None:
+        """
+        Update configuration with other data.
+
+        To update the component parts, populate the field "component_configurations" as a
+        mapping from ComponentId to configurations.
+
+        :param data: the data to replace.
+        :return: None
+        """
+        data = copy(data)
+        # update component parts
+        new_component_configurations: Dict = data.pop("component_configurations", {})
+        result: Dict[ComponentId, Dict] = copy(self.component_configurations)
+        for component_id, obj in new_component_configurations.items():
+            if component_id not in result:
+                result[component_id] = obj
+            else:
+                recursive_update(result[component_id], obj)
+        self.component_configurations = result
+
+        # update other fields
+        for item_id, value in data.get("private_key_paths", {}).items():
+            self.private_key_paths.update(item_id, value)
+
+        for item_id, value in data.get("connection_private_key_paths", {}).items():
+            self.connection_private_key_paths.update(item_id, value)
+
+        self.logging_config = data.get("logging_config", self.logging_config)
+        self.registry_path = data.get("registry_path", self.registry_path)
 
 
 class SpeechActContentConfig(Configuration):

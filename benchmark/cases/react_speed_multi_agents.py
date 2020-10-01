@@ -20,12 +20,11 @@
 """Example performance test using benchmark framework. Test react speed on amount of incoming messages using normal agent operating."""
 import time
 
+from aea.configurations.base import SkillConfig
 from benchmark.cases.helpers.dummy_handler import DummyHandler
 from benchmark.framework.aea_test_wrapper import AEATestWrapper
 from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
-
-from aea.configurations.base import SkillConfig
 
 
 def _make_custom_config(name: str = "dummy_agent", skills_num: int = 1) -> dict:

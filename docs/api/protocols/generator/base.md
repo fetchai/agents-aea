@@ -39,6 +39,7 @@ None
 ```
 
 Run the generator in "protobuf only" mode:
+
 a) validate the protocol specification.
 b) create the protocol buffer schema file.
 
@@ -54,10 +55,12 @@ None
 ```
 
 Run the generator in "full" mode:
+
 a) validates the protocol specification.
 b) creates the protocol buffer schema file.
 c) generates python modules.
 d) applies black formatting
+e) applies isort formatting
 
 **Returns**:
 
@@ -71,10 +74,12 @@ None
 ```
 
 Run the generator. If in "full" mode (protobuf_only is False), it:
+
 a) validates the protocol specification.
 b) creates the protocol buffer schema file.
 c) generates python modules.
 d) applies black formatting
+e) applies isort formatting
 
 If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
 

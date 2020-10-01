@@ -22,4 +22,5 @@
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
+
 OefSearchMessage.serializer = OefSearchSerializer

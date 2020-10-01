@@ -28,17 +28,16 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator, List, Optional
 
-from pexpect.exceptions import EOF  # type: ignore
-
 import pytest
-
 import yaml
+from pexpect.exceptions import EOF  # type: ignore
 
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner, MAX_FLAKY_RERUNS
+
 
 logger = logging.getLogger(__name__)
 
@@ -214,11 +213,11 @@ class TestLaunchMultithreaded(BaseLaunchTestCase):
                     f"[{self.agent_name_1}] Start processing messages",
                     f"[{self.agent_name_2}] Start processing messages",
                 ],
-                timeout=20,
+                timeout=30,
             )
             process_launch.control_c()
             process_launch.expect_all(
-                ["Exit cli. code: 0"], timeout=20,
+                ["Exit cli. code: 0"], timeout=30,
             )
 
 

@@ -49,6 +49,7 @@ from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
+
 _default_logger = logging.getLogger(__name__)
 
 
@@ -613,8 +614,7 @@ class Model(SkillComponent, ABC):
 
 def _check_duplicate_classes(name_class_pairs: Sequence[Tuple[str, Type]]):
     """
-    Given a sequence of pairs (class_name, class_obj), check
-    whether there are duplicates in the class names.
+    Given a sequence of pairs (class_name, class_obj), check whether there are duplicates in the class names.
 
     :param name_class_pairs: the sequence of pairs (class_name, class_obj)
     :return: None

@@ -42,7 +42,8 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.5.0"
+
+LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
 
 class GenericFipaHandler(Handler):

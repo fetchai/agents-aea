@@ -22,4 +22,5 @@
 from aea.protocols.state_update.message import StateUpdateMessage
 from aea.protocols.state_update.serialization import StateUpdateSerializer
 
+
 StateUpdateMessage.serializer = StateUpdateSerializer

@@ -40,6 +40,7 @@ from packages.fetchai.protocols.ledger_api.custom_types import (
     TransactionReceipt as CustomTransactionReceipt,
 )
 
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.ledger_api.message")
 
 DEFAULT_BODY_SIZE = 4
@@ -48,7 +49,7 @@ DEFAULT_BODY_SIZE = 4
 class LedgerApiMessage(Message):
     """A protocol for ledger APIs requests and responses."""
 
-    protocol_id = ProtocolId.from_str("fetchai/ledger_api:0.3.0")
+    protocol_id = ProtocolId.from_str("fetchai/ledger_api:0.4.0")
 
     RawTransaction = CustomRawTransaction
 

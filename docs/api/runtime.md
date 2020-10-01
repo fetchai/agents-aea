@@ -3,6 +3,35 @@
 
 This module contains the implementation of runtime for economic agent (AEA).
 
+<a name="aea.runtime._StopRuntime"></a>
+## `_`StopRuntime Objects
+
+```python
+class _StopRuntime(Exception)
+```
+
+Exception to stop runtime.
+
+For internal usage only!
+Used to perform asyncio call from sync callbacks.
+
+<a name="aea.runtime._StopRuntime.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(reraise: Optional[Exception] = None)
+```
+
+Init _StopRuntime exception.
+
+**Arguments**:
+
+- `reraise`: exception to reraise.
+
+**Returns**:
+
+None
+
 <a name="aea.runtime.RuntimeStates"></a>
 ## RuntimeStates Objects
 
@@ -16,7 +45,7 @@ Runtime states.
 ## BaseRuntime Objects
 
 ```python
-class BaseRuntime(ABC)
+class BaseRuntime(Runnable)
 ```
 
 Abstract runtime class to create implementations.
@@ -25,7 +54,7 @@ Abstract runtime class to create implementations.
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None) -> None
+ | __init__(agent: AbstractAgent, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded=False) -> None
 ```
 
 Init runtime.
@@ -74,7 +103,7 @@ Get the task manager.
 
 ```python
  | @property
- | loop() -> AbstractEventLoop
+ | loop() -> Optional[AbstractEventLoop]
 ```
 
 Get event loop.
@@ -84,7 +113,7 @@ Get event loop.
 
 ```python
  | @property
- | multiplexer() -> Multiplexer
+ | multiplexer() -> AsyncMultiplexer
 ```
 
 Get multiplexer.
@@ -107,24 +136,6 @@ Return decision maker if set.
 ```
 
 Set decision maker with handler provided.
-
-<a name="aea.runtime.BaseRuntime.start"></a>
-#### start
-
-```python
- | start() -> None
-```
-
-Start agent using runtime.
-
-<a name="aea.runtime.BaseRuntime.stop"></a>
-#### stop
-
-```python
- | stop() -> None
-```
-
-Stop agent and runtime.
 
 <a name="aea.runtime.BaseRuntime.is_running"></a>
 #### is`_`running
@@ -186,7 +197,7 @@ Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loo
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None) -> None
+ | __init__(agent: AbstractAgent, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded=False) -> None
 ```
 
 Init runtime.
@@ -214,6 +225,30 @@ Set event loop to be used.
 
 - `loop`: event loop to use.
 
+<a name="aea.runtime.AsyncRuntime.run"></a>
+#### run
+
+```python
+ | async run() -> None
+```
+
+Start runtime task.
+
+Starts multiplexer and agent loop.
+
+<a name="aea.runtime.AsyncRuntime.stop_runtime"></a>
+#### stop`_`runtime
+
+```python
+ | async stop_runtime() -> None
+```
+
+Stop runtime coroutine.
+
+Stop main loop.
+Tear down the agent..
+Disconnect multiplexer.
+
 <a name="aea.runtime.AsyncRuntime.run_runtime"></a>
 #### run`_`runtime
 
@@ -227,7 +262,7 @@ Run agent and starts multiplexer.
 ## ThreadedRuntime Objects
 
 ```python
-class ThreadedRuntime(BaseRuntime)
+class ThreadedRuntime(AsyncRuntime)
 ```
 
 Run agent and multiplexer in different threads with own asyncio loops.

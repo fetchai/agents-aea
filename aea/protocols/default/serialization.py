@@ -21,8 +21,7 @@
 
 from typing import Any, Dict, cast
 
-from aea.protocols.base import Message
-from aea.protocols.base import Serializer
+from aea.protocols.base import Message, Serializer
 from aea.protocols.default import default_pb2
 from aea.protocols.default.custom_types import ErrorCode
 from aea.protocols.default.message import DefaultMessage

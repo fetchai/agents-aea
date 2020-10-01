@@ -41,9 +41,11 @@ def test_sequence_behaviour():
         """Custom sequence behaviour."""
 
         def setup(self) -> None:
+            """Setup behaviour."""
             pass
 
         def teardown(self) -> None:
+            """Teardown behaviour."""
             pass
 
     class SimpleOneShotBehaviour(OneShotBehaviour):
@@ -53,12 +55,15 @@ def test_sequence_behaviour():
             super().__init__(name=name, **kwargs)
 
         def setup(self) -> None:
+            """Setup behaviour."""
             pass
 
         def teardown(self) -> None:
+            """Teardown behaviour."""
             pass
 
         def act(self) -> None:
+            """Act implementation."""
             outputs.append(self.name)
 
     # TODO let the initialization of a behaviour action from constructor
@@ -96,9 +101,11 @@ class SimpleFSMBehaviour(FSMBehaviour):
     """A Finite-State Machine behaviour for testing purposes."""
 
     def setup(self) -> None:
+        """Setup behaviour."""
         pass
 
     def teardown(self) -> None:
+        """Teardown behaviour."""
         pass
 
 
@@ -113,17 +120,21 @@ class SimpleStateBehaviour(State):
         self.executed = False
 
     def setup(self) -> None:
+        """Setup behaviour."""
         pass
 
     def teardown(self) -> None:
+        """Teardown behaviour."""
         pass
 
     def act(self) -> None:
+        """Act implementation."""
         self.shared_list.append(self.name)
         self.executed = True
         self._event = self.event_to_trigger
 
     def is_done(self) -> bool:
+        """Get is done."""
         return self.executed
 
 

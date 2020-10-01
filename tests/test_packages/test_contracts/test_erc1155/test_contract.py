@@ -40,6 +40,7 @@ from tests.conftest import (
     FETCHAI_TESTNET_CONFIG,
 )
 
+
 ledger = [
     (ETHEREUM, ETHEREUM_TESTNET_CONFIG),
 ]
@@ -51,6 +52,7 @@ crypto = [
 
 @pytest.fixture(params=ledger)
 def ledger_api(request):
+    """Ledger api fixture."""
     ledger_id, config = request.param
     api = ledger_apis_registry.make(ledger_id, **config)
     yield api
@@ -58,6 +60,7 @@ def ledger_api(request):
 
 @pytest.fixture(params=crypto)
 def crypto_api(request):
+    """Crypto api fixture."""
     crypto_id = request.param[0]
     api = crypto_registry.make(crypto_id)
     yield api
@@ -66,6 +69,7 @@ def crypto_api(request):
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
+    """Test helper methods and get transactions."""
     expected_a = [
         340282366920938463463374607431768211456,
         340282366920938463463374607431768211457,
@@ -154,6 +158,7 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
+    """Test get single atomic swap."""
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     from_address = ETHEREUM_ADDRESS_ONE
     to_address = ETHEREUM_ADDRESS_TWO
@@ -201,6 +206,7 @@ def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
+    """Test get batch atomic swap."""
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     from_address = ETHEREUM_ADDRESS_ONE
     to_address = ETHEREUM_ADDRESS_TWO
@@ -249,6 +255,7 @@ class TestCosmWasmContract:
     """Test the cosmwasm contract."""
 
     def setup(self):
+        """Setup."""
         self.ledger_api = ledger_apis_registry.make(FETCHAI, **FETCHAI_TESTNET_CONFIG)
         self.faucet_api = faucet_apis_registry.make(FETCHAI)
         self.deployer_crypto = crypto_registry.make(FETCHAI)
@@ -281,6 +288,7 @@ class TestCosmWasmContract:
         )
 
     def refill_from_faucet(self, ledger_api, faucet_api, address):
+        """Refill from faucet."""
         start_balance = ledger_api.get_balance(address)
 
         faucet_api.get_wealth(address)
@@ -356,6 +364,7 @@ class TestCosmWasmContract:
     @pytest.mark.integration
     @pytest.mark.ledger
     def test_cosmwasm_contract_deploy_and_interact(self, erc1155_contract):
+        """Test cosmwasm contract deploy and interact."""
         # Deploy contract
         tx = erc1155_contract.get_deploy_transaction(
             ledger_api=self.ledger_api,
@@ -452,6 +461,7 @@ class TestCosmWasmContract:
     def test_cosmwasm_unimplemented_exception_single_atomic_swap(
         self, erc1155_contract
     ):
+        """Test unimplemented exception single atomic swap."""
         pytest.raises(
             NotImplementedError,
             erc1155_contract.get_atomic_swap_single_transaction,
@@ -470,6 +480,7 @@ class TestCosmWasmContract:
     @pytest.mark.integration
     @pytest.mark.ledger
     def test_cosmwasm_unimplemented_exception_batch_atomic_swap(self, erc1155_contract):
+        """Test unimplemented exception batch atomic swap."""
         pytest.raises(
             NotImplementedError,
             erc1155_contract.get_atomic_swap_batch_transaction,

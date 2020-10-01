@@ -1,4 +1,4 @@
-The `fetchai/p2p_libp2p:0.9.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
+The `fetchai/p2p_libp2p:0.10.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
 
 ## Local demo
 
@@ -9,9 +9,9 @@ Create one AEA as follows:
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_libp2p:0.9.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
-aea run --connections fetchai/p2p_libp2p:0.9.0
+aea add connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea run --connections fetchai/p2p_libp2p:0.10.0
 ```
 
 ### Create and run another AEA
@@ -21,8 +21,8 @@ Create a second AEA:
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_libp2p:0.9.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.9.0
+aea add connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 ```
 
 Provide the AEA with the information it needs to find the genesis by replacing the following block in `vendor/fetchai/connnections/p2p_libp2p/connection.yaml`:
@@ -40,7 +40,7 @@ Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses dis
 Run the AEA:
 
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.9.0
+aea run --connections fetchai/p2p_libp2p:0.10.0
 ```
 
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
@@ -71,15 +71,15 @@ config:
 ## Configuring the `connection.yaml` entries:
 
 
-To learn more about how to configure your `fetchai/p2p_libp2p:0.9.0` connection consult the `README.md` supplied with the connection package.
+To learn more about how to configure your `fetchai/p2p_libp2p:0.10.0` connection consult the `README.md` supplied with the connection package.
 
 ## Running Go peer standalone
 
 You can run the peer node in standalone mode, that is, as a Go process with no dependency to the agents framework. 
 To facilitate the deployment, we provide a script
- <a href="https://github.com/fetchai/agents-aea/tree/master/scripts/acn/run_acn_node_standalone.py">`run_acn_node_standalone.py`</a>
+ <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/acn/run_acn_node_standalone.py" target="_blank">`run_acn_node_standalone.py`</a>
  and a corresponding 
- <a href="https://github.com/fetchai/agents-aea/tree/master/scripts/acn/Dockerfile">Dockerfile</a>.
+ <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/acn/Dockerfile" target="_blank">Dockerfile</a>.
 
 First, you need to build the node's binary (`libp2p_node`) either:
 

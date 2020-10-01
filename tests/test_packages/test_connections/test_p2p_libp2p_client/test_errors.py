@@ -48,6 +48,7 @@ class TestLibp2pClientConnectionFailureNodeNotConnected:
 
     @pytest.mark.asyncio
     async def test_node_not_running(self):
+        """Test the node is not running."""
         conn = _make_libp2p_client_connection()
         with pytest.raises(Exception):
             await conn.connect()
@@ -73,6 +74,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         key_file_desc.close()
 
     def test_empty_nodes(self):
+        """Test empty nodes."""
         configuration = ConnectionConfig(
             client_key_file=self.key_file,
             nodes=[{"uri": "{}:{}".format(self.node_host, self.node_port)}],
@@ -130,6 +132,7 @@ class TestLibp2pClientConnectionNodeDisconnected:
             raise
 
     def test_node_disconnected(self):
+        """Test node disconnected."""
         assert self.connection_client.is_connected is True
         self.multiplexer_client.disconnect()
         self.multiplexer_node.disconnect()

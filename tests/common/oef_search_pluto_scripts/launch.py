@@ -20,11 +20,12 @@
 """This test module contains the launch script for the oef."""
 
 from __future__ import print_function
-import json
-import subprocess  # nosec
+
 import argparse
-import sys
+import json
 import os
+import subprocess  # nosec
+import sys
 
 
 def run(cmd):

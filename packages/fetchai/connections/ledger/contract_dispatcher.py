@@ -19,6 +19,7 @@
 
 """This module contains the implementation of the contract API request dispatcher."""
 import inspect
+import logging
 from typing import Callable, Optional, cast
 
 from aea.contracts import Contract, contract_registry
@@ -27,19 +28,19 @@ from aea.crypto.registries import Registry
 from aea.exceptions import AEAException
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.protocols.base import Address, Message
-from aea.protocols.dialogue.base import (
-    Dialogue as BaseDialogue,
-    Dialogues as BaseDialogues,
-)
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
-from packages.fetchai.connections.ledger.base import (
-    CONNECTION_ID,
-    RequestDispatcher,
-)
+from packages.fetchai.connections.ledger.base import CONNECTION_ID, RequestDispatcher
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue
 from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
+)
+
+
+_default_logger = logging.getLogger(
+    "aea.packages.fetchai.connections.ledger.contract_dispatcher"
 )
 
 
@@ -78,7 +79,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 
     def __init__(self, *args, **kwargs):
         """Initialize the dispatcher."""
-        super().__init__(*args, **kwargs)
+        logger = kwargs.pop("logger", None)
+        logger = logger if logger is not None else _default_logger
+
+        super().__init__(logger, *args, **kwargs)
         self._contract_api_dialogues = ContractApiDialogues()
 
     @property
@@ -266,8 +270,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
     def _get_data(
         self, api: LedgerApi, message: ContractApiMessage, contract: Contract,
     ) -> bytes:
-        """Get the data from the contract method, either from the stub or
-        from the callable specified by the message."""
+        """Get the data from the contract method, either from the stub or from the callable specified by the message."""
         # first, check if the custom handler for this type of request has been implemented.
         data = self._call_stub(api, message, contract)
         if data is not None:
@@ -281,8 +284,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
     def _call_stub(
         ledger_api: LedgerApi, message: ContractApiMessage, contract: Contract
     ) -> Optional[bytes]:
-        """Try to call stub methods associated to the
-        contract API request performative."""
+        """Try to call stub methods associated to the contract API request performative."""
         try:
             method: Callable = getattr(contract, message.performative.value)
             if message.performative in [

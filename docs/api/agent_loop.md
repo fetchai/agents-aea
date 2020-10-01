@@ -3,11 +3,29 @@
 
 This module contains the implementation of an agent loop using asyncio.
 
+<a name="aea.agent_loop.AgentLoopException"></a>
+## AgentLoopException Objects
+
+```python
+class AgentLoopException(AEAException)
+```
+
+Exception for agent loop runtime errors.
+
+<a name="aea.agent_loop.AgentLoopStates"></a>
+## AgentLoopStates Objects
+
+```python
+class AgentLoopStates(Enum)
+```
+
+Internal agent loop states.
+
 <a name="aea.agent_loop.BaseAgentLoop"></a>
 ## BaseAgentLoop Objects
 
 ```python
-class BaseAgentLoop(WithLogger,  ABC)
+class BaseAgentLoop(Runnable,  WithLogger,  ABC)
 ```
 
 Base abstract  agent loop class.
@@ -16,7 +34,7 @@ Base abstract  agent loop class.
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, loop: Optional[AbstractEventLoop] = None) -> None
+ | __init__(agent: AbstractAgent, loop: Optional[AbstractEventLoop] = None, threaded=False) -> None
 ```
 
 Init loop.
@@ -43,59 +61,24 @@ Get agent.
 
 Set event loop and all event loopp related objects.
 
-<a name="aea.agent_loop.BaseAgentLoop.start"></a>
-#### start
+<a name="aea.agent_loop.BaseAgentLoop.run"></a>
+#### run
 
 ```python
- | start() -> None
-```
-
-Start agent loop synchronously in own asyncio loop.
-
-<a name="aea.agent_loop.BaseAgentLoop.setup"></a>
-#### setup
-
-```python
- | setup() -> None
-```
-
-Set up loop before started.
-
-<a name="aea.agent_loop.BaseAgentLoop.teardown"></a>
-#### teardown
-
-```python
- | teardown()
-```
-
-Tear down loop on stop.
-
-<a name="aea.agent_loop.BaseAgentLoop.run_loop"></a>
-#### run`_`loop
-
-```python
- | async run_loop() -> None
+ | async run() -> None
 ```
 
 Run agent loop.
 
-<a name="aea.agent_loop.BaseAgentLoop.wait_run_loop_stopped"></a>
-#### wait`_`run`_`loop`_`stopped
+<a name="aea.agent_loop.BaseAgentLoop.state"></a>
+#### state
 
 ```python
- | async wait_run_loop_stopped() -> None
+ | @property
+ | state() -> AgentLoopStates
 ```
 
-Wait all tasks stopped.
-
-<a name="aea.agent_loop.BaseAgentLoop.stop"></a>
-#### stop
-
-```python
- | stop() -> None
-```
-
-Stop agent loop.
+Get current main loop state.
 
 <a name="aea.agent_loop.BaseAgentLoop.is_running"></a>
 #### is`_`running
@@ -106,24 +89,6 @@ Stop agent loop.
 ```
 
 Get running state of the loop.
-
-<a name="aea.agent_loop.AgentLoopException"></a>
-## AgentLoopException Objects
-
-```python
-class AgentLoopException(AEAException)
-```
-
-Exception for agent loop runtime errors.
-
-<a name="aea.agent_loop.AgentLoopStates"></a>
-## AgentLoopStates Objects
-
-```python
-class AgentLoopStates(Enum)
-```
-
-Internal agent loop states.
 
 <a name="aea.agent_loop.AsyncAgentLoop"></a>
 ## AsyncAgentLoop Objects
@@ -138,7 +103,7 @@ Asyncio based agent loop suitable only for AEA.
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, loop: AbstractEventLoop = None)
+ | __init__(agent: AbstractAgent, loop: AbstractEventLoop = None, threaded=False)
 ```
 
 Init agent loop.

@@ -33,6 +33,7 @@ from typing import IO, Optional
 
 from aea.exceptions import enforce
 
+
 _default_logger = logging.getLogger(__name__)
 
 PIPE_CONN_TIMEOUT = 10.0
@@ -42,9 +43,7 @@ TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS = 5
 
 
 class IPCChannelClient(ABC):
-    """
-    Multi-platform interprocess communication channel for the client side
-    """
+    """Multi-platform interprocess communication channel for the client side."""
 
     @abstractmethod
     async def connect(self, timeout=PIPE_CONN_TIMEOUT) -> bool:
@@ -58,6 +57,7 @@ class IPCChannelClient(ABC):
     async def write(self, data: bytes) -> None:
         """
         Write `data` bytes to the other end of the channel
+
         Will first write the size than the actual data
 
         :param data: bytes to write
@@ -67,6 +67,7 @@ class IPCChannelClient(ABC):
     async def read(self) -> Optional[bytes]:
         """
         Read bytes from the other end of the channel
+
         Will first read the size than the actual data
 
         :return: read bytes
@@ -75,34 +76,36 @@ class IPCChannelClient(ABC):
     @abstractmethod
     async def close(self) -> None:
         """
-        Close the communication channel
+        Close the communication channel.
+
+        :return: None
         """
 
 
 class IPCChannel(IPCChannelClient):
-    """
-    Multi-platform interprocess communication channel
-    """
+    """Multi-platform interprocess communication channel."""
 
     @property
     @abstractmethod
     def in_path(self) -> str:
         """
-        Rendezvous point for incoming communication
+        Rendezvous point for incoming communication.
+
+        :return: path
         """
 
     @property
     @abstractmethod
     def out_path(self) -> str:
         """
-        Rendezvous point for outgoing communication
+        Rendezvous point for outgoing communication.
+
+        :return: path
         """
 
 
 class PosixNamedPipeProtocol:
-    """
-    Posix named pipes async wrapper communication protocol
-    """
+    """Posix named pipes async wrapper communication protocol."""
 
     def __init__(
         self,
@@ -112,7 +115,7 @@ class PosixNamedPipeProtocol:
         loop: Optional[AbstractEventLoop] = None,
     ):
         """
-        Initialize a new posix named pipe
+        Initialize a new posix named pipe.
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing daa
@@ -228,7 +231,7 @@ class PosixNamedPipeProtocol:
             return None
 
     async def close(self) -> None:
-        """ Disconnect pipe """
+        """Disconnect pipe."""
         self.logger.debug("closing pipe (in={})...".format(self._in_path))
         if self._fileobj is None:
             raise ValueError("Pipe not connected")  # pragma: nocover
@@ -245,9 +248,7 @@ class PosixNamedPipeProtocol:
 
 
 class TCPSocketProtocol:
-    """
-    TCP socket communication protocol
-    """
+    """TCP socket communication protocol."""
 
     def __init__(
         self,
@@ -257,7 +258,7 @@ class TCPSocketProtocol:
         loop: Optional[AbstractEventLoop] = None,
     ):
         """
-        Initialize the tcp socket protocol
+        Initialize the tcp socket protocol.
 
         :param reader: established asyncio reader
         :param writer: established asyncio writer
@@ -308,23 +309,21 @@ class TCPSocketProtocol:
             return None
 
     async def close(self) -> None:
-        """ Disconnect socket """
+        """Disconnect socket."""
         self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
 
 
 class TCPSocketChannel(IPCChannel):
-    """
-    Interprocess communication channel implementation using tcp sockets
-    """
+    """Interprocess communication channel implementation using tcp sockets."""
 
     def __init__(
         self,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
     ):
-        """ Initialize tcp socket interprocess communication channel"""
+        """Initialize tcp socket interprocess communication channel."""
         self.logger = logger
         self._loop = loop
         self._server = None  # type: Optional[asyncio.AbstractServer]
@@ -339,7 +338,7 @@ class TCPSocketChannel(IPCChannel):
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
-        Setup communication channel and wait for other end to connect
+        Setup communication channel and wait for other end to connect.
 
         :param timeout: timeout for the connection to be established
         """
@@ -369,6 +368,7 @@ class TCPSocketChannel(IPCChannel):
     async def _handle_connection(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     ):
+        """Handle connection."""
         if self._connected is None:
             raise ValueError("Connected is None!")  # pragma: nocover
         self._connected.set()
@@ -397,33 +397,31 @@ class TCPSocketChannel(IPCChannel):
         return await self._sock.read()
 
     async def close(self) -> None:
-        """ Disconnect from channel and clean it up """
+        """Disconnect from channel and clean it up."""
         if self._sock is None:
             raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.close()
 
     @property
     def in_path(self) -> str:
-        """ Rendezvous point for incoming communication """
+        """Rendezvous point for incoming communication."""
         return str(self._port)
 
     @property
     def out_path(self) -> str:
-        """ Rendezvous point for outgoing communication """
+        """Rendezvous point for outgoing communication."""
         return str(self._port)
 
 
 class PosixNamedPipeChannel(IPCChannel):
-    """
-    Interprocess communication channel implementation using Posix named pipes
-    """
+    """Interprocess communication channel implementation using Posix named pipes."""
 
     def __init__(
         self,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
     ):
-        """ Initialize posix named pipe interprocess communication channel """
+        """Initialize posix named pipe interprocess communication channel."""
         self.logger = logger
         self._loop = loop
 
@@ -448,9 +446,10 @@ class PosixNamedPipeChannel(IPCChannel):
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
-        Setup communication channel and wait for other end to connect
+        Setup communication channel and wait for other end to connect.
 
         :param timeout: timeout for connection to be established
+        :return: bool, indicating sucess
         """
 
         if self._loop is None:
@@ -475,27 +474,23 @@ class PosixNamedPipeChannel(IPCChannel):
         return await self._pipe.read()
 
     async def close(self) -> None:
-        """
-        Close the channel and clean it up
-        """
+        """Close the channel and clean it up."""
         await self._pipe.close()
         rmtree(self._pipe_dir)
 
     @property
     def in_path(self) -> str:
-        """ Rendezvous point for incoming communication """
+        """Rendezvous point for incoming communication."""
         return self._in_path
 
     @property
     def out_path(self) -> str:
-        """ Rendezvous point for outgoing communication """
+        """Rendezvous point for outgoing communication."""
         return self._out_path
 
 
 class TCPSocketChannelClient(IPCChannelClient):
-    """
-    Interprocess communication channel client using tcp sockets
-    """
+    """Interprocess communication channel client using tcp sockets."""
 
     def __init__(  # pylint: disable=unused-argument
         self,
@@ -505,7 +500,7 @@ class TCPSocketChannelClient(IPCChannelClient):
         loop: Optional[AbstractEventLoop] = None,
     ):
         """
-        Initialize a tcp socket communication channel client
+        Initialize a tcp socket communication channel client.
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing data
@@ -521,11 +516,10 @@ class TCPSocketChannelClient(IPCChannelClient):
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
-        Connect to the other end of the communication channel
+        Connect to the other end of the communication channel.
 
         :param timeout: timeout for connection to be established
         """
-
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
@@ -558,7 +552,7 @@ class TCPSocketChannelClient(IPCChannelClient):
 
     async def write(self, data: bytes) -> None:
         """
-        Write data to channel
+        Write data to channel.
 
         :param data: bytes to write
         """
@@ -568,7 +562,7 @@ class TCPSocketChannelClient(IPCChannelClient):
 
     async def read(self) -> Optional[bytes]:
         """
-        Read data from channel
+        Read data from channel.
 
         :return: read bytes
         """
@@ -577,16 +571,14 @@ class TCPSocketChannelClient(IPCChannelClient):
         return await self._sock.read()
 
     async def close(self) -> None:
-        """ Disconnect from communication channel """
+        """Disconnect from communication channel."""
         if self._sock is None:
             raise ValueError("Socket pipe not connected.")  # pragma: nocover
         await self._sock.close()
 
 
 class PosixNamedPipeChannelClient(IPCChannelClient):
-    """
-    Interprocess communication channel client using Posix named pipes
-    """
+    """Interprocess communication channel client using Posix named pipes."""
 
     def __init__(
         self,
@@ -596,7 +588,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         loop: Optional[AbstractEventLoop] = None,
     ):
         """
-        Initialize a posix named pipe communication channel client
+        Initialize a posix named pipe communication channel client.
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing data
@@ -611,7 +603,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
-        Connect to the other end of the communication channel
+        Connect to the other end of the communication channel.
 
         :param timeout: timeout for connection to be established
         """
@@ -626,7 +618,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
 
     async def write(self, data: bytes) -> None:
         """
-        Write data to channel
+        Write data to channel.
 
         :param data: bytes to write
         """
@@ -636,7 +628,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
 
     async def read(self) -> Optional[bytes]:
         """
-        Read data from channel
+        Read data from channel.
 
         :return: read bytes
         """
@@ -645,7 +637,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         return await self._pipe.read()
 
     async def close(self) -> None:
-        """ Disconnect from communication channel """
+        """Disconnect from communication channel."""
         if self._pipe is None:
             raise ValueError("Pipe not connected.")  # pragma: nocover
         return await self._pipe.close()
@@ -656,6 +648,10 @@ def make_ipc_channel(
 ) -> IPCChannel:
     """
     Build a portable bidirectional InterProcess Communication channel
+
+    :param logger: the logger
+    :param loop: the loop
+    :return: IPCChannel
     """
     if os.name == "posix":
         return PosixNamedPipeChannel(logger=logger, loop=loop)
@@ -677,6 +673,9 @@ def make_ipc_channel_client(
 
     :param in_path: rendezvous point for incoming communication
     :param out_path: rendezvous point for outgoing outgoing
+    :param logger: the logger
+    :param loop: the loop
+    :return: IPCChannel
     """
     if os.name == "posix":
         return PosixNamedPipeChannelClient(in_path, out_path, logger=logger, loop=loop)

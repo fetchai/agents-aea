@@ -25,11 +25,9 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from jsonschema import ValidationError
-
 import pytest
-
 import yaml
+from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli
@@ -59,7 +57,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.3.0"
-        cls.connection_id = "fetchai/http_client:0.8.0"
+        cls.connection_id = "fetchai/http_client:0.9.0"
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
@@ -150,7 +148,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.3.0"
-        cls.connection_id = "fetchai/http_client:0.8.0"
+        cls.connection_id = "fetchai/http_client:0.9.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -347,7 +345,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/http_client:0.8.0"
+        cls.connection_id = "fetchai/http_client:0.9.0"
         cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -415,7 +413,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/http_client:0.8.0"
+        cls.connection_id = "fetchai/http_client:0.9.0"
         cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -483,6 +481,19 @@ class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""
         self.add_item("connection", "fetchai/local:0.4.0", local=False)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
+        items_folders = os.listdir(items_path)
+        item_name = "local"
+        assert item_name in items_folders
+
+
+class TestAddConnectionWithLatestVersion(AEATestCaseEmpty):
+    """Test case for add connection with latest version."""
+
+    def test_add_connection_latest_version(self):
+        """Test add connection with latest version."""
+        self.add_item("connection", "fetchai/local:latest", local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
         items_folders = os.listdir(items_path)

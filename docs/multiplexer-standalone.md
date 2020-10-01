@@ -14,6 +14,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
+
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 ```
@@ -60,7 +61,7 @@ We use the input and output text files to send an envelope to our agent and rece
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
-            "multiplexer,some_agent,fetchai/default:0.5.0,\x08\x01*\x07\n\x05hello,"
+            "multiplexer,some_agent,fetchai/default:0.6.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             write_with_lock(f, message_text)
@@ -124,11 +125,14 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
+
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 
 
 def run():
+    """Run demo."""
+
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
         os.remove(INPUT_FILE)
@@ -155,7 +159,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
-            "multiplexer,some_agent,fetchai/default:0.5.0,\x08\x01*\x07\n\x05hello,"
+            "multiplexer,some_agent,fetchai/default:0.6.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             write_with_lock(f, message_text)

@@ -31,17 +31,16 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
+import requests
 from bech32 import bech32_encode, convertbits
-
 from ecdsa import SECP256k1, SigningKey, VerifyingKey
 from ecdsa.util import sigencode_string_canonize
-
-import requests
 
 from aea.common import Address
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
+
 
 logger = logging.getLogger(__name__)
 
@@ -355,9 +354,7 @@ class _CosmosApi(LedgerApi):
     identifier = _COSMOS
 
     def __init__(self, **kwargs):
-        """
-        Initialize the Cosmos ledger APIs.
-        """
+        """Initialize the Cosmos ledger APIs."""
         self._api = None
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
@@ -867,10 +864,6 @@ class CosmosApi(_CosmosApi, CosmosHelper):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""
 
 
-class CosmWasmCLIWrapper:
-    """Wrapper of the CosmWasm CLI."""
-
-
 """ Equivalent to:
 
 @dataclass
@@ -991,16 +984,12 @@ class CosmosFaucetApi(FaucetApi):
 
     @classmethod
     def _faucet_request_uri(cls) -> str:
-        """
-        Generates the request URI derived from `cls.faucet_base_url`
-        """
+        """Generates the request URI derived from `cls.faucet_base_url`."""
         if cls.testnet_faucet_url is None:  # pragma: nocover
             raise ValueError("Testnet faucet url not set.")
         return f"{cls.testnet_faucet_url}/claim/requests"
 
     @classmethod
     def _faucet_status_uri(cls, uid: str) -> str:
-        """
-        Generates the status URI derived from `cls.faucet_base_url`
-        """
+        """Generates the status URI derived from `cls.faucet_base_url`."""
         return f"{cls._faucet_request_uri()}/{uid}"

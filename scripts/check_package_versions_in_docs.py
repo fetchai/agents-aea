@@ -29,10 +29,9 @@ import re
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Callable, Set
+from typing import Callable, Dict, Set
 
 import yaml
-
 
 from aea.configurations.base import ComponentType, PackageId, PackageType, PublicId
 
@@ -93,13 +92,31 @@ def default_config_file_paths():
         yield item
 
 
+def unified_yaml_load(configuration_file: Path) -> Dict:
+    """
+    Load YAML file, unified (both single- and multi-paged).
+
+    :param configuration_file: the configuration file path.
+    :return: the data.
+    """
+    package_type = configuration_file.parent.parent.name
+    with configuration_file.open() as fp:
+        if package_type != "agents":
+            return yaml.safe_load(fp)
+        # when it is an agent configuration file,
+        # we are interested only in the first page of the YAML,
+        # because the dependencies are contained only there.
+        data = yaml.safe_load_all(fp)
+        return list(data)[0]
+
+
 def get_public_id_from_yaml(configuration_file: Path):
     """
     Get the public id from yaml.
 
     :param configuration_file: the path to the config yaml
     """
-    data = yaml.safe_load(configuration_file.open())
+    data = unified_yaml_load(configuration_file)
     author = data["author"]
     # handle the case when it's a package or agent config file.
     name = data["name"] if "name" in data else data["agent_name"]
@@ -140,8 +157,7 @@ def _checks(
 
 def check_add_commands(file: Path):
     """
-    Check that 'aea add' commands of the documentation file contains
-    known package ids.
+    Check that 'aea add' commands of the documentation file contains known package ids.
 
     :param file: path to the file.
     :return: None
@@ -158,8 +174,7 @@ def check_add_commands(file: Path):
 
 def check_fetch_commands(file: Path):
     """
-    Check that 'aea fetch' commands of the documentation file contains
-    known package ids.
+    Check that 'aea fetch' commands of the documentation file contains known package ids.
 
     :param file: path to the file.
     :return: None

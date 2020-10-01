@@ -19,13 +19,12 @@
 
 """This module contains the tests for the aea.configurations.base module."""
 import re
+from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
 
 import pytest
-
 import semver
-
 import yaml
 
 from aea.configurations.base import (
@@ -35,9 +34,11 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     ContractConfig,
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PackageId,
     PackageType,
+    PackageVersion,
     ProtocolConfig,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
@@ -53,6 +54,9 @@ from aea.configurations.loader import ConfigLoaders, load_component_configuratio
 
 from tests.conftest import (
     AUTHOR,
+    CUR_PATH,
+    DUMMY_SKILL_PATH,
+    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     agent_config_files,
     connection_config_files,
@@ -201,6 +205,37 @@ class TestSkillConfig:
 
     def test_update_method(self):
         """Test the update method."""
+        skill_config_path = Path(DUMMY_SKILL_PATH)
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+        skill_config = loader.load(skill_config_path.open())
+
+        dummy_behaviour = skill_config.behaviours.read("dummy")
+        expected_dummy_behaviour_args = copy(dummy_behaviour.args)
+        expected_dummy_behaviour_args["behaviour_arg_1"] = 42
+
+        dummy_handler = skill_config.handlers.read("dummy")
+        expected_dummy_handler_args = copy(dummy_handler.args)
+        expected_dummy_handler_args["handler_arg_1"] = 42
+
+        dummy_model = skill_config.models.read("dummy")
+        expected_dummy_model_args = copy(dummy_model.args)
+        expected_dummy_model_args["model_arg_1"] = 42
+
+        new_configurations = {
+            "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
+            "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
+            "models": {"dummy": {"args": dict(model_arg_1=42)}},
+        }
+        skill_config.update(new_configurations)
+
+        assert (
+            expected_dummy_behaviour_args == skill_config.behaviours.read("dummy").args
+        )
+        assert expected_dummy_handler_args == skill_config.handlers.read("dummy").args
+        assert expected_dummy_model_args == skill_config.models.read("dummy").args
+
+    def test_update_method_raises_error_if_skill_component_not_allowed(self):
+        """Test that we raise error if the custom configuration contain unexpected skill components."""
         skill_config_path = Path(
             ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
         )
@@ -211,14 +246,12 @@ class TestSkillConfig:
             "handlers": {"new_handler": {"args": {}, "class_name": "SomeClass"}},
             "models": {"new_model": {"args": {}, "class_name": "SomeClass"}},
         }
-        skill_config.update(new_configurations)
 
-        new_behaviour = skill_config.behaviours.read("new_behaviour")
-        assert new_behaviour.json == new_configurations["behaviours"]["new_behaviour"]
-        new_handler = skill_config.handlers.read("new_handler")
-        assert new_handler.json == new_configurations["handlers"]["new_handler"]
-        new_model = skill_config.models.read("new_model")
-        assert new_model.json == new_configurations["models"]["new_model"]
+        with pytest.raises(
+            ValueError,
+            match="The custom configuration for skill fetchai/error:0.6.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+        ):
+            skill_config.update(new_configurations)
 
 
 class TestAgentConfig:
@@ -240,6 +273,60 @@ class TestAgentConfig:
         actual_json = actual_config.json
         assert expected_json == actual_json
 
+    def test_update(self):
+        """Test the update method."""
+        aea_config_path = Path(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE)
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        aea_config: AgentConfig = loader.load(aea_config_path.open())
+
+        dummy_skill_component_id = ComponentId(
+            ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID
+        )
+
+        new_dummy_skill_config = {
+            "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
+            "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
+            "models": {"dummy": {"args": dict(model_arg_1=42)}},
+        }
+
+        new_private_key_paths = dict(ethereum="foo")
+        expected_private_key_paths = dict(
+            ethereum="foo", cosmos="cosmos_private_key.txt"
+        )
+        aea_config.update(
+            dict(
+                component_configurations={
+                    dummy_skill_component_id: new_dummy_skill_config
+                },
+                private_key_paths=new_private_key_paths,
+                connection_private_key_paths=new_private_key_paths,
+            )
+        )
+        assert (
+            aea_config.component_configurations[dummy_skill_component_id]
+            == new_dummy_skill_config
+        )
+        assert (
+            dict(aea_config.private_key_paths.read_all()) == expected_private_key_paths
+        )
+        assert (
+            dict(aea_config.connection_private_key_paths.read_all())
+            == expected_private_key_paths
+        )
+
+        # test idempotence
+        aea_config.update(
+            dict(
+                component_configurations={
+                    dummy_skill_component_id: new_dummy_skill_config
+                }
+            )
+        )
+        assert (
+            aea_config.component_configurations[dummy_skill_component_id]
+            == new_dummy_skill_config
+        )
+
 
 class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
     """Test case for _get_default_configuration_file_name_from_type method."""
@@ -256,7 +343,7 @@ class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
 class PublicIdTestCase(TestCase):
     """Test case for PublicId class."""
 
-    @mock.patch("aea.configurations.base.re.match", return_value=False)
+    @mock.patch("aea.configurations.base.re.match", return_value=None)
     def test_public_id_from_str_not_matching(self, *mocks):
         """Test case for from_str method regex not matching."""
         with self.assertRaises(ValueError):
@@ -427,6 +514,30 @@ def test_public_id_invalid_version():
         PublicId("author", "name", object())
 
 
+def test_public_id_from_string():
+    """Test parsing the public id from string."""
+    public_id = PublicId.from_str("author/package:0.1.0")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "0.1.0"
+
+
+def test_public_id_from_string_without_version_string():
+    """Test parsing the public id without version string."""
+    public_id = PublicId.from_str("author/package")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "latest"
+
+
+def test_public_id_from_string_with_version_string_latest():
+    """Test parsing the public id with version string 'latest'."""
+    public_id = PublicId.from_str("author/package:latest")
+    assert public_id.author == "author"
+    assert public_id.name == "package"
+    assert public_id.version == "latest"
+
+
 def test_public_id_from_uri_path():
     """Test PublicId.from_uri_path"""
     result = PublicId.from_uri_path("author/package_name/0.1.0")
@@ -436,8 +547,7 @@ def test_public_id_from_uri_path():
 
 
 def test_public_id_from_uri_path_wrong_input():
-    """Test that when a bad formatted path is passed in input of PublicId.from_uri_path
-    an exception is raised."""
+    """Test that when a bad formatted path is passed in input of PublicId.from_uri_path an exception is raised."""
     with pytest.raises(
         ValueError, match="Input 'bad/formatted:input' is not well formatted."
     ):
@@ -454,6 +564,30 @@ def test_pubic_id_repr():
     """Test PublicId.__repr__"""
     public_id = PublicId("author", "name", "0.1.0")
     assert repr(public_id) == "<author/name:0.1.0>"
+
+
+def test_pubic_id_to_latest():
+    """Test PublicId.to_latest"""
+    public_id = PublicId("author", "name", "0.1.0")
+    expected_public_id = PublicId("author", "name", "latest")
+    actual_public_id = public_id.to_latest()
+    assert expected_public_id == actual_public_id
+
+
+def test_pubic_id_same_prefix():
+    """Test PublicId.same_prefix"""
+    same_1 = PublicId("author", "name", "0.1.0")
+    same_2 = PublicId("author", "name", "0.1.1")
+    different = PublicId("author", "different_name", "0.1.0")
+
+    assert same_1.same_prefix(same_2)
+    assert same_2.same_prefix(same_1)
+
+    assert not different.same_prefix(same_1)
+    assert not same_1.same_prefix(different)
+
+    assert not different.same_prefix(same_2)
+    assert not same_2.same_prefix(different)
 
 
 def test_public_id_comparator_when_author_is_different():
@@ -634,6 +768,7 @@ def test_agent_config_to_json_with_optional_configurations():
 
 
 def test_protocol_specification_attributes():
+    """Test protocol specification attributes."""
     protocol_specification = ProtocolSpecification("name", "author", "0.1.0")
 
     # test getter and setter for 'protobuf_snippets'
@@ -651,3 +786,27 @@ def test_contract_config_component_type():
     """Test ContractConfig.component_type"""
     config = ContractConfig("name", "author", "0.1.0")
     assert config.component_type == ComponentType.CONTRACT
+
+
+def test_package_version_eq_negative():
+    """Test package version __eq__."""
+    v1 = PackageVersion("0.1.0")
+    v2 = PackageVersion("0.2.0")
+    assert v1 != v2
+
+
+def test_package_version_lt():
+    """Test package version __lt__."""
+    v1 = PackageVersion("0.1.0")
+    v2 = PackageVersion("0.2.0")
+    v3 = PackageVersion("latest")
+    assert v1 < v2 < v3
+
+
+def test_configuration_class():
+    """Test the attribute 'configuration class' of PackageType."""
+    assert PackageType.PROTOCOL.configuration_class() == ProtocolConfig
+    assert PackageType.CONNECTION.configuration_class() == ConnectionConfig
+    assert PackageType.CONTRACT.configuration_class() == ContractConfig
+    assert PackageType.SKILL.configuration_class() == SkillConfig
+    assert PackageType.AGENT.configuration_class() == AgentConfig

@@ -10,7 +10,7 @@ PUBLIC_ID_REGEX: "^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\\d*)\\.(0|[1-9]
 LEDGER_ID_REGEX: "^[^\\d\\W]\\w*\\Z"
 ```
 
-The `aea-config.yaml` defines the AEA project. The compulsary components are listed below:
+The `aea-config.yaml` defines the AEA project. The compulsory components are listed below:
 ``` yaml
 agent_name: my_agent                            # Name of the AEA project (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the project's author (must satisfy AUTHOR_REGEX)
@@ -21,13 +21,13 @@ aea_version: '>=0.6.0, <0.7.0'                  # AEA framework version(s) compa
 fingerprint: {}                                 # Fingerprint of AEA project components.
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 connections:                                    # The list of connection public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX)
-- fetchai/stub:0.9.0
+- fetchai/stub:0.10.0
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/default:0.5.0
+- fetchai/default:0.6.0
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/error:0.5.0
-default_connection: fetchai/p2p_libp2p:0.9.0    # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
+- fetchai/error:0.6.0
+default_connection: fetchai/p2p_libp2p:0.10.0    # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 logging_config:                                 # The logging configurations the AEA project uses
   disable_existing_loggers: false

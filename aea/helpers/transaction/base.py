@@ -27,6 +27,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 
+
 Address = str
 
 
@@ -88,6 +89,7 @@ class RawTransaction:
         return raw_transaction
 
     def __eq__(self, other):
+        """Check equality."""
         return (
             isinstance(other, RawTransaction)
             and self.ledger_id == other.ledger_id
@@ -95,6 +97,7 @@ class RawTransaction:
         )
 
     def __str__(self):
+        """Get string representation."""
         return "RawTransaction: ledger_id={}, body={}".format(
             self.ledger_id, self.body,
         )
@@ -164,6 +167,7 @@ class RawMessage:
         return raw_message
 
     def __eq__(self, other):
+        """Check equality."""
         return (
             isinstance(other, RawMessage)
             and self.ledger_id == other.ledger_id
@@ -172,6 +176,7 @@ class RawMessage:
         )
 
     def __str__(self):
+        """Get string representation."""
         return "RawMessage: ledger_id={}, body={}, is_deprecated_mode={}".format(
             self.ledger_id, self.body, self.is_deprecated_mode,
         )
@@ -236,6 +241,7 @@ class SignedTransaction:
         return signed_transaction
 
     def __eq__(self, other):
+        """Check equality."""
         return (
             isinstance(other, SignedTransaction)
             and self.ledger_id == other.ledger_id
@@ -243,6 +249,7 @@ class SignedTransaction:
         )
 
     def __str__(self):
+        """Get string representation."""
         return "SignedTransaction: ledger_id={}, body={}".format(
             self.ledger_id, self.body,
         )
@@ -316,6 +323,7 @@ class SignedMessage:
         return signed_message
 
     def __eq__(self, other):
+        """Check equality."""
         return (
             isinstance(other, SignedMessage)
             and self.ledger_id == other.ledger_id
@@ -324,6 +332,7 @@ class SignedMessage:
         )
 
     def __str__(self):
+        """Get string representation."""
         return "SignedMessage: ledger_id={}, body={}, is_deprecated_mode={}".format(
             self.ledger_id, self.body, self.is_deprecated_mode,
         )
@@ -381,6 +390,7 @@ class State:
         return state
 
     def __eq__(self, other):
+        """Check equality."""
         return (
             isinstance(other, State)
             and self.ledger_id == other.ledger_id
@@ -388,6 +398,7 @@ class State:
         )
 
     def __str__(self):
+        """Get string representation."""
         return "State: ledger_id={}, body={}".format(self.ledger_id, self.body)
 
 
@@ -827,6 +838,7 @@ class Terms:
         return terms
 
     def __eq__(self, other):
+        """Check equality."""
         return (
             isinstance(other, Terms)
             and self.ledger_id == other.ledger_id
@@ -843,6 +855,7 @@ class Terms:
         )
 
     def __str__(self):
+        """Get string representation."""
         return "Terms: ledger_id={}, sender_address={}, counterparty_address={}, amount_by_currency_id={}, quantities_by_good_id={}, is_sender_payable_tx_fee={}, nonce={}, fee_by_currency_id={}, kwargs={}".format(
             self.ledger_id,
             self.sender_address,
@@ -913,6 +926,7 @@ class TransactionDigest:
         return transaction_digest
 
     def __eq__(self, other):
+        """Check equality."""
         return (
             isinstance(other, TransactionDigest)
             and self.ledger_id == other.ledger_id
@@ -920,6 +934,7 @@ class TransactionDigest:
         )
 
     def __str__(self):
+        """Get string representation."""
         return "TransactionDigest: ledger_id={}, body={}".format(
             self.ledger_id, self.body
         )
@@ -991,6 +1006,7 @@ class TransactionReceipt:
         return transaction_receipt
 
     def __eq__(self, other):
+        """Check equality."""
         return (
             isinstance(other, TransactionReceipt)
             and self.ledger_id == other.ledger_id
@@ -999,6 +1015,7 @@ class TransactionReceipt:
         )
 
     def __str__(self):
+        """Get string representation."""
         return "TransactionReceipt: ledger_id={}, receipt={}, transaction={}".format(
             self.ledger_id, self.receipt, self.transaction
         )

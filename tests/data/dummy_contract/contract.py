@@ -28,4 +28,5 @@ class DummyContract(Contract):
 
     @classmethod
     def some_method(cls, ledger_api: LedgerApi, contract_address: str) -> None:
+        """Some method."""
         pass

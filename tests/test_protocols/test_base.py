@@ -92,11 +92,13 @@ class TestMessageProperties:
 
     @classmethod
     def setup_class(cls):
+        """Setup test."""
         cls.body = {"body_1": "1", "body_2": "2"}
         cls.kwarg = 1
         cls.message = Message(cls.body, kwarg=cls.kwarg)
 
     def test_message_properties(self):
+        """Test message properties."""
         for key, value in self.body.items():
             assert self.message.get(key) == value
         assert self.message.get("kwarg") == self.kwarg

@@ -29,9 +29,8 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
-
-from benchmark.checks.utils import (  # noqa: I100
-    GeneratorConnection,
+from benchmark.checks.utils import GeneratorConnection  # noqa: I100
+from benchmark.checks.utils import (
     SyncedGeneratorConnection,
     make_agent,
     make_envelope,

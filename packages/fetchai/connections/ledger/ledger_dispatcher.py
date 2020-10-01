@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of the ledger API request dispatcher."""
+import logging
 import time
 from typing import cast
 
@@ -24,21 +25,21 @@ from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
 from aea.helpers.transaction.base import RawTransaction, TransactionDigest
 from aea.protocols.base import Address, Message
-from aea.protocols.dialogue.base import (
-    Dialogue as BaseDialogue,
-    Dialogues as BaseDialogues,
-)
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
-from packages.fetchai.connections.ledger.base import (
-    CONNECTION_ID,
-    RequestDispatcher,
-)
+from packages.fetchai.connections.ledger.base import CONNECTION_ID, RequestDispatcher
 from packages.fetchai.protocols.ledger_api.custom_types import TransactionReceipt
 from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+
+
+_default_logger = logging.getLogger(
+    "aea.packages.fetchai.connections.ledger.ledger_dispatcher"
+)
 
 
 class LedgerApiDialogues(BaseLedgerApiDialogues):
@@ -76,7 +77,9 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
     def __init__(self, *args, **kwargs):
         """Initialize the dispatcher."""
-        super().__init__(*args, **kwargs)
+        logger = kwargs.pop("logger", None)
+        logger = logger if logger is not None else _default_logger
+        super().__init__(logger, *args, **kwargs)
         self._ledger_api_dialogues = LedgerApiDialogues()
 
     def get_ledger_id(self, message: Message) -> str:

@@ -203,6 +203,7 @@ class Strategy(Model):
     def get_own_service_description(self, is_supply: bool) -> Description:
         """
         Get the description of the supplied goods (as a seller), or the demanded goods (as a buyer).
+
         :param is_supply: Boolean indicating whether it is supply or demand.
         :return: the description (to advertise on the Service Directory).
         """

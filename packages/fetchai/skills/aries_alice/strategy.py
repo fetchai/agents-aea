@@ -28,6 +28,7 @@ from aea.helpers.search.generic import (
 from aea.helpers.search.models import Description, Location
 from aea.skills.base import Model
 
+
 # default configs
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8031

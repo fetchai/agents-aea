@@ -23,6 +23,7 @@ from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialo
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler, Model, Skill, SkillContext
 
+
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
@@ -311,6 +312,7 @@ from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialo
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler, Model, Skill, SkillContext
 
+
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
@@ -319,6 +321,8 @@ FETCHAI_PRIVATE_KEY_FILE_2 = "fetchai_private_key_2.txt"
 
 
 def run():
+    """Run demo."""
+
     # Create a private key
     create_private_key(
         FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1

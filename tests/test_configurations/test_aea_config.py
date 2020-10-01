@@ -24,11 +24,9 @@ from textwrap import dedent
 from typing import Any, List, Sequence
 from unittest import TestCase
 
-from jsonschema.exceptions import ValidationError  # type: ignore
-
 import pytest
-
 import yaml
+from jsonschema.exceptions import ValidationError  # type: ignore
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -61,7 +59,7 @@ connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.9.0
+default_connection: fetchai/stub:0.10.0
 default_ledger: cosmos
 private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
@@ -320,10 +318,7 @@ def test_agent_configuration_loading_multipage_when_type_not_found():
 
 
 def test_agent_configuration_loading_multipage_when_same_id():
-    """
-    Test agent configuration loading, multi-page case,
-    when there are two components with the same id.
-    """
+    """Test agent configuration loading, multi-page case, when there are two components with the same id."""
     file = Path(CUR_PATH, "data", "aea-config.example_multipage.yaml").open()
     jsons = list(yaml.safe_load_all(file))
     # add twice the last component
@@ -341,10 +336,7 @@ def test_agent_configuration_loading_multipage_when_same_id():
 
 
 def test_agent_configuration_loading_multipage_validation_error():
-    """
-    Test agent configuration loading, multi-page case,
-    when the configuration is invalid.
-    """
+    """Test agent configuration loading, multi-page case, when the configuration is invalid."""
     file = Path(CUR_PATH, "data", "aea-config.example_multipage.yaml").open()
     jsons = list(yaml.safe_load_all(file))
     # make invalid the last component configuration

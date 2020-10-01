@@ -26,13 +26,13 @@ from asyncio import CancelledError
 from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
+from enum import Enum
 from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
 
-from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
-
 import requests
+from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -62,9 +62,10 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-_default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.8.0")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
+
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.9.0")
 
 NOT_SPECIFIED = object()
 
@@ -80,16 +81,16 @@ PERSONALITY_PIECES_KEYS = [
 ]
 
 
-class ModelNames:
+class ModelNames(Enum):
     """Enum of supported data models."""
 
-    location_agent = "location_agent"
-    set_service_key = "set_service_key"
-    remove_service_key = "remove_service_key"
-    personality_agent = "personality_agent"
-    search_model = "search_model"
-    ping = "ping"
-    generic_command = "generic_command"
+    LOCATION_AGENT = "location_agent"
+    SET_SERVICE_KEY = "set_service_key"
+    REMOVE_SERVICE_KEY = "remove_service_key"
+    PERSONALITY_AGENT = "personality_agent"
+    SEARCH_MODEL = "search_model"
+    PING = "ping"
+    GENERIC_COMMAND = "generic_command"
 
 
 class SOEFException(Exception):
@@ -264,6 +265,7 @@ class SOEFChannel:
         self._find_around_me_queue: Optional[asyncio.Queue] = None
         self._find_around_me_processor_task: Optional[asyncio.Task] = None
         self.logger = logger
+        self._unregister_lock: Optional[asyncio.Lock] = None
 
     async def _find_around_me_processor(self) -> None:
         """Process find me around requests in background task."""
@@ -275,7 +277,11 @@ class SOEFChannel:
                     oef_message, oef_search_dialogue, radius, params
                 )
                 await asyncio.sleep(self.FIND_AROUND_ME_REQUEST_DELAY)
-            except asyncio.CancelledError:  # pylint: disable=try-except-raise
+            except (
+                asyncio.CancelledError,
+                CancelledError,
+                GeneratorExit,
+            ):  # pylint: disable=try-except-raise
                 return
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
@@ -511,7 +517,7 @@ class SOEFChannel:
 
         :return None
         """
-        self._check_data_model(service_description, ModelNames.ping)
+        self._check_data_model(service_description, ModelNames.PING.value)
         await self._ping_command()
 
     async def _generic_command_handler(
@@ -531,7 +537,7 @@ class SOEFChannel:
             """not connected."""
             return
 
-        self._check_data_model(service_description, ModelNames.generic_command)
+        self._check_data_model(service_description, ModelNames.GENERIC_COMMAND.value)
         command = service_description.values.get("command", None)
         params = service_description.values.get("parameters", {})
 
@@ -593,7 +599,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._check_data_model(service_description, ModelNames.set_service_key)
+        self._check_data_model(service_description, ModelNames.SET_SERVICE_KEY.value)
 
         key = service_description.values.get("key", None)
         value = service_description.values.get("value", NOT_SPECIFIED)
@@ -654,7 +660,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._check_data_model(service_description, ModelNames.remove_service_key)
+        self._check_data_model(service_description, ModelNames.REMOVE_SERVICE_KEY.value)
         key = service_description.values.get("key", None)
 
         if key is None:  # pragma: nocover
@@ -683,7 +689,7 @@ class SOEFChannel:
         :param service_description: Service description
         :return None
         """
-        self._check_data_model(service_description, ModelNames.location_agent)
+        self._check_data_model(service_description, ModelNames.LOCATION_AGENT.value)
 
         agent_location = service_description.values.get("location", None)
 
@@ -761,7 +767,7 @@ class SOEFChannel:
         :param piece: the piece to be set
         :param value: the value to be set
         """
-        self._check_data_model(service_description, ModelNames.personality_agent)
+        self._check_data_model(service_description, ModelNames.PERSONALITY_AGENT.value)
         piece = service_description.values.get("piece", None)
         value = service_description.values.get("value", None)
 
@@ -820,7 +826,7 @@ class SOEFChannel:
                 unique_token = child.text
         if not (len(unique_page_address) > 0 and len(unique_token) > 0):
             raise SOEFException.error(
-                "Agent registration error - page address or token not received"
+                f"Agent registration error - page address or token not received. Response text: {response_text}"
             )
         self.logger.debug("Registering agent")
         params = {"token": unique_token}
@@ -901,19 +907,31 @@ class SOEFChannel:
 
         :return: None
         """
-        await self._stop_periodic_ping_task()
-        if self.unique_page_address is None:  # pragma: nocover
-            self.logger.debug(
-                "The service is not registered to the simple OEF. Cannot unregister."
+        if not self._unregister_lock:
+            raise ValueError(  # pragma: nocover
+                "unregistered lock is not set, please call connect!"
             )
-            return
 
-        response = await self._generic_oef_command("unregister", check_success=False)
-        enforce(
-            "<response><message>Goodbye!</message></response>" in response,
-            "No Goodbye response.",
-        )
-        self.unique_page_address = None
+        async with self._unregister_lock:
+            if self.unique_page_address is None:  # pragma: nocover
+                self.logger.debug(
+                    "The service is not registered to the simple OEF. Cannot unregister."
+                )
+                return
+
+            task = asyncio.ensure_future(
+                self._generic_oef_command("unregister", check_success=False)
+            )
+
+            try:
+                response = await asyncio.shield(task)
+            finally:
+                response = await task
+                enforce(
+                    "<response><message>Goodbye!</message></response>" in response,
+                    "No Goodbye response.",
+                )
+                self.unique_page_address = None
 
     async def _stop_periodic_ping_task(self) -> None:
         """Cancel periodic ping task."""
@@ -929,6 +947,7 @@ class SOEFChannel:
         self._loop = asyncio.get_event_loop()
         self.in_queue = asyncio.Queue()
         self._find_around_me_queue = asyncio.Queue()
+        self._unregister_lock = asyncio.Lock()
         self._executor_pool = ThreadPoolExecutor(max_workers=10)
         self._find_around_me_processor_task = self._loop.create_task(
             self._find_around_me_processor()
@@ -944,12 +963,13 @@ class SOEFChannel:
 
         if self.in_queue is None:
             raise ValueError("Queue is not set, use connect first!")  # pragma: nocover
-        await self._unregister_agent()
 
         if self._find_around_me_processor_task:
             if not self._find_around_me_processor_task.done():
                 self._find_around_me_processor_task.cancel()
             await self._find_around_me_processor_task
+
+        await self._unregister_agent()
 
         await self.in_queue.put(None)
         self._find_around_me_queue = None
@@ -1095,7 +1115,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.6.0")
+                PublicId.from_str("fetchai/oef_search:0.7.0")
             ]
 
         super().__init__(**kwargs)

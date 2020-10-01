@@ -27,12 +27,7 @@ import pytest
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
-from aea.helpers.search.models import (
-    Constraint,
-    ConstraintType,
-    Description,
-    Query,
-)
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -49,6 +44,7 @@ from packages.fetchai.protocols.oef_search.message import (
 )
 
 from tests.conftest import ROOT_DIR
+
 
 sys.path.append(ROOT_DIR)
 

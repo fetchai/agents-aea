@@ -18,9 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This CLI tool freezes the dependencies
-"""
+"""This CLI tool freezes the dependencies."""
 import re
 import subprocess  # nosec
 

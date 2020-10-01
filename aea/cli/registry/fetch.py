@@ -17,8 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 """Methods for CLI fetch functionality."""
-
 import os
+import shutil
 from typing import Optional
 
 import click
@@ -32,14 +32,19 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
 @clean_after
-def fetch_agent(ctx: Context, public_id: PublicId, alias: Optional[str] = None) -> None:
+def fetch_agent(
+    ctx: Context,
+    public_id: PublicId,
+    alias: Optional[str] = None,
+    target_dir: Optional[str] = None,
+) -> None:
     """
     Fetch Agent from Registry.
 
     :param ctx: Context
-    :param public_id: str public ID of desirable Agent.
-    :param ctx: a Context object.
+    :param public_id: str public ID of desirable agent.
     :param alias: an optional alias.
+    :param target_dir: the target directory to which the agent is fetched.
     :return: None
     """
     author, name, version = public_id.author, public_id.name, public_id.version
@@ -49,14 +54,16 @@ def fetch_agent(ctx: Context, public_id: PublicId, alias: Optional[str] = None) 
 
     filepath = download_file(file_url, ctx.cwd)
 
-    folder_name = name if alias is None else alias
+    folder_name = target_dir or (name if alias is None else alias)
     aea_folder = os.path.join(ctx.cwd, folder_name)
     ctx.clean_paths.append(aea_folder)
 
     extract(filepath, ctx.cwd)
 
-    if alias is not None:
-        os.rename(name, alias)
+    if alias or target_dir:
+        shutil.move(
+            os.path.join(ctx.cwd, name), aea_folder,
+        )
 
     ctx.cwd = aea_folder
     try_to_load_agent_config(ctx)

@@ -42,7 +42,6 @@ from typing import (
 )
 
 import jsonschema
-
 from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
@@ -83,6 +82,7 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
+
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -291,6 +291,8 @@ class AEABuilder:
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
+
+    loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
 
     # pylint: disable=attribute-defined-outside-init
 
@@ -1336,15 +1338,45 @@ class AEABuilder:
         builder = AEABuilder(with_default_packages=False)
 
         # load agent configuration file
-        configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
-
-        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
-        agent_configuration = loader.load(configuration_file.open())
+        configuration_file = cls.get_configuration_file_path(aea_project_path)
+        agent_configuration = cls.loader.load(configuration_file.open())
 
         builder.set_from_configuration(
             agent_configuration, aea_project_path, skip_consistency_check
         )
         return builder
+
+    @classmethod
+    def from_config_json(
+        cls,
+        json_data: List[Dict],
+        aea_project_path: PathLike,
+        skip_consistency_check: bool = False,
+    ) -> "AEABuilder":
+        """
+        Load agent configuration for alreaady provided json data.
+
+        :param json_data: list of dicts with agent configuration
+        :param aea_project_path: path to project root
+        :param skip_consistency_check: skip consistency check on configs load.
+
+        :return: AEABuilder instance
+        """
+        aea_project_path = Path(aea_project_path)
+        builder = AEABuilder(with_default_packages=False)
+
+        # load agent configuration file
+        agent_configuration = cls.loader.load_agent_config_from_json(json_data)
+
+        builder.set_from_configuration(
+            agent_configuration, aea_project_path, skip_consistency_check
+        )
+        return builder
+
+    @staticmethod
+    def get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path:
+        """Return path to aea-config file for the given aea project path."""
+        return Path(aea_project_path) / DEFAULT_AEA_CONFIG_FILE
 
     def _load_and_add_components(
         self,
@@ -1365,10 +1397,6 @@ class AEABuilder:
         for configuration in self._package_dependency_manager.get_components_by_type(
             component_type
         ).values():
-            if configuration.is_abstract_component:
-                load_aea_package(configuration)
-                continue
-
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
                 if configuration.component_type != ComponentType.SKILL:
@@ -1376,15 +1404,13 @@ class AEABuilder:
                         logging.Logger, make_logger(configuration, agent_name)
                     )
             else:
-                configuration = deepcopy(configuration)
-                configuration.update(
-                    self._custom_component_configurations.get(
-                        configuration.component_id, {}
-                    )
-                )
-                _logger = make_logger(configuration, agent_name)
+                new_configuration = self._overwrite_custom_configuration(configuration)
+                if new_configuration.is_abstract_component:
+                    load_aea_package(configuration)
+                    continue
+                _logger = make_logger(new_configuration, agent_name)
                 component = load_component_from_config(
-                    configuration, logger=_logger, **kwargs
+                    new_configuration, logger=_logger, **kwargs
                 )
 
             resources.add_component(component)
@@ -1397,6 +1423,23 @@ class AEABuilder:
                 "- added a private key manually.\n"
                 "Please call 'reset() if you want to build another agent."
             )
+
+    def _overwrite_custom_configuration(self, configuration: ComponentConfiguration):
+        """
+        Overwrite custom configurations.
+
+        It deep-copies the configuration, to avoid undesired side-effects.
+
+        :param configuration: the configuration object.
+        :param custom_config: the configurations to apply.
+        :return: the new configuration instance.
+        """
+        new_configuration = deepcopy(configuration)
+        custom_config = self._custom_component_configurations.get(
+            new_configuration.component_id, {}
+        )
+        new_configuration.update(custom_config)
+        return new_configuration
 
 
 def make_logger(
