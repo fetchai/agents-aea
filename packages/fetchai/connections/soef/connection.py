@@ -265,6 +265,7 @@ class SOEFChannel:
         self._find_around_me_queue: Optional[asyncio.Queue] = None
         self._find_around_me_processor_task: Optional[asyncio.Task] = None
         self.logger = logger
+        self._unregister_lock: Optional[asyncio.Lock] = None
 
     async def _find_around_me_processor(self) -> None:
         """Process find me around requests in background task."""
@@ -276,7 +277,11 @@ class SOEFChannel:
                     oef_message, oef_search_dialogue, radius, params
                 )
                 await asyncio.sleep(self.FIND_AROUND_ME_REQUEST_DELAY)
-            except asyncio.CancelledError:  # pylint: disable=try-except-raise
+            except (
+                asyncio.CancelledError,
+                CancelledError,
+                GeneratorExit,
+            ):  # pylint: disable=try-except-raise
                 return
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
@@ -902,19 +907,29 @@ class SOEFChannel:
 
         :return: None
         """
-        await self._stop_periodic_ping_task()
-        if self.unique_page_address is None:  # pragma: nocover
-            self.logger.debug(
-                "The service is not registered to the simple OEF. Cannot unregister."
-            )
-            return
+        if not self._unregister_lock:
+            raise ValueError("unregistered lock is not set, please call connect!")
 
-        response = await self._generic_oef_command("unregister", check_success=False)
-        enforce(
-            "<response><message>Goodbye!</message></response>" in response,
-            "No Goodbye response.",
-        )
-        self.unique_page_address = None
+        async with self._unregister_lock:
+            if self.unique_page_address is None:  # pragma: nocover
+                self.logger.debug(
+                    "The service is not registered to the simple OEF. Cannot unregister."
+                )
+                return
+
+            task = asyncio.ensure_future(
+                self._generic_oef_command("unregister", check_success=False)
+            )
+
+            try:
+                response = await asyncio.shield(task)
+            finally:
+                response = await task
+                enforce(
+                    "<response><message>Goodbye!</message></response>" in response,
+                    "No Goodbye response.",
+                )
+                self.unique_page_address = None
 
     async def _stop_periodic_ping_task(self) -> None:
         """Cancel periodic ping task."""
@@ -930,6 +945,7 @@ class SOEFChannel:
         self._loop = asyncio.get_event_loop()
         self.in_queue = asyncio.Queue()
         self._find_around_me_queue = asyncio.Queue()
+        self._unregister_lock = asyncio.Lock()
         self._executor_pool = ThreadPoolExecutor(max_workers=10)
         self._find_around_me_processor_task = self._loop.create_task(
             self._find_around_me_processor()
@@ -945,12 +961,13 @@ class SOEFChannel:
 
         if self.in_queue is None:
             raise ValueError("Queue is not set, use connect first!")  # pragma: nocover
-        await self._unregister_agent()
 
         if self._find_around_me_processor_task:
             if not self._find_around_me_processor_task.done():
                 self._find_around_me_processor_task.cancel()
             await self._find_around_me_processor_task
+
+        await self._unregister_agent()
 
         await self.in_queue.put(None)
         self._find_around_me_queue = None
