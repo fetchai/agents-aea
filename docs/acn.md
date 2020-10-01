@@ -7,7 +7,6 @@ Agents need to contact each others. Given the wallet address of a target agent, 
 The properties we would like to have are:
 
 - Reliability: with guarantees on message reception
-- Security: no third-party can tamper with the message
 - Authentication: to prevent impersonation
 - Confidentiality: to prevent exposing sensitive information within the message
 - Availability: some guarantees about the liveness of the service (tampering detection)
