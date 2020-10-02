@@ -28,65 +28,23 @@ This module contains the classes required for dialogue management.
 import itertools
 import secrets
 from abc import ABC
+from collections import namedtuple
 from enum import Enum
 from inspect import signature
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    FrozenSet,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    cast,
-)
+from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 
-class CompactMessage:
-    """Representation of a message in a dialogue."""
-
-    def __init__(
-        self,
-        performative: Message.Performative,
-        contents: Dict[str, Any],
-        is_incoming: Optional[bool] = None,
-        target: Optional[int] = None,
-    ) -> None:
-        """Initialise."""
-        self._performative = performative
-        self._contents = contents
-        self._is_incoming = is_incoming
-        self._target = target
-
-    @property
-    def is_incoming(self) -> bool:
-        """Get message's is_incoming."""
-        if self._is_incoming is None:
-            raise AEAEnforceError("is_incoming is None.")
-        return self._is_incoming
-
-    @property
-    def target(self) -> int:
-        """Get message's target."""
-        if self._target is None:
-            raise AEAEnforceError("target is None.")
-        return self._target
-
-    @property
-    def performative(self) -> Message.Performative:
-        """Get message's performative."""
-        return self._performative
-
-    @property
-    def contents(self) -> Dict[str, Any]:
-        """Get message's contents."""
-        return self._contents
+DialogueMessage = namedtuple(
+    typename="DialogueMessage",
+    field_names=["performative", "contents", "is_incoming", "target"],
+    rename=False,
+    defaults=[None, None],
+    module="aea.protocols.dialogues.base",
+)
 
 
 class InvalidDialogueMessage(Exception):
