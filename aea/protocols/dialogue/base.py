@@ -39,8 +39,8 @@ from aea.protocols.base import Message
 
 
 DialogueMessage = namedtuple(
-    typename="DialogueMessage",
-    field_names=["performative", "contents", "is_incoming", "target"],
+    "DialogueMessage",
+    ["performative", "contents", "is_incoming", "target"],
     rename=False,
     defaults=[None, None],
     module="aea.protocols.dialogues.base",
