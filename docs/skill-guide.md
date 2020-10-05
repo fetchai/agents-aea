@@ -108,7 +108,7 @@ class MySearchBehaviour(TickerBehaviour):
 
 Searches are proactive and, as such, well placed in a <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>. Specifically, we subclass the <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> as it allows us to repeatedly search at a defined tick interval.
 
-We place this code in `my_aea/skills/my_search/behaviours.py`.
+We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import OefSearchDialogues` with your author handle (run `aea init` to set or check the author name).
 
 ## Step 3: Develop a Handler
 
@@ -259,7 +259,7 @@ Note, how the handler simply reacts to incoming events (i.e. messages). It could
 
 Also note, how we have access to other objects in the skill via `self.context`, the <a href="../api/skills/base#skillcontext-objects">`SkillContext`</a>.
 
-We place this code in `my_aea/skills/my_search/handlers.py`.
+We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import (` with your author handle (run `aea init` to set or check the author name).
 
 ## Step 4: Add dialogues model
 
@@ -396,9 +396,9 @@ This will ensure that search requests are processed by the correct connection.
 
 ## Step 8: Run a service provider AEA
 
-In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA:
+In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.13.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.13.0 && cd simple_service_registration && aea install
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -841,7 +841,7 @@ aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
-Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+Then, update the configuration of the search AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
 
 ``` yaml
 config:

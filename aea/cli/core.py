@@ -65,6 +65,7 @@ from aea.helpers.win32 import enable_ctrl_c_support
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")
 @click.option(
+    "-s",
     "--skip-consistency-check",
     "skip_consistency_check",
     is_flag=True,

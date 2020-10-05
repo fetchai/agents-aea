@@ -178,7 +178,7 @@ At some point you should see the log output:
 registering service on SOEF.
 ```
 
-Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+Then, update the configuration of the client AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
 
 ``` yaml
 config:
