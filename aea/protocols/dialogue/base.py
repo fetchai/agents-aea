@@ -27,6 +27,7 @@ This module contains the classes required for dialogue management.
 
 import itertools
 import secrets
+import sys
 from abc import ABC
 from collections import namedtuple
 from enum import Enum
@@ -38,13 +39,22 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 
-DialogueMessage = namedtuple(
-    "DialogueMessage",
-    ["performative", "contents", "is_incoming", "target"],
-    rename=False,
-    defaults=[dict(), None, None],
-    module="aea.protocols.dialogues.base",
-)
+if sys.version_info < (3, 7):
+    DialogueMessage = namedtuple(
+        "DialogueMessage",
+        ["performative", "contents", "is_incoming", "target"],
+        rename=False,
+        module="aea.protocols.dialogues.base",
+    )
+    DialogueMessage.__new__.__defaults__ = (dict(), None, None)
+else:
+    DialogueMessage = namedtuple(
+        "DialogueMessage",
+        ["performative", "contents", "is_incoming", "target"],
+        rename=False,
+        defaults=[dict(), None, None],
+        module="aea.protocols.dialogues.base",
+    )
 
 
 class InvalidDialogueMessage(Exception):
