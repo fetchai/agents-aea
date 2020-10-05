@@ -71,7 +71,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
             )
         )
 
-    to = split[0].decode("utf-8").strip()
+    to = split[0].decode("utf-8").strip().lstrip('\x00')
     sender = split[1].decode("utf-8").strip()
     protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
     # protobuf messages cannot be delimited as they can contain an arbitrary byte sequence; however

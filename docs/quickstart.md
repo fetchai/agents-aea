@@ -64,7 +64,9 @@ sudo apt-get install python3.7-dev
 
 ## Setup author name
 
-You can now setup your author name:
+AEA are composed from components. The components can be developed by anyone and are available on the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a>. To use the registry we require an author name.
+
+You can setup your author name using the `init` command:
 ``` bash
 aea init
 ```
@@ -98,7 +100,9 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
 
 ## Echo skill demo
 
-The echo skill is a simple demo that introduces you to the main business logic components of an AEA. The fastest way to create your first AEA is to fetch it!
+The echo skill demo is a simple demo that introduces you to the main business logic components of an AEA. The <a href="https://aea-registry.fetch.ai/details/skill/fetchai/echo/latest" target="_blank">echo skill</a> simply echoes received messages back to the sender.
+
+The fastest way to create your first AEA is to fetch it!
 
 ``` bash
 aea fetch fetchai/my_first_aea:0.12.0
@@ -207,7 +211,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 
-<details><summary>CLI interact command</summary>
+<details><summary>Manual approach</summary>
 
 Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), we send the AEA a message wrapped in an envelope via the input file.
 
@@ -224,7 +228,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 
-Note, due to the dialogue reference having to be incremented, you can only send the above envelope once!
+Note, due to the dialogue reference having to be incremented, you can only send the above envelope once! This approach does not work in conjunction with the `aea interact` command.
 
 </details>
 
