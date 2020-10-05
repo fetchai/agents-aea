@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC
-  connection.py: QmTPDTvfGBusxmiMQatt5f99kMphbkftdA8Ke4a99qAaqt
+  connection.py: QmUZZMEYxBSWJpx5Sd53cq9jVDHr276SjoNmZJCFhdS3np
   readme.md: QmQ2Y2sk2xnH45KzxdMna1pUXDGQ5S32fJk1qwdTSfAGc2
 fingerprint_ignore_patterns: []
 protocols: []

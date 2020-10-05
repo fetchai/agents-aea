@@ -64,7 +64,7 @@ sudo apt-get install python3.7-dev
 
 ## Setup author name
 
-AEA are composed from components. The components can be developed by anyone and are available on the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a>. To use the registry we require an author name.
+AEAs are composed from components. The components can be developed by anyone and are available on the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a>. To use the registry we need to register an author name.
 
 You can setup your author name using the `init` command:
 ``` bash
