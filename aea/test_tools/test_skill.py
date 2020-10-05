@@ -152,7 +152,7 @@ class BaseSkillTestCase:
 
         return incoming_message
 
-    def build_incoming_message_for_dialogue(
+    def build_incoming_message_for_skill_dialogue(
         self,
         dialogue: Dialogue,
         performative: Message.Performative,
@@ -208,7 +208,7 @@ class BaseSkillTestCase:
             else dialogue.last_message.message_id + 1
         )
         target = target if target is not None else dialogue.last_message.message_id
-        to = to if to is not None else self.skill.skill_context.agent_address
+        to = to if to is not None else dialogue.self_address
         sender = (
             sender
             if sender is not None
@@ -230,9 +230,21 @@ class BaseSkillTestCase:
 
     @staticmethod
     def _provide_unspecified_fields(
-        message: DialogueMessage, last_incoming: Optional[bool], message_id: int
+        message: DialogueMessage, last_is_incoming: Optional[bool], message_id: int
     ) -> Tuple[bool, int]:
-        default_is_incoming = not last_incoming
+        """
+        Specifies values (an interpretation) for the unspecified fields of a DialogueMessage.
+
+        For an unspecified is_incoming, the opposite of the last_is_incoming value is used.
+        For an unspecified target, the message_id of the previous message (message_id - 1) is used.
+
+        :param message: the DialogueMessage
+        :param last_is_incoming: the is_incoming value of the previous DialogueMessage
+        :param message_id: the message_id of this DialogueMessage
+
+        :return: the is_incoming and target values
+        """
+        default_is_incoming = not last_is_incoming
         is_incoming = default_is_incoming if message[2] is None else message[2]
 
         default_target = message_id - 1
@@ -243,6 +255,15 @@ class BaseSkillTestCase:
     def _non_initial_incoming_message_dialogue_reference(
         dialogue: Dialogue,
     ) -> Tuple[str, str]:
+        """
+        Specifies the dialogue reference of a non-initial incoming message for a dialogue.
+
+        It uses a complete version of the reference in the dialogue if it is incomplete,
+        otherwise it uses the reference in the dialogue.
+
+        :param dialogue: the dialogue to which the incoming message is intended
+        :return: its dialogue reference
+        """
         dialogue_reference = (
             dialogue.dialogue_label.dialogue_reference[0],
             Dialogues._generate_dialogue_nonce()  # pylint: disable=protected-access
@@ -252,7 +273,21 @@ class BaseSkillTestCase:
         )
         return dialogue_reference
 
-    def prepare_dialogue(
+    def _extract_message_fields(
+        self,
+        message: DialogueMessage,
+        messages: Tuple[DialogueMessage, ...],
+        last_is_incoming: bool,
+    ):
+        performative = message[0]
+        contents = message[1]
+        message_id = messages.index(message) + 1
+        is_incoming, target = self._provide_unspecified_fields(
+            message, last_is_incoming=last_is_incoming, message_id=message_id,
+        )
+        return performative, contents, message_id, is_incoming, target
+
+    def prepare_skill_dialogue(
         self,
         dialogues: Dialogues,
         messages: Tuple[DialogueMessage, ...],
@@ -274,13 +309,16 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
-        incomplete_message_1 = messages[0]
-        performative = incomplete_message_1[0]
-        contents = incomplete_message_1[1]
-        message_id = messages.index(incomplete_message_1) + 1
-        is_incoming, target = self._provide_unspecified_fields(
-            incomplete_message_1, last_incoming=True, message_id=1,
-        )
+        if not len(messages) >= 1:
+            raise AEAEnforceError("the list of messages must be positive.")
+
+        (
+            performative,
+            contents,
+            message_id,
+            is_incoming,
+            target,
+        ) = self._extract_message_fields(messages[0], messages, True)
 
         if is_incoming:  # messages from the opponent
             dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
@@ -307,14 +345,13 @@ class BaseSkillTestCase:
             )
 
         for incomplete_message in messages[1:]:  # type: ignore
-            performative = incomplete_message[0]
-            contents = incomplete_message[1]
-            message_id = messages.index(incomplete_message) + 1
-            is_incoming, target = self._provide_unspecified_fields(
-                incomplete_message,
-                last_incoming=is_incoming,
-                message_id=messages.index(incomplete_message) + 1,
-            )
+            (
+                performative,
+                contents,
+                message_id,
+                is_incoming,
+                target,
+            ) = self._extract_message_fields(incomplete_message, messages, is_incoming)
             if is_incoming:  # messages from the opponent
                 dialogue_reference = self._non_initial_incoming_message_dialogue_reference(
                     dialogue

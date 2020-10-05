@@ -42,7 +42,7 @@ DialogueMessage = namedtuple(
     "DialogueMessage",
     ["performative", "contents", "is_incoming", "target"],
     rename=False,
-    defaults=[None, None],
+    defaults=[dict(), None, None],
     module="aea.protocols.dialogues.base",
 )
 

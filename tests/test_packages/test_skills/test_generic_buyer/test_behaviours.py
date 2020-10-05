@@ -53,6 +53,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.search_behaviour = cast(
             GenericSearchBehaviour, cls._skill.skill_context.behaviours.search
         )
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
     def test_search_behaviour_setup_is_ledger_tx(self):
         """Test the setup method of the search behaviour where is_ledger_tx is True."""
@@ -75,23 +76,21 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test_search_behaviour_setup_not_is_ledger_tx(self):
         """Test the setup method of the search behaviour where is_ledger_tx is False."""
         # setup
-        strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
-        strategy._is_ledger_tx = False
+        self.strategy._is_ledger_tx = False
 
         # before
-        assert not strategy.is_searching
+        assert not self.strategy.is_searching
 
         # operation
         self.search_behaviour.setup()
 
         # after
-        assert strategy.is_searching
+        assert self.strategy.is_searching
 
     def test_search_behaviour_act_is_searching(self):
         """Test the act method of the search behaviour where is_searching is True."""
         # setup
-        strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
-        strategy._is_searching = True
+        self.strategy._is_searching = True
 
         # operation
         self.search_behaviour.act()
@@ -112,8 +111,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test_search_behaviour_act_not_is_searching(self):
         """Test the act method of the search behaviour where is_searching is False."""
         # setup
-        strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
-        strategy._is_searching = False
+        self.strategy._is_searching = False
 
         # operation
         self.search_behaviour.act()
@@ -136,6 +134,13 @@ class TestSkillHandler(BaseSkillTestCase):
         )
         cls.fipa_dialogues = cast(
             FipaDialogues, cls._skill.skill_context.fipa_dialogues
+        )
+        cls.list_of_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT, {}),
         )
 
     def test_fipa_handler_handle_unidentified_dialogue(self):
@@ -179,13 +184,10 @@ class TestSkillHandler(BaseSkillTestCase):
                 "tx_nonce": "some_tx_nonce",
             }
         )
-        fipa_dialogue = self.prepare_dialogue(
-            dialogues=self.fipa_dialogues,
-            messages=(
-                DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
-            ),
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:1],
         )
-        incoming_message = self.build_incoming_message_for_dialogue(
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=fipa_dialogue,
             performative=FipaMessage.Performative.PROPOSE,
             proposal=proposal,
@@ -209,13 +211,10 @@ class TestSkillHandler(BaseSkillTestCase):
     def test_fipa_handler_handle_decline_decline_cfp(self):
         """Test the _handle_decline method of the fipa handler where the end state is decline_cfp."""
         # setup
-        fipa_dialogue = self.prepare_dialogue(
-            dialogues=self.fipa_dialogues,
-            messages=(
-                DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
-            ),
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:1],
         )
-        incoming_message = self.build_incoming_message_for_dialogue(
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
         )
 
@@ -249,17 +248,10 @@ class TestSkillHandler(BaseSkillTestCase):
     def test_fipa_handler_handle_decline_decline_accept(self):
         """Test the _handle_decline method of the fipa handler where the end state is decline_accept."""
         # setup
-        fipa_dialogue = self.prepare_dialogue(
-            dialogues=self.fipa_dialogues,
-            messages=(
-                DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
-                DialogueMessage(
-                    FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
-                ),
-                DialogueMessage(FipaMessage.Performative.ACCEPT, {}),
-            ),
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages,
         )
-        incoming_message = self.build_incoming_message_for_dialogue(
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
         )
 
@@ -296,17 +288,10 @@ class TestSkillHandler(BaseSkillTestCase):
         strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
         strategy._is_ledger_tx = False
 
-        fipa_dialogue = self.prepare_dialogue(
-            dialogues=self.fipa_dialogues,
-            messages=(
-                DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
-                DialogueMessage(
-                    FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
-                ),
-                DialogueMessage(FipaMessage.Performative.ACCEPT, {}),
-            ),
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages,
         )
-        incoming_message = self.build_incoming_message_for_dialogue(
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=fipa_dialogue,
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
             info={"info": {"address": "some_term_sender_address"}},
