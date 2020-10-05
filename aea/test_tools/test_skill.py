@@ -127,10 +127,7 @@ class BaseSkillTestCase:
         """
         message_attributes = dict()  # type: Dict[str, Any]
 
-        default_dialogue_reference = (
-            Dialogues._generate_dialogue_nonce(),  # pylint: disable=protected-access
-            "",
-        )
+        default_dialogue_reference = Dialogues.new_self_initiated_dialogue_reference()
         dialogue_reference = (
             default_dialogue_reference
             if dialogue_reference is None

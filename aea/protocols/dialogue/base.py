@@ -1062,13 +1062,14 @@ class Dialogues(ABC):
         )
         return counterparty
 
-    def new_self_initiated_dialogue_reference(self) -> Tuple[str, str]:
+    @classmethod
+    def new_self_initiated_dialogue_reference(cls) -> Tuple[str, str]:
         """
         Return a dialogue label for a new self initiated dialogue.
 
         :return: the next nonce
         """
-        return self._generate_dialogue_nonce(), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+        return cls._generate_dialogue_nonce(), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
 
     def create(
         self, counterparty: Address, performative: Message.Performative, **kwargs,
