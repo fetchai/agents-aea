@@ -154,6 +154,20 @@ class FipaNegotiationHandler(Handler):
             fipa_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.DECLINE, target_message=cfp,
             )
+            fipa_dialogue.terms = Terms(
+                ledger_id=strategy.ledger_id,
+                sender_address=self.context.agent_address,
+                counterparty_address=propose.sender,
+                amount_by_currency_id={},
+                quantities_by_good_id={
+                    str(propose.proposal.values["token_id"]): int(
+                        propose.proposal.values["from_supply"]
+                    )
+                    - int(propose.proposal.values["to_supply"])
+                },
+                is_sender_payable_tx_fee=False,
+                nonce=str(propose.proposal.values["trade_nonce"]),
+            )
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, fipa_dialogue.is_self_initiated
@@ -204,6 +218,25 @@ class FipaNegotiationHandler(Handler):
         new_msg_id = propose.message_id + 1
         strategy = cast(Strategy, self.context.strategy)
         proposal_description = propose.proposal
+        fipa_dialogue.terms = Terms(
+            ledger_id=strategy.ledger_id,
+            sender_address=self.context.agent_address,
+            counterparty_address=propose.sender,
+            amount_by_currency_id={},
+            quantities_by_good_id={
+                str(propose.proposal.values["token_id"]): int(
+                    propose.proposal.values["from_supply"]
+                )
+                - int(propose.proposal.values["to_supply"])
+            },
+            is_sender_payable_tx_fee=False,
+            nonce=str(propose.proposal.values["trade_nonce"]),
+            fee_by_currency_id={},
+        )
+            amount_by_currency_id={
+                str(proposal.values["token_id"]): int(proposal.values["from_supply"])
+                - int(proposal.values["to_supply"])
+            },
         self.context.logger.debug("on Propose as {}.".format(fipa_dialogue.role))
         transactions = cast(Transactions, self.context.transactions)
         signing_msg = transactions.generate_signing_message(
@@ -315,54 +348,40 @@ class FipaNegotiationHandler(Handler):
                 signing_msg, role=cast(FipaDialogue.Role, fipa_dialogue.role)
             )
             if strategy.is_contract_tx:
-                pass
-                # contract = cast(ERC1155Contract, self.context.contracts.erc1155) # noqa: E800
-                # if not contract.is_deployed: # noqa: E800
-                #     ledger_api = self.context.ledger_apis.get_api(strategy.ledger_id) # noqa: E800
-                #     contract_address = self.context.shared_state.get( # noqa: E800
-                #         "erc1155_contract_address", None # noqa: E800
-                #     ) # noqa: E800
-                #     enforce( # noqa: E800
-                #         contract_address is not None, # noqa: E800
-                #         "ERC1155Contract address not set!" # noqa: E800
-                #     ) # noqa: E800
-                # tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None) # noqa: E800
-                # enforce(tx_nonce is not None, "tx_nonce must be provided") # noqa: E800
-                # transaction_msg = contract.get_hash_batch_transaction_msg( # noqa: E800
-                #     from_address=accept.counterparty, # noqa: E800
-                #     to_address=self.context.agent_address,  # must match self # noqa: E800
-                #     token_ids=[ # noqa: E800
-                #         int(key) # noqa: E800
-                #         for key in transaction_msg.terms.quantities_by_good_id.keys() # noqa: E800
-                #     ] # noqa: E800
-                #     + [ # noqa: E800
-                #         int(key) # noqa: E800
-                #         for key in transaction_msg.terms.amount_by_currency_id.keys() # noqa: E800
-                #     ], # noqa: E800
-                #     from_supplies=[ # noqa: E800
-                #         quantity if quantity > 0 else 0 # noqa: E800
-                #         for quantity in transaction_msg.terms.quantities_by_good_id.values() # noqa: E800
-                #     ] # noqa: E800
-                #     + [ # noqa: E800
-                #         value if value > 0 else 0 # noqa: E800
-                #         for value in transaction_msg.terms.amount_by_currency_id.values() # noqa: E800
-                #     ], # noqa: E800
-                #     to_supplies=[ # noqa: E800
-                #         -quantity if quantity < 0 else 0 # noqa: E800
-                #         for quantity in transaction_msg.terms.quantities_by_good_id.values() # noqa: E800
-                #     ] # noqa: E800
-                #     + [ # noqa: E800
-                #         -value if value < 0 else 0 # noqa: E800
-                #         for value in transaction_msg.terms.amount_by_currency_id.values() # noqa: E800
-                #     ], # noqa: E800
-                #     value=0, # noqa: E800
-                #     trade_nonce=int(tx_nonce), # noqa: E800
-                #     ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id), # noqa: E800
-                #     skill_callback_id=self.context.skill_id, # noqa: E800
-                #     skill_callback_info={ # noqa: E800
-                #         "dialogue_label": fipa_dialogue.dialogue_label.json # noqa: E800
-                #     }, # noqa: E800
-                # ) # noqa: E800
+                contract_address = self.context.shared_state.get(
+                    "erc1155_contract_address", None
+                )
+                enforce(
+                    contract_address is not None,
+                    "ERC1155Contract address not set!"
+                )
+                counterparty_signature = signing_dialogue.counterparty_signature
+                tx_nonce = signing_dialogue.counterparty_signature
+                .skill_callback_info.get("tx_nonce", None) # noqa: E800
+                enforce(tx_nonce is not None, "tx_nonce must be provided") # noqa: E800
+                contract_api_dialogues = cast(ContractApiDialogues, self.context.contract_api_dialogues)
+                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
+                    ledger_id=strategy.ledger_id,
+                    contract_id="fetchai/erc1155:0.10.0",
+                    contract_address=contract_address,
+                    callable="get_hash_single",
+                    kwargs=ContractApiMessage.Kwargs(
+                        {
+                            "from_address": accept.sender,
+                            "to_address": self.context.agent_address,
+                            "token_id": int(fipa_msg.proposal.values["token_id"]),
+                            "from_supply": int(fipa_msg.proposal.values["from_supply"]),
+                            "to_supply": int(fipa_msg.proposal.values["to_supply"]),
+                            "value": int(fipa_msg.proposal.values["value"]),
+                            "trade_nonce": int(fipa_msg.proposal.values["trade_nonce"]),
+                        }
+                    ),
+                )
+                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+                self.context.outbox.put_message(message=contract_api_msg)
+                self.context.logger.info("requesting single atomic swap transaction...")
             else:
                 self.context.logger.info(
                     "sending signing_msg={} to decison maker following ACCEPT.".format(
@@ -419,63 +438,46 @@ class FipaNegotiationHandler(Handler):
                 return
             signing_dialogue.counterparty_signature = counterparty_signature
             if strategy.is_contract_tx:
-                pass
-                # contract = cast(ERC1155Contract, self.context.contracts.erc1155) # noqa: E800
-                # if not contract.is_deployed: # noqa: E800
-                #     ledger_api = self.context.ledger_apis.get_api(strategy.ledger_id) # noqa: E800
-                #     contract_address = self.context.shared_state.get( # noqa: E800
-                #         "erc1155_contract_address", None # noqa: E800
-                #     ) # noqa: E800
-                #     enforce( # noqa: E800
-                #         contract_address is not None, # noqa: E800
-                #         "ERC1155Contract address not set!" # noqa: E800
-                #     ) # noqa: E800
-                #     contract.set_deployed_instance( # noqa: E800
-                #         ledger_api, cast(str, contract_address), # noqa: E800
-                #     ) # noqa: E800
-                # strategy = cast(Strategy, self.context.strategy) # noqa: E800
-                # tx_nonce = transaction_msg.skill_callback_info.get("tx_nonce", None) # noqa: E800
-                # tx_signature = match_accept.info.get("tx_signature", None) # noqa: E800
-                # enforce( # noqa: E800
-                #     tx_nonce is not None and tx_signature is not None, # noqa: E800
-                #     "tx_nonce or tx_signature not available" # noqa: E800
-                # ) # noqa: E800
-                # transaction_msg = contract.get_atomic_swap_batch_transaction_msg( # noqa: E800
-                #     from_address=self.context.agent_address, # noqa: E800
-                #     to_address=match_accept.counterparty, # noqa: E800
-                #     token_ids=[ # noqa: E800
-                #         int(key) # noqa: E800
-                #         for key in transaction_msg.terms.quantities_by_good_id.keys() # noqa: E800
-                #     ] # noqa: E800
-                #     + [ # noqa: E800
-                #         int(key) # noqa: E800
-                #         for key in transaction_msg.terms.amount_by_currency_id.keys() # noqa: E800
-                #     ], # noqa: E800
-                #     from_supplies=[ # noqa: E800
-                #         -quantity if quantity < 0 else 0 # noqa: E800
-                #         for quantity in transaction_msg.terms.quantities_by_good_id.values() # noqa: E800
-                #     ] # noqa: E800
-                #     + [ # noqa: E800
-                #         -value if value < 0 else 0 # noqa: E800
-                #         for value in transaction_msg.terms.amount_by_currency_id.values() # noqa: E800
-                #     ], # noqa: E800
-                #     to_supplies=[ # noqa: E800
-                #         quantity if quantity > 0 else 0 # noqa: E800
-                #         for quantity in transaction_msg.terms.quantities_by_good_id.values() # noqa: E800
-                #     ] # noqa: E800
-                #     + [ # noqa: E800
-                #         value if value > 0 else 0 # noqa: E800
-                #         for value in transaction_msg.terms.amount_by_currency_id.values() # noqa: E800
-                #     ], # noqa: E800
-                #     value=0, # noqa: E800
-                #     trade_nonce=int(tx_nonce), # noqa: E800
-                #     ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id), # noqa: E800
-                #     skill_callback_id=self.context.skill_id, # noqa: E800
-                #     signature=tx_signature, # noqa: E800
-                #     skill_callback_info={ # noqa: E800
-                #         "dialogue_label": dialogue.dialogue_label.json # noqa: E800
-                #     }, # noqa: E800
-                # ) # noqa: E800
+                contract_api_dialogues = cast(
+                    ContractApiDialogues, self.context.contract_api_dialogues
+                )
+                contract_address = self.context.shared_state.get(
+                    "erc1155_contract_address", None
+                )
+                enforce(
+                    contract_address is not None,
+                    "ERC1155Contract address not set!"
+                )
+                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+                    ledger_id=strategy.ledger_id,
+                    contract_id="fetchai/erc1155:0.10.0",
+                    contract_address=contract_address,
+                    callable="get_atomic_swap_single_transaction",
+                    kwargs=ContractApiMessage.Kwargs(
+                        {
+                            "from_address": self.context.agent_address,
+                            "to_address": match_accept.sender,
+                            "token_id": int(fipa_dialogue.proposal.values["token_id"]),
+                            "from_supply": int(
+                                fipa_dialogue.proposal.values["from_supply"]
+                            ),
+                            "to_supply": int(fipa_dialogue.proposal.values["to_supply"]),
+                            "value": int(fipa_dialogue.proposal.values["value"]),
+                            "trade_nonce": int(
+                                fipa_dialogue.proposal.values["trade_nonce"]
+                            ),
+                            "signature": contract_api_dialogue.counterparty_signature,
+                        }
+                    ),
+                )
+                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+                contract_api_dialogue.terms = strategy.get_single_swap_terms(
+                    fipa_dialogue.proposal, fipa_msg.sender
+                )
+                self.context.outbox.put_message(message=contract_api_msg)
+                self.context.logger.info("requesting single atomic swap transaction...")
             else:
                 self.context.logger.info(
                     "sending signing_msg={} to decison maker following MATCH_ACCEPT.".format(

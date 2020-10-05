@@ -84,7 +84,46 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         )
 
 
-FipaDialogue = BaseFipaDialogue
+class FipaDialogue(BaseFipaDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[FipaMessage] = FipaMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseContractApiDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+        self._terms = None  # type: Optional[Terms]
+
+    @property
+    def terms(self) -> Terms:
+        """Get the terms."""
+        if self._terms is None:
+            raise ValueError("Terms not set!")
+        return self._terms
+
+    @terms.setter
+    def terms(self, terms: Terms) -> None:
+        """Set the terms."""
+        enforce(self._terms is None, "Terms already set!")
+        self._terms = terms
 
 
 class FipaDialogues(Model, BaseFipaDialogues):
