@@ -151,25 +151,6 @@ Activate period calls.
 
 Remove from schedule.
 
-<a name="aea.helpers.async_utils.ensure_loop"></a>
-#### ensure`_`loop
-
-```python
-ensure_loop(loop: Optional[AbstractEventLoop] = None) -> AbstractEventLoop
-```
-
-Use loop provided or create new if not provided or closed.
-
-Return loop passed if its provided,not closed and not running, otherwise returns new event loop.
-
-**Arguments**:
-
-- `loop`: optional event loop
-
-**Returns**:
-
-asyncio event loop
-
 <a name="aea.helpers.async_utils.AnotherThreadTask"></a>
 ## AnotherThreadTask Objects
 
@@ -295,7 +276,7 @@ Stop event loop in thread.
 class AwaitableProc()
 ```
 
-Async-friendly subprocess.Popen
+Async-friendly subprocess.Popen.
 
 <a name="aea.helpers.async_utils.AwaitableProc.__init__"></a>
 #### `__`init`__`
@@ -313,7 +294,7 @@ Initialise awaitable proc.
  | async start()
 ```
 
-Start the subprocess
+Start the subprocess.
 
 <a name="aea.helpers.async_utils.ItemGetter"></a>
 ## ItemGetter Objects
@@ -367,4 +348,105 @@ Init HandlerItemGetter.
 **Arguments**:
 
 - `getters`: List of tuples of handler and couroutine to be awaiteed for an item.
+
+<a name="aea.helpers.async_utils.Runnable"></a>
+## Runnable Objects
+
+```python
+class Runnable(ABC)
+```
+
+Abstract Runnable class.
+
+Use to run async task in same event loop or in dedicated thread.
+Provides: start, stop sync methods to start and stop task
+Use wait_completed to await task was completed.
+
+<a name="aea.helpers.async_utils.Runnable.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(loop: asyncio.AbstractEventLoop = None, threaded: bool = False) -> None
+```
+
+Init runnable.
+
+**Arguments**:
+
+- `loop`: asyncio event loop to use.
+- `threaded`: bool. start in thread if True.
+
+**Returns**:
+
+None
+
+<a name="aea.helpers.async_utils.Runnable.start"></a>
+#### start
+
+```python
+ | start() -> bool
+```
+
+Start runnable.
+
+**Returns**:
+
+bool started or not.
+
+<a name="aea.helpers.async_utils.Runnable.is_running"></a>
+#### is`_`running
+
+```python
+ | @property
+ | is_running() -> bool
+```
+
+Get running state.
+
+<a name="aea.helpers.async_utils.Runnable.run"></a>
+#### run
+
+```python
+ | @abstractmethod
+ | async run() -> Any
+```
+
+Implement run logic respectfull to CancelError on termination.
+
+<a name="aea.helpers.async_utils.Runnable.wait_completed"></a>
+#### wait`_`completed
+
+```python
+ | wait_completed(sync: bool = False, timeout: float = None, force_result: bool = False) -> Awaitable
+```
+
+Wait runnable execution completed.
+
+**Arguments**:
+
+- `sync`: bool. blocking wait
+- `timeout`: float seconds
+- `force_result`: check result even it was waited.
+
+**Returns**:
+
+awaitable if sync is False, otherise None
+
+<a name="aea.helpers.async_utils.Runnable.stop"></a>
+#### stop
+
+```python
+ | stop(force: bool = False) -> None
+```
+
+Stop runnable.
+
+<a name="aea.helpers.async_utils.Runnable.start_and_wait_completed"></a>
+#### start`_`and`_`wait`_`completed
+
+```python
+ | start_and_wait_completed(*args, **kwargs) -> Awaitable
+```
+
+Alias for start and wait methods.
 

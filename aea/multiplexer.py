@@ -258,7 +258,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
                 if all(c.is_connected for c in self._connections):
                     self.connection_status.set(ConnectionStates.connected)
-                else:
+                else:  # pragma: nocover
                     raise AEAConnectionError("Failed to connect the multiplexer.")
 
                 self._recv_loop_task = self._loop.create_task(self._receiving_loop())

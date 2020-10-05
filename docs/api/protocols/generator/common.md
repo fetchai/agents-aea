@@ -67,6 +67,23 @@ Run Black code formatting via subprocess.
 
 None
 
+<a name="aea.protocols.generator.common.try_run_isort_formatting"></a>
+#### try`_`run`_`isort`_`formatting
+
+```python
+try_run_isort_formatting(path_to_protocol_package: str) -> None
+```
+
+Run Isort code formatting via subprocess.
+
+**Arguments**:
+
+- `path_to_protocol_package`: a path where formatting should be applied.
+
+**Returns**:
+
+None
+
 <a name="aea.protocols.generator.common.try_run_protoc"></a>
 #### try`_`run`_`protoc
 

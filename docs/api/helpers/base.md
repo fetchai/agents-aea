@@ -269,3 +269,29 @@ Run code in context to log and re raise exception.
 - `log_method`: function to print log
 - `message`: message template to add error text.
 
+<a name="aea.helpers.base.recursive_update"></a>
+#### recursive`_`update
+
+```python
+recursive_update(to_update: Dict, new_values: Dict) -> None
+```
+
+Update a dictionary by replacing conflicts with the new values.
+
+It does side-effects to the first dictionary.
+
+>>> to_update = dict(a=1, b=2, subdict=dict(subfield1=1))
+>>> new_values = dict(b=3, subdict=dict(subfield1=2))
+>>> recursive_update(to_update, new_values)
+>>> to_update
+{'a': 1, 'b': 3, 'subdict': {'subfield1': 2}}
+
+**Arguments**:
+
+- `to_update`: the dictionary to update.
+- `new_values`: the dictionary of new values to replace.
+
+**Returns**:
+
+None
+

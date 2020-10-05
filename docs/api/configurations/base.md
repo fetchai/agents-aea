@@ -23,6 +23,66 @@ The package name must satisfy  <a href="https://www.python.org/dev/peps/pep-0426
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 
+<a name="aea.configurations.base.PackageVersion"></a>
+## PackageVersion Objects
+
+```python
+@functools.total_ordering
+class PackageVersion()
+```
+
+A package version.
+
+<a name="aea.configurations.base.PackageVersion.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(version_like: PackageVersionLike)
+```
+
+Initialize a package version.
+
+**Arguments**:
+
+- `version_like`: a string, os a semver.VersionInfo object.
+
+<a name="aea.configurations.base.PackageVersion.is_latest"></a>
+#### is`_`latest
+
+```python
+ | @property
+ | is_latest() -> bool
+```
+
+Check whether the version is 'latest'.
+
+<a name="aea.configurations.base.PackageVersion.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__() -> str
+```
+
+Get the string representation.
+
+<a name="aea.configurations.base.PackageVersion.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other) -> bool
+```
+
+Check equality.
+
+<a name="aea.configurations.base.PackageVersion.__lt__"></a>
+#### `__`lt`__`
+
+```python
+ | __lt__(other)
+```
+
+Compare with another object.
+
 <a name="aea.configurations.base.PackageType"></a>
 ## PackageType Objects
 
@@ -324,12 +384,17 @@ The concatenation of those three elements gives the public identifier:
 >>> another_public_id = PublicId("author", "my_package", "0.1.0")
 >>> assert hash(public_id) == hash(another_public_id)
 >>> assert public_id == another_public_id
+>>> latest_public_id = PublicId("author", "my_package", "latest")
+>>> latest_public_id
+<author/my_package:latest>
+>>> latest_public_id.package_version.is_latest
+True
 
 <a name="aea.configurations.base.PublicId.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(author: str, name: str, version: PackageVersionLike)
+ | __init__(author: str, name: str, version: Optional[PackageVersionLike] = None)
 ```
 
 Initialize the public identifier.
@@ -362,17 +427,17 @@ Get the name.
  | version() -> str
 ```
 
-Get the version.
+Get the version string.
 
-<a name="aea.configurations.base.PublicId.version_info"></a>
-#### version`_`info
+<a name="aea.configurations.base.PublicId.package_version"></a>
+#### package`_`version
 
 ```python
  | @property
- | version_info() -> PackageVersion
+ | package_version() -> PackageVersion
 ```
 
-Get the package version.
+Get the package version object.
 
 <a name="aea.configurations.base.PublicId.latest"></a>
 #### latest
@@ -383,6 +448,24 @@ Get the package version.
 ```
 
 Get the public id in `latest` form.
+
+<a name="aea.configurations.base.PublicId.same_prefix"></a>
+#### same`_`prefix
+
+```python
+ | same_prefix(other: "PublicId") -> bool
+```
+
+Check if the other public id has the same author and name of this.
+
+<a name="aea.configurations.base.PublicId.to_latest"></a>
+#### to`_`latest
+
+```python
+ | to_latest() -> "PublicId"
+```
+
+Return the same public id, but with latest version.
 
 <a name="aea.configurations.base.PublicId.from_str"></a>
 #### from`_`str
@@ -765,6 +848,16 @@ Get the component identifier without the version.
 
 Get the prefix import path for this component.
 
+<a name="aea.configurations.base.ComponentId.json"></a>
+#### json
+
+```python
+ | @property
+ | json() -> Dict
+```
+
+Get the JSON representation.
+
 <a name="aea.configurations.base.PackageConfiguration"></a>
 ## PackageConfiguration Objects
 
@@ -852,6 +945,23 @@ Get the public id.
 ```
 
 Get the package dependencies.
+
+<a name="aea.configurations.base.PackageConfiguration.update"></a>
+#### update
+
+```python
+ | update(data: Dict) -> None
+```
+
+Update configuration with other data.
+
+**Arguments**:
+
+- `data`: the data to replace.
+
+**Returns**:
+
+None
 
 <a name="aea.configurations.base.ComponentConfiguration"></a>
 ## ComponentConfiguration Objects
@@ -945,23 +1055,6 @@ Check that the AEA version matches the specifier set.
 
 :raises ValueError if the version of the aea framework falls within a specifier.
 
-<a name="aea.configurations.base.ComponentConfiguration.update"></a>
-#### update
-
-```python
- | update(data: Dict) -> None
-```
-
-Update configuration with other data.
-
-**Arguments**:
-
-- `data`: the data to replace.
-
-**Returns**:
-
-None
-
 <a name="aea.configurations.base.ConnectionConfig"></a>
 ## ConnectionConfig Objects
 
@@ -1019,9 +1112,11 @@ Initialize from a JSON object.
 
 Update configuration with other data.
 
+This method does side-effect on the configuration object.
+
 **Arguments**:
 
-- `data`: the data to replace.
+- `data`: the data to populate or replace.
 
 **Returns**:
 
@@ -1336,6 +1431,26 @@ Return the JSON representation.
 ```
 
 Initialize from a JSON object.
+
+<a name="aea.configurations.base.AgentConfig.update"></a>
+#### update
+
+```python
+ | update(data: Dict) -> None
+```
+
+Update configuration with other data.
+
+To update the component parts, populate the field "component_configurations" as a
+mapping from ComponentId to configurations.
+
+**Arguments**:
+
+- `data`: the data to replace.
+
+**Returns**:
+
+None
 
 <a name="aea.configurations.base.SpeechActContentConfig"></a>
 ## SpeechActContentConfig Objects

@@ -233,7 +233,7 @@ class IPFSDaemon:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Terminate the ipfs daemon."""
         self.process.send_signal(signal.SIGTERM)
-        self.process.wait(timeout=10)
+        self.process.wait(timeout=30)
         poll = self.process.poll()
         if poll is None:
             self.process.terminate()

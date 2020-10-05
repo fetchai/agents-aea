@@ -65,7 +65,7 @@ Return is disconnected.
 ## AsyncMultiplexer Objects
 
 ```python
-class AsyncMultiplexer(WithLogger)
+class AsyncMultiplexer(Runnable,  WithLogger)
 ```
 
 This class can handle multiple connections at once.
@@ -74,7 +74,7 @@ This class can handle multiple connections at once.
 #### `__`init`__`
 
 ```python
- | __init__(connections: Optional[Sequence[Connection]] = None, default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None, exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate)
+ | __init__(connections: Optional[Sequence[Connection]] = None, default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None, exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, threaded: bool = False)
 ```
 
 Initialize the connection multiplexer.
@@ -87,6 +87,15 @@ This information is used for envelopes which don't specify any routing context.
 If connections is None, this parameter is ignored.
 - `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
 - `agent_name`: the name of the agent that owns the multiplexer, for logging purposes.
+
+<a name="aea.multiplexer.AsyncMultiplexer.run"></a>
+#### run
+
+```python
+ | async run() -> None
+```
+
+Run multiplexer connect and recv/send tasks.
 
 <a name="aea.multiplexer.AsyncMultiplexer.default_connection"></a>
 #### default`_`connection
@@ -285,6 +294,25 @@ running on a different thread than the one used in this function.
 
 None
 
+<a name="aea.multiplexer.AsyncMultiplexer.setup"></a>
+#### setup
+
+```python
+ | setup(connections: Collection[Connection], default_routing: Optional[Dict[PublicId, PublicId]] = None, default_connection: Optional[PublicId] = None) -> None
+```
+
+Set up the multiplexer.
+
+**Arguments**:
+
+- `connections`: the connections to use. It will replace the other ones.
+- `default_routing`: the default routing.
+- `default_connection`: the default connection.
+
+**Returns**:
+
+None.
+
 <a name="aea.multiplexer.Multiplexer"></a>
 ## Multiplexer Objects
 
@@ -370,25 +398,6 @@ running on a different thread than the one used in this function.
 
 None
 
-<a name="aea.multiplexer.Multiplexer.setup"></a>
-#### setup
-
-```python
- | setup(connections: Collection[Connection], default_routing: Optional[Dict[PublicId, PublicId]] = None, default_connection: Optional[PublicId] = None) -> None
-```
-
-Set up the multiplexer.
-
-**Arguments**:
-
-- `connections`: the connections to use. It will replace the other ones.
-- `default_routing`: the default routing.
-- `default_connection`: the default connection.
-
-**Returns**:
-
-None.
-
 <a name="aea.multiplexer.InBox"></a>
 ## InBox Objects
 
@@ -402,7 +411,7 @@ A queue from where you can only consume envelopes.
 #### `__`init`__`
 
 ```python
- | __init__(multiplexer: Multiplexer)
+ | __init__(multiplexer: AsyncMultiplexer)
 ```
 
 Initialize the inbox.
@@ -498,7 +507,7 @@ A queue from where you can only enqueue envelopes.
 #### `__`init`__`
 
 ```python
- | __init__(multiplexer: Multiplexer)
+ | __init__(multiplexer: AsyncMultiplexer)
 ```
 
 Initialize the outbox.
