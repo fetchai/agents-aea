@@ -37,7 +37,9 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import ConfigLoader
 
+from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
@@ -47,7 +49,7 @@ class BaseTestCase:
 
     @staticmethod
     def loader() -> ConfigLoader:
-        """Return Agent config laoder."""
+        """Return Agent config loader."""
         return ConfigLoader.from_configuration_type(PackageType.AGENT)
 
     def load_config(self) -> AgentConfig:
@@ -100,6 +102,179 @@ class BaseTestCase:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class TestRemoveAndDependencies(BaseTestCase):
+    """Test dependency remove helper and upgrade with dependency removed."""
+
+    ITEM_TYPE = "connection"
+    ITEM_PUBLIC_ID = SOEF_PUBLIC_ID
+    LOCAL: List[str] = ["--local"]
+    DEPENDENCY_TYPE = "protocol"
+    DEPENDENCY_PUBLIC_ID = OefSearchMessage.protocol_id
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        super(TestRemoveAndDependencies, cls).setup_class()
+        cls.DEPENDENCY = (cls.DEPENDENCY_TYPE, cls.DEPENDENCY_PUBLIC_ID)
+        result = cls.runner.invoke(
+            cli,
+            ["-v", "DEBUG", "add", "--local", cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID)],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+    def setup(self):
+        """Save agent config."""
+        self._agent_config = self.load_config()
+
+    def teardown(self):
+        """Restore agent config."""
+        self.dump_config(self._agent_config)
+
+    def check_remove(self, item_type, public_id):
+        """Check remove can be performed with remove helper."""
+        return upgrade.ItemRemoveHelper(self.load_config()).check_remove(
+            item_type, public_id
+        )
+
+    def test_package_can_be_removed_with_its_dependency(self):
+        """Test package can be removed with its dependency."""
+        required_by, can_be_removed, can_not_be_removed = self.check_remove(
+            self.ITEM_TYPE, self.ITEM_PUBLIC_ID
+        )
+
+        assert not required_by, required_by
+        assert self.DEPENDENCY in can_be_removed
+        assert self.DEPENDENCY not in can_not_be_removed
+
+    def test_package_can_be_removed_but_not_dependency(self):
+        """Test package can be removed but not its dependency."""
+        with self.with_oef_installed():
+            required_by, can_be_removed, can_not_be_removed = self.check_remove(
+                self.ITEM_TYPE, self.ITEM_PUBLIC_ID
+            )
+
+            assert not required_by, required_by
+            assert self.DEPENDENCY not in can_be_removed
+            assert self.DEPENDENCY in can_not_be_removed
+
+    def test_package_can_not_be_removed_cause_required(self):
+        """Test package can not be removed cause required by another package."""
+        required_by, can_be_removed, can_not_be_removed = self.check_remove(
+            self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID
+        )
+
+        assert (self.ITEM_TYPE, self.ITEM_PUBLIC_ID) in required_by
+        assert not can_be_removed
+        assert not can_not_be_removed
+
+    @contextmanager
+    def with_oef_installed(self):
+        """Add and remove oef connection."""
+        result = self.runner.invoke(
+            cli,
+            [
+                "-v",
+                "DEBUG",
+                "add",
+                "--local",
+                "connection",
+                str(oef.connection.PUBLIC_ID),
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        try:
+            yield
+        finally:
+            result = self.runner.invoke(
+                cli,
+                ["-v", "DEBUG", "remove", "connection", str(oef.connection.PUBLIC_ID)],
+                standalone_mode=False,
+            )
+            assert result.exit_code == 0
+
+    @contextmanager
+    def with_config_update(self):
+        """Context manager to update item version to 0.0.1."""
+        original_config = self.load_config()
+
+        config_data = original_config.json
+        config_data[f"{self.ITEM_TYPE}s"].remove(str(self.ITEM_PUBLIC_ID))
+        config_data[f"{self.ITEM_TYPE}s"].append(
+            f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:0.0.1"
+        )
+        self.dump_config(AgentConfig.from_json(config_data))
+        try:
+            yield
+        finally:
+            self.dump_config(original_config)
+
+    def test_upgrade_and_dependency_removed(self):
+        """
+        Test dependency removed after upgrade.
+
+        Done with mocking _add_item_deps to avoid dependencies installation.
+        """
+        assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+
+        with self.with_config_update(), patch("aea.cli.add._add_item_deps"):
+            result = self.runner.invoke(
+                cli,
+                [
+                    "-v",
+                    "DEBUG",
+                    "upgrade",
+                    *self.LOCAL,
+                    self.ITEM_TYPE,
+                    f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
+                ],
+                catch_exceptions=True,
+            )
+            try:
+                assert result.exit_code == 0
+
+                assert self.DEPENDENCY_PUBLIC_ID not in self.load_config().protocols
+            finally:
+                # restore component removed
+                result = self.runner.invoke(
+                    cli,
+                    [
+                        "-v",
+                        "DEBUG",
+                        "add",
+                        *self.LOCAL,
+                        self.DEPENDENCY_TYPE,
+                        f"{self.DEPENDENCY_PUBLIC_ID.author}/{self.DEPENDENCY_PUBLIC_ID.name}:latest",
+                    ],
+                    catch_exceptions=True,
+                )
+                assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+
+    def test_upgrade_and_dependency_not_removed_caused_required_by_another_item(self):
+        """Test dependency is not removed after upgrade cause required by another item."""
+        assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+        # do not add dependencies for the package
+
+        with self.with_oef_installed(), self.with_config_update(), patch(
+            "aea.cli.add._add_item_deps"
+        ):
+            result = self.runner.invoke(
+                cli,
+                [
+                    "-v",
+                    "DEBUG",
+                    "upgrade",
+                    *self.LOCAL,
+                    self.ITEM_TYPE,
+                    f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
+                ],
+                catch_exceptions=True,
+            )
+            assert result.exit_code == 0
+            assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
 
 
 class TestUpgradeProject(BaseTestCase):
@@ -181,7 +356,7 @@ class TestUpgradeConnectionLocally(BaseTestCase):
             in result.exception.message
         )
 
-    def test_upgrade_required(self):
+    def test_upgrade_required_mock(self):
         """Test upgrade with mocking upgrade required."""
         with patch.object(upgrade, "_check_upgrade_is_required", return_value=True):
             result = self.runner.invoke(
@@ -197,22 +372,6 @@ class TestUpgradeConnectionLocally(BaseTestCase):
                 catch_exceptions=True,
             )
             assert result.exit_code == 0
-
-    @contextmanager
-    def with_config_update(self):
-        """Context manager to update item vewrsion to 0.0.1."""
-        original_config = self.load_config()
-
-        config_data = original_config.json
-        config_data[f"{self.ITEM_TYPE}s"].remove(str(self.ITEM_PUBLIC_ID))
-        config_data[f"{self.ITEM_TYPE}s"].append(
-            f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:0.0.1"
-        )
-        self.dump_config(AgentConfig.from_json(config_data))
-        try:
-            yield
-        finally:
-            self.dump_config(original_config)
 
     def test_do_upgrade(self):
         """Test real full upgrade."""
