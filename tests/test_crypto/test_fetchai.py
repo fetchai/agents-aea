@@ -654,9 +654,7 @@ def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
 
     tx_fee = 1000
     amount = balance - tx_fee
-    nonce = FetchAIApi.generate_tx_nonce(
-        seller=account.address, client=faucet_address
-    )
+    nonce = FetchAIApi.generate_tx_nonce(seller=account.address, client=faucet_address)
     transfer_transaction = fetchai_api.get_transfer_transaction(
         sender_address=account.address,
         destination_address=faucet_address,
