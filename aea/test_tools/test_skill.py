@@ -88,13 +88,12 @@ class BaseSkillTestCase:
             )
 
         for attribute_name, expected_value in kwargs.items():
-            attribute = getattr(actual_message, attribute_name)
-            if callable(attribute):
-                if attribute != expected_value:
-                    return (
-                        False,
-                        f"The '{attribute_name}' fields do not match. Actual '{attribute_name}': {attribute}. Expected '{attribute_name}': {expected_value}",
-                    )
+            actual_value = getattr(actual_message, attribute_name)
+            if actual_value != expected_value:
+                return (
+                    False,
+                    f"The '{attribute_name}' fields do not match. Actual '{attribute_name}': {actual_value}. Expected '{attribute_name}': {expected_value}",
+                )
 
         return True, "The message has the provided expected attributes."
 
@@ -158,7 +157,7 @@ class BaseSkillTestCase:
         message_id: Optional[int] = None,
         target: Optional[int] = None,
         to: Optional[Address] = None,
-        sender: Address = None,
+        sender: Optional[Address] = None,
         **kwargs,
     ) -> Message:
         """
@@ -190,9 +189,7 @@ class BaseSkillTestCase:
             raise AEAEnforceError("dialogue cannot be empty.")
 
         message_type = (
-            message_type
-            if message_type is not None
-            else dialogue._message_class  # pylint: disable=protected-access
+            message_type if message_type is not None else dialogue.message_class
         )
         dialogue_reference = (
             dialogue_reference
@@ -271,14 +268,20 @@ class BaseSkillTestCase:
         return dialogue_reference
 
     def _extract_message_fields(
-        self,
-        message: DialogueMessage,
-        messages: Tuple[DialogueMessage, ...],
-        last_is_incoming: bool,
-    ):
+        self, message: DialogueMessage, index: int, last_is_incoming: bool,
+    ) -> Tuple[Message.Performative, Dict, int, bool, int]:
+        """
+        Extracts message attributes from a dialogue message.
+
+        :param message: the dialogue message
+        :param index: the index of this dialogue message in the sequence of messages
+        :param message: the is_incoming of the last message in the sequence
+
+        :return: the performative, contents, message_id, is_incoming, target of the message
+        """
         performative = message[0]
         contents = message[1]
-        message_id = messages.index(message) + 1
+        message_id = index + 1
         is_incoming, target = self._provide_unspecified_fields(
             message, last_is_incoming=last_is_incoming, message_id=message_id,
         )
@@ -306,7 +309,7 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
-        if not len(messages) >= 1:
+        if len(messages) == 0:
             raise AEAEnforceError("the list of messages must be positive.")
 
         (
@@ -315,12 +318,12 @@ class BaseSkillTestCase:
             message_id,
             is_incoming,
             target,
-        ) = self._extract_message_fields(messages[0], messages, True)
+        ) = self._extract_message_fields(messages[0], index=0, last_is_incoming=True)
 
-        if is_incoming:  # messages from the opponent
+        if is_incoming:  # first message from the opponent
             dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
             message = self.build_incoming_message(
-                message_type=dialogues._message_class,  # pylint: disable=protected-access
+                message_type=dialogues.message_class,
                 dialogue_reference=dialogue_reference,
                 message_id=message_id,
                 target=target,
@@ -336,25 +339,25 @@ class BaseSkillTestCase:
                         message_id
                     )
                 )
-        else:  # messages from self
+        else:  # first message from self
             _, dialogue = dialogues.create(
                 counterparty=counterparty, performative=performative, **contents
             )
 
-        for incomplete_message in messages[1:]:  # type: ignore
+        for idx, dialogue_message in enumerate(messages[1:]):  # type: ignore
             (
                 performative,
                 contents,
                 message_id,
                 is_incoming,
                 target,
-            ) = self._extract_message_fields(incomplete_message, messages, is_incoming)
+            ) = self._extract_message_fields(dialogue_message, idx + 1, is_incoming)
             if is_incoming:  # messages from the opponent
                 dialogue_reference = self._non_initial_incoming_message_dialogue_reference(
                     dialogue
                 )
                 message = self.build_incoming_message(
-                    message_type=dialogues._message_class,  # pylint: disable=protected-access
+                    message_type=dialogues.message_class,
                     dialogue_reference=dialogue_reference,
                     message_id=message_id,
                     target=target,

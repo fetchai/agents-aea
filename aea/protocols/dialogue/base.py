@@ -52,7 +52,7 @@ else:
         "DialogueMessage",
         ["performative", "contents", "is_incoming", "target"],
         rename=False,
-        defaults=[dict(), None, None],
+        defaults=[dict(), None, None],  # pylint: disable=unexpected-keyword-arg
         module="aea.protocols.dialogues.base",
     )
 
@@ -378,6 +378,15 @@ class Dialogue(ABC):
         if self._rules is None:  # pragma: nocover
             raise ValueError("Rules is not set.")
         return self._rules
+
+    @property
+    def message_class(self) -> Type[Message]:
+        """
+        Get the message class.
+
+        :return: the message class
+        """
+        return self._message_class
 
     @property
     def is_self_initiated(self) -> bool:
@@ -1022,6 +1031,24 @@ class Dialogues(ABC):
         :return: dialogue stats object
         """
         return self._dialogue_stats
+
+    @property
+    def message_class(self) -> Type[Message]:
+        """
+        Get the message class.
+
+        :return: the message class
+        """
+        return self._message_class
+
+    @property
+    def dialogue_class(self) -> Type[Dialogue]:
+        """
+        Get the dialogue class.
+
+        :return: the dialogue class
+        """
+        return self._dialogue_class
 
     def get_dialogues_with_counterparty(self, counterparty: Address) -> List[Dialogue]:
         """

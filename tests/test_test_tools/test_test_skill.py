@@ -1,0 +1,357 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""This module contains a test for aea.test_tools.test_cases."""
+
+from pathlib import Path
+from typing import cast
+
+import pytest
+
+from aea.exceptions import AEAEnforceError
+from aea.mail.base import Address
+from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel, DialogueMessage
+from aea.skills.base import Skill
+from aea.test_tools.test_skill import BaseSkillTestCase
+
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
+from packages.fetchai.protocols.fipa.message import FipaMessage
+
+from tests.conftest import ROOT_DIR
+
+
+class TestSkillTestCase(BaseSkillTestCase):
+    """Test case for BaseSkillTestCase."""
+
+    path_to_skill = Path(ROOT_DIR, "tests", "data", "dummy_skill")
+
+    def test_setup(self):
+        """Test the setup() class method."""
+        assert self.skill.skill_context.agent_address == "test_agent_address"
+        assert self.skill.skill_context.agent_name == "test_agent_name"
+        assert (
+            self.skill.skill_context.search_service_address
+            == "dummy_search_service_address"
+        )
+        assert (
+            self.skill.skill_context.decision_maker_address
+            == "dummy_decision_maker_address"
+        )
+        assert "dummy" in self.skill.behaviours.keys()
+        assert "dummy" in self.skill.handlers.keys()
+        assert "dummy_internal" in self.skill.handlers.keys()
+        assert "dummy" in self.skill.models.keys()
+
+    def test_properties(self):
+        """Test the properties."""
+        assert isinstance(self.skill, Skill)
+        assert self.skill.behaviours.get("dummy") is not None
+
+    def test_get_quantity_in_outbox(self):
+        """Test the get_quantity_in_outbox method."""
+        assert self.get_quantity_in_outbox() == 0
+
+        dummy_message = Message(dummy="dummy")
+        dummy_message.to = "some_to"
+        dummy_message.sender = "some_sender"
+        self.skill.skill_context.outbox.put_message(dummy_message)
+
+        assert self.get_quantity_in_outbox() == 1
+
+    def test_get_message_from_outbox(self):
+        """Test the get_message_from_outbox method."""
+        assert self.get_message_from_outbox() is None
+
+        dummy_message_1 = Message(dummy_1="dummy_1")
+        dummy_message_1.to = "some_to_1"
+        dummy_message_1.sender = "some_sender_1"
+        self.skill.skill_context.outbox.put_message(dummy_message_1)
+
+        dummy_message_2 = Message(dummy_2="dummy_2")
+        dummy_message_2.to = "some_to_2"
+        dummy_message_2.sender = "some_sender_2"
+        self.skill.skill_context.outbox.put_message(dummy_message_2)
+
+        assert self.get_message_from_outbox() == dummy_message_1
+        assert self.get_message_from_outbox() == dummy_message_2
+
+    def test_message_has_attributes(self):
+        """Test the message_has_attributes method."""
+        dummy_message = FipaMessage(
+            dialogue_reference=("0", "0"),
+            message_id=1,
+            performative=FipaMessage.Performative.CFP,
+            target=0,
+            query="some_query",
+        )
+        dummy_message.to = "some_to"
+        dummy_message.sender = "some_sender"
+
+        valid_has_attribute, valid_has_attribute_msg = self.message_has_attributes(
+            actual_message=dummy_message,
+            message_type=FipaMessage,
+            message_id=1,
+            performative=FipaMessage.Performative.CFP,
+            target=0,
+            query="some_query",
+            to="some_to",
+            sender="some_sender",
+        )
+        assert valid_has_attribute
+        assert (
+            valid_has_attribute_msg
+            == "The message has the provided expected attributes."
+        )
+
+        invalid_has_attribute, invalid_has_attribute_msg = self.message_has_attributes(
+            actual_message=dummy_message,
+            message_type=FipaMessage,
+            message_id=2,
+            performative=FipaMessage.Performative.CFP,
+            target=0,
+            query="some_query",
+            to="some_to",
+            sender="some_sender",
+        )
+        assert not invalid_has_attribute
+        assert (
+            invalid_has_attribute_msg
+            == "The 'message_id' fields do not match. Actual 'message_id': 1. Expected 'message_id': 2"
+        )
+
+    def test_build_incoming_message(self):
+        """Test the build_incoming_message method."""
+        message_type = FipaMessage
+        performative = FipaMessage.Performative.CFP
+        dialogue_reference = ("1", "1")
+        to = "some_to"
+        query = "some_query"
+        incoming_message = self.build_incoming_message(
+            message_type=message_type,
+            performative=performative,
+            dialogue_reference=dialogue_reference,
+            to=to,
+            query=query,
+        )
+
+        assert type(incoming_message) == message_type
+        incoming_message = cast(FipaMessage, incoming_message)
+        assert incoming_message.dialogue_reference == dialogue_reference
+        assert incoming_message.message_id == 1
+        assert incoming_message.target == 0
+        assert incoming_message.performative == performative
+        assert incoming_message.query == query
+        assert incoming_message.sender == "counterparty"
+        assert incoming_message.to == to
+
+    def test_build_incoming_message_for_skill_dialogue(self):
+        """Test the build_incoming_message_for_skill_dialogue method."""
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+        _, dialogue = fipa_dialogues.create(
+            counterparty="some_counterparty",
+            performative=FipaMessage.Performative.CFP,
+            query="some_query",
+        )
+
+        performative = FipaMessage.Performative.PROPOSE
+        proposal = "some_proposal"
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=dialogue, performative=performative, proposal=proposal,
+        )
+
+        assert type(incoming_message) == FipaMessage
+        incoming_message = cast(FipaMessage, incoming_message)
+        assert (
+            incoming_message.dialogue_reference
+            == dialogue.dialogue_label.dialogue_reference
+        )
+        assert incoming_message.message_id == 2
+        assert incoming_message.target == 1
+        assert incoming_message.performative == performative
+        assert incoming_message.proposal == proposal
+        assert incoming_message.sender == dialogue.dialogue_label.dialogue_opponent_addr
+        assert incoming_message.to == dialogue.self_address
+
+    def test_provide_unspecified_fields(self):
+        """Test the _provide_unspecified_fields method."""
+        dialogue_message_unspecified = DialogueMessage(
+            FipaMessage.Performative.ACCEPT, {}
+        )
+
+        is_incoming, target = self._provide_unspecified_fields(
+            dialogue_message_unspecified, last_is_incoming=False, message_id=2
+        )
+        assert is_incoming is True
+        assert target == 1
+
+        dialogue_message_specified = DialogueMessage(
+            FipaMessage.Performative.ACCEPT, {}, False, 4
+        )
+
+        is_incoming, target = self._provide_unspecified_fields(
+            dialogue_message_specified, last_is_incoming=True, message_id=7
+        )
+        assert is_incoming is False
+        assert target == 4
+
+    def test_non_initial_incoming_message_dialogue_reference(self):
+        """Test the _non_initial_incoming_message_dialogue_reference method."""
+        dialogue_incomplete_ref = FipaDialogue(
+            DialogueLabel(("2", ""), "opponent", "self_address"),
+            "self_address",
+            FipaDialogue.Role.BUYER,
+        )
+        reference_incomplete = self._non_initial_incoming_message_dialogue_reference(
+            dialogue_incomplete_ref
+        )
+        assert reference_incomplete[1] != ""
+
+        dialogue_complete_ref = FipaDialogue(
+            DialogueLabel(("2", "7"), "opponent", "self_address"),
+            "self_address",
+            FipaDialogue.Role.BUYER,
+        )
+        reference_complete = self._non_initial_incoming_message_dialogue_reference(
+            dialogue_complete_ref
+        )
+        assert reference_complete[1] == "7"
+
+    def test_extract_message_fields(self):
+        """Test the _extract_message_fields method."""
+        expected_performative = FipaMessage.Performative.ACCEPT
+        expected_contents = {}
+        expected_is_incoming = False
+        expected_target = 4
+        dialogue_message = DialogueMessage(
+            expected_performative,
+            expected_contents,
+            expected_is_incoming,
+            expected_target,
+        )
+
+        (
+            actual_performative,
+            actual_contents,
+            actual_message_id,
+            actual_is_incoming,
+            actual_target,
+        ) = self._extract_message_fields(
+            message=dialogue_message, index=3, last_is_incoming=True
+        )
+
+        assert actual_message_id == 4
+        assert actual_target == expected_target
+        assert actual_performative == expected_performative
+        assert actual_contents == expected_contents
+        assert actual_is_incoming == expected_is_incoming
+
+    def test_prepare_skill_dialogue_valid(self):
+        """Test the prepare_skill_dialogue method with a valid dialogue."""
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+        dialogue_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_1"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_2"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_3"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_4"},
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT, {}),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM, {"info": "some_info"}
+            ),
+        )
+        dialogue = self.prepare_skill_dialogue(
+            fipa_dialogues, dialogue_messages, "counterparty",
+        )
+
+        assert type(dialogue) == FipaDialogue
+        assert dialogue.is_self_initiated
+        assert len(dialogue._outgoing_messages) == 4
+        assert len(dialogue._incoming_messages) == 4
+        assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
+        assert dialogue._get_message(8).info == "some_info"
+
+    def test_prepare_skill_dialogue_invalid(self):
+        """Test the prepare_skill_dialogue method with an invalid dialogue."""
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+        dialogue_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_proposal"},
+                target=2,
+            ),
+        )
+
+        with pytest.raises(
+            AEAEnforceError, match="Cannot update the dialogue with message number 2"
+        ):
+            self.prepare_skill_dialogue(
+                fipa_dialogues, dialogue_messages, "counterparty",
+            )
+
+
+class FipaDialogues(BaseFipaDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, self_address: Address, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return FipaDialogue.Role.BUYER
+
+        BaseFipaDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=FipaDialogue,
+        )
