@@ -658,7 +658,7 @@ def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
     )
     transfer_transaction = fetchai_api.get_transfer_transaction(
         sender_address=account.address,
-        destination_address=fc2.faucet_address,
+        destination_address=faucet_address,
         amount=amount,
         tx_fee=tx_fee,
         tx_nonce=nonce,
@@ -692,7 +692,7 @@ def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
 
     tx = fetchai_api.get_transaction(transaction_digest)
     is_valid = fetchai_api.is_transaction_valid(
-        tx, fc2.address, account.address, "", amount
+        tx, faucet_address, account.address, "", amount
     )
     assert is_valid, "Failed to settle tx correctly!"
     assert tx == transaction_receipt, "Should be same!"
@@ -700,4 +700,4 @@ def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
 def check_balance_0(account: FetchAICrypto):
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     balance = fetchai_api.get_balance(account.address)
-    assert balance = 0, "Remaining funds were not sent back to faucet"
+    assert balance == 0, "Remaining funds were not sent back to faucet"
