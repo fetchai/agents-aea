@@ -698,6 +698,7 @@ def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
     assert tx == transaction_receipt, "Should be same!"
 
 def check_balance_0(account: FetchAICrypto):
+    """Check if account balance is 0"""
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     balance = fetchai_api.get_balance(account.address)
     assert balance == 0, "Remaining funds were not sent back to faucet"
