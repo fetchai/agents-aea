@@ -639,3 +639,55 @@ def test_execute_shell_command(mock_api_call):
 
     res = cosmos_api._execute_shell_command(["test", "command"])
     assert res == {"SOME": "RESULT"}
+
+def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
+    """Sends remainind funds back to faucet"""
+    faucet_address = "fetch193vvag846gz3pt3q0mdjuxn0s5jrt39fsjrays"
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    balance = get_wealth(account.address)
+
+    tx_fee = 1000
+    amount = balance - tx_fee
+    nonce = FetchAIApi.generate_tx_nonce(
+        seller=account.address, client=faucet_address
+    )
+    transfer_transaction = fetchai_api.get_transfer_transaction(
+        sender_address=account.address,
+        destination_address=fc2.faucet_address,
+        amount=amount,
+        tx_fee=tx_fee,
+        tx_nonce=nonce,
+    )
+    assert (
+        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 6
+    ), "Incorrect transfer_transaction constructed."
+
+    signed_transaction = account.sign_transaction(transfer_transaction)
+    assert (
+        isinstance(signed_transaction, dict)
+        and len(signed_transaction["tx"]) == 4
+        and isinstance(signed_transaction["tx"]["signatures"], list)
+    ), "Incorrect signed_transaction constructed."
+
+    transaction_digest = fetchai_api.send_signed_transaction(signed_transaction)
+    assert transaction_digest is not None, "Failed to submit transfer transaction!"
+
+    not_settled = True
+    elapsed_time = 0
+    while not_settled and elapsed_time < 20:
+        elapsed_time += 1
+        time.sleep(2)
+        transaction_receipt = fetchai_api.get_transaction_receipt(transaction_digest)
+        if transaction_receipt is None:
+            continue
+        is_settled = fetchai_api.is_transaction_settled(transaction_receipt)
+        not_settled = not is_settled
+    assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
+    assert is_settled, "Failed to verify tx!"
+
+    tx = fetchai_api.get_transaction(transaction_digest)
+    is_valid = fetchai_api.is_transaction_valid(
+        tx, fc2.address, account.address, "", amount
+    )
+    assert is_valid, "Failed to settle tx correctly!"
+    assert tx == transaction_receipt, "Should be same!"
