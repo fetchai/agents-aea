@@ -645,6 +645,7 @@ def test_execute_shell_command(mock_api_call):
     res = cosmos_api._execute_shell_command(["test", "command"])
     assert res == {"SOME": "RESULT"}
 
+
 def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
     """Sends remainind funds back to faucet"""
     faucet_address = "fetch193vvag846gz3pt3q0mdjuxn0s5jrt39fsjrays"
@@ -696,6 +697,7 @@ def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
     )
     assert is_valid, "Failed to settle tx correctly!"
     assert tx == transaction_receipt, "Should be same!"
+
 
 def check_balance_0(account: FetchAICrypto):
     """Check if account balance is 0"""
