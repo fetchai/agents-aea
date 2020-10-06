@@ -180,6 +180,7 @@ def test_construct_sign_and_submit_transfer_transaction():
     )
     assert is_valid, "Failed to settle tx correctly!"
     assert tx == transaction_receipt, "Should be same!"
+    send_remaining_funds_back_to_faucet(account)
 
 
 # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -193,6 +194,7 @@ def test_get_balance():
     assert balance == 0, "New account has a positive balance."
     balance = get_wealth(fc.address)
     assert balance > 0, "Existing account has no balance."
+    send_remaining_funds_back_to_faucet(fc)
 
 
 def get_wealth(address: str):
@@ -218,6 +220,7 @@ def test_get_wealth_positive(caplog):
         fetchai_faucet_api = FetchAIFaucetApi()
         fc = FetchAICrypto()
         fetchai_faucet_api.get_wealth(fc.address)
+        send_remaining_funds_back_to_faucet(fc)
 
 
 @pytest.mark.ledger
@@ -255,6 +258,7 @@ def test_successful_faucet_operation(mock_post, mock_get):
             )
         ]
     )
+    send_remaining_funds_back_to_faucet(address)
 
 
 @pytest.mark.ledger
@@ -316,6 +320,7 @@ def test_successful_realistic_faucet_operation(mock_post, mock_get):
             ),
         ]
     )
+    send_remaining_funds_back_to_faucet(address)
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -644,7 +649,7 @@ def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
     """Sends remainind funds back to faucet"""
     faucet_address = "fetch193vvag846gz3pt3q0mdjuxn0s5jrt39fsjrays"
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    balance = get_wealth(account.address)
+    balance = fetchai_api.get_balance(account.address)
 
     tx_fee = 1000
     amount = balance - tx_fee
@@ -691,3 +696,8 @@ def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
     )
     assert is_valid, "Failed to settle tx correctly!"
     assert tx == transaction_receipt, "Should be same!"
+
+def check_balance_0(account: FetchAICrypto):
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    balance = fetchai_api.get_balance(account.address)
+    assert balance = 0, "Remaining funds were not sent back to faucet"
