@@ -647,10 +647,11 @@ def test_execute_shell_command(mock_api_call):
 
 
 def send_remaining_funds_back_to_faucet(account: FetchAICrypto):
-    """Sends remainind funds back to faucet"""
+    """Sends remaining funds back to faucet"""
     faucet_address = "fetch193vvag846gz3pt3q0mdjuxn0s5jrt39fsjrays"
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     balance = fetchai_api.get_balance(account.address)
+    assert balance is not None, "balance is of type None"
 
     tx_fee = 1000
     amount = balance - tx_fee
