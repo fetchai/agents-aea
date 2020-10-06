@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import cast
 
 from aea.helpers.search.models import Description
+from aea.helpers.transaction.base import Terms
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
@@ -32,7 +33,10 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import FipaDialogue, FipaDialogues
-from packages.fetchai.skills.generic_buyer.handlers import GenericFipaHandler
+from packages.fetchai.skills.generic_buyer.handlers import (
+    GenericFipaHandler,
+    LEDGER_API_ADDRESS,
+)
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 from tests.conftest import ROOT_DIR
@@ -132,6 +136,7 @@ class TestSkillHandler(BaseSkillTestCase):
         cls.fipa_handler = cast(
             GenericFipaHandler, cls._skill.skill_context.handlers.fipa
         )
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
         cls.fipa_dialogues = cast(
             FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
@@ -285,8 +290,44 @@ class TestSkillHandler(BaseSkillTestCase):
     def test_fipa_handler_handle_match_accept_is_ledger_tx(self):
         """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is True."""
         # setup
-        strategy = cast(GenericStrategy, self.skill.skill_context.strategy)
-        strategy._is_ledger_tx = False
+        self.strategy._is_ledger_tx = True
+
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages,
+        )
+        fipa_dialogue.terms = Terms(
+            "some_ledger_id",
+            self.skill.skill_context.agent_address,
+            "counterprty",
+            {"currency_id": 50},
+            {"good_id": -10},
+            "some_nonce",
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            info={"info": {"address": "some_term_sender_address"}},
+        )
+
+        # operation
+        self.fipa_handler.handle(incoming_message)
+
+        # after
+        assert self.get_quantity_in_outbox() == 1, "No message in outbox."
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+            to=LEDGER_API_ADDRESS,
+            sender=self.skill.skill_context.agent_address,
+            terms=fipa_dialogue.terms,
+        )
+        assert has_attributes, error_str
+
+    def test_fipa_handler_handle_match_accept_not_is_ledger_tx(self):
+        """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is False."""
+        # setup
+        self.strategy._is_ledger_tx = False
 
         fipa_dialogue = self.prepare_skill_dialogue(
             dialogues=self.fipa_dialogues, messages=self.list_of_messages,

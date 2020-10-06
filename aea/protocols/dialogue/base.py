@@ -48,11 +48,11 @@ if sys.version_info < (3, 7):
     )
     DialogueMessage.__new__.__defaults__ = (dict(), None, None)
 else:
-    DialogueMessage = namedtuple(
+    DialogueMessage = namedtuple(  # pylint: disable=unexpected-keyword-arg
         "DialogueMessage",
         ["performative", "contents", "is_incoming", "target"],
         rename=False,
-        defaults=[dict(), None, None],  # pylint: disable=unexpected-keyword-arg
+        defaults=[dict(), None, None],
         module="aea.protocols.dialogues.base",
     )
 
