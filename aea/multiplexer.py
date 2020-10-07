@@ -31,11 +31,9 @@ from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.async_utils import AsyncState, Runnable, ThreadedAsyncRunner
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.logging import WithLogger
+from aea.helpers.logging import WithLogger, get_logger
 from aea.mail.base import AEAConnectionError, Empty, Envelope, EnvelopeContext
 from aea.protocols.base import Message
-
-_default_logger = logging.getLogger(__name__)
 
 
 class MultiplexerStatus(AsyncState):
@@ -78,7 +76,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         loop: Optional[AbstractEventLoop] = None,
         exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         threaded: bool = False,
-        logger: Logger = _default_logger,
+        agent_name: str = "standalone",
     ):
         """
         Initialize the connection multiplexer.
@@ -91,6 +89,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param agent_name: the name of the agent that owns the multiplexer, for logging purposes.
         """
         self._exception_policy: ExceptionPolicyEnum = exception_policy
+        logger = get_logger(__name__, agent_name)
         WithLogger.__init__(self, logger=logger)
         Runnable.__init__(self, loop=loop, threaded=threaded)
         self._connections: List[Connection] = []

@@ -53,7 +53,7 @@ from aea.helpers.search.models import (
 )
 
 
-logger = logging.getLogger("aea.packages.fetchai.connections.oef")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
 
 class OEFObjectTranslator:

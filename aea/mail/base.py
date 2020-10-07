@@ -30,7 +30,7 @@ from aea.mail import base_pb2
 from aea.protocols.base import Message
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class AEAConnectionError(Exception):
@@ -203,7 +203,9 @@ class EnvelopeContext:
                     f"Invalid package type {package_type} in uri for envelope context."
                 )
         except ValueError as e:
-            logger.debug(f"URI - {uri.path} - not a valid package_id id. Error: {e}")
+            _default_logger.debug(
+                f"URI - {uri.path} - not a valid package_id id. Error: {e}"
+            )
         return (skill_id, connection_id)
 
     def __str__(self):

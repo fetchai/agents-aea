@@ -21,7 +21,6 @@
 """This module contains the implementation of runtime for economic agent (AEA)."""
 
 import asyncio
-import logging
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
@@ -34,11 +33,9 @@ from aea.connections.base import ConnectionStates
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.helpers.async_utils import Runnable
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.logging import WithLogger, get_logger
 from aea.multiplexer import AsyncMultiplexer
 from aea.skills.tasks import TaskManager
-
-
-_default_logger = logging.getLogger(__name__)
 
 
 class _StopRuntime(Exception):
@@ -86,7 +83,6 @@ class BaseRuntime(Runnable, WithLogger):
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
         threaded: bool = False,
-        logger: Logger = _default_logger,
     ) -> None:
         """
         Init runtime.
@@ -97,6 +93,7 @@ class BaseRuntime(Runnable, WithLogger):
         :return: None
         """
         Runnable.__init__(self, threaded=threaded, loop=loop if not threaded else None)
+        logger = get_logger(__name__, agent.name)
         WithLogger.__init__(self, logger=logger)
         self._agent: AbstractAgent = agent
         self._state: AsyncState = AsyncState(RuntimeStates.stopped, RuntimeStates)
@@ -141,7 +138,10 @@ class BaseRuntime(Runnable, WithLogger):
             self._agent, "_connection_exception_policy", ExceptionPolicyEnum.propagate
         )
         return AsyncMultiplexer(
-            self._agent.connections, loop=self.loop, exception_policy=exception_policy, logger=self.logger
+            self._agent.connections,
+            loop=self.loop,
+            exception_policy=exception_policy,
+            agent_name=self._agent.name,
         )
 
     def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:

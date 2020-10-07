@@ -40,7 +40,7 @@ import yaml
 from dotenv import load_dotenv
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 def _ordered_loading(fun: Callable):
@@ -143,12 +143,12 @@ def locate(path: str) -> Any:
         spec_name = ".".join(parts[: n + 1])
         module_location = os.path.join(file_location, "__init__.py")
         spec = importlib.util.spec_from_file_location(spec_name, module_location)
-        logger.debug("Trying to import {}".format(module_location))
+        _default_logger.debug("Trying to import {}".format(module_location))
         nextmodule = _get_module(spec)
         if nextmodule is None:
             module_location = file_location + ".py"
             spec = importlib.util.spec_from_file_location(spec_name, module_location)
-            logger.debug("Trying to import {}".format(module_location))
+            _default_logger.debug("Trying to import {}".format(module_location))
             nextmodule = _get_module(spec)
 
         if nextmodule:

@@ -21,7 +21,6 @@
 import hashlib
 import threading
 from abc import ABC, abstractmethod
-from logging import Logger
 from queue import Queue
 from threading import Thread
 from types import SimpleNamespace
@@ -30,7 +29,7 @@ from uuid import uuid4
 
 from aea.crypto.wallet import Wallet
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
-from aea.helpers.logging import WithLogger
+from aea.helpers.logging import WithLogger, get_logger
 from aea.helpers.transaction.base import Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
@@ -238,7 +237,7 @@ class DecisionMakerHandler(WithLogger, ABC):
 
     self_address: str = "decision_maker"
 
-    def __init__(self, identity: Identity, wallet: Wallet, logger: Logger, **kwargs):
+    def __init__(self, identity: Identity, wallet: Wallet, **kwargs):
         """
         Initialize the decision maker handler.
 
@@ -247,6 +246,7 @@ class DecisionMakerHandler(WithLogger, ABC):
         :param logger: the logger
         :param kwargs: the key word arguments
         """
+        logger = get_logger(__name__, identity.name)
         WithLogger.__init__(self, logger=logger)
         self._identity = identity
         self._wallet = wallet

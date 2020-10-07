@@ -19,8 +19,8 @@
 
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import datetime
-import logging
 from asyncio import AbstractEventLoop
+from logging import Logger
 from multiprocessing.pool import AsyncResult
 from typing import (
     Any,
@@ -47,9 +47,8 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import _get_aea_logger_name_prefix
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.logging import AgentLoggerAdapter, WithLogger
+from aea.helpers.logging import AgentLoggerAdapter, get_logger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -119,10 +118,7 @@ class AEA(Agent):
         self._connection_exception_policy = connection_exception_policy
 
         aea_logger = AgentLoggerAdapter(
-            logger=logging.getLogger(
-                _get_aea_logger_name_prefix(__name__, identity.name)
-            ),
-            agent_name=identity.name,
+            logger=get_logger(__name__, identity.name), agent_name=identity.name,
         )
 
         super().__init__(
@@ -132,12 +128,12 @@ class AEA(Agent):
             period=period,
             loop_mode=loop_mode,
             runtime_mode=runtime_mode,
-            logger=cast(logging.Logger, aea_logger),
+            logger=cast(Logger, aea_logger),
         )
 
         self.max_reactions = max_reactions
         decision_maker_handler = decision_maker_handler_class(
-            identity=identity, wallet=wallet, logger=aea_logger
+            identity=identity, wallet=wallet
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 

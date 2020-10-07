@@ -21,11 +21,13 @@
 import datetime
 import logging
 from asyncio import AbstractEventLoop
+from logging import Logger
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from aea.abstract_agent import AbstractAgent
 from aea.connections.base import Connection
 from aea.exceptions import AEAException
+from aea.helpers.logging import WithLogger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import InBox, OutBox
@@ -74,7 +76,7 @@ class Agent(AbstractAgent, WithLogger):
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
         runtime_cls = self._get_runtime_class()
         self._runtime: BaseRuntime = runtime_cls(
-            agent=self, loop_mode=loop_mode, loop=loop, logger=logger
+            agent=self, loop_mode=loop_mode, loop=loop
         )
 
         self._inbox = InBox(self.runtime.multiplexer)
@@ -255,7 +257,7 @@ class Agent(AbstractAgent, WithLogger):
 
         :return: bool, propagate exception if True otherwise skip it.
         """
-        logger.exception(
+        self.logger.exception(
             f"Exception {repr(exception)} raised during {repr(function)} call."
         )
         return True

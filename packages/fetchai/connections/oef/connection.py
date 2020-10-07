@@ -23,6 +23,7 @@ import logging
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import cycle
+from logging import Logger
 from typing import Dict, List, Optional, Set, Type, cast
 
 import oef
@@ -50,7 +51,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 
-logger = logging.getLogger("aea.packages.fetchai.connections.oef")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
 TARGET = 0
 MESSAGE_ID = 1
@@ -142,6 +143,7 @@ class OEFChannel(OEFAgent):
         oef_addr: str,
         oef_port: int,
         excluded_protocols: Optional[Set[str]] = None,
+        logger: Logger = _default_logger,
     ):
         """
         Initialize.
@@ -489,7 +491,7 @@ class OEFChannel(OEFAgent):
     ) -> None:
         """Connect channel."""
         await self._set_loop_and_queue()
-        self.core.__init__(loop=self._loop, logger=logger)
+        self.core.__init__(loop=self._loop, logger=self.aea_logger)
 
         if self.CONNECT_ATTEMPTS_LIMIT != 0:  # pragma: nocover
             gen = range(self.CONNECT_ATTEMPTS_LIMIT)
@@ -556,7 +558,7 @@ class OEFConnection(Connection):
             raise ValueError("addr and port must be set!")  # pragma: nocover
         self.oef_addr = addr
         self.oef_port = port
-        self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port)  # type: ignore
+        self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, self.logger)  # type: ignore
         self._connection_check_task = None  # type: Optional[asyncio.Future]
 
     async def connect(self) -> None:

@@ -34,7 +34,7 @@ from aea.crypto.ethereum import EthereumApi
 from aea.crypto.fetchai import FetchAIApi
 
 
-logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
+_default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
 
@@ -742,10 +742,12 @@ class ERC1155Contract(Contract):
         try:
             # try estimate the gas and update the transaction dict
             gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-            logger.debug("[ERC1155Contract]: gas estimate: {}".format(gas_estimate))
+            _default_logger.debug(
+                "[ERC1155Contract]: gas estimate: {}".format(gas_estimate)
+            )
             tx["gas"] = gas_estimate
         except Exception as e:  # pylint: disable=broad-except
-            logger.debug(
+            _default_logger.debug(
                 "[ERC1155Contract]: Error when trying to estimate gas: {}".format(e)
             )
         return tx

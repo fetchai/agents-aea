@@ -20,7 +20,6 @@
 """The base connection package."""
 import asyncio
 import inspect
-import logging
 import re
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
@@ -34,7 +33,8 @@ from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.async_utils import AsyncState
-from aea.helpers.base import _get_aea_logger_name_prefix, load_module
+from aea.helpers.base import load_module
+from aea.helpers.logging import get_logger
 from aea.identity.base import Identity
 
 
@@ -245,7 +245,7 @@ class Connection(Component, ABC):
             filter(lambda x: re.match(connection_class_name, x[0]), classes)
         )
         name_to_class = dict(connection_classes)
-        logger = logging.getLogger(_get_aea_logger_name_prefix(__name__, identity.name))
+        logger = get_logger(__name__, identity.name)
         logger.debug("Processing connection {}".format(connection_class_name))
         connection_class = name_to_class.get(connection_class_name, None)
         enforce(
