@@ -52,10 +52,10 @@ class Resources:
         :return None
         """
         self._agent_name = agent_name
-        self._component_registry = AgentComponentRegistry(agent_name)
-        self._handler_registry = HandlerRegistry(agent_name)
-        self._behaviour_registry = ComponentRegistry[Behaviour](agent_name)
-        self._model_registry = ComponentRegistry[Model](agent_name)
+        self._component_registry = AgentComponentRegistry(agent_name=agent_name)
+        self._handler_registry = HandlerRegistry(agent_name=agent_name)
+        self._behaviour_registry = ComponentRegistry[Behaviour](agent_name=agent_name)
+        self._model_registry = ComponentRegistry[Model](agent_name=agent_name)
 
         self._registries = [
             self._component_registry,

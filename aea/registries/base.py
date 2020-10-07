@@ -191,15 +191,15 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
 class AgentComponentRegistry(Registry[ComponentId, Component]):
     """This class implements a simple dictionary-based registry for agent components."""
 
-    def __init__(self, agent_name: str) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
-        :param agent_name: str
+        :param kwargs: kwargs
 
         :return: None
         """
-        super().__init__(agent_name=agent_name)
+        super().__init__(**kwargs)
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
         self._registered_keys: Set[ComponentId] = set()
 
@@ -331,15 +331,15 @@ class ComponentRegistry(
 ):
     """This class implements a generic registry for skill components."""
 
-    def __init__(self, agent_name: str) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
-        :param agent_name: str
+        :param kwargs: kwargs
 
         :return: None
         """
-        super().__init__(agent_name=agent_name)
+        super().__init__(**kwargs)
         self._items: PublicIdRegistry[
             Dict[str, SkillComponentType]
         ] = PublicIdRegistry()
@@ -510,15 +510,15 @@ class ComponentRegistry(
 class HandlerRegistry(ComponentRegistry[Handler]):
     """This class implements the handlers registry."""
 
-    def __init__(self, agent_name: str) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
-        :param agent_name: str
+        :param kwargs: kwargs
 
         :return: None
         """
-        super().__init__(agent_name=agent_name)
+        super().__init__(**kwargs)
         # nested public id registries; one for protocol ids, one for skill ids
         self._items_by_protocol_and_skill = PublicIdRegistry[
             PublicIdRegistry[Handler]
