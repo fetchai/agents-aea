@@ -34,6 +34,7 @@ from aea.protocols.dialogue.base import Dialogue, DialogueMessage, Dialogues
 from aea.skills.base import Skill
 from aea.skills.tasks import TaskManager
 
+
 COUNTERPARTY_NAME = "counterparty"
 
 

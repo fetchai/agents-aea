@@ -29,14 +29,16 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_NAME
 
-import packages
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_PUBLIC_ID
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import FipaDialogue, FipaDialogues
-from packages.fetchai.skills.generic_buyer.handlers import GenericFipaHandler, LEDGER_API_ADDRESS
+from packages.fetchai.skills.generic_buyer.handlers import (
+    GenericFipaHandler,
+    LEDGER_API_ADDRESS,
+)
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 from tests.conftest import ROOT_DIR
@@ -146,7 +148,10 @@ class TestSkillHandler(BaseSkillTestCase):
                 FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
             ),
             DialogueMessage(FipaMessage.Performative.ACCEPT),
-            DialogueMessage(FipaMessage.Performative.MATCH_ACCEPT_W_INFORM, {"info": {"address": "some_term_sender_address"}}),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                {"info": {"address": "some_term_sender_address"}},
+            ),
         )
 
     def test_fipa_handler_handle_unidentified_dialogue(self, caplog):
@@ -162,7 +167,10 @@ class TestSkillHandler(BaseSkillTestCase):
         # operation
         with caplog.at_level(logging.INFO):
             self.fipa_handler.handle(incoming_message)
-        assert f"received invalid fipa message={incoming_message}, unidentified dialogue." in caplog.text
+        assert (
+            f"received invalid fipa message={incoming_message}, unidentified dialogue."
+            in caplog.text
+        )
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
@@ -181,14 +189,16 @@ class TestSkillHandler(BaseSkillTestCase):
     @mock.patch.object(
         "packages.fetchai.skills.generic_buyer.strategy.GenericStrategy",
         "is_acceptable_proposal",
-        return_value=True
+        return_value=True,
     )
     @mock.patch.object(
         "packages.fetchai.skills.generic_buyer.strategy.GenericStrategy",
         "is_affordable_proposal",
-        return_value=True
+        return_value=True,
     )
-    def test_fipa_handler_handle_propose(self, caplog, mocked_affordable, mocked_acceptable):
+    def test_fipa_handler_handle_propose(
+        self, caplog, mocked_affordable, mocked_acceptable
+    ):
         """Test the _handle_propose method of the fipa handler."""
         # ToDo need to mock affordable and acceptable values
         # setup
@@ -214,8 +224,14 @@ class TestSkillHandler(BaseSkillTestCase):
         # operation
         with caplog.at_level(logging.INFO):
             self.fipa_handler.handle(incoming_message)
-        assert f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
-        assert f"accepting the proposal from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
+        assert (
+            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}"
+            in caplog.text
+        )
+        assert (
+            f"accepting the proposal from sender={COUNTERPARTY_NAME[-5:]}"
+            in caplog.text
+        )
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
@@ -332,7 +348,10 @@ class TestSkillHandler(BaseSkillTestCase):
         # operation
         with caplog.at_level(logging.INFO):
             self.fipa_handler.handle(incoming_message)
-        assert f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}" in caplog.text
+        assert (
+            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}"
+            in caplog.text
+        )
         assert "requesting transfer transaction from ledger api..." in caplog.text
 
         # after
@@ -364,8 +383,14 @@ class TestSkillHandler(BaseSkillTestCase):
         # operation
         with caplog.at_level(logging.INFO):
             self.fipa_handler.handle(incoming_message)
-        assert f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}" in caplog.text
-        assert f"informing counterparty={COUNTERPARTY_NAME[-5:]} of payment." in caplog.text
+        assert (
+            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}"
+            in caplog.text
+        )
+        assert (
+            f"informing counterparty={COUNTERPARTY_NAME[-5:]} of payment."
+            in caplog.text
+        )
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
