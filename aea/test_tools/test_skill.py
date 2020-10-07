@@ -346,7 +346,7 @@ class BaseSkillTestCase:
                 counterparty=counterparty, performative=performative, **contents
             )
 
-        for idx, dialogue_message in enumerate(messages[1:]):  # type: ignore
+        for idx, dialogue_message in enumerate(messages[1:]):
             (
                 performative,
                 contents,
