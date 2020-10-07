@@ -19,7 +19,7 @@
 """Implementation of the 'aea upgrade' subcommand."""
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, Generator, Set, Tuple, cast
+from typing import Dict, Generator, Optional, Set, Tuple, cast
 
 import click
 
@@ -55,7 +55,7 @@ class ItemRemoveHelper:
         """
         Get all reverse dependencices in agent.
 
-        :return: defaultdict with package id: (type, public_id) and set of component that uses this package
+        :return: dict with PackageId: and set of PackageIds that uses this package
         """
         return self.get_item_dependencies(self._agent_config, None)
 
@@ -71,7 +71,9 @@ class ItemRemoveHelper:
         )
 
     @staticmethod
-    def _get_item_requirements(item: Any,) -> Generator[PackageId, None, None]:
+    def _get_item_requirements(
+        item: PackageConfiguration,
+    ) -> Generator[PackageId, None, None]:
         """
         List all the requiemenents for item provided.
 
@@ -83,14 +85,14 @@ class ItemRemoveHelper:
                 yield PackageId(item_type, item_public_id)
 
     def get_item_dependencies(
-        self, item: Any, package_id: PackageId = None
+        self, item: PackageConfiguration, package_id: Optional[PackageId] = None
     ) -> Dict[PackageId, Set[PackageId]]:
         """
         Get item dependencies.
 
         It's recursive and provides all the sub dependencies.
 
-        :return: defaultdict with package id: (type, public_id) and set of component that uses this package
+        :return: dict with PackageId: and set of PackageIds that uses this package
         """
         result: defaultdict = defaultdict(set)
 
