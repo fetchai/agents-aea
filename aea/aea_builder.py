@@ -1408,7 +1408,7 @@ class AEABuilder:
                 if new_configuration.is_abstract_component:
                     load_aea_package(configuration)
                     continue
-                _logger = make_logger(new_configuration, agent_name)
+                _logger = make_component_logger(new_configuration, agent_name)
                 component = load_component_from_config(
                     new_configuration, logger=_logger, **kwargs
                 )
@@ -1442,7 +1442,7 @@ class AEABuilder:
         return new_configuration
 
 
-def make_logger(
+def make_component_logger(
     configuration: ComponentConfiguration, agent_name: str,
 ) -> Optional[logging.Logger]:
     """
