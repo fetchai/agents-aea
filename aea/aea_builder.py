@@ -77,7 +77,7 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_module
+from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.identity.base import Identity
@@ -1455,6 +1455,7 @@ def make_logger(
     if configuration.component_type == ComponentType.SKILL:
         # skip because skill object already have their own logger from the skill context.
         return None
-    logger_name = f"aea.{agent_name}.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
+    logger_name = f"aea.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
+    logger_name = _get_aea_logger_name_prefix(logger_name, agent_name)
     _logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
     return cast(logging.Logger, _logger)

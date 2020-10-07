@@ -43,7 +43,7 @@ from aea.configurations.base import (
 from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
 from aea.exceptions import AEAException, enforce
-from aea.helpers.base import load_module
+from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
@@ -749,6 +749,7 @@ class Skill(Component):
         skill_context = SkillContext()
         skill_context.set_agent_context(agent_context)
         logger_name = f"aea.packages.{configuration.author}.skills.{configuration.name}"
+        logger_name = _get_aea_logger_name_prefix(logger_name, agent_context.agent_name)
         _logger = AgentLoggerAdapter(
             logging.getLogger(logger_name), agent_context.agent_name
         )

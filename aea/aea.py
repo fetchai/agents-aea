@@ -128,7 +128,10 @@ class AEA(Agent, WithLogger):
         )
 
         aea_logger = AgentLoggerAdapter(
-            logger=logging.getLogger(_get_aea_logger_name_prefix(__name__, identity.name)), agent_name=identity.name
+            logger=logging.getLogger(
+                _get_aea_logger_name_prefix(__name__, identity.name)
+            ),
+            agent_name=identity.name,
         )
         WithLogger.__init__(self, logger=cast(logging.Logger, aea_logger))
 

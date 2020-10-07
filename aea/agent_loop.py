@@ -123,7 +123,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
             with suppress(BaseException):
                 await t
         self._state.set(AgentLoopStates.stopped)
-        logger.debug("agent loop stopped")
+        self.logger.debug("agent loop stopped")
 
     async def _gather_tasks(self) -> None:
         """Wait till first task exception."""
