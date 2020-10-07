@@ -26,11 +26,11 @@ from pathlib import Path
 from typing import List
 from unittest.mock import patch
 
+import pytest
 from click.exceptions import ClickException
 
-import pytest
-
 from aea.cli import cli, upgrade
+from aea.cli.upgrade import ItemRemoveHelper
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -39,6 +39,8 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.helpers.base import cd
+from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
@@ -290,15 +292,57 @@ class TestRemoveAndDependencies(BaseTestCase):
             assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
 
 
-class TestUpgradeProject(BaseTestCase):
+class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
     """Test that the command 'aea upgrade' works."""
 
-    def test_uprgade_does_nothing(self):
-        """Test project upgrade is not implemented yet."""
-        result = self.runner.invoke(
-            cli, ["-v", "DEBUG", "upgrade", "--local"], standalone_mode=False,
+    capture_log = True
+
+    @classmethod
+    def setup_class(cls):
+        """Set up test case."""
+        super(TestUpgradeProject, cls).setup_class()
+        cls.agent_name = "generic_buyer_0.9.0"
+        cls.latest_agent_name = "generic_buyer_latest"
+        cls.run_cli_command(
+            "fetch", "fetchai/generic_buyer:0.9.0", "--alias", cls.agent_name
         )
-        assert result.exit_code == 0
+        cls.run_cli_command(
+            "fetch", "fetchai/generic_buyer:latest", "--alias", cls.latest_agent_name
+        )
+        cls.agents.add(cls.agent_name)
+        cls.set_agent_context(cls.agent_name)
+
+    def test_upgrade(self):
+        """Test upgrade project old version to latest one and compare with latest project fetched."""
+        with cd(self.latest_agent_name):
+            latest_agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+
+        with cd(self.agent_name):
+            self.runner.invoke(  # pylint: disable=no-member
+                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+            )
+            agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+            assert latest_agent_items == agent_items
+
+        # upgrade again to check it workd with upgraded version
+        with cd(self.agent_name):
+            self.runner.invoke(  # pylint: disable=no-member
+                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+            )
+            agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+            assert latest_agent_items == agent_items
 
 
 class TestUpgradeConnectionLocally(BaseTestCase):
@@ -373,7 +417,10 @@ class TestUpgradeConnectionLocally(BaseTestCase):
 
     def test_upgrade_required_mock(self):
         """Test upgrade with mocking upgrade required."""
-        with patch.object(upgrade, "_check_upgrade_is_required", return_value=True):
+        with patch(
+            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required",
+            return_value="100.0.0",
+        ):
             result = self.runner.invoke(
                 cli,
                 [
