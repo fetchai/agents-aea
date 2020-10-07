@@ -18,25 +18,25 @@
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
 
+import logging
 from pathlib import Path
 from typing import cast
+from unittest import mock
 
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_NAME
 
+import packages
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_PUBLIC_ID
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import FipaDialogue, FipaDialogues
-from packages.fetchai.skills.generic_buyer.handlers import (
-    GenericFipaHandler,
-    LEDGER_API_ADDRESS,
-)
+from packages.fetchai.skills.generic_buyer.handlers import GenericFipaHandler, LEDGER_API_ADDRESS
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 from tests.conftest import ROOT_DIR
@@ -145,10 +145,11 @@ class TestSkillHandler(BaseSkillTestCase):
             DialogueMessage(
                 FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
             ),
-            DialogueMessage(FipaMessage.Performative.ACCEPT, {}),
+            DialogueMessage(FipaMessage.Performative.ACCEPT),
+            DialogueMessage(FipaMessage.Performative.MATCH_ACCEPT_W_INFORM, {"info": {"address": "some_term_sender_address"}}),
         )
 
-    def test_fipa_handler_handle_unidentified_dialogue(self):
+    def test_fipa_handler_handle_unidentified_dialogue(self, caplog):
         """Test the _handle_unidentified_dialogue method of the fipa handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -159,7 +160,9 @@ class TestSkillHandler(BaseSkillTestCase):
         )
 
         # operation
-        self.fipa_handler.handle(incoming_message)
+        with caplog.at_level(logging.INFO):
+            self.fipa_handler.handle(incoming_message)
+        assert f"received invalid fipa message={incoming_message}, unidentified dialogue." in caplog.text
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
@@ -175,7 +178,17 @@ class TestSkillHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_propose(self):
+    @mock.patch.object(
+        "packages.fetchai.skills.generic_buyer.strategy.GenericStrategy",
+        "is_acceptable_proposal",
+        return_value=True
+    )
+    @mock.patch.object(
+        "packages.fetchai.skills.generic_buyer.strategy.GenericStrategy",
+        "is_affordable_proposal",
+        return_value=True
+    )
+    def test_fipa_handler_handle_propose(self, caplog, mocked_affordable, mocked_acceptable):
         """Test the _handle_propose method of the fipa handler."""
         # ToDo need to mock affordable and acceptable values
         # setup
@@ -199,7 +212,10 @@ class TestSkillHandler(BaseSkillTestCase):
         )
 
         # operation
-        self.fipa_handler.handle(incoming_message)
+        with caplog.at_level(logging.INFO):
+            self.fipa_handler.handle(incoming_message)
+        assert f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
+        assert f"accepting the proposal from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
@@ -213,7 +229,7 @@ class TestSkillHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_decline_decline_cfp(self):
+    def test_fipa_handler_handle_decline_decline_cfp(self, caplog):
         """Test the _handle_decline method of the fipa handler where the end state is decline_cfp."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
@@ -234,7 +250,9 @@ class TestSkillHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        self.fipa_handler.handle(incoming_message)
+        with caplog.at_level(logging.INFO):
+            self.fipa_handler.handle(incoming_message)
+        assert f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
         # after
         for (
@@ -250,11 +268,11 @@ class TestSkillHandler(BaseSkillTestCase):
             else:
                 assert end_state_numbers == 0
 
-    def test_fipa_handler_handle_decline_decline_accept(self):
+    def test_fipa_handler_handle_decline_decline_accept(self, caplog):
         """Test the _handle_decline method of the fipa handler where the end state is decline_accept."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.fipa_dialogues, messages=self.list_of_messages,
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:3],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
@@ -271,7 +289,9 @@ class TestSkillHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        self.fipa_handler.handle(incoming_message)
+        with caplog.at_level(logging.INFO):
+            self.fipa_handler.handle(incoming_message)
+        assert f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
         # after
         for (
@@ -287,13 +307,13 @@ class TestSkillHandler(BaseSkillTestCase):
             else:
                 assert end_state_numbers == 0
 
-    def test_fipa_handler_handle_match_accept_is_ledger_tx(self):
+    def test_fipa_handler_handle_match_accept_is_ledger_tx(self, caplog):
         """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is True."""
         # setup
         self.strategy._is_ledger_tx = True
 
         fipa_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.fipa_dialogues, messages=self.list_of_messages,
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:3],
         )
         fipa_dialogue.terms = Terms(
             "some_ledger_id",
@@ -310,7 +330,10 @@ class TestSkillHandler(BaseSkillTestCase):
         )
 
         # operation
-        self.fipa_handler.handle(incoming_message)
+        with caplog.at_level(logging.INFO):
+            self.fipa_handler.handle(incoming_message)
+        assert f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}" in caplog.text
+        assert "requesting transfer transaction from ledger api..." in caplog.text
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
@@ -324,13 +347,13 @@ class TestSkillHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_match_accept_not_is_ledger_tx(self):
+    def test_fipa_handler_handle_match_accept_not_is_ledger_tx(self, caplog):
         """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is False."""
         # setup
         self.strategy._is_ledger_tx = False
 
         fipa_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.fipa_dialogues, messages=self.list_of_messages,
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:3],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=fipa_dialogue,
@@ -339,7 +362,10 @@ class TestSkillHandler(BaseSkillTestCase):
         )
 
         # operation
-        self.fipa_handler.handle(incoming_message)
+        with caplog.at_level(logging.INFO):
+            self.fipa_handler.handle(incoming_message)
+        assert f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}" in caplog.text
+        assert f"informing counterparty={COUNTERPARTY_NAME[-5:]} of payment." in caplog.text
 
         # after
         assert self.get_quantity_in_outbox() == 1, "No message in outbox."
@@ -353,3 +379,61 @@ class TestSkillHandler(BaseSkillTestCase):
             info={"Done": "Sending payment via bank transfer"},
         )
         assert has_attributes, error_str
+
+    def test_fipa_handler_handle_inform_with_data(self, caplog):
+        """Test the _handle_inform method of the fipa handler where info has data."""
+        # setup
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages,
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.INFORM,
+            info={"data_name": "data"},
+        )
+
+        # before
+        for (
+            end_state_numbers
+        ) in self.fipa_dialogues.dialogue_stats.self_initiated.values():
+            assert end_state_numbers == 0
+        for (
+            end_state_numbers
+        ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
+            assert end_state_numbers == 0
+
+        # operation
+        with caplog.at_level(logging.INFO):
+            self.fipa_handler.handle(incoming_message)
+        assert "received the following data={'data_name': 'data'}" in caplog.text
+
+        # after
+        for (
+            end_state_numbers
+        ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
+            assert end_state_numbers == 0
+        for (
+            end_state,
+            end_state_numbers,
+        ) in self.fipa_dialogues.dialogue_stats.self_initiated.items():
+            if end_state == FipaDialogue.EndState.SUCCESSFUL:
+                assert end_state_numbers == 1
+            else:
+                assert end_state_numbers == 0
+
+    def test_fipa_handler_handle_inform_without_data(self, caplog):
+        """Test the _handle_inform method of the fipa handler where info has NO data."""
+        # setup
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages,
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.INFORM,
+            info={},
+        )
+
+        # operation
+        with caplog.at_level(logging.INFO):
+            self.fipa_handler.handle(incoming_message)
+        assert f"received no data from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text

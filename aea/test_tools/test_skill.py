@@ -34,6 +34,8 @@ from aea.protocols.dialogue.base import Dialogue, DialogueMessage, Dialogues
 from aea.skills.base import Skill
 from aea.skills.tasks import TaskManager
 
+COUNTERPARTY_NAME = "counterparty"
+
 
 class BaseSkillTestCase:
     """A class to test a skill."""
@@ -105,7 +107,7 @@ class BaseSkillTestCase:
         message_id: Optional[int] = None,
         target: Optional[int] = None,
         to: Optional[Address] = None,
-        sender: Address = "counterparty",
+        sender: Address = COUNTERPARTY_NAME,
         **kwargs,
     ) -> Message:
         """
@@ -291,7 +293,7 @@ class BaseSkillTestCase:
         self,
         dialogues: Dialogues,
         messages: Tuple[DialogueMessage, ...],
-        counterparty: Address = "counterparty",
+        counterparty: Address = COUNTERPARTY_NAME,
     ) -> Dialogue:
         """
         Quickly create a dialogue.
