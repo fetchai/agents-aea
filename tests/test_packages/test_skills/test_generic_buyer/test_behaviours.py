@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains test case classes based on pytest for AEA end-to-end testing."""
+"""This module contains the tests of the behaviour classes of the generic buyer skill."""
 
 import logging
 from pathlib import Path
@@ -186,29 +186,16 @@ class TestSkillHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    @mock.patch.object(
-        "packages.fetchai.skills.generic_buyer.strategy.GenericStrategy",
-        "is_acceptable_proposal",
-        return_value=True,
-    )
-    @mock.patch.object(
-        "packages.fetchai.skills.generic_buyer.strategy.GenericStrategy",
-        "is_affordable_proposal",
-        return_value=True,
-    )
-    def test_fipa_handler_handle_propose(
-        self, caplog, mocked_affordable, mocked_acceptable
-    ):
+    def test_fipa_handler_handle_propose(self, caplog):
         """Test the _handle_propose method of the fipa handler."""
-        # ToDo need to mock affordable and acceptable values
         # setup
         proposal = Description(
             {
-                "ledger_id": "some_ledger_id",
-                "price": "some_price",
-                "currency_id": "some_currency_id",
+                "ledger_id": self.strategy.ledger_id,
+                "price": 100,
+                "currency_id": "FET",
                 "service_id": "some_service_id",
-                "quantity": "some_quantity",
+                "quantity": 1,
                 "tx_nonce": "some_tx_nonce",
             }
         )
@@ -222,8 +209,14 @@ class TestSkillHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        with mock.patch.object(
+            self.strategy, "is_acceptable_proposal", return_value=True,
+        ):
+            with mock.patch.object(
+                self.strategy, "is_affordable_proposal", return_value=True,
+            ):
+                with caplog.at_level(logging.INFO):
+                    self.fipa_handler.handle(incoming_message)
         assert (
             f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}"
             in caplog.text
@@ -241,7 +234,7 @@ class TestSkillHandler(BaseSkillTestCase):
             performative=FipaMessage.Performative.ACCEPT,
             to=incoming_message.sender,
             sender=self.skill.skill_context.agent_address,
-            target=1,
+            target=incoming_message.message_id,
         )
         assert has_attributes, error_str
 
