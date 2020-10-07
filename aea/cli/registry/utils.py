@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """Utils used for operating Registry with CLI."""
 
-
 import os
 import tarfile
 from json.decoder import JSONDecodeError
@@ -29,6 +28,7 @@ import requests
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.loggers import logger
+from aea.configurations.base import PublicId
 
 
 def get_auth_token() -> str:
@@ -209,3 +209,17 @@ def is_auth_token_present():
     :return: bool is logged in.
     """
     return get_auth_token() is not None
+
+
+def get_package_meta(obj_type: str, public_id: PublicId) -> dict:
+    """
+    Get package meta data from remote registry.
+
+    :param obj_type: str. component type
+    :param public_id: component public id
+
+    :return: dict with package details
+    """
+    api_path = f"/{obj_type}s/{public_id.author}/{public_id.name}/{public_id.version}"
+    resp = request_api("GET", api_path)
+    return resp

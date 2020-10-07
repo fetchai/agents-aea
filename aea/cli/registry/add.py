@@ -23,23 +23,9 @@ from pathlib import Path
 
 import click
 
-from aea.cli.registry.utils import download_file, extract, request_api
+from aea.cli.registry.utils import download_file, extract, get_package_meta
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import PublicId
-
-
-def _get_package_meta(obj_type: str, public_id: PublicId) -> dict:
-    """
-    Get package meta data from remote registry.
-
-    :param obj_type: str. component type
-    :param public_id: component public id
-
-    :return: dict with package details
-    """
-    api_path = f"/{obj_type}s/{public_id.author}/{public_id.name}/{public_id.version}"
-    resp = request_api("GET", api_path)
-    return resp
 
 
 def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Path:
@@ -64,7 +50,7 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Pa
             public_id=public_id, obj_type=obj_type
         )
     )
-    package_meta = _get_package_meta(obj_type, public_id)
+    package_meta = get_package_meta(obj_type, public_id)
     file_url = package_meta["file"]
     filepath = download_file(file_url, cwd)
 

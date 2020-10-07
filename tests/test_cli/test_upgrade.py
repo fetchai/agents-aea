@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This test module contains the tests for the `aea add connection` sub-command."""
 
 import os
@@ -28,10 +26,14 @@ from pathlib import Path
 from typing import List
 from unittest.mock import patch
 
+import pytest
+from click.exceptions import ClickException
+
 from aea.cli import cli, upgrade
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
+    PackageId,
     PackageType,
     PublicId,
 )
@@ -46,6 +48,12 @@ from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 class BaseTestCase:
     """Base test case class with setup and teardown and some utils."""
+
+    ITEM_TYPE = "connection"
+    ITEM_PUBLIC_ID = SOEF_PUBLIC_ID
+    LOCAL: List[str] = ["--local"]
+    DEPENDENCY_TYPE = "protocol"
+    DEPENDENCY_PUBLIC_ID = OefSearchMessage.protocol_id
 
     @staticmethod
     def loader() -> ConfigLoader:
@@ -94,82 +102,6 @@ class BaseTestCase:
         os.chdir(cls.agent_name)
         # add connection first time
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
-
-
-class TestRemoveAndDependencies(BaseTestCase):
-    """Test dependency remove helper and upgrade with dependency removed."""
-
-    ITEM_TYPE = "connection"
-    ITEM_PUBLIC_ID = SOEF_PUBLIC_ID
-    LOCAL: List[str] = ["--local"]
-    DEPENDENCY_TYPE = "protocol"
-    DEPENDENCY_PUBLIC_ID = OefSearchMessage.protocol_id
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        super(TestRemoveAndDependencies, cls).setup_class()
-        cls.DEPENDENCY = (cls.DEPENDENCY_TYPE, cls.DEPENDENCY_PUBLIC_ID)
-        result = cls.runner.invoke(
-            cli,
-            ["-v", "DEBUG", "add", "--local", cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID)],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-    def setup(self):
-        """Save agent config."""
-        self._agent_config = self.load_config()
-
-    def teardown(self):
-        """Restore agent config."""
-        self.dump_config(self._agent_config)
-
-    def check_remove(self, item_type, public_id):
-        """Check remove can be performed with remove helper."""
-        return upgrade.ItemRemoveHelper(self.load_config()).check_remove(
-            item_type, public_id
-        )
-
-    def test_package_can_be_removed_with_its_dependency(self):
-        """Test package can be removed with its dependency."""
-        required_by, can_be_removed, can_not_be_removed = self.check_remove(
-            self.ITEM_TYPE, self.ITEM_PUBLIC_ID
-        )
-
-        assert not required_by, required_by
-        assert self.DEPENDENCY in can_be_removed
-        assert self.DEPENDENCY not in can_not_be_removed
-
-    def test_package_can_be_removed_but_not_dependency(self):
-        """Test package can be removed but not its dependency."""
-        with self.with_oef_installed():
-            required_by, can_be_removed, can_not_be_removed = self.check_remove(
-                self.ITEM_TYPE, self.ITEM_PUBLIC_ID
-            )
-
-            assert not required_by, required_by
-            assert self.DEPENDENCY not in can_be_removed
-            assert self.DEPENDENCY in can_not_be_removed
-
-    def test_package_can_not_be_removed_cause_required(self):
-        """Test package can not be removed cause required by another package."""
-        required_by, can_be_removed, can_not_be_removed = self.check_remove(
-            self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID
-        )
-
-        assert (self.ITEM_TYPE, self.ITEM_PUBLIC_ID) in required_by
-        assert not can_be_removed
-        assert not can_not_be_removed
-
     @contextmanager
     def with_oef_installed(self):
         """Add and remove oef connection."""
@@ -211,6 +143,86 @@ class TestRemoveAndDependencies(BaseTestCase):
             yield
         finally:
             self.dump_config(original_config)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestRemoveAndDependencies(BaseTestCase):
+    """Test dependency remove helper and upgrade with dependency removed."""
+
+    ITEM_TYPE = "connection"
+    ITEM_PUBLIC_ID = SOEF_PUBLIC_ID
+    LOCAL: List[str] = ["--local"]
+    DEPENDENCY_TYPE = "protocol"
+    DEPENDENCY_PUBLIC_ID = OefSearchMessage.protocol_id
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        super(TestRemoveAndDependencies, cls).setup_class()
+        cls.DEPENDENCY_PACKAGE_ID = PackageId(
+            cls.DEPENDENCY_TYPE, cls.DEPENDENCY_PUBLIC_ID
+        )
+        result = cls.runner.invoke(
+            cli,
+            ["-v", "DEBUG", "add", "--local", cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID)],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+    def setup(self):
+        """Save agent config."""
+        self._agent_config = (  # pylint: disable=attribute-defined-outside-init
+            self.load_config()
+        )
+
+    def teardown(self):
+        """Restore agent config."""
+        self.dump_config(self._agent_config)
+
+    def check_remove(self, item_type, public_id):
+        """Check remove can be performed with remove helper."""
+        return upgrade.ItemRemoveHelper(self.load_config()).check_remove(
+            item_type, public_id
+        )
+
+    def test_package_can_be_removed_with_its_dependency(self):
+        """Test package can be removed with its dependency."""
+        required_by, can_be_removed, can_not_be_removed = self.check_remove(
+            self.ITEM_TYPE, self.ITEM_PUBLIC_ID
+        )
+
+        assert not required_by, required_by
+        assert self.DEPENDENCY_PACKAGE_ID in can_be_removed
+        assert self.DEPENDENCY_PACKAGE_ID not in can_not_be_removed
+
+    def test_package_can_be_removed_but_not_dependency(self):
+        """Test package can be removed but not its dependency."""
+        with self.with_oef_installed():
+            required_by, can_be_removed, can_not_be_removed = self.check_remove(
+                self.ITEM_TYPE, self.ITEM_PUBLIC_ID
+            )
+
+            assert not required_by, required_by
+            assert self.DEPENDENCY_PACKAGE_ID not in can_be_removed
+            assert self.DEPENDENCY_PACKAGE_ID in can_not_be_removed
+
+    def test_package_can_not_be_removed_cause_required(self):
+        """Test package can not be removed cause required by another package."""
+        required_by, can_be_removed, can_not_be_removed = self.check_remove(
+            self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID
+        )
+
+        assert PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID) in required_by
+        assert not can_be_removed
+        assert not can_not_be_removed
 
     def test_upgrade_and_dependency_removed(self):
         """
@@ -312,49 +324,55 @@ class TestUpgradeConnectionLocally(BaseTestCase):
         assert result.exit_code == 0
 
     def test_upgrade_to_same_version(self):
-        """Test do not  upgreade to version already installed."""
-        result = self.runner.invoke(
-            cli,
-            ["upgrade", *self.LOCAL, self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 1
-        assert b"Nothing to upgrade." in result.stdout_bytes
+        """Test do not  upgrade to version already installed."""
+        with pytest.raises(
+            ClickException,
+            match=r"The .* with id '.*' already has version .*. Nothing to upgrade.",
+        ):
+            self.runner.invoke(
+                cli,
+                ["upgrade", *self.LOCAL, self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_upgrade_to_latest_but_same_version(self):
         """Test no update to latest if already latest component."""
-        result = self.runner.invoke(
-            cli,
-            [
-                "upgrade",
-                *self.LOCAL,
-                self.ITEM_TYPE,
-                f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 1
+        with pytest.raises(
+            ClickException,
+            match=r"The .* with id '.*' already has version .*. Nothing to upgrade.",
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    "upgrade",
+                    *self.LOCAL,
+                    self.ITEM_TYPE,
+                    f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_upgrade_to_non_registered(self):
         """Test can not upgrade not registered component."""
-        result = self.runner.invoke(
-            cli,
-            [
-                "-v",
-                "DEBUG",
-                "upgrade",
-                *self.LOCAL,
-                self.ITEM_TYPE,
-                "nonexits/dummy:0.0.0",
-            ],
-            standalone_mode=False,
-        )
-
-        assert result.exit_code == 1
-        assert (
-            "is not registered. Please use `add` command. Aborting"
-            in result.exception.message
-        )
+        with pytest.raises(
+            ClickException,
+            match=r"Error: .* with id .* is not registered. Please use `add` command. Aborting...",
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    "-v",
+                    "DEBUG",
+                    "upgrade",
+                    *self.LOCAL,
+                    self.ITEM_TYPE,
+                    "nonexits/dummy:0.0.0",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_upgrade_required_mock(self):
         """Test upgrade with mocking upgrade required."""
@@ -369,7 +387,7 @@ class TestUpgradeConnectionLocally(BaseTestCase):
                     self.ITEM_TYPE,
                     f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
                 ],
-                catch_exceptions=True,
+                catch_exceptions=False,
             )
             assert result.exit_code == 0
 
@@ -391,12 +409,17 @@ class TestUpgradeConnectionLocally(BaseTestCase):
     def test_package_can_not_be_found_in_registry(self):
         """Test no package in registry."""
         with self.with_config_update():
-            with patch.object(
-                upgrade, "_get_package_meta", side_effects=Exception("expected!")
-            ), patch.object(
-                upgrade, "find_item_locally", side_effects=Exception("expected!")
+            with patch(
+                "aea.cli.utils.package_utils.get_package_meta",
+                side_effects=Exception("expected!"),
+            ), patch(
+                "aea.cli.utils.package_utils.find_item_locally",
+                side_effects=Exception("expected!"),
+            ), pytest.raises(
+                ClickException,
+                match=r"Package .* details can not be fetched from the registry!",
             ):
-                result = self.runner.invoke(
+                self.runner.invoke(
                     cli,
                     [
                         "upgrade",
@@ -405,8 +428,33 @@ class TestUpgradeConnectionLocally(BaseTestCase):
                         f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
                     ],
                     standalone_mode=False,
+                    catch_exceptions=False,
                 )
-            assert result.exit_code == 1
+
+    def test_package_can_notupgraded_cause_required(self):
+        """Test no package in registry."""
+        with self.with_config_update():
+            with patch(
+                "aea.cli.upgrade.ItemRemoveHelper.check_remove",
+                return_value=(
+                    set([PackageId("connection", PublicId("test", "test", "0.0.1"))]),
+                    set(),
+                    dict(),
+                ),
+            ), pytest.raises(
+                ClickException, match=r"Can not upgrade .* cause it's required by"
+            ):
+                self.runner.invoke(
+                    cli,
+                    [
+                        "upgrade",
+                        *self.LOCAL,
+                        self.ITEM_TYPE,
+                        f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
+                    ],
+                    standalone_mode=False,
+                    catch_exceptions=False,
+                )
 
     @classmethod
     def teardown_class(cls):

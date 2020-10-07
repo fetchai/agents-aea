@@ -28,6 +28,7 @@ import click
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
+from aea.cli.registry.utils import get_package_meta
 from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
@@ -231,7 +232,9 @@ def find_item_locally(
     :param ctx: the CLI context.
     :param item_type: the type of the item to load. One of: protocols, connections, skills
     :param item_public_id: the public id of the item to find.
-    :return: path to the package directory (either in registry or in aea directory).
+
+    :return: tuple of path to the package directory (either in registry or in aea directory) and component configuration
+
     :raises SystemExit: if the search fails.
     """
     item_type_plural = item_type + "s"
@@ -443,11 +446,11 @@ def is_item_present(
     # check item presence only by author/package_name pair, without version.
 
     item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
-    is_item_registered = bool(
-        get_item_public_id_by_author_name(
-            ctx.agent_config, item_type, item_public_id.author, item_public_id.name
-        )
+    registered_item_public_id = get_item_public_id_by_author_name(
+        ctx.agent_config, item_type, item_public_id.author, item_public_id.name
     )
+    is_item_registered = registered_item_public_id is not None
+
     return is_item_registered and Path(item_path).exists()
 
 
@@ -522,3 +525,30 @@ def try_get_balance(  # pylint: disable=unused-argument
         return balance
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
+
+
+def get_latest_version_available_in_registry(
+    ctx: Context, item_type: str, item_public_id: PublicId
+) -> PublicId:
+    """
+    Get latest avalable package version public id.
+
+    :param ctx: Context object.
+    :param item_type: the item type.
+    :param item_public_id: the item public id.
+    :return: PublicId
+    """
+    is_local = ctx.config.get("is_local")
+    try:
+        if is_local:
+            _, item_config = find_item_locally(ctx, item_type, item_public_id)
+            latest_item_public_id = item_config.public_id
+        else:
+            package_meta = get_package_meta(item_type, item_public_id)
+            latest_item_public_id = PublicId.from_str(package_meta["public_id"])
+    except Exception:  # pylint: disable=broad-except
+        raise click.ClickException(
+            f"Package {item_public_id} details can not be fetched from the registry!"
+        )
+
+    return latest_item_public_id
