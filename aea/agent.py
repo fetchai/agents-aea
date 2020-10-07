@@ -32,10 +32,10 @@ from aea.multiplexer import InBox, OutBox
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
-class Agent(AbstractAgent):
+class Agent(AbstractAgent, WithLogger):
     """This class provides an abstract base class for a generic agent."""
 
     RUNTIMES: Dict[str, Type[BaseRuntime]] = {
@@ -52,6 +52,7 @@ class Agent(AbstractAgent):
         period: float = 1.0,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        logger: Logger = _default_logger,
     ) -> None:
         """
         Instantiate the agent.
@@ -65,6 +66,7 @@ class Agent(AbstractAgent):
 
         :return: None
         """
+        WithLogger.__init__(self, logger=logger)
         self._connections = connections
         self._identity = identity
         self._period = period
@@ -72,7 +74,7 @@ class Agent(AbstractAgent):
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
         runtime_cls = self._get_runtime_class()
         self._runtime: BaseRuntime = runtime_cls(
-            agent=self, loop_mode=loop_mode, loop=loop
+            agent=self, loop_mode=loop_mode, loop=loop, logger=logger
         )
 
         self._inbox = InBox(self.runtime.multiplexer)

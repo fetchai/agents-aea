@@ -61,7 +61,7 @@ from aea.skills.base import Behaviour, Handler
 from aea.skills.error.handlers import ErrorHandler
 
 
-class AEA(Agent, WithLogger):
+class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
     RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
@@ -118,6 +118,13 @@ class AEA(Agent, WithLogger):
         self._skills_exception_policy = skill_exception_policy
         self._connection_exception_policy = connection_exception_policy
 
+        aea_logger = AgentLoggerAdapter(
+            logger=logging.getLogger(
+                _get_aea_logger_name_prefix(__name__, identity.name)
+            ),
+            agent_name=identity.name,
+        )
+
         super().__init__(
             identity=identity,
             connections=[],
@@ -125,19 +132,12 @@ class AEA(Agent, WithLogger):
             period=period,
             loop_mode=loop_mode,
             runtime_mode=runtime_mode,
+            logger=cast(logging.Logger, aea_logger),
         )
-
-        aea_logger = AgentLoggerAdapter(
-            logger=logging.getLogger(
-                _get_aea_logger_name_prefix(__name__, identity.name)
-            ),
-            agent_name=identity.name,
-        )
-        WithLogger.__init__(self, logger=cast(logging.Logger, aea_logger))
 
         self.max_reactions = max_reactions
         decision_maker_handler = decision_maker_handler_class(
-            identity=identity, wallet=wallet
+            identity=identity, wallet=wallet, logger=aea_logger
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 
