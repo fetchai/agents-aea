@@ -129,7 +129,13 @@ class AcnNodeConfig:
         entry_peers = config.get(AcnNodeConfig.ENTRY_PEERS_MADDRS, "")
 
         return cls(
-            key, uri, external_uri, delegate_uri, monitoring_uri, entry_peers.split(","), enable_checks
+            key,
+            uri,
+            external_uri,
+            delegate_uri,
+            monitoring_uri,
+            entry_peers.split(","),
+            enable_checks,
         )
 
     @staticmethod
@@ -320,7 +326,12 @@ if __name__ == "__main__":
         with open(args.key, "r") as f:
             key = f.read().strip()
         node_config = AcnNodeConfig(
-            key, args.uri, args.external_uri, args.delegate_uri, args.monitoring_uri, args.entry_peers_maddrs
+            key,
+            args.uri,
+            args.external_uri,
+            args.delegate_uri,
+            args.monitoring_uri,
+            args.entry_peers_maddrs,
         )
 
     node = AcnNodeStandalone(node_config, args.libp2p_node)

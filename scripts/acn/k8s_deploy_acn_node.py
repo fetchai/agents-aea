@@ -19,9 +19,15 @@
 """ Deploy an ACN libp2p node to a kubernetes cluster """
 
 import argparse
+import base64
+import os
+import subprocess  # nosec
+from os import stat
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Type, Union
+
+from .run_acn_node_standalone import AcnNodeConfig
 
 k8s_deployment_name = "ph-deployment-name-here"
 k8s_cluster_namespace = "ph-cluster-namespace-here"
@@ -42,20 +48,76 @@ node_entry_peers = "ph-node-entry-peers-list-here"
 node_key_name = "ph-node-priv-key-name-here"
 node_key_encoded = "ph-base64-encoded-private-key-here"
 
+def _execute_cmd(cmd: List[str]) -> str:
+    proc = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE)  # nosec
+    out, _ = proc.communicate()
+    try:
+        proc.wait()
+    except:
+        pass
+    return out.decode('ascii')
 
-config: Dict[str, str] = {}
+class K8sPodDeployment:
+    """ """
 
-k8s_deployment_templates = [
-    "k8s/deployment.yaml",
-    "k8s/dns.yaml",
-    "k8s/secrect.yaml",
-    "k8s/istion.yaml",
-]
+    def __init__(
+        self,
+        root_dir: str,
+        deployments_files: List[Path],
+        dockerfile_path: Union[Path, str],
+        docker_remote_image: str,
+    ):
+        """
+        """
+
+        self.deployment_files = deployments_files
+        self.dockerfile = dockerfile_path
+        self.docker_remote_image = docker_remote_image
+        self.root_dir = root_dir
+
+    @property
+    def yaml_files(self) -> List[Path]:
+        return self.deployment_files
+
+    @property
+    def dockerfile(self) -> Path:
+        return Path(self.dockerfile)
+
+    @property
+    def docker_remote_image(self) -> str:
+        return self.docker_remote_image
 
 
-class AcnK8sConfig:
+class AcnK8sPodConfig:
     """
+    Store, parse, and generate kubernetes deployment for ACN node
     """
+
+    K8S_DEPLOYMENT_NAME = "ph-deployment-name-here"
+    K8S_PUBLIC_DNS = "agents-p2p-dht.sandbox.fetch-ai.com"  # TODO
+
+    DOCKER_IMAGE_REMOTE_WITH_TAG = "ph-gcr-image-with-tag-here"
+
+    NODE_PORT = "ph-node-port-number-here"
+    NODE_PORT_DELEGATE = "ph-node-delegate-port-number-here"
+    NODE_PORT_MONITORING = "ph-node-monitoring-port-number-here"  # TODO
+    NODE_URI_EXTERNAL = "ph-node-external-uri-here"
+    NODE_URI = "ph-node-local-uri-here"
+    NODE_URI_DELEGATE = "ph-node-delegate-uri-here"
+    NODE_URI_MONITORING = "ph-node-monitoring-uri-here"
+    NODE_ENTRY_PEERS = "ph-node-entry-peers-list-here"
+    NODE_KEY_NAME = "ph-node-priv-key-name-here"
+    NODE_KEY_ENCODED = "ph-base64-encoded-private-key-here"
+    NODE_LAST_ENTRY_PEER_HOST = "ph-latest-entry-peer-host-here"
+    NODE_LAST_ENTRY_PEER_PORT = "ph-latest-entry-peer-port-here"
+
+    # TODO add the rest of placeholders
+
+    Defaults: Dict[str, str] = {
+        K8S_DEPLOYMENT_NAME: "agents-p2p-dht",
+        K8S_PUBLIC_DNS: "agents-p2p-dht.sandbox.fetch-ai.com",
+        DOCKER_IMAGE_REMOTE_WITH_TAG: "gcr.io/fetch-ai-sandbox/agents-p2p-dht",
+    }
 
     def __init__(
         self,
@@ -63,53 +125,116 @@ class AcnK8sConfig:
         key_file: str,
         port: int,
         delegate_port: int,
+        monitoring_port: int,
         entry_peers: Optional[List[str]],
         enable_checks: bool = True,
+        dnsname: Optional[str] = None,
     ):
         """
+        Initialize a AcnK8sPodConfig, populate the config dict  
+
+        :param :
         """
-        self.workdir = ""
-        self.root_dir = root_dir
-        self.port = port
-        self.port_delegate = delegate_port
-        self.entry_peers = entry_peers if entry_peers is not None else []
 
-        self.key = ""
+        config: Dict[str, str] = dict()
+        cls: Type[AcnK8sPodConfig] = AcnK8sPodConfig
+
+        config[cls.K8S_DEPLOYMENT_NAME] = "{}-{}".format(
+            cls.Defaults[cls.K8S_DEPLOYMENT_NAME], str(port)
+        )
+        config[cls.K8S_PUBLIC_DNS] = (
+            dnsname if dnsname is not None else cls.Defaults[cls.K8S_PUBLIC_DNS]
+        )
+
+        config[cls.DOCKER_IMAGE_REMOTE_WITH_TAG] = cls.Defaults[
+            cls.DOCKER_IMAGE_REMOTE_WITH_TAG
+        ]
+
+        config[cls.NODE_PORT] = port
+        config[cls.NODE_PORT_DELEGATE] = delegate_port
+        config[cls.NODE_PORT_MONITORING] = monitoring_port
+        config[cls.NODE_ENTRY_PEERS] = (
+            ",".join(entry_peers) if entry_peers is not None else ""
+        )
+        peer_host, peer_port = cls._parse_multiaddr_for_uri(
+            entry_peers[-1] if entry_peers is not None and len(entry_peers) > 0 else ""
+        )
+        config[cls.NODE_LAST_ENTRY_PEER_HOST] = peer_host
+        config[cls.NODE_LAST_ENTRY_PEER_PORT] = peer_port
+
+        config[cls.NODE_URI] = "0.0.0.0:{}".format(port)
+        config[cls.NODE_URI_DELEGATE] = "0.0.0.0:{}".format(delegate_port)
+        config[cls.NODE_URI_MONITORING] = "0.0.0.0:{}".format(monitoring_port)
+        config[cls.NODE_URI_EXTERNAL] = "{}:{}".format(
+            dnsname if dnsname is not None else cls.Defaults[cls.K8S_PUBLIC_DNS], port
+        )
+
         with open(key_file, "r") as f:
-            self.key = f.read().strip()
+            key = f.read().strip()
+            config[cls.NODE_KEY_ENCODED] = base64.b64encode(key.encode("ascii")).decode(
+                "ascii"
+            )
 
-        self.deployment_files = []
-        self.template_files = []   # type: List[Path]
-        self._fetch_deployment_templates()
+        files: List[Path] = []
+        for path in [Path(p) for p in os.listdir(root_dir)]:
+            if path.is_file(path) and path.suffix == ".yaml":
+                files.append(path)
+        assert (
+            len(files) > 0
+        ), f"Couldn't find any template deployment file at {root_dir}"
+
+        self.config = config
+        self.template_files = files
+        self.dockerfile = root_dir / "Dockerfile"
 
         if enable_checks:
-            self._check_config()
+            cls._check_config(self.config)
 
-    def _fetch_deployment_templates(self):
-        for  template in k8s_deployment_templates:
-            path = Path(self.root_dir, template)
-            if not path.is_file():
-                raise ValueError("Couldn't find deployment template file: {}".format(path))
-            self.template_files.append(path)
-        
-    def generate_deployment(self):
-        """ """
+    @staticmethod
+    def _parse_multiaddr_for_uri(maddr: str) -> Tuple[str, str]:
+        if maddr != "":
+            parts = maddr.split("/")
+            if len(parts) == 7:
+                return parts[3], parts[5]
+        return "", ""
 
-        self.workdir = mkdtemp()
-        
+    @staticmethod
+    def check_config(config: Dict[str, str]) -> None:
+        AcnNodeConfig(
+            base64.b64decode(
+                config[AcnK8sPodConfig.NODE_KEY_ENCODED].encode("ascii")
+            ).decode("ascii"),
+            config[AcnK8sPodConfig.NODE_URI],
+            config[AcnK8sPodConfig.NODE_URI_EXTERNAL],
+            config[AcnK8sPodConfig.NODE_URI_DELEGATE],
+            config[AcnK8sPodConfig.NODE_URI_MONITORING],
+            config[AcnK8sPodConfig.NODE_ENTRY_PEERS],
+            True,
+        )
+
+    def generate_deployment(self) -> K8sPodDeployment:
+        """ 
+        """
+
+        workdir = mkdtemp()
+        deployment_files: List[Path] = []
+
         for path in self.template_files:
             with open(path, "r") as f:
                 content = f.read()
-            
-            content = self._substitute_placeholders(content)
 
-            with open(self.workdir / path.name, "w") as f:
+            for placeholder, value in self.config.items():
+                content = content.replace(placeholder, value)
+
+            with open(workdir / path.name, "w") as f:
                 f.write(content)
-
             
+            deployment_files.append(workdir / path.name)
 
-    def _check_config(self):
+        tag = _execute_cmd(["git", "describe", "--no-match", "--always", "--dirty"])
         
+
+        return K8sPodDeployment(workdir, deployment_files, self.dockerfile, "{}:{}".format(config[AcnK8sPodConfig.DOCKER_IMAGE_REMOTE_WITH_TAG]))
 
 
 def parse_commandline():
