@@ -233,10 +233,6 @@ class FipaNegotiationHandler(Handler):
             nonce=str(propose.proposal.values["trade_nonce"]),
             fee_by_currency_id={},
         )
-            amount_by_currency_id={
-                str(proposal.values["token_id"]): int(proposal.values["from_supply"])
-                - int(proposal.values["to_supply"])
-            },
         self.context.logger.debug("on Propose as {}.".format(fipa_dialogue.role))
         transactions = cast(Transactions, self.context.transactions)
         signing_msg = transactions.generate_signing_message(
@@ -352,14 +348,14 @@ class FipaNegotiationHandler(Handler):
                     "erc1155_contract_address", None
                 )
                 enforce(
-                    contract_address is not None,
-                    "ERC1155Contract address not set!"
+                    contract_address is not None, "ERC1155Contract address not set!"
                 )
                 counterparty_signature = signing_dialogue.counterparty_signature
                 tx_nonce = signing_dialogue.counterparty_signature
-                .skill_callback_info.get("tx_nonce", None) # noqa: E800
-                enforce(tx_nonce is not None, "tx_nonce must be provided") # noqa: E800
-                contract_api_dialogues = cast(ContractApiDialogues, self.context.contract_api_dialogues)
+                enforce(tx_nonce is not None, "tx_nonce must be provided")  # noqa: E800
+                contract_api_dialogues = cast(
+                    ContractApiDialogues, self.context.contract_api_dialogues
+                )
                 contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
                     counterparty=LEDGER_API_ADDRESS,
                     performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
@@ -445,8 +441,7 @@ class FipaNegotiationHandler(Handler):
                     "erc1155_contract_address", None
                 )
                 enforce(
-                    contract_address is not None,
-                    "ERC1155Contract address not set!"
+                    contract_address is not None, "ERC1155Contract address not set!"
                 )
                 contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
                     counterparty=LEDGER_API_ADDRESS,
@@ -463,7 +458,9 @@ class FipaNegotiationHandler(Handler):
                             "from_supply": int(
                                 fipa_dialogue.proposal.values["from_supply"]
                             ),
-                            "to_supply": int(fipa_dialogue.proposal.values["to_supply"]),
+                            "to_supply": int(
+                                fipa_dialogue.proposal.values["to_supply"]
+                            ),
                             "value": int(fipa_dialogue.proposal.values["value"]),
                             "trade_nonce": int(
                                 fipa_dialogue.proposal.values["trade_nonce"]
