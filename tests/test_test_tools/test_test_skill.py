@@ -26,6 +26,7 @@ import pytest
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Address
 from aea.protocols.base import Message
+from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, DialogueMessage
 from aea.skills.base import Skill
 from aea.test_tools.test_skill import BaseSkillTestCase
@@ -92,8 +93,8 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_outbox() == dummy_message_1
         assert self.get_message_from_outbox() == dummy_message_2
 
-    def test_message_has_attributes(self):
-        """Test the message_has_attributes method."""
+    def test_positive_message_has_attributes_valid_type(self):
+        """Test the message_has_attributes method where the message is of the specified type."""
         dummy_message = FipaMessage(
             dialogue_reference=("0", "0"),
             message_id=1,
@@ -118,6 +119,62 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert (
             valid_has_attribute_msg
             == "The message has the provided expected attributes."
+        )
+
+    def test_negative_message_has_attributes_invalid_message_id(self):
+        """Negative test for message_has_attributes method where the message id does NOT match."""
+        dummy_message = FipaMessage(
+            dialogue_reference=("0", "0"),
+            message_id=1,
+            performative=FipaMessage.Performative.CFP,
+            target=0,
+            query="some_query",
+        )
+        dummy_message.to = "some_to"
+        dummy_message.sender = "some_sender"
+
+        invalid_has_attribute, invalid_has_attribute_msg = self.message_has_attributes(
+            actual_message=dummy_message,
+            message_type=FipaMessage,
+            message_id=2,
+            performative=FipaMessage.Performative.CFP,
+            target=0,
+            query="some_query",
+            to="some_to",
+            sender="some_sender",
+        )
+        assert not invalid_has_attribute
+        assert (
+            invalid_has_attribute_msg
+            == "The 'message_id' fields do not match. Actual 'message_id': 1. Expected 'message_id': 2"
+        )
+
+    def test_negative_message_has_attributes_invalid_type(self):
+        """Test the message_has_attributes method where the message is NOT of the specified type."""
+        dummy_message = FipaMessage(
+            dialogue_reference=("0", "0"),
+            message_id=1,
+            performative=FipaMessage.Performative.CFP,
+            target=0,
+            query="some_query",
+        )
+        dummy_message.to = "some_to"
+        dummy_message.sender = "some_sender"
+
+        valid_has_attribute, valid_has_attribute_msg = self.message_has_attributes(
+            actual_message=dummy_message,
+            message_type=DefaultMessage,
+            message_id=1,
+            performative=FipaMessage.Performative.CFP,
+            target=0,
+            query="some_query",
+            to="some_to",
+            sender="some_sender",
+        )
+        assert not valid_has_attribute
+        assert (
+            valid_has_attribute_msg
+            == f"The message types do not match. Actual type: {FipaMessage}. Expected type: {DefaultMessage}"
         )
 
         invalid_has_attribute, invalid_has_attribute_msg = self.message_has_attributes(
@@ -161,8 +218,8 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert incoming_message.sender == "counterparty"
         assert incoming_message.to == to
 
-    def test_build_incoming_message_for_skill_dialogue(self):
-        """Test the build_incoming_message_for_skill_dialogue method."""
+    def test_positive_build_incoming_message_for_skill_dialogue(self):
+        """Positive test for build_incoming_message_for_skill_dialogue method."""
         fipa_dialogues = FipaDialogues(
             self_address=self.skill.skill_context.agent_address
         )
@@ -190,6 +247,35 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert incoming_message.proposal == proposal
         assert incoming_message.sender == dialogue.dialogue_label.dialogue_opponent_addr
         assert incoming_message.to == dialogue.self_address
+
+    def test_negative_build_incoming_message_for_skill_dialogue_dialogue_is_none(self):
+        """Negative test for build_incoming_message_for_skill_dialogue method where the provided dialogue is None."""
+        performative = FipaMessage.Performative.PROPOSE
+        proposal = "some_proposal"
+
+        with pytest.raises(AEAEnforceError, match="dialogue cannot be None."):
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=None, performative=performative, proposal=proposal,
+            )
+
+    def test_negative_build_incoming_message_for_skill_dialogue_dialogue_is_empty(self):
+        """Negative test for build_incoming_message_for_skill_dialogue method where the provided dialogue is empty."""
+        performative = FipaMessage.Performative.PROPOSE
+        proposal = "some_proposal"
+
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+        dialogue = fipa_dialogues._create_self_initiated(
+            dialogue_opponent_addr="some_counterparty",
+            dialogue_reference=("0", ""),
+            role=FipaDialogue.Role.BUYER,
+        )
+
+        with pytest.raises(AEAEnforceError, match="dialogue cannot be empty."):
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=dialogue, performative=performative, proposal=proposal,
+            )
 
     def test_provide_unspecified_fields(self):
         """Test the _provide_unspecified_fields method."""
@@ -264,8 +350,8 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert actual_contents == expected_contents
         assert actual_is_incoming == expected_is_incoming
 
-    def test_prepare_skill_dialogue_valid(self):
-        """Test the prepare_skill_dialogue method with a valid dialogue."""
+    def test_prepare_skill_dialogue_valid_self_initiated(self):
+        """Positive test for prepare_skill_dialogue method with a valid dialogue initiated by self."""
         fipa_dialogues = FipaDialogues(
             self_address=self.skill.skill_context.agent_address
         )
@@ -306,8 +392,97 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
         assert dialogue._get_message(8).info == "some_info"
 
-    def test_prepare_skill_dialogue_invalid(self):
-        """Test the prepare_skill_dialogue method with an invalid dialogue."""
+    def test_prepare_skill_dialogue_valid_opponent_initiated(self):
+        """Positive test for prepare_skill_dialogue method with a valid dialogue initiated by the opponent."""
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+        dialogue_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}, True),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_1"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_2"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_3"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_4"},
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT, {}),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM, {"info": "some_info"}
+            ),
+        )
+        dialogue = self.prepare_skill_dialogue(
+            fipa_dialogues, dialogue_messages, "counterparty",
+        )
+
+        assert type(dialogue) == FipaDialogue
+        assert not dialogue.is_self_initiated
+        assert len(dialogue._outgoing_messages) == 4
+        assert len(dialogue._incoming_messages) == 4
+        assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
+        assert dialogue._get_message(8).info == "some_info"
+
+    def test_negative_prepare_skill_dialogue_invalid_opponent_initiated(self):
+        """Negative test for prepare_skill_dialogue method with an invalid dialogue initiated by the opponent."""
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+        dialogue_messages = (
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}, True
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_1"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_2"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_3"},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE,
+                {"proposal": "some_counter_proposal_4"},
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT, {}),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM, {"info": "some_info"}
+            ),
+        )
+        with pytest.raises(AEAEnforceError, match="Cannot update the dialogue with message number 1"):
+            self.prepare_skill_dialogue(
+                fipa_dialogues, dialogue_messages, "counterparty",
+            )
+
+    def test_negative_prepare_skill_dialogue_empty_messages(self):
+        """Negative test for prepare_skill_dialogue method where the list of DialogueMessages is emoty."""
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+        dialogue_messages = tuple()
+
+        with pytest.raises(AEAEnforceError, match="the list of messages must be positive."):
+            self.prepare_skill_dialogue(
+                fipa_dialogues, dialogue_messages, "counterparty",
+            )
+
+    def test_negative_prepare_skill_dialogue_invalid(self):
+        """Negative test for prepare_skill_dialogue method with an invalid dialogue (a message has invalid target)."""
         fipa_dialogues = FipaDialogues(
             self_address=self.skill.skill_context.agent_address
         )

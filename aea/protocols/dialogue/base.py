@@ -39,7 +39,7 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 
-if sys.version_info < (3, 7):
+if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
     DialogueMessage = namedtuple(
         "DialogueMessage",
         ["performative", "contents", "is_incoming", "target"],
