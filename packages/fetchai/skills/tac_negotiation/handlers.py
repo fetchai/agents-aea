@@ -24,15 +24,20 @@ import time
 from typing import Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
+from aea.exceptions import enforce
 from aea.helpers.search.models import Query
+from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import (
+    ContractApiDialogue,
+    ContractApiDialogues,
     DefaultDialogues,
     FipaDialogue,
     FipaDialogues,
@@ -43,6 +48,9 @@ from packages.fetchai.skills.tac_negotiation.dialogues import (
 )
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
+
+
+LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
 
 
 class FipaNegotiationHandler(Handler):
@@ -154,20 +162,6 @@ class FipaNegotiationHandler(Handler):
             fipa_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.DECLINE, target_message=cfp,
             )
-            fipa_dialogue.terms = Terms(
-                ledger_id=strategy.ledger_id,
-                sender_address=self.context.agent_address,
-                counterparty_address=propose.sender,
-                amount_by_currency_id={},
-                quantities_by_good_id={
-                    str(propose.proposal.values["token_id"]): int(
-                        propose.proposal.values["from_supply"]
-                    )
-                    - int(propose.proposal.values["to_supply"])
-                },
-                is_sender_payable_tx_fee=False,
-                nonce=str(propose.proposal.values["trade_nonce"]),
-            )
             fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, fipa_dialogue.is_self_initiated
@@ -199,6 +193,20 @@ class FipaNegotiationHandler(Handler):
                         }
                     ),
                 )
+            )
+            fipa_dialogue.terms = Terms(
+                ledger_id=strategy.ledger_id,
+                sender_address=self.context.agent_address,
+                counterparty_address=fipa_msg.sender,
+                amount_by_currency_id={},
+                quantities_by_good_id={
+                    str(proposal_description.values["token_id"]): int(
+                        proposal_description.values["from_supply"]
+                    )
+                    - int(proposal_description.values["to_supply"])
+                },
+                is_sender_payable_tx_fee=False,
+                nonce=str(proposal_description.values["trade_nonce"]),
             )
             fipa_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.PROPOSE,
@@ -367,11 +375,17 @@ class FipaNegotiationHandler(Handler):
                         {
                             "from_address": accept.sender,
                             "to_address": self.context.agent_address,
-                            "token_id": int(fipa_msg.proposal.values["token_id"]),
-                            "from_supply": int(fipa_msg.proposal.values["from_supply"]),
-                            "to_supply": int(fipa_msg.proposal.values["to_supply"]),
-                            "value": int(fipa_msg.proposal.values["value"]),
-                            "trade_nonce": int(fipa_msg.proposal.values["trade_nonce"]),
+                            "token_id": int(fipa_dialogue.proposal.values["token_id"]),
+                            "from_supply": int(
+                                fipa_dialogue.proposal.values["from_supply"]
+                            ),
+                            "to_supply": int(
+                                fipa_dialogue.proposal.values["to_supply"]
+                            ),
+                            "value": int(fipa_dialogue.proposal.values["value"]),
+                            "trade_nonce": int(
+                                fipa_dialogue.proposal.values["trade_nonce"]
+                            ),
                         }
                     ),
                 )
@@ -432,7 +446,7 @@ class FipaNegotiationHandler(Handler):
             if counterparty_signature is None:
                 self.context.logger.warning("No signature from counterparty.")
                 return
-            signing_dialogue.counterparty_signature = counterparty_signature
+            fipa_dialogue.counterparty_signature = counterparty_signature
             if strategy.is_contract_tx:
                 contract_api_dialogues = cast(
                     ContractApiDialogues, self.context.contract_api_dialogues
@@ -465,13 +479,13 @@ class FipaNegotiationHandler(Handler):
                             "trade_nonce": int(
                                 fipa_dialogue.proposal.values["trade_nonce"]
                             ),
-                            "signature": contract_api_dialogue.counterparty_signature,
+                            "signature": fipa_dialogue.counterparty_signature,
                         }
                     ),
                 )
                 contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
                 contract_api_dialogue.terms = strategy.get_single_swap_terms(
-                    fipa_dialogue.proposal, fipa_msg.sender
+                    fipa_dialogue.proposal, match_accept.sender
                 )
                 self.context.outbox.put_message(message=contract_api_msg)
                 self.context.logger.info("requesting single atomic swap transaction...")

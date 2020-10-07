@@ -27,6 +27,8 @@ from typing import Optional, Type, cast
 
 from aea.common import Address
 from aea.exceptions import enforce
+from aea.helpers.search.models import Description
+from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
 from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
@@ -36,6 +38,12 @@ from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialo
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
+from packages.fetchai.protocols.contract_api.dialogues import (
+    ContractApiDialogue as BaseContractApiDialogue,
+)
+from packages.fetchai.protocols.contract_api.dialogues import (
+    ContractApiDialogues as BaseContractApiDialogues,
+)
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -50,6 +58,39 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
     DEMAND_DATAMODEL_NAME,
     SUPPLY_DATAMODEL_NAME,
 )
+
+
+ContractApiDialogue = BaseContractApiDialogue
+
+
+class ContractApiDialogues(Model, BaseContractApiDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return ContractApiDialogue.Role.AGENT
+
+        BaseContractApiDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=ContractApiDialogue,
+        )
 
 
 DefaultDialogue = BaseDefaultDialogue
@@ -89,9 +130,9 @@ class FipaDialogue(BaseFipaDialogue):
 
     def __init__(
         self,
-        dialogue_label: BaseDialogueLabel,
+        dialogue_label: DialogueLabel,
         self_address: Address,
-        role: BaseDialogue.Role,
+        role: Dialogue.Role,
         message_class: Type[FipaMessage] = FipaMessage,
     ) -> None:
         """
@@ -103,14 +144,44 @@ class FipaDialogue(BaseFipaDialogue):
 
         :return: None
         """
-        BaseContractApiDialogue.__init__(
+        BaseFipaDialogue.__init__(
             self,
             dialogue_label=dialogue_label,
             self_address=self_address,
             role=role,
             message_class=message_class,
         )
+        self._proposal = None  # type: Optional[Description]
         self._terms = None  # type: Optional[Terms]
+        self._counterparty_signature = None  # type: Optional[str]
+
+    @property
+    def counterparty_signature(self) -> str:
+        """Get counterparty signature."""
+        if self._counterparty_signature is None:
+            raise ValueError("counterparty_signature not set!")
+        return self._counterparty_signature
+
+    @counterparty_signature.setter
+    def counterparty_signature(self, counterparty_signature: str) -> None:
+        """Set is_seller_search."""
+        enforce(
+            self._counterparty_signature is None, "counterparty_signature already set!"
+        )
+        self._counterparty_signature = counterparty_signature
+
+    @property
+    def proposal(self) -> Description:
+        """Get the proposal."""
+        if self._proposal is None:
+            raise ValueError("Proposal not set!")
+        return self._proposal
+
+    @proposal.setter
+    def proposal(self, proposal: Description) -> None:
+        """Set the proposal."""
+        enforce(self._proposal is None, "Proposal already set!")
+        self._proposal = proposal
 
     @property
     def terms(self) -> Terms:
@@ -278,23 +349,7 @@ class SigningDialogue(BaseSigningDialogue):
             role=role,
             message_class=message_class,
         )
-        self._counterparty_signature = None  # type: Optional[str]
         self._associated_fipa_dialogue: Optional[FipaDialogue] = None
-
-    @property
-    def counterparty_signature(self) -> str:
-        """Get counterparty signature."""
-        if self._counterparty_signature is None:
-            raise ValueError("counterparty_signature not set!")
-        return self._counterparty_signature
-
-    @counterparty_signature.setter
-    def counterparty_signature(self, counterparty_signature: str) -> None:
-        """Set is_seller_search."""
-        enforce(
-            self._counterparty_signature is None, "counterparty_signature already set!"
-        )
-        self._counterparty_signature = counterparty_signature
 
     @property
     def associated_fipa_dialogue(self) -> FipaDialogue:
