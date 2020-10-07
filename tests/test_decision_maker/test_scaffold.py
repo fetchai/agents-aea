@@ -22,10 +22,13 @@
 import pytest
 
 from aea.decision_maker.scaffold import DecisionMakerHandler
+from aea.identity.base import Identity
 
 
 def test_init_and_not_implemented():
     """Initialise the decision maker handler."""
-    decision_maker_handler = DecisionMakerHandler(identity="identity", wallet="wallet")
+    decision_maker_handler = DecisionMakerHandler(
+        identity=Identity("name", "address"), wallet="wallet"
+    )
     with pytest.raises(NotImplementedError):
         decision_maker_handler.handle("message")

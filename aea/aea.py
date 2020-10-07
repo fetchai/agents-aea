@@ -388,7 +388,7 @@ class AEA(Agent):
 
         :return: None
         """
-        self.logger.debug("[{}]: Calling teardown method...".format(self.name))
+        self.logger.debug("Calling teardown method...")
         self.resources.teardown()
 
     def get_task_result(self, task_id: int) -> AsyncResult:

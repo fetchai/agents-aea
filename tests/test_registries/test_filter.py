@@ -22,7 +22,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-import aea
 from aea.configurations.base import PublicId, SkillConfig
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.protocols.signing import SigningMessage
@@ -75,7 +74,7 @@ class TestFilter:
     def test_handle_internal_message_when_none(self):
         """Test handle internal message when the received message is None."""
         with unittest.mock.patch.object(
-            aea.registries.filter.logger, "warning"
+            self.filter.logger, "warning"
         ) as mock_logger_warning:
             self.filter.handle_internal_message(None)
             mock_logger_warning.assert_called_with(
@@ -87,7 +86,7 @@ class TestFilter:
         msg = MagicMock()
         msg.to = "author/name:0.1.0"
         with unittest.mock.patch.object(
-            aea.registries.filter.logger, "warning"
+            self.filter.logger, "warning"
         ) as mock_logger_warning:
             self.filter.handle_internal_message(msg)
             mock_logger_warning.assert_called_with(
@@ -100,7 +99,7 @@ class TestFilter:
         msg = MagicMock()
         msg.to = "author!name"
         with unittest.mock.patch.object(
-            aea.registries.filter.logger, "warning"
+            self.filter.logger, "warning"
         ) as mock_logger_warning:
             self.filter.handle_internal_message(msg)
             mock_logger_warning.assert_called_with(
@@ -141,7 +140,7 @@ class TestFilter:
             self.resources.behaviour_registry, "register", side_effect=ValueError
         ):
             with unittest.mock.patch.object(
-                aea.registries.filter.logger, "warning"
+                self.filter.logger, "warning"
             ) as mock_logger_warning:
                 skill.skill_context.new_behaviours.put(new_behaviour)
                 self.filter.handle_new_handlers_and_behaviours()
@@ -187,7 +186,7 @@ class TestFilter:
             self.resources.handler_registry, "register", side_effect=ValueError
         ):
             with unittest.mock.patch.object(
-                aea.registries.filter.logger, "warning"
+                self.filter.logger, "warning"
             ) as mock_logger_warning:
                 skill.skill_context.new_handlers.put(new_handler)
                 self.filter.handle_new_handlers_and_behaviours()
@@ -209,7 +208,7 @@ class TestFilter:
         )
         message.to = public_id
         with unittest.mock.patch.object(
-            aea.registries.filter.logger, "warning"
+            self.filter.logger, "warning"
         ) as mock_logger_warning:
             self.filter.handle_internal_message(message)
             mock_logger_warning.assert_called_with(

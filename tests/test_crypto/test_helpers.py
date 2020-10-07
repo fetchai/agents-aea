@@ -82,7 +82,7 @@ class TestHelperFile:
             )
             try_validate_private_key_path(EthereumCrypto.identifier, private_key_path)
 
-    @patch("aea.crypto.ethereum.logger")
+    @patch("aea.crypto.ethereum._default_logger")
     def tests_generate_wealth_ethereum(self, mock_logging):
         """Test generate wealth for ethereum."""
         address = "my_address"

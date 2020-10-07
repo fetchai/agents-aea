@@ -139,7 +139,7 @@ def test_performative_str():
 def test_light_protocol_rule_3_target_less_than_message_id():
     """Test that if message_id is not 1, target must be > message_id"""
     with patch.object(
-        aea.protocols.state_update.message.logger, "error"
+        aea.protocols.state_update.message._default_logger, "error"
     ) as mock_logger:
         currency_endowment = {"FET": 100}
         good_endowment = {"a_good": 2}
