@@ -27,7 +27,9 @@ import requests
 
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.utils.config import get_or_create_cli_config
+from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
+from aea.cli.utils.package_utils import find_item_locally
 from aea.configurations.base import PublicId
 
 
@@ -223,3 +225,30 @@ def get_package_meta(obj_type: str, public_id: PublicId) -> dict:
     api_path = f"/{obj_type}s/{public_id.author}/{public_id.name}/{public_id.version}"
     resp = request_api("GET", api_path)
     return resp
+
+
+def get_latest_version_available_in_registry(
+    ctx: Context, item_type: str, item_public_id: PublicId
+) -> PublicId:
+    """
+    Get latest avalable package version public id.
+
+    :param ctx: Context object.
+    :param item_type: the item type.
+    :param item_public_id: the item public id.
+    :return: PublicId
+    """
+    is_local = ctx.config.get("is_local")
+    try:
+        if is_local:
+            _, item_config = find_item_locally(ctx, item_type, item_public_id)
+            latest_item_public_id = item_config.public_id
+        else:
+            package_meta = get_package_meta(item_type, item_public_id)
+            latest_item_public_id = PublicId.from_str(package_meta["public_id"])
+    except Exception:  # pylint: disable=broad-except
+        raise click.ClickException(
+            f"Package {item_public_id} details can not be fetched from the registry!"
+        )
+
+    return latest_item_public_id

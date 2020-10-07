@@ -26,8 +26,9 @@ from pathlib import Path
 from typing import List
 from unittest.mock import patch
 
-import pytest
 from click.exceptions import ClickException
+
+import pytest
 
 from aea.cli import cli, upgrade
 from aea.configurations.base import (
@@ -194,7 +195,7 @@ class TestRemoveAndDependencies(BaseTestCase):
         )
 
     def test_package_can_be_removed_with_its_dependency(self):
-        """Test package can be removed with its dependency."""
+        """Test package (soef) can be removed with its dependency (oef_search)."""
         required_by, can_be_removed, can_not_be_removed = self.check_remove(
             self.ITEM_TYPE, self.ITEM_PUBLIC_ID
         )
@@ -204,7 +205,7 @@ class TestRemoveAndDependencies(BaseTestCase):
         assert self.DEPENDENCY_PACKAGE_ID not in can_not_be_removed
 
     def test_package_can_be_removed_but_not_dependency(self):
-        """Test package can be removed but not its dependency."""
+        """Test package (soef) can be removed but not its shared dependency (oef_search) with other package (oef)."""
         with self.with_oef_installed():
             required_by, can_be_removed, can_not_be_removed = self.check_remove(
                 self.ITEM_TYPE, self.ITEM_PUBLIC_ID
@@ -214,8 +215,8 @@ class TestRemoveAndDependencies(BaseTestCase):
             assert self.DEPENDENCY_PACKAGE_ID not in can_be_removed
             assert self.DEPENDENCY_PACKAGE_ID in can_not_be_removed
 
-    def test_package_can_not_be_removed_cause_required(self):
-        """Test package can not be removed cause required by another package."""
+    def test_package_can_not_be_removed_cause_required_by_another_package(self):
+        """Test package (oef_search) can not be removed cause required by another package (soef)."""
         required_by, can_be_removed, can_not_be_removed = self.check_remove(
             self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID
         )
@@ -291,10 +292,6 @@ class TestRemoveAndDependencies(BaseTestCase):
 
 class TestUpgradeProject(BaseTestCase):
     """Test that the command 'aea upgrade' works."""
-
-    ITEM_TYPE = "connection"
-    ITEM_PUBLIC_ID = SOEF_PUBLIC_ID
-    LOCAL: List[str] = ["--local"]
 
     def test_uprgade_does_nothing(self):
         """Test project upgrade is not implemented yet."""
@@ -410,10 +407,10 @@ class TestUpgradeConnectionLocally(BaseTestCase):
         """Test no package in registry."""
         with self.with_config_update():
             with patch(
-                "aea.cli.utils.package_utils.get_package_meta",
+                "aea.cli.registry.utils.get_package_meta",
                 side_effects=Exception("expected!"),
             ), patch(
-                "aea.cli.utils.package_utils.find_item_locally",
+                "aea.cli.registry.utils.find_item_locally",
                 side_effects=Exception("expected!"),
             ), pytest.raises(
                 ClickException,

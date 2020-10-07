@@ -24,6 +24,7 @@ from typing import Dict, Generator, Optional, Set, Tuple, cast
 import click
 
 from aea.cli.add import add_item
+from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.remove import remove_item
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import load_item_config
@@ -32,7 +33,6 @@ from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
     get_item_public_id_by_author_name,
     get_items,
-    get_latest_version_available_in_registry,
     is_item_present,
 )
 from aea.configurations.base import (
@@ -51,23 +51,38 @@ class ItemRemoveHelper:
         """Init helper."""
         self._agent_config = agent_config
 
-    def get_agent_dependencies(self) -> Dict[PackageId, Set[PackageId]]:
+    def get_agent_dependencies_with_reverse_dependencies(
+        self,
+    ) -> Dict[PackageId, Set[PackageId]]:
         """
         Get all reverse dependencices in agent.
 
         :return: dict with PackageId: and set of PackageIds that uses this package
+
+        Return example:
+        {
+            PackageId(protocol, fetchai/default:0.6.0): {
+                PackageId(skill, fetchai/echo:0.8.0),
+                PackageId(skill, fetchai/error:0.6.0)
+            },
+            PackageId(connection, fetchai/stub:0.10.0): set(),
+            PackageId(skill, fetchai/error:0.6.0): set(),
+            PackageId(skill, fetchai/echo:0.8.0): set()}
+        )
         """
-        return self.get_item_dependencies(self._agent_config, None)
+        return self.get_item_dependencies_with_reverse_dependencies(
+            self._agent_config, None
+        )
 
     @staticmethod
-    def get_item_config(item_type: str, public_id: PublicId) -> PackageConfiguration:
+    def get_item_config(package_id: PackageId) -> PackageConfiguration:
         """Get item config for item,_type and public_id."""
         return load_item_config(
-            item_type,
+            str(package_id.package_type),
             package_path=Path("vendor")
-            / public_id.author
-            / f"{item_type}s"
-            / public_id.name,
+            / package_id.public_id.author
+            / f"{str(package_id.package_type)}s"
+            / package_id.public_id.name,
         )
 
     @staticmethod
@@ -84,7 +99,7 @@ class ItemRemoveHelper:
             for item_public_id in items:
                 yield PackageId(item_type, item_public_id)
 
-    def get_item_dependencies(
+    def get_item_dependencies_with_reverse_dependencies(
         self, item: PackageConfiguration, package_id: Optional[PackageId] = None
     ) -> Dict[PackageId, Set[PackageId]]:
         """
@@ -101,11 +116,8 @@ class ItemRemoveHelper:
                 _ = result[dep_package_id]  # init default dict value
             else:
                 result[dep_package_id].add(package_id)
-            dep_item = self.get_item_config(
-                str(dep_package_id.package_type), dep_package_id.public_id
-            )
-
-            for item_key, deps in self.get_item_dependencies(
+            dep_item = self.get_item_config(dep_package_id)
+            for item_key, deps in self.get_item_dependencies_with_reverse_dependencies(
                 dep_item, dep_package_id
             ).items():
                 result[item_key] = result[item_key].union(deps)
@@ -125,9 +137,11 @@ class ItemRemoveHelper:
         :return: Tuple[required by, can be deleted, can not be deleted.]
         """
         package_id = PackageId(item_type, item_public_id)
-        item = self.get_item_config(item_type, item_public_id)
-        agent_deps = self.get_agent_dependencies()
-        item_deps = self.get_item_dependencies(item, package_id)
+        item = self.get_item_config(package_id)
+        agent_deps = self.get_agent_dependencies_with_reverse_dependencies()
+        item_deps = self.get_item_dependencies_with_reverse_dependencies(
+            item, package_id
+        )
         can_be_removed = set()
         can_not_be_removed = dict()
 

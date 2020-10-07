@@ -28,7 +28,6 @@ import click
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
-from aea.cli.registry.utils import get_package_meta
 from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
@@ -525,30 +524,3 @@ def try_get_balance(  # pylint: disable=unused-argument
         return balance
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
-
-
-def get_latest_version_available_in_registry(
-    ctx: Context, item_type: str, item_public_id: PublicId
-) -> PublicId:
-    """
-    Get latest avalable package version public id.
-
-    :param ctx: Context object.
-    :param item_type: the item type.
-    :param item_public_id: the item public id.
-    :return: PublicId
-    """
-    is_local = ctx.config.get("is_local")
-    try:
-        if is_local:
-            _, item_config = find_item_locally(ctx, item_type, item_public_id)
-            latest_item_public_id = item_config.public_id
-        else:
-            package_meta = get_package_meta(item_type, item_public_id)
-            latest_item_public_id = PublicId.from_str(package_meta["public_id"])
-    except Exception:  # pylint: disable=broad-except
-        raise click.ClickException(
-            f"Package {item_public_id} details can not be fetched from the registry!"
-        )
-
-    return latest_item_public_id
