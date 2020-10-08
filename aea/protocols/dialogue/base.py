@@ -27,14 +27,34 @@ This module contains the classes required for dialogue management.
 
 import itertools
 import secrets
+import sys
 from abc import ABC
+from collections import namedtuple
 from enum import Enum
 from inspect import signature
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
 
 from aea.common import Address
-from aea.exceptions import enforce
+from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
+
+
+if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
+    DialogueMessage = namedtuple(  # pragma: no cover
+        "DialogueMessage",
+        ["performative", "contents", "is_incoming", "target"],
+        rename=False,
+        module="aea.protocols.dialogues.base",
+    )
+    DialogueMessage.__new__.__defaults__ = (dict(), None, None)  # pragma: no cover
+else:
+    DialogueMessage = namedtuple(  # pylint: disable=unexpected-keyword-arg
+        "DialogueMessage",
+        ["performative", "contents", "is_incoming", "target"],
+        rename=False,
+        defaults=[dict(), None, None],
+        module="aea.protocols.dialogues.base",
+    )
 
 
 class InvalidDialogueMessage(Exception):
@@ -360,6 +380,15 @@ class Dialogue(ABC):
         return self._rules
 
     @property
+    def message_class(self) -> Type[Message]:
+        """
+        Get the message class.
+
+        :return: the message class
+        """
+        return self._message_class
+
+    @property
     def is_self_initiated(self) -> bool:
         """
         Check whether the agent initiated the dialogue.
@@ -570,6 +599,7 @@ class Dialogue(ABC):
         self,
         performative: Message.Performative,
         target_message: Optional[Message] = None,
+        target: Optional[int] = None,
         **kwargs,
     ) -> Message:
         """
@@ -578,6 +608,7 @@ class Dialogue(ABC):
         Note if no target_message is provided, the last message in the dialogue will be replied to.
 
         :param target_message: the message to reply to.
+        :param target: the id of the message to reply to.
         :param performative: the performative of the reply message.
         :param kwargs: the content of the reply message.
 
@@ -587,20 +618,25 @@ class Dialogue(ABC):
         if last_message is None:
             raise ValueError("Cannot reply in an empty dialogue!")
 
-        if target_message is None:
-            target_message = last_message
-        else:
-            enforce(
-                self._has_message(
-                    target_message  # type: ignore
-                ),
-                "The target message does not exist in this dialogue.",
-            )
+        if target_message is None and target is None:
+            target = last_message.message_id
+        elif target_message is not None and target is None:
+            target = target_message.message_id
+        elif target_message is not None and target is not None:
+            if target != target_message.message_id:
+                raise AEAEnforceError(
+                    "The provided target and target_message do not match."
+                )
+
+        enforce(
+            self._has_message_id(target),  # type: ignore
+            "The target message does not exist in this dialogue.",
+        )
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
             message_id=last_message.message_id + 1,
-            target=target_message.message_id,
+            target=target,
             performative=performative,
             **kwargs,
         )
@@ -996,6 +1032,24 @@ class Dialogues(ABC):
         """
         return self._dialogue_stats
 
+    @property
+    def message_class(self) -> Type[Message]:
+        """
+        Get the message class.
+
+        :return: the message class
+        """
+        return self._message_class
+
+    @property
+    def dialogue_class(self) -> Type[Dialogue]:
+        """
+        Get the dialogue class.
+
+        :return: the dialogue class
+        """
+        return self._dialogue_class
+
     def get_dialogues_with_counterparty(self, counterparty: Address) -> List[Dialogue]:
         """
         Get the dialogues by address.
@@ -1035,13 +1089,14 @@ class Dialogues(ABC):
         )
         return counterparty
 
-    def new_self_initiated_dialogue_reference(self) -> Tuple[str, str]:
+    @classmethod
+    def new_self_initiated_dialogue_reference(cls) -> Tuple[str, str]:
         """
         Return a dialogue label for a new self initiated dialogue.
 
         :return: the next nonce
         """
-        return self._generate_dialogue_nonce(), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+        return cls._generate_dialogue_nonce(), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
 
     def create(
         self, counterparty: Address, performative: Message.Performative, **kwargs,
