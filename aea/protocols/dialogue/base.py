@@ -40,13 +40,13 @@ from aea.protocols.base import Message
 
 
 if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
-    DialogueMessage = namedtuple(
+    DialogueMessage = namedtuple(  # pragma: no cover
         "DialogueMessage",
         ["performative", "contents", "is_incoming", "target"],
         rename=False,
         module="aea.protocols.dialogues.base",
     )
-    DialogueMessage.__new__.__defaults__ = (dict(), None, None)
+    DialogueMessage.__new__.__defaults__ = (dict(), None, None)  # pragma: no cover
 else:
     DialogueMessage = namedtuple(  # pylint: disable=unexpected-keyword-arg
         "DialogueMessage",
