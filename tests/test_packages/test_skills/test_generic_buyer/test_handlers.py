@@ -1020,7 +1020,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
 
         # after
         assert f"received raw transaction={incoming_message}" in caplog.text
-        assert self.get_quantity_in_decision_maker_outbox() == 1
+        assert self.get_quantity_in_decision_maker_inbox() == 1
         assert (
             "proposing the transaction to the decision maker. Waiting for confirmation ..."
             in caplog.text

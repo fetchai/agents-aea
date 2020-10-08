@@ -19,6 +19,7 @@
 
 """This module contains the tests for the dialogue/base.py module."""
 
+import sys
 from typing import FrozenSet, Tuple, Type, cast
 from unittest import mock
 
@@ -125,6 +126,10 @@ class Dialogues(BaseDialogues):
         )
 
 
+@pytest.mark.skipif(
+    sys.version_info < (3, 7),
+    reason="This part of code is only defined for python version >= 3.7",
+)
 def test_dialogue_message_python_3_7():
     """Test DiallogueMessage if python is 3.7"""
     dialogue_message = DialogueMessage(DefaultMessage.Performative.BYTES)
@@ -136,6 +141,10 @@ def test_dialogue_message_python_3_7():
     assert dialogue_message.target is None
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 7),
+    reason="This part of code is only defined for python version < 3.7",
+)
 def test_dialogue_message_python_3_6():
     """Test DiallogueMessage if python is 3.6"""
     with mock.patch.object(

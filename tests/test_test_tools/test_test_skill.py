@@ -93,6 +93,34 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_outbox() == dummy_message_1
         assert self.get_message_from_outbox() == dummy_message_2
 
+    def test_get_quantity_in_decision_maker_inbox(self):
+        """Test the get_quantity_in_decision_maker_inbox method."""
+        assert self.get_quantity_in_decision_maker_inbox() == 0
+
+        dummy_message = Message(dummy="dummy")
+        dummy_message.to = "some_to"
+        dummy_message.sender = "some_sender"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message)
+
+        assert self.get_quantity_in_decision_maker_inbox() == 1
+
+    def test_get_message_from_decision_maker_inbox(self):
+        """Test the get_message_from_decision_maker_inbox method."""
+        assert self.get_message_from_decision_maker_inbox() is None
+
+        dummy_message_1 = Message(dummy_1="dummy_1")
+        dummy_message_1.to = "some_to_1"
+        dummy_message_1.sender = "some_sender_1"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message_1)
+
+        dummy_message_2 = Message(dummy_2="dummy_2")
+        dummy_message_2.to = "some_to_2"
+        dummy_message_2.sender = "some_sender_2"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message_2)
+
+        assert self.get_message_from_decision_maker_inbox() == dummy_message_1
+        assert self.get_message_from_decision_maker_inbox() == dummy_message_2
+
     def test_positive_message_has_attributes_valid_type(self):
         """Test the message_has_attributes method where the message is of the specified type."""
         dummy_message = FipaMessage(
