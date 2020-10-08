@@ -34,12 +34,12 @@ default_routing:
   fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
   fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
 ---
-name: tac_participation
 author: fetchai
+name: tac_participation
 version: 0.9.0
 type: skill
 ---
-name: tac_negotiation
 author: fetchai
+name: tac_negotiation
 version: 0.10.0
 type: skill
