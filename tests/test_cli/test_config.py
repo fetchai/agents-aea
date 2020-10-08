@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+import pytest
+from click.exceptions import ClickException
 
 """This test module contains the tests for the `aea config` sub-command."""
 
@@ -422,3 +424,47 @@ class TestConfigSet:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+class TestConfigNestedGetSet:
+    """Test that the command 'aea config set' works as expected."""
+    PATH = 'skills.dummy.behaviours.dummy.class_name'
+    INCORRECT_PATH = 'skills.dummy.behaviours.dummy.not_exists_property'
+    INITIAL_VALUE = 'DummyBehaviour'
+    NEW_VALUE = 'test2020'
+
+    def setup(self):
+        """Set the test up."""
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(self.t, "dummy_aea"))
+        os.chdir(Path(self.t, "dummy_aea"))
+        self.runner = CliRunner()
+
+    def teardown(self):
+        """Tear dowm the test."""
+        os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except (OSError, IOError):
+            pass
+
+
+    def test_set_get_incorrect_path(self):
+        with pytest.raises(ClickException, match='test'):
+            result = self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "config", "get", self.INCORRECT_PATH],
+                standalone_mode=False,
+            )
+        
+        with pytest.raises(ClickException, match='test'):
+            self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "config", "set", self.INCORRECT_PATH, self.NEW_VALUE],
+                standalone_mode=False,
+                catch_exceptions=False
+            )
+
+        
+        
+
