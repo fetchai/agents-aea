@@ -203,7 +203,7 @@ def skill(ctx: Context, skill_public_id: PublicId):
 @clean_after
 def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     """Perform project upgrade."""
-    click.echo("Upgrade project is not ready yet")
+    click.echo("Starting project upgrade...")
 
     item_remover = ItemRemoveHelper(ctx.agent_config)
 
@@ -230,7 +230,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
             items_to_upgrade_dependencies.add(package_id)
 
     if not items_to_upgrade:
-        click.echo("Everything is up to date.")
+        click.echo("Everything is already up to date!")
         return
 
     for dep in shared_deps:
@@ -252,6 +252,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         upgrader.remove_item()
         upgrader.remove_dependencies_for_item()
         upgrader.add_item()
+    click.echo("Finished project upgrade. Everything is up to date now!")
 
 
 class UpgraderException(Exception):
@@ -382,43 +383,44 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
     :return: None
     """
     try:
+        item_upgrader = ItemUpgrader(ctx, item_type, item_public_id)
         click.echo(
-            "Upgrading {} {}/{} from version to {} for the agent '{}'...".format(
+            "Upgrading {} '{}/{}' from version '{}' to '{}' for the agent '{}'...".format(
                 item_type,
                 item_public_id.author,
-                item_public_id.author,
+                item_public_id.name,
+                item_upgrader.current_item_public_id.version,
                 item_public_id.version,
                 ctx.agent_config.agent_name,
             )
         )
-        item_upgrader = ItemUpgrader(ctx, item_type, item_public_id)
         version = item_upgrader.check_upgrade_is_required()
 
         item_upgrader.remove_item()
 
         if item_upgrader.deps_can_be_removed:
             click.echo(
-                "Removing dependencies for {} {}/{}:{} ...".format(
+                "Removing dependencies for {} '{}/{}:{}' ...".format(
                     item_type,
                     item_public_id.author,
-                    item_public_id.author,
-                    item_public_id.version,
+                    item_public_id.name,
+                    item_upgrader.current_item_public_id.version,
                 )
             )
             item_upgrader.remove_dependencies_for_item()
             click.echo(
-                "Dependencies for {} {}/{}:{} removed.".format(
+                "Dependencies for {} '{}/{}:{}' removed.".format(
                     item_type,
                     item_public_id.author,
-                    item_public_id.author,
-                    item_public_id.version,
+                    item_public_id.name,
+                    item_upgrader.current_item_public_id.version,
                 )
             )
 
         item_upgrader.add_item()
 
         click.echo(
-            "The {} {}/{} for the agent '{}' successfully upgraded from {} to version {}".format(
+            "The {} '{}/{}' for the agent '{}' has been successfully upgraded from version '{}' to '{}'.".format(
                 item_type,
                 item_public_id.author,
                 item_public_id.name,
@@ -430,22 +432,22 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
 
     except NotAddedException:
         raise click.ClickException(
-            "Error: A {} with id '{}/{}' is not registered. Please use `add` command. Aborting...".format(
+            "A {} with id '{}/{}' is not registered. Please use the `add` command. Aborting...".format(
                 item_type, item_public_id.author, item_public_id.name
             ),
         )
     except AlreadyActualVersionException as e:
         raise click.ClickException(
-            "The {} with id '{}/{}' already has version {}. Nothing to upgrade.".format(
+            "The {} with id '{}/{}' already has version '{}'. Nothing to upgrade.".format(
                 item_type, item_public_id.author, item_public_id.name, e.version,
             )
         )
     except IsRequiredException as e:
         raise click.ClickException(
-            "Can not upgrade {} {}/{} cause it's required by {}".format(
+            "Can not upgrade {} '{}/{}' because it is required by '{}'".format(
                 item_type,
                 item_public_id.author,
-                item_public_id.author,
+                item_public_id.name,
                 ", ".join(map(str, e.required_by)),
             )
         )

@@ -399,7 +399,7 @@ class TestUpgradeConnectionLocally(BaseTestCase):
         """Test can not upgrade not registered component."""
         with pytest.raises(
             ClickException,
-            match=r"Error: .* with id .* is not registered. Please use `add` command. Aborting...",
+            match=r".* with id .* is not registered. Please use `add` command. Aborting...",
         ):
             self.runner.invoke(
                 cli,
