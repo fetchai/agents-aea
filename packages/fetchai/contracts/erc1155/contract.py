@@ -27,6 +27,7 @@ from typing import Any, Dict, List, Optional, cast
 from vyper.utils import keccak256
 
 from aea.common import Address
+from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
@@ -36,6 +37,8 @@ from aea.crypto.fetchai import FetchAIApi
 
 logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
+
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.10.0")
 
 
 class ERC1155Contract(Contract):

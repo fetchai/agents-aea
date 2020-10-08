@@ -109,6 +109,21 @@ class Connection(Component, ABC):
         if not self.is_connected:
             raise ConnectionError("Connection is not connected! Connect first!")
 
+    def _ensure_valid_envelope_for_external_comms(self, envelope: Envelope) -> None:
+        """
+        Ensure the envelope sender and to are valid addresses for agent-to-agent communication.
+
+        :param envelope: the envelope
+        """
+        enforce(
+            not envelope.is_sender_public_id,
+            "Sender field of envelope is public id, needs to be address.",
+        )
+        enforce(
+            not envelope.is_to_public_id,
+            "To field of envelope is public id, needs to be address.",
+        )
+
     @contextmanager
     def _connect_context(self) -> Generator:
         """Set state connecting, disconnecteing, dicsconnected during connect method."""

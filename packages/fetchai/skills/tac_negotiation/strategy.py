@@ -22,9 +22,11 @@
 import copy
 import random
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
+from aea.common import Address
 from aea.decision_maker.default import OwnershipState, Preferences
+from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -37,9 +39,12 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
+from aea.helpers.transaction.base import Terms
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
@@ -57,6 +62,7 @@ DEFAULT_SEARCH_QUERY = {
     "constraint_type": "==",
 }
 DEFAULT_SEARCH_RADIUS = 5.0
+CONTRACT_ID = str(PUBLIC_ID)
 
 
 class Strategy(Model):
@@ -105,6 +111,8 @@ class Strategy(Model):
         }
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
+        self._contract_id = CONTRACT_ID
+
         super().__init__(**kwargs)
 
     @property
@@ -144,6 +152,20 @@ class Strategy(Model):
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
+
+    @property
+    def contract_id(self) -> str:
+        """Get the contract id."""
+        return self._contract_id
+
+    @property
+    def contract_address(self) -> str:
+        """Get the contract address."""
+        contract_address = self.context.shared_state.get(
+            "erc1155_contract_address", None
+        )
+        enforce(contract_address is not None, "ERC1155Contract address not set!")
+        return contract_address
 
     def get_location_description(self) -> Description:
         """
@@ -431,3 +453,62 @@ class Strategy(Model):
             ownership_state_after_locks, signing_msg.terms
         )
         return proposal_delta_score >= 0
+
+    def terms_from_proposal(
+        self, proposal: Description, sender: Address, counterparty: Address
+    ) -> Terms:
+        """
+        Get the terms from a proposal.
+
+        :param proposal: the proposal
+        :param sender: the sender of the proposal
+        :param counterparty: the receiver of the proposal
+        :return: the terms
+        """
+        values = copy.deepcopy(proposal.values)
+        amount_by_currency_id = {values.pop("currency_id"): values.pop("price")}
+        nonce = values.pop("nonce")
+        ledger_id = values.pop("ledger_id")
+        _ = values.pop("fee")
+        quantities_by_good_id = values
+        terms = Terms(
+            ledger_id=ledger_id,
+            sender_address=sender,
+            counterparty_address=counterparty,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+            is_sender_payable_tx_fee=False,
+            nonce=nonce,
+        )
+        return terms
+
+    def kwargs_from_terms(
+        self, terms: Terms, signature: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Get the contract api message kwargs from the terms.
+
+        :param terms: the terms
+        :param signature: the signature
+        :return: the kwargs
+        """
+        all_tokens = {**terms.amount_by_currency_id, **terms.quantities_by_good_id}
+        token_ids = [int(key) for key in all_tokens.keys()]
+        from_supplies = [
+            0 if int(value) <= 0 else int(value) for value in all_tokens.values()
+        ]
+        to_supplies = [
+            0 if int(value) >= 0 else -int(value) for value in all_tokens.values()
+        ]
+        kwargs = {
+            "from_address": terms.sender_address,
+            "to_address": terms.counterparty_address,
+            "token_ids": token_ids,
+            "from_supplies": from_supplies,
+            "to_supplies": to_supplies,
+            "value": 0,
+            "trade_nonce": int(terms.nonce),
+        }
+        if signature is not None:
+            kwargs["signature"] = signature
+        return kwargs

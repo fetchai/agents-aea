@@ -410,6 +410,16 @@ class Envelope:
             connection_id = self.context.connection_id
         return connection_id
 
+    @property
+    def is_sender_public_id(self):
+        """Check if sender is a public id."""
+        return PublicId.is_valid_str(self.sender)
+
+    @property
+    def is_to_public_id(self):
+        """Check if to is a public id."""
+        return PublicId.is_valid_str(self.to)
+
     @staticmethod
     def _check_consistency(message: Message, to: str, sender: str) -> Message:
         """Check consistency of sender and to."""

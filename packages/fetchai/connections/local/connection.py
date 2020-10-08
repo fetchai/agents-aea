@@ -411,6 +411,7 @@ class OEFLocalConnection(Connection):
     async def send(self, envelope: Envelope):
         """Send a message."""
         self._ensure_connected()
+        self._ensure_valid_envelope_for_external_comms(envelope)
         self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore  # pylint: disable=protected-access
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
