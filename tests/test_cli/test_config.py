@@ -279,6 +279,7 @@ class TestConfigSet:
                 "new_dummy_name",
             ],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
@@ -290,6 +291,7 @@ class TestConfigSet:
                 "skills.dummy.behaviours.dummy.class_name",
             ],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
         assert result.output == "new_dummy_name\n"

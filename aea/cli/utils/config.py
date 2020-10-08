@@ -23,7 +23,7 @@ import logging
 import logging.config
 import os
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import click
 import jsonschema
@@ -144,7 +144,9 @@ def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration
     return item_config
 
 
-def handle_dotted_path(value: str, author: str) -> Tuple:
+def handle_dotted_path(
+    value: str, author: str
+) -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]:
     """Separate the path between path to resource and json path to attribute.
 
     Allowed values:

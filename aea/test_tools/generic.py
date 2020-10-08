@@ -104,7 +104,7 @@ def force_set_config(
 
     :return: None.
     """
-    settings_keys, file_path, _ = handle_dotted_path(dotted_path, author)
+    settings_keys, file_path, *_ = handle_dotted_path(dotted_path, author)
 
     settings = {}
     with open(file_path, "r") as f:

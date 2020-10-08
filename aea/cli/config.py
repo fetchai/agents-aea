@@ -24,7 +24,10 @@ from typing import Dict, List, Optional, cast
 import click
 
 from aea.cli.utils.click_utils import AEAJsonPathType
-from aea.cli.utils.config import _try_get_configuration_object_from_aea_config, _try_get_component_id_from_prefix
+from aea.cli.utils.config import (
+    _try_get_component_id_from_prefix,
+    _try_get_configuration_object_from_aea_config,
+)
 from aea.cli.utils.constants import FALSE_EQUIVALENTS, FROM_STRING_TO_TYPE
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
@@ -93,11 +96,6 @@ def _get_config_value(ctx: Context, json_path: List[str]):
 
 
 def _set_config(ctx: Context, json_path: List[str], value: str, type_str: str) -> None:
-    component_id = ctx.config.get("component_id")
-    configuration_file_path = ctx.config.get("configuration_file_path")
-    config_loader = ctx.config.get("config_loader")
-    is_main_agent_config = component_id is None
-
     configuration_object = _get_configuration_object(ctx)
     parent_object_path = json_path[:-1]
     attribute_name = json_path[-1]
@@ -144,21 +142,12 @@ def _get_configuration_object(ctx: Context) -> Dict:
     :param ctx: the CLI context.
     :return: the dictionary representing the configuration to update.
     """
+    config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
+    configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
-    is_main_agent_config = component_id is None
-    if is_main_agent_config:
-        configuration_object = load_yaml(configuration_file_path)
-        config_loader.validator.validate(instance=configuration_object)
-        return configuration_object
-    else:
-        true_component_id = _try_get_component_id_from_prefix(
-            # TODO get all component prefixes
-            set(ctx.agent_config)
-        )
-        return dict(
-            author=component_id.author,
-            name=component_id.name,
-        )
+    configuration_object = load_yaml(configuration_file_path)
+    config_loader.validator.validate(instance=configuration_object)
+    return configuration_object
 
 
 def _update_object(parent_object, type_str, attribute_name, value):
