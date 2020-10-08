@@ -398,7 +398,9 @@ class TestSkillTestCase(BaseSkillTestCase):
             self_address=self.skill.skill_context.agent_address
         )
         dialogue_messages = (
-            DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}, True),
+            DialogueMessage(
+                FipaMessage.Performative.CFP, {"query": "some_query"}, True
+            ),
             DialogueMessage(
                 FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
             ),
@@ -464,7 +466,9 @@ class TestSkillTestCase(BaseSkillTestCase):
                 FipaMessage.Performative.MATCH_ACCEPT_W_INFORM, {"info": "some_info"}
             ),
         )
-        with pytest.raises(AEAEnforceError, match="Cannot update the dialogue with message number 1"):
+        with pytest.raises(
+            AEAEnforceError, match="Cannot update the dialogue with message number 1"
+        ):
             self.prepare_skill_dialogue(
                 fipa_dialogues, dialogue_messages, "counterparty",
             )
@@ -476,7 +480,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         )
         dialogue_messages = tuple()
 
-        with pytest.raises(AEAEnforceError, match="the list of messages must be positive."):
+        with pytest.raises(
+            AEAEnforceError, match="the list of messages must be positive."
+        ):
             self.prepare_skill_dialogue(
                 fipa_dialogues, dialogue_messages, "counterparty",
             )

@@ -66,6 +66,17 @@ class BaseSkillTestCase:
         envelope = self._multiplexer.out_queue.get_nowait()
         return envelope.message
 
+    def get_quantity_in_decision_maker_outbox(self) -> int:
+        """Get the quantity of envelopes in the decision maker outbox."""
+        return self._skill.skill_context.decision_maker_message_queue.qsize()
+
+    def get_message_from_decision_maker_outbox(self) -> Optional[Message]:
+        """Get message from decision maker outbox."""
+        if self._skill.skill_context.decision_maker_message_queue.empty():
+            return None
+        envelope = self._skill.skill_context.decision_maker_message_queue.get_nowait()
+        return envelope.message
+
     @staticmethod
     def message_has_attributes(
         actual_message: Message, message_type: Type[Message], **kwargs,

@@ -29,9 +29,8 @@ from aea.common import Address
 from aea.exceptions import AEAEnforceError
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.dialogue.base import DialogueMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel, DialogueStats
+from aea.protocols.dialogue.base import DialogueLabel, DialogueMessage, DialogueStats
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 from aea.protocols.dialogue.base import InvalidDialogueMessage
 from aea.protocols.state_update.message import StateUpdateMessage
@@ -127,6 +126,7 @@ class Dialogues(BaseDialogues):
 
 
 def test_dialogue_message_python_3_7():
+    """Test DiallogueMessage if python is 3.7"""
     dialogue_message = DialogueMessage(DefaultMessage.Performative.BYTES)
     assert isinstance(dialogue_message.performative, Message.Performative)
 
@@ -137,7 +137,10 @@ def test_dialogue_message_python_3_7():
 
 
 def test_dialogue_message_python_3_6():
-    with mock.patch.object(aea.protocols.dialogue.base.sys, "version_info", return_value=(3, 6)):
+    """Test DiallogueMessage if python is 3.6"""
+    with mock.patch.object(
+        aea.protocols.dialogue.base.sys, "version_info", return_value=(3, 6)
+    ):
         dialogue_message = DialogueMessage(DefaultMessage.Performative.BYTES)
         assert isinstance(dialogue_message.performative, Message.Performative)
 
