@@ -85,7 +85,7 @@ class TestDialogues(BaseSkillTestCase):
         assert dialogue.self_address == self.skill.skill_context.agent_address
 
     def test_fipa_dialogue(self):
-        """Test the DefaultDialogues class."""
+        """Test the FipaDialogue class."""
         fipa_dialogue = FipaDialogue(
             DialogueLabel(
                 ("", ""), COUNTERPARTY_NAME, self.skill.skill_context.agent_address,
@@ -136,7 +136,7 @@ class TestDialogues(BaseSkillTestCase):
         assert dialogue.self_address == self.skill.skill_context.agent_address
 
     def test_ledger_api_dialogue(self):
-        """Test the LedgerApiDialogues class."""
+        """Test the LedgerApiDialogue class."""
         ledger_api_dialogue = LedgerApiDialogue(
             DialogueLabel(
                 ("", ""), COUNTERPARTY_NAME, self.skill.skill_context.agent_address,
@@ -183,7 +183,7 @@ class TestDialogues(BaseSkillTestCase):
         assert dialogue.self_address == self.skill.skill_context.agent_address
 
     def test_signing_dialogue(self):
-        """Test the SigningDialogues class."""
+        """Test the SigningDialogue class."""
         signing_dialogue = SigningDialogue(
             DialogueLabel(
                 ("", ""), COUNTERPARTY_NAME, self.skill.skill_context.agent_address,
