@@ -27,7 +27,9 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.state_update.message")
+_default_logger = logging.getLogger(
+    "aea.packages.fetchai.protocols.state_update.message"
+)
 
 DEFAULT_BODY_SIZE = 4
 
@@ -344,7 +346,7 @@ class StateUpdateMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

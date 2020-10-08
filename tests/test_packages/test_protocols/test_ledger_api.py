@@ -39,7 +39,7 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ledger_api.message import (
-    logger as ledger_api_message_logger,
+    _default_logger as ledger_api_message_logger,
 )
 
 from tests.conftest import ROOT_DIR

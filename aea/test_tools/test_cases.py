@@ -61,7 +61,7 @@ from aea.test_tools.generic import (
 from tests.conftest import ROOT_DIR
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 
@@ -728,14 +728,14 @@ class BaseAEATestCase(ABC):
         if is_terminating:
             cls.terminate_agents(process)
         if missing_strings != []:
-            logger.info(
+            _default_logger.info(
                 "Non-empty missing strings, stderr:\n{}".format(cls.stderr[process.pid])
             )
-            logger.info("=====================")
-            logger.info(
+            _default_logger.info("=====================")
+            _default_logger.info(
                 "Non-empty missing strings, stdout:\n{}".format(cls.stdout[process.pid])
             )
-            logger.info("=====================")
+            _default_logger.info("=====================")
         return missing_strings
 
     @classmethod

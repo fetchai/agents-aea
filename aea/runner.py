@@ -34,7 +34,7 @@ from aea.helpers.multiple_executor import (
 from aea.runtime import AsyncRuntime
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class AEAInstanceTask(AbstractExecutorTask):
@@ -54,7 +54,7 @@ class AEAInstanceTask(AbstractExecutorTask):
         try:
             self._agent.start()
         except BaseException:
-            logger.exception("Exceptions raised in runner task.")
+            _default_logger.exception("Exceptions raised in runner task.")
             raise
 
     def stop(self) -> None:

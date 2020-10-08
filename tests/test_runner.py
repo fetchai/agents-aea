@@ -26,7 +26,7 @@ from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.multiple_executor import ExecutorExceptionPolicies
-from aea.helpers.multiple_executor import logger as executor_logger
+from aea.helpers.multiple_executor import _default_logger as executor_logger
 from aea.runner import AEARunner
 from aea.skills.base import Skill, SkillContext
 

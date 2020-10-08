@@ -375,7 +375,7 @@ def test_remove_skill():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
-    skill = Skill.from_dir(dummy_skill_path, Mock())
+    skill = Skill.from_dir(dummy_skill_path, Mock(agent_name="name"))
     num_deps = len(builder._package_dependency_manager.all_dependencies)
     builder.add_component_instance(skill)
     assert len(builder._package_dependency_manager.all_dependencies) == num_deps + 1
@@ -490,11 +490,11 @@ def test_load_abstract_component():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
-    skill = Skill.from_dir(dummy_skill_path, Mock())
+    skill = Skill.from_dir(dummy_skill_path, Mock(agent_name="name"))
     skill.configuration.is_abstract = True
     builder.add_component_instance(skill)
     builder._load_and_add_components(
-        ComponentType.SKILL, Resources(), "aea_1", agent_context=Mock()
+        ComponentType.SKILL, Resources(), "aea_1", agent_context=Mock(agent_name="name")
     )
 
 

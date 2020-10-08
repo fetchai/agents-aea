@@ -35,7 +35,7 @@ from aea.protocols.signing.custom_types import (
 from aea.protocols.signing.custom_types import Terms as CustomTerms
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.signing.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.signing.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -292,7 +292,7 @@ class SigningMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

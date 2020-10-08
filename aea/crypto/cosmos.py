@@ -42,7 +42,7 @@ from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
 TESTNET_NAME = "testnet"
@@ -372,7 +372,7 @@ class _CosmosApi(LedgerApi):
 
     @try_decorator(
         "Encountered exception when trying get balance: {}",
-        logger_method=logger.warning,
+        logger_method=_default_logger.warning,
     )
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Try get the balance of a given account."""
@@ -540,7 +540,7 @@ class _CosmosApi(LedgerApi):
     @staticmethod
     @try_decorator(
         "Encountered exception when trying to execute wasm transaction: {}",
-        logger_method=logger.warning,
+        logger_method=_default_logger.warning,
     )
     def try_execute_wasm_transaction(
         tx_signed: Any, signed_tx_filename: str = "tx.signed"
@@ -571,7 +571,7 @@ class _CosmosApi(LedgerApi):
     @staticmethod
     @try_decorator(
         "Encountered exception when trying to execute wasm query: {}",
-        logger_method=logger.warning,
+        logger_method=_default_logger.warning,
     )
     def try_execute_wasm_query(
         contract_address: Address, query_msg: Any
@@ -690,7 +690,7 @@ class _CosmosApi(LedgerApi):
 
     @try_decorator(
         "Encountered exception when trying to get account number and sequence: {}",
-        logger_method=logger.warning,
+        logger_method=_default_logger.warning,
     )
     def _try_get_account_number_and_sequence(
         self, address: Address
@@ -723,7 +723,7 @@ class _CosmosApi(LedgerApi):
         elif self.is_transfer_transaction(tx_signed):
             tx_digest = self._try_send_signed_transaction(tx_signed)
         else:  # pragma: nocover
-            logger.warning(
+            _default_logger.warning(
                 "Cannot send transaction. Unknown transaction type: {}".format(
                     tx_signed
                 )
@@ -752,7 +752,8 @@ class _CosmosApi(LedgerApi):
         return result
 
     @try_decorator(
-        "Encountered exception when trying to send tx: {}", logger_method=logger.warning
+        "Encountered exception when trying to send tx: {}",
+        logger_method=_default_logger.warning,
     )
     def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
@@ -780,7 +781,7 @@ class _CosmosApi(LedgerApi):
 
     @try_decorator(
         "Encountered exception when trying to get transaction receipt: {}",
-        logger_method=logger.warning,
+        logger_method=_default_logger.warning,
     )
     def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
@@ -929,7 +930,7 @@ class CosmosFaucetApi(FaucetApi):
     @classmethod
     @try_decorator(
         "An error occured while attempting to request a faucet request:\n{}",
-        logger_method=logger.error,
+        logger_method=_default_logger.error,
     )
     def _try_create_faucet_claim(cls, address: Address) -> Optional[str]:
         """
@@ -947,9 +948,9 @@ class CosmosFaucetApi(FaucetApi):
             data = response.json()
             uid = data["uid"]
 
-            logger.info("Wealth claim generated, uid: {}".format(uid))
+            _default_logger.info("Wealth claim generated, uid: {}".format(uid))
         else:  # pragma: no cover
-            logger.warning(
+            _default_logger.warning(
                 "Response: {}, Text: {}".format(response.status_code, response.text)
             )
 
@@ -958,7 +959,7 @@ class CosmosFaucetApi(FaucetApi):
     @classmethod
     @try_decorator(
         "An error occured while attempting to request a faucet request:\n{}",
-        logger_method=logger.error,
+        logger_method=_default_logger.error,
     )
     def _try_check_faucet_claim(cls, uid: str) -> Optional[CosmosFaucetStatus]:
         """
@@ -969,7 +970,7 @@ class CosmosFaucetApi(FaucetApi):
         """
         response = requests.get(cls._faucet_status_uri(uid))
         if response.status_code != 200:  # pragma: nocover
-            logger.warning(
+            _default_logger.warning(
                 "Response: {}, Text: {}".format(response.status_code, response.text)
             )
             return None

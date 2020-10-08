@@ -21,21 +21,23 @@
 import datetime
 import logging
 from asyncio import AbstractEventLoop
+from logging import Logger
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from aea.abstract_agent import AbstractAgent
 from aea.connections.base import Connection
 from aea.exceptions import AEAException
+from aea.helpers.logging import WithLogger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import InBox, OutBox
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
-class Agent(AbstractAgent):
+class Agent(AbstractAgent, WithLogger):
     """This class provides an abstract base class for a generic agent."""
 
     RUNTIMES: Dict[str, Type[BaseRuntime]] = {
@@ -52,6 +54,7 @@ class Agent(AbstractAgent):
         period: float = 1.0,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        logger: Logger = _default_logger,
     ) -> None:
         """
         Instantiate the agent.
@@ -65,6 +68,7 @@ class Agent(AbstractAgent):
 
         :return: None
         """
+        WithLogger.__init__(self, logger=logger)
         self._connections = connections
         self._identity = identity
         self._period = period
@@ -197,7 +201,7 @@ class Agent(AbstractAgent):
 
         if was_started:
             self.runtime.wait_completed(sync=True)
-        else:
+        else:  #  pragma: nocover
             raise AEAException("Failed to start runtime! Was it already started?")
 
     def stop(self) -> None:
@@ -253,7 +257,7 @@ class Agent(AbstractAgent):
 
         :return: bool, propagate exception if True otherwise skip it.
         """
-        logger.exception(
+        self.logger.exception(
             f"Exception {repr(exception)} raised during {repr(function)} call."
         )
         return True
