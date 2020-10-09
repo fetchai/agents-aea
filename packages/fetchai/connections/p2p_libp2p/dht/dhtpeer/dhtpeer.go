@@ -818,6 +818,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 
 func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 	_, _, linfo, _ := dhtPeer.getLoggers()
+	//_, lwarn, linfo, _ := dhtPeer.getLoggers()
 
 	addressCID, err := utils.ComputeCID(addr)
 	if err != nil {
@@ -831,7 +832,16 @@ func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 	linfo().Str("op", "register").
 		Str("addr", addr).
 		Msgf("Announcing address to the dht with cid key %s", addressCID.String())
+	//var elapsed time.Duration
+	//start := time.Now()
 	err = dhtPeer.dht.Provide(ctx, addressCID, true)
+	//elapsed = time.Since(start)
+
+	/*
+		lwarn().Str("op", "register").
+			Str("addr", addr).
+			Msgf("RegisterAddress %l", elapsed.Microseconds())
+	*/
 	if err != context.DeadlineExceeded {
 		return err
 	}

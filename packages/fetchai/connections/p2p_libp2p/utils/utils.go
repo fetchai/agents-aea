@@ -50,6 +50,7 @@ import (
 	"libp2p_node/aea"
 )
 
+var LoggerGlobalLevel zerolog.Level = zerolog.DebugLevel
 var logger zerolog.Logger = NewDefaultLogger()
 
 /*
@@ -69,7 +70,7 @@ func newConsoleLogger() zerolog.Logger {
 func NewDefaultLogger() zerolog.Logger {
 	return newConsoleLogger().
 		With().Timestamp().
-		Logger()
+		Logger().Level(LoggerGlobalLevel)
 }
 
 // NewDefaultLoggerWithFields zerolog console writer
@@ -79,7 +80,8 @@ func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
 	for key, val := range fields {
 		logger = logger.Str(key, val)
 	}
-	return logger.Logger()
+	return logger.Logger().Level(LoggerGlobalLevel)
+
 }
 
 /*
