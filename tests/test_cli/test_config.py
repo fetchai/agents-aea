@@ -16,9 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-import pytest
-from click.exceptions import ClickException
-
 """This test module contains the tests for the `aea config` sub-command."""
 
 import os
@@ -26,8 +23,14 @@ import shutil
 import tempfile
 from pathlib import Path
 
+import pytest
+from click.exceptions import ClickException
+
 from aea.cli import cli
 from aea.cli.utils.constants import ALLOWED_PATH_ROOTS
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.loader import ConfigLoader
+from aea.helpers.base import yaml_load
 
 from tests.conftest import CLI_LOG_OPTION, CUR_PATH, CliRunner
 
@@ -50,6 +53,7 @@ class TestConfigGet:
             cli,
             [*CLI_LOG_OPTION, "config", "get", "agent.agent_name"],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
         assert result.output == "Agent0\n"
@@ -211,6 +215,7 @@ class TestConfigSet:
             cli,
             [*CLI_LOG_OPTION, "config", "set", "agent.agent_name", "new_name"],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
@@ -253,50 +258,34 @@ class TestConfigSet:
         )
         assert result.exit_code == 1
 
-    def test_set_skill_name(self):
+    def test_set_skill_name_should_fail(self):
         """Test setting the 'dummy' skill name."""
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "config", "set", "skills.dummy.name", "new_dummy_name"],
             standalone_mode=False,
         )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "config", "get", "skills.dummy.name"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        assert result.output == "new_dummy_name\n"
+        assert result.exit_code == 1
 
     def test_set_nested_attribute(self):
         """Test setting a nested attribute."""
+        path = "skills.dummy.behaviours.dummy.args.behaviour_arg_1"
+        new_value = "new_dummy_name"
         result = self.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "skills.dummy.behaviours.dummy.class_name",
-                "new_dummy_name",
-            ],
+            [*CLI_LOG_OPTION, "config", "set", path, new_value],
             standalone_mode=False,
             catch_exceptions=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "get",
-                "skills.dummy.behaviours.dummy.class_name",
-            ],
+            [*CLI_LOG_OPTION, "config", "get", path],
             standalone_mode=False,
             catch_exceptions=False,
         )
         assert result.exit_code == 0
-        assert result.output == "new_dummy_name\n"
+        assert new_value in result.output
 
     def test_no_recognized_root(self):
         """Test that the 'get' fails because the root is not recognized."""
@@ -316,7 +305,9 @@ class TestConfigSet:
     def test_too_short_path_but_root_correct(self):
         """Test that the 'get' fails because the path is too short but the root is correct."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "config", "set", "agent"], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "config", "set", "agent", "data"],
+            standalone_mode=False,
         )
         assert result.exit_code == 1
         assert (
@@ -401,15 +392,10 @@ class TestConfigSet:
 
     def test_get_fails_when_setting_non_dict_attribute(self):
         """Test that the set fails because the path point to a non-dict object."""
+        path = "skills.dummy.behaviours.dummy.args.behaviour_arg_1.over_the_string"
         result = self.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "skills.dummy.protocols.protocol",
-                "new_value",
-            ],
+            [*CLI_LOG_OPTION, "config", "set", path, "new_value"],
             standalone_mode=False,
         )
         assert result.exit_code == 1
@@ -425,12 +411,14 @@ class TestConfigSet:
         except (OSError, IOError):
             pass
 
+
 class TestConfigNestedGetSet:
     """Test that the command 'aea config set' works as expected."""
-    PATH = 'skills.dummy.behaviours.dummy.class_name'
-    INCORRECT_PATH = 'skills.dummy.behaviours.dummy.not_exists_property'
-    INITIAL_VALUE = 'DummyBehaviour'
-    NEW_VALUE = 'test2020'
+
+    PATH = "skills.dummy.behaviours.dummy.args.behaviour_arg_1"
+    INCORRECT_PATH = "skills.dummy.behaviours.dummy.args.behaviour_arg_100500"
+    INITIAL_VALUE = 1
+    NEW_VALUE = 100
 
     def setup(self):
         """Set the test up."""
@@ -448,23 +436,86 @@ class TestConfigNestedGetSet:
         except (OSError, IOError):
             pass
 
-
     def test_set_get_incorrect_path(self):
-        with pytest.raises(ClickException, match='test'):
-            result = self.runner.invoke(
+        """Fail on incorrect attribute tryed to be updated."""
+        with pytest.raises(ClickException, match="Attribute .* not found."):
+            self.runner.invoke(
                 cli,
                 [*CLI_LOG_OPTION, "config", "get", self.INCORRECT_PATH],
                 standalone_mode=False,
+                catch_exceptions=False,
             )
-        
-        with pytest.raises(ClickException, match='test'):
+
+        with pytest.raises(ClickException, match="Attribute .* not found."):
             self.runner.invoke(
                 cli,
-                [*CLI_LOG_OPTION, "config", "set", self.INCORRECT_PATH, self.NEW_VALUE],
+                [
+                    *CLI_LOG_OPTION,
+                    "config",
+                    "set",
+                    self.INCORRECT_PATH,
+                    str(self.NEW_VALUE),
+                ],
                 standalone_mode=False,
-                catch_exceptions=False
+                catch_exceptions=False,
             )
 
-        
-        
+    def load_agent_config(self) -> AgentConfig:
+        """Load agent config for current dir."""
+        agent_loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+        with open(DEFAULT_AEA_CONFIG_FILE, "r") as fp:
+            agent_config = agent_loader.load(fp)
+        return agent_config
 
+    def get_component_config_value(self) -> dict:
+        """Get component variable value."""
+        package_type, package_name, *path = self.PATH.split(".")
+        file_path = Path(f"{package_type}") / package_name / f"{package_type[:-1]}.yaml"
+
+        with open(file_path, "r") as fp:
+            data = yaml_load(fp)
+
+        value = data
+        for i in path:
+            value = value[i]
+        return value
+
+    def test_set_get_correct_path(self):
+        """Test component value updated in agent config not in component config."""
+        agent_config = self.load_agent_config()
+        assert not agent_config.component_configurations
+
+        config_value = self.get_component_config_value()
+        assert config_value == self.INITIAL_VALUE
+
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "config", "get", self.PATH],
+            standalone_mode=False,
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+        assert str(self.INITIAL_VALUE) in result.output
+
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "config", "set", self.PATH, str(self.NEW_VALUE)],
+            standalone_mode=False,
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+
+        config_value = self.get_component_config_value()
+        assert config_value == self.INITIAL_VALUE
+
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "config", "get", self.PATH],
+            standalone_mode=False,
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+        assert str(self.NEW_VALUE) in result.output
+
+        agent_config = self.load_agent_config()
+        assert agent_config.component_configurations
