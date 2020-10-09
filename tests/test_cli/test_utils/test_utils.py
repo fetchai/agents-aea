@@ -22,14 +22,13 @@
 from builtins import FileNotFoundError
 from typing import cast
 from unittest import TestCase, mock
-from unittest.mock import MagicMock
 
 import pytest
 from click import BadParameter, ClickException
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import AEAJsonPathType, PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -390,31 +389,6 @@ class IsFingerprintCorrectTestCase(TestCase):
         package_path = "package_dir"
         result = is_fingerprint_correct(package_path, item_config)
         self.assertFalse(result)
-
-
-@mock.patch("aea.cli.config.click.ParamType")
-class AEAJsonPathTypeTestCase(TestCase):
-    """Test case for AEAJsonPathType class."""
-
-    @mock.patch("aea.cli.utils.click_utils.Path.exists", return_value=True)
-    def test_convert_root_vendor_positive(self, *mocks):
-        """Test for convert method with root "vendor" positive result."""
-        value = "vendor.author.protocols.package_name.attribute_name"
-        ctx_mock = ContextMock()
-        ctx_mock.obj = mock.Mock()
-        ctx_mock.obj.set_config = mock.Mock()
-        obj = AEAJsonPathType()
-        obj.convert(value, "param", ctx_mock)
-
-    @mock.patch("aea.cli.utils.click_utils.Path.exists", return_value=False)
-    def test_convert_root_vendor_path_not_exists(self, *mocks):
-        """Test for convert method with root "vendor" path not exists."""
-        value = "vendor.author.protocols.package_name.attribute_name"
-        obj = AEAJsonPathType()
-        ctx = MagicMock()
-        ctx.obj.agent_config.author = "author"
-        with self.assertRaises(BadParameter):
-            obj.convert(value, "param", ctx)
 
 
 @mock.patch("aea.cli.utils.package_utils.LedgerApis", mock.MagicMock())

@@ -48,7 +48,7 @@ def config(click_context):  # pylint: disable=unused-argument
 
 
 @config.command()
-@click.argument("JSON_PATH", required=True)  # , type=AEAJsonPathType())
+@click.argument("JSON_PATH", required=True)
 @pass_ctx
 def get(ctx: Context, json_path: str):
     """Get a field."""
@@ -90,16 +90,6 @@ class ConfigGetSet:
         "contracts",
     ]
 
-    AGENT_FIELDS_ALLOWED_TO_CHANGE = [
-        "agent_name",
-        "author",
-        "registry_path",
-        "logging_config",
-        "private_key_paths",
-        "default_connection",
-        "default_ledger",
-    ]
-
     def __init__(self, ctx: Context, dotted_path: str) -> None:
         """Init tool.
 
@@ -134,8 +124,8 @@ class ConfigGetSet:
         """Get config value."""
         if self.component_id:
             return self._get_component_value()
-        else:
-            return self._get_agent_value()
+
+        return self._get_agent_value()
 
     def _get_agent_value(self) -> Any:
         """Get config value for agent config."""
@@ -220,14 +210,16 @@ class ConfigGetSet:
 
         :raises: click.ClickException is field is not allowed to be changeed.
         """
-        if (
-            self.is_target_agent
-            and self.json_path[0] in self.AGENT_FIELDS_ALLOWED_TO_CHANGE
-        ):
-            return
-        if self.json_path[0] in self.FIELDS_NOT_ALLOWED_TO_CHANGE:
+        top_level_key = self.json_path[0]
+
+        if self.component_id:
+            config = self.component_id.package_type.configuration_class()
+        else:
+            config = self.agent_config
+
+        if top_level_key not in config.FIELDS_ALLOWED_TO_UPDATE:
             raise click.ClickException(
-                f"Field `{self.json_path[0]}` is not allowed to change!"
+                f"Field `{top_level_key}` is not allowed to change!"
             )
 
     def _fix_component_id_version(self) -> None:
@@ -296,7 +288,15 @@ class ConfigGetSet:
         self._dump_agent_configuration(agent_configuration_object)
 
     def _update_object(self, parent_object: Dict, type_str: str, value: str) -> None:
-        """Update dict with value converted to type."""
+        """
+        Update dict with value converted to type.
+
+        :param parent_object: dict where value should be updated,
+        :param: type_str: type name to convert value on update.
+        :param value: str of the value to set.
+
+        :return: None
+        """
         type_ = FROM_STRING_TO_TYPE[type_str]
         try:
             if type_ != bool:

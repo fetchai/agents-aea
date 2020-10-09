@@ -940,6 +940,10 @@ class ConnectionConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
 
+    FIELDS_ALLOWED_TO_UPDATE = [
+        "config",
+    ]
+
     def __init__(
         self,
         name: str = "",
@@ -1083,6 +1087,8 @@ class ProtocolConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_PROTOCOL_CONFIG_FILE
     package_type = PackageType.PROTOCOL
 
+    FIELDS_ALLOWED_TO_UPDATE = []
+
     def __init__(
         self,
         name: str,
@@ -1177,6 +1183,12 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
+
+    FIELDS_ALLOWED_TO_UPDATE = [
+        "behaviours",
+        "handlers",
+        "models",
+    ]
 
     def __init__(
         self,
@@ -1369,6 +1381,16 @@ class AgentConfig(PackageConfiguration):
 
     default_configuration_filename = DEFAULT_AEA_CONFIG_FILE
     package_type = PackageType.AGENT
+
+    FIELDS_ALLOWED_TO_UPDATE = [
+        "agent_name",
+        "author",
+        "registry_path",
+        "logging_config",
+        "private_key_paths",
+        "default_connection",
+        "default_ledger",
+    ]
 
     def __init__(
         self,
@@ -1866,6 +1888,10 @@ class ContractConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_CONTRACT_CONFIG_FILE
     package_type = PackageType.CONTRACT
+
+    FIELDS_ALLOWED_TO_UPDATE = [
+        "contract_interface_paths",
+    ]
 
     def __init__(
         self,

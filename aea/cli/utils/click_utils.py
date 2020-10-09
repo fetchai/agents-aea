@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Module with click utils of the aea cli."""
 
 import os
@@ -26,9 +25,8 @@ from typing import List, Optional
 
 import click
 
-from aea.cli.utils.config import handle_dotted_path, try_to_load_agent_config
+from aea.cli.utils.config import try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
-from aea.exceptions import AEAException
 
 
 class ConnectionsOption(click.Option):
@@ -119,37 +117,3 @@ class AgentDirectory(click.Path):
             )
         finally:
             os.chdir(cwd)
-
-
-class AEAJsonPathType(click.ParamType):
-    """This class implements the JSON-path parameter type for the AEA CLI tool."""
-
-    name = "json-path"
-
-    def convert(self, value, param, ctx):
-        """Separate the path between path to resource and json path to attribute.
-
-        Allowed values:
-            'agent.an_attribute_name'
-            'protocols.my_protocol.an_attribute_name'
-            'connections.my_connection.an_attribute_name'
-            'contracts.my_contract.an_attribute_name'
-            'skills.my_skill.an_attribute_name'
-            'vendor.author.[protocols|connections|skills].package_name.attribute_name
-        """
-        try:
-            (
-                json_path,
-                path_to_resource_configuration,
-                config_loader,
-                component_id,
-            ) = handle_dotted_path(value, ctx.obj.agent_config.author)
-        except AEAException as e:
-            self.fail(str(e))
-        else:
-            ctx.obj.set_config(
-                "configuration_file_path", path_to_resource_configuration
-            )
-            ctx.obj.set_config("configuration_loader", config_loader)
-            ctx.obj.set_config("component_id", component_id)
-            return json_path

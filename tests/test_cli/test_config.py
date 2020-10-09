@@ -226,6 +226,18 @@ class TestConfigSet:
         assert result.exit_code == 0
         assert result.output == "new_name\n"
 
+    def test_set_agent_incorrect_value(self):
+        """Test setting the agent name."""
+        with pytest.raises(
+            ClickException, match="Field `not_agent_name` is not allowed to change!"
+        ):
+            self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "config", "set", "agent.not_agent_name", "new_name"],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
+
     def test_set_type_bool(self):
         """Test setting the agent name."""
         result = self.runner.invoke(
@@ -346,21 +358,22 @@ class TestConfigSet:
         )
 
     def test_attribute_not_found(self):
-        """Test that the 'get' fails because the attribute is not found."""
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "skills.dummy.non_existing_attribute",
-                "value",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 1
-        s = "Attribute 'non_existing_attribute' not found."
-        assert result.exception.message == s
+        """Test that the 'set' fails because the attribute is not found."""
+        with pytest.raises(
+            ClickException, match="Field `.*` is not allowed to change!"
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    *CLI_LOG_OPTION,
+                    "config",
+                    "set",
+                    "skills.dummy.non_existing_attribute",
+                    "value",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_set_fails_when_setting_non_primitive_type(self):
         """Test that setting the 'dummy' skill behaviours fails because not a primitive type."""
@@ -375,20 +388,21 @@ class TestConfigSet:
 
     def test_get_fails_when_setting_nested_object(self):
         """Test that setting a nested object in 'dummy' skill fails because path is not valid."""
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "skills.dummy.non_existing_attribute.dummy",
-                "new_value",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 1
-        s = "Cannot get attribute 'non_existing_attribute'"
-        assert result.exception.message == s
+        with pytest.raises(
+            ClickException, match=r"Field `.*` is not allowed to change!"
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    *CLI_LOG_OPTION,
+                    "config",
+                    "set",
+                    "skills.dummy.non_existing_attribute.dummy",
+                    "new_value",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_get_fails_when_setting_non_dict_attribute(self):
         """Test that the set fails because the path point to a non-dict object."""
@@ -446,7 +460,7 @@ class TestConfigNestedGetSet:
                 catch_exceptions=False,
             )
 
-        with pytest.raises(ClickException, match="Attribute .* not found."):
+        with pytest.raises(ClickException, match="Attribute '.*' not found."):
             self.runner.invoke(
                 cli,
                 [
