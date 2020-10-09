@@ -125,8 +125,8 @@ func BenchmarkBaselineTCPConnectAndEcho(b *testing.B) {
  * Peer DHT operations benchmark
  * ********************************** */
 
-var keysFilePath = "/home/lokman/dev/aea/agents-aea/benchmark_keys.txt"
-var addrsFilePath = "/home/lokman/dev/aea/agents-aea/benchmark_addrs.txt"
+var keysFilePath = "/path/to/file/benchmark_keys.txt"
+var addrsFilePath = "/path/to/file/benchmark_addrs.txt"
 
 func getKeysAndAddrs(b *testing.B) (keys []string, addrs []string) {
 	keysFile, err := os.Open(keysFilePath)
