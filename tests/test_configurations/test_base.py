@@ -624,6 +624,12 @@ def test_package_id_str():
     assert str(package_id) == "(protocol, author/name:0.1.0)"
 
 
+def test_package_id_repr():
+    """Test PackageId.__repr__"""
+    package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    assert repr(package_id) == "PackageId(protocol, author/name:0.1.0)"
+
+
 def test_package_id_lt():
     """Test PackageId.__lt__"""
     package_id_1 = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))

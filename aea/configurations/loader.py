@@ -347,8 +347,8 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
     ) -> None:
         """Dump agent configuration."""
         agent_config_part = configuration.ordered_json
+        self.validate(agent_config_part)
         agent_config_part.pop("component_configurations")
-        self.validator.validate(instance=agent_config_part)
         result = [agent_config_part] + configuration.component_configurations_json()
         yaml_dump_all(result, file_pointer)
 
