@@ -18,20 +18,17 @@
 # ------------------------------------------------------------------------------
 """This module contains registries."""
 
-import logging
 from typing import List, Optional
 
 from aea.configurations.base import PublicId, SkillId
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
+from aea.helpers.logging import WithLogger, get_logger
 from aea.protocols.base import Message
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler
 
 
-logger = logging.getLogger(__name__)
-
-
-class Filter:
+class Filter(WithLogger):
     """This class implements the filter of an AEA."""
 
     def __init__(
@@ -43,6 +40,8 @@ class Filter:
         :param resources: the resources
         :param decision_maker_out_queue: the decision maker queue
         """
+        logger = get_logger(__name__, resources.agent_name)
+        WithLogger.__init__(self, logger=logger)
         self._resources = resources
         self._decision_maker_out_queue = decision_maker_out_queue
 
@@ -106,7 +105,7 @@ class Filter:
     def handle_internal_message(self, internal_message: Optional[Message]) -> None:
         """Handlle internal message."""
         if internal_message is None:
-            logger.warning("Got 'None' while processing internal messages.")
+            self.logger.warning("Got 'None' while processing internal messages.")
             return
         self._handle_internal_message(internal_message)
 
@@ -122,7 +121,7 @@ class Filter:
                         is_dynamically_added=True,
                     )
                 except ValueError as e:
-                    logger.warning(
+                    self.logger.warning(
                         "Error when trying to add a new behaviour: {}".format(str(e))
                     )
 
@@ -138,7 +137,7 @@ class Filter:
                         is_dynamically_added=True,
                     )
                 except ValueError as e:
-                    logger.warning(
+                    self.logger.warning(
                         "Error when trying to add a new handler: {}".format(str(e))
                     )
 
@@ -147,17 +146,19 @@ class Filter:
         try:
             skill_id = PublicId.from_str(message.to)
         except ValueError:
-            logger.warning("Invalid public id as destination={}".format(message.to))
+            self.logger.warning(
+                "Invalid public id as destination={}".format(message.to)
+            )
             return
         handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
             message.protocol_id, skill_id,
         )
         if handler is not None:
-            logger.debug(
+            self.logger.debug(
                 "Calling handler {} of skill {}".format(type(handler), skill_id)
             )
             handler.handle(message)
         else:
-            logger.warning(
+            self.logger.warning(
                 "No internal handler fetched for skill_id={}".format(skill_id)
             )

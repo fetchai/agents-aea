@@ -100,7 +100,9 @@ def test_default_valid_performatives():
 
 def test_light_protocol_rule_3_target_0():
     """Test that if message_id is not 1, target must be > 0"""
-    with patch.object(aea.protocols.default.message.logger, "error") as mock_logger:
+    with patch.object(
+        aea.protocols.default.message._default_logger, "error"
+    ) as mock_logger:
         message_id = 2
         target = 0
         DefaultMessage(
@@ -116,7 +118,9 @@ def test_light_protocol_rule_3_target_0():
 
 def test_light_protocol_rule_3_target_less_than_message_id():
     """Test that if message_id is not 1, target must be > message_id"""
-    with patch.object(aea.protocols.default.message.logger, "error") as mock_logger:
+    with patch.object(
+        aea.protocols.default.message._default_logger, "error"
+    ) as mock_logger:
         message_id = 2
         target = 2
         DefaultMessage(

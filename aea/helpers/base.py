@@ -40,7 +40,7 @@ import yaml
 from dotenv import load_dotenv
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 def _ordered_loading(fun: Callable):
@@ -143,12 +143,12 @@ def locate(path: str) -> Any:
         spec_name = ".".join(parts[: n + 1])
         module_location = os.path.join(file_location, "__init__.py")
         spec = importlib.util.spec_from_file_location(spec_name, module_location)
-        logger.debug("Trying to import {}".format(module_location))
+        _default_logger.debug("Trying to import {}".format(module_location))
         nextmodule = _get_module(spec)
         if nextmodule is None:
             module_location = file_location + ".py"
             spec = importlib.util.spec_from_file_location(spec_name, module_location)
-            logger.debug("Trying to import {}".format(module_location))
+            _default_logger.debug("Trying to import {}".format(module_location))
             nextmodule = _get_module(spec)
 
         if nextmodule:
@@ -426,3 +426,25 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             recursive_update(value_to_update, value)
         else:
             to_update[key] = value
+
+
+def _get_aea_logger_name_prefix(module_name: str, agent_name: str) -> str:
+    """
+    Get the logger name prefix.
+
+    It consists of a dotted path with:
+    - the name of the package, 'aea';
+    - the agent name;
+    - the rest of the dotted path.
+
+    >>> _get_aea_logger_name_prefix("aea.path.to.package", "myagent")
+    'aea.myagent.path.to.package'
+
+    :param module_name: the module name.
+    :param agent_name: the agent name.
+    :return: the logger name prefix.
+    """
+    module_name_parts = module_name.split(".")
+    root = module_name_parts[0]
+    postfix = module_name_parts[1:]
+    return ".".join([root, agent_name, *postfix])

@@ -6,11 +6,11 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  __init__.py: QmTwLir2v2eYMkDeUomf9uL1hrQhjzVTTqrQwamGG5iwn4
-  custom_types.py: QmVboXL98TzRtreCRMrCF3U9xjRGRkGJjNgDBTAm5GXyLq
-  dialogues.py: QmVUoaW4CNgjZNy6PzmQrSYTCdeWQERsQR5maXhD9cd6HF
-  message.py: QmS3NcTMgbDx1ZkXkzwfiML26LU9FPfgjg2XznpL8wueQR
-  serialization.py: QmcS33k6rHgCCkhBuQ5kiXVKFMxxEzcZManshPD51MEHbw
+  __init__.py: QmQy21g5sVYfmy4vSYuEFyPnobM4SA1dEouz5deXNssPWx
+  custom_types.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
+  dialogues.py: QmdpXJCUP6wV6StDxByraFGveMcTSjjFhDju74S4QVQpxf
+  message.py: QmaTFAmfVGAoxmQ78J3q5KhNAk7ErwKfzsaMZik4bxdjEx
+  serialization.py: QmYkdw251GKKCw6ZmPp4JmE6mXQ3jUhTgcfNKqsdCJbyfU
   t_protocol.proto: QmRuYvnojwkyZLzeECH3snomgoMJTB3m48yJiLq8LYsVb8
   t_protocol_pb2.py: QmXrSgBBJCj8hbGCynKrvdkSDohQzHLPBA2vi5hDHmaGid
 fingerprint_ignore_patterns: []

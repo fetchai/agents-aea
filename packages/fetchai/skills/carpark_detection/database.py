@@ -28,7 +28,7 @@ from typing import Optional
 import skimage  # type: ignore
 
 
-_logger = logging.getLogger(
+_default_logger = logging.getLogger(
     "aea.packages.fetchai.skills.carpark_detection.detection_database"
 )
 
@@ -61,7 +61,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         if create_if_not_present:
             self.initialise_backend()
 
-        self.logger = logger if logger is not None else _logger
+        self.logger = logger if logger is not None else _default_logger
 
     def is_db_exits(self):
         """Return true if database exixts and is set up."""

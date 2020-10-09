@@ -49,7 +49,7 @@ REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
 PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.9.0")
 
-logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
 
@@ -125,7 +125,7 @@ class HTTPClientAsyncChannel:
         self.is_stopped = True
         self._tasks: Set[Task] = set()
 
-        self.logger = logger
+        self.logger = _default_logger
         self.logger.info("Initialised the HTTP client channel")
 
     async def connect(self, loop: AbstractEventLoop) -> None:

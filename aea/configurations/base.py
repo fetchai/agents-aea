@@ -676,6 +676,10 @@ class PackageId:
             package_type=self.package_type.value, public_id=self.public_id,
         )
 
+    def __repr__(self):
+        """Get the object representation in string."""
+        return f"PackageId{self.__str__()}"
+
     def __eq__(self, other):
         """Compare with another object."""
         return (

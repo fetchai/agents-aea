@@ -32,7 +32,7 @@ from packages.fetchai.protocols.ml_trade.custom_types import (
 from packages.fetchai.protocols.ml_trade.custom_types import Query as CustomQuery
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.ml_trade.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.ml_trade.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -251,7 +251,7 @@ class MlTradeMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

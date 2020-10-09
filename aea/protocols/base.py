@@ -36,7 +36,7 @@ from aea.configurations.loader import load_component_configuration
 from aea.exceptions import enforce
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 Address = str
 
@@ -68,7 +68,7 @@ class Message:
         try:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
-            logger.error(e)
+            _default_logger.error(e)
 
     @property
     def has_sender(self) -> bool:
