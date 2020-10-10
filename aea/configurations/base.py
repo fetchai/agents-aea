@@ -1200,6 +1200,7 @@ class SkillConfig(ComponentConfiguration):
         "behaviours",
         "handlers",
         "models",
+        "is_abstract",
     ]
 
     def __init__(
