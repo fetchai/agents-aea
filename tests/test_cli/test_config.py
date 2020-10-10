@@ -209,22 +209,33 @@ class TestConfigSet:
         os.chdir(Path(cls.t, "dummy_aea"))
         cls.runner = CliRunner()
 
-    def test_set_agent_name(self):
+    def test_set_agent_logging_options(self):
         """Test setting the agent name."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "config", "set", "agent.agent_name", "new_name"],
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.logging_config.disable_existing_loggers",
+                "True",
+            ],
             standalone_mode=False,
             catch_exceptions=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "config", "get", "agent.agent_name"],
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "get",
+                "agent.logging_config.disable_existing_loggers",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
-        assert result.output == "new_name\n"
+        assert result.output == "True\n"
 
     def test_set_agent_incorrect_value(self):
         """Test setting the agent name."""

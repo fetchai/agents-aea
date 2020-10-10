@@ -79,17 +79,6 @@ def set_command(
 class ConfigGetSet:
     """Tool to get/set value in agent config."""
 
-    FIELDS_NOT_ALLOWED_TO_CHANGE = [
-        "name",
-        "version",
-        "author",
-        "type",
-        "connections",
-        "skills",
-        "protocols",
-        "contracts",
-    ]
-
     def __init__(self, ctx: Context, dotted_path: str) -> None:
         """Init tool.
 
@@ -213,11 +202,11 @@ class ConfigGetSet:
         top_level_key = self.json_path[0]
 
         if self.component_id:
-            config = self.component_id.package_type.configuration_class()
+            config_class = self.component_id.package_type.configuration_class()
         else:
-            config = self.agent_config
+            config_class = type(self.agent_config)
 
-        if top_level_key not in config.FIELDS_ALLOWED_TO_UPDATE:
+        if top_level_key not in config_class.FIELDS_ALLOWED_TO_UPDATE:
             raise click.ClickException(
                 f"Field `{top_level_key}` is not allowed to change!"
             )
