@@ -187,6 +187,33 @@ class TestConfigGet:
         s = "The target object is not a dictionary."
         assert result.exception.message == s
 
+    def test_get_fails_when_getting_non_dict_attribute_in_between(self):
+        """Test that the get fails because an object in between is not a dictionary."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "config", "get", "agent.skills.some_attribute"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 1
+        s = "Attribute 'skills' is not a dictionary."
+        assert result.exception.message == s
+
+    def test_get_fails_when_getting_vendor_dependency_with_wrong_component_type(self):
+        """Test that getting a vendor component with wrong component type raises error."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "get",
+                "vendor.fetchai.component_type_not_correct.error.non_existing_attribute",
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 1
+        s = "'component_type_not_correct' is not a valid component type. Please use one of ['protocols', 'connections', 'skills', 'contracts']."
+        assert result.exception.message == s
+
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
