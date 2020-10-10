@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea config' subcommand."""
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
 
@@ -35,6 +35,7 @@ from aea.configurations.base import (
     ComponentId,
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,
+    SkillConfig,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.exceptions import AEAException
@@ -79,17 +80,6 @@ def set_command(
 class ConfigGetSet:
     """Tool to get/set value in agent config."""
 
-    FIELDS_NOT_ALLOWED_TO_CHANGE = [
-        "name",
-        "version",
-        "author",
-        "type",
-        "connections",
-        "skills",
-        "protocols",
-        "contracts",
-    ]
-
     def __init__(self, ctx: Context, dotted_path: str) -> None:
         """Init tool.
 
@@ -120,19 +110,19 @@ class ConfigGetSet:
         """Attribute name."""
         return self.json_path[-1]
 
-    def get(self) -> Any:
+    def get(self) -> Union[str, int]:
         """Get config value."""
         if self.component_id:
             return self._get_component_value()
 
         return self._get_agent_value()
 
-    def _get_agent_value(self) -> Any:
+    def _get_agent_value(self) -> Union[str, int]:
         """Get config value for agent config."""
         configuration_object = self._load_configuration_object()
         return self._get_value_from_configuration_object(configuration_object)
 
-    def _get_component_value(self) -> Any:
+    def _get_component_value(self) -> Union[str, int]:
         """Get config value for component section in agent config or component package."""
         configuration_object_from_agent = self._get_configuration_object_from_agent()
         try:
@@ -160,7 +150,9 @@ class ConfigGetSet:
         self.config_loader.validate(configuration_object)
         return configuration_object
 
-    def _get_configuration_object_from_agent(self) -> Optional[Dict]:
+    def _get_configuration_object_from_agent(
+        self,
+    ) -> Optional[Dict[str, Union[str, int]]]:
         """Get component configuration object from agent component configurations."""
         if not self.component_id:  # pragma: nocover
             raise ValueError("component in not set")
@@ -169,11 +161,15 @@ class ConfigGetSet:
             self.ctx, self.component_id
         )
 
-    def _get_value_from_configuration_object(self, conf_obj: Dict) -> Any:
+    def _get_value_from_configuration_object(
+        self, conf_obj: Dict[str, Union[str, int]]
+    ) -> Any:
         """Get value from configuration object."""
         return self._get_parent_object(conf_obj).get(self.attr_name)
 
-    def _get_parent_object(self, conf_obj: Dict) -> Dict:
+    def _get_parent_object(
+        self, conf_obj: Dict[str, Union[str, int]]
+    ) -> Dict[str, Union[str, int]]:
         """
         Get and validate parent object.
 
@@ -213,14 +209,25 @@ class ConfigGetSet:
         top_level_key = self.json_path[0]
 
         if self.component_id:
-            config = self.component_id.package_type.configuration_class()
+            _config = self.component_id.package_type.configuration_class()
         else:
-            config = self.agent_config
+            _config = type(self.agent_config)
 
-        if top_level_key not in config.FIELDS_ALLOWED_TO_UPDATE:
+        if top_level_key not in _config.FIELDS_ALLOWED_TO_UPDATE:
             raise click.ClickException(
                 f"Field `{top_level_key}` is not allowed to change!"
             )
+        if _config == SkillConfig:
+            if len(self.json_path) < 3:
+                raise click.ClickException(
+                    f"Path {self.json_path} not valid for skill."
+                )
+            second_level_key = self.json_path[1]
+            third_level_key = self.json_path[2]
+            if third_level_key not in SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
+                raise click.ClickException(
+                    f"Field `{top_level_key}.{second_level_key}.{third_level_key}` is not allowed to change!"
+                )
 
     def _fix_component_id_version(self) -> None:
         """Update self.component_id with actual version defined in agent instead of latest."""
@@ -241,7 +248,9 @@ class ConfigGetSet:
 
         self.component_id = component_id
 
-    def _parent_object_for_agent_component_configuration(self) -> Dict:
+    def _parent_object_for_agent_component_configuration(
+        self,
+    ) -> Dict[str, Union[str, int]]:
         if not self.component_id:  # pragma: nocover: check for mypy
             raise ValueError("no component specified")
         configuration_object = self.agent_config.component_configurations.get(
@@ -318,7 +327,9 @@ class ConfigGetSet:
         """Return agent config file path."""
         return Path(".") / DEFAULT_AEA_CONFIG_FILE
 
-    def _dump_agent_configuration(self, agent_configuration_object: Dict) -> None:
+    def _dump_agent_configuration(
+        self, agent_configuration_object: Dict[str, Union[str, int]]
+    ) -> None:
         """Save agent configuration."""
         try:
             configuration_obj = self.agent_config_loader.configuration_class.from_json(
