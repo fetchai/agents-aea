@@ -486,7 +486,8 @@ class TestUpgradeConnectionLocally(BaseTestCase):
                     dict(),
                 ),
             ), pytest.raises(
-                ClickException, match=r"Can not upgrade .* because it is required by"
+                ClickException,
+                match=r"Can not upgrade .* because it is required by '.*'",
             ):
                 self.runner.invoke(
                     cli,
