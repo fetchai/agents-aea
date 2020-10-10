@@ -28,13 +28,27 @@ import (
 
 	"libp2p_node/aea"
 	"libp2p_node/utils"
+
+	"github.com/rs/zerolog"
 )
 
-// to run benchmark: go test -p 1 -count 20 libp2p_node/dht/dhtpeer/ -run=XXX  -bench B  -benchtime=20x
+/* **********
+* How to run
+* ***********
+
+	$ go test -p 1 -count 20 libp2p_node/dht/dhtpeer/ -run=XXX  -bench .  -benchtime=20x
+
+*/
+
+var keysFilePath = "/path/to/file/benchmark_keys.txt"
+var addrsFilePath = "/path/to/file/benchmark_addrs.txt"
+var tcpUri = "localhost:12345"
 
 /* **********************************
  * baseline TCP connection benchmark
  * ********************************** */
+
+// helpers
 
 func acceptAndEcho(server net.Listener) {
 	for {
@@ -72,20 +86,22 @@ func sendAndReceive(conn net.Conn, buf []byte, b *testing.B) {
 }
 
 func connectAndSend(buf []byte, b *testing.B) {
-	conn := connect("localhost:12345", b)
+	conn := connect(tcpUri, b)
 	sendAndReceive(conn, buf, b)
 	conn.Close()
 }
 
+// benchs
+
 func BenchmarkBaselineTCPEcho(b *testing.B) {
 
-	tcpServer, err := net.Listen("tcp", "localhost:12345")
+	tcpServer, err := net.Listen("tcp", tcpUri)
 	if err != nil {
 		b.Fatal(err.Error())
 	}
 	go acceptAndEcho(tcpServer)
 	buf := make([]byte, 200)
-	conn := connect("localhost:12345", b)
+	conn := connect(tcpUri, b)
 
 	for i := 0; i < b.N; i++ {
 		sendAndReceive(conn, buf, b)
@@ -98,7 +114,7 @@ func BenchmarkBaselineTCPEcho(b *testing.B) {
 
 func BenchmarkBaselineTCPConnectAndEcho(b *testing.B) {
 
-	tcpServer, err := net.Listen("tcp", "localhost:12345")
+	tcpServer, err := net.Listen("tcp", tcpUri)
 	if err != nil {
 		b.Fatal(err.Error())
 	}
@@ -125,8 +141,7 @@ func BenchmarkBaselineTCPConnectAndEcho(b *testing.B) {
  * Peer DHT operations benchmark
  * ********************************** */
 
-var keysFilePath = "/path/to/file/benchmark_keys.txt"
-var addrsFilePath = "/path/to/file/benchmark_addrs.txt"
+// helpers
 
 func getKeysAndAddrs(b *testing.B) (keys []string, addrs []string) {
 	keysFile, err := os.Open(keysFilePath)
@@ -152,6 +167,42 @@ func getKeysAndAddrs(b *testing.B) (keys []string, addrs []string) {
 	return keys, addrs
 }
 
+func setupLocalDHTPeerForBench(key string, addr string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
+	/*
+		peer, peerCleanup, err := SetupLocalDHTPeer(key, addr, dhtPort, delegatePort, entry)
+		if err == nil {
+			peer.SetLogLevel(zerolog.Disabled)
+			utils.SetLoggerLevel(zerolog.Disabled)
+		}
+		return peer, peerCleanup, err
+	*/
+
+	opts := []Option{
+		LocalURI(DefaultLocalHost, dhtPort),
+		PublicURI(DefaultLocalHost, dhtPort),
+		IdentityFromFetchAIKey(key),
+		EnableRelayService(),
+		BootstrapFrom(entry),
+	}
+
+	if addr != "" {
+		opts = append(opts, RegisterAgentAddress(addr, func() bool { return true }))
+	}
+
+	if delegatePort != 0 {
+		opts = append(opts, EnableDelegateService(delegatePort))
+	}
+
+	dhtPeer, err := New(opts...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	utils.SetLoggerLevel(zerolog.Disabled)
+
+	return dhtPeer, func() { dhtPeer.Close() }, nil
+}
+
 func deployPeers(number uint16, b *testing.B) ([]*DHTPeer, []string) {
 	keys, addrs := getKeysAndAddrs(b)
 	peers := make([]*DHTPeer, 0, number)
@@ -160,7 +211,7 @@ func deployPeers(number uint16, b *testing.B) ([]*DHTPeer, []string) {
 		if i > 0 {
 			entry = append(entry, peers[i-1].MultiAddr())
 		}
-		peer, _, err := SetupLocalDHTPeer(
+		peer, _, err := setupLocalDHTPeerForBench(
 			keys[i], addrs[i], DefaultLocalPort+i, 0,
 			entry,
 		)
@@ -178,12 +229,26 @@ func closePeers(peers ...*DHTPeer) {
 	}
 }
 
-func benchmarkDHTPeerRegisterAddress(npeers uint16, b *testing.B) {
+func setupEchoServicePeers(peers ...*DHTPeer) {
+	for _, peer := range peers {
+		peer.ProcessEnvelope(func(envel *aea.Envelope) error {
+			err := peer.RouteEnvelope(&aea.Envelope{
+				To:     envel.Sender,
+				Sender: envel.To,
+			})
+			return err
+		})
+	}
+}
+
+// benchs
+
+func benchmarkAgentRegistration(npeers uint16, b *testing.B) {
 	peers, addrs := deployPeers(npeers, b)
 	ensureAddressAnnounced(peers...)
 	defer closePeers(peers...)
 
-	peer, peerCleanup, err := SetupLocalDHTPeer(
+	peer, peerCleanup, err := setupLocalDHTPeerForBench(
 		FetchAITestKeys[1], "", DefaultLocalPort+npeers+1, 0,
 		[]string{peers[0].MultiAddr()},
 	)
@@ -198,18 +263,12 @@ func benchmarkDHTPeerRegisterAddress(npeers uint16, b *testing.B) {
 	}
 }
 
-func BenchmarkDHTPeerRegisterAddress2(b *testing.B)   { benchmarkDHTPeerRegisterAddress(2, b) }
-func BenchmarkDHTPeerRegisterAddress8(b *testing.B)   { benchmarkDHTPeerRegisterAddress(8, b) }
-func BenchmarkDHTPeerRegisterAddress32(b *testing.B)  { benchmarkDHTPeerRegisterAddress(32, b) }
-func BenchmarkDHTPeerRegisterAddress128(b *testing.B) { benchmarkDHTPeerRegisterAddress(128, b) }
-func BenchmarkDHTPeerRegisterAddress256(b *testing.B) { benchmarkDHTPeerRegisterAddress(256, b) }
-
-func benchmarkDHTPeerLookupAddress(npeers uint16, b *testing.B) {
+func benchmarkAgentLookup(npeers uint16, b *testing.B) {
 	peers, addrs := deployPeers(npeers, b)
 	ensureAddressAnnounced(peers...)
 	defer closePeers(peers...)
 
-	peer, peerCleanup, err := SetupLocalDHTPeer(
+	peer, peerCleanup, err := setupLocalDHTPeerForBench(
 		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+npeers+1, 0,
 		[]string{peers[len(peers)-1].MultiAddr()},
 	)
@@ -225,20 +284,14 @@ func benchmarkDHTPeerLookupAddress(npeers uint16, b *testing.B) {
 	}
 }
 
-func BenchmarkDHTPeerLookupAddress2(b *testing.B)   { benchmarkDHTPeerLookupAddress(2, b) }
-func BenchmarkDHTPeerLookupAddress8(b *testing.B)   { benchmarkDHTPeerLookupAddress(8, b) }
-func BenchmarkDHTPeerLookupAddress32(b *testing.B)  { benchmarkDHTPeerLookupAddress(32, b) }
-func BenchmarkDHTPeerLookupAddress128(b *testing.B) { benchmarkDHTPeerLookupAddress(128, b) }
-func BenchmarkDHTPeerLookupAddress256(b *testing.B) { benchmarkDHTPeerLookupAddress(256, b) }
-
-func benchmarkDHTPeerJoin(npeers uint16, b *testing.B) {
+func benchmarkPeerJoin(npeers uint16, b *testing.B) {
 	peers, _ := deployPeers(npeers, b)
 	ensureAddressAnnounced(peers...)
 	defer closePeers(peers...)
 
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
-		peer, peerCleanup, err := SetupLocalDHTPeer(
+		peer, peerCleanup, err := setupLocalDHTPeerForBench(
 			FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+npeers+1, 0,
 			[]string{peers[i%len(peers)].MultiAddr()},
 		)
@@ -252,30 +305,13 @@ func benchmarkDHTPeerJoin(npeers uint16, b *testing.B) {
 	}
 }
 
-func BenchmarkDHTPeerJoin2(b *testing.B)   { benchmarkDHTPeerJoin(2, b) }
-func BenchmarkDHTPeerJoin8(b *testing.B)   { benchmarkDHTPeerJoin(8, b) }
-func BenchmarkDHTPeerJoin32(b *testing.B)  { benchmarkDHTPeerJoin(32, b) }
-func BenchmarkDHTPeerJoin128(b *testing.B) { benchmarkDHTPeerJoin(128, b) }
-func BenchmarkDHTPeerJoin256(b *testing.B) { benchmarkDHTPeerJoin(256, b) }
-func setupEchoServicePeers(peers ...*DHTPeer) {
-	for _, peer := range peers {
-		peer.ProcessEnvelope(func(envel *aea.Envelope) error {
-			err := peer.RouteEnvelope(&aea.Envelope{
-				To:     envel.Sender,
-				Sender: envel.To,
-			})
-			return err
-		})
-	}
-}
-
-func benchmarkDHTPeerEchoMessage(npeers uint16, b *testing.B) {
+func benchmarkPeerEcho(npeers uint16, b *testing.B) {
 	peers, addrs := deployPeers(npeers, b)
 	ensureAddressAnnounced(peers...)
 	defer closePeers(peers...)
 	setupEchoServicePeers(peers...)
 
-	peer, peerCleanup, err := SetupLocalDHTPeer(
+	peer, peerCleanup, err := setupLocalDHTPeerForBench(
 		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+npeers+1, 0,
 		[]string{peers[len(peers)-1].MultiAddr()},
 	)
@@ -305,8 +341,26 @@ func benchmarkDHTPeerEchoMessage(npeers uint16, b *testing.B) {
 	}
 }
 
-func BenchmarkDHTPeerEchoMessage2(b *testing.B)   { benchmarkDHTPeerEchoMessage(2, b) }
-func BenchmarkDHTPeerEchoMessage8(b *testing.B)   { benchmarkDHTPeerEchoMessage(8, b) }
-func BenchmarkDHTPeerEchoMessage32(b *testing.B)  { benchmarkDHTPeerEchoMessage(32, b) }
-func BenchmarkDHTPeerEchoMessage128(b *testing.B) { benchmarkDHTPeerEchoMessage(128, b) }
-func BenchmarkDHTPeerEchoMessage256(b *testing.B) { benchmarkDHTPeerEchoMessage(256, b) }
+func BenchmarkAgentRegistration2(b *testing.B)   { benchmarkAgentRegistration(2, b) }
+func BenchmarkAgentRegistration8(b *testing.B)   { benchmarkAgentRegistration(8, b) }
+func BenchmarkAgentRegistration32(b *testing.B)  { benchmarkAgentRegistration(32, b) }
+func BenchmarkAgentRegistration128(b *testing.B) { benchmarkAgentRegistration(128, b) }
+func BenchmarkAgentRegistration256(b *testing.B) { benchmarkAgentRegistration(256, b) }
+
+func BenchmarkAgentLookup2(b *testing.B)   { benchmarkAgentLookup(2, b) }
+func BenchmarkAgentLookup8(b *testing.B)   { benchmarkAgentLookup(8, b) }
+func BenchmarkAgentLookup32(b *testing.B)  { benchmarkAgentLookup(32, b) }
+func BenchmarkAgentLookup128(b *testing.B) { benchmarkAgentLookup(128, b) }
+func BenchmarkAgentLookup256(b *testing.B) { benchmarkAgentLookup(256, b) }
+
+func BenchmarkPeerJoin2(b *testing.B)   { benchmarkPeerJoin(2, b) }
+func BenchmarkPeerJoin8(b *testing.B)   { benchmarkPeerJoin(8, b) }
+func BenchmarkPeerJoin32(b *testing.B)  { benchmarkPeerJoin(32, b) }
+func BenchmarkPeerJoin128(b *testing.B) { benchmarkPeerJoin(128, b) }
+func BenchmarkPeerJoin256(b *testing.B) { benchmarkPeerJoin(256, b) }
+
+func BenchmarkPeerEcho2(b *testing.B)   { benchmarkPeerEcho(2, b) }
+func BenchmarkPeerEcho8(b *testing.B)   { benchmarkPeerEcho(8, b) }
+func BenchmarkPeerEcho32(b *testing.B)  { benchmarkPeerEcho(32, b) }
+func BenchmarkPeerEcho128(b *testing.B) { benchmarkPeerEcho(128, b) }
+func BenchmarkPeerEcho256(b *testing.B) { benchmarkPeerEcho(256, b) }

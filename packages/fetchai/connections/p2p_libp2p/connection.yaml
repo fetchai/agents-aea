@@ -21,15 +21,15 @@ fingerprint:
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  dht/dhtpeer/benchmarks_test.go: Qmc1G3aaEgR7TdrvbUMkDCP8aWrznBZKUYQwUUpwjU8azK
-  dht/dhtpeer/dhtpeer.go: QmReF7a4G9rADbiN43WJAiwdmSeWW7CibHoBu26UcNDgSF
+  dht/dhtpeer/benchmarks_test.go: QmVhWzMcvNvAYwdd7bUabymCidZR1SBqbqR1qP6QHrpXv5
+  dht/dhtpeer/dhtpeer.go: QmV4qpQXUV3e6hsgpxDWBDqKWHDJeTZMuHzrkGciZTBrZT
   dht/dhtpeer/dhtpeer_test.go: QmeWksk2g4hmQPNUeF9SbdAdmMmAL2RhkHLcNHrFcBeGby
-  dht/dhtpeer/options.go: QmVgL17zbVSU1DfV4TMd3NZQn8t3Qe4zqtCHMRfD4eCLd9
+  dht/dhtpeer/options.go: QmbZkL4x9N3WwMxibXR9gkcdanskRazXaq4LNXf1GwPao9
   dht/dhttests/dhttests.go: QmZpYRCiVARGL1n4nDwqjhzHA95Y4ACNWoa3HSDnB6PitK
   go.mod: QmacqAAxC3dkydmfbEyVWVkMDmZECTWKZcBoPyRSnheQzD
   go.sum: Qmbu57aSPSqanJ1xHNmMHAqLL8nvCV61URknizsKJDvenG
   libp2p_node.go: QmYczbp9C62ykF4pUG2onF8nkYvfKsEsqwWxcLWcWwcP9u
-  utils/utils.go: QmaqHQATfcrhtzLqwEGGmkqSx2qucoKk4HMSK7NirnHzHT
+  utils/utils.go: QmWMTas6nMGL5R4MtEZcAq8XEse8e66AhcnW7hJV11dnki
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PLibp2pConnection

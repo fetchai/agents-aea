@@ -24,6 +24,7 @@ import (
 	"fmt"
 
 	"github.com/multiformats/go-multiaddr"
+	"github.com/rs/zerolog"
 
 	utils "libp2p_node/utils"
 )
@@ -106,6 +107,15 @@ func EnableDelegateService(port uint16) Option {
 func EnableRelayService() Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.enableRelay = true
+		return nil
+	}
+
+}
+
+// LoggingLevel for dhtpeer.New
+func LoggingLevel(lvl zerolog.Level) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.logger = dhtPeer.logger.Level(lvl)
 		return nil
 	}
 
