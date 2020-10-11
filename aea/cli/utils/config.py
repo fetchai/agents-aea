@@ -155,7 +155,7 @@ def handle_dotted_path(
         'connections.my_connection.an_attribute_name'
         'contracts.my_contract.an_attribute_name'
         'skills.my_skill.an_attribute_name'
-        'vendor.author.[protocols|connections|skills].package_name.attribute_name
+        'vendor.author.[protocols|contracts|connections|skills].package_name.attribute_name
 
     We also return the component id to retrieve the configuration of a specific
     component. Notice that at this point we don't know the version,
@@ -202,7 +202,12 @@ def handle_dotted_path(
 
         # extract component id
         resource_type_singular = resource_type_plural[:-1]
-        component_type = ComponentType(resource_type_singular)
+        try:
+            component_type = ComponentType(resource_type_singular)
+        except ValueError as e:
+            raise AEAException(
+                f"'{resource_type_plural}' is not a valid component type. Please use one of {ComponentType.plurals()}."
+            ) from e
         component_id = ComponentId(
             component_type, PublicId(resource_author, resource_name)
         )

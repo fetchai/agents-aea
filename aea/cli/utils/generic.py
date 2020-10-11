@@ -44,7 +44,11 @@ def get_parent_object(obj: Dict, dotted_path: List[str]):
         current_object = current_object.get(current_attribute_name, None)
         # if the dictionary does not have the key we want, fail.
         if current_object is None:
-            raise ValueError("Cannot get attribute '{}'".format(current_attribute_name))
+            raise ValueError(f"Cannot get attribute '{current_attribute_name}'.")
+        if not isinstance(current_object, dict):
+            raise ValueError(
+                f"Attribute '{current_attribute_name}' is not a dictionary."
+            )
         index += 1
     # if we are not at the last step and the attribute value is not a dictionary, fail.
     if isinstance(current_object, dict):

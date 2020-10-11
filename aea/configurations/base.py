@@ -225,6 +225,16 @@ class ComponentType(Enum):
         """Get package type for component type."""
         return PackageType(self.value)
 
+    @staticmethod
+    def plurals() -> Collection[str]:
+        """
+        Get the collection of type names, plural.
+
+        >>> ComponentType.plurals()
+        ['protocols', 'connections', 'skills', 'contracts']
+        """
+        return list(map(lambda x: x.to_plural(), ComponentType))
+
     def to_plural(self) -> str:
         """
         Get the plural version of the component type.
@@ -765,6 +775,8 @@ class PackageConfiguration(Configuration, ABC):
     package_type: PackageType
     FIELDS_ALLOWED_TO_UPDATE: List[str]
 
+    FIELDS_ALLOWED_TO_UPDATE: List[str] = []
+
     def __init__(
         self,
         name: str,
@@ -1189,6 +1201,7 @@ class SkillConfig(ComponentConfiguration):
         "behaviours",
         "handlers",
         "models",
+        "is_abstract",
     ]
     NESTED_FIELDS_ALLOWED_TO_UPDATE: List[str] = ["args"]
 
@@ -1399,6 +1412,7 @@ class AgentConfig(PackageConfiguration):
         "skill_exception_policy",
         "connection_exception_policy",
         "default_routing",
+        "description",
     ]
 
     def __init__(

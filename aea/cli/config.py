@@ -209,11 +209,11 @@ class ConfigGetSet:
         top_level_key = self.json_path[0]
 
         if self.component_id:
-            _config = self.component_id.package_type.configuration_class()
+            config_class = self.component_id.package_type.configuration_class()
         else:
-            _config = type(self.agent_config)
+            config_class = type(self.agent_config)
 
-        if top_level_key not in _config.FIELDS_ALLOWED_TO_UPDATE:
+        if top_level_key not in config_class.FIELDS_ALLOWED_TO_UPDATE:
             raise click.ClickException(
                 f"Field `{top_level_key}` is not allowed to change!"
             )
