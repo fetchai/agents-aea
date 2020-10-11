@@ -106,7 +106,7 @@ class ConfigGetSet:
             raise click.ClickException(*e.args)
 
     @property
-    def parent_obj_path(self) -> str:
+    def parent_obj_path(self) -> List[str]:
         """Get the parent object (dotted) path."""
         return self.json_path[:-1]
 

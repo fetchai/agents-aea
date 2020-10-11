@@ -18,10 +18,9 @@
 # ------------------------------------------------------------------------------
 """This module contains generic tools for AEA end-to-end testing."""
 
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List
-
-import yaml
 
 from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import (
@@ -77,7 +76,7 @@ def _nested_set(
     configuration_obj: PackageConfiguration, keys: List, value: Any
 ) -> None:
     """
-    Nested set a value to a dict.
+    Nested set a value to a dict. Force sets the value, overwriting any present values.
 
     :param configuration_obj: configuration object
     :param keys: list of keys.
@@ -85,7 +84,7 @@ def _nested_set(
 
     :return: None.
     """
-    # import pdb; pdb.set_trace()
+    dic = {}  # type: Dict[str, Any]
     root_key = keys[0]
     if (
         type(configuration_obj) == SkillConfig
@@ -94,17 +93,15 @@ def _nested_set(
         root_attr = getattr(configuration_obj, root_key)
         skill_component_id = keys[1]
         skill_component_config = root_attr.read(skill_component_id)
-        dic = {}
         for key in keys[3:-1]:
-            dic = dic.setdefault(key, {})
-        dic[keys[-1]] = value
+            dic = dic.setdefault(key, OrderedDict())
+        dic[keys[-1]] = value if type(value) != dict else OrderedDict(value)
         skill_component_config.args.update(dic)
         root_attr.update(skill_component_id, skill_component_config)
     else:
-        dic = getattr(configuration_obj, root_key, {})
         for key in keys[:-1]:
-            dic = dic.setdefault(key, {})
-        dic[keys[-1]] = value
+            dic = dic.setdefault(key, OrderedDict())
+        dic[keys[-1]] = value if type(value) != dict else OrderedDict(value)
         setattr(configuration_obj, root_key, dic[root_key])
 
 
@@ -134,17 +131,10 @@ def force_set_config(
         dotted_path, author
     )
 
-    settings = {}
     with config_file_path.open() as fp:
         config = config_loader.load(fp)
 
-    # with open(file_path, "r") as f:
-    #     settings = yaml.safe_load(f)
-
     _nested_set(config, settings_keys, value)
-
-    # with open(file_path, "w"c) as f:
-    #     yaml.dump(settings, f, default_flow_style=False)
 
     if config.package_type == PackageType.AGENT:
         json_data = config.ordered_json

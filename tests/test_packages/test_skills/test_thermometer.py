@@ -87,7 +87,7 @@ class TestThermometerSkill(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
@@ -119,8 +119,6 @@ class TestThermometerSkill(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (
@@ -266,11 +264,11 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
+        self.set_config(setting_path, location)
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
@@ -304,8 +302,6 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (

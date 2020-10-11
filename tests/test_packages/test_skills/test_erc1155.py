@@ -102,7 +102,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
         self.run_install()
 
         # replace location
@@ -144,8 +144,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
         self.run_install()
 
         # replace location

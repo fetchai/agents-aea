@@ -94,7 +94,7 @@ class TestCarPark(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.location"
         )
-        self.set_config(setting_path, location)
+        self.force_set_config(setting_path, location)
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
@@ -121,15 +121,13 @@ class TestCarPark(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.location"
         )
-        self.set_config(setting_path, location)
+        self.force_set_config(setting_path, location)
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(carpark_aea_name)
@@ -272,7 +270,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.location"
         )
-        self.set_config(setting_path, location)
+        self.force_set_config(setting_path, location)
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
@@ -305,15 +303,13 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.location"
         )
-        self.set_config(setting_path, location)
+        self.force_set_config(setting_path, location)
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(carpark_aea_name)

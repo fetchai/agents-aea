@@ -93,7 +93,7 @@ class TestTacSkills(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         default_routing = {
             "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
@@ -135,9 +135,7 @@ class TestTacSkills(AEATestCaseMany):
 
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-            self.force_set_config(setting_path, config)
-            setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-            self.force_set_config(setting_path, COSMOS)
+            self.set_config(setting_path, config)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -312,11 +310,11 @@ class TestTacSkillsContract(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
-        self.force_set_config(setting_path, ETHEREUM)
+        self.set_config(setting_path, ETHEREUM)
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
-        self.force_set_config(setting_path, True)
+        self.set_config(setting_path, True)
 
         default_routing = {
             "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
@@ -369,11 +367,11 @@ class TestTacSkillsContract(AEATestCaseMany):
 
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-            self.force_set_config(setting_path, config)
+            self.set_config(setting_path, config)
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-            self.force_set_config(setting_path, COSMOS)
+            self.set_config(setting_path, COSMOS)
             setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
-            self.force_set_config(setting_path, ETHEREUM)
+            self.set_config(setting_path, ETHEREUM)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
