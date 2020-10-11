@@ -87,7 +87,7 @@ def _nested_set(
     dic = {}  # type: Dict[str, Any]
     root_key = keys[0]
     if (
-        type(configuration_obj) == SkillConfig
+        isinstance(configuration_obj, SkillConfig)
         and root_key in SkillConfig.FIELDS_WITH_NESTED_FIELDS
     ):
         root_attr = getattr(configuration_obj, root_key)
@@ -95,13 +95,13 @@ def _nested_set(
         skill_component_config = root_attr.read(skill_component_id)
         for key in keys[3:-1]:
             dic = dic.setdefault(key, OrderedDict())
-        dic[keys[-1]] = value if type(value) != dict else OrderedDict(value)
+        dic[keys[-1]] = OrderedDict(value) if isinstance(value, dict) else value
         skill_component_config.args.update(dic)
         root_attr.update(skill_component_id, skill_component_config)
     else:
         for key in keys[:-1]:
             dic = dic.setdefault(key, OrderedDict())
-        dic[keys[-1]] = value if type(value) != dict else OrderedDict(value)
+        dic[keys[-1]] = OrderedDict(value) if isinstance(value, dict) else value
         setattr(configuration_obj, root_key, dic[root_key])
 
 
