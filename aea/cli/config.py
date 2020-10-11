@@ -221,9 +221,8 @@ class ConfigGetSet:
             if top_level_key not in SkillConfig.FIELDS_WITH_NESTED_FIELDS:
                 return
             if len(self.json_path) < 3:
-                raise click.ClickException(
-                    f"Path {self.json_path} not valid for skill."
-                )
+                path = ".".join(self.json_path)
+                raise click.ClickException(f"Path '{path}' not valid for skill.")
             second_level_key = self.json_path[1]
             third_level_key = self.json_path[2]
             if third_level_key not in SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:

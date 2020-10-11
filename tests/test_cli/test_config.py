@@ -173,18 +173,19 @@ class TestConfigGet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        s = "Cannot get attribute 'non_existing_attribute'"
+        s = "Cannot get attribute 'non_existing_attribute'."
         assert result.exception.message == s
 
     def test_get_fails_when_getting_non_dict_attribute(self):
         """Test that the get fails because the path point to a non-dict object."""
+        attribute = "protocols"
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "config", "get", "skills.dummy.protocols.protocol"],
+            [*CLI_LOG_OPTION, "config", "get", f"skills.dummy.{attribute}.protocol"],
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        s = "The target object is not a dictionary."
+        s = f"Attribute '{attribute}' is not a dictionary."
         assert result.exception.message == s
 
     def test_get_fails_when_getting_non_dict_attribute_in_between(self):
@@ -421,7 +422,7 @@ class TestConfigSet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        s = "Attribute 'behaviours' is not of primitive type."
+        s = "Path 'behaviours' not valid for skill."
         assert result.exception.message == s
 
     def test_get_fails_when_setting_nested_object(self):
@@ -444,14 +445,15 @@ class TestConfigSet:
 
     def test_get_fails_when_setting_non_dict_attribute(self):
         """Test that the set fails because the path point to a non-dict object."""
-        path = "skills.dummy.behaviours.dummy.args.behaviour_arg_1.over_the_string"
+        behaviour_arg_1 = "behaviour_arg_1"
+        path = f"skills.dummy.behaviours.dummy.args.{behaviour_arg_1}.over_the_string"
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "config", "set", path, "new_value"],
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        s = "The target object is not a dictionary."
+        s = f"Attribute '{behaviour_arg_1}' is not a dictionary."
         assert result.exception.message == s
 
     @classmethod

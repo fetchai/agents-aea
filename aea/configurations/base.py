@@ -1396,6 +1396,7 @@ class AgentConfig(PackageConfiguration):
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         [
+            "description",
             "registry_path",
             "logging_config",
             "private_key_paths",
@@ -1410,6 +1411,7 @@ class AgentConfig(PackageConfiguration):
             "connection_exception_policy",
             "default_connection",
             "default_ledger",
+            "default_routing",
         ]
     )
 
