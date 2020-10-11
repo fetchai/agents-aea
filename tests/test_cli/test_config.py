@@ -338,6 +338,22 @@ class TestConfigSet:
         assert result.exit_code == 0
         assert new_value in result.output
 
+    def test_set_nested_attribute_not_allowed(self):
+        """Test setting a nested attribute."""
+        path = "skills.dummy.behaviours.dummy.config.behaviour_arg_1"
+        new_value = "new_dummy_name"
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "config", "set", path, new_value],
+            standalone_mode=False,
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 1
+        assert (
+            result.exception.message
+            == "Field `behaviours.dummy.config.behaviour_arg_1` is not allowed to change!"
+        )
+
     def test_no_recognized_root(self):
         """Test that the 'get' fails because the root is not recognized."""
         result = self.runner.invoke(

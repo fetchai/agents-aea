@@ -87,7 +87,7 @@ class TestGenericSkills(AEATestCaseMany):
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
@@ -126,7 +126,7 @@ class TestGenericSkills(AEATestCaseMany):
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_buyer.is_abstract"
@@ -136,7 +136,7 @@ class TestGenericSkills(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.set_config(setting_path, location)
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
@@ -271,7 +271,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
@@ -281,7 +281,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.set_config(setting_path, location)
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -317,9 +317,9 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        self.set_config(setting_path, NON_GENESIS_CONFIG)
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (

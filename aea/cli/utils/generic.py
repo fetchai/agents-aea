@@ -53,7 +53,7 @@ def get_parent_object(obj: Dict, dotted_path: List[str]):
     # if we are not at the last step and the attribute value is not a dictionary, fail.
     if isinstance(current_object, dict):
         return current_object
-    raise ValueError("The target object is not a dictionary.")
+    raise ValueError("The target object is not a dictionary.")  # pragma: nocover
 
 
 def load_yaml(filepath: str) -> Dict:

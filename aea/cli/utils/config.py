@@ -176,7 +176,7 @@ def handle_dotted_path(
         )
 
     if (
-        len(parts) < 1
+        len(parts) < 2
         or parts[0] == "agent"
         and len(parts) < 2
         or parts[0] == "vendor"

@@ -106,6 +106,11 @@ class ConfigGetSet:
             raise click.ClickException(*e.args)
 
     @property
+    def parent_obj_path(self) -> str:
+        """Get the parent object (dotted) path."""
+        return self.json_path[:-1]
+
+    @property
     def attr_name(self) -> str:
         """Attribute name."""
         return self.json_path[-1]
@@ -178,7 +183,7 @@ class ConfigGetSet:
         :return: parent object.
         :raises: ClickException if attribute is not valid.
         """
-        parent_obj_path = self.json_path[:-1]
+        parent_obj_path = self.parent_obj_path
         attr_name = self.attr_name
         try:
             parent_obj = get_parent_object(conf_obj, parent_obj_path)
@@ -226,7 +231,7 @@ class ConfigGetSet:
             second_level_key = self.json_path[1]
             third_level_key = self.json_path[2]
             if third_level_key not in SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
-                raise click.ClickException(
+                raise click.ClickException(  # pragma: nocover
                     f"Field `{top_level_key}.{second_level_key}.{third_level_key}` is not allowed to change!"
                 )
 
@@ -262,7 +267,7 @@ class ConfigGetSet:
         ] = configuration_object
         parent_object = configuration_object
         # get or create parent object in component configuration
-        for i in self.json_path[:-1]:
+        for i in self.parent_obj_path:
             if i not in parent_object:
                 parent_object[i] = {}
             parent_object = parent_object[i]

@@ -24,9 +24,15 @@ from typing import Any, Dict, List
 import yaml
 
 from aea.cli.utils.config import handle_dotted_path
-from aea.configurations.base import PublicId
+from aea.configurations.base import (
+    PackageConfiguration,
+    PackageType,
+    PublicId,
+    SkillConfig,
+)
 from aea.connections.stub.connection import write_envelope
 from aea.exceptions import enforce
+from aea.helpers.base import yaml_dump, yaml_dump_all
 from aea.mail.base import Envelope
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
@@ -67,19 +73,39 @@ def read_envelope_from_file(file_path: str):
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
 
 
-def _nested_set(dic: Dict, keys: List, value: Any) -> None:
+def _nested_set(
+    configuration_obj: PackageConfiguration, keys: List, value: Any
+) -> None:
     """
     Nested set a value to a dict.
 
-    :param dic: target dict
+    :param configuration_obj: configuration object
     :param keys: list of keys.
     :param value: a value to set.
 
     :return: None.
     """
-    for key in keys[:-1]:
-        dic = dic.setdefault(key, {})
-    dic[keys[-1]] = value
+    # import pdb; pdb.set_trace()
+    root_key = keys[0]
+    if (
+        type(configuration_obj) == SkillConfig
+        and root_key in SkillConfig.FIELDS_WITH_NESTED_FIELDS
+    ):
+        root_attr = getattr(configuration_obj, root_key)
+        skill_component_id = keys[1]
+        skill_component_config = root_attr.read(skill_component_id)
+        dic = {}
+        for key in keys[3:-1]:
+            dic = dic.setdefault(key, {})
+        dic[keys[-1]] = value
+        skill_component_config.args.update(dic)
+        root_attr.update(skill_component_id, skill_component_config)
+    else:
+        dic = getattr(configuration_obj, root_key, {})
+        for key in keys[:-1]:
+            dic = dic.setdefault(key, {})
+        dic[keys[-1]] = value
+        setattr(configuration_obj, root_key, dic[root_key])
 
 
 def force_set_config(
@@ -104,13 +130,27 @@ def force_set_config(
 
     :return: None.
     """
-    settings_keys, file_path, *_ = handle_dotted_path(dotted_path, author)
+    settings_keys, config_file_path, config_loader, _ = handle_dotted_path(
+        dotted_path, author
+    )
 
     settings = {}
-    with open(file_path, "r") as f:
-        settings = yaml.safe_load(f)
+    with config_file_path.open() as fp:
+        config = config_loader.load(fp)
 
-    _nested_set(settings, settings_keys, value)
+    # with open(file_path, "r") as f:
+    #     settings = yaml.safe_load(f)
 
-    with open(file_path, "w") as f:
-        yaml.dump(settings, f, default_flow_style=False)
+    _nested_set(config, settings_keys, value)
+
+    # with open(file_path, "w"c) as f:
+    #     yaml.dump(settings, f, default_flow_style=False)
+
+    if config.package_type == PackageType.AGENT:
+        json_data = config.ordered_json
+        component_configurations = json_data.pop("component_configurations")
+        yaml_dump_all(
+            [json_data] + component_configurations, config_file_path.open("w")
+        )
+    else:
+        yaml_dump(config.ordered_json, config_file_path.open("w"))
