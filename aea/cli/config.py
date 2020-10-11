@@ -217,7 +217,9 @@ class ConfigGetSet:
             raise click.ClickException(
                 f"Field `{top_level_key}` is not allowed to change!"
             )
-        if _config == SkillConfig:
+        if config_class == SkillConfig:
+            if top_level_key not in SkillConfig.FIELDS_WITH_NESTED_FIELDS:
+                return
             if len(self.json_path) < 3:
                 raise click.ClickException(
                     f"Path {self.json_path} not valid for skill."

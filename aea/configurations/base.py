@@ -34,6 +34,7 @@ from typing import (
     Any,
     Collection,
     Dict,
+    FrozenSet,
     Generic,
     List,
     Optional,
@@ -773,9 +774,7 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
-    FIELDS_ALLOWED_TO_UPDATE: List[str]
-
-    FIELDS_ALLOWED_TO_UPDATE: List[str] = []
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
     def __init__(
         self,
@@ -953,9 +952,7 @@ class ConnectionConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
 
-    FIELDS_ALLOWED_TO_UPDATE: List[str] = [
-        "config",
-    ]
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["config"])
 
     def __init__(
         self,
@@ -1100,7 +1097,7 @@ class ProtocolConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_PROTOCOL_CONFIG_FILE
     package_type = PackageType.PROTOCOL
 
-    FIELDS_ALLOWED_TO_UPDATE: List[str] = []
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
     def __init__(
         self,
@@ -1197,13 +1194,13 @@ class SkillConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
 
-    FIELDS_ALLOWED_TO_UPDATE: List[str] = [
-        "behaviours",
-        "handlers",
-        "models",
-        "is_abstract",
-    ]
-    NESTED_FIELDS_ALLOWED_TO_UPDATE: List[str] = ["args"]
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
+        ["behaviours", "handlers", "models", "is_abstract"]
+    )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(
+        ["behaviours", "handlers", "models"]
+    )
+    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["args"])
 
     def __init__(
         self,
@@ -1397,23 +1394,22 @@ class AgentConfig(PackageConfiguration):
     default_configuration_filename = DEFAULT_AEA_CONFIG_FILE
     package_type = PackageType.AGENT
 
-    FIELDS_ALLOWED_TO_UPDATE: List[str] = [
-        "registry_path",
-        "logging_config",
-        "private_key_paths",
-        "connection_private_key_paths",
-        "default_connection",
-        "default_ledger",
-        "loop_mode",
-        "runtime_mode",
-        "execution_timeout",
-        "timeout",
-        "max_reactions",
-        "skill_exception_policy",
-        "connection_exception_policy",
-        "default_routing",
-        "description",
-    ]
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
+        [
+            "registry_path",
+            "logging_config",
+            "private_key_paths",
+            "connection_private_key_paths",
+            "loop_mode",
+            "runtime_mode",
+            "execution_timeout",
+            "timeout",
+            "period",
+            "max_reactions",
+            "skill_exception_policy",
+            "connection_exception_policy",
+        ]
+    )
 
     def __init__(
         self,
@@ -1912,9 +1908,7 @@ class ContractConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_CONTRACT_CONFIG_FILE
     package_type = PackageType.CONTRACT
 
-    FIELDS_ALLOWED_TO_UPDATE: List[str] = [
-        "contract_interface_paths",
-    ]
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset([])
 
     def __init__(
         self,
