@@ -1408,6 +1408,8 @@ class AgentConfig(PackageConfiguration):
             "max_reactions",
             "skill_exception_policy",
             "connection_exception_policy",
+            "default_connection",
+            "default_ledger",
         ]
     )
 
