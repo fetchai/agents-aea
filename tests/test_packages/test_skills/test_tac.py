@@ -135,7 +135,7 @@ class TestTacSkills(AEATestCaseMany):
 
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-            self.set_config(setting_path, config)
+            self.force_set_config(setting_path, config)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)

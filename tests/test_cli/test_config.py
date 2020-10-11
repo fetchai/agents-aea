@@ -346,7 +346,6 @@ class TestConfigSet:
             cli,
             [*CLI_LOG_OPTION, "config", "set", path, new_value],
             standalone_mode=False,
-            catch_exceptions=False,
         )
         assert result.exit_code == 1
         assert (

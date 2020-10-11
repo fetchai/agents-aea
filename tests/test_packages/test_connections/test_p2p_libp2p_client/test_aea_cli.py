@@ -65,8 +65,8 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         self.add_item("connection", "fetchai/p2p_libp2p_client:0.7.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.force_set_config(
-            "{}.nodes".format(config_path),
-            [{"uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT)}],
+            config_path,
+            {"nodes": [{"uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT)}]},
         )
 
         process = self.run_agent()

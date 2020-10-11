@@ -24,6 +24,7 @@ from typing import Any, Dict, List
 
 from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import (
+    CRUDCollection,
     PackageConfiguration,
     PackageType,
     PublicId,
@@ -91,18 +92,31 @@ def _nested_set(
         and root_key in SkillConfig.FIELDS_WITH_NESTED_FIELDS
     ):
         root_attr = getattr(configuration_obj, root_key)
-        skill_component_id = keys[1]
-        skill_component_config = root_attr.read(skill_component_id)
-        for key in keys[3:-1]:
-            dic = dic.setdefault(key, OrderedDict())
-        dic[keys[-1]] = OrderedDict(value) if isinstance(value, dict) else value
-        skill_component_config.args.update(dic)
-        root_attr.update(skill_component_id, skill_component_config)
+        if len(keys) >= 4:  # root.skill_component_id.args.
+            skill_component_id = keys[1]
+            skill_component_config = root_attr.read(skill_component_id)
+            for key in keys[3:-1]:
+                dic = dic.setdefault(key, OrderedDict())
+            dic[keys[-1]] = OrderedDict(value) if isinstance(value, dict) else value
+            skill_component_config.args.update(dic)
+            root_attr.update(skill_component_id, skill_component_config)
+        elif len(keys) == 1 and isinstance(value, dict):  # root
+            raise NotImplementedError()
+        else:
+            raise ValueError(f"Invalid keys={keys}.")
     else:
-        for key in keys[:-1]:
-            dic = dic.setdefault(key, OrderedDict())
-        dic[keys[-1]] = OrderedDict(value) if isinstance(value, dict) else value
-        setattr(configuration_obj, root_key, dic[root_key])
+        root_attr = getattr(configuration_obj, root_key)
+        if isinstance(root_attr, CRUDCollection):
+            if isinstance(value, dict):
+                for key, _value in value.items():
+                    root_attr.update(key, _value)
+            else:
+                raise NotImplementedError
+        else:
+            for key in keys[:-1]:
+                dic = dic.setdefault(key, OrderedDict())
+            dic[keys[-1]] = OrderedDict(value) if isinstance(value, dict) else value
+            setattr(configuration_obj, root_key, dic[root_key])
 
 
 def force_set_config(

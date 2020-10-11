@@ -70,9 +70,9 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
         self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
-            "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
+            "vendor.fetchai.connections.stub.config",
+            {"host": "127.0.0.1", "port": 10000},
         )
-        self.force_set_config("vendor.fetchai.connections.stub.config.port", 10000)
 
         result = self.run_cli_command(
             "get-multiaddress",
@@ -104,7 +104,7 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
         self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
-            "vendor.fetchai.connections.stub.config.public_uri", "127.0.0.1:10000"
+            "vendor.fetchai.connections.stub.config", {"public_uri": "127.0.0.1:10000"}
         )
 
         result = self.run_cli_command(
@@ -213,7 +213,7 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
         self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
-            "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
+            "vendor.fetchai.connections.stub.config", {"host": "127.0.0.1"}
         )
 
         # this will cause exception because no port configuration is in stub connection by default.
@@ -272,9 +272,9 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
         self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
-            "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
+            "vendor.fetchai.connections.stub.config",
+            {"host": "127.0.0.1", "port": 10000},
         )
-        self.force_set_config("vendor.fetchai.connections.stub.config.port", 10000)
 
         # this will cause exception due to the mocking.
         with pytest.raises(
@@ -354,7 +354,8 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
         self.add_private_key(FETCHAI, connection=True)
 
         self.force_set_config(
-            "vendor.fetchai.connections.stub.config.some_uri", "some-unparsable_URI"
+            "vendor.fetchai.connections.stub.config",
+            {"some_uri": "some-unparsable_URI"},
         )
 
         # this will cause exception because only the host, and not the port, are specified.

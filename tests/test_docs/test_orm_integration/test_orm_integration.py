@@ -149,7 +149,8 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.eject_item("skill", "fetchai/thermometer:0.12.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.force_set_config(
-            "skills.thermometer.models", seller_skill_config_replacement["models"],
+            "skills.thermometer.models.strategy.args",
+            seller_skill_config_replacement["models"]["strategy"]["args"],
         )
         self.force_set_config(
             "skills.thermometer.dependencies",
@@ -176,7 +177,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = "skills.thermometer.models.strategy.args.location"
@@ -193,8 +194,8 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.force_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
         self.force_set_config(
-            "vendor.fetchai.skills.thermometer_client.models",
-            buyer_skill_config_replacement["models"],
+            "vendor.fetchai.skills.thermometer_client.models.strategy.args",
+            buyer_skill_config_replacement["models"]["strategy"]["args"],
         )
         self.run_install()
 
@@ -212,8 +213,6 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (

@@ -268,7 +268,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # replace location
         setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
-        self.set_config(setting_path, location)
+        self.force_set_config(setting_path, location)
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
