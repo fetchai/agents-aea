@@ -192,7 +192,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
     def validate(self, json_data: Dict) -> None:
         """
-        Validate a JSON object.
+        Validate a JSON object against the right JSON schema.
 
         :param json_data: the JSON data.
         :return: None.
@@ -250,26 +250,6 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         configuration_type = PackageType(configuration_type)
         return ConfigLoaders.from_package_type(configuration_type)
 
-    def _validate(self, json_data: Dict) -> None:
-        """
-        Validate a configuration file.
-
-        :param json_data: the JSON object of the configuration file to validate.
-        :return: None
-        :raises ValidationError: if the file doesn't comply with the JSON schema.
-              | ValueError: if other consistency checks fail.
-        """
-        # this might raise ValidationError.
-        self.validate(json_data)
-
-        expected_type = self.configuration_class.package_type
-        if expected_type != PackageType.AGENT and "type" in json_data:
-            actual_type = PackageType(json_data["type"])
-            if expected_type != actual_type:
-                raise ValueError(
-                    f"The field type is not correct: expected {expected_type}, found {actual_type}."
-                )
-
     def _load_component_config(self, file_pointer: TextIO) -> T:
         """Load a component configuration."""
         configuration_file_json = yaml_load(file_pointer)
@@ -277,7 +257,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
     def _load_from_json(self, configuration_file_json: Dict) -> T:
         """Load component configuration from JSON object."""
-        self._validate(configuration_file_json)
+        self.validate(configuration_file_json)
         key_order = list(configuration_file_json.keys())
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
@@ -296,7 +276,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         if len(configuration_json) == 0:
             raise ValueError("Agent configuration file was empty.")
         agent_config_json = configuration_json[0]
-        self._validate(agent_config_json)
+        self.validate(agent_config_json)
         key_order = list(agent_config_json.keys())
         agent_configuration_obj = cast(
             AgentConfig, self.configuration_class.from_json(agent_config_json)

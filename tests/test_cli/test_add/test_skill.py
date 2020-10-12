@@ -489,7 +489,7 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
         self.run_cli_command(
             *["remove", "protocol", "fetchai/default:0.6.0"], cwd=self._get_cwd()
         )
-        self.add_item("skill", "fetchai/echo:0.3.0", local=False)
+        self.add_item("skill", "fetchai/echo:0.8.0", local=False)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)
