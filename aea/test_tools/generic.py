@@ -98,9 +98,9 @@ def _nested_set(
     def get_nested_ordered_dict_from_keys_and_value(
         keys: List[str], value: Any
     ) -> Dict:
-        _dic = {}
+        _dic = {}  # type: Dict[str, Any]
         for key in keys[:-1]:
-            _dic = dic.setdefault(key, OrderedDict())
+            _dic = _dic.setdefault(key, OrderedDict())
         _dic[keys[-1]] = (
             OrderedDict(get_nested_ordered_dict_from_dict(value))
             if isinstance(value, dict)
@@ -115,7 +115,7 @@ def _nested_set(
     ):
         root_attr = getattr(configuration_obj, root_key)
         length = len(keys)
-        if length < 3 or keys[2] != SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
+        if length < 3 or keys[2] not in SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
             raise ValueError(f"Invalid keys={keys}.")
         skill_component_id = keys[1]
         skill_component_config = root_attr.read(skill_component_id)
@@ -134,8 +134,8 @@ def _nested_set(
         if isinstance(root_attr, CRUDCollection):
             if isinstance(value, dict) and len(keys) == 1:
                 for _key, _value in value.items():
-                    _value = get_nested_ordered_dict_from_dict(_value)
-                    root_attr.update(_key, _value)
+                    dic = get_nested_ordered_dict_from_keys_and_value([_key], _value)
+                    root_attr.update(_key, dic[_key])
             elif len(keys) >= 2:  # root.[keys]
                 dic = get_nested_ordered_dict_from_keys_and_value(keys[1:], value)
                 root_attr.update(keys[1], dic[keys[1]])
