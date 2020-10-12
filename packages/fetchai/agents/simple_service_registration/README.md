@@ -4,7 +4,7 @@ This agent registers and unregisters its service on the SOEF.
 
 ## Description
 
-This agent is used in the "Guide on Writing a Skill" section in the documentation. On start, it registers its service on the `SOEF`, and on termination it unregisters it.
+This agent is used in the "Guide on Writing a Skill" section of the documentation. On start, it registers its service on the `SOEF`, and on termination it unregisters it.
 
 ## Links
 

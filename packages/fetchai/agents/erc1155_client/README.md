@@ -1,10 +1,12 @@
 # ERC1155 Client
 
-This is an agent that purchases data via a smart contract.
+An agent that purchases data via a smart contract.
 
 ## Description
 
-This agent uses its primary skill, the `fetchai/erc1155_client` skill, to find an agent selling data on the `SOEF` service. Once found, it requests specific data, negotiates the price using the `fetchai/fipa` protocol, and if an agreement is reached, pays the proposed amount via a smart contract and receives the data.
+This agent uses its primary skill, the `fetchai/erc1155_client` skill, to find an agent selling data on the `SOEF` service.
+ 
+ Once found, it requests specific data, negotiates the price using the `fetchai/fipa` protocol, and if an agreement is reached, pays the proposed amount via a smart contract and receives the data.
 
 ## Links
 

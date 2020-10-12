@@ -5,13 +5,13 @@ This agent represents the Faber actor in <a href="https://github.com/hyperledger
 ## Description
 
 This agent is part of the Fetch.ai Aries demo. It simulates the Faber actor of the demo linked above. It uses its primary skill, the `fetchai/aries_faber` skill, to do the following:
- * register a decentralised ID on a ledger
- * connects with an underlying aries cloud agent (ACA) instance, and forwards the following instructions:
-    * register schema definition
-    * register credential definition
-    * create an invitation
+ * Register a decentralised ID on a ledger.
+ * Connects with an underlying Aries Cloud Agent (ACA) instance, and forwards the following instructions:
+    * Register schema definition
+    * Register credential definition
+    * Create an invitation
  
-It sends the invitation detail to an Alice agent that it finds via the `SOEF` service.
+It then sends the invitation detail to the Alice agent (see `fetchai/aries_alice` agent) it finds via the `SOEF` service.
 
 ## Links
 

@@ -5,8 +5,9 @@ This agent represents the Alice actor in <a href="https://github.com/hyperledger
 ## Description
 
 This agent is part of the Fetch.ai Aries demo. It simulates the Alice actor of the demo linked above. It uses its primary skill, the `fetchai/aries_alice` skill, to do the following:
-    * registers Alice on the `SOEF` service. 
-    * On receiving an invitation details from Faber AEA (see `fetchai/aries_faber` agent) it connects with an underlying aries cloud agent (ACA) instance and executes an `accept-invitation` command.
+
+* Registers Alice on the `SOEF` service. 
+* On receiving an invitation details from Faber AEA (see `fetchai/aries_faber` agent), it connects with an underlying Aries Cloud Agent (ACA) instance and executes an `accept-invitation` command.
 
 ## Links
 
