@@ -54,12 +54,12 @@ Run from agent's directory.
 
 Result
 
-<a name="aea.test_tools.test_cases.BaseAEATestCase.force_set_config"></a>
+<a name="aea.test_tools.test_cases.BaseAEATestCase.nested_set_config"></a>
 #### force`_`set`_`config
 
 ```python
  | @classmethod
- | force_set_config(cls, dotted_path: str, value: Any) -> None
+ | nested_set_config(cls, dotted_path: str, value: Any) -> None
 ```
 
 Force set config.

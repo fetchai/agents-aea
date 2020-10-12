@@ -201,7 +201,22 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """
         if self.configuration_class.package_type == PackageType.AGENT:
             json_data_copy = deepcopy(json_data)
-            json_data_copy.pop("component_configurations", None)
+
+            # validate component_configurations
+            component_configurations = json_data_copy.pop(
+                "component_configurations", {}
+            )
+            for idx, component_configuration_json in enumerate(
+                component_configurations
+            ):
+                component_id = self._split_component_id_and_config(
+                    idx, component_configuration_json
+                )
+                self._validate_component_configuration(
+                    component_id, component_configuration_json
+                )
+
+            # validate agent config
             self._validator.validate(instance=json_data_copy)
         else:
             self._validator.validate(instance=json_data)
@@ -332,8 +347,8 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
     ) -> None:
         """Dump agent configuration."""
         agent_config_part = configuration.ordered_json
+        self.validate(agent_config_part)
         agent_config_part.pop("component_configurations")
-        self.validator.validate(instance=agent_config_part)
         result = [agent_config_part] + configuration.component_configurations_json()
         yaml_dump_all(result, file_pointer)
 
@@ -419,7 +434,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
             )
         except jsonschema.ValidationError as e:
             raise ValueError(
-                f"Configuration of component {component_id} is not valid."
+                f"Configuration of component {component_id} is not valid. {e}"
             ) from e
 
 

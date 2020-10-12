@@ -45,7 +45,7 @@ from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FIL
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
-from aea.helpers.base import cd
+from aea.helpers.base import cd, yaml_load_all
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.protocols.base import Protocol
 from aea.protocols.default import DefaultMessage
@@ -649,6 +649,13 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         assert dummy_handler.config == {"handler_arg_1": 42, "handler_arg_2": "2"}
         dummy_model = dummy_skill.models["dummy"]
         assert dummy_model.config == {"model_arg_1": 42, "model_arg_2": "2"}
+
+    def test_from_json(self):
+        """Test load project from json file with path specified."""
+        with open(Path(self._get_cwd(), DEFAULT_AEA_CONFIG_FILE), "r") as fp:
+            json_config = yaml_load_all(fp)
+
+        AEABuilder.from_config_json(json_config, Path(self._get_cwd()))
 
 
 class TestFromAEAProjectMakeSkillAbstract(AEATestCase):

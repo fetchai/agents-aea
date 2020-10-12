@@ -34,6 +34,7 @@ from typing import (
     Any,
     Collection,
     Dict,
+    FrozenSet,
     Generic,
     List,
     Optional,
@@ -224,6 +225,16 @@ class ComponentType(Enum):
     def to_configuration_type(self) -> PackageType:
         """Get package type for component type."""
         return PackageType(self.value)
+
+    @staticmethod
+    def plurals() -> Collection[str]:
+        """
+        Get the collection of type names, plural.
+
+        >>> ComponentType.plurals()
+        ['protocols', 'connections', 'skills', 'contracts']
+        """
+        return list(map(lambda x: x.to_plural(), ComponentType))
 
     def to_plural(self) -> str:
         """
@@ -763,6 +774,7 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
     def __init__(
         self,
@@ -940,6 +952,8 @@ class ConnectionConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
 
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["config"])
+
     def __init__(
         self,
         name: str = "",
@@ -1083,6 +1097,8 @@ class ProtocolConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_PROTOCOL_CONFIG_FILE
     package_type = PackageType.PROTOCOL
 
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
+
     def __init__(
         self,
         name: str,
@@ -1177,6 +1193,14 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
+
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
+        ["behaviours", "handlers", "models", "is_abstract"]
+    )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(
+        ["behaviours", "handlers", "models"]
+    )
+    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["args"])
 
     def __init__(
         self,
@@ -1369,6 +1393,27 @@ class AgentConfig(PackageConfiguration):
 
     default_configuration_filename = DEFAULT_AEA_CONFIG_FILE
     package_type = PackageType.AGENT
+
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
+        [
+            "description",
+            "registry_path",
+            "logging_config",
+            "private_key_paths",
+            "connection_private_key_paths",
+            "loop_mode",
+            "runtime_mode",
+            "execution_timeout",
+            "timeout",
+            "period",
+            "max_reactions",
+            "skill_exception_policy",
+            "connection_exception_policy",
+            "default_connection",
+            "default_ledger",
+            "default_routing",
+        ]
+    )
 
     def __init__(
         self,
@@ -1866,6 +1911,8 @@ class ContractConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_CONTRACT_CONFIG_FILE
     package_type = PackageType.CONTRACT
+
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset([])
 
     def __init__(
         self,
