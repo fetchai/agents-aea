@@ -46,15 +46,17 @@ from typing import (
     Union,
     cast,
 )
+from urllib.parse import urlparse
 
 import packaging
 import semver
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
+from urllib3.util import Url
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
-from aea.helpers.base import recursive_update
+from aea.helpers.base import RegexConstrainedString, recursive_update
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -81,16 +83,128 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "contract.yaml",
 ]
 
-Dependency = dict
-"""
-A dependency is a dictionary with the following (optional) keys:
+DEFAULT_PYPI_INDEX_URL = "https://pypi.org"
+
+
+class PyPIPackageName(RegexConstrainedString):
+    """A PyPI Package name."""
+
+    REGEX = re.compile(r"^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9])$")
+
+
+class GitRef(RegexConstrainedString):
+    """A Git reference."""
+
+    BRANCH_REGEX = ""
+    REGEX = re.compile(r"^[A-Za-z0-9/.\-_]+$")
+
+
+class Dependency:
+    """
+    This class represents a PyPI dependency.
+
+    It contains the following information:
     - version: a version specifier(s) (e.g. '==0.1.0').
     - index: the PyPI index where to download the package from (default: https://pypi.org)
     - git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
     - ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
-If the 'git' field is set, the 'version' field will be ignored.
-These fields will be forwarded to the 'pip' command.
-"""
+
+    If the 'git' field is set, the 'version' field will be ignored.
+    These fields will be forwarded to the 'pip' command.
+    """
+
+    def __init__(
+        self,
+        name: Union[PyPIPackageName, str],
+        version: Union[str, SpecifierSet],
+        index: Union[str, Url] = DEFAULT_PYPI_INDEX_URL,
+        git: Optional[Union[str, Url]] = None,
+        ref: Union[GitRef, str] = "master",
+    ):
+        """
+        Initialize a PyPI dependency.
+
+        :param name: the package name.
+        :param version: the specifier set object
+        :param index: the URL to the PyPI server.
+        :param git: the URL to a git repository.
+        :param ref: the Git reference (branch/commit/tag).
+        """
+        self._name = PyPIPackageName(name)
+        self._version = self._parse_version(version)
+        self._index = self._parse_url(index)
+        self._git = self._parse_url(git) if git is not None else None
+        self._ref = GitRef(ref)
+
+    @property
+    def name(self) -> str:
+        """Get the name."""
+        return str(self._name)
+
+    @property
+    def version(self) -> str:
+        """Get the version."""
+        return str(self._version)
+
+    @property
+    def index(self) -> str:
+        """Get the index."""
+        return str(self._index)
+
+    @property
+    def git(self) -> Optional[str]:
+        """Get the git."""
+        return str(self._git) if self._git else None
+
+    @property
+    def ref(self) -> str:
+        """Get the ref."""
+        return str(self._ref)
+
+    @staticmethod
+    def _parse_version(version: Union[str, SpecifierSet]) -> SpecifierSet:
+        """
+        Parse a version specifier set.
+
+        :param version: the version, a string or a SpecifierSet instance.
+        :return: the SpecifierSet instance.
+        """
+        return version if isinstance(version, SpecifierSet) else SpecifierSet(version)
+
+    @staticmethod
+    def _parse_url(url: Union[str, Url]) -> Url:
+        """
+        Parse an URL.
+
+        :param url: the URL, in either string or an urllib3.Url instance.
+        :return: the urllib3.Url instance.
+        """
+        return url if isinstance(url, Url) else urlparse(url)
+
+    @classmethod
+    def from_dictionary(cls, obj: Dict[str, str]):
+        """Parse a dependency object from a dictionary."""
+
+    def get_pip_install_args(self) -> List[str]:
+        """Get 'pip install' arguments."""
+        name = self.name
+        index = self.index
+        git_url = self.git
+        revision = self.ref
+        version_constraint = str(self.version)
+        command = []
+        if git_url is not None:
+            command += ["-i", index] if index is not None else []
+            command += ["git+" + git_url + "@" + revision + "#egg=" + name]
+        else:
+            command += ["-i", index] if index is not None else []
+            command += [name + version_constraint]
+        return command
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        return f"{self.__class__.__name__}(name={self.name}, version={self.version}, index={self.index}, git={self.git}, ref={self.ref})"
+
 
 Dependencies = Dict[str, Dependency]
 """
