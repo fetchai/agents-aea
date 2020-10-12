@@ -28,7 +28,7 @@ from aea.cli.push import _check_package_public_id, _save_item_locally
 from aea.cli.utils.constants import ITEM_TYPES
 from aea.configurations.base import PublicId
 from aea.test_tools.constants import DEFAULT_AUTHOR
-from aea.test_tools.test_cases import AEATestCaseEmpty, reset_at_each_method
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
@@ -210,15 +210,14 @@ class PushContractCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-@reset_at_each_method
 class TestPushLocallyWithLatest(AEATestCaseEmpty):
     """Test push locally with 'latest' as version."""
 
     @pytest.mark.parametrize("component_type", ITEM_TYPES)
-    @pytest.mark.parametrize("version", [":latest", ""])
-    def test_command(self, version, component_type):
+    def test_command(self, component_type):
         """Run the test."""
         item_name = f"my_{component_type}"
+        version = ":latest"
         self.scaffold_item(component_type, item_name)
         self.run_cli_command(
             "push",
