@@ -21,7 +21,7 @@
 """This module contains a checker for PyPI version consistency."""
 import operator
 from collections import defaultdict
-from typing import Dict, Set, cast
+from typing import Dict, List, Set, cast
 
 from packaging.specifiers import Specifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
@@ -32,6 +32,47 @@ from aea.configurations.base import Dependencies, Dependency
 def and_(s1: SpecifierSet, s2: SpecifierSet):
     """Do the and between two specifier sets."""
     return operator.and_(s1, s2)
+
+
+def _handle_compatibility_operator(
+    all_specifiers: List[Specifier],
+    operator_to_specifiers: Dict[str, Set[Specifier]],
+    specifier: Specifier,
+) -> None:
+    """
+    Handle a specifier with operator '~='.
+
+    Split specifier of the form "~=<major.minor>" in two specifiers:
+    - >= <major.minor>
+    - < <major+1>
+    Also handle micro-numbers, i.e. "~=<major.minor.micro>"
+    (see last examples of https://www.python.org/dev/peps/pep-0440/#compatible-release)
+
+    :param all_specifiers: the list of all specifiers (to be populated).
+    :param operator_to_specifiers: a mapping from operator to specifiers (to be populated).
+    :param specifier: the specifier to process.
+    :return: None
+    """
+    spec_version = Version(specifier.version)
+    base_version = spec_version.base_version
+    parts = base_version.split(".")
+    index_to_update = -2
+    if (
+        spec_version.is_prerelease
+        or spec_version.is_devrelease
+        or spec_version.is_postrelease
+    ):
+        # if it is a pre-release, ignore the suffix.
+        index_to_update += 1
+        parts = parts[:-1]
+    # bump second-to-last part
+    parts[index_to_update] = str(int(parts[index_to_update]) + 1)
+    upper_version = Version(".".join(parts))
+    spec_1 = Specifier(">=" + str(spec_version))
+    spec_2 = Specifier("<" + str(upper_version))
+    all_specifiers.extend([spec_1, spec_2])
+    operator_to_specifiers[spec_1.operator].add(spec_1)
+    operator_to_specifiers[spec_2.operator].add(spec_2)
 
 
 def is_satisfiable(specifier_set: SpecifierSet) -> bool:
@@ -68,7 +109,7 @@ def is_satisfiable(specifier_set: SpecifierSet) -> bool:
     :return: False if the constraints are surely non-satisfiable, True if we don't know.
     """
     # group single specifiers by operator
-    all_specifiers = []
+    all_specifiers: List[Specifier] = []
     operator_to_specifiers: Dict[str, Set[Specifier]] = defaultdict(set)
     # pre-processing
     for specifier in list(specifier_set):
@@ -80,20 +121,11 @@ def is_satisfiable(specifier_set: SpecifierSet) -> bool:
         except InvalidVersion:
             continue
 
-        # split specifier "~=<major.minor>" in two specifiers:
-        # - >= <major.minor>
-        # - < <major+1>
-        #   this is not the full story. we should check the version number
-        #   up to the last zero, which might be the micro number.
-        #   e.g. see last examples of https://www.python.org/dev/peps/pep-0440/#compatible-release
+        # handle specifiers with '~=' operators.
         if specifier.operator == "~=":
-            spec_version = Version(specifier.version)
-            upper_major_version = Version(str(spec_version.major + 1))
-            spec_1 = Specifier(">=" + str(spec_version))
-            spec_2 = Specifier("<" + str(upper_major_version))
-            all_specifiers.extend([spec_1, spec_2])
-            operator_to_specifiers[spec_1.operator].add(spec_1)
-            operator_to_specifiers[spec_2.operator].add(spec_2)
+            _handle_compatibility_operator(
+                all_specifiers, operator_to_specifiers, specifier
+            )
         else:
             all_specifiers.append(specifier)
             operator_to_specifiers[specifier.operator].add(specifier)
