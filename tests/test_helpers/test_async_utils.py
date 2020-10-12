@@ -240,11 +240,15 @@ async def test_handler_item_getter():
         handler, item = await asyncio.wait_for(getter.get(), timeout=1)
 
 
-def test_libp2pconnection_awaitable_proc_cancelled():
+@pytest.mark.asyncio
+async def test_libp2pconnection_awaitable_proc_cancelled():
     """Test awaitable proc."""
     proc = AwaitableProc(["sleep", "100"], shell=False)
     proc_task = asyncio.ensure_future(proc.start())
+    await asyncio.sleep(0.1)
     proc_task.cancel()
+    with suppress(asyncio.CancelledError):
+        await proc_task
 
 
 class RunAndExit(Runnable):
@@ -396,10 +400,35 @@ class TestRunnable:
         run = TestRun(threaded=True)
         run.start()
         await asyncio.sleep(0.4)
-        assert run._task
 
         with pytest.raises(Exception, match="awaited"):
             await run.wait_completed(timeout=1)
 
+        run.stop()
+        await run.wait_completed()
+
+    @pytest.mark.asyncio
+    async def test_wait_async_threaded_no_exception(self):
+        """Test runnable threaded wait completed."""
+        # for pydocstyle
+        class TestRun(Runnable):
+            async def run(self):
+                await asyncio.sleep(0.1)
+
+        run = TestRun(threaded=True)
+        run.start()
+        await run.wait_completed()
+
+    @pytest.mark.asyncio
+    async def test_double_stop(self):
+        """Test runnable double stop."""
+        # for pydocstyle
+        class TestRun(Runnable):
+            async def run(self):
+                await asyncio.sleep(0.1)
+
+        run = TestRun()
+        run.start()
+        run.stop()
         run.stop()
         await run.wait_completed()

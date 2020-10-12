@@ -46,17 +46,17 @@ class TestConfigCases(AEATestCaseEmpty):
     def test_agent_force_set(self):
         """Test agent test force set from path."""
         key_name = "agent.private_key_paths.cosmos"
-        self.force_set_config(key_name, "testdata2000")
+        self.nested_set_config(key_name, "testdata2000")
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
         assert b"testdata2000" in result.stdout_bytes
 
     def test_agent_set(self):
         """Test agent test set from path."""
-        self.set_config("agent.author", "testauthor21")
-        result = self.run_cli_command(
-            "config", "get", "agent.author", cwd=self._get_cwd()
-        )
-        assert b"testauthor21" in result.stdout_bytes
+        value = "testvalue"
+        key_name = "agent.logging_config.disable_existing_loggers"
+        self.set_config(key_name, value)
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert value in str(result.stdout_bytes)
 
     def test_agent_get_exception(self):
         """Test agent test get non exists key."""

@@ -38,7 +38,7 @@ class Project:
 
     @classmethod
     def load(cls, working_dir: str, public_id: PublicId) -> "Project":
-        """Load project with given pubblic_id to working_dir."""
+        """Load project with given public_id to working_dir."""
         ctx = Context(cwd=working_dir)
         path = os.path.join(working_dir, public_id.author, public_id.name)
         fetch_agent(
