@@ -19,87 +19,96 @@
 
 """Helper functions related to YAML loading/dumping."""
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, TextIO
+from typing import Any, Dict, List
 
 import yaml
 
 
-def _ordered_loading(fun: Callable):
-    # for pydocstyle
-    def ordered_load(stream: TextIO):
-        object_pairs_hook = OrderedDict
+class _AEAYamlLoader(yaml.SafeLoader):
+    """
+    Custom yaml.SafeLoader for the AEA framework.
 
-        class OrderedLoader(yaml.SafeLoader):
-            """A wrapper for safe yaml loader."""
+    It extends the default SafeLoader in two ways:
+    - loads YAML configurations while *remembering the order of the fields*;
+    - TODO
+    """
 
-            pass
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the AEAYamlLoader.
 
-        def construct_mapping(loader, node):
-            loader.flatten_mapping(node)
-            return object_pairs_hook(loader.construct_pairs(node))
-
-        OrderedLoader.add_constructor(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
+        It adds a YAML Loader constructor to use 'OderedDict' to load the files.
+        """
+        super().__init__(*args, **kwargs)
+        _AEAYamlLoader.add_constructor(
+            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, self._construct_mapping
         )
-        return fun(stream, Loader=OrderedLoader)  # nosec
 
-    return ordered_load
-
-
-def _ordered_dumping(fun: Callable):
-    # for pydocstyle
-    def ordered_dump(data, stream=None, **kwds):
-        class OrderedDumper(yaml.SafeDumper):
-            """A wrapper for safe yaml loader."""
-
-            pass
-
-        def _dict_representer(dumper, data):
-            return dumper.represent_mapping(
-                yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items()
-            )
-
-        OrderedDumper.add_representer(OrderedDict, _dict_representer)
-        return fun(data, stream, Dumper=OrderedDumper, **kwds)  # nosec
-
-    return ordered_dump
+    @staticmethod
+    def _construct_mapping(loader, node):
+        """Construct a YAML mapping with OrderedDict."""
+        object_pairs_hook = OrderedDict
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
 
 
-@_ordered_loading
+class _AEAYamlDumper(yaml.SafeDumper):
+    """
+    Custom yaml.SafeDumper for the AEA framework.
+
+    It extends the default SafeDumper in two ways:
+    - dumps YAML configurations while *following the order of the fields*;
+    - TODO
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the AEAYamlDumper.
+
+        It adds a YAML Dumper representer to use 'OderedDict' to dump the files.
+        """
+        super().__init__(*args, **kwargs)
+        _AEAYamlDumper.add_representer(OrderedDict, self._dict_representer)
+
+    @staticmethod
+    def _dict_representer(dumper, data):
+        """Use a custom representer."""
+        return dumper.represent_mapping(
+            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items()
+        )
+
+
 def yaml_load(*args, **kwargs) -> Dict[str, Any]:
     """
     Load a yaml from a file pointer in an ordered way.
 
     :return: the yaml
     """
-    return yaml.load(*args, **kwargs)  # nosec
+    return yaml.load(*args, **kwargs, Loader=_AEAYamlLoader)  # nosec
 
 
-@_ordered_loading
 def yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]:
     """
     Load a multi-paged yaml from a file pointer in an ordered way.
 
     :return: the yaml
     """
-    return list(yaml.load_all(*args, **kwargs))  # nosec
+    return list(yaml.load_all(*args, **kwargs, Loader=_AEAYamlLoader))  # nosec
 
 
-@_ordered_dumping
 def yaml_dump(*args, **kwargs) -> None:
     """
     Dump multi-paged yaml data to a yaml file in an ordered way.
 
     :return None
     """
-    yaml.dump(*args, **kwargs)  # nosec
+    yaml.dump(*args, **kwargs, Dumper=_AEAYamlDumper)  # nosec
 
 
-@_ordered_dumping
 def yaml_dump_all(*args, **kwargs) -> None:
     """
     Dump multi-paged yaml data to a yaml file in an ordered way.
 
     :return None
     """
-    yaml.dump_all(*args, **kwargs)  # nosec
+    yaml.dump_all(*args, **kwargs, Dumper=_AEAYamlDumper)  # nosec
