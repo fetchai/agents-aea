@@ -914,7 +914,7 @@ def reset_at_each_method(cls) -> Type:
 
     cls.setup = setup
 
-    def teardown_class(cls):
+    def teardown_class(_cls):
         """Tear down the class - do nothing."""
 
     cls.teardown_class = classmethod(teardown_class)

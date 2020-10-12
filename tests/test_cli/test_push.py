@@ -26,6 +26,7 @@ from click import ClickException
 from aea.cli import cli
 from aea.cli.push import _check_package_public_id, _save_item_locally
 from aea.cli.utils.constants import ITEM_TYPES
+from aea.configurations.base import PublicId
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import AEATestCaseEmpty, reset_at_each_method
 
@@ -77,18 +78,14 @@ class CheckPackagePublicIdTestCase(TestCase):
     def test__check_package_public_id_positive(self, *mocks):
         """Test for _check_package_public_id positive result."""
         _check_package_public_id(
-            "source-path",
-            "item-type",
-            PublicIdMock.from_str("{}/name:0.1.0".format(AUTHOR)),
+            "source-path", "item-type", PublicId.from_str(f"{AUTHOR}/name:0.1.0"),
         )
 
     def test__check_package_public_id_negative(self, *mocks):
         """Test for _check_package_public_id negative result."""
         with self.assertRaises(ClickException):
             _check_package_public_id(
-                "source-path",
-                "item-type",
-                PublicIdMock.from_str("{}/name:0.1.1".format(AUTHOR)),
+                "source-path", "item-type", PublicId.from_str(f"{AUTHOR}/name:0.1.1"),
             )
 
 

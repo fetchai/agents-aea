@@ -125,7 +125,8 @@ def _check_package_public_id(source_path, item_type, item_id) -> None:
     item_version = config.get("version", "")
     actual_item_id = PublicId(item_author, item_name, item_version)
     if not actual_item_id.same_prefix(item_id) or (
-        not item_id.latest and item_id.version != actual_item_id.version
+        not item_id.package_version.is_latest
+        and item_id.version != actual_item_id.version
     ):
         raise click.ClickException(
             "Version, name or author does not match. Expected '{}', found '{}'".format(
