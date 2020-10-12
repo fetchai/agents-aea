@@ -21,7 +21,7 @@
 import os
 import re
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Sequence, TextIO
+from typing import Any, Dict, List, Match, Optional, Sequence, TextIO, cast
 
 import yaml
 from yaml import MappingNode
@@ -76,6 +76,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
         """Extract the matched value, expand env variable, and replace the match."""
         node_value = node.value
         match = _AEAYamlLoader.envvar_matcher.match(node_value)
+        match = cast(Match[str], match)
         env_var = match.group()[2:-1]
 
         # check for defaults
