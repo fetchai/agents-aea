@@ -63,6 +63,9 @@ func acceptAndEcho(server net.Listener) {
 					return
 				}
 				err = utils.WriteBytesConn(conn, buf)
+				if err != nil {
+					return
+				}
 
 			}
 		}()
@@ -83,6 +86,9 @@ func sendAndReceive(conn net.Conn, buf []byte, b *testing.B) {
 		b.Fatal(err.Error())
 	}
 	_, err = utils.ReadBytesConn(conn)
+	if err != nil {
+		b.Fatal(err.Error())
+	}
 }
 
 func connectAndSend(buf []byte, b *testing.B) {
@@ -259,7 +265,10 @@ func benchmarkAgentRegistration(npeers uint16, b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
-		peer.registerAgentAddress(addrs[len(addrs)-1-i%len(addrs)])
+		err = peer.registerAgentAddress(addrs[len(addrs)-1-i%len(addrs)])
+		if err != nil {
+			b.Fail()
+		}
 	}
 }
 
@@ -280,7 +289,10 @@ func benchmarkAgentLookup(npeers uint16, b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
-		peer.lookupAddressDHT(addrs[len(peers)-1-i%len(peers)])
+		_, err = peer.lookupAddressDHT(addrs[len(peers)-1-i%len(peers)])
+		if err != nil {
+			b.Fail()
+		}
 	}
 }
 
