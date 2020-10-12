@@ -1,12 +1,12 @@
 # ERC1155 Deployer
 
-An agent that sells data via a smart contract.
+An agent that deploys a smart contract sells data using it.
 
 ## Description
 
-This agent uses its primary skill, the `fetchai/erc1155_deploy` skill, to register its 'data-selling' service on the `SOEF`. It can then be contacted by another agent (for example the `fetchai/erc1155_client` agent) to provide specific data. 
+This agent uses its primary skill, the `fetchai/erc1155_deploy` skill, to deploy a smart contract, create and mint tokens, and register its 'data-selling' service on the `SOEF`. It can then be contacted by another agent (for example the `fetchai/erc1155_client` agent) to provide specific data. 
 
-Once such aa request is made, this agent negotiates the terms of trade using the `fetchai/fipa` protocol, and if an agreement is reached, it delivers the data after receiving payment via its deployed smart contract.
+Once such a request is made, this agent negotiates the terms of trade using the `fetchai/fipa` protocol, and if an agreement is reached, it delivers the data after receiving payment via the deployed smart contract.
 
 ## Links
 
