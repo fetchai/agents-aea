@@ -21,7 +21,7 @@
 import os
 import re
 from collections import OrderedDict
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Sequence, TextIO
 
 import yaml
 
@@ -32,7 +32,10 @@ class _AEAYamlLoader(yaml.SafeLoader):
 
     It extends the default SafeLoader in two ways:
     - loads YAML configurations while *remembering the order of the fields*;
-    - TODO
+    - resolves the environment variables at loading time.
+
+    This class is for internal usage only; please use
+    the public functions of the module 'yaml_load' and 'yaml_load_all'.
     """
 
     envvar_matcher = re.compile(r"\${([^}^{]+)\}")
@@ -85,7 +88,10 @@ class _AEAYamlDumper(yaml.SafeDumper):
     Custom yaml.SafeDumper for the AEA framework.
 
     It extends the default SafeDumper so to dump
-    YAML configurations while *following the order of the fields*;
+    YAML configurations while *following the order of the fields*.
+
+    This class is for internal usage only; please use
+    the public functions of the module 'yaml_dump' and 'yaml_dump_all'.
     """
 
     def __init__(self, *args, **kwargs):
@@ -105,37 +111,43 @@ class _AEAYamlDumper(yaml.SafeDumper):
         )
 
 
-def yaml_load(*args, **kwargs) -> Dict[str, Any]:
+def yaml_load(stream: TextIO) -> Dict[str, Any]:
     """
     Load a yaml from a file pointer in an ordered way.
 
-    :return: the yaml
+    :param stream: file pointer to the input file.
+    :return: the dictionary object with the YAML file content.
     """
-    return yaml.load(*args, **kwargs, Loader=_AEAYamlLoader)  # nosec
+    return yaml.load(stream, Loader=_AEAYamlLoader)  # nosec
 
 
-def yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]:
+def yaml_load_all(stream: TextIO) -> List[Dict[str, Any]]:
     """
     Load a multi-paged yaml from a file pointer in an ordered way.
 
-    :return: the yaml
+    :param stream: file pointer to the input file.
+    :return: the list of dictionary objects with the (multi-paged) YAML file content.
     """
-    return list(yaml.load_all(*args, **kwargs, Loader=_AEAYamlLoader))  # nosec
+    return list(yaml.load_all(stream, Loader=_AEAYamlLoader))  # nosec
 
 
-def yaml_dump(*args, **kwargs) -> None:
+def yaml_dump(data: Dict, stream: Optional[TextIO] = None) -> None:
     """
-    Dump multi-paged yaml data to a yaml file in an ordered way.
+    Dump YAML data to a yaml file in an ordered way.
 
-    :return None
+    :param data: the data to write.
+    :param stream: (optional) the file to write on.
+    :return: None
     """
-    yaml.dump(*args, **kwargs, Dumper=_AEAYamlDumper)  # nosec
+    yaml.dump(data, stream=stream, Dumper=_AEAYamlDumper)  # nosec
 
 
-def yaml_dump_all(*args, **kwargs) -> None:
+def yaml_dump_all(data: Sequence[Dict], stream: Optional[TextIO] = None) -> None:
     """
-    Dump multi-paged yaml data to a yaml file in an ordered way.
+    Dump YAML data to a yaml file in an ordered way.
 
-    :return None
+    :param data: the data to write.
+    :param stream: (optional) the file to write on.
+    :return: None
     """
-    yaml.dump_all(*args, **kwargs, Dumper=_AEAYamlDumper)  # nosec
+    yaml.dump_all(data, stream=stream, Dumper=_AEAYamlDumper)  # nosec
