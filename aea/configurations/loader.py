@@ -45,7 +45,7 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore

@@ -32,7 +32,7 @@ from aea.configurations.base import (
 )
 from aea.connections.stub.connection import write_envelope
 from aea.exceptions import enforce
-from aea.helpers.base import yaml_dump, yaml_dump_all
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 from aea.mail.base import Envelope
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
