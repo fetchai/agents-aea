@@ -24,6 +24,7 @@ from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Sequence, TextIO
 
 import yaml
+from yaml import MappingNode
 
 
 class _AEAYamlLoader(yaml.SafeLoader):
@@ -62,14 +63,16 @@ class _AEAYamlLoader(yaml.SafeLoader):
             )
 
     @staticmethod
-    def _construct_mapping(loader, node):
+    def _construct_mapping(loader: "_AEAYamlLoader", node: MappingNode):
         """Construct a YAML mapping with OrderedDict."""
         object_pairs_hook = OrderedDict
         loader.flatten_mapping(node)
         return object_pairs_hook(loader.construct_pairs(node))
 
     @staticmethod
-    def _envvar_constructor(_loader, node):  # pragma: no cover
+    def _envvar_constructor(
+        _loader: "_AEAYamlLoader", node: MappingNode
+    ):  # pragma: no cover
         """Extract the matched value, expand env variable, and replace the match."""
         node_value = node.value
         match = _AEAYamlLoader.envvar_matcher.match(node_value)
