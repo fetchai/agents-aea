@@ -48,6 +48,13 @@ def test_is_satisfiable_with_compatibility_constraints():
     assert is_satisfiable(SpecifierSet("~=1.1,==1.2")) is True
     assert is_satisfiable(SpecifierSet("~=1.1,>1.2")) is True
     assert is_satisfiable(SpecifierSet("==1.1,==1.2")) is False
+    assert is_satisfiable(SpecifierSet("~= 1.4.5.0")) is True
+    assert is_satisfiable(SpecifierSet("~= 1.4.5.0,>1.4.6")) is False
+    assert is_satisfiable(SpecifierSet("~=2.2.post3,==2.*")) is True
+    assert is_satisfiable(SpecifierSet("~=2.2.post3,>2.3")) is True
+    assert is_satisfiable(SpecifierSet("~=2.2.post3,>3")) is False
+    assert is_satisfiable(SpecifierSet("~=1.4.5a4,>1.4.6")) is True
+    assert is_satisfiable(SpecifierSet("~=1.4.5a4,>1.5")) is False
 
 
 def test_is_satisfiable_with_legacy_version():
