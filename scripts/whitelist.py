@@ -209,3 +209,4 @@ _.list_projects  # unused method (aea/manager.py:283)
 _.add_agent  # unused method (aea/manager.py:291)
 _.start_all_agents  # unused method (aea/manager.py:396)
 _.get_agent_alias  # unused method (aea/manager.py:486)
+_.reset_at_each_method  # unused method

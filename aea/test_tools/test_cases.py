@@ -33,7 +33,18 @@ from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pytest
 import yaml
@@ -877,3 +888,41 @@ class AEATestCase(BaseAEATestCase):
         cls.path_to_aea = Path(".")
         cls.agent_configuration = None
         super(AEATestCase, cls).teardown_class()
+
+
+def reset_at_each_method(cls) -> Type:
+    """
+    Wrap an AEA test case class such that each test method runs independently.
+
+    That means the setup and the teardown must be called before/after each test method.
+
+    :param cls: the AEA test case class to wrap.
+    :return: the wrapped class.
+    """
+
+    if not issubclass(cls, BaseAEATestCase):
+        raise ValueError("The wrapper is only applicable to AEA test case classes.")
+
+    def setup_class(_cls):
+        """Set up the class - do nothing."""
+
+    cls.setup_class = classmethod(setup_class)
+
+    def setup(self):
+        """Set up a class test."""
+        super(cls, self).setup_class()
+
+    cls.setup = setup
+
+    def teardown_class(cls):
+        """Tear down the class - do nothing."""
+
+    cls.teardown_class = classmethod(teardown_class)
+
+    def teardown(self):
+        """Tear down a class test."""
+        super(cls, self).teardown_class()
+
+    cls.teardown = teardown
+
+    return cls
