@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """Helper functions related to YAML loading/dumping."""
+import os
+import re
 from collections import OrderedDict
 from typing import Any, Dict, List
 
@@ -33,6 +35,9 @@ class _AEAYamlLoader(yaml.SafeLoader):
     - TODO
     """
 
+    envvar_matcher = re.compile(r"\${([^}^{]+)\}")
+    envvar_key = "!envvar"
+
     def __init__(self, *args, **kwargs):
         """
         Initialize the AEAYamlLoader.
@@ -43,6 +48,15 @@ class _AEAYamlLoader(yaml.SafeLoader):
         _AEAYamlLoader.add_constructor(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, self._construct_mapping
         )
+        _AEAYamlLoader.add_constructor(self.envvar_key, self._envvar_constructor)
+        self._add_implicit_resolver_if_not_present_already()
+
+    def _add_implicit_resolver_if_not_present_already(self) -> None:
+        """Add implicit resolver for environment variables, if not present already."""
+        if self.envvar_key in dict(self.yaml_implicit_resolvers.get(None, [])):
+            _AEAYamlLoader.add_implicit_resolver(
+                self.envvar_key, self.envvar_matcher, None
+            )
 
     @staticmethod
     def _construct_mapping(loader, node):
@@ -51,14 +65,27 @@ class _AEAYamlLoader(yaml.SafeLoader):
         loader.flatten_mapping(node)
         return object_pairs_hook(loader.construct_pairs(node))
 
+    @staticmethod
+    def _envvar_constructor(_loader, node):  # pragma: no cover
+        """Extract the matched value, expand env variable, and replace the match."""
+        node_value = node.value
+        match = _AEAYamlLoader.envvar_matcher.match(node_value)
+        env_var = match.group()[2:-1]
+
+        # check for defaults
+        var_name, default_value = env_var.split(":")
+        var_name = var_name.strip()
+        default_value = default_value.strip()
+        var_value = os.getenv(var_name, default_value)
+        return var_value + node_value[match.end() :]
+
 
 class _AEAYamlDumper(yaml.SafeDumper):
     """
     Custom yaml.SafeDumper for the AEA framework.
 
-    It extends the default SafeDumper in two ways:
-    - dumps YAML configurations while *following the order of the fields*;
-    - TODO
+    It extends the default SafeDumper so to dump
+    YAML configurations while *following the order of the fields*;
     """
 
     def __init__(self, *args, **kwargs):
