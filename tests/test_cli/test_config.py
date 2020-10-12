@@ -350,7 +350,7 @@ class TestConfigSet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "Field `behaviours.dummy.config.behaviour_arg_1` is not allowed to change!"
+            == "Field `behaviours.dummy.config` is not allowed to change!"
         )
 
     def test_no_recognized_root(self):

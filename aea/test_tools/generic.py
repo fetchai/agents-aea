@@ -77,7 +77,7 @@ def _nested_set(
     configuration_obj: PackageConfiguration, keys: List, value: Any
 ) -> None:
     """
-    Nested set a value to a dict. Force sets the value, overwriting any present values.
+    Nested set a value to a dict. Force sets the values, overwriting any present values, but maintaining schema validation.
 
     :param configuration_obj: configuration object
     :param keys: list of keys.
@@ -85,45 +85,72 @@ def _nested_set(
 
     :return: None.
     """
-    dic = {}  # type: Dict[str, Any]
+
+    def get_nested_ordered_dict_from_dict(input_dict: Dict) -> Dict:
+        _dic = {}
+        for _key, _value in input_dict.items():
+            if isinstance(_value, dict):
+                _dic[_key] = OrderedDict(get_nested_ordered_dict_from_dict(_value))
+            else:
+                _dic[_key] = _value
+        return _dic
+
+    def get_nested_ordered_dict_from_keys_and_value(
+        keys: List[str], value: Any
+    ) -> Dict:
+        _dic = {}
+        for key in keys[:-1]:
+            _dic = dic.setdefault(key, OrderedDict())
+        _dic[keys[-1]] = (
+            OrderedDict(get_nested_ordered_dict_from_dict(value))
+            if isinstance(value, dict)
+            else value
+        )
+        return _dic
+
     root_key = keys[0]
     if (
         isinstance(configuration_obj, SkillConfig)
         and root_key in SkillConfig.FIELDS_WITH_NESTED_FIELDS
     ):
         root_attr = getattr(configuration_obj, root_key)
-        if len(keys) >= 4:  # root.skill_component_id.args.
-            skill_component_id = keys[1]
-            skill_component_config = root_attr.read(skill_component_id)
-            for key in keys[3:-1]:
-                dic = dic.setdefault(key, OrderedDict())
-            dic[keys[-1]] = OrderedDict(value) if isinstance(value, dict) else value
-            skill_component_config.args.update(dic)
-            root_attr.update(skill_component_id, skill_component_config)
-        elif len(keys) == 1 and isinstance(value, dict):  # root
-            raise NotImplementedError()
-        else:
+        length = len(keys)
+        if length < 3 or keys[2] != SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
             raise ValueError(f"Invalid keys={keys}.")
+        skill_component_id = keys[1]
+        skill_component_config = root_attr.read(skill_component_id)
+        if length == 3 and isinstance(value, dict):  # root.skill_component_id.args
+            # set all args
+            skill_component_config.args = get_nested_ordered_dict_from_dict(value)
+        elif len(keys) >= 4:  # root.skill_component_id.args.[keys]
+            # update some args
+            dic = get_nested_ordered_dict_from_keys_and_value(keys[3:], value)
+            skill_component_config.args.update(dic)
+        else:
+            raise NotImplementedError
+        root_attr.update(skill_component_id, skill_component_config)
     else:
         root_attr = getattr(configuration_obj, root_key)
         if isinstance(root_attr, CRUDCollection):
-            if isinstance(value, dict):
-                for key, _value in value.items():
-                    root_attr.update(key, _value)
+            if isinstance(value, dict) and len(keys) == 1:
+                for _key, _value in value.items():
+                    _value = get_nested_ordered_dict_from_dict(_value)
+                    root_attr.update(_key, _value)
+            elif len(keys) >= 2:  # root.[keys]
+                dic = get_nested_ordered_dict_from_keys_and_value(keys[1:], value)
+                root_attr.update(keys[1], dic[keys[1]])
             else:
                 raise NotImplementedError
         else:
-            for key in keys[:-1]:
-                dic = dic.setdefault(key, OrderedDict())
-            dic[keys[-1]] = OrderedDict(value) if isinstance(value, dict) else value
+            dic = get_nested_ordered_dict_from_keys_and_value(keys, value)
             setattr(configuration_obj, root_key, dic[root_key])
 
 
-def force_set_config(
+def nested_set_config(
     dotted_path: str, value: Any, author: str = DEFAULT_AUTHOR
 ) -> None:
     """
-    Set an AEA config without validation.
+    Set an AEA config with nested values.
 
     Run from agent's directory.
 

@@ -73,7 +73,7 @@ class TestWeatherSkills(AEATestCaseMany):
         )
         self.set_config(dotted_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -93,7 +93,7 @@ class TestWeatherSkills(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
@@ -108,7 +108,7 @@ class TestWeatherSkills(AEATestCaseMany):
         )
         self.set_config(dotted_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -121,13 +121,13 @@ class TestWeatherSkills(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # run agents
         self.set_agent_context(weather_station_aea_name)
@@ -238,7 +238,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/weather_station:0.12.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -265,7 +265,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
@@ -275,7 +275,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/weather_client:0.11.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -298,13 +298,13 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         self.set_agent_context(weather_station_aea_name)
         weather_station_process = self.run_agent()

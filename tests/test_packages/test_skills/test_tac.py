@@ -72,7 +72,7 @@ class TestTacSkills(AEATestCaseMany):
         self.add_item("skill", "fetchai/tac_control:0.8.0")
         self.set_config("agent.default_ledger", FETCHAI)
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -114,7 +114,7 @@ class TestTacSkills(AEATestCaseMany):
             self.add_item("skill", "fetchai/tac_negotiation:0.10.0")
             self.set_config("agent.default_ledger", FETCHAI)
             setting_path = "agent.default_routing"
-            self.force_set_config(setting_path, default_routing)
+            self.nested_set_config(setting_path, default_routing)
             self.run_install()
             diff = self.difference_to_fetched_agent(
                 "fetchai/tac_participant:0.11.0", agent_name
@@ -135,7 +135,7 @@ class TestTacSkills(AEATestCaseMany):
 
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-            self.force_set_config(setting_path, config)
+            self.nested_set_config(setting_path, config)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -286,7 +286,7 @@ class TestTacSkillsContract(AEATestCaseMany):
         self.add_item("skill", "fetchai/tac_control_contract:0.9.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -335,7 +335,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             self.add_item("skill", "fetchai/tac_negotiation:0.10.0")
             self.set_config("agent.default_ledger", ETHEREUM)
             setting_path = "agent.default_routing"
-            self.force_set_config(setting_path, default_routing)
+            self.nested_set_config(setting_path, default_routing)
             self.set_config(
                 "vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract",
                 True,

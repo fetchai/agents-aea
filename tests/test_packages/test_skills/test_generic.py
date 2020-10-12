@@ -72,7 +72,7 @@ class TestGenericSkills(AEATestCaseMany):
         )
         self.set_config(setting_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -97,7 +97,7 @@ class TestGenericSkills(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -111,7 +111,7 @@ class TestGenericSkills(AEATestCaseMany):
         )
         self.set_config(setting_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -124,7 +124,7 @@ class TestGenericSkills(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_buyer.is_abstract"
@@ -134,7 +134,7 @@ class TestGenericSkills(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
@@ -247,7 +247,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/generic_seller:0.13.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -279,7 +279,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -289,7 +289,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/generic_buyer:0.12.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -315,13 +315,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # run AEAs
         self.set_agent_context(seller_aea_name)

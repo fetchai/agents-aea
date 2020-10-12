@@ -99,7 +99,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         # replace location
         setting_path = "vendor.fetchai.skills.simple_service_registration.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         search_aea = "search_aea"
         self.create_agents(search_aea)
@@ -111,7 +111,7 @@ class TestBuildSkill(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.9.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
 
         # manually change the files:
         path = Path(self.t, search_aea, "skills", skill_name, "behaviours.py")
@@ -156,13 +156,13 @@ class TestBuildSkill(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = "skills.{}.behaviours.my_search_behaviour.args.location".format(
             skill_name
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # run agents
         self.set_agent_context(simple_service_registration_aea)

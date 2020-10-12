@@ -46,7 +46,7 @@ class TestConfigCases(AEATestCaseEmpty):
     def test_agent_force_set(self):
         """Test agent test force set from path."""
         key_name = "agent.private_key_paths.cosmos"
-        self.force_set_config(key_name, "testdata2000")
+        self.nested_set_config(key_name, "testdata2000")
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
         assert b"testdata2000" in result.stdout_bytes
 

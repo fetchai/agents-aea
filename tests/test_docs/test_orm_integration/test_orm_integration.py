@@ -144,15 +144,15 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/thermometer:0.12.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         # ejecting changes author and version!
         self.eject_item("skill", "fetchai/thermometer:0.12.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
-        self.force_set_config(
+        self.nested_set_config(
             "skills.thermometer.models.strategy.args",
             seller_skill_config_replacement["models"]["strategy"]["args"],
         )
-        self.force_set_config(
+        self.nested_set_config(
             "skills.thermometer.dependencies",
             seller_skill_config_replacement["dependencies"],
         )
@@ -181,7 +181,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # replace location
         setting_path = "skills.thermometer.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
@@ -191,9 +191,9 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/thermometer_client:0.11.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
-        self.force_set_config(
+        self.nested_set_config(
             "vendor.fetchai.skills.thermometer_client.models.strategy.args",
             buyer_skill_config_replacement["models"]["strategy"]["args"],
         )
@@ -212,13 +212,13 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.thermometer_client.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(seller_aea_name)

@@ -69,7 +69,7 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
+        self.nested_set_config(
             "vendor.fetchai.connections.stub.config",
             {"host": "127.0.0.1", "port": 10000},
         )
@@ -103,7 +103,7 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
+        self.nested_set_config(
             "vendor.fetchai.connections.stub.config", {"public_uri": "127.0.0.1:10000"}
         )
 
@@ -212,7 +212,7 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
+        self.nested_set_config(
             "vendor.fetchai.connections.stub.config", {"host": "127.0.0.1"}
         )
 
@@ -271,7 +271,7 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
+        self.nested_set_config(
             "vendor.fetchai.connections.stub.config",
             {"host": "127.0.0.1", "port": 10000},
         )
@@ -353,7 +353,7 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
+        self.nested_set_config(
             "vendor.fetchai.connections.stub.config",
             {"some_uri": "some-unparsable_URI"},
         )

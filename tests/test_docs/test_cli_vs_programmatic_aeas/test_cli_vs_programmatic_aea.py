@@ -90,7 +90,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         weather_station_process = self.run_agent()
 
