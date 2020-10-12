@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of runtime for economic agent (AEA)."""
 
 import asyncio

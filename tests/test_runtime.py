@@ -17,7 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for aea runtime."""
+import asyncio
 import os
+import time
 from pathlib import Path
 from typing import Type
 from unittest.mock import patch
@@ -26,10 +28,16 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
-from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
+from aea.runtime import (
+    AsyncRuntime,
+    BaseRuntime,
+    RuntimeStates,
+    ThreadedRuntime,
+    _StopRuntime,
+)
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import CUR_PATH
+from tests.conftest import CUR_PATH, DUMMY_SKILL_PUBLIC_ID
 
 
 class TestAsyncRuntime:
@@ -60,11 +68,31 @@ class TestAsyncRuntime:
         self.runtime.stop()
         self.runtime.wait_completed(sync=True)
 
+    def test_stop_with_stopped_exception(self):
+        """Test runtime stopped by stopruntime exception."""
+        behaviour = self.agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
+        with patch.object(
+            behaviour, "act", side_effect=_StopRuntime(reraise=ValueError("expected"))
+        ):
+            self.runtime.start()
+            wait_for_condition(lambda: self.runtime.is_running, timeout=20)
+            time.sleep(1)
+            assert self.runtime.is_stopped
+
+        with pytest.raises(ValueError, match="expected"):
+            self.runtime.wait_completed(timeout=10, sync=True)
+
     def test_double_start(self):
         """Test runtime double start do nothing."""
         assert self.runtime.start()
         assert not self.runtime.start()
         wait_for_condition(lambda: self.runtime.is_running, timeout=20)
+
+    def test_set_loop(self):
+        """Test set loop method."""
+        loop = asyncio.new_event_loop()
+        self.runtime.set_loop(loop)
+        assert self.runtime.loop is loop
 
     def test_double_stop(self):
         """Test runtime double stop do nothing."""

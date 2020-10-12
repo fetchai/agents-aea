@@ -36,11 +36,11 @@ Read an envelope from a file.
 
 envelope
 
-<a name="aea.test_tools.generic.force_set_config"></a>
+<a name="aea.test_tools.generic.nested_set_config"></a>
 #### force`_`set`_`config
 
 ```python
-force_set_config(dotted_path: str, value: Any) -> None
+nested_set_config(dotted_path: str, value: Any) -> None
 ```
 
 Set an AEA config without validation.

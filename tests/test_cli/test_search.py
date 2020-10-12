@@ -214,6 +214,7 @@ class TestSearchAgentsLocal:
                 "Some description.",
             ],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(

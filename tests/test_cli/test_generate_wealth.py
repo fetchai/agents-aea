@@ -107,7 +107,7 @@ class TestWealthCommandsNegative(AEATestCaseMany):
         self.add_private_key()
 
         settings = {"unsupported_crypto": "path"}
-        self.force_set_config("agent.private_key_paths", settings)
+        self.nested_set_config("agent.private_key_paths", settings)
         with pytest.raises(AEATestingException) as excinfo:
             self.generate_wealth()
 

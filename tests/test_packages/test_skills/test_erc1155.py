@@ -75,7 +75,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_deploy:0.14.0")
 
         diff = self.difference_to_fetched_agent(
@@ -102,14 +102,14 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
         self.run_install()
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.erc1155_deploy.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # add packages for agent two
         self.set_agent_context(client_aea_name)
@@ -119,7 +119,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_client:0.13.0")
 
         diff = self.difference_to_fetched_agent(
@@ -143,16 +143,14 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
         self.run_install()
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.erc1155_client.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # run agents
         self.set_agent_context(deploy_aea_name)
