@@ -47,6 +47,13 @@ from packages.fetchai.protocols.contract_api.dialogues import (
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogue as BaseLedgerApiDialogue,
+)
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -247,6 +254,83 @@ class FipaDialogues(Model, BaseFipaDialogues):
             self,
             self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
+        )
+
+
+class LedgerApiDialogue(BaseLedgerApiDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        self_address: Address,
+        role: Dialogue.Role,
+        message_class: Type[LedgerApiMessage] = LedgerApiMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseLedgerApiDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+        self._associated_signing_dialogue = None  # type: Optional[SigningDialogue]
+
+    @property
+    def associated_signing_dialogue(self) -> "SigningDialogue":
+        """Get the associated signing dialogue."""
+        if self._associated_signing_dialogue is None:
+            raise ValueError("Associated signing dialogue not set!")
+        return self._associated_signing_dialogue
+
+    @associated_signing_dialogue.setter
+    def associated_signing_dialogue(
+        self, associated_signing_dialogue: "SigningDialogue"
+    ) -> None:
+        """Set the associated signing dialogue."""
+        enforce(
+            self._associated_signing_dialogue is None,
+            "Associated signing dialogue already set!",
+        )
+        self._associated_signing_dialogue = associated_signing_dialogue
+
+
+class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseLedgerApiDialogue.Role.AGENT
+
+        BaseLedgerApiDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=LedgerApiDialogue,
         )
 
 
