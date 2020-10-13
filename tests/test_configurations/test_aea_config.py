@@ -39,8 +39,8 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
-from aea.helpers.base import yaml_load_all
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.yaml_utils import yaml_load_all
 
 from tests.conftest import CUR_PATH, ROOT_DIR
 

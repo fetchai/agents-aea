@@ -45,8 +45,9 @@ from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FIL
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
-from aea.helpers.base import cd, yaml_load_all
+from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.yaml_utils import yaml_load_all
 from aea.protocols.base import Protocol
 from aea.protocols.default import DefaultMessage
 from aea.registries.resources import Resources

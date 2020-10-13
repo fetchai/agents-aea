@@ -22,7 +22,6 @@
 import inspect
 import json
 import os
-import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
@@ -30,7 +29,6 @@ from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
 import jsonschema
 import yaml
 from jsonschema import Draft4Validator
-from yaml import SafeLoader
 
 from aea.configurations.base import (
     AgentConfig,
@@ -45,7 +43,7 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
@@ -497,26 +495,3 @@ def _load_configuration_object(
             )
         )
     return configuration_object
-
-
-def _config_loader():
-    envvar_matcher = re.compile(r"\${([^}^{]+)\}")
-
-    def envvar_constructor(_loader, node):  # pragma: no cover
-        """Extract the matched value, expand env variable, and replace the match."""
-        node_value = node.value
-        match = envvar_matcher.match(node_value)
-        env_var = match.group()[2:-1]
-
-        # check for defaults
-        var_name, default_value = env_var.split(":")
-        var_name = var_name.strip()
-        default_value = default_value.strip()
-        var_value = os.getenv(var_name, default_value)
-        return var_value + node_value[match.end() :]
-
-    yaml.add_implicit_resolver("!envvar", envvar_matcher, None, SafeLoader)
-    yaml.add_constructor("!envvar", envvar_constructor, SafeLoader)
-
-
-_config_loader()
