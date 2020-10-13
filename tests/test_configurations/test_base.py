@@ -273,58 +273,80 @@ class TestAgentConfig:
         actual_json = actual_config.json
         assert expected_json == actual_json
 
-    def test_update(self):
-        """Test the update method."""
-        aea_config_path = Path(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE)
-        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
-        aea_config: AgentConfig = loader.load(aea_config_path.open())
 
-        dummy_skill_component_id = ComponentId(
+class TestAgentConfigUpdate:
+    """Test methods that change the agent configuration."""
+
+    def setup(self):
+        """Set up the tests."""
+        self.aea_config_path = Path(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE)
+        self.loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        self.aea_config: AgentConfig = self.loader.load(self.aea_config_path.open())
+        self.dummy_skill_component_id = ComponentId(
             ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID
         )
 
-        new_dummy_skill_config = {
+        self.new_dummy_skill_config = {
             "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
             "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
             "models": {"dummy": {"args": dict(model_arg_1=42)}},
         }
 
+    def test_component_configurations_setter(self):
+        """Test component configuration setter."""
+        assert self.aea_config.component_configurations == {}
+        new_component_configurations = {
+            self.dummy_skill_component_id: self.new_dummy_skill_config
+        }
+        self.aea_config.component_configurations = new_component_configurations
+
+    def test_component_configurations_setter_negative(self):
+        """Test component configuration setter with wrong configurations."""
+        assert self.aea_config.component_configurations == {}
+        new_component_configurations = {
+            self.dummy_skill_component_id: {"handlers": {"dummy": {"class_name": "SomeClass"}}}
+        }
+        with pytest.raises(ValueError, match=r"Configuration of component .* is not valid.*"):
+            self.aea_config.component_configurations = new_component_configurations
+
+    def test_update(self):
+        """Test the update method."""
         new_private_key_paths = dict(ethereum="foo")
         expected_private_key_paths = dict(
             ethereum="foo", cosmos="cosmos_private_key.txt"
         )
-        aea_config.update(
+        self.aea_config.update(
             dict(
                 component_configurations={
-                    dummy_skill_component_id: new_dummy_skill_config
+                    self.dummy_skill_component_id: self.new_dummy_skill_config
                 },
                 private_key_paths=new_private_key_paths,
                 connection_private_key_paths=new_private_key_paths,
             )
         )
         assert (
-            aea_config.component_configurations[dummy_skill_component_id]
-            == new_dummy_skill_config
+            self.aea_config.component_configurations[self.dummy_skill_component_id]
+            == self.new_dummy_skill_config
         )
         assert (
-            dict(aea_config.private_key_paths.read_all()) == expected_private_key_paths
+            dict(self.aea_config.private_key_paths.read_all()) == expected_private_key_paths
         )
         assert (
-            dict(aea_config.connection_private_key_paths.read_all())
+            dict(self.aea_config.connection_private_key_paths.read_all())
             == expected_private_key_paths
         )
 
         # test idempotence
-        aea_config.update(
+        self.aea_config.update(
             dict(
                 component_configurations={
-                    dummy_skill_component_id: new_dummy_skill_config
+                    self.dummy_skill_component_id: self.new_dummy_skill_config
                 }
             )
         )
         assert (
-            aea_config.component_configurations[dummy_skill_component_id]
-            == new_dummy_skill_config
+            self.aea_config.component_configurations[self.dummy_skill_component_id]
+            == self.new_dummy_skill_config
         )
 
 

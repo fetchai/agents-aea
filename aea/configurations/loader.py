@@ -210,7 +210,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
                 component_id = self._split_component_id_and_config(
                     idx, component_configuration_json
                 )
-                self._validate_component_configuration(
+                self.validate_component_configuration(
                     component_id, component_configuration_json
                 )
 
@@ -354,7 +354,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         component_id = self._split_component_id_and_config(
             component_index, component_configuration_json
         )
-        self._validate_component_configuration(
+        self.validate_component_configuration(
             component_id, component_configuration_json
         )
         return component_id
@@ -390,7 +390,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         return component_id
 
     @staticmethod
-    def _validate_component_configuration(
+    def validate_component_configuration(
         component_id: ComponentId, configuration: Dict
     ) -> None:
         """

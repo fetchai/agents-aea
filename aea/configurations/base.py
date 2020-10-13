@@ -1487,7 +1487,6 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
-        self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
             component_configurations if component_configurations is not None else {}
         )
@@ -1506,11 +1505,16 @@ class AgentConfig(PackageConfiguration):
             PackageType.CONTRACT: self.contracts,
             PackageType.SKILL: self.skills,
         }
-        for component_id, _ in d.items():
+        for component_id, component_configuration in d.items():
             enforce(
                 component_id.public_id
                 in package_type_to_set[component_id.package_type],
                 f"Component {component_id} not declared in the agent configuration.",
+            )
+            from aea.configurations.loader import ConfigLoader  # pylint: disable=import-outside-toplevel,cyclic-import
+
+            ConfigLoader.validate_component_configuration(
+                component_id, component_configuration
             )
         self._component_configurations = d
 
