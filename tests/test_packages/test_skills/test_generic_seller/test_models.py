@@ -16,16 +16,28 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the strategy class of the generic buyer skill."""
+"""This module contains the tests of the strategy class of the generic seller skill."""
 
 from pathlib import Path
 
+import pytest
+
 from aea.configurations.constants import DEFAULT_LEDGER
-from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
+from aea.crypto.ledger_apis import LedgerApis
+from aea.helpers.search.models import (
+    Constraint,
+    ConstraintType,
+    Description,
+    Location,
+    Query,
+)
 from aea.helpers.transaction.base import Terms
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_NAME
 
-from packages.fetchai.skills.generic_buyer.strategy import (
+from packages.fetchai.skills.generic_seller.strategy import (
+    AGENT_LOCATION_MODEL,
+    AGENT_REMOVE_SERVICE_MODEL,
+    AGENT_SET_SERVICE_MODEL,
     GenericStrategy,
     SIMPLE_SERVICE_MODEL,
 )
@@ -34,9 +46,9 @@ from tests.conftest import ROOT_DIR
 
 
 class TestGenericStrategy(BaseSkillTestCase):
-    """Test GenericStrategy of generic buyer."""
+    """Test GenericStrategy of generic seller."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_seller")
 
     @classmethod
     def setup(cls):
@@ -45,31 +57,25 @@ class TestGenericStrategy(BaseSkillTestCase):
         cls.ledger_id = DEFAULT_LEDGER
         cls.is_ledger_tx = True
         cls.currency_id = "some_currency_id"
-        cls.max_unit_price = 20
-        cls.max_tx_fee = 1
+        cls.unit_price = 20
         cls.service_id = "some_service_id"
-        cls.search_query = {
-            "constraint_type": "==",
-            "search_key": "seller_service",
-            "search_value": "some_search_value",
-        }
         cls.location = {
             "longitude": 51.5194,
             "latitude": 0.127,
         }
-        cls.search_radius = 5.0
-        cls.max_negotiations = 2
+        cls.service_data = {"key": "seller_service", "value": "some_service"}
+        cls.has_data_source = False
+        cls.data_for_sale = {"some_data_type": "some_data"}
         cls.strategy = GenericStrategy(
             ledger_id=cls.ledger_id,
             is_ledger_tx=cls.is_ledger_tx,
             currency_id=cls.currency_id,
-            max_unit_price=cls.max_unit_price,
-            max_tx_fee=cls.max_tx_fee,
+            unit_price=cls.unit_price,
             service_id=cls.service_id,
-            search_query=cls.search_query,
             location=cls.location,
-            search_radius=cls.search_radius,
-            max_negotiations=cls.max_negotiations,
+            service_data=cls.service_data,
+            has_data_source=cls.has_data_source,
+            data_for_sale=cls.data_for_sale,
             name="strategy",
             skill_context=cls._skill.skill_context,
         )
@@ -78,129 +84,106 @@ class TestGenericStrategy(BaseSkillTestCase):
         """Test the properties of GenericStrategy class."""
         assert self.strategy.ledger_id == self.ledger_id
         assert self.strategy.is_ledger_tx == self.is_ledger_tx
-        assert self.strategy.is_searching is False
 
-        self.strategy.is_searching = True
-        assert self.strategy.is_searching is True
+    def test_get_location_description(self):
+        """Test the get_location_description method of the GenericStrategy class."""
+        description = self.strategy.get_location_description()
 
-        assert self.strategy.balance == 0
+        assert type(description) == Description
+        assert description.data_model is AGENT_LOCATION_MODEL
 
-        self.strategy.balance = 100
-        assert self.strategy.balance == 100
-
-        assert self.strategy.max_negotiations is self.max_negotiations
-
-    def test_get_location_and_service_query(self):
-        """Test the get_location_and_service_query method of the GenericStrategy class."""
-        query = self.strategy.get_location_and_service_query()
-
-        assert type(query) == Query
-        assert len(query.constraints) == 2
-        assert query.model is None
-
-        location_constraint = Constraint(
-            "location",
-            ConstraintType(
-                "distance", (self.strategy._agent_location, self.search_radius)
-            ),
+        assert "location" in description.values
+        assert description.values["location"] == Location(
+            longitude=self.location["longitude"], latitude=self.location["latitude"]
         )
-        assert query.constraints[0] == location_constraint
 
-        service_key_constraint = Constraint(
-            self.search_query["search_key"],
-            ConstraintType(
-                self.search_query["constraint_type"], self.search_query["search_value"],
-            ),
+    def test_get_register_service_description(self):
+        """Test the get_register_service_description method of the GenericStrategy class."""
+        description = self.strategy.get_register_service_description()
+
+        assert type(description) == Description
+        assert description.data_model is AGENT_SET_SERVICE_MODEL
+
+        assert "key" in description.values
+        assert "value" in description.values
+        assert description.values["key"] == "seller_service"
+        assert description.values["value"] == "some_service"
+
+    def test_get_service_description(self):
+        """Test the get_service_description method of the GenericStrategy class."""
+        description = self.strategy.get_service_description()
+
+        assert type(description) == Description
+        assert description.data_model is SIMPLE_SERVICE_MODEL
+
+        assert "seller_service" in description.values
+        assert description.values["seller_service"] == "some_service"
+
+    def test_get_unregister_service_description(self):
+        """Test the get_unregister_service_description method of the GenericStrategy class."""
+        description = self.strategy.get_unregister_service_description()
+
+        assert type(description) == Description
+        assert description.data_model is AGENT_REMOVE_SERVICE_MODEL
+
+        assert "key" in description.values
+        assert description.values["key"] == "seller_service"
+
+    def test_is_matching_supply(self):
+        """Test the is_matching_supply method of the GenericStrategy class."""
+        acceptable_constraint = Constraint(
+            "seller_service", ConstraintType("==", "some_service")
         )
-        assert query.constraints[1] == service_key_constraint
+        matching_query = Query([acceptable_constraint])
+        is_matching_supply = self.strategy.is_matching_supply(matching_query)
+        assert is_matching_supply
 
-    def test_get_service_query(self):
-        """Test the get_service_query method of the GenericStrategy class."""
-        query = self.strategy.get_service_query()
-
-        assert type(query) == Query
-        assert len(query.constraints) == 1
-
-        assert query.model == SIMPLE_SERVICE_MODEL
-
-        service_key_constraint = Constraint(
-            self.search_query["search_key"],
-            ConstraintType(
-                self.search_query["constraint_type"], self.search_query["search_value"],
-            ),
+        acceptable_constraint = Constraint(
+            "seller_service", ConstraintType("==", "some_other_service")
         )
-        assert query.constraints[0] == service_key_constraint
+        unmatching_query = Query([acceptable_constraint])
+        is_matching_supply = self.strategy.is_matching_supply(unmatching_query)
+        assert not is_matching_supply
 
-    def test_is_acceptable_proposal(self):
-        """Test the is_acceptable_proposal method of the GenericStrategy class."""
-        acceptable_description = Description(
+    def test_generate_proposal_terms_and_data(self):
+        """Test the generate_proposal_terms_and_data method of the GenericStrategy class."""
+        seller = self.skill.skill_context.agent_address
+        total_price = len(self.data_for_sale) * self.unit_price
+        sale_quantity = len(self.data_for_sale)
+        tx_nonce = LedgerApis.generate_tx_nonce(
+            identifier=self.ledger_id, seller=seller, client=COUNTERPARTY_NAME,
+        )
+        query = Query(
+            [Constraint("seller_service", ConstraintType("==", "some_service"))]
+        )
+        expected_proposal = Description(
             {
                 "ledger_id": self.ledger_id,
-                "price": 150,
+                "price": total_price,
                 "currency_id": self.currency_id,
                 "service_id": self.service_id,
-                "quantity": 10,
-                "tx_nonce": "some_tx_nonce",
+                "quantity": sale_quantity,
+                "tx_nonce": tx_nonce,
             }
         )
-        is_acceptable = self.strategy.is_acceptable_proposal(acceptable_description)
-        assert is_acceptable
-
-        unacceptable_description = Description(
-            {
-                "ledger_id": self.ledger_id,
-                "price": 250,
-                "currency_id": self.currency_id,
-                "service_id": self.service_id,
-                "quantity": 10,
-                "tx_nonce": "some_tx_nonce",
-            }
-        )
-        is_acceptable = self.strategy.is_acceptable_proposal(unacceptable_description)
-        assert not is_acceptable
-
-    def test_is_affordable_proposal(self):
-        """Test the is_affordable_proposal method of the GenericStrategy class."""
-        description = Description(
-            {
-                "ledger_id": self.ledger_id,
-                "price": 150,
-                "currency_id": self.currency_id,
-                "service_id": self.service_id,
-                "quantity": 10,
-                "tx_nonce": "some_tx_nonce",
-            }
-        )
-        self.strategy.balance = 151
-        is_affordable = self.strategy.is_affordable_proposal(description)
-        assert is_affordable
-
-        self.strategy.balance = 150
-        is_affordable = self.strategy.is_affordable_proposal(description)
-        assert not is_affordable
-
-    def test_terms_from_proposal(self):
-        """Test the terms_from_proposal method of the GenericStrategy class."""
-        description = Description(
-            {
-                "ledger_id": self.ledger_id,
-                "price": 150,
-                "currency_id": self.currency_id,
-                "service_id": self.service_id,
-                "quantity": 10,
-                "tx_nonce": "some_tx_nonce",
-            }
-        )
-        terms = Terms(
+        expected_terms = Terms(
             ledger_id=self.ledger_id,
-            sender_address=self.skill.skill_context.agent_address,
+            sender_address=seller,
             counterparty_address=COUNTERPARTY_NAME,
-            amount_by_currency_id={self.currency_id: -150},
-            quantities_by_good_id={self.service_id: 10},
-            is_sender_payable_tx_fee=True,
-            nonce="some_tx_nonce",
-            fee_by_currency_id={self.currency_id: self.max_tx_fee},
+            amount_by_currency_id={self.currency_id: total_price},
+            quantities_by_good_id={self.service_id: -sale_quantity},
+            is_sender_payable_tx_fee=False,
+            nonce=tx_nonce,
+            fee_by_currency_id={self.currency_id: 0},
         )
-        assert (
-            self.strategy.terms_from_proposal(description, COUNTERPARTY_NAME) == terms
+        proposal, terms, data = self.strategy.generate_proposal_terms_and_data(
+            query, COUNTERPARTY_NAME
         )
+        assert proposal == expected_proposal
+        assert terms == expected_terms
+        assert data == self.data_for_sale
+
+    def test_collect_from_data_source(self):
+        """Test the collect_from_data_source method of the GenericStrategy class."""
+        with pytest.raises(NotImplementedError):
+            self.strategy.collect_from_data_source()

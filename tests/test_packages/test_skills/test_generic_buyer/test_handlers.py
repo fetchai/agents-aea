@@ -431,9 +431,9 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # before
-        for (
-            end_state_numbers
-        ) in list(self.fipa_dialogues.dialogue_stats.self_initiated.values()) + list(self.fipa_dialogues.dialogue_stats.other_initiated.values()):
+        for end_state_numbers in list(
+            self.fipa_dialogues.dialogue_stats.self_initiated.values()
+        ) + list(self.fipa_dialogues.dialogue_stats.other_initiated.values()):
             assert end_state_numbers == 0
 
         # operation
@@ -1114,7 +1114,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
 
         message_quantity = self.get_quantity_in_decision_maker_inbox()
         assert (
-                message_quantity == 1
+            message_quantity == 1
         ), f"Invalid number of messages in decision maker queue. Expected {1}. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_decision_maker_inbox(),

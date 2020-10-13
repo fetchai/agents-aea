@@ -27,13 +27,7 @@ import pytest
 
 import aea
 from aea.helpers.search.models import Description
-from aea.helpers.transaction.base import (
-    RawTransaction,
-    SignedTransaction,
-    Terms,
-    TransactionDigest,
-    TransactionReceipt,
-)
+from aea.helpers.transaction.base import Terms, TransactionDigest, TransactionReceipt
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import DialogueMessage, Dialogues
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_NAME
@@ -94,7 +88,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             ),
         )
 
-    def test_fipa_handler_handle_unidentified_dialogue(self):
+    def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the fipa handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -129,7 +123,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_cfp_is_matching_supply(self):
+    def test_handle_cfp_is_matching_supply(self):
         """Test the _handle_cfp method of the fipa handler where is_matching_supply is True."""
         # setup
         proposal = Description(
@@ -191,7 +185,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_cfp_not_is_matching_supply(self):
+    def test_handle_cfp_not_is_matching_supply(self):
         """Test the _handle_cfp method of the fipa handler where is_matching_supply is False."""
         # setup
         incoming_message = self.build_incoming_message(
@@ -229,7 +223,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_decline(self):
+    def test_handle_decline(self):
         """Test the _handle_decline method of the fipa handler."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
@@ -271,7 +265,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             else:
                 assert end_state_numbers == 0
 
-    def test_fipa_handler_handle_accept(self):
+    def test_handle_accept(self):
         """Test the _handle_accept method of the fipa handler."""
         # setup
         fipa_dialogue = cast(
@@ -320,7 +314,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_inform_is_ledger_tx_and_with_tx_digest(self):
+    def test_handle_inform_is_ledger_tx_and_with_tx_digest(self):
         """Test the _handle_inform method of the fipa handler where is_ledger_tx is True and info contains transaction_digest."""
         # setup
         self.strategy._is_ledger_tx = True
@@ -373,7 +367,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_inform_is_ledger_tx_and_no_tx_digest(self):
+    def test_handle_inform_is_ledger_tx_and_no_tx_digest(self):
         """Test the _handle_inform method of the fipa handler where is_ledger_tx is True and info does not have a transaction_digest."""
         # setup
         self.strategy._is_ledger_tx = True
@@ -408,7 +402,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             f"did not receive transaction digest from sender={COUNTERPARTY_NAME[-5:]}.",
         )
 
-    def test_fipa_handler_handle_inform_not_is_ledger_tx_and_with_done(self):
+    def test_handle_inform_not_is_ledger_tx_and_with_done(self):
         """Test the _handle_inform method of the fipa handler where is_ledger_tx is False and info contains done."""
         # setup
         self.strategy._is_ledger_tx = False
@@ -485,7 +479,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             f"transaction confirmed, sending data={data} to buyer={COUNTERPARTY_NAME[-5:]}.",
         )
 
-    def test_fipa_handler_handle_inform_not_is_ledger_tx_and_nothin_in_info(self):
+    def test_handle_inform_not_is_ledger_tx_and_nothin_in_info(self):
         """Test the _handle_inform method of the fipa handler where is_ledger_tx is False and info does not contain done or transaction_digest."""
         # setup
         self.strategy._is_ledger_tx = False
@@ -512,7 +506,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             f"did not receive transaction confirmation from sender={COUNTERPARTY_NAME[-5:]}.",
         )
 
-    def test_fipa_handler_handle_invalid(self):
+    def test_handle_invalid(self):
         """Test the _handle_invalid method of the fipa handler."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
@@ -536,7 +530,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
 
 class TestGenericLedgerApiHandler(BaseSkillTestCase):
-    """Test ledger_api handler of generic buyer."""
+    """Test ledger_api handler of generic seller."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_seller")
 
@@ -594,7 +588,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             ),
         )
 
-    def test_ledger_api_handler_handle_unidentified_dialogue(self):
+    def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the ledger_api handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -616,7 +610,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"received invalid ledger_api message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_ledger_api_handler_handle_balance(self):
+    def test_handle_balance(self):
         """Test the _handle_balance method of the ledger_api handler."""
         # setup
         ledger_id = "some_Ledger_id"
@@ -653,7 +647,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"starting balance on {ledger_id} ledger={incoming_message.balance}.",
         )
 
-    def test_ledger_api_handler_handle_transaction_receipt_is_settled_and_is_valid_last_incoming_fipa_message_is_none(
+    def test_handle_transaction_receipt_is_settled_and_is_valid_last_incoming_fipa_message_is_none(
         self,
     ):
         """Test the _handle_transaction_receipt method of the ledger_api handler where is_settled and is_valid are True and the last incoming FipaMessage is None."""
@@ -696,17 +690,12 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 "is_transaction_valid",
                 return_value=True,
             ):
-                with patch.object(
-                    self.ledger_api_handler.context.logger, "log"
-                ) as mock_logger:
-                    with pytest.raises(
-                        ValueError, match="Cannot retrieve last fipa message."
-                    ):
-                        self.ledger_api_handler.handle(incoming_message)
+                with pytest.raises(
+                    ValueError, match="Cannot retrieve last fipa message."
+                ):
+                    self.ledger_api_handler.handle(incoming_message)
 
-    def test_ledger_api_handler_handle_transaction_receipt_is_settled_and_is_valid(
-        self,
-    ):
+    def test_handle_transaction_receipt_is_settled_and_is_valid(self,):
         """Test the _handle_transaction_receipt method of the ledger_api handler where is_settled and is_valid are True."""
         # setup
         ledger_api_dialogue = cast(
@@ -795,9 +784,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"transaction confirmed, sending data={fipa_dialogue.data_for_sale} to buyer={COUNTERPARTY_NAME[-5:]}.",
         )
 
-    def test_ledger_api_handler_handle_transaction_receipt_not_is_settled_or_not_is_valid(
-        self,
-    ):
+    def test_handle_transaction_receipt_not_is_settled_or_not_is_valid(self,):
         """Test the _handle_transaction_receipt method of the ledger_api handler where is_settled or is_valid is False."""
         # setup
         ledger_api_dialogue = cast(
@@ -847,7 +834,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"transaction_receipt={self.transaction_receipt} not settled or not valid, aborting",
         )
 
-    def test_ledger_api_handler_handle_error(self):
+    def test_handle_error(self):
         """Test the _handle_error method of the ledger_api handler."""
         # setup
         ledger_api_dialogue = self.prepare_skill_dialogue(
@@ -873,7 +860,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"received ledger_api error message={incoming_message} in dialogue={ledger_api_dialogue}.",
         )
 
-    def test_ledger_api_handler_handle_invalid(self):
+    def test_handle_invalid(self):
         """Test the _handle_invalid method of the ledger_api handler."""
         # setup
         invalid_performative = LedgerApiMessage.Performative.GET_BALANCE
@@ -898,7 +885,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
 
 
 class TestGenericOefSearchHandler(BaseSkillTestCase):
-    """Test oef search handler of generic buyer."""
+    """Test oef search handler of generic seller."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_seller")
 
@@ -919,7 +906,7 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             ),
         )
 
-    def test_oef_search_handler_handle_unidentified_dialogue(self):
+    def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the oef_search handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -936,10 +923,10 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received invalid oef_search message={incoming_message}, unidentified dialogue."
+            f"received invalid oef_search message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_oef_search_handler_handle_error(self):
+    def test_handle_error(self):
         """Test the _handle_error method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
@@ -958,10 +945,10 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received oef_search error message={incoming_message} in dialogue={oef_dialogue}."
+            f"received oef_search error message={incoming_message} in dialogue={oef_dialogue}.",
         )
 
-    def test_oef_search_handler_handle_invalid(self):
+    def test_handle_invalid(self):
         """Test the _handle_invalid method of the oef_search handler."""
         # setup
         invalid_performative = OefSearchMessage.Performative.UNREGISTER_SERVICE
@@ -979,5 +966,5 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.WARNING,
-            f"cannot handle oef_search message of performative={invalid_performative} in dialogue={self.oef_dialogues.get_dialogue(incoming_message)}."
+            f"cannot handle oef_search message of performative={invalid_performative} in dialogue={self.oef_dialogues.get_dialogue(incoming_message)}.",
         )

@@ -27,7 +27,10 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.generic_seller.behaviours import GenericServiceRegistrationBehaviour, LEDGER_API_ADDRESS
+from packages.fetchai.skills.generic_seller.behaviours import (
+    GenericServiceRegistrationBehaviour,
+    LEDGER_API_ADDRESS,
+)
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 from tests.conftest import ROOT_DIR
@@ -43,7 +46,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.service_registration = cast(
-            GenericServiceRegistrationBehaviour, cls._skill.skill_context.behaviours.service_registration
+            GenericServiceRegistrationBehaviour,
+            cls._skill.skill_context.behaviours.service_registration,
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
@@ -56,12 +60,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # operation
         with patch.object(
-                self.strategy, "get_location_description", return_value=mocked_description_1,
+            self.strategy,
+            "get_location_description",
+            return_value=mocked_description_1,
         ):
             with patch.object(
-                    self.strategy, "get_register_service_description", return_value=mocked_description_2,
+                self.strategy,
+                "get_register_service_description",
+                return_value=mocked_description_2,
             ):
-                with patch.object(self.service_registration.context.logger, "log") as mock_logger:
+                with patch.object(
+                    self.service_registration.context.logger, "log"
+                ) as mock_logger:
                     self.service_registration.setup()
 
         # after
@@ -115,12 +125,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # operation
         with patch.object(
-                self.strategy, "get_location_description", return_value=mocked_description_1,
+            self.strategy,
+            "get_location_description",
+            return_value=mocked_description_1,
         ):
             with patch.object(
-                    self.strategy, "get_register_service_description", return_value=mocked_description_2,
+                self.strategy,
+                "get_register_service_description",
+                return_value=mocked_description_2,
             ):
-                with patch.object(self.service_registration.context.logger, "log") as mock_logger:
+                with patch.object(
+                    self.service_registration.context.logger, "log"
+                ) as mock_logger:
                     self.service_registration.setup()
 
         # after
@@ -153,7 +169,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
         mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
 
-    def test_service_registration_behaviour_teardown(self, caplog):
+    def test_service_registration_behaviour_teardown(self):
         """Test the teardown method of the service_registration behaviour."""
         # setup
         mocked_description_1 = "some_description_1"
@@ -161,18 +177,24 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # operation
         with patch.object(
-                self.strategy, "get_unregister_service_description", return_value=mocked_description_1,
+            self.strategy,
+            "get_unregister_service_description",
+            return_value=mocked_description_1,
         ):
             with patch.object(
-                    self.strategy, "get_location_description", return_value=mocked_description_2,
+                self.strategy,
+                "get_location_description",
+                return_value=mocked_description_2,
             ):
-                with patch.object(self.service_registration.context.logger, "log") as mock_logger:
+                with patch.object(
+                    self.service_registration.context.logger, "log"
+                ) as mock_logger:
                     self.service_registration.teardown()
 
         # after
         quantity = self.get_quantity_in_outbox()
         assert (
-                quantity == 2
+            quantity == 2
         ), f"Invalid number of messages in outbox. Expected 2. Found {quantity}."
 
         # message 1
