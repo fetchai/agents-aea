@@ -57,7 +57,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
 
     def _add_implicit_resolver_if_not_present_already(self) -> None:
         """Add implicit resolver for environment variables, if not present already."""
-        if self.envvar_key in dict(self.yaml_implicit_resolvers.get(None, [])):
+        if self.envvar_key not in dict(self.yaml_implicit_resolvers.get(None, [])):
             _AEAYamlLoader.add_implicit_resolver(
                 self.envvar_key, self.envvar_matcher, None
             )
@@ -70,9 +70,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
         return object_pairs_hook(loader.construct_pairs(node))
 
     @staticmethod
-    def _envvar_constructor(
-        _loader: "_AEAYamlLoader", node: MappingNode
-    ):  # pragma: no cover
+    def _envvar_constructor(_loader: "_AEAYamlLoader", node: MappingNode) -> str:
         """Extract the matched value, expand env variable, and replace the match."""
         node_value = node.value
         match = _AEAYamlLoader.envvar_matcher.match(node_value)
@@ -80,7 +78,13 @@ class _AEAYamlLoader(yaml.SafeLoader):
         env_var = match.group()[2:-1]
 
         # check for defaults
-        var_name, default_value = env_var.split(":")
+        var_split = env_var.split(":")
+        if len(var_split) == 2:
+            var_name, default_value = var_split
+        elif len(var_split) == 1:
+            var_name, default_value = var_split[0], ""
+        else:
+            raise ValueError(f"Cannot resolve environment variable '{env_var}'.")
         var_name = var_name.strip()
         default_value = default_value.strip()
         var_value = os.getenv(var_name, default_value)
@@ -108,7 +112,7 @@ class _AEAYamlDumper(yaml.SafeDumper):
         _AEAYamlDumper.add_representer(OrderedDict, self._dict_representer)
 
     @staticmethod
-    def _dict_representer(dumper, data):
+    def _dict_representer(dumper: "_AEAYamlDumper", data: OrderedDict) -> MappingNode:
         """Use a custom representer."""
         return dumper.represent_mapping(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items()
