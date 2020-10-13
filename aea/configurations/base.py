@@ -82,7 +82,7 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "contract.yaml",
 ]
 
-DEFAULT_PYPI_INDEX_URL = "https://pypi.org"
+DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
 DEFAULT_GIT_REF = "master"
 
 
@@ -225,7 +225,8 @@ class Dependency:
         revision = self.ref if self.ref is not None else DEFAULT_GIT_REF
         version_constraint = str(self.version)
         command: List[str] = []
-        command += ["-i", index if index is not None else DEFAULT_PYPI_INDEX_URL]
+        if index is not None:
+            command += ["-i", index]
         if git_url is not None:
             command += ["git+" + git_url + "@" + revision + "#egg=" + name]
         else:

@@ -840,8 +840,6 @@ class TestDependencyGetPipInstallArgs:
         # no index and no git
         dep = Dependency(self.package_name, self.version)
         assert dep.get_pip_install_args() == [
-            "-i",
-            DEFAULT_PYPI_INDEX_URL,
             f"{self.package_name}{self.version}",
         ]
 
