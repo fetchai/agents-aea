@@ -113,9 +113,7 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     _check_package_public_id(source_path, item_type, item_id)
     copytree(source_path, target_path)
     click.echo(
-        '{} "{}" successfully saved in packages folder.'.format(
-            item_type.title(), item_id
-        )
+        f'{item_type.title()} "{item_id}" successfully saved in packages folder.'
     )
 
 
@@ -125,10 +123,10 @@ def _check_package_public_id(source_path, item_type, item_id) -> None:
     item_author = config.get("author", "")
     item_name = config.get("name", "")
     item_version = config.get("version", "")
-    if (
-        item_id.name != item_name
-        or item_id.author != item_author
-        or item_id.version != item_version
+    actual_item_id = PublicId(item_author, item_name, item_version)
+    if not actual_item_id.same_prefix(item_id) or (
+        not item_id.package_version.is_latest
+        and item_id.version != actual_item_id.version
     ):
         raise click.ClickException(
             "Version, name or author does not match. Expected '{}', found '{}'".format(

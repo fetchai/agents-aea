@@ -53,7 +53,7 @@ from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.generic import (
-    force_set_config,
+    nested_set_config,
     read_envelope_from_file,
     write_envelope_to_file,
 )
@@ -125,10 +125,10 @@ class BaseAEATestCase(ABC):
         )
 
     @classmethod
-    def force_set_config(cls, dotted_path: str, value: Any) -> None:
+    def nested_set_config(cls, dotted_path: str, value: Any) -> None:
         """Force set config."""
         with cd(cls._get_cwd()):
-            force_set_config(dotted_path, value)
+            nested_set_config(dotted_path, value)
 
     @classmethod
     def disable_aea_logging(cls) -> None:
