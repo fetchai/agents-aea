@@ -32,7 +32,7 @@ from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
 import requests
-from bech32 import bech32_encode, convertbits
+from bech32 import bech32_decode, bech32_encode, convertbits
 from ecdsa import SECP256k1, SigningKey, VerifyingKey
 from ecdsa.util import sigencode_string_canonize
 
@@ -166,6 +166,16 @@ class CosmosHelper(Helper):
         """
         digest = hashlib.sha256(message).hexdigest()
         return digest
+
+    @classmethod
+    def is_valid_address(cls, address: Address) -> bool:
+        """
+        Check if the address is valid.
+
+        :param address: the address to validate
+        """
+        result = bech32_decode(address)
+        return result != (None, None)
 
 
 class CosmosCrypto(Crypto[SigningKey]):

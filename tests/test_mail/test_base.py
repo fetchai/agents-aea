@@ -95,6 +95,8 @@ def test_envelope_initialisation():
     ), "Cannot set protocol_id on Envelope "
     assert envelope.message == b"HelloWorld", "Cannot set message on Envelope"
     assert envelope.context.uri_raw is not None
+    assert not envelope.is_sender_public_id
+    assert not envelope.is_to_public_id
 
 
 def test_inbox_empty():

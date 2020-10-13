@@ -106,7 +106,8 @@ class Connection(Component, ABC):
         if not self.is_connected:
             raise ConnectionError("Connection is not connected! Connect first!")
 
-    def _ensure_valid_envelope_for_external_comms(self, envelope: Envelope) -> None:
+    @staticmethod
+    def _ensure_valid_envelope_for_external_comms(envelope: "Envelope") -> None:
         """
         Ensure the envelope sender and to are valid addresses for agent-to-agent communication.
 

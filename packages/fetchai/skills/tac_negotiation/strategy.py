@@ -44,7 +44,6 @@ from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
@@ -454,8 +453,9 @@ class Strategy(Model):
         )
         return proposal_delta_score >= 0
 
+    @staticmethod
     def terms_from_proposal(
-        self, proposal: Description, sender: Address, counterparty: Address
+        proposal: Description, sender: Address, counterparty: Address
     ) -> Terms:
         """
         Get the terms from a proposal.
@@ -482,8 +482,9 @@ class Strategy(Model):
         )
         return terms
 
+    @staticmethod
     def kwargs_from_terms(
-        self, terms: Terms, signature: Optional[str] = None,
+        terms: Terms, signature: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Get the contract api message kwargs from the terms.

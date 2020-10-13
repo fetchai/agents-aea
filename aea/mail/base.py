@@ -324,8 +324,10 @@ class Envelope:
         :param message: the protocol-specific message.
         :param context: the optional envelope context.
         """
-        enforce(type(to) == str, f"To must be string. Found '{type(to)}'")
-        enforce(type(sender) == str, f"Sender must be string. Found '{type(sender)}'")
+        enforce(isinstance(to, str), f"To must be string. Found '{type(to)}'")
+        enforce(
+            isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
+        )
         if isinstance(message, Message):
             message = self._check_consistency(message, to, sender)
         self._to = to
@@ -342,7 +344,7 @@ class Envelope:
     @to.setter
     def to(self, to: Address) -> None:
         """Set address of receiver."""
-        enforce(type(to) == str, f"To must be string. Found '{type(to)}'")
+        enforce(isinstance(to, str), f"To must be string. Found '{type(to)}'")
         self._to = to
 
     @property
@@ -353,7 +355,9 @@ class Envelope:
     @sender.setter
     def sender(self, sender: Address) -> None:
         """Set address of sender."""
-        enforce(type(sender) == str, f"Sender must be string. Found '{type(sender)}'")
+        enforce(
+            isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
+        )
         self._sender = sender
 
     @property

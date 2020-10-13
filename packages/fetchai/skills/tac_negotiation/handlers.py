@@ -338,7 +338,9 @@ class FipaNegotiationHandler(Handler):
                     contract_id=strategy.contract_id,
                     contract_address=strategy.contract_address,
                     callable="get_hash_batch",
-                    kwargs=ContractApiMessage.Kwargs(strategy.kwargs_from_terms(fipa_dialogue.terms)),
+                    kwargs=ContractApiMessage.Kwargs(
+                        strategy.kwargs_from_terms(fipa_dialogue.terms)
+                    ),
                 )
                 contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
                 self.context.outbox.put_message(message=contract_api_msg)
@@ -415,10 +417,12 @@ class FipaNegotiationHandler(Handler):
                     contract_id="fetchai/erc1155:0.10.0",
                     contract_address=contract_address,
                     callable="get_atomic_swap_batch_transaction",
-                    kwargs=ContractApiMessage.Kwargs(strategy.kwargs_from_terms(
-                        fipa_dialogue.terms,
-                        signature=fipa_dialogue.counterparty_signature,
-                    )),
+                    kwargs=ContractApiMessage.Kwargs(
+                        strategy.kwargs_from_terms(
+                            fipa_dialogue.terms,
+                            signature=fipa_dialogue.counterparty_signature,
+                        )
+                    ),
                 )
                 contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
                 self.context.outbox.put_message(message=contract_api_msg)
@@ -534,7 +538,7 @@ class SigningHandler(Handler):
             and last_fipa_message.performative
             == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM
         ):
-            counterparty_signature = signing_dialogue.counterparty_signature
+            counterparty_signature = signing_dialogue.counterparty_signature  # type: ignore
             if counterparty_signature is not None:
                 last_signing_msg = cast(
                     Optional[SigningMessage], signing_dialogue.last_outgoing_message
