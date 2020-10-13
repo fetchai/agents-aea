@@ -297,7 +297,7 @@ class TacHandler(Handler):
     ) -> None:
         """Handle an invalid transaction."""
         self.context.logger.info(
-            "handling invalid transaction: {}".format(tac_msg.transaction_id)
+            "handling invalid transaction: {}, tac_msg={}".format(tac_msg.transaction_id, tac_msg)
         )
         error_msg = tac_dialogue.reply(
             performative=TacMessage.Performative.TAC_ERROR,

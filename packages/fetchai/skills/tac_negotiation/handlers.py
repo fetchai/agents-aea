@@ -188,8 +188,8 @@ class FipaNegotiationHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         fipa_dialogue.terms = strategy.terms_from_proposal(
             propose.proposal,
-            propose.sender,
             self.context.agent_address,
+            propose.sender,
             cast(FipaDialogue.Role, fipa_dialogue.role),
         )
         transactions = cast(Transactions, self.context.transactions)

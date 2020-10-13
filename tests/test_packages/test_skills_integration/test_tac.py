@@ -225,17 +225,21 @@ class TestTacSkills(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "received cfp from",
+            "received decline from",
+            "received propose from",
+            "received accept from",
+            "received match_accept_w_inform from",
             "sending CFP to agent=",
-            "accepting propose",
-            "sending signing_msg=",
-            "message signed by decision maker.",
-            "sending transaction to controller.",
-            "sending match accept to",
-            # "Received transaction confirmation from the controller: transaction_id=", # noqa: E800
+            "sending propose to",
+            "sending accept to",
+            "requesting signature, sending sign_message to decision_maker, message=",
+            "received signed_message from decision_maker, message=",
+            "sending transaction to controller, tx=",
+            "received transaction confirmation from the controller:",
             "Applying state update!",
             "found potential buyers agents=",
             "sending CFP to agent=",
-            "declining propose",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=240, is_terminating=False
