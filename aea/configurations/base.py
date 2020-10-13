@@ -1487,6 +1487,8 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        # this attribute will be set through the setter below
+        self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
             component_configurations if component_configurations is not None else {}
         )
