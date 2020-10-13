@@ -175,7 +175,7 @@ class CosmosHelper(Helper):
         :param address: the address to validate
         """
         result = bech32_decode(address)
-        return result != (None, None)
+        return result != (None, None) and result[0] == cls.address_prefix
 
 
 class CosmosCrypto(Crypto[SigningKey]):
