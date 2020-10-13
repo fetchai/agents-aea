@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains the tests for the `aea add connection` sub-command."""
 
 import os
@@ -29,7 +30,7 @@ from unittest.mock import patch
 import pytest
 from click.exceptions import ClickException
 
-from aea.cli import cli, upgrade
+from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.configurations.base import (
     AgentConfig,
@@ -189,43 +190,6 @@ class TestRemoveAndDependencies(BaseTestCase):
     def teardown(self):
         """Restore agent config."""
         self.dump_config(self._agent_config)
-
-    def check_remove(self, item_type, public_id):
-        """Check remove can be performed with remove helper."""
-        return upgrade.ItemRemoveHelper(self.load_config()).check_remove(
-            item_type, public_id
-        )
-
-    def test_package_can_be_removed_with_its_dependency(self):
-        """Test package (soef) can be removed with its dependency (oef_search)."""
-        required_by, can_be_removed, can_not_be_removed = self.check_remove(
-            self.ITEM_TYPE, self.ITEM_PUBLIC_ID
-        )
-
-        assert not required_by, required_by
-        assert self.DEPENDENCY_PACKAGE_ID in can_be_removed
-        assert self.DEPENDENCY_PACKAGE_ID not in can_not_be_removed
-
-    def test_package_can_be_removed_but_not_dependency(self):
-        """Test package (soef) can be removed but not its shared dependency (oef_search) with other package (oef)."""
-        with self.with_oef_installed():
-            required_by, can_be_removed, can_not_be_removed = self.check_remove(
-                self.ITEM_TYPE, self.ITEM_PUBLIC_ID
-            )
-
-            assert not required_by, required_by
-            assert self.DEPENDENCY_PACKAGE_ID not in can_be_removed
-            assert self.DEPENDENCY_PACKAGE_ID in can_not_be_removed
-
-    def test_package_can_not_be_removed_cause_required_by_another_package(self):
-        """Test package (oef_search) can not be removed cause required by another package (soef)."""
-        required_by, can_be_removed, can_not_be_removed = self.check_remove(
-            self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID
-        )
-
-        assert PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID) in required_by
-        assert not can_be_removed
-        assert not can_not_be_removed
 
     def test_upgrade_and_dependency_removed(self):
         """
