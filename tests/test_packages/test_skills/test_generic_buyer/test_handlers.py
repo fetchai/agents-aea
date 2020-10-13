@@ -104,8 +104,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        self.fipa_handler.handle(incoming_message)
         assert (
             f"received invalid fipa message={incoming_message}, unidentified dialogue."
             in caplog.text
@@ -157,8 +156,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             with mock.patch.object(
                 self.strategy, "is_affordable_proposal", return_value=True,
             ):
-                with caplog.at_level(logging.INFO):
-                    self.fipa_handler.handle(incoming_message)
+                self.fipa_handler.handle(incoming_message)
         assert (
             f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}"
             in caplog.text
@@ -204,8 +202,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        self.fipa_handler.handle(incoming_message)
         assert f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
         # after
@@ -243,8 +240,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        self.fipa_handler.handle(incoming_message)
         assert f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
         # after
@@ -284,8 +280,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        self.fipa_handler.handle(incoming_message)
         assert (
             f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}"
             in caplog.text
@@ -322,8 +317,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        self.fipa_handler.handle(incoming_message)
         assert (
             f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}"
             in caplog.text
@@ -372,8 +366,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        self.fipa_handler.handle(incoming_message)
         assert "received the following data={'data_name': 'data'}" in caplog.text
 
         # after
@@ -403,8 +396,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        self.fipa_handler.handle(incoming_message)
         assert f"received no data from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
     def test_fipa_handler_handle_invalid(self, caplog):
@@ -418,8 +410,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
-            self.fipa_handler.handle(incoming_message)
+        self.fipa_handler.handle(incoming_message)
         assert (
             f"cannot handle fipa message of performative={incoming_message.performative} in dialogue={fipa_dialogue}."
             in caplog.text
