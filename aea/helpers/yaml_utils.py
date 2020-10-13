@@ -70,7 +70,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
         return object_pairs_hook(loader.construct_pairs(node))
 
     @staticmethod
-    def _envvar_constructor(_loader: "_AEAYamlLoader", node: MappingNode):
+    def _envvar_constructor(_loader: "_AEAYamlLoader", node: MappingNode) -> str:
         """Extract the matched value, expand env variable, and replace the match."""
         node_value = node.value
         match = _AEAYamlLoader.envvar_matcher.match(node_value)
@@ -112,7 +112,7 @@ class _AEAYamlDumper(yaml.SafeDumper):
         _AEAYamlDumper.add_representer(OrderedDict, self._dict_representer)
 
     @staticmethod
-    def _dict_representer(dumper, data):
+    def _dict_representer(dumper: "_AEAYamlDumper", data: OrderedDict) -> MappingNode:
         """Use a custom representer."""
         return dumper.represent_mapping(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items()
