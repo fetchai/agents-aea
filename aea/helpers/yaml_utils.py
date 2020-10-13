@@ -57,7 +57,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
 
     def _add_implicit_resolver_if_not_present_already(self) -> None:
         """Add implicit resolver for environment variables, if not present already."""
-        if self.envvar_key in dict(self.yaml_implicit_resolvers.get(None, [])):
+        if self.envvar_key not in dict(self.yaml_implicit_resolvers.get(None, [])):
             _AEAYamlLoader.add_implicit_resolver(
                 self.envvar_key, self.envvar_matcher, None
             )
@@ -70,9 +70,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
         return object_pairs_hook(loader.construct_pairs(node))
 
     @staticmethod
-    def _envvar_constructor(
-        _loader: "_AEAYamlLoader", node: MappingNode
-    ):  # pragma: no cover
+    def _envvar_constructor(_loader: "_AEAYamlLoader", node: MappingNode):
         """Extract the matched value, expand env variable, and replace the match."""
         node_value = node.value
         match = _AEAYamlLoader.envvar_matcher.match(node_value)
@@ -80,7 +78,11 @@ class _AEAYamlLoader(yaml.SafeLoader):
         env_var = match.group()[2:-1]
 
         # check for defaults
-        var_name, default_value = env_var.split(":")
+        var_split = env_var.split(":")
+        if len(var_split) == 2:
+            var_name, default_value = var_split
+        else:
+            var_name, default_value = var_split[0], ""
         var_name = var_name.strip()
         default_value = default_value.strip()
         var_value = os.getenv(var_name, default_value)
