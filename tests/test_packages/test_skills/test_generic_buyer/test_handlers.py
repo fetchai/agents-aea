@@ -21,7 +21,6 @@
 import logging
 from pathlib import Path
 from typing import cast
-from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -107,16 +106,17 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
+
+        # after
         mock_logger.assert_any_call(
             logging.INFO,
             f"received invalid fipa message={incoming_message}, unidentified dialogue.",
         )
 
-        # after
-        quantity = self.get_quantity_in_outbox()
+        message_quantity = self.get_quantity_in_outbox()
         assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected 1. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=DefaultMessage,
@@ -129,7 +129,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_propose(self):
+    def test_fipa_handler_handle_propose_is_affordable_and_is_acceptable(self):
         """Test the _handle_propose method of the fipa handler."""
         # setup
         proposal = Description(
@@ -152,10 +152,10 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with mock.patch.object(
+        with patch.object(
             self.strategy, "is_acceptable_proposal", return_value=True,
         ):
-            with mock.patch.object(
+            with patch.object(
                 self.strategy, "is_affordable_proposal", return_value=True,
             ):
                 with patch.object(
@@ -172,14 +172,73 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         mock_logger.assert_any_call(
             logging.INFO, f"accepting the proposal from sender={COUNTERPARTY_NAME[-5:]}"
         )
-        quantity = self.get_quantity_in_outbox()
+
+        message_quantity = self.get_quantity_in_outbox()
         assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected 1. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
             performative=FipaMessage.Performative.ACCEPT,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+        )
+        assert has_attributes, error_str
+
+    def test_fipa_handler_handle_propose_not_is_affordable_or_not_is_acceptable(self):
+        """Test the _handle_propose method of the fipa handler."""
+        # setup
+        proposal = Description(
+            {
+                "ledger_id": self.strategy.ledger_id,
+                "price": 100,
+                "currency_id": "FET",
+                "service_id": "some_service_id",
+                "quantity": 1,
+                "tx_nonce": "some_tx_nonce",
+            }
+        )
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=proposal,
+        )
+
+        # operation
+        with patch.object(
+            self.strategy, "is_acceptable_proposal", return_value=False,
+        ):
+            with patch.object(
+                self.strategy, "is_affordable_proposal", return_value=False,
+            ):
+                with patch.object(
+                    self.fipa_handler.context.logger, "log"
+                ) as mock_logger:
+                    self.fipa_handler.handle(incoming_message)
+
+        # after
+        incoming_message = cast(FipaMessage, incoming_message)
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO, f"declining the proposal from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+
+        message_quantity = self.get_quantity_in_outbox()
+        assert (
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected 1. Found {message_quantity}."
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.DECLINE,
             to=incoming_message.sender,
             sender=self.skill.skill_context.agent_address,
             target=incoming_message.message_id,
@@ -214,6 +273,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         mock_logger.assert_any_call(
             logging.INFO, f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}"
         )
+
         for (
             end_state_numbers
         ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -238,13 +298,9 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # before
-        for (
-            end_state_numbers
-        ) in self.fipa_dialogues.dialogue_stats.self_initiated.values():
-            assert end_state_numbers == 0
-        for (
-            end_state_numbers
-        ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
+        for end_state_numbers in list(
+            self.fipa_dialogues.dialogue_stats.self_initiated.values()
+        ) + list(self.fipa_dialogues.dialogue_stats.other_initiated.values()):
             assert end_state_numbers == 0
 
         # operation
@@ -255,6 +311,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         mock_logger.assert_any_call(
             logging.INFO, f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}"
         )
+
         for (
             end_state_numbers
         ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -299,13 +356,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             logging.INFO,
             f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}",
         )
-        mock_logger.assert_any_call(
-            logging.INFO, "requesting transfer transaction from ledger api..."
-        )
-        quantity = self.get_quantity_in_outbox()
+
+        message_quantity = self.get_quantity_in_outbox()
         assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected 1. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=LedgerApiMessage,
@@ -315,6 +370,10 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             terms=fipa_dialogue.terms,
         )
         assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO, "requesting transfer transaction from ledger api..."
+        )
 
     def test_fipa_handler_handle_match_accept_not_is_ledger_tx(self):
         """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is False."""
@@ -339,13 +398,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             logging.INFO,
             f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}",
         )
-        mock_logger.assert_any_call(
-            logging.INFO, f"informing counterparty={COUNTERPARTY_NAME[-5:]} of payment."
-        )
-        quantity = self.get_quantity_in_outbox()
+
+        message_quantity = self.get_quantity_in_outbox()
         assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected 1. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
@@ -356,6 +413,10 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             info={"Done": "Sending payment via bank transfer"},
         )
         assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO, f"informing counterparty={COUNTERPARTY_NAME[-5:]} of payment."
+        )
 
     def test_fipa_handler_handle_inform_with_data(self):
         """Test the _handle_inform method of the fipa handler where info has data."""
@@ -372,11 +433,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         # before
         for (
             end_state_numbers
-        ) in self.fipa_dialogues.dialogue_stats.self_initiated.values():
-            assert end_state_numbers == 0
-        for (
-            end_state_numbers
-        ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
+        ) in list(self.fipa_dialogues.dialogue_stats.self_initiated.values()) + list(self.fipa_dialogues.dialogue_stats.other_initiated.values()):
             assert end_state_numbers == 0
 
         # operation
@@ -385,8 +442,12 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
+            logging.INFO, f"received INFORM from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+        mock_logger.assert_any_call(
             logging.INFO, "received the following data={'data_name': 'data'}"
         )
+
         for (
             end_state_numbers
         ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -417,6 +478,10 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             self.fipa_handler.handle(incoming_message)
 
         # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"received INFORM from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+
         mock_logger.assert_any_call(
             logging.INFO, f"received no data from sender={COUNTERPARTY_NAME[-5:]}"
         )
@@ -554,11 +619,13 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         mock_logger.assert_any_call(
             logging.INFO, f"found agents={list(agents)}, stopping search."
         )
+
         assert not self.strategy.is_searching
-        quantity = self.get_quantity_in_outbox()
-        assert quantity == len(
+
+        message_quantity = self.get_quantity_in_outbox()
+        assert message_quantity == len(
             agents
-        ), f"Invalid number of messages in outbox. Expected {len(agents)}. Found {quantity}."
+        ), f"Invalid number of messages in outbox. Expected {len(agents)}. Found {message_quantity}."
         for agent in agents:
             has_attributes, error_str = self.message_has_attributes(
                 actual_message=self.get_message_from_outbox(),
@@ -775,10 +842,11 @@ class TestGenericSigningHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(logging.INFO, "transaction signing was successful.")
-        quantity = self.get_quantity_in_outbox()
+
+        message_quantity = self.get_quantity_in_outbox()
         assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected {1}. Found {quantity}."
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected {1}. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=LedgerApiMessage,
@@ -788,6 +856,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str
+
         mock_logger.assert_any_call(logging.INFO, "sending transaction to ledger.")
 
     def test_signing_handler_handle_error(self):
@@ -1042,7 +1111,21 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         mock_logger.assert_any_call(
             logging.INFO, f"received raw transaction={incoming_message}"
         )
-        assert self.get_quantity_in_decision_maker_inbox() == 1
+
+        message_quantity = self.get_quantity_in_decision_maker_inbox()
+        assert (
+                message_quantity == 1
+        ), f"Invalid number of messages in decision maker queue. Expected {1}. Found {message_quantity}."
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_decision_maker_inbox(),
+            message_type=SigningMessage,
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
+            to=self.skill.skill_context.decision_maker_address,
+            sender=str(self.skill.skill_context.skill_id),
+            terms=self.terms,
+        )
+        assert has_attributes, error_str
+
         mock_logger.assert_any_call(
             logging.INFO,
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
@@ -1128,10 +1211,11 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             logging.INFO,
             f"transaction was successfully submitted. Transaction digest={incoming_message.transaction_digest}",
         )
-        quantity = self.get_quantity_in_outbox()
+
+        message_quantity = self.get_quantity_in_outbox()
         assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected {1}. Found {quantity}."
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected {1}. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
@@ -1141,6 +1225,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             info={"transaction_digest": incoming_message.transaction_digest.body},
         )
         assert has_attributes, error_str
+
         mock_logger.assert_any_call(
             logging.INFO,
             f"informing counterparty={COUNTERPARTY_NAME[-5:]} of transaction digest.",

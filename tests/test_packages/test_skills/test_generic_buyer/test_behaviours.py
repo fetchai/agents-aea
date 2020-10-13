@@ -55,10 +55,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.search_behaviour.setup()
 
         # after
-        quantity = self.get_quantity_in_outbox()
+        message_quantity = self.get_quantity_in_outbox()
         assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected 1. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=LedgerApiMessage,
@@ -93,11 +93,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.search_behaviour.act()
 
         # after
-        quantity = self.get_quantity_in_outbox()
+        message_quantity = self.get_quantity_in_outbox()
         assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
-
+            message_quantity == 1
+        ), f"Invalid number of messages in outbox. Expected 1. Found {message_quantity}."
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=OefSearchMessage,

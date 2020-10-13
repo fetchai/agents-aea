@@ -18,9 +18,10 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour classes of the generic seller skill."""
 
+import logging
 from pathlib import Path
 from typing import cast
-from unittest import mock
+from unittest.mock import patch
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -46,7 +47,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
-    def test_service_registration_behaviour_setup_is_ledger_tx(self, caplog):
+    def test_service_registration_behaviour_setup_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour where is_ledger_tx is True."""
         # setup
         self.strategy._is_ledger_tx = True
@@ -54,13 +55,14 @@ class TestSkillBehaviour(BaseSkillTestCase):
         mocked_description_2 = "some_description_2"
 
         # operation
-        with mock.patch.object(
+        with patch.object(
                 self.strategy, "get_location_description", return_value=mocked_description_1,
         ):
-            with mock.patch.object(
+            with patch.object(
                     self.strategy, "get_register_service_description", return_value=mocked_description_2,
             ):
-                self.service_registration.setup()
+                with patch.object(self.service_registration.context.logger, "log") as mock_logger:
+                    self.service_registration.setup()
 
         # after
         quantity = self.get_quantity_in_outbox()
@@ -90,7 +92,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             service_description=mocked_description_1,
         )
         assert has_attributes, error_str
-        assert "registering agent on SOEF." in caplog.text
+        mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
 
         # message 3
         has_attributes, error_str = self.message_has_attributes(
@@ -102,9 +104,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
             service_description=mocked_description_2,
         )
         assert has_attributes, error_str
-        assert "registering service on SOEF." in caplog.text
+        mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
 
-    def test_service_registration_behaviour_setup_not_is_ledger_tx(self, caplog):
+    def test_service_registration_behaviour_setup_not_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour: where is_ledger_tx is False."""
         # setup
         self.strategy._is_ledger_tx = False
@@ -112,13 +114,14 @@ class TestSkillBehaviour(BaseSkillTestCase):
         mocked_description_2 = "some_description_2"
 
         # operation
-        with mock.patch.object(
+        with patch.object(
                 self.strategy, "get_location_description", return_value=mocked_description_1,
         ):
-            with mock.patch.object(
+            with patch.object(
                     self.strategy, "get_register_service_description", return_value=mocked_description_2,
             ):
-                self.service_registration.setup()
+                with patch.object(self.service_registration.context.logger, "log") as mock_logger:
+                    self.service_registration.setup()
 
         # after
         quantity = self.get_quantity_in_outbox()
@@ -136,7 +139,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             service_description=mocked_description_1,
         )
         assert has_attributes, error_str
-        assert "registering agent on SOEF." in caplog.text
+        mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
 
         # message 2
         has_attributes, error_str = self.message_has_attributes(
@@ -148,7 +151,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             service_description=mocked_description_2,
         )
         assert has_attributes, error_str
-        assert "registering service on SOEF." in caplog.text
+        mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
 
     def test_service_registration_behaviour_teardown(self, caplog):
         """Test the teardown method of the service_registration behaviour."""
@@ -157,13 +160,14 @@ class TestSkillBehaviour(BaseSkillTestCase):
         mocked_description_2 = "some_description_2"
 
         # operation
-        with mock.patch.object(
+        with patch.object(
                 self.strategy, "get_unregister_service_description", return_value=mocked_description_1,
         ):
-            with mock.patch.object(
+            with patch.object(
                     self.strategy, "get_location_description", return_value=mocked_description_2,
             ):
-                self.service_registration.teardown()
+                with patch.object(self.service_registration.context.logger, "log") as mock_logger:
+                    self.service_registration.teardown()
 
         # after
         quantity = self.get_quantity_in_outbox()
@@ -181,7 +185,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             service_description=mocked_description_1,
         )
         assert has_attributes, error_str
-        assert "unregistering service from SOEF." in caplog.text
+        mock_logger.assert_any_call(logging.INFO, "unregistering service from SOEF.")
 
         # message 2
         has_attributes, error_str = self.message_has_attributes(
@@ -193,4 +197,4 @@ class TestSkillBehaviour(BaseSkillTestCase):
             service_description=mocked_description_2,
         )
         assert has_attributes, error_str
-        assert "unregistering agent from SOEF." in caplog.text
+        mock_logger.assert_any_call(logging.INFO, "unregistering agent from SOEF.")
