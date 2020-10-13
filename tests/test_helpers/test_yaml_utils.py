@@ -24,6 +24,8 @@ import string
 from collections import OrderedDict
 from textwrap import dedent
 
+import pytest
+
 from aea.helpers.yaml_utils import (
     _AEAYamlLoader,
     yaml_dump,
@@ -113,3 +115,17 @@ def test_resolve_env_variable_without_default_negative():
     stream = io.StringIO(yaml_file)
     yaml_obj = yaml_load(stream)
     assert yaml_obj[variable_key] == ""
+
+
+def test_resolve_env_variable_fails():
+    """Test the case when resolving the environment variable fails."""
+    with pytest.raises(
+        ValueError, match=f"Cannot resolve environment variable 'some:wrong:variable'."
+    ):
+        yaml_file = dedent(
+            f"""
+            some_variable_name: ${{some:wrong:variable}}
+            """
+        )
+        stream = io.StringIO(yaml_file)
+        yaml_load(stream)

@@ -81,8 +81,10 @@ class _AEAYamlLoader(yaml.SafeLoader):
         var_split = env_var.split(":")
         if len(var_split) == 2:
             var_name, default_value = var_split
-        else:
+        elif len(var_split) == 1:
             var_name, default_value = var_split[0], ""
+        else:
+            raise ValueError(f"Cannot resolve environment variable '{env_var}'.")
         var_name = var_name.strip()
         default_value = default_value.strip()
         var_value = os.getenv(var_name, default_value)
