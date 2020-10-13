@@ -44,6 +44,7 @@ from packages.fetchai.protocols.contract_api.dialogues import (
 from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -65,71 +66,6 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
     DEMAND_DATAMODEL_NAME,
     SUPPLY_DATAMODEL_NAME,
 )
-
-
-ContractApiDialogue = BaseContractApiDialogue
-
-
-class ContractApiDialogues(Model, BaseContractApiDialogues):
-    """The dialogues class keeps track of all dialogues."""
-
-    def __init__(self, **kwargs) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
-        Model.__init__(self, **kwargs)
-
-        def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message, receiver_address: Address
-        ) -> Dialogue.Role:
-            """Infer the role of the agent from an incoming/outgoing first message
-
-            :param message: an incoming/outgoing first message
-            :param receiver_address: the address of the receiving agent
-            :return: The role of the agent
-            """
-            return ContractApiDialogue.Role.AGENT
-
-        BaseContractApiDialogues.__init__(
-            self,
-            self_address=self.context.agent_address,
-            role_from_first_message=role_from_first_message,
-            dialogue_class=ContractApiDialogue,
-        )
-
-
-DefaultDialogue = BaseDefaultDialogue
-
-
-class DefaultDialogues(Model, BaseDefaultDialogues):
-    """The dialogues class keeps track of all dialogues."""
-
-    def __init__(self, **kwargs) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
-        Model.__init__(self, **kwargs)
-
-        def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message, receiver_address: Address
-        ) -> Dialogue.Role:
-            """Infer the role of the agent from an incoming/outgoing first message
-
-            :param message: an incoming/outgoing first message
-            :param receiver_address: the address of the receiving agent
-            :return: The role of the agent
-            """
-            return DefaultDialogue.Role.AGENT
-
-        BaseDefaultDialogues.__init__(
-            self,
-            self_address=self.context.agent_address,
-            role_from_first_message=role_from_first_message,
-        )
 
 
 class FipaDialogue(BaseFipaDialogue):
@@ -251,6 +187,113 @@ class FipaDialogues(Model, BaseFipaDialogues):
             return role
 
         BaseFipaDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+        )
+
+
+class ContractApiDialogue(BaseContractApiDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        self_address: Address,
+        role: Dialogue.Role,
+        message_class: Type[ContractApiMessage] = ContractApiMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseContractApiDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+        self._associated_fipa_dialogue: Optional[FipaDialogue] = None
+
+    @property
+    def associated_fipa_dialogue(self) -> FipaDialogue:
+        """Get associated_fipa_dialogue."""
+        if self._associated_fipa_dialogue is None:
+            raise ValueError("associated_fipa_dialogue not set!")
+        return self._associated_fipa_dialogue
+
+    @associated_fipa_dialogue.setter
+    def associated_fipa_dialogue(self, associated_fipa_dialogue: FipaDialogue) -> None:
+        """Set associated_fipa_dialogue."""
+        enforce(
+            self._associated_fipa_dialogue is None,
+            "associated_fipa_dialogue already set!",
+        )
+        self._associated_fipa_dialogue = associated_fipa_dialogue
+
+
+class ContractApiDialogues(Model, BaseContractApiDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return ContractApiDialogue.Role.AGENT
+
+        BaseContractApiDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=ContractApiDialogue,
+        )
+
+
+DefaultDialogue = BaseDefaultDialogue
+
+
+class DefaultDialogues(Model, BaseDefaultDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return DefaultDialogue.Role.AGENT
+
+        BaseDefaultDialogues.__init__(
             self,
             self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,

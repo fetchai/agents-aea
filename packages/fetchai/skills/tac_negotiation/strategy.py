@@ -40,7 +40,6 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.helpers.transaction.base import Terms
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID
@@ -421,9 +420,7 @@ class Strategy(Model):
             proposals.append(proposal)
         return proposals
 
-    def is_profitable_transaction(
-        self, signing_msg: SigningMessage, role: FipaDialogue.Role
-    ) -> bool:
+    def is_profitable_transaction(self, terms: Terms, role: FipaDialogue.Role) -> bool:
         """
         Check if a transaction is profitable.
 
@@ -432,7 +429,7 @@ class Strategy(Model):
         - check if the transaction is consistent with the locks (enough money/holdings)
         - check that we gain score.
 
-        :param signing_msg: the signing_msg
+        :param terms: the terms
         :param role: the role of the agent (seller or buyer)
 
         :return: True if the transaction is good (as stated above), False otherwise.
@@ -443,19 +440,22 @@ class Strategy(Model):
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller
         )
-        if not ownership_state_after_locks.is_affordable_transaction(signing_msg.terms):
+        if not ownership_state_after_locks.is_affordable_transaction(terms):
             return False
         preferences = cast(
             Preferences, self.context.decision_maker_handler_context.preferences
         )
         proposal_delta_score = preferences.utility_diff_from_transaction(
-            ownership_state_after_locks, signing_msg.terms
+            ownership_state_after_locks, terms
         )
         return proposal_delta_score >= 0
 
     @staticmethod
     def terms_from_proposal(
-        proposal: Description, sender: Address, counterparty: Address
+        proposal: Description,
+        sender: Address,
+        counterparty: Address,
+        role: FipaDialogue.Role,
     ) -> Terms:
         """
         Get the terms from a proposal.
@@ -465,20 +465,31 @@ class Strategy(Model):
         :param counterparty: the receiver of the proposal
         :return: the terms
         """
-        values = copy.deepcopy(proposal.values)
-        amount_by_currency_id = {values.pop("currency_id"): values.pop("price")}
-        nonce = values.pop("nonce")
-        ledger_id = values.pop("ledger_id")
-        _ = values.pop("fee")
-        quantities_by_good_id = values
+        is_seller = role == FipaDialogue.Role.SELLER
+        goods_component = copy.copy(proposal.values)
+        [  # pylint: disable=expression-not-assigned
+            goods_component.pop(key)
+            for key in ["fee", "price", "currency_id", "nonce", "ledger_id"]
+        ]
+        # switch signs based on whether seller or buyer role
+        amount = proposal.values["price"] if is_seller else -proposal.values["price"]
+        fee = proposal.values["fee"]
+        if is_seller:
+            for good_id in goods_component.keys():
+                goods_component[good_id] = goods_component[good_id] * (-1)
+        amount_by_currency_id = {proposal.values["currency_id"]: amount}
+        fee_by_currency_id = {proposal.values["currency_id"]: fee}
+        nonce = proposal.values["nonce"]
+        ledger_id = proposal.values["ledger_id"]
         terms = Terms(
             ledger_id=ledger_id,
             sender_address=sender,
             counterparty_address=counterparty,
             amount_by_currency_id=amount_by_currency_id,
-            quantities_by_good_id=quantities_by_good_id,
-            is_sender_payable_tx_fee=False,
+            quantities_by_good_id=goods_component,
+            is_sender_payable_tx_fee=not is_seller,
             nonce=nonce,
+            fee_by_currency_id=fee_by_currency_id,
         )
         return terms
 

@@ -66,6 +66,12 @@ class Location:
             return False  # pragma: nocover
         return self.latitude == other.latitude and self.longitude == other.longitude
 
+    def __str__(self):
+        """Get the string representation of the data model."""
+        return "Location(latitude={},longitude={})".format(
+            self.latitude, self.longitude
+        )
+
 
 """
 The allowable types that an Attribute can have
@@ -117,6 +123,12 @@ class Attribute:
             and self.is_required == other.is_required
         )
 
+    def __str__(self):
+        """Get the string representation of the data model."""
+        return "Attribute(name={},type={},is_required={})".format(
+            self.name, self.type, self.is_required
+        )
+
 
 class DataModel:
     """Implements an OEF data model."""
@@ -133,7 +145,7 @@ class DataModel:
             attributes, key=lambda x: x.name
         )  # type: List[Attribute]
         self._check_validity()
-        self.attributes_by_name = {a.name: a for a in attributes}
+        self.attributes_by_name = {a.name: a for a in self.attributes}
         self.description = description
 
     def _check_validity(self):
@@ -152,6 +164,12 @@ class DataModel:
             isinstance(other, DataModel)
             and self.name == other.name
             and self.attributes == other.attributes
+        )
+
+    def __str__(self):
+        """Get the string representation of the data model."""
+        return "DataModel(name={},attributes={},description={})".format(
+            self.name, {a.name: str(a) for a in self.attributes}, self.description
         )
 
 
@@ -267,6 +285,12 @@ class Description:
                         attribute.name, type(value), ALLOWED_ATTRIBUTE_TYPES,
                     )
                 )
+
+    def __str__(self):
+        """Get the string representation of the description."""
+        return "Description(values={},data_model={})".format(
+            self._values, self.data_model
+        )
 
     @classmethod
     def encode(
@@ -540,6 +564,10 @@ class ConstraintType:
             and self.type == other.type
         )
 
+    def __str__(self):
+        """Get the string representation of the constraint type."""
+        return "ConstraintType(value={},type={})".format(self.value, self.type)
+
 
 class ConstraintExpr(ABC):
     """Implementation of the constraint language to query the OEF node."""
@@ -806,6 +834,12 @@ class Constraint(ConstraintExpr):
             and self.constraint_type == other.constraint_type
         )
 
+    def __str__(self):
+        """Get the string representation of the constraint."""
+        return "Constraint(attribute_name={},constraint_type={})".format(
+            self.attribute_name, self.constraint_type
+        )
+
 
 class Query:
     """This class lets you build a query for the OEF."""
@@ -877,6 +911,10 @@ class Query:
             and self.constraints == other.constraints
             and self.model == other.model
         )
+
+    def __str__(self):
+        """Get the string representation of the constraint."""
+        return "Query(constraints={},model={})".format(self.constraints, self.model)
 
     @classmethod
     def encode(cls, query_protobuf_object, query_object: "Query") -> None:
