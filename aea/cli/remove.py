@@ -16,27 +16,45 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea remove' subcommand."""
 
 import os
 import shutil
+from collections import defaultdict
 from pathlib import Path
+from typing import Dict, Generator, Optional, Set, Tuple, cast
 
 import click
 
 from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.cli.utils.package_utils import get_item_public_id_by_author_name
+from aea.configurations.base import (
+    AgentConfig,
+    ComponentType,
+    DEFAULT_AEA_CONFIG_FILE,
+    PackageConfiguration,
+    PackageId,
+    PublicId,
+)
 
 
 @click.group()
+@click.option(
+    "--with-dependencies",
+    is_flag=True,
+    help="Remove obsolete dependencies not required anymore.",
+)
 @click.pass_context
 @check_aea_project
-def remove(click_context):  # pylint: disable=unused-argument
+def remove(click_context, with_dependencies):  # pylint: disable=unused-argument
     """Remove a resource from the agent."""
+    ctx = cast(Context, click_context.obj)
+    if with_dependencies:
+        ctx.set_config("with_dependencies", True)
 
 
 @remove.command()
@@ -87,6 +105,320 @@ def skill(ctx: Context, skill_id):
     remove_item(ctx, "skill", skill_id)
 
 
+class ItemRemoveHelper:
+    """Helper to check dependencies on removing component from agent config."""
+
+    def __init__(self, agent_config: AgentConfig) -> None:
+        """Init helper."""
+        self._agent_config = agent_config
+
+    def get_agent_dependencies_with_reverse_dependencies(
+        self,
+    ) -> Dict[PackageId, Set[PackageId]]:
+        """
+        Get all reverse dependencices in agent.
+
+        :return: dict with PackageId: and set of PackageIds that uses this package
+
+        Return example:
+        {
+            PackageId(protocol, fetchai/default:0.6.0): {
+                PackageId(skill, fetchai/echo:0.8.0),
+                PackageId(skill, fetchai/error:0.6.0)
+            },
+            PackageId(connection, fetchai/stub:0.10.0): set(),
+            PackageId(skill, fetchai/error:0.6.0): set(),
+            PackageId(skill, fetchai/echo:0.8.0): set()}
+        )
+        """
+        return self.get_item_dependencies_with_reverse_dependencies(
+            self._agent_config, None
+        )
+
+    @staticmethod
+    def get_item_config(package_id: PackageId) -> PackageConfiguration:
+        """Get item config for item,_type and public_id."""
+        return load_item_config(
+            str(package_id.package_type),
+            package_path=Path("vendor")
+            / package_id.public_id.author
+            / f"{str(package_id.package_type)}s"
+            / package_id.public_id.name,
+        )
+
+    @staticmethod
+    def _get_item_requirements(
+        item: PackageConfiguration,
+    ) -> Generator[PackageId, None, None]:
+        """
+        List all the requiemenents for item provided.
+
+        :return: generator with package ids: (type, public_id)
+        """
+        for item_type in map(str, ComponentType):
+            items = getattr(item, f"{item_type}s", set())
+            for item_public_id in items:
+                yield PackageId(item_type, item_public_id)
+
+    def get_item_dependencies_with_reverse_dependencies(
+        self, item: PackageConfiguration, package_id: Optional[PackageId] = None
+    ) -> Dict[PackageId, Set[PackageId]]:
+        """
+        Get item dependencies.
+
+        It's recursive and provides all the sub dependencies.
+
+        :return: dict with PackageId: and set of PackageIds that uses this package
+        """
+        result: defaultdict = defaultdict(set)
+
+        for dep_package_id in self._get_item_requirements(item):
+            if package_id is None:
+                _ = result[dep_package_id]  # init default dict value
+            else:
+                result[dep_package_id].add(package_id)
+            if not self.is_present_in_agent_config(dep_package_id):
+                continue
+            dep_item = self.get_item_config(dep_package_id)
+            for item_key, deps in self.get_item_dependencies_with_reverse_dependencies(
+                dep_item, dep_package_id
+            ).items():
+                result[item_key] = result[item_key].union(deps)
+
+        return result
+
+    def is_present_in_agent_config(self, package_id: PackageId) -> bool:
+        """Check item is in agent config."""
+        current_item = get_item_public_id_by_author_name(
+            self._agent_config,
+            str(package_id.package_type),
+            package_id.public_id.author,
+            package_id.public_id.name,
+        )
+        return bool(current_item)
+
+    def check_remove(
+        self, item_type: str, item_public_id: PublicId
+    ) -> Tuple[Set[PackageId], Set[PackageId], Dict[PackageId, Set[PackageId]]]:
+        """
+        Check item can be removed from agent.
+
+        required by - set of components that requires this component
+        can be deleted - set of dependencies used only by component so can be deleted
+        can not be deleted  - dict - keys - packages can not be deleted, values are set of packages requireed by.
+
+        :return: Tuple[required by, can be deleted, can not be deleted.]
+        """
+        package_id = PackageId(item_type, item_public_id)
+        item = self.get_item_config(package_id)
+        agent_deps = self.get_agent_dependencies_with_reverse_dependencies()
+        item_deps = self.get_item_dependencies_with_reverse_dependencies(
+            item, package_id
+        )
+        can_be_removed = set()
+        can_not_be_removed = dict()
+
+        for dep_key, deps in item_deps.items():
+            if agent_deps[dep_key] == deps:
+                can_be_removed.add(dep_key)
+            else:
+                can_not_be_removed[dep_key] = agent_deps[dep_key] - deps
+
+        return agent_deps[package_id], can_be_removed, can_not_be_removed
+
+
+class RemoveItem:
+    """Implementation of item remove from the project."""
+
+    def __init__(
+        self,
+        ctx: Context,
+        item_type: str,
+        item_id: PublicId,
+        with_dependencies: bool,
+        force: bool = False,
+    ) -> None:
+        """
+        Init remove item tool.
+
+        :param ctx: click context.
+        :param item_type: str, package type
+        :param item_id: PublicId of the item to remove.
+        :oaram force: bool. if True remove even required by another package.
+
+        :return: None
+        """
+        self.ctx = ctx
+        self.force = force
+        self.item_type = item_type
+        self.item_id = item_id
+        self.with_dependencies = with_dependencies
+        self.item_type_plural = "{}s".format(item_type)
+        self.item_name = item_id.name
+
+        self.current_item = self.get_current_item()
+        self.required_by: Set[PackageId] = set()
+        self.dependencies_can_be_removed: Set[PackageId] = set()
+        self.dependencies_can_not_be_removed: Dict[PackageId, Set[PackageId]] = {}
+        try:
+            (
+                self.required_by,
+                self.dependencies_can_be_removed,
+                self.dependencies_can_not_be_removed,
+            ) = ItemRemoveHelper(self.agent_config).check_remove(
+                self.item_type, self.current_item
+            )
+        except FileNotFoundError:
+            pass  # item registered but not present on filesystem
+
+    def get_current_item(self) -> PublicId:
+        """Return public id of the item already presents in agent config."""
+        current_item = get_item_public_id_by_author_name(
+            self.ctx.agent_config,
+            self.item_type,
+            self.item_id.author,
+            self.item_id.name,
+        )
+        if not current_item:  # pragma: nocover # actually checked in check_item_present
+            raise click.ClickException(
+                "The {} '{}' is not supported.".format(self.item_type, self.item_id)
+            )
+        return current_item
+
+    def remove(self) -> None:
+        """Remove item and it's dependencies if specified."""
+        click.echo(
+            "Removing {item_type} '{item_name}' from the agent '{agent_name}'...".format(
+                agent_name=self.agent_name,
+                item_type=self.item_type,
+                item_name=self.item_name,
+            )
+        )
+        self.remove_item()
+        if self.with_dependencies:
+            self.remove_dependencies()
+        click.echo(
+            "{item_type} '{item_name}' was removed from the agent '{agent_name}'...".format(
+                agent_name=self.agent_name,
+                item_type=self.item_type,
+                item_name=self.item_name,
+            )
+        )
+
+    @property
+    def agent_items(self) -> Set[PublicId]:
+        """Return items registered with agent of the same type as item."""
+        return getattr(self.agent_config, self.item_type_plural, set)
+
+    @property
+    def is_required_by(self) -> bool:
+        """Is required by any other registered component in the agent."""
+        return bool(self.required_by)
+
+    def remove_item(self) -> None:
+        """
+        Remove item.
+
+        Removed from the filesystem.
+        Removed from the agent configuration
+
+        Does not remove dependencies, please use `remove_dependencies`.
+        """
+        if (not self.force) and self.is_required_by:
+            raise click.ClickException(
+                f"Package {self.item_type} {self.item_id} can not be removed cause required by {','.join(map(str, self.required_by))}"
+            )
+        self._remove_package()
+        self._remove_from_config()
+
+    @property
+    def cwd(self) -> str:
+        """Get current workdir."""
+        return self.ctx.cwd
+
+    @property
+    def agent_config(self) -> AgentConfig:
+        """Get agent config from context."""
+        return self.ctx.agent_config
+
+    @property
+    def agent_name(self) -> str:
+        """Get agent name."""
+        return self.ctx.agent_config.agent_name
+
+    def _get_item_folder(self) -> Path:
+        """Get item package folder."""
+        item_folder = Path(
+            self.cwd,
+            "vendor",
+            self.item_id.author,
+            self.item_type_plural,
+            self.item_name,
+        )
+        if not item_folder.exists():
+            # check if it is present in custom packages.
+            item_folder = Path(self.cwd, self.item_type_plural, self.item_name)
+            if not item_folder.exists():
+                raise click.ClickException(
+                    "{} {} not found. Aborting.".format(
+                        self.item_type.title(), self.item_name
+                    )
+                )
+            if (
+                item_folder.exists()
+                and not self.agent_config.author == self.item_id.author
+            ):  # pragma: no cover
+                raise click.ClickException(
+                    "{} {} author is different from {} agent author. "
+                    "Please fix the author field.".format(
+                        self.item_name, self.item_type, self.agent_name
+                    )
+                )
+            logger.debug(
+                "Removing local {} {}.".format(self.item_type, self.item_name)
+            )  # pragma: no cover
+        return item_folder
+
+    def _remove_package(self) -> None:
+        """Remove package from filesystem."""
+        item_folder = self._get_item_folder()
+        try:
+            shutil.rmtree(item_folder)
+        except BaseException:
+            raise click.ClickException(
+                f"An error occurred during {item_folder} removing."
+            )
+
+    def _remove_from_config(self) -> None:
+        """Remove item from agent config."""
+        current_item = self.get_current_item()
+        logger.debug(
+            "Removing the {} from {}".format(self.item_type, DEFAULT_AEA_CONFIG_FILE)
+        )
+        self.agent_items.remove(current_item)
+        with open(os.path.join(self.ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
+            self.ctx.agent_loader.dump(self.ctx.agent_config, f)
+
+    def remove_dependencies(self) -> None:
+        """Remove all the dependecies related only to the package."""
+        if not self.dependencies_can_be_removed:
+            return
+        click.echo(
+            f"Removing obsolete dependencies for {self.agent_name}: {self.dependencies_can_be_removed}..."
+        )
+        for dependency in self.dependencies_can_be_removed:
+            RemoveItem(
+                self.ctx,
+                str(dependency.package_type),
+                dependency.public_id,
+                with_dependencies=False,
+                force=True,
+            ).remove_item()
+            click.echo(
+                f"{dependency.package_type} {dependency.public_id} was removed from {self.agent_name}..."
+            )
+
+
 def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     Remove an item from the configuration file and agent, given the public id.
@@ -98,54 +430,6 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     :return: None
     :raises ClickException: if some error occures.
     """
-    item_name = item_id.name
-    item_type_plural = "{}s".format(item_type)
-    existing_item_ids = getattr(ctx.agent_config, item_type_plural)
-    existing_items_name_to_ids = {
-        public_id.name: public_id for public_id in existing_item_ids
-    }
-
-    agent_name = ctx.agent_config.agent_name
-    click.echo(
-        "Removing {item_type} '{item_name}' from the agent '{agent_name}'...".format(
-            agent_name=agent_name, item_type=item_type, item_name=item_name
-        )
-    )
-
-    if item_name not in existing_items_name_to_ids.keys() and not any(
-        item_id.same_prefix(existing_id) for existing_id in existing_item_ids
-    ):
-        raise click.ClickException(
-            "The {} '{}' is not supported.".format(item_type, item_id)
-        )
-
-    item_folder = Path(ctx.cwd, "vendor", item_id.author, item_type_plural, item_name)
-    if not item_folder.exists():
-        # check if it is present in custom packages.
-        item_folder = Path(ctx.cwd, item_type_plural, item_name)
-        if not item_folder.exists():
-            raise click.ClickException(
-                "{} {} not found. Aborting.".format(item_type.title(), item_name)
-            )
-        if (
-            item_folder.exists() and not ctx.agent_config.author == item_id.author
-        ):  # pragma: no cover
-            raise click.ClickException(
-                "{} {} author is different from {} agent author. "
-                "Please fix the author field.".format(item_name, item_type, agent_name)
-            )
-        logger.debug(
-            "Removing local {} {}.".format(item_type, item_name)
-        )  # pragma: no cover
-
-    try:
-        shutil.rmtree(item_folder)
-    except BaseException:
-        raise click.ClickException("An error occurred.")
-
-    # removing the item from the configurations.
-    item_public_id = existing_items_name_to_ids[item_name]
-    logger.debug("Removing the {} from {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
-    existing_item_ids.remove(item_public_id)
-    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
-        ctx.agent_loader.dump(ctx.agent_config, f)
+    RemoveItem(
+        ctx, item_type, item_id, cast(bool, ctx.config.get("with_dependencies"))
+    ).remove()
