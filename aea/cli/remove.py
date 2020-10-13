@@ -44,6 +44,7 @@ from aea.configurations.base import (
 
 @click.group()
 @click.option(
+    "-w",
     "--with-dependencies",
     is_flag=True,
     help="Remove obsolete dependencies not required anymore.",
@@ -325,7 +326,7 @@ class RemoveItem:
         """
         if (not self.force) and self.is_required_by:
             raise click.ClickException(
-                f"Package {self.item_type} {self.item_id} can not be removed cause required by {','.join(map(str, self.required_by))}"
+                f"Package {self.item_type} {self.item_id} can not be removed because it is required by {','.join(map(str, self.required_by))}"
             )
         self._remove_package()
         self._remove_from_config()
@@ -414,7 +415,7 @@ class RemoveItem:
                 force=True,
             ).remove_item()
             click.echo(
-                f"{dependency.package_type} {dependency.public_id} was removed from {self.agent_name}..."
+                f"{str(dependency.package_type).capitalize()} {dependency.public_id} was removed from {self.agent_name}."
             )
 
 

@@ -206,7 +206,8 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
         assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
         # do not add dependencies for the package
         with pytest.raises(
-            ClickException, match="Package .* can not be removed cause required by .*"
+            ClickException,
+            match="Package .* can not be removed because it is required by .*",
         ):
             self.runner.invoke(
                 cli,
