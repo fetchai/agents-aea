@@ -259,12 +259,11 @@ class RemoveItem:
         self.current_item = self.get_current_item()
         self.required_by: Set[PackageId] = set()
         self.dependencies_can_be_removed: Set[PackageId] = set()
-        self.dependencies_can_not_be_removed: Dict[PackageId, Set[PackageId]] = {}
         try:
             (
                 self.required_by,
                 self.dependencies_can_be_removed,
-                self.dependencies_can_not_be_removed,
+                *_,
             ) = ItemRemoveHelper(self.agent_config).check_remove(
                 self.item_type, self.current_item
             )

@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This test module contains the tests for the `aea add skill` sub-command."""
 
 import os
@@ -24,6 +25,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from unittest import mock
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -486,9 +488,10 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""
-        self.run_cli_command(
-            *["remove", "protocol", "fetchai/default:0.6.0"], cwd=self._get_cwd()
-        )
+        with patch("aea.cli.remove.RemoveItem.is_required_by", False):
+            self.run_cli_command(
+                *["remove", "protocol", "fetchai/default:0.6.0"], cwd=self._get_cwd()
+            )
         self.add_item("skill", "fetchai/echo:0.8.0", local=False)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")

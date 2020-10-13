@@ -139,10 +139,6 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         upgrader.remove_item()
         upgrader.add_item()
 
-    click.echo(
-        f"111 {ctx.agent_config.protocols} {shared_deps_to_remove} {shared_deps}"
-    )
-
     click.echo("Finished project upgrade. Everything is up to date now!")
 
 
@@ -262,15 +258,8 @@ class ItemUpgrader:
 
     def add_item(self) -> None:
         """Add new package version to agent."""
-        current_item = get_item_public_id_by_author_name(
-            self.ctx.agent_config,
-            self.item_type,
-            self.item_public_id.author,
-            self.item_public_id.name,
-        )
-        if not current_item:
-            click.echo(f"Adding item { self.item_type} {self.item_public_id}.")
-            add_item(self.ctx, str(self.item_type), self.item_public_id)
+        click.echo(f"Adding item {self.item_type} {self.item_public_id}.")
+        add_item(self.ctx, str(self.item_type), self.item_public_id)
 
 
 @clean_after
