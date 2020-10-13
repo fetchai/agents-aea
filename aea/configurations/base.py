@@ -1299,9 +1299,6 @@ class SkillConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
-        if result["is_abstract"] is False:
-            result.pop("is_abstract")
-
         return result
 
     @classmethod

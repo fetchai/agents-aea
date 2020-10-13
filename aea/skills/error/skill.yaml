@@ -20,3 +20,4 @@ handlers:
     class_name: ErrorHandler
 models: {}
 dependencies: {}
+is_abstract: false

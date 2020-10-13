@@ -84,3 +84,4 @@ models:
       pending_transaction_timeout: 30
     class_name: Transactions
 dependencies: {}
+is_abstract: false

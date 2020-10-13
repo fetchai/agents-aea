@@ -41,6 +41,8 @@ from tests.conftest import (
     NON_GENESIS_CONFIG_TWO,
 )
 
+MAX_FLAKY_RERUNS_ETH -= 1
+
 
 class TestTacSkills(AEATestCaseMany):
     """Test that tac skills work."""
@@ -318,7 +320,7 @@ class TestTacSkillsContract(AEATestCaseMany):
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, ETHEREUM)
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
-        self.set_config(setting_path, True)
+        self.set_config(setting_path, True, "bool")
 
         default_routing = {
             "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
@@ -371,7 +373,7 @@ class TestTacSkillsContract(AEATestCaseMany):
 
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-            self.set_config(setting_path, config)
+            self.nested_set_config(setting_path, config)
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
             self.set_config(setting_path, COSMOS)
             setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
