@@ -171,6 +171,7 @@ NON_GENESIS_CONFIG = {
     "local_uri": "127.0.0.1:9001",
     "log_file": "libp2p_node.log",
     "public_uri": "127.0.0.1:9001",
+    "ledger_id": "cosmos",
 }
 NON_GENESIS_CONFIG_TWO = {
     "delegate_uri": "127.0.0.1:11002",
@@ -178,6 +179,7 @@ NON_GENESIS_CONFIG_TWO = {
     "local_uri": "127.0.0.1:9002",
     "log_file": "libp2p_node.log",
     "public_uri": "127.0.0.1:9002",
+    "ledger_id": "cosmos",
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
 PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"

@@ -50,12 +50,12 @@ def test_flag_help():
   Command-line tool for setting up an Autonomous Economic Agent.
 
 Options:
-  --version                 Show the version and exit.
-  -v, --verbosity LVL       One of NOTSET, DEBUG, INFO, WARNING, ERROR,
-                            CRITICAL, OFF
+  --version                     Show the version and exit.
+  -v, --verbosity LVL           One of NOTSET, DEBUG, INFO, WARNING, ERROR,
+                                CRITICAL, OFF
 
-  --skip-consistency-check  Skip consistency check.
-  --help                    Show this message and exit.
+  -s, --skip-consistency-check  Skip consistency check.
+  --help                        Show this message and exit.
 
 Commands:
   add               Add a resource to the agent.
@@ -89,5 +89,6 @@ Commands:
   run               Run the agent.
   scaffold          Scaffold a resource for the agent.
   search            Search for components in the registry.
+  upgrade           Upgrade agent's component.
 """
     )

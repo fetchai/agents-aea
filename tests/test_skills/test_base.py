@@ -298,7 +298,7 @@ class SkillComponentTestCase(TestCase):
 
 def test_load_skill():
     """Test the loading of a skill."""
-    agent_context = MagicMock()
+    agent_context = MagicMock(agent_name="name")
     skill = Skill.from_dir(
         Path(ROOT_DIR, "tests", "data", "dummy_skill"), agent_context=agent_context
     )

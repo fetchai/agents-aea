@@ -19,16 +19,19 @@
 
 """This module contains the tests for the dialogue/base.py module."""
 
+import sys
 from typing import FrozenSet, Tuple, Type, cast
+from unittest import mock
 
 import pytest
 
+import aea
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel, DialogueStats
+from aea.protocols.dialogue.base import DialogueLabel, DialogueMessage, DialogueStats
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 from aea.protocols.dialogue.base import InvalidDialogueMessage
 from aea.protocols.state_update.message import StateUpdateMessage
@@ -121,6 +124,39 @@ class Dialogues(BaseDialogues):
             dialogue_class=dialogue_class,
             role_from_first_message=role_from_first_message,
         )
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 7),
+    reason="This part of code is only defined for python version >= 3.7",
+)
+def test_dialogue_message_python_3_7():
+    """Test DiallogueMessage if python is 3.7"""
+    dialogue_message = DialogueMessage(DefaultMessage.Performative.BYTES)
+    assert isinstance(dialogue_message.performative, Message.Performative)
+
+    assert dialogue_message.performative == DefaultMessage.Performative.BYTES
+    assert dialogue_message.contents == {}
+    assert dialogue_message.is_incoming is None
+    assert dialogue_message.target is None
+
+
+@pytest.mark.skipif(
+    sys.version_info >= (3, 7),
+    reason="This part of code is only defined for python version < 3.7",
+)
+def test_dialogue_message_python_3_6():
+    """Test DiallogueMessage if python is 3.6"""
+    with mock.patch.object(
+        aea.protocols.dialogue.base.sys, "version_info", return_value=(3, 6)
+    ):
+        dialogue_message = DialogueMessage(DefaultMessage.Performative.BYTES)
+        assert isinstance(dialogue_message.performative, Message.Performative)
+
+        assert dialogue_message.performative == DefaultMessage.Performative.BYTES
+        assert dialogue_message.contents == {}
+        assert dialogue_message.is_incoming is None
+        assert dialogue_message.target is None
 
 
 class TestDialogueLabel:
@@ -268,6 +304,7 @@ class TestDialogueBase:
         assert self.dialogue.rules.get_valid_replies(
             DefaultMessage.Performative.ERROR
         ) == frozenset({})
+        assert self.dialogue.message_class == DefaultMessage
 
         assert self.dialogue.is_self_initiated
 
@@ -461,6 +498,21 @@ class TestDialogueBase:
             )
         assert str(cm.value) == "Cannot reply in an empty dialogue!"
         assert self.dialogue.is_empty
+
+    def test_reply_negative_target_message_target_mismatch(self):
+        """Negative test for the 'reply' method: target message and target provided but do not match."""
+        self.dialogue._update(self.valid_message_1_by_self)
+        assert self.dialogue.last_message.message_id == 1
+
+        with pytest.raises(AEAEnforceError) as cm:
+            self.dialogue.reply(
+                target_message=self.valid_message_1_by_self,
+                target=2,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"Hello Back",
+            )
+        assert str(cm.value) == "The provided target and target_message do not match."
+        assert self.dialogue.last_message.message_id == 1
 
     def test_reply_negative_invalid_target(self):
         """Negative test for the 'reply' method: target message is not in the dialogue."""
@@ -1049,6 +1101,8 @@ class TestDialoguesBase:
             Dialogue.EndState.SUCCESSFUL: 0,
             Dialogue.EndState.FAILED: 0,
         }
+        assert self.own_dialogues.message_class == DefaultMessage
+        assert self.own_dialogues.dialogue_class == Dialogue
 
     def test_counterparty_from_message(self):
         """Test the 'counterparty_from_message' method."""

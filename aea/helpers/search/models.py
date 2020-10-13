@@ -30,7 +30,7 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
 from aea.exceptions import enforce
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class Location:
@@ -859,7 +859,7 @@ class Query:
                 )
             )
         if len(self.constraints) < 1:
-            logger.warning(
+            _default_logger.warning(
                 "DEPRECATION WARNING: "
                 "Invalid input value for type '{}': empty list of constraints. The number of "
                 "constraints must be at least 1.".format(type(self).__name__)

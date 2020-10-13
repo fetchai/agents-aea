@@ -1,6 +1,6 @@
 ``` bash 
 aea fetch fetchai/thermometer_aea:0.11.0 --alias my_thermometer_aea
-cd thermometer_aea
+cd my_thermometer_aea
 aea install
 ```
 ``` bash

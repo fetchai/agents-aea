@@ -320,7 +320,7 @@ def test_envelope_connection_id():
 def test_envelope_skill_id_raises_value_error():
     """Test the property Envelope.skill_id raises ValueError if the URI is not a package id.."""
     with unittest.mock.patch.object(
-        aea.mail.base.logger, "debug"
+        aea.mail.base._default_logger, "debug"
     ) as mock_logger_method:
         bad_uri = "skill/author/skill_name/bad_version"
         envelope_context = EnvelopeContext(uri=URI(bad_uri))
@@ -341,7 +341,7 @@ def test_envelope_skill_id_raises_value_error():
 def test_envelope_skill_id_raises_value_error_wrong_package_type():
     """Test the property Envelope.skill_id raises ValueError if the URI is not a valid package type."""
     with unittest.mock.patch.object(
-        aea.mail.base.logger, "debug"
+        aea.mail.base._default_logger, "debug"
     ) as mock_logger_method:
         invalid_uri = "protocol/author/skill_name/0.1.0"
         envelope_context = EnvelopeContext(uri=URI(invalid_uri))

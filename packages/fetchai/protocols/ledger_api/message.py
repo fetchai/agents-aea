@@ -41,7 +41,7 @@ from packages.fetchai.protocols.ledger_api.custom_types import (
 )
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.ledger_api.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.ledger_api.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -394,7 +394,7 @@ class LedgerApiMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

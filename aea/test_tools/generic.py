@@ -18,16 +18,23 @@
 # ------------------------------------------------------------------------------
 """This module contains generic tools for AEA end-to-end testing."""
 
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List
 
-import yaml
-
 from aea.cli.utils.config import handle_dotted_path
-from aea.configurations.base import PublicId
+from aea.configurations.base import (
+    CRUDCollection,
+    PackageConfiguration,
+    PackageType,
+    PublicId,
+    SkillConfig,
+)
 from aea.connections.stub.connection import write_envelope
 from aea.exceptions import enforce
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 from aea.mail.base import Envelope
+from aea.test_tools.constants import DEFAULT_AUTHOR
 
 
 def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
@@ -66,24 +73,87 @@ def read_envelope_from_file(file_path: str):
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
 
 
-def _nested_set(dic: Dict, keys: List, value: Any) -> None:
+def _nested_set(
+    configuration_obj: PackageConfiguration, keys: List, value: Any
+) -> None:
     """
-    Nested set a value to a dict.
+    Nested set a value to a dict. Force sets the values, overwriting any present values, but maintaining schema validation.
 
-    :param dic: target dict
+    :param configuration_obj: configuration object
     :param keys: list of keys.
     :param value: a value to set.
 
     :return: None.
     """
-    for key in keys[:-1]:
-        dic = dic.setdefault(key, {})
-    dic[keys[-1]] = value
+
+    def get_nested_ordered_dict_from_dict(input_dict: Dict) -> Dict:
+        _dic = {}
+        for _key, _value in input_dict.items():
+            if isinstance(_value, dict):
+                _dic[_key] = OrderedDict(get_nested_ordered_dict_from_dict(_value))
+            else:
+                _dic[_key] = _value
+        return _dic
+
+    def get_nested_ordered_dict_from_keys_and_value(
+        keys: List[str], value: Any
+    ) -> Dict:
+        _dic = (
+            OrderedDict(get_nested_ordered_dict_from_dict(value))
+            if isinstance(value, dict)
+            else value
+        )
+        for key in keys[::-1]:
+            _dic = OrderedDict({key: _dic})
+        return _dic
+
+    root_key = keys[0]
+    if (
+        isinstance(configuration_obj, SkillConfig)
+        and root_key in SkillConfig.FIELDS_WITH_NESTED_FIELDS
+    ):
+        root_attr = getattr(configuration_obj, root_key)
+        length = len(keys)
+        if length < 3 or keys[2] not in SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
+            raise ValueError(f"Invalid keys={keys}.")  # pragma: nocover
+        skill_component_id = keys[1]
+        skill_component_config = root_attr.read(skill_component_id)
+        if length == 3 and isinstance(value, dict):  # root.skill_component_id.args
+            # set all args
+            skill_component_config.args = get_nested_ordered_dict_from_dict(value)
+        elif len(keys) >= 4:  # root.skill_component_id.args.[keys]
+            # update some args
+            dic = get_nested_ordered_dict_from_keys_and_value(keys[3:], value)
+            skill_component_config.args.update(dic)
+        else:
+            raise ValueError(  # pragma: nocover
+                f"Invalid keys={keys} and values={value}."
+            )
+        root_attr.update(skill_component_id, skill_component_config)
+    else:
+        root_attr = getattr(configuration_obj, root_key)
+        if isinstance(root_attr, CRUDCollection):
+            if isinstance(value, dict) and len(keys) == 1:  # root.
+                for _key, _value in value.items():
+                    dic = get_nested_ordered_dict_from_keys_and_value([_key], _value)
+                    root_attr.update(_key, dic[_key])
+            elif len(keys) >= 2:  # root.[keys]
+                dic = get_nested_ordered_dict_from_keys_and_value(keys[1:], value)
+                root_attr.update(keys[1], dic[keys[1]])
+            else:
+                raise ValueError(  # pragma: nocover
+                    f"Invalid keys={keys} and values={value}."
+                )
+        else:
+            dic = get_nested_ordered_dict_from_keys_and_value(keys, value)
+            setattr(configuration_obj, root_key, dic[root_key])
 
 
-def force_set_config(dotted_path: str, value: Any) -> None:
+def nested_set_config(
+    dotted_path: str, value: Any, author: str = DEFAULT_AUTHOR
+) -> None:
     """
-    Set an AEA config without validation.
+    Set an AEA config with nested values.
 
     Run from agent's directory.
 
@@ -97,16 +167,24 @@ def force_set_config(dotted_path: str, value: Any) -> None:
 
     :param dotted_path: dotted path to a setting.
     :param value: a value to assign. Must be of yaml serializable type.
+    :param author: the author name, used to parse the dotted path.
 
     :return: None.
     """
-    settings_keys, file_path, _ = handle_dotted_path(dotted_path)
+    settings_keys, config_file_path, config_loader, _ = handle_dotted_path(
+        dotted_path, author
+    )
 
-    settings = {}
-    with open(file_path, "r") as f:
-        settings = yaml.safe_load(f)
+    with config_file_path.open() as fp:
+        config = config_loader.load(fp)
 
-    _nested_set(settings, settings_keys, value)
+    _nested_set(config, settings_keys, value)
 
-    with open(file_path, "w") as f:
-        yaml.dump(settings, f, default_flow_style=False)
+    if config.package_type == PackageType.AGENT:
+        json_data = config.ordered_json
+        component_configurations = json_data.pop("component_configurations")
+        yaml_dump_all(
+            [json_data] + component_configurations, config_file_path.open("w")
+        )
+    else:
+        yaml_dump(config.ordered_json, config_file_path.open("w"))

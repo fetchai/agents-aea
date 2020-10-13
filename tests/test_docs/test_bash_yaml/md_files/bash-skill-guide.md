@@ -15,7 +15,7 @@ aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.13.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.13.0 && cd simple_service_registration && aea install
 ```
 ``` bash
 aea generate-key fetchai

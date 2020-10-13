@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests for the aea configurations."""
 import io
 from enum import Enum
@@ -39,6 +40,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.yaml_utils import yaml_load_all
 
 from tests.conftest import CUR_PATH, ROOT_DIR
 
@@ -386,3 +388,47 @@ def test_agent_configuration_loading_multipage_positive_case(component_type):
     assert isinstance(agent_config.component_configurations, dict)
     assert len(agent_config.component_configurations)
     assert set(agent_config.component_configurations.keys()) == {expected_component_id}
+
+
+def test_agent_configuration_dump_multipage():
+    """Test agent configuration dump with component configuration."""
+    loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+    agent_config = loader.load(
+        Path(CUR_PATH, "data", "aea-config.example_multipage.yaml").open()
+    )
+
+    # test main agent configuration loaded correctly
+    assert agent_config.agent_name == "myagent"
+    assert agent_config.author == "fetchai"
+
+    # test component configurations loaded correctly
+    assert len(agent_config.component_configurations) == 1
+    fp = io.StringIO()
+    loader.dump(agent_config, fp)
+    fp.seek(0)
+    agent_config = yaml_load_all(fp)
+    assert agent_config[0]["agent_name"] == "myagent"
+    assert agent_config[1]["name"] == "dummy"
+
+
+def test_agent_configuration_dump_multipage_fails_bad_component_configuration():
+    """Test agent configuration dump with INCORRECT component configuration."""
+    loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+    agent_config = loader.load(
+        Path(CUR_PATH, "data", "aea-config.example_multipage.yaml").open()
+    )
+
+    # test main agent configuration loaded correctly
+    assert agent_config.agent_name == "myagent"
+    assert agent_config.author == "fetchai"
+
+    # test component configurations loaded correctly
+    assert len(agent_config.component_configurations) == 1
+    list(agent_config.component_configurations.values())[0][
+        "BAD FIELD"
+    ] = "not in specs!"
+    fp = io.StringIO()
+    with pytest.raises(
+        ValueError, match="Configuration of component .* is not valid..*'BAD FIELD'"
+    ):
+        loader.dump(agent_config, fp)

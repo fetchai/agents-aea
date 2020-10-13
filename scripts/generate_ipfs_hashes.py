@@ -53,7 +53,7 @@ from aea.configurations.base import (
     _compute_fingerprint,
 )
 from aea.configurations.loader import ConfigLoaders
-from aea.helpers.base import yaml_dump, yaml_dump_all
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 
 
 AUTHOR = "fetchai"
@@ -117,6 +117,8 @@ def _get_all_packages() -> List[Tuple[PackageType, Path]]:
         (PackageType.AGENT, TEST_PATH / "dummy_aea"),
         (PackageType.CONNECTION, TEST_PATH / "dummy_connection"),
         (PackageType.CONTRACT, TEST_PATH / "dummy_contract"),
+        (PackageType.PROTOCOL, TEST_PATH / "generator" / "t_protocol"),
+        (PackageType.PROTOCOL, TEST_PATH / "generator" / "t_protocol_no_ct"),
         (PackageType.SKILL, TEST_PATH / "dependencies_skill"),
         (PackageType.SKILL, TEST_PATH / "exception_skill"),
         (PackageType.SKILL, TEST_PATH / "dummy_skill"),

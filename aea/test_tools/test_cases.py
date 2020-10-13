@@ -53,7 +53,7 @@ from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.generic import (
-    force_set_config,
+    nested_set_config,
     read_envelope_from_file,
     write_envelope_to_file,
 )
@@ -61,7 +61,7 @@ from aea.test_tools.generic import (
 from tests.conftest import ROOT_DIR
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 
@@ -125,10 +125,10 @@ class BaseAEATestCase(ABC):
         )
 
     @classmethod
-    def force_set_config(cls, dotted_path: str, value: Any) -> None:
+    def nested_set_config(cls, dotted_path: str, value: Any) -> None:
         """Force set config."""
         with cd(cls._get_cwd()):
-            force_set_config(dotted_path, value)
+            nested_set_config(dotted_path, value)
 
     @classmethod
     def disable_aea_logging(cls) -> None:
@@ -728,14 +728,14 @@ class BaseAEATestCase(ABC):
         if is_terminating:
             cls.terminate_agents(process)
         if missing_strings != []:
-            logger.info(
+            _default_logger.info(
                 "Non-empty missing strings, stderr:\n{}".format(cls.stderr[process.pid])
             )
-            logger.info("=====================")
-            logger.info(
+            _default_logger.info("=====================")
+            _default_logger.info(
                 "Non-empty missing strings, stdout:\n{}".format(cls.stdout[process.pid])
             )
-            logger.info("=====================")
+            _default_logger.info("=====================")
         return missing_strings
 
     @classmethod

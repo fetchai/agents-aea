@@ -31,97 +31,15 @@ import subprocess  # nosec
 import sys
 import time
 import types
-from collections import OrderedDict, UserString
+from collections import UserString
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, List, TextIO, Union
+from typing import Any, Callable, Dict, Union
 
-import yaml
 from dotenv import load_dotenv
 
 
-logger = logging.getLogger(__name__)
-
-
-def _ordered_loading(fun: Callable):
-    # for pydocstyle
-    def ordered_load(stream: TextIO):
-        object_pairs_hook = OrderedDict
-
-        class OrderedLoader(yaml.SafeLoader):
-            """A wrapper for safe yaml loader."""
-
-            pass
-
-        def construct_mapping(loader, node):
-            loader.flatten_mapping(node)
-            return object_pairs_hook(loader.construct_pairs(node))
-
-        OrderedLoader.add_constructor(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
-        )
-        return fun(stream, Loader=OrderedLoader)  # nosec
-
-    return ordered_load
-
-
-def _ordered_dumping(fun: Callable):
-    # for pydocstyle
-    def ordered_dump(data, stream=None, **kwds):
-        class OrderedDumper(yaml.SafeDumper):
-            """A wrapper for safe yaml loader."""
-
-            pass
-
-        def _dict_representer(dumper, data):
-            return dumper.represent_mapping(
-                yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items()
-            )
-
-        OrderedDumper.add_representer(OrderedDict, _dict_representer)
-        return fun(data, stream, Dumper=OrderedDumper, **kwds)  # nosec
-
-    return ordered_dump
-
-
-@_ordered_loading
-def yaml_load(*args, **kwargs) -> Dict[str, Any]:
-    """
-    Load a yaml from a file pointer in an ordered way.
-
-    :return: the yaml
-    """
-    return yaml.load(*args, **kwargs)  # nosec
-
-
-@_ordered_loading
-def yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]:
-    """
-    Load a multi-paged yaml from a file pointer in an ordered way.
-
-    :return: the yaml
-    """
-    return list(yaml.load_all(*args, **kwargs))  # nosec
-
-
-@_ordered_dumping
-def yaml_dump(*args, **kwargs) -> None:
-    """
-    Dump multi-paged yaml data to a yaml file in an ordered way.
-
-    :return None
-    """
-    yaml.dump(*args, **kwargs)  # nosec
-
-
-@_ordered_dumping
-def yaml_dump_all(*args, **kwargs) -> None:
-    """
-    Dump multi-paged yaml data to a yaml file in an ordered way.
-
-    :return None
-    """
-    yaml.dump_all(*args, **kwargs)  # nosec
+_default_logger = logging.getLogger(__name__)
 
 
 def _get_module(spec):
@@ -143,12 +61,12 @@ def locate(path: str) -> Any:
         spec_name = ".".join(parts[: n + 1])
         module_location = os.path.join(file_location, "__init__.py")
         spec = importlib.util.spec_from_file_location(spec_name, module_location)
-        logger.debug("Trying to import {}".format(module_location))
+        _default_logger.debug("Trying to import {}".format(module_location))
         nextmodule = _get_module(spec)
         if nextmodule is None:
             module_location = file_location + ".py"
             spec = importlib.util.spec_from_file_location(spec_name, module_location)
-            logger.debug("Trying to import {}".format(module_location))
+            _default_logger.debug("Trying to import {}".format(module_location))
             nextmodule = _get_module(spec)
 
         if nextmodule:
@@ -426,3 +344,25 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             recursive_update(value_to_update, value)
         else:
             to_update[key] = value
+
+
+def _get_aea_logger_name_prefix(module_name: str, agent_name: str) -> str:
+    """
+    Get the logger name prefix.
+
+    It consists of a dotted path with:
+    - the name of the package, 'aea';
+    - the agent name;
+    - the rest of the dotted path.
+
+    >>> _get_aea_logger_name_prefix("aea.path.to.package", "myagent")
+    'aea.myagent.path.to.package'
+
+    :param module_name: the module name.
+    :param agent_name: the agent name.
+    :return: the logger name prefix.
+    """
+    module_name_parts = module_name.split(".")
+    root = module_name_parts[0]
+    postfix = module_name_parts[1:]
+    return ".".join([root, agent_name, *postfix])

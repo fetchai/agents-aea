@@ -214,7 +214,7 @@ def get_wealth(address: str):
 @pytest.mark.ledger
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
-    with caplog.at_level(logging.DEBUG, logger="aea.crypto.fetchai"):
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.fetchai._default_logger"):
         fetchai_faucet_api = FetchAIFaucetApi()
         fc = FetchAICrypto()
         fetchai_faucet_api.get_wealth(fc.address)

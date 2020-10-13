@@ -40,7 +40,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.message import (
-    logger as oef_search_message_logger,
+    _default_logger as oef_search_message_logger,
 )
 
 from tests.conftest import ROOT_DIR

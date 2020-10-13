@@ -190,7 +190,7 @@ def test_construct_sign_and_submit_transfer_transaction():
 @pytest.mark.ledger
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
-    with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum"):
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
         ethereum_faucet_api = EthereumFaucetApi()
         ec = EthereumCrypto()
         ethereum_faucet_api.get_wealth(ec.address)

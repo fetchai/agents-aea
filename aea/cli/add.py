@@ -112,11 +112,12 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     is_local = ctx.config.get("is_local")
 
     ctx.clean_paths.append(dest_path)
+
     if is_local_item(item_public_id):
         source_path = find_item_in_distribution(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
     elif is_local:
-        source_path = find_item_locally(ctx, item_type, item_public_id)
+        source_path, _ = find_item_locally(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
     else:
         package_path = fetch_package(

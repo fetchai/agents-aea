@@ -43,20 +43,71 @@ TestInteractCommand = test_interact.TestInteractCommand
 class TestConfigCases(AEATestCaseEmpty):
     """Test config set/get."""
 
-    def test_agent_force_set(self):
-        """Test agent test force set from path."""
+    def test_agent_nested_set_agent_crudcollection(self):
+        """Test agent test nested set from path."""
         key_name = "agent.private_key_paths.cosmos"
-        self.force_set_config(key_name, "testdata2000")
+        self.nested_set_config(key_name, "testdata2000")
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
         assert b"testdata2000" in result.stdout_bytes
 
+    def test_agent_nested_set_agent_crudcollection_all(self):
+        """Test agent test nested set from path."""
+        key_name = "agent.private_key_paths"
+        self.nested_set_config(key_name, {"cosmos": "testdata2000"})
+        result = self.run_cli_command(
+            "config", "get", f"{key_name}.cosmos", cwd=self._get_cwd()
+        )
+        assert b"testdata2000" in result.stdout_bytes
+
+    def test_agent_nested_set_agent_simple(self):
+        """Test agent test nested set from path."""
+        key_name = "agent.registry_path"
+        self.nested_set_config(key_name, "some_path")
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert b"some_path" in result.stdout_bytes
+
+    def test_agent_nested_set_skill_simple(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.skills.error.handlers.error_handler.args.some_key"
+        self.nested_set_config(key_name, "some_value")
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert b"some_value" in result.stdout_bytes
+
+    def test_agent_nested_set_skill_simple_nested(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.skills.error.handlers.error_handler.args.some_key"
+        self.nested_set_config(f"{key_name}.some_nested_key", "some_value")
+
+    def test_agent_nested_set_skill_all(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.skills.error.handlers.error_handler.args"
+        self.nested_set_config(key_name, {"some_key": "some_value"})
+        result = self.run_cli_command(
+            "config", "get", f"{key_name}.some_key", cwd=self._get_cwd()
+        )
+        assert b"some_value" in result.stdout_bytes
+
+    def test_agent_nested_set_skill_all_nested(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.skills.error.handlers.error_handler.args"
+        self.nested_set_config(
+            key_name, {"some_key": {"some_nested_key": "some_value"}}
+        )
+
+    def test_agent_nested_set_connection_simple(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.connections.stub.config.input_file"
+        self.nested_set_config(key_name, "some_value")
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert b"some_value" in result.stdout_bytes
+
     def test_agent_set(self):
         """Test agent test set from path."""
-        self.set_config("agent.author", "testauthor21")
-        result = self.run_cli_command(
-            "config", "get", "agent.author", cwd=self._get_cwd()
-        )
-        assert b"testauthor21" in result.stdout_bytes
+        value = "testvalue"
+        key_name = "agent.logging_config.disable_existing_loggers"
+        self.set_config(key_name, value)
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert value in str(result.stdout_bytes)
 
     def test_agent_get_exception(self):
         """Test agent test get non exists key."""

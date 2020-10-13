@@ -47,6 +47,7 @@ from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.yaml_utils import yaml_load_all
 from aea.protocols.base import Protocol
 from aea.protocols.default import DefaultMessage
 from aea.registries.resources import Resources
@@ -375,7 +376,7 @@ def test_remove_skill():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
-    skill = Skill.from_dir(dummy_skill_path, Mock())
+    skill = Skill.from_dir(dummy_skill_path, Mock(agent_name="name"))
     num_deps = len(builder._package_dependency_manager.all_dependencies)
     builder.add_component_instance(skill)
     assert len(builder._package_dependency_manager.all_dependencies) == num_deps + 1
@@ -490,11 +491,11 @@ def test_load_abstract_component():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
-    skill = Skill.from_dir(dummy_skill_path, Mock())
+    skill = Skill.from_dir(dummy_skill_path, Mock(agent_name="name"))
     skill.configuration.is_abstract = True
     builder.add_component_instance(skill)
     builder._load_and_add_components(
-        ComponentType.SKILL, Resources(), "aea_1", agent_context=Mock()
+        ComponentType.SKILL, Resources(), "aea_1", agent_context=Mock(agent_name="name")
     )
 
 
@@ -649,6 +650,13 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         assert dummy_handler.config == {"handler_arg_1": 42, "handler_arg_2": "2"}
         dummy_model = dummy_skill.models["dummy"]
         assert dummy_model.config == {"model_arg_1": 42, "model_arg_2": "2"}
+
+    def test_from_json(self):
+        """Test load project from json file with path specified."""
+        with open(Path(self._get_cwd(), DEFAULT_AEA_CONFIG_FILE), "r") as fp:
+            json_config = yaml_load_all(fp)
+
+        AEABuilder.from_config_json(json_config, Path(self._get_cwd()))
 
 
 class TestFromAEAProjectMakeSkillAbstract(AEATestCase):

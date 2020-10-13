@@ -45,7 +45,7 @@ from aea.helpers.multiple_executor import (
 from aea.runtime import AsyncRuntime
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 def load_agent(agent_dir: Union[PathLike, str]) -> AEA:
@@ -103,25 +103,25 @@ def _run_agent(
         try:
             stop_event.wait()
         except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:  # pragma: nocover
-            logger.error(
+            _default_logger.error(
                 f"Exception raised in stop_event_thread {e} {type(e)}. Skip it, looks process is closed."
             )
         finally:
-            logger.debug("_run_agent: stop event raised. call agent.stop")
+            _default_logger.debug("_run_agent: stop event raised. call agent.stop")
             agent.runtime.stop()
 
     Thread(target=stop_event_thread, daemon=True).start()
     try:
         agent.start()
     except KeyboardInterrupt:  # pragma: nocover
-        logger.debug("_run_agent: keyboard interrupt")
+        _default_logger.debug("_run_agent: keyboard interrupt")
     except BaseException as e:  # pragma: nocover
-        logger.exception("exception in _run_agent")
+        _default_logger.exception("exception in _run_agent")
         exc = AEAException(f"Raised {type(e)}({e})")
         exc.__traceback__ = e.__traceback__
         raise exc
     finally:
-        logger.debug("_run_agent: call agent.stop")
+        _default_logger.debug("_run_agent: call agent.stop")
         agent.stop()
 
 
@@ -192,12 +192,12 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
     def stop(self):
         """Stop task."""
         if self._future.done():
-            logger.debug("Stop called, but task is already done.")
+            _default_logger.debug("Stop called, but task is already done.")
             return
         try:
             self._stop_event.set()
         except (FileNotFoundError, BrokenPipeError, EOFError) as e:  # pragma: nocover
-            logger.error(
+            _default_logger.error(
                 f"Exception raised in task.stop {e} {type(e)}. Skip it, looks process is closed."
             )
 

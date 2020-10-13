@@ -155,7 +155,9 @@ class TestStubConnectionReception:
 
     def test_reception_fails(self):
         """Test the case when an error occurs during the processing of a line."""
-        patch = mock.patch.object(aea.connections.stub.connection.logger, "error")
+        patch = mock.patch.object(
+            aea.connections.stub.connection._default_logger, "error"
+        )
         mocked_logger_error = patch.start()
         with mock.patch(
             "aea.connections.stub.connection._decode",

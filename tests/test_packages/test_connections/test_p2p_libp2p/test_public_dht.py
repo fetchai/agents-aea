@@ -359,18 +359,20 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
         self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
 
-        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.set_config(
-            "{}.local_uri".format(config_path), "127.0.0.1:{}".format(DEFAULT_PORT)
-        )
-        self.force_set_config(
-            "{}.entry_peers".format(config_path), PUBLIC_DHT_MADDRS,
-        )
-
         # for logging
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
-        self.set_config("{}.log_file".format(config_path), log_file)
+
+        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        self.nested_set_config(
+            config_path,
+            {
+                "local_uri": "127.0.0.1:{}".format(DEFAULT_PORT),
+                "entry_peers": PUBLIC_DHT_MADDRS,
+                "log_file": log_file,
+            },
+        )
+
         self.log_files = [log_file]
 
         process = self.run_agent()
@@ -404,9 +406,9 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
         """Test connectivity."""
         self.add_item("connection", "fetchai/p2p_libp2p_client:0.7.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
-        self.force_set_config(
-            "{}.nodes".format(config_path),
-            [{"uri": "{}".format(uri)} for uri in PUBLIC_DHT_DELEGATE_URIS],
+        self.nested_set_config(
+            config_path,
+            {"nodes": [{"uri": "{}".format(uri)} for uri in PUBLIC_DHT_DELEGATE_URIS]},
         )
 
         process = self.run_agent()

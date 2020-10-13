@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
-import logging
 from typing import Any, Dict, Optional, Tuple, Union
 
 from aea.common import Address
@@ -46,8 +45,6 @@ DEFAULT_LEDGER_CONFIGS = {
     },
     FetchAIApi.identifier: {"address": FETCHAI_DEFAULT_ADDRESS},
 }  # type: Dict[str, Dict[str, Union[str, int]]]
-
-logger = logging.getLogger(__name__)
 
 
 class LedgerApis:

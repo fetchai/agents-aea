@@ -43,11 +43,8 @@ from aea.helpers.base import (
     send_control_c,
     try_decorator,
     win_popen_kwargs,
-    yaml_dump,
-    yaml_dump_all,
-    yaml_load,
-    yaml_load_all,
 )
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 

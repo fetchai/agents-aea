@@ -104,7 +104,9 @@ def _generate_item(click_context, item_type, specification_path):
 
         output_path = os.path.join(ctx.cwd, item_type_plural)
         protocol_generator = ProtocolGenerator(specification_path, output_path)
-        protocol_generator.generate()
+        warning_message = protocol_generator.generate()
+        if warning_message is not None:
+            click.echo(warning_message)
 
         # Add the item to the configurations
         logger.debug(

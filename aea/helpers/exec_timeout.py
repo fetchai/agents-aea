@@ -31,7 +31,7 @@ from types import TracebackType
 from typing import Optional, Type
 
 
-logger = logging.getLogger(__file__)
+_default_logger = logging.getLogger(__file__)
 
 
 class TimeoutResult:
@@ -271,7 +271,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         :return: None
         """
         if not self._supervisor_thread:
-            logger.warning(
+            _default_logger.warning(
                 "ExecTimeoutThreadGuard is used but not started! No timeout wil be applied!"
             )
             return

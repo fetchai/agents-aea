@@ -55,7 +55,7 @@ except ImportError:  # pragma: no cover
     )
 
 
-logger = logging.getLogger(__file__)
+_default_logger = logging.getLogger(__file__)
 
 
 def ensure_list(value: Any) -> List:
@@ -121,7 +121,7 @@ class AsyncState:
             try:
                 callback_fn(state)
             except Exception:  # pylint: disable=broad-except
-                logger.exception(f"Exception on calling {callback_fn}")
+                _default_logger.exception(f"Exception on calling {callback_fn}")
 
         for watcher in list(self._watchers):
             if state not in watcher._states:  # type: ignore # pylint: disable=protected-access  # pragma: nocover
@@ -331,10 +331,10 @@ class ThreadedAsyncRunner(Thread):
 
     def run(self) -> None:
         """Run code inside thread."""
-        logger.debug("Starting threaded asyncio loop...")
+        _default_logger.debug("Starting threaded asyncio loop...")
         asyncio.set_event_loop(self._loop)
         self._loop.run_forever()
-        logger.debug("Asyncio loop has been stopped.")
+        _default_logger.debug("Asyncio loop has been stopped.")
 
     def call(self, coro: Awaitable) -> Any:
         """
@@ -346,18 +346,18 @@ class ThreadedAsyncRunner(Thread):
 
     def stop(self) -> None:
         """Stop event loop in thread."""
-        logger.debug("Stopping...")
+        _default_logger.debug("Stopping...")
 
         if not self.is_alive():  # pragma: nocover
             return
 
         if self._loop.is_running():
-            logger.debug("Stopping loop...")
+            _default_logger.debug("Stopping loop...")
             self._loop.call_soon_threadsafe(self._loop.stop)
 
-        logger.debug("Wait thread to join...")
+        _default_logger.debug("Wait thread to join...")
         self.join(10)
-        logger.debug("Stopped.")
+        _default_logger.debug("Stopped.")
 
 
 class AwaitableProc:
@@ -504,7 +504,7 @@ class Runnable(ABC):
         :return: bool started or not.
         """
         if self._task and not self._task.done():
-            logger.debug(f"{self} already running")
+            _default_logger.debug(f"{self} already running")
             return False
 
         self._is_running = False
@@ -572,7 +572,7 @@ class Runnable(ABC):
         :return: awaitable if sync is False, otherise None
         """
         if not self._task:
-            logger.warning("Runnable is not started")
+            _default_logger.warning("Runnable is not started")
             return ready_future
 
         if self._got_result and not force_result:
@@ -647,7 +647,7 @@ class Runnable(ABC):
 
     def stop(self, force: bool = False) -> None:
         """Stop runnable."""
-        logger.debug(f"{self} is going to be stopped {self._task}")
+        _default_logger.debug(f"{self} is going to be stopped {self._task}")
         if not self._task or not self._loop:
             return
 

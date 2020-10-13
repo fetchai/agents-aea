@@ -86,7 +86,7 @@ class TestMLSkills(AEATestCaseMany):
         )
         self.set_config(setting_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -101,13 +101,13 @@ class TestMLSkills(AEATestCaseMany):
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
@@ -121,7 +121,7 @@ class TestMLSkills(AEATestCaseMany):
         )
         self.set_config(setting_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -134,13 +134,11 @@ class TestMLSkills(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = "vendor.fetchai.skills.ml_train.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         self.set_agent_context(data_provider_aea_name)
         data_provider_aea_process = self.run_agent()
@@ -259,7 +257,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/ml_data_provider:0.12.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -281,13 +279,13 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
@@ -297,7 +295,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/ledger:0.6.0")
         self.add_item("skill", "fetchai/ml_train:0.12.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -320,13 +318,11 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = "vendor.fetchai.skills.ml_train.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         self.set_agent_context(data_provider_aea_name)
         data_provider_aea_process = self.run_agent()

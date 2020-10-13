@@ -29,7 +29,7 @@ from aea.protocols.base import Message
 from packages.fetchai.protocols.gym.custom_types import AnyObject as CustomAnyObject
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.gym.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.gym.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -292,7 +292,7 @@ class GymMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

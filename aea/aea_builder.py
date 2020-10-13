@@ -79,14 +79,14 @@ from aea.decision_maker.default import (
 from aea.exceptions import AEAException
 from aea.helpers.base import load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.logging import AgentLoggerAdapter
+from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 
 
 PathLike = Union[os.PathLike, Path, str]
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class _DependenciesManager:
@@ -232,7 +232,7 @@ class _DependenciesManager:
         return all_pypi_dependencies
 
 
-class AEABuilder:
+class AEABuilder(WithLogger):
     """
     This class helps to build an AEA.
 
@@ -302,6 +302,7 @@ class AEABuilder:
 
         :param with_default_packages: add the default packages.
         """
+        WithLogger.__init__(self, logger=_default_logger)
         self._with_default_packages = with_default_packages
         self._reset(is_full_reset=True)
 
@@ -422,7 +423,7 @@ class AEABuilder:
             _class = getattr(module, class_name)
             self._decision_maker_handler_class = _class
         except Exception as e:  # pragma: nocover
-            logger.error(
+            self.logger.error(
                 "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
                     dotted_path, class_name, file_path, e
                 )
@@ -868,11 +869,11 @@ class AEABuilder:
         :raises ValueError: if we cannot
         """
         self._check_we_can_build()
-        resources = Resources()
         wallet = Wallet(
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
         identity = self._build_identity_from_wallet(wallet)
+        resources = Resources(identity.name)
         self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)
         self._load_and_add_components(ComponentType.CONTRACT, resources, identity.name)
         self._load_and_add_components(
@@ -1401,14 +1402,14 @@ class AEABuilder:
                 component = self._component_instances[component_type][configuration]
                 if configuration.component_type != ComponentType.SKILL:
                     component.logger = cast(
-                        logging.Logger, make_logger(configuration, agent_name)
+                        logging.Logger, make_component_logger(configuration, agent_name)
                     )
             else:
                 new_configuration = self._overwrite_custom_configuration(configuration)
                 if new_configuration.is_abstract_component:
                     load_aea_package(configuration)
                     continue
-                _logger = make_logger(new_configuration, agent_name)
+                _logger = make_component_logger(new_configuration, agent_name)
                 component = load_component_from_config(
                     new_configuration, logger=_logger, **kwargs
                 )
@@ -1442,7 +1443,7 @@ class AEABuilder:
         return new_configuration
 
 
-def make_logger(
+def make_component_logger(
     configuration: ComponentConfiguration, agent_name: str,
 ) -> Optional[logging.Logger]:
     """
@@ -1456,5 +1457,5 @@ def make_logger(
         # skip because skill object already have their own logger from the skill context.
         return None
     logger_name = f"aea.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
-    _logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
+    _logger = AgentLoggerAdapter(get_logger(logger_name, agent_name), agent_name)
     return cast(logging.Logger, _logger)

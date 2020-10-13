@@ -35,7 +35,9 @@ from aea.exceptions import enforce
 from aea.mail.base import Envelope
 
 
-logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
+_default_logger = logging.getLogger(
+    "aea.packages.fetchai.connections.p2p_libp2p_client"
+)
 
 PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.7.0")
 
@@ -129,7 +131,7 @@ class P2PLibp2pClientConnection(Connection):
 
         # client connection id
         self.key = key
-        logger.debug("Public key used by libp2p client: {}".format(key.public_key))
+        self.logger.debug("Public key used by libp2p client: {}".format(key.public_key))
 
         # delegate uris
         self.delegate_uris = [Uri(node_uri) for node_uri in nodes_uris]
@@ -141,7 +143,7 @@ class P2PLibp2pClientConnection(Connection):
         # select a delegate
         index = random.randint(0, len(self.delegate_uris) - 1)  # nosec
         self.node_uri = self.delegate_uris[index]
-        logger.debug("Node to use as delegate: {}".format(self.node_uri))
+        self.logger.debug("Node to use as delegate: {}".format(self.node_uri))
 
         # tcp connection
         self._reader = None  # type: Optional[asyncio.StreamReader]
