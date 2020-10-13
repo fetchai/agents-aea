@@ -19,6 +19,7 @@
 """This module contains tests for the aea.helpers.pypi module."""
 from packaging.specifiers import SpecifierSet
 
+from aea.configurations.base import Dependency
 from aea.configurations.pypi import (
     is_satisfiable,
     is_simple_dep,
@@ -65,33 +66,35 @@ def test_is_satisfiable_with_legacy_version():
 def test_merge_dependencies():
     """Test the 'merge_dependencies' function."""
     dependencies_a = {
-        "package_1": {"version": "==0.1.0"},
-        "package_2": {"version": "==0.3.0"},
-        "package_3": {"version": "0.2.0", "index": "pypi"},
+        "package_1": Dependency("package_1", "==0.1.0"),
+        "package_2": Dependency("package_2", "==0.3.0"),
+        "package_3": Dependency("package_3", "==0.2.0", "https://pypi.org"),
     }
     dependencies_b = {
-        "package_1": {"version": "==0.1.0"},
-        "package_2": {"version": "==0.2.0"},
-        "package_4": {"version": "0.1.0", "index": "pypi"},
+        "package_1": Dependency("package_1", "==0.1.0"),
+        "package_2": Dependency("package_2", "==0.2.0"),
+        "package_4": Dependency("package_4", "==0.1.0", "https://pypi.org"),
     }
-    merged_dependencies = {
-        "package_1": {"version": "==0.1.0"},
-        "package_2": {"version": "==0.2.0,==0.3.0"},
+    expected_merged_dependencies = {
+        "package_1": Dependency("package_1", "==0.1.0"),
+        "package_2": Dependency("package_2", "==0.2.0,==0.3.0"),
     }
-    assert merged_dependencies == merge_dependencies(dependencies_a, dependencies_b)
+    assert expected_merged_dependencies == merge_dependencies(
+        dependencies_a, dependencies_b
+    )
 
 
 def test_is_simple_dep():
     """Test the `is_simple_dep` function."""
-    dependency_a = {"version": "==0.1.0"}
+    dependency_a = Dependency("name", "==0.1.0")
     assert is_simple_dep(dependency_a), "Should be a simple dependency."
-    dependency_b = {}
+    dependency_b = Dependency("name")
     assert is_simple_dep(dependency_b), "Should be a simple dependency."
-    dependency_c = {"version": "==0.1.0", "index": "pypi"}
+    dependency_c = Dependency("name", "==0.1.0", "pypi")
     assert not is_simple_dep(dependency_c), "Should not be a simple dependency."
 
 
 def test_to_set_specifier():
     """Test the 'to_set_specifier' function."""
-    dependency_a = {"version": "==0.1.0"}
-    assert to_set_specifier(dependency_a) == "==0.1.0"
+    dependency_a = Dependency("name", "==0.1.0")
+    assert to_set_specifier(dependency_a) == SpecifierSet("==0.1.0")

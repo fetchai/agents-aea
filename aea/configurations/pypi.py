@@ -224,12 +224,12 @@ def is_simple_dep(dep: Dependency) -> bool:
     :param dep: the dependency
     :return: whether it is a simple dependency or not
     """
-    return len(dep) == 0 or len(dep) == 1 and "version" in dep
+    return dep.index is None and dep.git is None
 
 
 def to_set_specifier(dep: Dependency) -> SpecifierSet:
     """Get the set specifier. It assumes to be a simple dependency (see above)."""
-    return dep["version"]
+    return SpecifierSet(dep.version)
 
 
 def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies:
@@ -248,9 +248,20 @@ def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies:
     for pkg_name, info in dep2.items():
         if not is_simple_dep(info):
             continue
-        new_specifier = SpecifierSet(info.get("version", ""))
-        old_specifier = SpecifierSet(result.get(pkg_name, {}).get("version", ""))
+        new_specifier = SpecifierSet(info.version)
+        old_specifier = (
+            SpecifierSet(result[pkg_name].version)
+            if pkg_name in result
+            else SpecifierSet("")
+        )
         combined_specifier = and_(new_specifier, old_specifier)
-        result[pkg_name] = {"version": str(combined_specifier)}
+        new_info = Dependency(
+            name=info.name,
+            version=combined_specifier,
+            index=info.index,
+            git=info.git,
+            ref=info.ref,
+        )
+        result[pkg_name] = new_info
 
     return result
