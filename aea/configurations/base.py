@@ -1513,7 +1513,9 @@ class AgentConfig(PackageConfiguration):
                 in package_type_to_set[component_id.package_type],
                 f"Component {component_id} not declared in the agent configuration.",
             )
-            from aea.configurations.loader import ConfigLoader  # pylint: disable=import-outside-toplevel,cyclic-import
+            from aea.configurations.loader import (  # pylint: disable=import-outside-toplevel,cyclic-import
+                ConfigLoader,
+            )
 
             ConfigLoader.validate_component_configuration(
                 component_id, component_configuration

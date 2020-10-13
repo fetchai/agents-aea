@@ -279,7 +279,9 @@ class TestAgentConfigUpdate:
 
     def setup(self):
         """Set up the tests."""
-        self.aea_config_path = Path(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE)
+        self.aea_config_path = Path(
+            CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE
+        )
         self.loader = ConfigLoaders.from_package_type(PackageType.AGENT)
         self.aea_config: AgentConfig = self.loader.load(self.aea_config_path.open())
         self.dummy_skill_component_id = ComponentId(
@@ -304,9 +306,13 @@ class TestAgentConfigUpdate:
         """Test component configuration setter with wrong configurations."""
         assert self.aea_config.component_configurations == {}
         new_component_configurations = {
-            self.dummy_skill_component_id: {"handlers": {"dummy": {"class_name": "SomeClass"}}}
+            self.dummy_skill_component_id: {
+                "handlers": {"dummy": {"class_name": "SomeClass"}}
+            }
         }
-        with pytest.raises(ValueError, match=r"Configuration of component .* is not valid.*"):
+        with pytest.raises(
+            ValueError, match=r"Configuration of component .* is not valid.*"
+        ):
             self.aea_config.component_configurations = new_component_configurations
 
     def test_update(self):
@@ -329,7 +335,8 @@ class TestAgentConfigUpdate:
             == self.new_dummy_skill_config
         )
         assert (
-            dict(self.aea_config.private_key_paths.read_all()) == expected_private_key_paths
+            dict(self.aea_config.private_key_paths.read_all())
+            == expected_private_key_paths
         )
         assert (
             dict(self.aea_config.connection_private_key_paths.read_all())
