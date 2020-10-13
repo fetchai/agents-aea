@@ -1076,12 +1076,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             fingerprint,
             fingerprint_ignore_patterns,
         )
-        self._pypi_dependencies = dependencies if dependencies is not None else {}
-
-    @property
-    def pypi_dependencies(self) -> Dependencies:
-        """Get PyPI dependencies."""
-        return self._pypi_dependencies
+        self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
 
     @property
     def component_type(self) -> ComponentType:

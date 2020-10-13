@@ -435,7 +435,7 @@ def test_component_add_bad_dep():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
     connection = _make_dummy_connection()
-    connection.configuration._pypi_dependencies = {
+    connection.configuration.pypi_dependencies = {
         "something": Dependency("something", "==0.1.0")
     }
     builder.add_component_instance(connection)
@@ -443,7 +443,7 @@ def test_component_add_bad_dep():
     a_protocol = Protocol(
         ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
     )
-    a_protocol.configuration._pypi_dependencies = {
+    a_protocol.configuration.pypi_dependencies = {
         "something": Dependency("something", "==0.2.0")
     }
     with pytest.raises(

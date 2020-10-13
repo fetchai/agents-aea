@@ -153,7 +153,7 @@ def _nested_set(
             )
             configuration_obj = cast(ComponentConfiguration, configuration_obj)
             new_pypi_dependencies = dependencies_from_json(value)
-            configuration_obj._pypi_dependencies = new_pypi_dependencies
+            configuration_obj.pypi_dependencies = new_pypi_dependencies
         else:
             dic = get_nested_ordered_dict_from_keys_and_value(keys, value)
             setattr(configuration_obj, root_key, dic[root_key])
