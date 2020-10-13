@@ -242,14 +242,33 @@ class TestSkillConfig:
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
         skill_config = loader.load(skill_config_path.open())
         new_configurations = {
-            "behaviours": {"new_behaviour": {"args": {}, "class_name": "SomeClass"}},
-            "handlers": {"new_handler": {"args": {}, "class_name": "SomeClass"}},
-            "models": {"new_model": {"args": {}, "class_name": "SomeClass"}},
+            "behaviours": {"new_behaviour": {"args": {}}},
+            "handlers": {"new_handler": {"args": {}}},
+            "models": {"new_model": {"args": {}}},
         }
 
         with pytest.raises(
             ValueError,
             match="The custom configuration for skill fetchai/error:0.6.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+        ):
+            skill_config.update(new_configurations)
+
+    def test_update_method_raises_error_if_we_try_to_change_classname_of_skill_component(
+        self,
+    ):
+        """Test that we raise error if we try to change the 'class_name' field of a skill component configuration."""
+        skill_config_path = Path(
+            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+        )
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+        skill_config = loader.load(skill_config_path.open())
+        new_configurations = {
+            "handlers": {"error_handler": {"class_name": "SomeClass", "args": {}}},
+        }
+
+        with pytest.raises(
+            ValueError,
+            match=f"These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.6.0' are not allowed to change: {{'class_name'}}.",
         ):
             skill_config.update(new_configurations)
 

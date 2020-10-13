@@ -1380,6 +1380,14 @@ class SkillConfig(ComponentConfiguration):
                 component_config = cast(
                     SkillComponentConfiguration, registry.read(component_name)
                 )
+                component_data_keys = set(component_data.keys())
+                unallowed_keys = component_data_keys.difference(
+                    SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE
+                )
+                if len(unallowed_keys) > 0:
+                    raise ValueError(
+                        f"These fields of skill component configuration '{component_name}' of skill '{self.public_id}' are not allowed to change: {unallowed_keys}."
+                    )
                 recursive_update(component_config.args, component_data.get("args", {}))
 
         _update_skill_component_config("behaviours", data)
