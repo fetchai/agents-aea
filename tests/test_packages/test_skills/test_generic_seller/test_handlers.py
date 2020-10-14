@@ -88,6 +88,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             ),
         )
 
+    def test_setup(self):
+        """Test the setup method of the fipa handler."""
+        assert self.fipa_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
     def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the fipa handler."""
         # setup
@@ -107,10 +112,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             logging.INFO,
             f"received invalid fipa message={incoming_message}, unidentified dialogue.",
         )
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=DefaultMessage,
@@ -169,10 +171,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             f"sending a PROPOSE with proposal={proposal.values} to sender={COUNTERPARTY_NAME[-5:]}",
         )
 
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        self.assert_quantity_in_outbox(1)
 
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
@@ -208,10 +207,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             logging.INFO, f"declined the CFP from sender={COUNTERPARTY_NAME[-5:]}"
         )
 
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        self.assert_quantity_in_outbox(1)
 
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
@@ -300,10 +296,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             f"sending MATCH_ACCEPT_W_INFORM to sender={COUNTERPARTY_NAME[-5:]} with info={info}",
         )
 
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
@@ -352,10 +345,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             f"checking whether transaction={incoming_message.info['transaction_digest']} has been received ...",
         )
 
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=LedgerApiMessage,
@@ -444,10 +434,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # check outgoing message
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
@@ -528,6 +515,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             f"cannot handle fipa message of performative={incoming_message.performative} in dialogue={fipa_dialogue}.",
         )
 
+    def test_teardown(self):
+        """Test the teardown method of the fipa handler."""
+        assert self.fipa_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
+
 
 class TestGenericLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of generic seller."""
@@ -587,6 +579,11 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 {"transaction_receipt": cls.transaction_receipt},
             ),
         )
+
+    def test_setup(self):
+        """Test the setup method of the ledger_api handler."""
+        assert self.ledger_api_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
 
     def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the ledger_api handler."""
@@ -749,10 +746,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         # after
 
         # check outgoing message
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
@@ -883,6 +877,11 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"cannot handle ledger_api message of performative={invalid_performative} in dialogue={self.ledger_api_dialogues.get_dialogue(incoming_message)}.",
         )
 
+    def test_teardown(self):
+        """Test the teardown method of the ledger_api handler."""
+        assert self.ledger_api_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
+
 
 class TestGenericOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of generic seller."""
@@ -905,6 +904,11 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
                 OefSearchMessage.Performative.SEARCH_SERVICES, {"query": "some_query"}
             ),
         )
+
+    def test_setup(self):
+        """Test the setup method of the oef_search handler."""
+        assert self.oef_search_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
 
     def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the oef_search handler."""
@@ -968,3 +972,8 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             logging.WARNING,
             f"cannot handle oef_search message of performative={invalid_performative} in dialogue={self.oef_dialogues.get_dialogue(incoming_message)}.",
         )
+
+    def test_teardown(self):
+        """Test the teardown method of the oef_search handler."""
+        assert self.oef_search_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)

@@ -76,7 +76,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
         mocked_logger.assert_any_call(logging.INFO, logger_message)
 
-    def test_service_registration_behaviour_setup_is_ledger_tx(self):
+    def test_setup_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour where is_ledger_tx is True."""
         # setup
         self.strategy._is_ledger_tx = True
@@ -124,7 +124,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             mocked_description_2, mock_logger, "registering service on SOEF.",
         )
 
-    def test_service_registration_behaviour_setup_not_is_ledger_tx(self):
+    def test_setup_not_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour: where is_ledger_tx is False."""
         # setup
         self.strategy._is_ledger_tx = False
@@ -160,7 +160,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
             mocked_description_2, mock_logger, "registering service on SOEF.",
         )
 
-    def test_service_registration_behaviour_teardown(self):
+    def test_act(self):
+        """Test the act method of the service_registration behaviour."""
+        assert self.service_registration.act() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_teardown(self):
         """Test the teardown method of the service_registration behaviour."""
         # setup
         mocked_description_1 = "some_description_1"

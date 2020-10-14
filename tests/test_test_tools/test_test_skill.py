@@ -121,6 +121,36 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_decision_maker_inbox() == dummy_message_1
         assert self.get_message_from_decision_maker_inbox() == dummy_message_2
 
+    def test_assert_quantity_in_outbox(self):
+        """Test the assert_quantity_in_outbox method."""
+        with pytest.raises(
+            AssertionError,
+            match=f"Invalid number of messages in outbox. Expected {1}. Found {0}.",
+        ):
+            self.assert_quantity_in_outbox(1)
+
+        dummy_message = Message(dummy="dummy")
+        dummy_message.to = "some_to"
+        dummy_message.sender = "some_sender"
+        self.skill.skill_context.outbox.put_message(dummy_message)
+
+        self.assert_quantity_in_outbox(1)
+
+    def test_assert_quantity_in_decision_making_queue(self):
+        """Test the assert_quantity_in_decision_making_queue method."""
+        with pytest.raises(
+            AssertionError,
+            match=f"Invalid number of messages in decision maker queue. Expected {1}. Found {0}.",
+        ):
+            self.assert_quantity_in_decision_making_queue(1)
+
+        dummy_message = Message(dummy_1="dummy_1")
+        dummy_message.to = "some_to_1"
+        dummy_message.sender = "some_sender_1"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message)
+
+        self.assert_quantity_in_decision_making_queue(1)
+
     def test_positive_message_has_attributes_valid_type(self):
         """Test the message_has_attributes method where the message is of the specified type."""
         dummy_message = FipaMessage(

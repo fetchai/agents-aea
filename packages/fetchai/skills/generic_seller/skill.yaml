@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmdHumzBTxWg2PgWzwNVF4a5eG1dhGXzDwrY9eq4uevHqs
   dialogues.py: QmfBWHVuKTzXu8vV5AkgWF6ZqMTZ3bs7SHEykoKXdmqvnH
   handlers.py: QmdCtELzeNVBtVozwMLqMeVDuk2JdS8CG5D3xssBWEjTrk
-  strategy.py: QmUrUJzDoKFk6mhoz5ui58pXxVjTkPfEMnSdM8UezTjy3S
+  strategy.py: Qmbk1HR4EC6ZhP2ZvLAuqbpSSA19ZU3GtUeG5suGGVU82T
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
