@@ -187,7 +187,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
     def test_no_wallet_registered(self, wait_tx_settled_mock, confirm_mock):
         """Test no wallet for crypto id registered."""
         with pytest.raises(
-            ClickException, match=r"Wallet for ledger `.*` is not registered!"
+            ClickException, match=r"No private key registered for `.*` in wallet!"
         ):
             self.invoke(
                 "transfer", self.ANOTHER_LEDGER_ID, self.get_address(), "100000", "100"

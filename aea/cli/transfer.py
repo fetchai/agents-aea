@@ -60,7 +60,9 @@ def transfer(click_context, type_, address, amount, fee, yes, settle_timeout, sy
     try:
         own_address = _try_get_address(ctx, type_)
     except KeyError:
-        raise click.ClickException(f"Wallet for ledger `{type_}` is not registered!")
+        raise click.ClickException(
+            f"No private key registered for `{type_}` in wallet!"
+        )
     if not yes:
         click.confirm(
             f"You are about to transfer from {own_address} to {address} on ledger {type_} the amount {amount} with fee {fee}. Do you want to continue?",
@@ -73,11 +75,15 @@ def transfer(click_context, type_, address, amount, fee, yes, settle_timeout, sy
         raise click.ClickException("Failed to send a transaction!")
 
     if sync:
-        click.echo("Transaction set. Waiting to be settled.")
+        click.echo("Transaction set. Waiting to be settled...")
         wait_tx_settled(type_, tx_digest, timeout=settle_timeout)
-    click.echo(
-        f"Transaction set successfully. Sent {amount} with fee {fee} to {address}"
-    )
+        click.echo(
+            f"Transaction successfully settled. Sent {amount} with fee {fee} to {address}, transaction digest: {tx_digest}"
+        )
+    else:
+        click.echo(
+            f"Transaction successfully submitted. Sending {amount} with fee {fee} to {address}, transaction digest: {tx_digest}"
+        )
 
 
 def wait_tx_settled(
@@ -121,9 +127,10 @@ def do_transfer(
     source_address = wallet.addresses[identifier]
 
     balance = int(try_get_balance(ctx.agent_config, wallet, identifier))
-    if amount + tx_fee > balance:
+    total_payable = amount + tx_fee
+    if total_payable > balance:
         raise click.ClickException(
-            f"Balance is not enough! Available={balance}, required={amount + tx_fee }!"
+            f"Balance is not enough! Available={balance}, required={total_payable}!"
         )
 
     tx_nonce = LedgerApis.generate_tx_nonce(identifier, source_address, address)
