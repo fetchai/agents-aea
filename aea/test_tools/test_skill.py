@@ -79,14 +79,14 @@ class BaseSkillTestCase:
     def assert_quantity_in_outbox(self, expected_quantity) -> None:
         """Assert the quantity of messages in the outbox."""
         quantity = self.get_quantity_in_outbox()
-        assert (
+        assert (  # nosec
             quantity == expected_quantity
         ), f"Invalid number of messages in outbox. Expected {expected_quantity}. Found {quantity}."
 
     def assert_quantity_in_decision_making_queue(self, expected_quantity) -> None:
         """Assert the quantity of messages in the decision maker queue."""
         quantity = self.get_quantity_in_decision_maker_inbox()
-        assert (
+        assert (  # nosec
             quantity == expected_quantity
         ), f"Invalid number of messages in decision maker queue. Expected {expected_quantity}. Found {quantity}."
 
