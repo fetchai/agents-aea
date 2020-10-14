@@ -1667,7 +1667,7 @@ The above code terminates each dialogue with the specific AEA and stores the ste
 In case we do not receive any `DECLINE` message that means that the `my_generic_seller` AEA want to move on with the sale, in that case, it will send a `MATCH_ACCEPT` message. In order to handle this we add the following code:
 
 ``` python
-        def _handle_match_accept(
+    def _handle_match_accept(
         self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue
     ) -> None:
         """
