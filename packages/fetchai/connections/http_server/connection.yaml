@@ -23,7 +23,7 @@ restricted_to_protocols:
 - fetchai/http:0.6.0
 dependencies:
   aiohttp:
-    version: '>=3.6.2,<3.7'
+    version: <3.7,>=3.6.2
   openapi-core:
     version: ==0.13.2
   openapi-spec-validator:
