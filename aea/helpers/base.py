@@ -31,10 +31,11 @@ import subprocess  # nosec
 import sys
 import time
 import types
-from collections import UserString
+from collections import UserString, defaultdict, deque
+from copy import copy
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
 
 from dotenv import load_dotenv
 
@@ -366,3 +367,50 @@ def _get_aea_logger_name_prefix(module_name: str, agent_name: str) -> str:
     root = module_name_parts[0]
     postfix = module_name_parts[1:]
     return ".".join([root, agent_name, *postfix])
+
+
+T = TypeVar("T")
+
+
+def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
+    """
+    Compute the topological order of a graph (using Kahn's algorithm).
+
+    :param adjacency_list: the adjacency list of the graph.
+    :return: the topological order for the graph (as a sequence of nodes)
+    :raises ValueError: if the graph contains a cycle.
+    """
+    # compute inverse adjacency list and the roots of the DAG.
+    adjacency_list = copy(adjacency_list)
+    visited: Set[T] = set()
+    roots: Set[T] = set()
+    inverse_adjacency_list: Dict[T, Set[T]] = defaultdict(set)
+    # compute both roots and inv. adj. list in one pass.
+    for start_node, end_nodes in adjacency_list.items():
+        if start_node not in visited:
+            roots.add(start_node)
+        visited.update([start_node, *end_nodes])
+        for end_node in end_nodes:
+            roots.discard(end_node)
+            inverse_adjacency_list[end_node].add(start_node)
+
+    # compute the topological order
+    queue: Deque[T] = deque()
+    order = []
+    queue.extendleft(sorted(roots))
+    while len(queue) > 0:
+        current = queue.pop()
+        order.append(current)
+        next_nodes = adjacency_list.get(current, set())
+        for node in next_nodes:
+            inverse_adjacency_list[node].discard(current)
+            if len(inverse_adjacency_list[node]) == 0:
+                queue.append(node)
+
+        # remove all the edges
+        adjacency_list[current] = set()
+
+    if any(len(edges) > 0 for edges in inverse_adjacency_list.values()):
+        raise ValueError("Graph has at least one cycle.")
+
+    return order
