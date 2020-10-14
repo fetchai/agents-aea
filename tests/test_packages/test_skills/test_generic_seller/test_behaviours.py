@@ -51,7 +51,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
-    def _assert_oef_message_and_logging_output(self, service_description, mocked_logger, logger_message):
+    def _assert_oef_message_and_logging_output(
+        self, service_description, mocked_logger, logger_message
+    ):
         """
         Check there is a specific OEFMessage in the outbox and the mocked logger is called with a specific message.
 
@@ -114,16 +116,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # message 2
         self._assert_oef_message_and_logging_output(
-            mocked_description_1,
-            mock_logger,
-            "registering agent on SOEF.",
+            mocked_description_1, mock_logger, "registering agent on SOEF.",
         )
 
         # message 3
         self._assert_oef_message_and_logging_output(
-            mocked_description_2,
-            mock_logger,
-            "registering service on SOEF.",
+            mocked_description_2, mock_logger, "registering service on SOEF.",
         )
 
     def test_service_registration_behaviour_setup_not_is_ledger_tx(self):
@@ -154,16 +152,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # message 1
         self._assert_oef_message_and_logging_output(
-            mocked_description_1,
-            mock_logger,
-            "registering agent on SOEF.",
+            mocked_description_1, mock_logger, "registering agent on SOEF.",
         )
 
         # message 2
         self._assert_oef_message_and_logging_output(
-            mocked_description_2,
-            mock_logger,
-            "registering service on SOEF.",
+            mocked_description_2, mock_logger, "registering service on SOEF.",
         )
 
     def test_service_registration_behaviour_teardown(self):
