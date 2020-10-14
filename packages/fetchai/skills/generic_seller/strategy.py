@@ -103,7 +103,7 @@ class GenericStrategy(Model):
         )
 
         if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()
+            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
         else:
             self._data_for_sale = data_for_sale
         self._sale_quantity = len(data_for_sale)
@@ -190,7 +190,7 @@ class GenericStrategy(Model):
                 client=counterparty_address,
             )
         else:
-            tx_nonce = uuid.uuid4().hex
+            tx_nonce = uuid.uuid4().hex  # pragma: nocover
         proposal = Description(
             {
                 "ledger_id": self.ledger_id,

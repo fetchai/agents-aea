@@ -179,6 +179,10 @@ class TestGenericStrategy(BaseSkillTestCase):
         is_affordable = self.strategy.is_affordable_proposal(description)
         assert not is_affordable
 
+        self.strategy._is_ledger_tx = False
+        is_affordable = self.strategy.is_affordable_proposal(description)
+        assert is_affordable
+
     def test_terms_from_proposal(self):
         """Test the terms_from_proposal method of the GenericStrategy class."""
         description = Description(
