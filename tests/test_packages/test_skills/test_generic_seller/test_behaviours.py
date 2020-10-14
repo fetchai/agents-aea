@@ -51,6 +51,29 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
+    def _assert_oef_message_and_logging_output(self, service_description, mocked_logger, logger_message):
+        """
+        Check there is a specific OEFMessage in the outbox and the mocked logger is called with a specific message.
+
+        This method is reused a few times in the following tests and its purpose is to avoid code duplication.
+
+        :param service_description: the service description
+        :param mocked_logger: the mocked logger
+        :param logger_message: the logger message
+
+        :return: None
+        """
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            to=self.skill.skill_context.search_service_address,
+            sender=self.skill.skill_context.agent_address,
+            service_description=service_description,
+        )
+        assert has_attributes, error_str
+        mocked_logger.assert_any_call(logging.INFO, logger_message)
+
     def test_service_registration_behaviour_setup_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour where is_ledger_tx is True."""
         # setup
@@ -75,10 +98,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     self.service_registration.setup()
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 3
-        ), f"Invalid number of messages in outbox. Expected 3. Found {quantity}."
+        self.assert_quantity_in_outbox(3)
 
         # message 1
         has_attributes, error_str = self.message_has_attributes(
@@ -93,28 +113,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
 
         # message 2
-        has_attributes, error_str = self.message_has_attributes(
-            actual_message=self.get_message_from_outbox(),
-            message_type=OefSearchMessage,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description_1,
+        self._assert_oef_message_and_logging_output(
+            mocked_description_1,
+            mock_logger,
+            "registering agent on SOEF.",
         )
-        assert has_attributes, error_str
-        mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
 
         # message 3
-        has_attributes, error_str = self.message_has_attributes(
-            actual_message=self.get_message_from_outbox(),
-            message_type=OefSearchMessage,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description_2,
+        self._assert_oef_message_and_logging_output(
+            mocked_description_2,
+            mock_logger,
+            "registering service on SOEF.",
         )
-        assert has_attributes, error_str
-        mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
 
     def test_service_registration_behaviour_setup_not_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour: where is_ledger_tx is False."""
@@ -140,34 +150,21 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     self.service_registration.setup()
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 2
-        ), f"Invalid number of messages in outbox. Expected 2. Found {quantity}."
+        self.assert_quantity_in_outbox(2)
 
         # message 1
-        has_attributes, error_str = self.message_has_attributes(
-            actual_message=self.get_message_from_outbox(),
-            message_type=OefSearchMessage,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description_1,
+        self._assert_oef_message_and_logging_output(
+            mocked_description_1,
+            mock_logger,
+            "registering agent on SOEF.",
         )
-        assert has_attributes, error_str
-        mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
 
         # message 2
-        has_attributes, error_str = self.message_has_attributes(
-            actual_message=self.get_message_from_outbox(),
-            message_type=OefSearchMessage,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description_2,
+        self._assert_oef_message_and_logging_output(
+            mocked_description_2,
+            mock_logger,
+            "registering service on SOEF.",
         )
-        assert has_attributes, error_str
-        mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
 
     def test_service_registration_behaviour_teardown(self):
         """Test the teardown method of the service_registration behaviour."""
@@ -192,10 +189,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     self.service_registration.teardown()
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 2
-        ), f"Invalid number of messages in outbox. Expected 2. Found {quantity}."
+        self.assert_quantity_in_outbox(2)
 
         # message 1
         has_attributes, error_str = self.message_has_attributes(

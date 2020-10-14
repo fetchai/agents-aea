@@ -91,9 +91,7 @@ class TestGenericStrategy(BaseSkillTestCase):
 
         assert type(description) == Description
         assert description.data_model is AGENT_LOCATION_MODEL
-
-        assert "location" in description.values
-        assert description.values["location"] == Location(
+        assert description.values.get("location", "") == Location(
             longitude=self.location["longitude"], latitude=self.location["latitude"]
         )
 
@@ -103,11 +101,8 @@ class TestGenericStrategy(BaseSkillTestCase):
 
         assert type(description) == Description
         assert description.data_model is AGENT_SET_SERVICE_MODEL
-
-        assert "key" in description.values
-        assert "value" in description.values
-        assert description.values["key"] == "seller_service"
-        assert description.values["value"] == "some_service"
+        assert description.values.get("key", "") == "seller_service"
+        assert description.values.get("value", "") == "some_service"
 
     def test_get_service_description(self):
         """Test the get_service_description method of the GenericStrategy class."""
@@ -115,9 +110,7 @@ class TestGenericStrategy(BaseSkillTestCase):
 
         assert type(description) == Description
         assert description.data_model is SIMPLE_SERVICE_MODEL
-
-        assert "seller_service" in description.values
-        assert description.values["seller_service"] == "some_service"
+        assert description.values.get("seller_service", "") == "some_service"
 
     def test_get_unregister_service_description(self):
         """Test the get_unregister_service_description method of the GenericStrategy class."""
@@ -125,9 +118,7 @@ class TestGenericStrategy(BaseSkillTestCase):
 
         assert type(description) == Description
         assert description.data_model is AGENT_REMOVE_SERVICE_MODEL
-
-        assert "key" in description.values
-        assert description.values["key"] == "seller_service"
+        assert description.values.get("key", "") == "seller_service"
 
     def test_is_matching_supply(self):
         """Test the is_matching_supply method of the GenericStrategy class."""
@@ -138,15 +129,16 @@ class TestGenericStrategy(BaseSkillTestCase):
         is_matching_supply = self.strategy.is_matching_supply(matching_query)
         assert is_matching_supply
 
-        acceptable_constraint = Constraint(
+        unacceptable_constraint = Constraint(
             "seller_service", ConstraintType("==", "some_other_service")
         )
-        unmatching_query = Query([acceptable_constraint])
+        unmatching_query = Query([unacceptable_constraint])
         is_matching_supply = self.strategy.is_matching_supply(unmatching_query)
         assert not is_matching_supply
 
     def test_generate_proposal_terms_and_data(self):
         """Test the generate_proposal_terms_and_data method of the GenericStrategy class."""
+        # setup
         seller = self.skill.skill_context.agent_address
         total_price = len(self.data_for_sale) * self.unit_price
         sale_quantity = len(self.data_for_sale)
@@ -156,6 +148,8 @@ class TestGenericStrategy(BaseSkillTestCase):
         query = Query(
             [Constraint("seller_service", ConstraintType("==", "some_service"))]
         )
+
+        # expected returned values
         expected_proposal = Description(
             {
                 "ledger_id": self.ledger_id,
@@ -176,9 +170,13 @@ class TestGenericStrategy(BaseSkillTestCase):
             nonce=tx_nonce,
             fee_by_currency_id={self.currency_id: 0},
         )
+
+        # operation
         proposal, terms, data = self.strategy.generate_proposal_terms_and_data(
             query, COUNTERPARTY_NAME
         )
+
+        # after
         assert proposal == expected_proposal
         assert terms == expected_terms
         assert data == self.data_for_sale
