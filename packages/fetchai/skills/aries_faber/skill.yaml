@@ -57,3 +57,4 @@ models:
       search_radius: 5.0
     class_name: FaberStrategy
 dependencies: {}
+is_abstract: false

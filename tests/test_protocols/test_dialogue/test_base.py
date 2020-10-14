@@ -1312,7 +1312,10 @@ class TestDialoguesBase:
 
         with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(invalid_message_1_by_other)
-        assert str(cm.value) == "Message to and dialogue self address do not match."
+        assert (
+            str(cm.value)
+            == "Message to and dialogue self address do not match. Got 'to=agent 1wrong_stuff' expected 'to=agent 1'."
+        )
 
         assert len(self.own_dialogues.dialogues) == 0
 

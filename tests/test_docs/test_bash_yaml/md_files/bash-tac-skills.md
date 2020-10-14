@@ -81,6 +81,11 @@ default_routing:
   fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
 ```
 ``` yaml
+---
+name: p2p_libp2p
+author: fetchai
+version: 0.10.0
+type: connection
 config:
   delegate_uri: 127.0.0.1:11001
   entry_peers: ['SOME_ADDRESS']
@@ -89,6 +94,11 @@ config:
   public_uri: 127.0.0.1:9001
 ```
 ``` yaml
+---
+name: p2p_libp2p
+author: fetchai
+version: 0.10.0
+type: connection
 config:
   delegate_uri: 127.0.0.1:11002
   entry_peers: ['SOME_ADDRESS']

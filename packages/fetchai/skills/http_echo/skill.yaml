@@ -29,3 +29,4 @@ models:
     args: {}
     class_name: HttpDialogues
 dependencies: {}
+is_abstract: false

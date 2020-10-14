@@ -316,6 +316,7 @@ class StubConnection(Connection):
         :return: None
         """
         self._ensure_connected()
+        self._ensure_valid_envelope_for_external_comms(envelope)
         await self.loop.run_in_executor(
             self._write_pool, write_envelope, envelope, self.output_file
         )

@@ -125,7 +125,9 @@ class Parameters(Model):
         self._currency_id_to_name = generate_currency_id_to_name(
             self.nb_currencies, self.currency_ids
         )
-        self._good_id_to_name = generate_good_id_to_name(self.nb_goods, self.good_ids)
+        self._good_id_to_name = generate_good_id_to_name(
+            self.nb_goods, self.good_ids, starting_index=1
+        )
         self._registration_end_time = (
             self._registration_start_time
             + datetime.timedelta(seconds=self._registration_timeout)

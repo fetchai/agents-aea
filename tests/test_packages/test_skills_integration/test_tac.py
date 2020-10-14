@@ -42,6 +42,9 @@ from tests.conftest import (
 )
 
 
+MAX_FLAKY_RERUNS_ETH -= 1
+
+
 class TestTacSkills(AEATestCaseMany):
     """Test that tac skills work."""
 
@@ -225,17 +228,21 @@ class TestTacSkills(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "received cfp from",
+            "received decline from",
+            "received propose from",
+            "received accept from",
+            "received match_accept_w_inform from",
             "sending CFP to agent=",
-            "accepting propose",
-            "sending signing_msg=",
-            "message signed by decision maker.",
-            "sending transaction to controller.",
-            "sending match accept to",
-            # "Received transaction confirmation from the controller: transaction_id=", # noqa: E800
+            "sending propose to",
+            "sending accept to",
+            "requesting signature, sending sign_message to decision_maker, message=",
+            "received signed_message from decision_maker, message=",
+            "sending transaction to controller, tx=",
+            "received transaction confirmation from the controller:",
             "Applying state update!",
             "found potential buyers agents=",
             "sending CFP to agent=",
-            "declining propose",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=240, is_terminating=False
@@ -314,7 +321,7 @@ class TestTacSkillsContract(AEATestCaseMany):
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, ETHEREUM)
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
-        self.set_config(setting_path, True)
+        self.set_config(setting_path, True, "bool")
 
         default_routing = {
             "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
@@ -367,7 +374,7 @@ class TestTacSkillsContract(AEATestCaseMany):
 
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-            self.set_config(setting_path, config)
+            self.nested_set_config(setting_path, config)
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
             self.set_config(setting_path, COSMOS)
             setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
@@ -488,7 +495,24 @@ class TestTacSkillsContract(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "found potential buyers agents=",
             "sending CFP to agent=",
+            "received cfp from",
+            "received propose from",
+            "received decline from",
+            "received accept from",
+            "received match_accept_w_inform from",
+            "sending propose to",
+            "sending accept to",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.10.0, message=",
+            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.10.0, message=",
+            "received raw transaction=",
+            "received raw message=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "proposing the message to the decision maker. Waiting for confirmation ...",
+            "received signed_message from decision_maker, message=",
+            "received signed_transaction from decision_maker, message=",
+            "sending send_signed_transaction to ledger ethereum, message=",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=300, is_terminating=False
@@ -504,7 +528,24 @@ class TestTacSkillsContract(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "found potential buyers agents=",
             "sending CFP to agent=",
+            "received cfp from",
+            "received propose from",
+            "received decline from",
+            "received accept from",
+            "received match_accept_w_inform from",
+            "sending propose to",
+            "sending accept to",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.10.0, message=",
+            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.10.0, message=",
+            "received raw transaction=",
+            "received raw message=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "proposing the message to the decision maker. Waiting for confirmation ...",
+            "received signed_message from decision_maker, message=",
+            "received signed_transaction from decision_maker, message=",
+            "sending send_signed_transaction to ledger ethereum, message=",
         )
         missing_strings = self.missing_from_output(
             tac_aea_two_process, check_strings, timeout=360, is_terminating=False

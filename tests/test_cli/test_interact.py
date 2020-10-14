@@ -117,6 +117,8 @@ class TryConstructEnvelopeTestCase(TestCase):
         """Test _try_construct_envelope for positive result."""
         dialogues_mock = mock.Mock()
         msg_mock = mock.Mock()
+        msg_mock.to = "to"
+        msg_mock.sender = "sender"
         dialogues_mock.create.return_value = msg_mock, None
         envelope = _try_construct_envelope("agent_name", dialogues_mock)
         self.assertIsInstance(envelope, Envelope)

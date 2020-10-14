@@ -134,6 +134,7 @@ class TCPConnection(Connection, ABC):
         :param envelope: the envelope to send.
         :return: None.
         """
+        self._ensure_valid_envelope_for_external_comms(envelope)
         writer = self.select_writer_from_envelope(envelope)
         if writer is not None:
             data = envelope.encode()

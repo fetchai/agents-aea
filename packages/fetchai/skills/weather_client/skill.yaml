@@ -74,3 +74,4 @@ models:
       service_id: weather_data
     class_name: Strategy
 dependencies: {}
+is_abstract: false

@@ -425,6 +425,11 @@ class PublicIdTestCase(TestCase):
         obj2 = PublicId(AUTHOR, "name", "2.0.0")
         self.assertTrue(obj1 < obj2)
 
+    def test_is_valid_str(self):
+        """Test is_valid_str method."""
+        assert PublicId.is_valid_str("author/name:0.1.0")
+        assert not PublicId.is_valid_str("author!name:0.1.0")
+
 
 class AgentConfigTestCase(TestCase):
     """Test case for AgentConfig class."""

@@ -456,6 +456,17 @@ class PublicId(JSONSerializable):
         return PublicId(self.author, self.name, self.LATEST_VERSION)
 
     @classmethod
+    def is_valid_str(cls, public_id_string: str) -> bool:
+        """
+        Check if a string is a public id.
+
+        :param public_id_string: the public id in string format.
+        :return: bool indicating validity
+        """
+        match = re.match(cls.PUBLIC_ID_REGEX, public_id_string)
+        return match is not None
+
+    @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
         """
         Initialize the public id from the string.
@@ -1288,9 +1299,6 @@ class SkillConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
-        if result["is_abstract"] is False:
-            result.pop("is_abstract")
-
         return result
 
     @classmethod

@@ -90,6 +90,10 @@ class Message:
     def sender(self, sender: Address) -> None:
         """Set the sender of the message."""
         enforce(self._sender is None, "Sender already set.")
+        enforce(
+            isinstance(sender, str),
+            f"Sender must be string type. Found '{type(sender)}'",
+        )
         self._sender = sender
 
     @property
@@ -108,6 +112,7 @@ class Message:
     def to(self, to: Address) -> None:
         """Set address of receiver."""
         enforce(self._to is None, "To already set.")
+        enforce(isinstance(to, str), f"To must be string type. Found '{type(to)}'")
         self._to = to
 
     @property

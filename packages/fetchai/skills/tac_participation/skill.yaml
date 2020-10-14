@@ -61,3 +61,4 @@ models:
     args: {}
     class_name: TacDialogues
 dependencies: {}
+is_abstract: false
