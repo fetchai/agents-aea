@@ -1271,6 +1271,7 @@ class AEABuilder(WithLogger):
                 ),
             )
 
+            dependency_to_supported_dependencies[skill_id] = set()
             for dependency in configuration.skills:
                 dependency_to_supported_dependencies[
                     ComponentId(ComponentType.SKILL, dependency)

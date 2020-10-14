@@ -514,7 +514,8 @@ def test_find_import_order():
 
     def _new_load(*args, **kwargs):
         skill_config = _old_load(*args, **kwargs)
-        skill_config.skills = [Mock()]
+        # add loop
+        skill_config.skills = [skill_config.public_id]
         return skill_config
 
     with patch("aea.aea_builder.load_component_configuration", _new_load):
