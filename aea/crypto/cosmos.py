@@ -777,6 +777,8 @@ class _CosmosApi(LedgerApi):
         response = requests.post(url=url, json=tx_signed)
         if response.status_code == 200:
             tx_digest = response.json()["txhash"]
+        else:
+            _default_logger.error("Cannot send transaction: {}".format(response.json()))
         return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:

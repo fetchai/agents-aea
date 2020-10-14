@@ -22,7 +22,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import click
 from jsonschema import ValidationError
@@ -526,3 +526,26 @@ def try_get_balance(  # pylint: disable=unused-argument
         return balance
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
+
+
+def get_wallet_from_context(ctx: Context) -> Wallet:
+    """
+    Get wallet from current click Context.
+
+    :param ctx: click context
+
+    :return: wallet
+    """
+    verify_or_create_private_keys_ctx(ctx=ctx)
+    wallet = get_wallet_from_agent_config(ctx.agent_config)
+    return wallet
+
+
+def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
+    """Get wallet from agent_cofig provided."""
+    private_key_paths: Dict[str, Optional[str]] = {
+        config_pair[0]: config_pair[1]
+        for config_pair in agent_config.private_key_paths.read_all()
+    }
+    wallet = Wallet(private_key_paths)
+    return wallet
