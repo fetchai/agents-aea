@@ -501,9 +501,18 @@ class TestTacSkillsContract(AEATestCaseMany):
             "received propose from",
             "received decline from",
             "received accept from",
+            "received match_accept_w_inform from",
             "sending propose to",
             "sending accept to",
-            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.10.0",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.10.0, message=",
+            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.10.0, message=",
+            "received raw transaction=",
+            "received raw message=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "proposing the message to the decision maker. Waiting for confirmation ...",
+            "received signed_message from decision_maker, message=",
+            "received signed_transaction from decision_maker, message=",
+            "sending send_signed_transaction to ledger ethereum, message=",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=300, is_terminating=False
@@ -525,9 +534,18 @@ class TestTacSkillsContract(AEATestCaseMany):
             "received propose from",
             "received decline from",
             "received accept from",
+            "received match_accept_w_inform from",
             "sending propose to",
             "sending accept to",
-            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.10.0",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.10.0, message=",
+            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.10.0, message=",
+            "received raw transaction=",
+            "received raw message=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "proposing the message to the decision maker. Waiting for confirmation ...",
+            "received signed_message from decision_maker, message=",
+            "received signed_transaction from decision_maker, message=",
+            "sending send_signed_transaction to ledger ethereum, message=",
         )
         missing_strings = self.missing_from_output(
             tac_aea_two_process, check_strings, timeout=360, is_terminating=False

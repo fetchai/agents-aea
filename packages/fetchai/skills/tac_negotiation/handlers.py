@@ -481,12 +481,6 @@ class SigningHandler(Handler):
         :param signing_dialogue: the dialogue
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_contract_tx:
-            self.context.logger.warning(
-                "signed message handler only for non-contract case."
-            )
-            return
         fipa_dialogue = signing_dialogue.associated_fipa_dialogue
         last_fipa_message = cast(FipaMessage, fipa_dialogue.last_incoming_message)
         enforce(last_fipa_message is not None, "last message not recovered.")
