@@ -495,7 +495,15 @@ class TestTacSkillsContract(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "found potential buyers agents=",
             "sending CFP to agent=",
+            "received cfp from",
+            "received propose from",
+            "received decline from",
+            "received accept from",
+            "sending propose to",
+            "sending accept to",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.10.0",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=300, is_terminating=False
@@ -511,7 +519,15 @@ class TestTacSkillsContract(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "found potential buyers agents=",
             "sending CFP to agent=",
+            "received cfp from",
+            "received propose from",
+            "received decline from",
+            "received accept from",
+            "sending propose to",
+            "sending accept to",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.10.0",
         )
         missing_strings = self.missing_from_output(
             tac_aea_two_process, check_strings, timeout=360, is_terminating=False

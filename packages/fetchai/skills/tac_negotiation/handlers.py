@@ -86,7 +86,7 @@ class FipaNegotiationHandler(Handler):
         self.context.logger.info(
             "received {} from {} (as {}), message={}".format(
                 fipa_msg.performative.value,
-                fipa_msg.to[-5:],
+                fipa_msg.sender[-5:],
                 fipa_dialogue.role,
                 fipa_msg,
             )
