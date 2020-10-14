@@ -1083,10 +1083,10 @@ class AEABuilder(WithLogger):
             all_pypi_dependencies, configuration.pypi_dependencies
         )
         for pkg_name, dep_info in all_pypi_dependencies.items():
-            set_specifier = SpecifierSet(dep_info.get("version", ""))
+            set_specifier = SpecifierSet(dep_info.version)
             if not is_satisfiable(set_specifier):
                 raise AEAException(
-                    f"Conflict on package {pkg_name}: specifier set '{dep_info['version']}' not satisfiable."
+                    f"Conflict on package {pkg_name}: specifier set '{dep_info.version}' not satisfiable."
                 )
 
     @staticmethod

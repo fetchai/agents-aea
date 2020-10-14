@@ -35,7 +35,10 @@ from aea.configurations.base import (
     ConnectionConfig,
     ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_GIT_REF,
+    DEFAULT_PYPI_INDEX_URL,
     DEFAULT_SKILL_CONFIG_FILE,
+    Dependency,
     PackageId,
     PackageType,
     PackageVersion,
@@ -48,6 +51,8 @@ from aea.configurations.base import (
     _check_aea_version,
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
+    dependencies_from_json,
+    dependencies_to_json,
 )
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
@@ -869,3 +874,98 @@ def test_configuration_class():
     assert PackageType.CONTRACT.configuration_class() == ContractConfig
     assert PackageType.SKILL.configuration_class() == SkillConfig
     assert PackageType.AGENT.configuration_class() == AgentConfig
+
+
+class TestDependencyGetPipInstallArgs:
+    """Test 'get_pip_install_args' of 'Dependency' class."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        cls.package_name = "package_name"
+        cls.version = "<0.2.0,>=0.1.0"
+        cls.custom_index = "https://test.pypi.org"
+        cls.git_url = "https://github.com/some-author/some-repository.git"
+        cls.ref = "develop"
+
+    def test_only_name_and_version(self):
+        """Test only with name and version."""
+        # no index and no git
+        dep = Dependency(self.package_name, self.version)
+        assert dep.get_pip_install_args() == [
+            f"{self.package_name}{self.version}",
+        ]
+
+    def test_name_version_index(self):
+        """Test the method with name, version and index."""
+        dep = Dependency(self.package_name, self.version, self.custom_index)
+        assert dep.get_pip_install_args() == [
+            "-i",
+            self.custom_index,
+            f"{self.package_name}{self.version}",
+        ]
+
+    def test_name_version_index_git(self):
+        """Test the method when name, version, index and git fields are provided."""
+        dep = Dependency(
+            self.package_name, self.version, self.custom_index, self.git_url
+        )
+        git_url = f"git+{self.git_url}@{DEFAULT_GIT_REF}#egg={self.package_name}"
+        assert dep.get_pip_install_args() == ["-i", self.custom_index, git_url]
+
+    def test_name_version_index_git_ref(self):
+        """Test the method when name, version, index, git and ref fields are provided."""
+        dep = Dependency(
+            self.package_name, self.version, self.custom_index, self.git_url, self.ref
+        )
+        git_url = f"git+{self.git_url}@{self.ref}#egg={self.package_name}"
+        assert dep.get_pip_install_args() == ["-i", self.custom_index, git_url]
+
+
+def test_dependencies_from_to_json():
+    """Test serialization and deserialization of Dependencies object."""
+    version_str = "==0.1.0"
+    git_url = "https://some-git-repo.git"
+    branch = "some-branch"
+    dep1 = Dependency("package_1", version_str, DEFAULT_PYPI_INDEX_URL, git_url, branch)
+    dep2 = Dependency("package_2", version_str)
+    expected_obj = {"package_1": dep1, "package_2": dep2}
+    expected_obj_json = dependencies_to_json(expected_obj)
+    assert expected_obj_json == {
+        "package_1": {
+            "version": "==0.1.0",
+            "index": DEFAULT_PYPI_INDEX_URL,
+            "git": git_url,
+            "ref": branch,
+        },
+        "package_2": {"version": version_str},
+    }
+
+    actual_obj = dependencies_from_json(expected_obj_json)
+    assert expected_obj == actual_obj
+
+
+def test_dependency_from_json_fail_more_than_one_key():
+    """Test failure of Dependency.from_json due to more than one key at the top level."""
+    bad_obj = {"field_1": {}, "field_2": {}}
+    keys = set(bad_obj.keys())
+    with pytest.raises(ValueError, match=f"Only one key allowed, found {keys}"):
+        Dependency.from_json(bad_obj)
+
+
+def test_dependency_from_json_fail_not_allowed_keys():
+    """Test failure of Dependency.from_json due to unallowed keys"""
+    bad_obj = {"field_1": {"not-allowed-key": "value"}}
+    with pytest.raises(ValueError, match="Not allowed keys: {'not-allowed-key'}"):
+        Dependency.from_json(bad_obj)
+
+
+def test_dependency_to_string():
+    """Test dependency.__str__ method."""
+    dependency = Dependency(
+        "package_1", "==0.1.0", "https://index.com", "https://some-repo.git", "branch"
+    )
+    assert (
+        str(dependency)
+        == "Dependency(name='package_1', version='==0.1.0', index='https://index.com', git='https://some-repo.git', ref='branch')"
+    )

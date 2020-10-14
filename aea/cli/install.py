@@ -76,17 +76,8 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
 def _install_dependency(dependency_name: str, dependency: Dependency):
     click.echo("Installing {}...".format(pprint.pformat(dependency_name)))
     try:
-        index = dependency.get("index", None)
-        git_url = dependency.get("git", None)
-        revision = dependency.get("ref", "")
-        version_constraint = dependency.get("version", "")
-        command = [sys.executable, "-m", "pip", "install"]
-        if git_url is not None:
-            command += ["-i", index] if index is not None else []
-            command += ["git+" + git_url + "@" + revision + "#egg=" + dependency_name]
-        else:
-            command += ["-i", index] if index is not None else []
-            command += [dependency_name + version_constraint]
+        pip_args = dependency.get_pip_install_args()
+        command = [sys.executable, "-m", "pip", "install", *pip_args]
         logger.debug("Calling '{}'".format(" ".join(command)))
         return_code = _run_install_subprocess(command)
         if return_code == 1:

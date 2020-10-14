@@ -20,15 +20,17 @@
 
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import (
     CRUDCollection,
+    ComponentConfiguration,
     PackageConfiguration,
     PackageType,
     PublicId,
     SkillConfig,
+    dependencies_from_json,
 )
 from aea.connections.stub.connection import write_envelope
 from aea.exceptions import enforce
@@ -144,6 +146,14 @@ def _nested_set(
                 raise ValueError(  # pragma: nocover
                     f"Invalid keys={keys} and values={value}."
                 )
+        elif root_key == "dependencies":
+            enforce(
+                isinstance(configuration_obj, ComponentConfiguration),
+                "Cannot set dependencies to ComponentConfiguration instance.",
+            )
+            configuration_obj = cast(ComponentConfiguration, configuration_obj)
+            new_pypi_dependencies = dependencies_from_json(value)
+            configuration_obj.pypi_dependencies = new_pypi_dependencies
         else:
             dic = get_nested_ordered_dict_from_keys_and_value(keys, value)
             setattr(configuration_obj, root_key, dic[root_key])
