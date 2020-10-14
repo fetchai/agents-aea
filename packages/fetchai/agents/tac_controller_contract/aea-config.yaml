@@ -42,10 +42,7 @@ author: fetchai
 version: 0.9.0
 type: connection
 config:
-  api_key: TwiCIriSl0mLahw17pyqoA
   chain_identifier: ethereum
-  soef_addr: soef.fetch.ai
-  soef_port: 9002
 ---
 name: tac_control
 author: fetchai

@@ -9,7 +9,7 @@ aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmW9vG1qAt8hjycMMK6LUFNaDp52KnakgjbRrTCMCRTnNW
   __init__.py: QmW9XFKGsea4u3fupkFMcQutgsjqusCMBMyTcTmLLmQ4tR
-  connection.py: QmbeuHyjBW7PjEuZXGr9BsLTmV5WEe6YE9sNYszX7iirek
+  connection.py: QmdTs38n4FtZT3unushT3gcL3BcyJYJpWS4yhs6qFCYYne
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PStubConnection

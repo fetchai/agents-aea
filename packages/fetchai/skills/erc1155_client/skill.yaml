@@ -77,3 +77,4 @@ models:
       search_radius: 5.0
     class_name: Strategy
 dependencies: {}
+is_abstract: false

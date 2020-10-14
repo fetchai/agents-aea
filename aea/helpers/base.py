@@ -31,97 +31,15 @@ import subprocess  # nosec
 import sys
 import time
 import types
-from collections import OrderedDict, UserString
+from collections import UserString
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, List, TextIO, Union
+from typing import Any, Callable, Dict, Union
 
-import yaml
 from dotenv import load_dotenv
 
 
 _default_logger = logging.getLogger(__name__)
-
-
-def _ordered_loading(fun: Callable):
-    # for pydocstyle
-    def ordered_load(stream: TextIO):
-        object_pairs_hook = OrderedDict
-
-        class OrderedLoader(yaml.SafeLoader):
-            """A wrapper for safe yaml loader."""
-
-            pass
-
-        def construct_mapping(loader, node):
-            loader.flatten_mapping(node)
-            return object_pairs_hook(loader.construct_pairs(node))
-
-        OrderedLoader.add_constructor(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
-        )
-        return fun(stream, Loader=OrderedLoader)  # nosec
-
-    return ordered_load
-
-
-def _ordered_dumping(fun: Callable):
-    # for pydocstyle
-    def ordered_dump(data, stream=None, **kwds):
-        class OrderedDumper(yaml.SafeDumper):
-            """A wrapper for safe yaml loader."""
-
-            pass
-
-        def _dict_representer(dumper, data):
-            return dumper.represent_mapping(
-                yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items()
-            )
-
-        OrderedDumper.add_representer(OrderedDict, _dict_representer)
-        return fun(data, stream, Dumper=OrderedDumper, **kwds)  # nosec
-
-    return ordered_dump
-
-
-@_ordered_loading
-def yaml_load(*args, **kwargs) -> Dict[str, Any]:
-    """
-    Load a yaml from a file pointer in an ordered way.
-
-    :return: the yaml
-    """
-    return yaml.load(*args, **kwargs)  # nosec
-
-
-@_ordered_loading
-def yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]:
-    """
-    Load a multi-paged yaml from a file pointer in an ordered way.
-
-    :return: the yaml
-    """
-    return list(yaml.load_all(*args, **kwargs))  # nosec
-
-
-@_ordered_dumping
-def yaml_dump(*args, **kwargs) -> None:
-    """
-    Dump multi-paged yaml data to a yaml file in an ordered way.
-
-    :return None
-    """
-    yaml.dump(*args, **kwargs)  # nosec
-
-
-@_ordered_dumping
-def yaml_dump_all(*args, **kwargs) -> None:
-    """
-    Dump multi-paged yaml data to a yaml file in an ordered way.
-
-    :return None
-    """
-    yaml.dump_all(*args, **kwargs)  # nosec
 
 
 def _get_module(spec):

@@ -456,6 +456,17 @@ class PublicId(JSONSerializable):
         return PublicId(self.author, self.name, self.LATEST_VERSION)
 
     @classmethod
+    def is_valid_str(cls, public_id_string: str) -> bool:
+        """
+        Check if a string is a public id.
+
+        :param public_id_string: the public id in string format.
+        :return: bool indicating validity
+        """
+        match = re.match(cls.PUBLIC_ID_REGEX, public_id_string)
+        return match is not None
+
+    @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
         """
         Initialize the public id from the string.
@@ -1288,9 +1299,6 @@ class SkillConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
-        if result["is_abstract"] is False:
-            result.pop("is_abstract")
-
         return result
 
     @classmethod
@@ -1380,6 +1388,14 @@ class SkillConfig(ComponentConfiguration):
                 component_config = cast(
                     SkillComponentConfiguration, registry.read(component_name)
                 )
+                component_data_keys = set(component_data.keys())
+                unallowed_keys = component_data_keys.difference(
+                    SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE
+                )
+                if len(unallowed_keys) > 0:
+                    raise ValueError(
+                        f"These fields of skill component configuration '{component_name}' of skill '{self.public_id}' are not allowed to change: {unallowed_keys}."
+                    )
                 recursive_update(component_config.args, component_data.get("args", {}))
 
         _update_skill_component_config("behaviours", data)
@@ -1487,6 +1503,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        # this attribute will be set through the setter below
         self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
             component_configurations if component_configurations is not None else {}
@@ -1506,11 +1523,18 @@ class AgentConfig(PackageConfiguration):
             PackageType.CONTRACT: self.contracts,
             PackageType.SKILL: self.skills,
         }
-        for component_id, _ in d.items():
+        for component_id, component_configuration in d.items():
             enforce(
                 component_id.public_id
                 in package_type_to_set[component_id.package_type],
                 f"Component {component_id} not declared in the agent configuration.",
+            )
+            from aea.configurations.loader import (  # pylint: disable=import-outside-toplevel,cyclic-import
+                ConfigLoader,
+            )
+
+            ConfigLoader.validate_component_configuration(
+                component_id, component_configuration
             )
         self._component_configurations = d
 

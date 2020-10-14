@@ -75,3 +75,4 @@ models:
       service_id: car_park_service
     class_name: Strategy
 dependencies: {}
+is_abstract: false

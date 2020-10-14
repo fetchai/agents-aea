@@ -33,3 +33,4 @@ models:
     class_name: GymDialogues
 dependencies:
   gym: {}
+is_abstract: false

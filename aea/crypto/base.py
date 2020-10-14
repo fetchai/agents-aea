@@ -212,6 +212,15 @@ class Helper(ABC):
         :return: the hash of the message.
         """
 
+    @classmethod
+    @abstractmethod
+    def is_valid_address(cls, address: Address) -> bool:
+        """
+        Check if the address is valid.
+
+        :param address: the address to validate
+        """
+
 
 class LedgerApi(Helper, ABC):
     """Interface for ledger APIs."""

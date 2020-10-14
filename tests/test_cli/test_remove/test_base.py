@@ -19,6 +19,7 @@
 """Test module for aea.cli.remove.remove_item method."""
 import os
 from unittest import TestCase, mock
+from unittest.mock import patch
 
 import pytest
 from click import ClickException
@@ -40,7 +41,9 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 class RemoveItemTestCase(TestCase):
     """Test case for remove_item method."""
 
-    def test_remove_item_item_folder_not_exists(self, *mocks):
+    def test_remove_item_item_folder_not_exists(
+        self, *mocks
+    ):  # pylint: disable=unused-argument
         """Test for save_agent_locally item folder not exists."""
         public_id = PublicIdMock.from_str("author/name:0.1.0")
         with self.assertRaises(ClickException):
@@ -73,7 +76,10 @@ class TestRemovePackageWithLatestVersion(AEATestCaseEmpty):
         assert item_name in items_folders
 
         # remove the package
-        self.run_cli_command(*["remove", type_, str(public_id)], cwd=self._get_cwd())
+        with patch("aea.cli.remove.RemoveItem.is_required_by", False):
+            self.run_cli_command(
+                *["remove", type_, str(public_id)], cwd=self._get_cwd()
+            )
 
         # check that the 'aea remove' took effect.
         items_folders = os.listdir(items_path)

@@ -57,3 +57,4 @@ models:
         value: intro_alice
     class_name: AliceStrategy
 dependencies: {}
+is_abstract: false

@@ -18,13 +18,11 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helper module."""
 
-import io
 import os
 import platform
 import re
 import signal
 import time
-from collections import OrderedDict
 from pathlib import Path
 from subprocess import Popen  # nosec
 from unittest.mock import patch
@@ -43,10 +41,6 @@ from aea.helpers.base import (
     send_control_c,
     try_decorator,
     win_popen_kwargs,
-    yaml_dump,
-    yaml_dump_all,
-    yaml_load,
-    yaml_load_all,
 )
 
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -108,16 +102,6 @@ def test_regex_constrained_string_initialization():
     RegexConstrainedString(b"abcde")
     RegexConstrainedString(RegexConstrainedString(""))
     RegexConstrainedString(RegexConstrainedString("abcde"))
-
-
-def test_yaml_dump_load():
-    """Test yaml dump/load works."""
-    data = OrderedDict({"a": 12, "b": None})
-    stream = io.StringIO()
-    yaml_dump(data, stream)
-    stream.seek(0)
-    loaded_data = yaml_load(stream)
-    assert loaded_data == data
 
 
 def test_load_module():
@@ -232,16 +216,6 @@ def test_send_control_c_windows():
             with patch("os.kill") as mock_kill:
                 send_control_c(process)
                 mock_kill.assert_called_with(pid, mock_signal.CTRL_C_EVENT)
-
-
-def test_yaml_dump_all_load_all():
-    """Test yaml_dump_all and yaml_load_all."""
-    f = io.StringIO()
-    data = [{"a": "12"}, {"b": "13"}]
-    yaml_dump_all(data, f)
-
-    f.seek(0)
-    assert yaml_load_all(f) == data
 
 
 def test_recursive_update_no_recursion():

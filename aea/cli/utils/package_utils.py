@@ -517,7 +517,9 @@ def try_get_balance(  # pylint: disable=unused-argument
     try:
         if type_ not in DEFAULT_LEDGER_CONFIGS:  # pragma: no cover
             raise ValueError("No ledger api config for {} available.".format(type_))
-        address = wallet.addresses[type_]
+        address = wallet.addresses.get(type_)
+        if address is None:  # pragma: no cover
+            raise ValueError("No key '{}' in wallet.".format(type_))
         balance = LedgerApis.get_balance(type_, address)
         if balance is None:  # pragma: no cover
             raise ValueError("No balance returned!")

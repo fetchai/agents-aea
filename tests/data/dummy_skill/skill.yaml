@@ -42,3 +42,4 @@ models:
       model_arg_2: '2'
     class_name: DummyModel
 dependencies: {}
+is_abstract: false

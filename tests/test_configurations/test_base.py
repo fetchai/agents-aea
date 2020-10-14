@@ -242,14 +242,33 @@ class TestSkillConfig:
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
         skill_config = loader.load(skill_config_path.open())
         new_configurations = {
-            "behaviours": {"new_behaviour": {"args": {}, "class_name": "SomeClass"}},
-            "handlers": {"new_handler": {"args": {}, "class_name": "SomeClass"}},
-            "models": {"new_model": {"args": {}, "class_name": "SomeClass"}},
+            "behaviours": {"new_behaviour": {"args": {}}},
+            "handlers": {"new_handler": {"args": {}}},
+            "models": {"new_model": {"args": {}}},
         }
 
         with pytest.raises(
             ValueError,
             match="The custom configuration for skill fetchai/error:0.6.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+        ):
+            skill_config.update(new_configurations)
+
+    def test_update_method_raises_error_if_we_try_to_change_classname_of_skill_component(
+        self,
+    ):
+        """Test that we raise error if we try to change the 'class_name' field of a skill component configuration."""
+        skill_config_path = Path(
+            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+        )
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+        skill_config = loader.load(skill_config_path.open())
+        new_configurations = {
+            "handlers": {"error_handler": {"class_name": "SomeClass", "args": {}}},
+        }
+
+        with pytest.raises(
+            ValueError,
+            match=f"These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.6.0' are not allowed to change: {{'class_name'}}.",
         ):
             skill_config.update(new_configurations)
 
@@ -273,58 +292,87 @@ class TestAgentConfig:
         actual_json = actual_config.json
         assert expected_json == actual_json
 
-    def test_update(self):
-        """Test the update method."""
-        aea_config_path = Path(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE)
-        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
-        aea_config: AgentConfig = loader.load(aea_config_path.open())
 
-        dummy_skill_component_id = ComponentId(
+class TestAgentConfigUpdate:
+    """Test methods that change the agent configuration."""
+
+    def setup(self):
+        """Set up the tests."""
+        self.aea_config_path = Path(
+            CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE
+        )
+        self.loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        self.aea_config: AgentConfig = self.loader.load(self.aea_config_path.open())
+        self.dummy_skill_component_id = ComponentId(
             ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID
         )
 
-        new_dummy_skill_config = {
+        self.new_dummy_skill_config = {
             "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
             "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
             "models": {"dummy": {"args": dict(model_arg_1=42)}},
         }
 
+    def test_component_configurations_setter(self):
+        """Test component configuration setter."""
+        assert self.aea_config.component_configurations == {}
+        new_component_configurations = {
+            self.dummy_skill_component_id: self.new_dummy_skill_config
+        }
+        self.aea_config.component_configurations = new_component_configurations
+
+    def test_component_configurations_setter_negative(self):
+        """Test component configuration setter with wrong configurations."""
+        assert self.aea_config.component_configurations == {}
+        new_component_configurations = {
+            self.dummy_skill_component_id: {
+                "handlers": {"dummy": {"class_name": "SomeClass"}}
+            }
+        }
+        with pytest.raises(
+            ValueError, match=r"Configuration of component .* is not valid.*"
+        ):
+            self.aea_config.component_configurations = new_component_configurations
+
+    def test_update(self):
+        """Test the update method."""
         new_private_key_paths = dict(ethereum="foo")
         expected_private_key_paths = dict(
             ethereum="foo", cosmos="cosmos_private_key.txt"
         )
-        aea_config.update(
+        self.aea_config.update(
             dict(
                 component_configurations={
-                    dummy_skill_component_id: new_dummy_skill_config
+                    self.dummy_skill_component_id: self.new_dummy_skill_config
                 },
                 private_key_paths=new_private_key_paths,
                 connection_private_key_paths=new_private_key_paths,
             )
         )
         assert (
-            aea_config.component_configurations[dummy_skill_component_id]
-            == new_dummy_skill_config
+            self.aea_config.component_configurations[self.dummy_skill_component_id]
+            == self.new_dummy_skill_config
         )
         assert (
-            dict(aea_config.private_key_paths.read_all()) == expected_private_key_paths
+            dict(self.aea_config.private_key_paths.read_all())
+            == expected_private_key_paths
         )
         assert (
-            dict(aea_config.connection_private_key_paths.read_all())
+            dict(self.aea_config.connection_private_key_paths.read_all())
             == expected_private_key_paths
         )
 
         # test idempotence
-        aea_config.update(
+        self.aea_config.update(
             dict(
                 component_configurations={
-                    dummy_skill_component_id: new_dummy_skill_config
+                    self.dummy_skill_component_id: self.new_dummy_skill_config
                 }
             )
         )
         assert (
-            aea_config.component_configurations[dummy_skill_component_id]
-            == new_dummy_skill_config
+            self.aea_config.component_configurations[self.dummy_skill_component_id]
+            == self.new_dummy_skill_config
         )
 
 
@@ -376,6 +424,11 @@ class PublicIdTestCase(TestCase):
         obj1 = PublicId(AUTHOR, "name", "1.0.0")
         obj2 = PublicId(AUTHOR, "name", "2.0.0")
         self.assertTrue(obj1 < obj2)
+
+    def test_is_valid_str(self):
+        """Test is_valid_str method."""
+        assert PublicId.is_valid_str("author/name:0.1.0")
+        assert not PublicId.is_valid_str("author!name:0.1.0")
 
 
 class AgentConfigTestCase(TestCase):

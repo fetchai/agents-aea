@@ -254,6 +254,7 @@ class P2PLibp2pClientConnection(Connection):
 
         :return: None
         """
+        self._ensure_valid_envelope_for_external_comms(envelope)
         await self._send(envelope.encode())
 
     async def _process_messages(self) -> None:

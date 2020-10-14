@@ -1196,7 +1196,7 @@ class Dialogues(ABC):
         )
         enforce(
             message.to == self.self_address,
-            "Message to and dialogue self address do not match.",
+            f"Message to and dialogue self address do not match. Got 'to={message.to}' expected 'to={self.self_address}'.",
         )
 
         dialogue_reference = message.dialogue_reference

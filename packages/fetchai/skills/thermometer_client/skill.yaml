@@ -75,3 +75,4 @@ models:
       service_id: thermometer_data
     class_name: Strategy
 dependencies: {}
+is_abstract: false

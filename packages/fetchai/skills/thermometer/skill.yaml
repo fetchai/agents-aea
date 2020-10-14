@@ -69,3 +69,4 @@ models:
 dependencies:
   pyserial: {}
   temper-py: {}
+is_abstract: false

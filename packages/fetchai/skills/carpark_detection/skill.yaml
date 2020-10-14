@@ -71,3 +71,4 @@ models:
     class_name: Strategy
 dependencies:
   scikit-image: {}
+is_abstract: false

@@ -93,3 +93,4 @@ models:
 dependencies:
   vyper:
     version: ==0.1.0b12
+is_abstract: false

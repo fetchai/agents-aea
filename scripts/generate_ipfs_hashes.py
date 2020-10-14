@@ -53,7 +53,7 @@ from aea.configurations.base import (
     _compute_fingerprint,
 )
 from aea.configurations.loader import ConfigLoaders
-from aea.helpers.base import yaml_dump, yaml_dump_all
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 
 
 AUTHOR = "fetchai"
