@@ -77,7 +77,7 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_module
+from aea.helpers.base import load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
@@ -87,6 +87,7 @@ from aea.registries.resources import Resources
 PathLike = Union[os.PathLike, Path, str]
 
 _default_logger = logging.getLogger(__name__)
+DEFAULT_ENV_DOTFILE = ".env"
 
 
 class _DependenciesManager:
@@ -1337,6 +1338,8 @@ class AEABuilder(WithLogger):
             aea_project_path=aea_project_path, exit_on_error=False
         )
         builder = AEABuilder(with_default_packages=False)
+
+        load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # load agent configuration file
         configuration_file = cls.get_configuration_file_path(aea_project_path)
