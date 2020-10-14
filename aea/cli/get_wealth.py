@@ -19,18 +19,14 @@
 
 """Implementation of the 'aea get_wealth' subcommand."""
 
-from typing import Dict, Optional, cast
+from typing import cast
 
 import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import (
-    try_get_balance,
-    verify_or_create_private_keys_ctx,
-)
+from aea.cli.utils.package_utils import get_wallet_from_context, try_get_balance
 from aea.crypto.registries import ledger_apis_registry
-from aea.crypto.wallet import Wallet
 
 
 @click.command()
@@ -44,16 +40,11 @@ from aea.crypto.wallet import Wallet
 @check_aea_project
 def get_wealth(click_context, type_):
     """Get the wealth associated with the private key."""
-    wealth = _try_get_wealth(click_context, type_)
+    ctx = cast(Context, click_context.obj)
+    wealth = _try_get_wealth(ctx, type_)
     click.echo(wealth)
 
 
-def _try_get_wealth(click_context: click.core.Context, type_: str):
-    ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys_ctx(ctx=ctx)
-    private_key_paths = {
-        config_pair[0]: config_pair[1]
-        for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }  # type: Dict[str, Optional[str]]
-    wallet = Wallet(private_key_paths)
+def _try_get_wealth(ctx: Context, type_: str):
+    wallet = get_wallet_from_context(ctx)
     return try_get_balance(ctx.agent_config, wallet, type_)

@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for aea.cli.utils module."""
 
 from builtins import FileNotFoundError
@@ -42,6 +41,7 @@ from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
     get_package_path_unified,
+    get_wallet_from_context,
     is_fingerprint_correct,
     is_item_present_unified,
     is_local_item,
@@ -59,6 +59,9 @@ from aea.configurations.constants import (
     SIGNING_PROTOCOL,
     STATE_UPDATE_PROTOCOL,
 )
+from aea.crypto.wallet import Wallet
+from aea.helpers.base import cd
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import FETCHAI
 from tests.test_cli.tools_for_testing import (
@@ -462,3 +465,13 @@ def test_is_item_present_unified(mock_, vendor):
 def test_is_local_item(public_id, expected_outcome):
     """Test the 'is_local_item' CLI utility function."""
     assert is_local_item(public_id) is expected_outcome
+
+
+class TestGetWalletFromtx(AEATestCaseEmpty):
+    """Test get_wallet_from_context."""
+
+    def test_get_wallet_from_ctx(self):
+        """Test get_wallet_from_context."""
+        ctx = mock.Mock()
+        with cd(self._get_cwd()):
+            assert isinstance(get_wallet_from_context(ctx), Wallet)
