@@ -920,7 +920,7 @@ class GenericStrategy(Model):
         )
 
         if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()
+            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
         else:
             self._data_for_sale = data_for_sale
         self._sale_quantity = len(data_for_sale)
@@ -1013,7 +1013,7 @@ The following properties and methods deal with different aspects of the strategy
                 client=counterparty_address,
             )
         else:
-            tx_nonce = uuid.uuid4().hex
+            tx_nonce = uuid.uuid4().hex  # pragma: nocover
         proposal = Description(
             {
                 "ledger_id": self.ledger_id,
@@ -1667,7 +1667,7 @@ The above code terminates each dialogue with the specific AEA and stores the ste
 In case we do not receive any `DECLINE` message that means that the `my_generic_seller` AEA want to move on with the sale, in that case, it will send a `MATCH_ACCEPT` message. In order to handle this we add the following code:
 
 ``` python
-    def _handle_match_accept(
+        def _handle_match_accept(
         self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue
     ) -> None:
         """
@@ -1686,7 +1686,9 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
         if strategy.is_ledger_tx:
             transfer_address = fipa_msg.info.get("address", None)
             if transfer_address is not None and isinstance(transfer_address, str):
-                fipa_dialogue.terms.counterparty_address = transfer_address
+                fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
+                    transfer_address
+                )
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
