@@ -914,7 +914,9 @@ class Query:
 
     def __str__(self):
         """Get the string representation of the constraint."""
-        return "Query(constraints={},model={})".format(self.constraints, self.model)
+        return "Query(constraints={},model={})".format(
+            [str(c) for c in self.constraints], self.model
+        )
 
     @classmethod
     def encode(cls, query_protobuf_object, query_object: "Query") -> None:

@@ -41,6 +41,7 @@ from tests.conftest import (
     NON_GENESIS_CONFIG_TWO,
 )
 
+
 MAX_FLAKY_RERUNS_ETH -= 1
 
 
