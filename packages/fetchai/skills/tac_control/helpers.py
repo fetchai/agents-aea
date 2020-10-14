@@ -35,28 +35,30 @@ FT_NAME = "FT"
 FT_ID = 2
 
 
-def generate_good_ids(nb_goods: int) -> List[int]:
+def generate_good_ids(nb_goods: int, starting_index: int) -> List[int]:
     """
     Generate ids for things.
 
     :param nb_goods: the number of things.
-    :param contract: the instance of the contract
+    :param starting_index: the index to start creating from.
     """
-    good_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_goods)
+    good_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_goods, starting_index)
     enforce(
         len(good_ids) == nb_goods, "Length of good ids and number of goods must match."
     )
     return good_ids
 
 
-def generate_currency_ids(nb_currencies: int) -> List[int]:
+def generate_currency_ids(nb_currencies: int, starting_index: int) -> List[int]:
     """
     Generate currency ids.
 
     :param nb_currencies: the number of currencies.
-    :param contract: the instance of the contract.
+    :param starting_index: the index to start creating from.
     """
-    currency_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_currencies)
+    currency_ids = ERC1155Contract.generate_token_ids(
+        FT_ID, nb_currencies, starting_index
+    )
     enforce(
         len(currency_ids) == nb_currencies,
         "Length of currency ids and number of currencies must match.",
@@ -65,7 +67,7 @@ def generate_currency_ids(nb_currencies: int) -> List[int]:
 
 
 def generate_currency_id_to_name(
-    nb_currencies: int, currency_ids: List[int]
+    nb_currencies: int, currency_ids: List[int], starting_index: int = 0
 ) -> Dict[str, str]:
     """
     Generate a dictionary mapping good ids to names.
@@ -80,7 +82,7 @@ def generate_currency_id_to_name(
             "Length of currency_ids does not match nb_currencies.",
         )
     else:
-        currency_ids = generate_currency_ids(nb_currencies)
+        currency_ids = generate_currency_ids(nb_currencies, starting_index)
     currency_id_to_name = {
         str(currency_id): "{}_{}".format(FT_NAME, currency_id)
         for currency_id in currency_ids
@@ -88,7 +90,9 @@ def generate_currency_id_to_name(
     return currency_id_to_name
 
 
-def generate_good_id_to_name(nb_goods: int, good_ids: List[int]) -> Dict[str, str]:
+def generate_good_id_to_name(
+    nb_goods: int, good_ids: List[int], starting_index: int = 0
+) -> Dict[str, str]:
     """
     Generate a dictionary mapping good ids to names.
 
@@ -101,7 +105,7 @@ def generate_good_id_to_name(nb_goods: int, good_ids: List[int]) -> Dict[str, st
             len(good_ids) == nb_goods, "Length of good_ids does not match nb_goods."
         )
     else:
-        good_ids = generate_good_ids(nb_goods)
+        good_ids = generate_good_ids(nb_goods, starting_index)
     good_id_to_name = {
         str(good_id): "{}_{}".format(FT_NAME, good_id) for good_id in good_ids
     }
