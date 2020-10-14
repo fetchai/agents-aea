@@ -957,7 +957,9 @@ class ContractApiHandler(Handler):
             return
 
         # handle message
-        if (
+        if contract_api_msg.performative is ContractApiMessage.Performative.RAW_MESSAGE:
+            self._handle_raw_message(contract_api_msg, contract_api_dialogue)
+        elif (
             contract_api_msg.performative
             is ContractApiMessage.Performative.RAW_TRANSACTION
         ):
@@ -987,6 +989,38 @@ class ContractApiHandler(Handler):
             "received invalid contract_api message={}, unidentified dialogue.".format(
                 contract_api_msg
             )
+        )
+
+    def _handle_raw_message(
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
+    ) -> None:
+        """
+        Handle a message of raw_message performative.
+
+        :param contract_api_message: the ledger api message
+        :param contract_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.info("received raw message={}".format(contract_api_msg))
+        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty=self.context.decision_maker_address,
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
+            raw_message=RawMessage(
+                contract_api_msg.raw_message.ledger_id,
+                contract_api_msg.raw_message.body,
+                is_deprecated_mode=True,
+            ),
+            terms=contract_api_dialogue.associated_fipa_dialogue.terms,
+        )
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
+        signing_dialogue.associated_fipa_dialogue = (
+            contract_api_dialogue.associated_fipa_dialogue
+        )
+        self.context.decision_maker_message_queue.put_nowait(signing_msg)
+        self.context.logger.info(
+            "proposing the message to the decision maker. Waiting for confirmation ..."
         )
 
     def _handle_raw_transaction(
