@@ -163,7 +163,9 @@ def test_react():
         local_connection_id = PublicId.from_str("fetchai/local:0.10.0")
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.10.0")])
+        agent = builder.build(
+            connection_ids=[PublicId.from_str("fetchai/local:0.10.0")]
+        )
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = agent.resources.get_connection(local_connection_id)

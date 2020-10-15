@@ -350,7 +350,9 @@ def test_run_fet_private_key_config():
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/http_client:0.10.0"])
+        cli.main(
+            [*CLI_LOG_OPTION, "run", "--connections", "fetchai/http_client:0.10.0"]
+        )
     except SystemExit as e:
         error_msg = str(e)
 
@@ -409,7 +411,9 @@ def test_run_ethereum_private_key_config():
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/http_client:0.10.0"])
+        cli.main(
+            [*CLI_LOG_OPTION, "run", "--connections", "fetchai/http_client:0.10.0"]
+        )
     except SystemExit as e:
         error_msg = str(e)
 
