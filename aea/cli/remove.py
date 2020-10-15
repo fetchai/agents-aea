@@ -413,15 +413,6 @@ class RemoveItem:
         )
         self._dump_agent_config()
 
-    def remove_unused_component_configurations(self) -> None:
-        """Remove all component configurations for items not registered and dump agent config."""
-        registered_components = self.agent_config.package_dependencies
-        for component_id in list(self.agent_config.component_configurations.keys()):
-            if component_id not in registered_components:
-                self.agent_config.component_configurations.pop(component_id)
-
-        self._dump_agent_config()
-
     def _dump_agent_config(self) -> None:
         """Save agent config to the filesystem."""
         with open(os.path.join(self.ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
