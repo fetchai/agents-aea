@@ -394,7 +394,7 @@ class Libp2pNode:
         return await self.pipe.read()
 
     def describe_configuration(self) -> None:
-        """ Print a message discribing the libp2p node configuration"""
+        """Print a message discribing the libp2p node configuration"""
         msg = "Peer running in "
 
         if self.public_uri is not None:
@@ -435,9 +435,8 @@ class Libp2pNode:
                 continue
             if found:
                 elem = line.strip()
-                if elem != LIST_END:
-                    if len(elem) != 0:
-                        multiaddrs.append(MultiAddr.from_string(elem))
+                if elem != LIST_END and len(elem) != 0:
+                    multiaddrs.append(MultiAddr.from_string(elem))
                 else:
                     found = False
         return multiaddrs
