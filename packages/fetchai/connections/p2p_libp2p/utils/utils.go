@@ -55,7 +55,7 @@ var logger zerolog.Logger = NewDefaultLogger()
 
 // SetLoggerLevel set utils logger level
 func SetLoggerLevel(lvl zerolog.Level) {
-	logger.Level(lvl)
+	//logger.Level(lvl)
 }
 
 /*
@@ -67,7 +67,7 @@ func newConsoleLogger() zerolog.Logger {
 	return zerolog.New(zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		NoColor:    false,
-		TimeFormat: "15:04:05.000",
+		TimeFormat: time.RFC3339Nano,
 	})
 }
 
@@ -75,7 +75,7 @@ func newConsoleLogger() zerolog.Logger {
 func NewDefaultLogger() zerolog.Logger {
 	return newConsoleLogger().
 		With().Timestamp().
-		Logger().Level(loggerGlobalLevel)
+		Logger() //.Level(loggerGlobalLevel)
 }
 
 // NewDefaultLoggerWithFields zerolog console writer
@@ -85,7 +85,7 @@ func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
 	for key, val := range fields {
 		logger = logger.Str(key, val)
 	}
-	return logger.Logger().Level(loggerGlobalLevel)
+	return logger.Logger().Level(zerolog.Disabled) //.Level(loggerGlobalLevel)
 
 }
 

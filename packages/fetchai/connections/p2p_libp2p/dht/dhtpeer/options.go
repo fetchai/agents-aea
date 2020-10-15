@@ -116,6 +116,7 @@ func EnableRelayService() Option {
 func LoggingLevel(lvl zerolog.Level) Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.logger = dhtPeer.logger.Level(lvl)
+		zerolog.SetGlobalLevel(lvl)
 		return nil
 	}
 

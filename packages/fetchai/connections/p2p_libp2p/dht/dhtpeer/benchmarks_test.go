@@ -40,8 +40,8 @@ import (
 
 */
 
-var keysFilePath = "/path/to/file/benchmark_keys.txt"
-var addrsFilePath = "/path/to/file/benchmark_addrs.txt"
+var keysFilePath = "/home/lokman/dev/aea/agents-aea/benchmark_keys.txt"
+var addrsFilePath = "/home/lokman/dev/aea/agents-aea/benchmark_addrs.txt"
 var tcpUri = "localhost:12345"
 
 /* **********************************
