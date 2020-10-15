@@ -192,8 +192,9 @@ class HTTPClientAsyncChannel:
         :return: Tuple[MEssage, Optional[Dialogue]]
         """
         message = cast(HttpMessage, envelope.message)
-        dialogue = cast(HttpDialogue, self._dialogues.update(message))
-        dialogue.envelope_context = envelope.context
+        dialogue = cast(Optional[HttpDialogue], self._dialogues.update(message))
+        if dialogue is not None:
+            dialogue.envelope_context = envelope.context
         return message, dialogue
 
     async def _http_request_task(self, request_envelope: Envelope) -> None:

@@ -386,8 +386,9 @@ class LocalNode:
         if self._dialogues is None:  # pragma: nocover
             raise ValueError("Call connect before!")
         message = cast(OefSearchMessage, envelope.message)
-        dialogue = cast(OefSearchDialogue, self._dialogues.update(message))
-        dialogue.envelope_context = envelope.context
+        dialogue = cast(Optional[OefSearchDialogue], self._dialogues.update(message))
+        if dialogue is not None:
+            dialogue.envelope_context = envelope.context
         return message, dialogue
 
     async def _send(self, envelope: Envelope):
