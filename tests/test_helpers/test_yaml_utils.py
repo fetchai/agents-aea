@@ -120,10 +120,10 @@ def test_resolve_env_variable_without_default_negative():
 def test_resolve_env_variable_fails():
     """Test the case when resolving the environment variable fails."""
     with pytest.raises(
-        ValueError, match=f"Cannot resolve environment variable 'some:wrong:variable'."
+        ValueError, match="Cannot resolve environment variable 'some:wrong:variable'."
     ):
         yaml_file = dedent(
-            f"""
+            """
             some_variable_name: ${{some:wrong:variable}}
             """
         )

@@ -120,9 +120,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
 
         The expected message is: 'A connection with id '{connection_id}' already exists. Aborting...'
         """
-        s = "A connection with id '{}/{}' already exists. Aborting...".format(
-            self.connection_author, self.connection_name
-        )
+        s = f"A connection with id '{self.connection_id}' already exists. Aborting..."
         assert self.result.exception.message == s
 
     @classmethod
@@ -207,9 +205,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
 
         The expected message is: 'A connection with id '{connection_id}' already exists. Aborting...'
         """
-        s = "A connection with id '{}' already exists. Aborting...".format(
-            self.connection_author + "/" + self.connection_name
-        )
+        s = f"A connection with id '{self.connection_id}' already exists. Aborting..."
         assert self.result.exception.message == s
 
     @classmethod
@@ -476,11 +472,14 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add connection from Registry command."""
 
+    IS_LOCAL = False
+    IS_EMPTY = True
+
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""
-        self.add_item("connection", "fetchai/local:0.10.0", local=False)
+        self.add_item("connection", "fetchai/local:0.9.0", local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
         items_folders = os.listdir(items_path)

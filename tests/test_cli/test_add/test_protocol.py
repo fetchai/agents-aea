@@ -97,9 +97,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
 
         The expected message is: 'A protocol with id '{protocol_id}' already exists. Aborting...'
         """
-        s = "A protocol with id '{}' already exists. Aborting...".format(
-            self.protocol_author + "/" + self.protocol_name
-        )
+        s = f"A protocol with id '{self.protocol_id}' already exists. Aborting..."
         assert self.result.exception.message == s
 
     @classmethod
@@ -182,9 +180,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
 
         The expected message is: 'A protocol with id '{protocol_id}' already exists. Aborting...'
         """
-        s = "A protocol with id '{}' already exists. Aborting...".format(
-            self.protocol_author + "/" + self.protocol_name
-        )
+        s = f"A protocol with id '{self.protocol_id}' already exists. Aborting..."
         assert self.result.exception.message == s
 
     @unittest.mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
@@ -457,11 +453,14 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add protocol from Registry command."""
 
+    IS_LOCAL = False
+    IS_EMPTY = True
+
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_protocol_from_remote_registry_positive(self):
         """Test add protocol from Registry positive result."""
-        self.add_item("protocol", "fetchai/fipa:0.8.0", local=False)
+        self.add_item("protocol", "fetchai/fipa:0.7.0", local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
         items_folders = os.listdir(items_path)

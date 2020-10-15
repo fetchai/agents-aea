@@ -25,7 +25,6 @@ import shutil
 import tempfile
 from pathlib import Path
 from unittest import mock
-from unittest.mock import patch
 
 import pytest
 import yaml
@@ -101,9 +100,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
 
         The expected message is: 'A skill with id '{skill_id}' already exists. Aborting...'
         """
-        s = "A skill with id '{}' already exists. Aborting...".format(
-            self.skill_author + "/" + self.skill_name
-        )
+        s = f"A skill with id '{self.skill_id}' already exists. Aborting..."
         assert self.result.exception.message == s
 
     @mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
@@ -203,9 +200,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
 
         The expected message is: 'A skill with id '{skill_id}' already exists. Aborting...'
         """
-        s = "A skill with id '{}' already exists. Aborting...".format(
-            self.skill_author + "/" + self.skill_name
-        )
+        s = f"A skill with id '{self.skill_id}' already exists. Aborting..."
         assert self.result.exception.message == s
 
     @classmethod
@@ -484,15 +479,14 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add skill from Registry command."""
 
+    IS_LOCAL = False
+    IS_EMPTY = True
+
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""
-        with patch("aea.cli.remove.RemoveItem.is_required_by", False):
-            self.run_cli_command(
-                *["remove", "protocol", "fetchai/default:0.7.0"], cwd=self._get_cwd()
-            )
-        self.add_item("skill", "fetchai/echo:0.9.0", local=False)
+        self.add_item("skill", "fetchai/echo:0.8.0", local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)

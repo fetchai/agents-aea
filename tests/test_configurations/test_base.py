@@ -273,7 +273,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match=f"These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.7.0' are not allowed to change: {{'class_name'}}.",
+            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.7.0' are not allowed to change: {{'class_name'}}.",
         ):
             skill_config.update(new_configurations)
 
