@@ -94,7 +94,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
 class OefSearchDialogues(BaseOefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self) -> None:
         """
         Initialize dialogues.
 
@@ -117,7 +117,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
             self,
             self_address=str(OEFLocalConnection.connection_id),
             role_from_first_message=role_from_first_message,
-            **kwargs,
+            dialogue_class=OefSearchDialogue,
         )
 
 

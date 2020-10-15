@@ -98,7 +98,7 @@ class HttpDialogue(BaseHttpDialogue):
 class HttpDialogues(BaseHttpDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self) -> None:
         """
         Initialize dialogues.
 
@@ -121,7 +121,7 @@ class HttpDialogues(BaseHttpDialogues):
             self,
             self_address=str(HTTPClientConnection.connection_id),
             role_from_first_message=role_from_first_message,
-            **kwargs,
+            dialogue_class=HttpDialogue,
         )
 
 

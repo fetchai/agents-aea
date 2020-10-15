@@ -47,7 +47,7 @@ from aea.configurations.loader import ConfigLoader
 from scripts.generate_ipfs_hashes import update_hashes
 
 
-DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples", "tests"]
+DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples"]
 CLI_LOG_OPTION = ["-v", "OFF"]
 TYPES = set(map(lambda x: x.to_plural(), PackageType))
 HASHES_CSV = "hashes.csv"
