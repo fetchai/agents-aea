@@ -40,8 +40,8 @@ from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import AwaitableProc
-from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.helpers.multiaddr.base import MultiAddr
+from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
 
 
@@ -79,9 +79,8 @@ def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
     for addr in addrs:
         if ip_address(gethostbyname(addr)).is_private != is_private:
             return False  # pragma: nocover
-        else:
-            if ip_address(gethostbyname(addr)).is_loopback != is_loopback:
-                return False
+        if ip_address(gethostbyname(addr)).is_loopback != is_loopback:
+            return False
     return True
 
 
@@ -570,15 +569,14 @@ class P2PLibp2pConnection(Connection):
                     "Local Uri must be set when Public Uri is provided. "
                     "Hint: they are the same for local host/network deployment"
                 )
-            else:
-                # check if node's public host and entry peers hosts are either
-                #  both private or both public
-                if not _ip_all_private_or_all_public(
-                    [public_uri.host] + [maddr.host for maddr in entry_peers]
-                ):
-                    raise ValueError(
-                        "Node's public ip and entry peers ip addresses are not in the same ip address space (private/public)"
-                    )
+            # check if node's public host and entry peers hosts are either
+            #  both private or both public
+            if not _ip_all_private_or_all_public(
+                [public_uri.host] + [maddr.host for maddr in entry_peers]
+            ):
+                raise ValueError(
+                    "Node's public ip and entry peers ip addresses are not in the same ip address space (private/public)"
+                )
 
         # libp2p local node
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))

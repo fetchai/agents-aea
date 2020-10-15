@@ -162,6 +162,9 @@ class MultiAddr:
 
     @classmethod
     def from_string(cls, maddr: str) -> "MultiAddr":
+        """
+        Construct a MultiAddr object from its string format
+        """
         parts = maddr.split("/")
         if len(parts) != 7 or not parts[4].isdigit():
             raise ValueError("Malformed multiaddress '{}'".format(maddr))
