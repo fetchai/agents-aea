@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains utilities for building an AEA."""
 
 import itertools
@@ -34,6 +33,7 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.cli.install import _install_dependency
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -220,8 +220,13 @@ class _DependenciesManager:
             )
         return all_pypi_dependencies
 
+    def install_dependencies(self) -> None:
+        """Install extra dependencies for components."""
+        for name, d in self.pypi_dependencies.items():
+            _install_dependency(name, d)
 
-class AEABuilder(WithLogger):
+
+class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     """
     This class helps to build an AEA.
 
@@ -841,6 +846,10 @@ class AEABuilder(WithLogger):
             )
 
         return sorted_selected_connections_ids
+
+    def install_pypi_dependencies(self) -> None:
+        """Install components extra dependecies."""
+        self._package_dependency_manager.install_dependencies()
 
     def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
         """
