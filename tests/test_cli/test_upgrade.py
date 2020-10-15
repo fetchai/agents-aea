@@ -34,6 +34,7 @@ from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.configurations.base import (
     AgentConfig,
+    ComponentId,
     DEFAULT_AEA_CONFIG_FILE,
     PackageId,
     PackageType,
@@ -196,8 +197,32 @@ class TestRemoveAndDependencies(BaseTestCase):
         Test dependency removed after upgrade.
 
         Done with mocking _add_item_deps to avoid dependencies installation.
+
+        Also checks dependency configuration removed with component
         """
         assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+
+        # add empty component config to aea-config.py
+        agent_config = self.load_config()
+        component_id = ComponentId(self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID)
+        agent_config.component_configurations[component_id] = {}  # just empty
+        self.dump_config(agent_config)
+
+        agent_config = self.load_config()
+        assert component_id in agent_config.component_configurations
+
+        self.runner.invoke(
+            cli,
+            [
+                "-v",
+                "DEBUG",
+                "upgrade",
+                *self.LOCAL,
+                self.ITEM_TYPE,
+                f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
+            ],
+            catch_exceptions=True,
+        )
 
         with self.with_config_update(), patch("aea.cli.add._add_item_deps"):
             result = self.runner.invoke(
@@ -216,6 +241,10 @@ class TestRemoveAndDependencies(BaseTestCase):
                 assert result.exit_code == 0
 
                 assert self.DEPENDENCY_PUBLIC_ID not in self.load_config().protocols
+                agent_config = self.load_config()
+
+                # check configuration was removed too
+                assert component_id not in agent_config.component_configurations
             finally:
                 # restore component removed
                 result = self.runner.invoke(
@@ -439,7 +468,7 @@ class TestUpgradeConnectionLocally(BaseTestCase):
                     catch_exceptions=False,
                 )
 
-    def test_package_can_notupgraded_cause_required(self):
+    def test_package_can_not_upgraded_cause_required(self):
         """Test no package in registry."""
         with self.with_config_update():
             with patch(

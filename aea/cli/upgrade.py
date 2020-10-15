@@ -24,7 +24,11 @@ import click
 
 from aea.cli.add import add_item
 from aea.cli.registry.utils import get_latest_version_available_in_registry
-from aea.cli.remove import ItemRemoveHelper, RemoveItem
+from aea.cli.remove import (
+    ItemRemoveHelper,
+    RemoveItem,
+    remove_unused_component_configurations,
+)
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
@@ -139,6 +143,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         upgrader.remove_item()
         upgrader.add_item()
 
+    remove_unused_component_configurations(ctx)
     click.echo("Finished project upgrade. Everything is up to date now!")
 
 
@@ -288,6 +293,7 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
 
         item_upgrader.remove_item()
         item_upgrader.add_item()
+        remove_unused_component_configurations(ctx)
 
         click.echo(
             "The {} '{}/{}' for the agent '{}' has been successfully upgraded from version '{}' to '{}'.".format(
