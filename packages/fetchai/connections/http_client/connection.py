@@ -223,7 +223,6 @@ class HTTPClientAsyncChannel:
                 timeout=self.DEFAULT_TIMEOUT,
             )
             envelope = self.to_envelope(
-                self.connection_id,
                 request_http_message,
                 status_code=resp.status,
                 headers=resp.headers,
@@ -235,7 +234,6 @@ class HTTPClientAsyncChannel:
             )
         except Exception:  # pragma: nocover # pylint: disable=broad-except
             envelope = self.to_envelope(
-                self.connection_id,
                 request_http_message,
                 status_code=self.DEFAULT_EXCEPTION_CODE,
                 headers={},
@@ -349,7 +347,6 @@ class HTTPClientAsyncChannel:
 
     @staticmethod
     def to_envelope(
-        connection_id: PublicId,
         http_request_message: HttpMessage,
         status_code: int,
         headers: dict,
@@ -360,7 +357,6 @@ class HTTPClientAsyncChannel:
         """
         Convert an HTTP response object (from the 'requests' library) into an Envelope containing an HttpMessage (from the 'http' Protocol).
 
-        :param connection_id: the connection id
         :param http_request_message: the message of the http request envelop
         :param status_code: the http status code, int
         :param headers: dict of http response headers

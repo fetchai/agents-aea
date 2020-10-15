@@ -225,7 +225,9 @@ class LocalNode:
         if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.7.0"):
             await self._handle_oef_message(envelope)
         else:
-            OEFLocalConnection._ensure_valid_envelope_for_external_comms(envelope)
+            OEFLocalConnection._ensure_valid_envelope_for_external_comms(  # pylint: disable=protected-access
+                envelope
+            )
             await self._handle_agent_message(envelope)
 
     async def _handle_oef_message(self, envelope: Envelope) -> None:
