@@ -59,7 +59,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
-        check_strings = "My libp2p addresses: ["
+        check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
             missing_strings == []
@@ -116,7 +116,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
-        check_strings = "My libp2p addresses: ['/dns4/"
+        check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
             missing_strings == []

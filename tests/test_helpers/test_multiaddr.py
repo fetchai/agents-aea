@@ -18,8 +18,11 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for MultiAddr helper class."""
 
+
 import tempfile
 from shutil import rmtree
+
+import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
@@ -66,3 +69,16 @@ def test_multiaddr_correctness():
     rmtree(tmpdir)
 
     assert maddr._peerid == PEER_ID
+
+
+def test_multiaddr_from_string():
+    """Test multiaddress from string"""
+    maddr_str = "/dns4/" + HOST + "/tcp/" + str(PORT) + "/p2p/"
+    maddr = MultiAddr.from_string(maddr_str + PEER_ID)
+    assert maddr.host == HOST and maddr.port == PORT and maddr.peer_id == PEER_ID
+
+    with pytest.raises(ValueError):
+        MultiAddr.from_string("")
+
+    with pytest.raises(ValueError):
+        MultiAddr.from_string(maddr_str + "wrong-peer-id")

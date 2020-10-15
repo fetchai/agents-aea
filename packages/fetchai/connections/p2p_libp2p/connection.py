@@ -26,8 +26,10 @@ import shutil
 import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
+from ipaddress import ip_address
 from pathlib import Path
 from random import randint
+from socket import gethostbyname
 from typing import IO, List, Optional, Sequence, cast
 
 from aea.common import Address
@@ -38,6 +40,7 @@ from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import AwaitableProc
+from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
 
@@ -63,9 +66,24 @@ LIBP2P = "libp2p"
 
 PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.11.0")
 
-MultiAddr = str
-
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
+
+LIBP2P_SUCCESS_MESSAGE = "Peer running in "
+
+
+def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
+    if len(addrs) == 0:
+        return True
+
+    is_private = ip_address(gethostbyname(addrs[0])).is_private
+    is_loopback = ip_address(gethostbyname(addrs[0])).is_loopback
+
+    for addr in addrs:
+        if ip_address(gethostbyname(addr)).is_private != is_private:
+            return False  # pragma: nocover
+        if ip_address(gethostbyname(addr)).is_loopback != is_loopback:
+            return False
+    return True
 
 
 async def _golang_module_build_async(
@@ -355,7 +373,7 @@ class Libp2pNode:
 
         self.logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
-        self.logger.info("My libp2p addresses: {}".format(self.multiaddrs))
+        self.describe_configuration()
 
     async def write(self, data: bytes) -> None:
         """
@@ -377,7 +395,25 @@ class Libp2pNode:
             raise ValueError("pipe is not set.")  # pragma: nocover
         return await self.pipe.read()
 
-    # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
+    def describe_configuration(self) -> None:
+        """Print a message discribing the libp2p node configuration"""
+        msg = LIBP2P_SUCCESS_MESSAGE
+
+        if self.public_uri is not None:
+            msg += "full DHT mode with "
+            if self.delegate_uri is not None:
+                msg += "delegate service reachable at '{}:{}' and relay service enabled. ".format(
+                    self.public_uri.host, self.delegate_uri.port
+                )
+            else:
+                msg += "relay service enabled. "
+
+            msg += "To join its network use multiaddr '{}'.".format(self.multiaddrs[0])
+        else:
+            msg += "relayed mode and cannot be used as entry peer."
+
+        self.logger.info(msg)
+
     def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
         """
         Get the node's multiaddresses.
@@ -401,8 +437,8 @@ class Libp2pNode:
                 continue
             if found:
                 elem = line.strip()
-                if elem != LIST_END:
-                    multiaddrs.append(MultiAddr(elem))
+                if elem != LIST_END and len(elem) != 0:
+                    multiaddrs.append(MultiAddr.from_string(elem))
                 else:
                     found = False
         return multiaddrs
@@ -512,22 +548,20 @@ class P2PLibp2pConnection(Connection):
         if libp2p_delegate_uri is not None:
             delegate_uri = Uri(libp2p_delegate_uri)
 
-        entry_peers = [MultiAddr(maddr) for maddr in libp2p_entry_peers]
-        # TOFIX(LR) Make sure that this node is reachable in the case where
-        #   fetchai's public dht nodes are used as entry peer and public
-        #   uri is provided.
-        #   Otherwise, it may impact the proper functioning of the dht
+        entry_peers = [
+            MultiAddr.from_string(str(maddr)) for maddr in libp2p_entry_peers
+        ]
 
         if public_uri is None:
             # node will be run as a ClientDHT
             # requires entry peers to use as relay
             if entry_peers is None or len(entry_peers) == 0:
                 raise ValueError(
-                    "At least one Entry Peer should be provided when node can not be publically reachable"
+                    "At least one Entry Peer should be provided when node is run in relayed mode"
                 )
             if delegate_uri is not None:  # pragma: no cover
                 self.logger.warning(
-                    "Ignoring Delegate Uri configuration as node can not be publically reachable"
+                    "Ignoring Delegate Uri configuration as node is run in relayed mode"
                 )
         else:
             # node will be run as a full NodeDHT
@@ -535,6 +569,14 @@ class P2PLibp2pConnection(Connection):
                 raise ValueError(
                     "Local Uri must be set when Public Uri is provided. "
                     "Hint: they are the same for local host/network deployment"
+                )
+            # check if node's public host and entry peers hosts are either
+            #  both private or both public
+            if not _ip_all_private_or_all_public(
+                [public_uri.host] + [maddr.host for maddr in entry_peers]
+            ):
+                raise ValueError(  # pragma: nocover
+                    "Node's public ip and entry peers ip addresses are not in the same ip address space (private/public)"
                 )
 
         # libp2p local node
