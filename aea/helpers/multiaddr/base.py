@@ -132,10 +132,10 @@ class MultiAddr:
                     "Malformed multihash '{}': {}".format(multihash_id, str(e))
                 )
 
-            self._public_key = None
+            self._public_key = ""
             self._peerid = multihash_id
         else:
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "MultiAddr requires either public_key or multihash_id to be provided."
             )
 
@@ -189,7 +189,7 @@ class MultiAddr:
         return self._host
 
     @property
-    def port(self) -> str:
+    def port(self) -> int:
         """Get the peer port."""
         return self._port
 
