@@ -16,21 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea install' subcommand."""
 
-import pprint
-import subprocess  # nosec
 import sys
-from typing import List, Optional, cast
+from typing import Optional, cast
 
 import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import Dependency
 from aea.exceptions import AEAException, enforce
+from aea.helpers.install_dependency import install_dependency, run_install_subprocess
 
 
 @click.command()
@@ -68,50 +65,9 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
             logger.debug("Installing all the dependencies...")
             dependencies = ctx.get_dependencies()
             for name, d in dependencies.items():
-                _install_dependency(name, d)
+                install_dependency(name, d)
     except AEAException as e:
         raise click.ClickException(str(e))
-
-
-def _install_dependency(dependency_name: str, dependency: Dependency):
-    click.echo("Installing {}...".format(pprint.pformat(dependency_name)))
-    try:
-        pip_args = dependency.get_pip_install_args()
-        command = [sys.executable, "-m", "pip", "install", *pip_args]
-        logger.debug("Calling '{}'".format(" ".join(command)))
-        return_code = _run_install_subprocess(command)
-        if return_code == 1:
-            # try a second time
-            return_code = _run_install_subprocess(command)
-        enforce(return_code == 0, "Return code != 0.")
-    except Exception as e:
-        raise AEAException(
-            "An error occurred while installing {}, {}: {}".format(
-                dependency_name, dependency, str(e)
-            )
-        )
-
-
-def _run_install_subprocess(
-    install_command: List[str], install_timeout: float = 300
-) -> int:
-    """
-    Try executing install command.
-
-    :param install_command: list strings of the command
-    :param install_timeout: timeout to wait pip to install
-    :return: the return code of the subprocess
-    """
-    try:
-        subp = subprocess.Popen(install_command)  # nosec
-        subp.wait(install_timeout)
-        return_code = subp.returncode
-    finally:
-        poll = subp.poll()
-        if poll is None:  # pragma: no cover
-            subp.terminate()
-            subp.wait(30)
-    return return_code
 
 
 def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
@@ -124,7 +80,7 @@ def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
     :return: None
     """
     try:
-        returncode = _run_install_subprocess(
+        returncode = run_install_subprocess(
             [sys.executable, "-m", "pip", "install", "-r", file], install_timeout
         )
         enforce(returncode == 0, "Return code != 0.")

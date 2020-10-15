@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-
 """This module contains tests for aea/aea_builder.py."""
 import os
 import re
+import sys
+from importlib import import_module
 from pathlib import Path
 from textwrap import dedent, indent
 from typing import Collection
@@ -48,6 +49,7 @@ from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.install_dependency import run_install_subprocess
 from aea.helpers.yaml_utils import yaml_load_all
 from aea.protocols.base import Protocol
 from aea.protocols.default import DefaultMessage
@@ -733,3 +735,50 @@ class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmp
         ):
             with cd(self._get_cwd()):
                 AEABuilder.from_aea_project(Path(self._get_cwd()))
+
+
+class TestExtraDeps(AEATestCaseEmpty):
+    """Test builder set from project dir."""
+
+    def test_check_dependencies_correct(self):
+        """Test dependencies properly listed."""
+        self.run_cli_command(
+            "add", "--local", "connection", "fetchai/http_client", cwd=self._get_cwd()
+        )
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        assert "aiohttp" in builder._package_dependency_manager.pypi_dependencies
+
+    def test_install_dependency(self):
+        """Test dependencies installed."""
+        package_name = "async_generator"
+        dependency = Dependency(package_name, "==1.10")
+        sys.modules.pop(package_name, None)
+        run_install_subprocess(
+            [sys.executable, "-m", "pip", "uninstall", package_name, "-y"]
+        )
+        try:
+            import_module(package_name)
+
+            raise Exception("should not be raised")
+        except ModuleNotFoundError:
+            pass
+
+        builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with patch(
+            "aea.aea_builder._DependenciesManager.pypi_dependencies",
+            {"package_name": dependency},
+        ):
+            builder.install_pypi_dependencies()
+
+        import_module(package_name)
+
+        sys.modules.pop(package_name)
+        run_install_subprocess(
+            [sys.executable, "-m", "pip", "uninstall", package_name, "-y"]
+        )
+        try:
+            import_module(package_name)
+
+            raise Exception("should not be raised")
+        except ModuleNotFoundError:
+            pass

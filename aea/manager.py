@@ -528,7 +528,22 @@ class MultiAgentManager:
                 default_ledger, self._create_private_key(agent_name, default_ledger)
             )
         agent = builder.build()
-        return AgentAlias(project, agent_name, json_config, agent)
+        return AgentAlias(project, agent_name, json_config, agent, builder)
+
+    def install_pypi_dependencies(self) -> None:
+        """Install dependencies for every project has at least one agent alias."""
+        for project in self._projects.values():
+            self._install_pypi_dependencies_for_project(project)
+
+    def _install_pypi_dependencies_for_project(self, project: Project) -> None:
+        """Install dependencies for project specified if has at least one agent alias."""
+        if not project.agents:
+            return
+        self._install_pypi_dependencies_for_agent(list(project.agents)[0])
+
+    def _install_pypi_dependencies_for_agent(self, agent_name: str) -> None:
+        """Install dependencies for the agent registered."""
+        self._agents[agent_name].builder.install_pypi_dependencies()
 
     def _make_config(
         self,
