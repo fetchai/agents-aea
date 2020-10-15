@@ -101,6 +101,11 @@ class TestConfigCases(AEATestCaseEmpty):
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
         assert b"some_value" in result.stdout_bytes
 
+    def test_agent_nested_set_connection_dependency(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.connections.stub.dependencies"
+        self.nested_set_config(key_name, {"dep": {"version": "==1.0.0"}})
+
     def test_agent_set(self):
         """Test agent test set from path."""
         value = "testvalue"

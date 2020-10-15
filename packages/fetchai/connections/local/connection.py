@@ -23,17 +23,22 @@ import logging
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
 from threading import Thread
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, Type, cast
 
 from aea.common import Address
 from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.exceptions import enforce
 from aea.helpers.search.models import Description
-from aea.mail.base import Envelope, Message
+from aea.mail.base import Envelope, EnvelopeContext
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
-from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
+from packages.fetchai.protocols.oef_search.dialogues import (
+    OefSearchDialogue as BaseOefSearchDialogue,
+)
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
@@ -48,6 +53,42 @@ RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
 PUBLIC_ID = PublicId.from_str("fetchai/local:0.9.0")
+
+
+class OefSearchDialogue(BaseOefSearchDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[OefSearchMessage] = OefSearchMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseOefSearchDialogue.__init__(
+            self, dialogue_label=dialogue_label, self_address=self_address, role=role
+        )
+        self._envelope_context = None  # type: Optional[EnvelopeContext]
+
+    @property
+    def envelope_context(self) -> Optional[EnvelopeContext]:
+        """Get envelope_context."""
+        return self._envelope_context
+
+    @envelope_context.setter
+    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
+        """Set envelope_context."""
+        enforce(self._envelope_context is None, "envelope_context already set!")
+        self._envelope_context = envelope_context
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -184,6 +225,7 @@ class LocalNode:
         if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.7.0"):
             await self._handle_oef_message(envelope)
         else:
+            OEFLocalConnection._ensure_valid_envelope_for_external_comms(envelope)
             await self._handle_agent_message(envelope)
 
     async def _handle_oef_message(self, envelope: Envelope) -> None:
@@ -282,6 +324,7 @@ class LocalNode:
                     sender=msg.sender,
                     protocol_id=msg.protocol_id,
                     message=msg,
+                    context=dialogue.envelope_context,
                 )
                 await self._send(envelope)
             else:
@@ -320,7 +363,11 @@ class LocalNode:
             )
 
             envelope = Envelope(
-                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+                to=msg.to,
+                sender=msg.sender,
+                protocol_id=msg.protocol_id,
+                message=msg,
+                context=dialogue.envelope_context,
             )
             await self._send(envelope)
 
@@ -338,6 +385,7 @@ class LocalNode:
             raise ValueError("Call connect before!")
         message = cast(OefSearchMessage, envelope.message)
         dialogue = cast(OefSearchDialogue, self._dialogues.update(message))
+        dialogue.envelope_context = envelope.context
         return message, dialogue
 
     async def _send(self, envelope: Envelope):

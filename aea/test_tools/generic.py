@@ -149,7 +149,7 @@ def _nested_set(
         elif root_key == "dependencies":
             enforce(
                 isinstance(configuration_obj, ComponentConfiguration),
-                "Cannot set dependencies to ComponentConfiguration instance.",
+                "Cannot only set dependencies to ComponentConfiguration instances.",
             )
             configuration_obj = cast(ComponentConfiguration, configuration_obj)
             new_pypi_dependencies = dependencies_from_json(value)

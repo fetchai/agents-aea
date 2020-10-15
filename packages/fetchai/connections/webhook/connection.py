@@ -29,7 +29,7 @@ from aiohttp import web  # type: ignore
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Envelope, EnvelopeContext, URI
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
@@ -197,7 +197,7 @@ class WebhookChannel:
         payload_bytes = await request.read()
         version = str(request.version[0]) + "." + str(request.version[1])
 
-        context = EnvelopeContext(uri=URI("aea/mail/base.py"))
+        context = EnvelopeContext(connection_id=WebhookConnection.connection_id)
         http_message, _ = self._dialogues.create(
             counterparty=self.agent_address,
             performative=HttpMessage.Performative.REQUEST,
