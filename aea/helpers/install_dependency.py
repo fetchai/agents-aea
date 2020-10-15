@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Helper to install python dependecies."""
 import pprint
-import subprocess
+import subprocess  # nosec
 import sys
 from typing import List
 
