@@ -24,6 +24,8 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
+
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
@@ -156,7 +158,7 @@ class TestTacSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             tac_controller_process, check_strings, timeout=240, is_terminating=False
@@ -178,7 +180,7 @@ class TestTacSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=240, is_terminating=False
@@ -193,7 +195,7 @@ class TestTacSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             tac_aea_two_process, check_strings, timeout=240, is_terminating=False
@@ -398,7 +400,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
             "registering agent on SOEF.",
             "requesting contract deployment transaction...",
             "Start processing messages...",
@@ -432,7 +434,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
             "Start processing messages...",
             "searching for TAC, search_id=",
             "found the TAC controller. Registering...",
@@ -450,7 +452,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
             "Start processing messages...",
             "searching for TAC, search_id=",
             "found the TAC controller. Registering...",

@@ -26,6 +26,8 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
+
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
@@ -149,7 +151,7 @@ class TestMLSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             data_provider_aea_process, check_strings, timeout=240, is_terminating=False
@@ -169,7 +171,7 @@ class TestMLSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
@@ -333,7 +335,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             data_provider_aea_process, check_strings, timeout=240, is_terminating=False
@@ -353,7 +355,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
