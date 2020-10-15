@@ -380,7 +380,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
         is_running = self.is_running(process, timeout=AEA_LIBP2P_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
-        check_strings = "My libp2p addresses: ["
+        check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
             missing_strings == []

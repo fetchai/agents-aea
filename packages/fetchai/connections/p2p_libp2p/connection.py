@@ -573,7 +573,7 @@ class P2PLibp2pConnection(Connection):
             if not _ip_all_private_or_all_public(
                 [public_uri.host] + [maddr.host for maddr in entry_peers]
             ):
-                raise ValueError(
+                raise ValueError(  # pragma: nocover
                     "Node's public ip and entry peers ip addresses are not in the same ip address space (private/public)"
                 )
 
