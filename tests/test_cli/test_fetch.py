@@ -150,7 +150,7 @@ class TestFetchFromRemoteRegistry(AEATestCaseMany):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_fetch_agent_from_remote_registry_positive(self):
         """Test fetch agent from Registry for positive result."""
-        self.run_cli_command("fetch", "fetchai/my_first_aea:0.13.0")
+        self.run_cli_command("fetch", "fetchai/my_first_aea:0.12.0")
         assert "my_first_aea" in os.listdir(self.t)
 
 

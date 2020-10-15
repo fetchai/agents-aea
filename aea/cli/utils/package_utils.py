@@ -471,7 +471,7 @@ def get_item_id_present(
         ctx.agent_config, item_type, item_public_id.author, item_public_id.name
     )
     if registered_item_public_id is None:
-        raise AEAEnforceError("Cannot find item.")
+        raise AEAEnforceError("Cannot find item.")  # pragma: nocover
     return registered_item_public_id
 
 
