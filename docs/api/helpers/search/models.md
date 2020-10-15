@@ -59,6 +59,15 @@ Get the distance to another location.
 
 Compare equality of two locations.
 
+<a name="aea.helpers.search.models.Location.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation of the data model.
+
 <a name="aea.helpers.search.models.AttributeInconsistencyException"></a>
 ## AttributeInconsistencyException Objects
 
@@ -105,6 +114,15 @@ Initialize an attribute.
 
 Compare with another object.
 
+<a name="aea.helpers.search.models.Attribute.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation of the data model.
+
 <a name="aea.helpers.search.models.DataModel"></a>
 ## DataModel Objects
 
@@ -136,6 +154,15 @@ Initialize a data model.
 ```
 
 Compare with another object.
+
+<a name="aea.helpers.search.models.DataModel.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation of the data model.
 
 <a name="aea.helpers.search.models.generate_data_model"></a>
 #### generate`_`data`_`model
@@ -209,6 +236,15 @@ Compare with another object.
 ```
 
 Create an iterator.
+
+<a name="aea.helpers.search.models.Description.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation of the description.
 
 <a name="aea.helpers.search.models.Description.encode"></a>
 #### encode
@@ -411,6 +447,15 @@ True if the value satisfy the constraint, False otherwise.
 ```
 
 Check equality with another object.
+
+<a name="aea.helpers.search.models.ConstraintType.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation of the constraint type.
 
 <a name="aea.helpers.search.models.ConstraintExpr"></a>
 ## ConstraintExpr Objects
@@ -801,6 +846,15 @@ Check whether the constraint expression is valid wrt a data model.
 
 Compare with another object.
 
+<a name="aea.helpers.search.models.Constraint.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation of the constraint.
+
 <a name="aea.helpers.search.models.Query"></a>
 ## Query Objects
 
@@ -879,6 +933,15 @@ Check whether the` object is valid.
 ```
 
 Compare with another object.
+
+<a name="aea.helpers.search.models.Query.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation of the constraint.
 
 <a name="aea.helpers.search.models.Query.encode"></a>
 #### encode

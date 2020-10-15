@@ -77,6 +77,7 @@ MODULES_TO_PATH = {
     "aea.helpers.multiple_executor": "api/helpers/multiple_executor.md",
     "aea.helpers.pipe": "api/helpers/pipe.md",
     "aea.helpers.win32": "api/helpers/win32.md",
+    "aea.helpers.yaml_utils": "api/helpers/yaml_utils.md",
     "aea.identity.base": "api/identity/base.md",
     "aea.mail.base": "api/mail/base.md",
     "aea.protocols.base": "api/protocols/base.md",
@@ -105,6 +106,7 @@ MODULES_TO_PATH = {
     "aea.skills.error.handlers": "api/skills/error/handlers.md",
     "aea.test_tools.generic": "api/test_tools/generic.md",
     "aea.test_tools.test_cases": "api/helpers/test_cases.md",
+    "aea.test_tools.test_skill": "api/helpers/test_skill.md",
 }
 
 

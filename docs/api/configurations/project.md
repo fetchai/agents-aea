@@ -29,7 +29,7 @@ Init project with public_id and project's path.
  | load(cls, working_dir: str, public_id: PublicId) -> "Project"
 ```
 
-Load project with given pubblic_id to working_dir.
+Load project with given public_id to working_dir.
 
 <a name="aea.configurations.project.Project.remove"></a>
 #### remove

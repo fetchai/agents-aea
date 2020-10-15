@@ -127,6 +127,20 @@ Get the hash of a message.
 
 the hash of the message.
 
+<a name="aea.crypto.cosmos.CosmosHelper.is_valid_address"></a>
+#### is`_`valid`_`address
+
+```python
+ | @classmethod
+ | is_valid_address(cls, address: Address) -> bool
+```
+
+Check if the address is valid.
+
+**Arguments**:
+
+- `address`: the address to validate
+
 <a name="aea.crypto.cosmos.CosmosCrypto"></a>
 ## CosmosCrypto Objects
 
@@ -423,7 +437,7 @@ the unsigned CosmWasm HandleMsg
  | @staticmethod
  | @try_decorator(
  |         "Encountered exception when trying to execute wasm transaction: {}",
- |         logger_method=logger.warning,
+ |         logger_method=_default_logger.warning,
  |     )
  | try_execute_wasm_transaction(tx_signed: Any, signed_tx_filename: str = "tx.signed") -> Optional[str]
 ```
@@ -445,7 +459,7 @@ the transaction digest
  | @staticmethod
  | @try_decorator(
  |         "Encountered exception when trying to execute wasm query: {}",
- |         logger_method=logger.warning,
+ |         logger_method=_default_logger.warning,
  |     )
  | try_execute_wasm_query(contract_address: Address, query_msg: Any) -> Optional[str]
 ```

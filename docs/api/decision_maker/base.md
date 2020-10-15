@@ -313,7 +313,7 @@ internal message
 ## DecisionMakerHandler Objects
 
 ```python
-class DecisionMakerHandler(ABC)
+class DecisionMakerHandler(WithLogger,  ABC)
 ```
 
 This class implements the decision maker.
@@ -331,6 +331,7 @@ Initialize the decision maker handler.
 
 - `identity`: the identity
 - `wallet`: the wallet
+- `logger`: the logger
 - `kwargs`: the key word arguments
 
 <a name="aea.decision_maker.base.DecisionMakerHandler.agent_name"></a>
@@ -405,7 +406,7 @@ None
 ## DecisionMaker Objects
 
 ```python
-class DecisionMaker()
+class DecisionMaker(WithLogger)
 ```
 
 This class implements the decision maker.

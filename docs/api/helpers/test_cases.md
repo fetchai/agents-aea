@@ -55,7 +55,7 @@ Run from agent's directory.
 Result
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.nested_set_config"></a>
-#### force`_`set`_`config
+#### nested`_`set`_`config
 
 ```python
  | @classmethod

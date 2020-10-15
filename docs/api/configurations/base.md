@@ -3,16 +3,156 @@
 
 Classes to handle AEA configurations.
 
-<a name="aea.configurations.base.Dependency"></a>
-#### Dependency
+<a name="aea.configurations.base.PyPIPackageName"></a>
+## PyPIPackageName Objects
 
-A dependency is a dictionary with the following (optional) keys:
-    - version: a version specifier(s) (e.g. '==0.1.0').
-    - index: the PyPI index where to download the package from (default: https://pypi.org)
-    - git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
-    - ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
+```python
+class PyPIPackageName(RegexConstrainedString)
+```
+
+A PyPI Package name.
+
+<a name="aea.configurations.base.GitRef"></a>
+## GitRef Objects
+
+```python
+class GitRef(RegexConstrainedString)
+```
+
+A Git reference.
+
+It can be a branch name, a commit hash or a tag.
+
+<a name="aea.configurations.base.Dependency"></a>
+## Dependency Objects
+
+```python
+class Dependency()
+```
+
+This class represents a PyPI dependency.
+
+It contains the following information:
+- version: a version specifier(s) (e.g. '==0.1.0').
+- index: the PyPI index where to download the package from (default: https://pypi.org)
+- git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
+- ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
+
 If the 'git' field is set, the 'version' field will be ignored.
 These fields will be forwarded to the 'pip' command.
+
+<a name="aea.configurations.base.Dependency.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[Union[str, Url]] = None, git: Optional[Union[str, Url]] = None, ref: Optional[Union[GitRef, str]] = None)
+```
+
+Initialize a PyPI dependency.
+
+**Arguments**:
+
+- `name`: the package name.
+- `version`: the specifier set object
+- `index`: the URL to the PyPI server.
+- `git`: the URL to a git repository.
+- `ref`: the Git reference (branch/commit/tag).
+
+<a name="aea.configurations.base.Dependency.name"></a>
+#### name
+
+```python
+ | @property
+ | name() -> str
+```
+
+Get the name.
+
+<a name="aea.configurations.base.Dependency.version"></a>
+#### version
+
+```python
+ | @property
+ | version() -> str
+```
+
+Get the version.
+
+<a name="aea.configurations.base.Dependency.index"></a>
+#### index
+
+```python
+ | @property
+ | index() -> Optional[str]
+```
+
+Get the index.
+
+<a name="aea.configurations.base.Dependency.git"></a>
+#### git
+
+```python
+ | @property
+ | git() -> Optional[str]
+```
+
+Get the git.
+
+<a name="aea.configurations.base.Dependency.ref"></a>
+#### ref
+
+```python
+ | @property
+ | ref() -> Optional[str]
+```
+
+Get the ref.
+
+<a name="aea.configurations.base.Dependency.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, obj: Dict[str, Dict[str, str]]) -> "Dependency"
+```
+
+Parse a dependency object from a dictionary.
+
+<a name="aea.configurations.base.Dependency.to_json"></a>
+#### to`_`json
+
+```python
+ | to_json() -> Dict[str, Dict[str, str]]
+```
+
+Transform the object to JSON.
+
+<a name="aea.configurations.base.Dependency.get_pip_install_args"></a>
+#### get`_`pip`_`install`_`args
+
+```python
+ | get_pip_install_args() -> List[str]
+```
+
+Get 'pip install' arguments.
+
+<a name="aea.configurations.base.Dependency.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__() -> str
+```
+
+Get the string representation.
+
+<a name="aea.configurations.base.Dependency.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Compare with another object.
 
 <a name="aea.configurations.base.Dependencies"></a>
 #### Dependencies
@@ -22,6 +162,41 @@ The package name must satisfy  <a href="https://www.python.org/dev/peps/pep-0426
 
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
+
+<a name="aea.configurations.base.dependencies_from_json"></a>
+#### dependencies`_`from`_`json
+
+```python
+dependencies_from_json(obj: Dict[str, Dict]) -> Dependencies
+```
+
+Parse a JSON object to get an instance of Dependencies.
+
+**Arguments**:
+
+- `obj`: a dictionary whose keys are package names and values are dictionary with package specifications.
+
+**Returns**:
+
+a Dependencies object.
+
+<a name="aea.configurations.base.dependencies_to_json"></a>
+#### dependencies`_`to`_`json
+
+```python
+dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict]
+```
+
+Transform a Dependencies object into a JSON object.
+
+**Arguments**:
+
+- `dependencies`: an instance of "Dependencies" type.
+
+**Returns**:
+
+a dictionary whose keys are package names and
+values are the JSON version of a Dependency object.
 
 <a name="aea.configurations.base.PackageVersion"></a>
 ## PackageVersion Objects
@@ -147,6 +322,19 @@ Enum of component types supported.
 ```
 
 Get package type for component type.
+
+<a name="aea.configurations.base.ComponentType.plurals"></a>
+#### plurals
+
+```python
+ | @staticmethod
+ | plurals() -> Collection[str]
+```
+
+Get the collection of type names, plural.
+
+>>> ComponentType.plurals()
+['protocols', 'connections', 'skills', 'contracts']
 
 <a name="aea.configurations.base.ComponentType.to_plural"></a>
 #### to`_`plural
@@ -467,6 +655,24 @@ Check if the other public id has the same author and name of this.
 
 Return the same public id, but with latest version.
 
+<a name="aea.configurations.base.PublicId.is_valid_str"></a>
+#### is`_`valid`_`str
+
+```python
+ | @classmethod
+ | is_valid_str(cls, public_id_string: str) -> bool
+```
+
+Check if a string is a public id.
+
+**Arguments**:
+
+- `public_id_string`: the public id in string format.
+
+**Returns**:
+
+bool indicating validity
+
 <a name="aea.configurations.base.PublicId.from_str"></a>
 #### from`_`str
 
@@ -767,6 +973,15 @@ Get the hash.
 
 Get the string representation.
 
+<a name="aea.configurations.base.PackageId.__repr__"></a>
+#### `__`repr`__`
+
+```python
+ | __repr__()
+```
+
+Get the object representation in string.
+
 <a name="aea.configurations.base.PackageId.__eq__"></a>
 #### `__`eq`__`
 
@@ -980,16 +1195,6 @@ Class to represent an agent component configuration.
 ```
 
 Set component configuration.
-
-<a name="aea.configurations.base.ComponentConfiguration.pypi_dependencies"></a>
-#### pypi`_`dependencies
-
-```python
- | @property
- | pypi_dependencies() -> Dependencies
-```
-
-Get PyPI dependencies.
 
 <a name="aea.configurations.base.ComponentConfiguration.component_type"></a>
 #### component`_`type
