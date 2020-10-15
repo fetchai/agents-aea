@@ -20,6 +20,7 @@
 """This module contains multiaddress class."""
 
 from binascii import unhexlify
+from typing import Optional
 
 import base58
 import multihash  # type: ignore
@@ -92,25 +93,51 @@ def _hex_to_bytes(hexed):
 class MultiAddr:
     """Protocol Labs' Multiaddress representation of a network address."""
 
-    def __init__(self, host: str, port: int, public_key: str):
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        public_key: Optional[str] = None,
+        multihash_id: Optional[str] = None,
+    ):
         """
         Initialize a multiaddress.
 
         :param host: ip host of the address
-        :param host: port number of the address
-        :param host: hex encoded public key. Must conform to Bitcoin EC encoding standard for Secp256k1
+        :param port: port number of the address
+        :param public_key: hex encoded public key. Must conform to Bitcoin EC encoding standard for Secp256k1
+        :param multihash_id: a multihash of the public key
         """
 
         self._host = host
         self._port = port
 
-        try:
-            VerifyingKey._from_compressed(_hex_to_bytes(public_key), curves.SECP256k1)
-        except keys.MalformedPointError as e:  # pragma: no cover
-            raise Exception("Malformed public key:{}".format(str(e)))
+        if public_key is not None:
+            try:
+                VerifyingKey._from_compressed(
+                    _hex_to_bytes(public_key), curves.SECP256k1
+                )
+            except keys.MalformedPointError as e:  # pragma: no cover
+                raise ValueError(
+                    "Malformed public key '{}': {}".format(public_key, str(e))
+                )
 
-        self._public_key = public_key
-        self._peerid = self.compute_peerid(self._public_key)
+            self._public_key = public_key
+            self._peerid = self.compute_peerid(self._public_key)
+        elif multihash_id is not None:
+            try:
+                multihash.decode(base58.b58decode(multihash_id))
+            except Exception as e:
+                raise ValueError(
+                    "Malformed multihash '{}': {}".format(multihash_id, str(e))
+                )
+
+            self._public_key = None
+            self._peerid = multihash_id
+        else:
+            raise ValueError(
+                "MultiAddr requires either public_key or multihash_id to be provided."
+            )
 
     @staticmethod
     def compute_peerid(public_key: str) -> str:
@@ -133,6 +160,14 @@ class MultiAddr:
         key_mh = multihash.digest(key_serialized, algo)
         return base58.b58encode(key_mh.encode()).decode()
 
+    @classmethod
+    def from_string(cls, maddr: str) -> "MultiAddr":
+        parts = maddr.split("/")
+        if len(parts) != 7 or not parts[4].isdigit():
+            raise ValueError("Malformed multiaddress '{}'".format(maddr))
+
+        return cls(host=parts[2], port=int(parts[4]), multihash_id=parts[6])
+
     @property
     def public_key(self) -> str:
         """Get the public key."""
@@ -142,6 +177,16 @@ class MultiAddr:
     def peer_id(self) -> str:
         """Get the peer id."""
         return self._peerid
+
+    @property
+    def host(self) -> str:
+        """Get the peer host."""
+        return self._host
+
+    @property
+    def port(self) -> str:
+        """Get the peer port."""
+        return self._port
 
     def format(self) -> str:
         """Canonical representation of a multiaddress."""
