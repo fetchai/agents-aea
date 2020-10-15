@@ -68,6 +68,8 @@ PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.10.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
+LIBP2P_SUCCESS_MESSAGE = "Peer running in "
+
 
 def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
     if len(addrs) == 0:
@@ -395,7 +397,7 @@ class Libp2pNode:
 
     def describe_configuration(self) -> None:
         """Print a message discribing the libp2p node configuration"""
-        msg = "Peer running in "
+        msg = LIBP2P_SUCCESS_MESSAGE
 
         if self.public_uri is not None:
             msg += "full DHT mode with "
