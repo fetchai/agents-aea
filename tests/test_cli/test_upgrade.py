@@ -206,25 +206,17 @@ class TestRemoveAndDependencies(BaseTestCase):
         agent_config = self.load_config()
         component_id = ComponentId(self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID)
         agent_config.component_configurations[component_id] = {}  # just empty
+        agent_config.component_configurations[
+            ComponentId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
+        ] = {}  # just empty
         self.dump_config(agent_config)
 
         agent_config = self.load_config()
         assert component_id in agent_config.component_configurations
 
-        self.runner.invoke(
-            cli,
-            [
-                "-v",
-                "DEBUG",
-                "upgrade",
-                *self.LOCAL,
-                self.ITEM_TYPE,
-                f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:latest",
-            ],
-            catch_exceptions=True,
-        )
-
-        with self.with_config_update(), patch("aea.cli.add._add_item_deps"):
+        with patch(
+            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value=True
+        ), patch("aea.cli.add._add_item_deps"):
             result = self.runner.invoke(
                 cli,
                 [
@@ -245,6 +237,10 @@ class TestRemoveAndDependencies(BaseTestCase):
 
                 # check configuration was removed too
                 assert component_id not in agent_config.component_configurations
+                assert (
+                    ComponentId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
+                    in agent_config.component_configurations
+                )
             finally:
                 # restore component removed
                 result = self.runner.invoke(

@@ -21,6 +21,7 @@
 import os
 import shutil
 from collections import defaultdict
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Generator, Optional, Set, Tuple, cast
 
@@ -229,12 +230,24 @@ class ItemRemoveHelper:
         return agent_deps[package_id], can_be_removed, can_not_be_removed
 
 
-def remove_unused_component_configurations(ctx: Context) -> None:
-    """Remove all component configurations for items not registered and dump agent config."""
-    registered_components = ctx.agent_config.package_dependencies
-    for component_id in list(ctx.agent_config.component_configurations.keys()):
-        if component_id not in registered_components:
-            ctx.agent_config.component_configurations.pop(component_id)
+@contextmanager
+def remove_unused_component_configurations(ctx: Context):
+    """
+    Remove all component configurations for items not registered and dump agent config.
+
+    Context manager!
+    Clean all configurations on enter, restore actual configurations and dump agent config.
+    """
+    saved_configuration = ctx.agent_config.component_configurations
+    ctx.agent_config.component_configurations = {}
+    try:
+        yield
+    finally:
+        for component_id in ctx.agent_config.package_dependencies:
+            if component_id in saved_configuration:
+                ctx.agent_config.component_configurations[
+                    component_id
+                ] = saved_configuration[component_id]
 
     with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
         ctx.agent_loader.dump(ctx.agent_config, f)
@@ -449,7 +462,7 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     :return: None
     :raises ClickException: if some error occures.
     """
-    RemoveItem(
-        ctx, item_type, item_id, cast(bool, ctx.config.get("with_dependencies"))
-    ).remove()
-    remove_unused_component_configurations(ctx)
+    with remove_unused_component_configurations(ctx):
+        RemoveItem(
+            ctx, item_type, item_id, cast(bool, ctx.config.get("with_dependencies"))
+        ).remove()
