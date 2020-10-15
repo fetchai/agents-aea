@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """A module with config tools of the aea cli."""
-
 import logging
 import logging.config
 import os

@@ -34,6 +34,7 @@ from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.configurations.base import (
     AgentConfig,
+    ComponentId,
     DEFAULT_AEA_CONFIG_FILE,
     PackageId,
     PackageType,
@@ -196,10 +197,26 @@ class TestRemoveAndDependencies(BaseTestCase):
         Test dependency removed after upgrade.
 
         Done with mocking _add_item_deps to avoid dependencies installation.
+
+        Also checks dependency configuration removed with component
         """
         assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
 
-        with self.with_config_update(), patch("aea.cli.add._add_item_deps"):
+        # add empty component config to aea-config.py
+        agent_config = self.load_config()
+        component_id = ComponentId(self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID)
+        agent_config.component_configurations[component_id] = {}  # just empty
+        agent_config.component_configurations[
+            ComponentId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
+        ] = {}  # just empty
+        self.dump_config(agent_config)
+
+        agent_config = self.load_config()
+        assert component_id in agent_config.component_configurations
+
+        with patch(
+            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value=True
+        ), patch("aea.cli.add._add_item_deps"):
             result = self.runner.invoke(
                 cli,
                 [
@@ -216,6 +233,14 @@ class TestRemoveAndDependencies(BaseTestCase):
                 assert result.exit_code == 0
 
                 assert self.DEPENDENCY_PUBLIC_ID not in self.load_config().protocols
+                agent_config = self.load_config()
+
+                # check configuration was removed too
+                assert component_id not in agent_config.component_configurations
+                assert (
+                    ComponentId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
+                    in agent_config.component_configurations
+                )
             finally:
                 # restore component removed
                 result = self.runner.invoke(
@@ -439,7 +464,7 @@ class TestUpgradeConnectionLocally(BaseTestCase):
                     catch_exceptions=False,
                 )
 
-    def test_package_can_notupgraded_cause_required(self):
+    def test_package_can_not_upgraded_cause_required(self):
         """Test no package in registry."""
         with self.with_config_update():
             with patch(

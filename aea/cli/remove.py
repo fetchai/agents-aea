@@ -21,6 +21,7 @@
 import os
 import shutil
 from collections import defaultdict
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Generator, Optional, Set, Tuple, cast
 
@@ -34,6 +35,7 @@ from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import get_item_public_id_by_author_name
 from aea.configurations.base import (
     AgentConfig,
+    ComponentId,
     ComponentType,
     DEFAULT_AEA_CONFIG_FILE,
     PackageConfiguration,
@@ -228,6 +230,29 @@ class ItemRemoveHelper:
         return agent_deps[package_id], can_be_removed, can_not_be_removed
 
 
+@contextmanager
+def remove_unused_component_configurations(ctx: Context):
+    """
+    Remove all component configurations for items not registered and dump agent config.
+
+    Context manager!
+    Clean all configurations on enter, restore actual configurations and dump agent config.
+    """
+    saved_configuration = ctx.agent_config.component_configurations
+    ctx.agent_config.component_configurations = {}
+    try:
+        yield
+    finally:
+        for component_id in ctx.agent_config.package_dependencies:
+            if component_id in saved_configuration:
+                ctx.agent_config.component_configurations[
+                    component_id
+                ] = saved_configuration[component_id]
+
+    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
+        ctx.agent_loader.dump(ctx.agent_config, f)
+
+
 class RemoveItem:
     """Implementation of item remove from the project."""
 
@@ -396,8 +421,15 @@ class RemoveItem:
             "Removing the {} from {}".format(self.item_type, DEFAULT_AEA_CONFIG_FILE)
         )
         self.agent_items.remove(current_item)
+        self.agent_config.component_configurations.pop(
+            ComponentId(self.item_type, current_item), None
+        )
+        self._dump_agent_config()
+
+    def _dump_agent_config(self) -> None:
+        """Save agent config to the filesystem."""
         with open(os.path.join(self.ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
-            self.ctx.agent_loader.dump(self.ctx.agent_config, f)
+            self.ctx.agent_loader.dump(self.agent_config, f)
 
     def remove_dependencies(self) -> None:
         """Remove all the dependecies related only to the package."""
@@ -430,6 +462,7 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     :return: None
     :raises ClickException: if some error occures.
     """
-    RemoveItem(
-        ctx, item_type, item_id, cast(bool, ctx.config.get("with_dependencies"))
-    ).remove()
+    with remove_unused_component_configurations(ctx):
+        RemoveItem(
+            ctx, item_type, item_id, cast(bool, ctx.config.get("with_dependencies"))
+        ).remove()
