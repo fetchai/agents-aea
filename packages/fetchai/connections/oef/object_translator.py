@@ -73,7 +73,9 @@ class OEFObjectTranslator:
         loggers_by_key = {}
         for key, value in desc.values.items():
             if isinstance(value, Location):
-                oef_location = OEFLocation(value.latitude, value.longitude)
+                oef_location = OEFLocation(
+                    latitude=value.latitude, longitude=value.longitude
+                )
                 location_keys.add(key)
                 new_values[key] = oef_location
             else:
@@ -127,7 +129,7 @@ class OEFObjectTranslator:
     @classmethod
     def to_oef_location(cls, location: Location) -> OEFLocation:
         """From our location to OEF location."""
-        return OEFLocation(location.latitude, location.longitude)  # type: ignore
+        return OEFLocation(latitude=location.latitude, longitude=location.longitude)  # type: ignore
 
     @classmethod
     def to_oef_constraint_expr(
@@ -192,7 +194,9 @@ class OEFObjectTranslator:
         new_values = {}
         for key, value in oef_desc.values.items():
             if isinstance(value, OEFLocation):
-                new_values[key] = Location(value.latitude, value.longitude)
+                new_values[key] = Location(
+                    latitude=value.latitude, longitude=value.longitude
+                )
             else:
                 new_values[key] = value
 
@@ -234,7 +238,9 @@ class OEFObjectTranslator:
     @classmethod
     def from_oef_location(cls, oef_location: OEFLocation) -> Location:
         """From oef location to our location."""
-        return Location(oef_location.latitude, oef_location.longitude)
+        return Location(
+            latitude=oef_location.latitude, longitude=oef_location.longitude
+        )
 
     @classmethod
     def from_oef_constraint_expr(

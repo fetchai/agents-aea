@@ -73,7 +73,7 @@ class GenericStrategy(Model):
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = Location(
-            longitude=location["longitude"], latitude=location["latitude"]
+            latitude=location["latitude"], longitude=location["longitude"]
         )
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 

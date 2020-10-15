@@ -47,7 +47,7 @@ class MySearchBehaviour(TickerBehaviour):
 
         search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
-        agent_location = Location(longitude=location["longitude"], latitude=location["latitude"])
+        agent_location = Location(latitude=location["latitude"], longitude=location["longitude"])
         radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         close_to_my_service = Constraint(
@@ -583,7 +583,7 @@ class Strategy(Model):
         """
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
-            "location": Location(longitude=location["longitude"], latitude=location["latitude"])
+            "location": Location(latitude=location["latitude"], longitude=location["longitude"])
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         assert (

@@ -14,7 +14,7 @@ fingerprint:
   handlers.py: QmSZR738THX7bCaXkuuoPDgwF3fo6DSD3hDt7EY2pRGxBm
   ml_model.py: QmTfshn6dFnz9gKXZt7aJJczRH14bN7nk6TybwFpzkEPnk
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
-  strategy.py: QmR98NbFLJntoDfMMdps4XVZqXyoWNU97PF8WbxwpsxXxJ
+  strategy.py: QmNnxTUoGY1VGFkJreafPcPiRJh2Cqn6tkStDKAGkAHrL8
   tasks.py: QmahJRCf6V61FsqrKgMMUyJ8F7PRd6C2bjunZg2XtM9fpF
 fingerprint_ignore_patterns: []
 contracts: []

@@ -92,7 +92,7 @@ class TestGenericStrategy(BaseSkillTestCase):
         assert type(description) == Description
         assert description.data_model is AGENT_LOCATION_MODEL
         assert description.values.get("location", "") == Location(
-            longitude=self.location["longitude"], latitude=self.location["latitude"]
+            latitude=self.location["latitude"], longitude=self.location["longitude"]
         )
 
     def test_get_register_service_description(self):

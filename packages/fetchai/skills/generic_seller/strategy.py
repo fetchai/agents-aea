@@ -75,7 +75,7 @@ class GenericStrategy(Model):
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
             "location": Location(
-                longitude=location["longitude"], latitude=location["latitude"]
+                latitude=location["latitude"], longitude=location["longitude"]
             )
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
