@@ -62,7 +62,7 @@ class TestProjectAndAgentAlias:
     def test_agents(self):
         """Test agent added to project and rmeoved."""
         project = Project(self.project_public_id, self.project_path)
-        alias = AgentAlias(project, "test", [], Mock())
+        alias = AgentAlias(project, "test", [], Mock(), Mock())
         assert project.agents
         alias.remove_from_project()
         assert not project.agents

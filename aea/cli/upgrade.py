@@ -24,7 +24,11 @@ import click
 
 from aea.cli.add import add_item
 from aea.cli.registry.utils import get_latest_version_available_in_registry
-from aea.cli.remove import ItemRemoveHelper, RemoveItem
+from aea.cli.remove import (
+    ItemRemoveHelper,
+    RemoveItem,
+    remove_unused_component_configurations,
+)
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
@@ -87,7 +91,6 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     click.echo("Starting project upgrade...")
 
     item_remover = ItemRemoveHelper(ctx.agent_config)
-
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
     items_to_upgrade = set()
     upgraders: List[ItemUpgrader] = []
@@ -121,23 +124,24 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         # add it to remove
         shared_deps_to_remove.add(dep)
 
-    if shared_deps_to_remove:
-        click.echo(
-            f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
-        )
-        for dep in shared_deps_to_remove:
-            RemoveItem(
-                ctx,
-                str(dep.package_type),
-                dep.public_id,
-                with_dependencies=False,
-                force=True,
-            ).remove_item()
-        click.echo("Shared dependencies removed.")
+    with remove_unused_component_configurations(ctx):
+        if shared_deps_to_remove:
+            click.echo(
+                f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
+            )
+            for dep in shared_deps_to_remove:
+                RemoveItem(
+                    ctx,
+                    str(dep.package_type),
+                    dep.public_id,
+                    with_dependencies=False,
+                    force=True,
+                ).remove_item()
+            click.echo("Shared dependencies removed.")
 
-    for upgrader in upgraders:
-        upgrader.remove_item()
-        upgrader.add_item()
+        for upgrader in upgraders:
+            upgrader.remove_item()
+            upgrader.add_item()
 
     click.echo("Finished project upgrade. Everything is up to date now!")
 
@@ -273,21 +277,22 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
     :return: None
     """
     try:
-        item_upgrader = ItemUpgrader(ctx, item_type, item_public_id)
-        click.echo(
-            "Upgrading {} '{}/{}' from version '{}' to '{}' for the agent '{}'...".format(
-                item_type,
-                item_public_id.author,
-                item_public_id.name,
-                item_upgrader.current_item_public_id.version,
-                item_public_id.version,
-                ctx.agent_config.agent_name,
+        with remove_unused_component_configurations(ctx):
+            item_upgrader = ItemUpgrader(ctx, item_type, item_public_id)
+            click.echo(
+                "Upgrading {} '{}/{}' from version '{}' to '{}' for the agent '{}'...".format(
+                    item_type,
+                    item_public_id.author,
+                    item_public_id.name,
+                    item_upgrader.current_item_public_id.version,
+                    item_public_id.version,
+                    ctx.agent_config.agent_name,
+                )
             )
-        )
-        version = item_upgrader.check_upgrade_is_required()
+            version = item_upgrader.check_upgrade_is_required()
 
-        item_upgrader.remove_item()
-        item_upgrader.add_item()
+            item_upgrader.remove_item()
+            item_upgrader.add_item()
 
         click.echo(
             "The {} '{}/{}' for the agent '{}' has been successfully upgraded from version '{}' to '{}'.".format(

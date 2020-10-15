@@ -288,6 +288,34 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         self.manager.remove_agent(self.agent_name)
         assert self.agent_name not in self.manager.list_agents()
 
+    def test_install_pypi_dependencies(self):
+        """Test add agent alias."""
+        self.manager.start_manager()
+
+        self.manager.add_project(self.project_public_id)
+
+        # check empty project, nothing should be installed
+        with patch(
+            "aea.aea_builder.AEABuilder.install_pypi_dependencies", return_value=None
+        ) as install_mock:
+            self.manager.install_pypi_dependencies()
+            install_mock.assert_not_called()
+
+        self.manager.add_agent(
+            self.project_public_id, self.agent_name,
+        )
+
+        self.manager.add_agent(
+            self.project_public_id, self.agent_name + "2222",
+        )
+
+        # check project with two agents, install once!
+        with patch(
+            "aea.aea_builder.AEABuilder.install_pypi_dependencies", return_value=None
+        ) as install_mock:
+            self.manager.install_pypi_dependencies()
+            install_mock.assert_called_once()
+
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""

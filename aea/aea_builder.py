@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains utilities for building an AEA."""
 
 import itertools
@@ -67,6 +68,7 @@ from aea.decision_maker.default import (
 from aea.exceptions import AEAException
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.install_dependency import install_dependency
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
@@ -220,8 +222,13 @@ class _DependenciesManager:
             )
         return all_pypi_dependencies
 
+    def install_dependencies(self) -> None:
+        """Install extra dependencies for components."""
+        for name, d in self.pypi_dependencies.items():
+            install_dependency(name, d)
 
-class AEABuilder(WithLogger):
+
+class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     """
     This class helps to build an AEA.
 
@@ -841,6 +848,10 @@ class AEABuilder(WithLogger):
             )
 
         return sorted_selected_connections_ids
+
+    def install_pypi_dependencies(self) -> None:
+        """Install components extra dependecies."""
+        self._package_dependency_manager.install_dependencies()
 
     def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
         """

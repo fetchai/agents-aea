@@ -23,14 +23,11 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import TestCase, mock
 
 import yaml
 
 from aea.cli import cli
-from aea.cli.install import _install_dependency
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
-from aea.exceptions import AEAException
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
@@ -193,18 +190,3 @@ class TestInstallWithRequirementFailsWhenFileIsBad:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
-
-@mock.patch("aea.cli.install.subprocess.Popen")
-@mock.patch("aea.cli.install.subprocess.Popen.wait")
-@mock.patch("aea.cli.install.sys.exit")
-class InstallDependencyTestCase(TestCase):
-    """Test case for _install_dependency method."""
-
-    def test__install_dependency_with_git_url(self, *mocks):
-        """Test for _install_dependency method with git url."""
-        dependency = {
-            "git": "url",
-        }
-        with self.assertRaises(AEAException):
-            _install_dependency("dependency_name", dependency)
