@@ -485,7 +485,7 @@ class TestUpgradeProtocolLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade protocol --local' works."""
 
     ITEM_TYPE = "protocol"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.6.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.7.0")
 
 
 class TestUpgradeProtocolRemoteRegistry(TestUpgradeProtocolLocally):
@@ -498,7 +498,7 @@ class TestUpgradeSkillLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade skill --local' works."""
 
     ITEM_TYPE = "skill"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.8.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.9.0")
 
 
 class TestUpgradeSkillRemoteRegistry(TestUpgradeSkillLocally):
@@ -511,7 +511,7 @@ class TestUpgradeContractLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade contract' works."""
 
     ITEM_TYPE = "contract"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.10.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.11.0")
 
 
 class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):

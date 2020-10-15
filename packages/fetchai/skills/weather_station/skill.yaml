@@ -1,6 +1,6 @@
 name: weather_station
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
@@ -19,12 +19,12 @@ fingerprint_ignore_patterns:
 - '*.db'
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/ledger_api:0.4.0
-- fetchai/oef_search:0.7.0
+- fetchai/default:0.7.0
+- fetchai/fipa:0.8.0
+- fetchai/ledger_api:0.5.0
+- fetchai/oef_search:0.8.0
 skills:
-- fetchai/generic_seller:0.13.0
+- fetchai/generic_seller:0.14.0
 behaviours:
   service_registration:
     args:

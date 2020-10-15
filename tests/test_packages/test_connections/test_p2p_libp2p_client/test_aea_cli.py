@@ -62,7 +62,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
 
     def test_connection(self):
         """Test the connection can be used in an aea."""
-        self.add_item("connection", "fetchai/p2p_libp2p_client:0.7.0")
+        self.add_item("connection", "fetchai/p2p_libp2p_client:0.8.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.nested_set_config(
             config_path,

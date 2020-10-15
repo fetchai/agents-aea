@@ -357,7 +357,7 @@ def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
             semver.VersionInfo.parse(x.public_id.version),
             x.public_id.author,
             x.public_id.name,
-            x.package_type,
+            x.package_type.value,
         ),
         reverse=True,
     )
@@ -678,7 +678,7 @@ if __name__ == "__main__":
     """
     arguments = parse_arguments()
     run_hashing()
-    check_if_running_allowed()
+    # check_if_running_allowed()
     while run_once():
         run_hashing()
     sys.exit(0)

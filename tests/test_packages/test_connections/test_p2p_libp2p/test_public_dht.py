@@ -356,8 +356,8 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_connectivity(self):
         """Test connectivity."""
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
 
         # for logging
         log_file = "libp2p_node_{}.log".format(self.agent_name)
@@ -404,7 +404,7 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
 
     def test_connectivity(self):
         """Test connectivity."""
-        self.add_item("connection", "fetchai/p2p_libp2p_client:0.7.0")
+        self.add_item("connection", "fetchai/p2p_libp2p_client:0.8.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.nested_set_config(
             config_path,

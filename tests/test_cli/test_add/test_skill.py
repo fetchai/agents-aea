@@ -62,7 +62,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/error:0.6.0")
+        cls.skill_id = PublicId.from_str("fetchai/error:0.7.0")
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -144,7 +144,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/echo:0.8.0")
+        cls.skill_id = PublicId.from_str("fetchai/echo:0.9.0")
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -339,7 +339,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.8.0"
+        cls.skill_id = "fetchai/echo:0.9.0"
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -411,7 +411,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.8.0"
+        cls.skill_id = "fetchai/echo:0.9.0"
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -473,7 +473,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.13.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.14.0")
 
         contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)
@@ -490,9 +490,9 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
         """Test add skill from Registry positive result."""
         with patch("aea.cli.remove.RemoveItem.is_required_by", False):
             self.run_cli_command(
-                *["remove", "protocol", "fetchai/default:0.6.0"], cwd=self._get_cwd()
+                *["remove", "protocol", "fetchai/default:0.7.0"], cwd=self._get_cwd()
             )
-        self.add_item("skill", "fetchai/echo:0.8.0", local=False)
+        self.add_item("skill", "fetchai/echo:0.9.0", local=False)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)

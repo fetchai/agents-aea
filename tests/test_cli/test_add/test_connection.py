@@ -57,7 +57,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.3.0"
-        cls.connection_id = "fetchai/http_client:0.9.0"
+        cls.connection_id = "fetchai/http_client:0.10.0"
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
@@ -148,7 +148,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.3.0"
-        cls.connection_id = "fetchai/http_client:0.9.0"
+        cls.connection_id = "fetchai/http_client:0.10.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -345,7 +345,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/http_client:0.9.0"
+        cls.connection_id = "fetchai/http_client:0.10.0"
         cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -413,7 +413,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/http_client:0.9.0"
+        cls.connection_id = "fetchai/http_client:0.10.0"
         cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -480,7 +480,7 @@ class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""
-        self.add_item("connection", "fetchai/local:0.9.0", local=False)
+        self.add_item("connection", "fetchai/local:0.10.0", local=False)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
         items_folders = os.listdir(items_path)

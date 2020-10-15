@@ -44,7 +44,7 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.10.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.11.0")
 
 
 def _encode(e: Envelope, separator: bytes = SEPARATOR):
