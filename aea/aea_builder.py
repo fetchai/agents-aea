@@ -24,22 +24,10 @@ import logging
 import logging.config
 import os
 import pprint
-from collections import defaultdict, deque
+from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
-from typing import (
-    Any,
-    Collection,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
 from packaging.specifiers import SpecifierSet
@@ -77,7 +65,7 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_env_file, load_module
+from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
@@ -1268,12 +1256,10 @@ class AEABuilder(WithLogger):
         - detect if there are cycles
         - import skills from the leaves of the dependency graph, by finding a topological ordering.
         """
-        # the adjacency list for the dependency graph
-        depends_on: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
         # the adjacency list for the inverse dependency graph
-        supports: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
-        # nodes with no incoming edges
-        roots = copy(skill_ids)
+        dependency_to_supported_dependencies: Dict[
+            ComponentId, Set[ComponentId]
+        ] = defaultdict(set)
         for skill_id in skill_ids:
             component_path = self._find_component_directory_from_component_id(
                 aea_project_path, skill_id
@@ -1285,31 +1271,15 @@ class AEABuilder(WithLogger):
                 ),
             )
 
-            if len(configuration.skills) != 0:
-                roots.remove(skill_id)
-
-            depends_on[skill_id].update(
-                [
-                    ComponentId(ComponentType.SKILL, skill)
-                    for skill in configuration.skills
-                ]
-            )
+            dependency_to_supported_dependencies[skill_id] = set()
             for dependency in configuration.skills:
-                supports[ComponentId(ComponentType.SKILL, dependency)].add(skill_id)
+                dependency_to_supported_dependencies[
+                    ComponentId(ComponentType.SKILL, dependency)
+                ].add(skill_id)
 
-        # find topological order (Kahn's algorithm)
-        queue: Deque[ComponentId] = deque()
-        order = []
-        queue.extend(roots)
-        while len(queue) > 0:
-            current = queue.pop()
-            order.append(current)
-            for node in supports[current]:  # pragma: nocover
-                depends_on[node].discard(current)
-                if len(depends_on[node]) == 0:
-                    queue.append(node)
-
-        if any(len(edges) > 0 for edges in depends_on.values()):
+        try:
+            order = find_topological_order(dependency_to_supported_dependencies)
+        except ValueError:
             raise AEAException("Cannot load skills, there is a cyclic dependency.")
 
         return order

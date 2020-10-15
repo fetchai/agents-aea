@@ -25,6 +25,7 @@ import signal
 import time
 from pathlib import Path
 from subprocess import Popen  # nosec
+from typing import Dict, Set
 from unittest.mock import patch
 
 import pytest
@@ -33,6 +34,7 @@ from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
     exception_log_and_reraise,
+    find_topological_order,
     load_env_file,
     load_module,
     locate,
@@ -264,3 +266,53 @@ def test_recursive_update_negative_unknown_field():
         match="Key 'new_field' is not contained in the dictionary to update.",
     ):
         recursive_update(to_update, new_values)
+
+
+class TestTopologicalOrder:
+    """Test the computation of topological order."""
+
+    def test_empty_graph(self):
+        """Test the function with empty input."""
+        order = find_topological_order({})
+        assert order == []
+
+    def test_one_node(self):
+        """Test the function with only one node."""
+        order = find_topological_order({0: set()})
+        assert order == [0]
+
+    def test_one_node_with_cycle(self):
+        """Test the function with only one node and a loop."""
+        with pytest.raises(ValueError, match="Graph has at least one cycle."):
+            find_topological_order({0: {0}})
+
+    def test_two_nodes_no_edges(self):
+        """Test the function with two nodes, but no edges."""
+        order = find_topological_order({0: set(), 1: set()})
+        assert order == [0, 1]
+
+    def test_two_nodes_no_cycle(self):
+        """Test the function with two nodes, but no cycles."""
+        order = find_topological_order({0: {1}})
+        assert order == [0, 1]
+
+    def test_two_nodes_with_cycle(self):
+        """Test the function with two nodes and a cycle between them."""
+        with pytest.raises(ValueError, match="Graph has at least one cycle."):
+            find_topological_order({0: {1}, 1: {0}})
+
+    def test_two_nodes_clique(self):
+        """Test the function with a clique of two nodes."""
+        with pytest.raises(ValueError, match="Graph has at least one cycle."):
+            find_topological_order({0: {1, 0}, 1: {0, 1}})
+
+    @pytest.mark.parametrize("chain_length", [3, 5, 10, 100])
+    def test_chain(self, chain_length):
+        """Test the function with a chain."""
+        adj_list: Dict[int, Set[int]] = {}
+        for i in range(chain_length - 1):
+            adj_list[i] = {i + 1}
+        adj_list[chain_length - 1] = set()
+
+        order = find_topological_order(adj_list)
+        assert order == list(range(chain_length))
