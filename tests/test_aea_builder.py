@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains tests for aea/aea_builder.py."""
 import os
 import re
@@ -31,7 +32,6 @@ import yaml
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder, _DependenciesManager
-from aea.cli.install import _run_install_subprocess
 from aea.components.base import Component
 from aea.configurations.base import (
     ComponentId,
@@ -49,6 +49,7 @@ from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.install_dependency import run_install_subprocess
 from aea.helpers.yaml_utils import yaml_load_all
 from aea.protocols.base import Protocol
 from aea.protocols.default import DefaultMessage
@@ -752,7 +753,7 @@ class TestExtraDeps(AEATestCaseEmpty):
         package_name = "async_generator"
         dependency = Dependency(package_name, "==1.10")
         sys.modules.pop(package_name, None)
-        _run_install_subprocess(
+        run_install_subprocess(
             [sys.executable, "-m", "pip", "uninstall", package_name, "-y"]
         )
         try:
@@ -772,7 +773,7 @@ class TestExtraDeps(AEATestCaseEmpty):
         import_module(package_name)
 
         sys.modules.pop(package_name)
-        _run_install_subprocess(
+        run_install_subprocess(
             [sys.executable, "-m", "pip", "uninstall", package_name, "-y"]
         )
         try:

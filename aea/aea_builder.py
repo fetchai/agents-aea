@@ -16,6 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This module contains utilities for building an AEA."""
 
 import itertools
@@ -33,7 +35,6 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.cli.install import _install_dependency
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -67,6 +68,7 @@ from aea.decision_maker.default import (
 from aea.exceptions import AEAException
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.install_dependency import install_dependency
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
@@ -223,7 +225,7 @@ class _DependenciesManager:
     def install_dependencies(self) -> None:
         """Install extra dependencies for components."""
         for name, d in self.pypi_dependencies.items():
-            _install_dependency(name, d)
+            install_dependency(name, d)
 
 
 class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
