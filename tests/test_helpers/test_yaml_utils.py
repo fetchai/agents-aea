@@ -122,9 +122,10 @@ def test_resolve_env_variable_fails():
     with pytest.raises(
         ValueError, match="Cannot resolve environment variable 'some:wrong:variable'."
     ):
+        wrong_var = "some:wrong:variable"
         yaml_file = dedent(
-            """
-            some_variable_name: ${{some:wrong:variable}}
+            f"""
+            some_variable_name: ${{{wrong_var}}}
             """
         )
         stream = io.StringIO(yaml_file)
