@@ -140,6 +140,15 @@ version field.
 
 the merged PyPI dependencies
 
+<a name="aea.aea_builder._DependenciesManager.install_dependencies"></a>
+#### install`_`dependencies
+
+```python
+ | install_dependencies() -> None
+```
+
+Install extra dependencies for components.
+
 <a name="aea.aea_builder.AEABuilder"></a>
 ## AEABuilder Objects
 
@@ -710,6 +719,15 @@ Remove protocol.
 **Returns**:
 
 the AEABuilder
+
+<a name="aea.aea_builder.AEABuilder.install_pypi_dependencies"></a>
+#### install`_`pypi`_`dependencies
+
+```python
+ | install_pypi_dependencies() -> None
+```
+
+Install components extra dependecies.
 
 <a name="aea.aea_builder.AEABuilder.build"></a>
 #### build

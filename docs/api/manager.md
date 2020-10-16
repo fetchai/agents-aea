@@ -363,3 +363,12 @@ Return details about agent alias definition.
 
 AgentAlias
 
+<a name="aea.manager.MultiAgentManager.install_pypi_dependencies"></a>
+#### install`_`pypi`_`dependencies
+
+```python
+ | install_pypi_dependencies() -> None
+```
+
+Install dependencies for every project has at least one agent alias.
+
