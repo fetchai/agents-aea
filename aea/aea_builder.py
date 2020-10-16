@@ -1282,7 +1282,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 ),
             )
 
-            dependency_to_supported_dependencies[skill_id] = set()
+            if skill_id not in dependency_to_supported_dependencies:
+                dependency_to_supported_dependencies[skill_id] = set()
             for dependency in configuration.skills:
                 dependency_to_supported_dependencies[
                     ComponentId(ComponentType.SKILL, dependency)
