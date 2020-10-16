@@ -53,10 +53,10 @@ Agent alias representation.
 #### `__`init`__`
 
 ```python
- | __init__(project: Project, agent_name: str, config: List[Dict], agent: AEA)
+ | __init__(project: Project, agent_name: str, config: List[Dict], agent: AEA, builder: AEABuilder)
 ```
 
-Init agent alias with project, config, name, agent.
+Init agent alias with project, config, name, agent, builder.
 
 <a name="aea.configurations.project.AgentAlias.remove_from_project"></a>
 #### remove`_`from`_`project

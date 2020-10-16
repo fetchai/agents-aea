@@ -1,5 +1,25 @@
 # Release History
 
+## 0.6.3 (2020-10-16)
+
+- Adds skill testing tools and documentation
+- Adds human readable log output regarding configuration for p2p_libp2p connection
+- Adds support to install PyPI dependencies from AEABuilder and MultiAgentManager
+- Adds CLI upgrade command to upgrade entire agent project and components
+- Extends CLI remove command to include option to remove dependencies
+- Extends SOEF chain identifier support
+- Adds CLI transfer command to transfer wealth
+- Adds integration tests for skills generic buyer and seller using skill testing tool
+- Adds validation of component configurations when setting componenet configuration overrides
+- Multiple refactoring of internal configuration and helper objects and methods
+- Fix a bug on CLI push local with latest rather than version specifier
+- Adds readmes in all agent projects
+- Adds agent name in logger paths of runnable objects
+- Fixes tac skills to work with and without erc1155 contract
+- Adds additional validations on message flow
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.6.2 (2020-10-01)
 
 - Adds MultiAgentManager to manage multiple agent projects programmatically

@@ -105,8 +105,8 @@ MODULES_TO_PATH = {
     "aea.skills.tasks": "api/skills/tasks.md",
     "aea.skills.error.handlers": "api/skills/error/handlers.md",
     "aea.test_tools.generic": "api/test_tools/generic.md",
-    "aea.test_tools.test_cases": "api/helpers/test_cases.md",
-    "aea.test_tools.test_skill": "api/helpers/test_skill.md",
+    "aea.test_tools.test_cases": "api/test_tools/test_cases.md",
+    "aea.test_tools.test_skill": "api/test_tools/test_skill.md",
 }
 
 
