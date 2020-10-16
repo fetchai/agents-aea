@@ -20,7 +20,6 @@
 """The base connection package."""
 import asyncio
 import inspect
-import logging
 import re
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
@@ -35,14 +34,12 @@ from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.async_utils import AsyncState
 from aea.helpers.base import load_module
+from aea.helpers.logging import get_logger
 from aea.identity.base import Identity
 
 
 if TYPE_CHECKING:
     from aea.mail.base import Address, Envelope  # pragma: no cover
-
-
-logger = logging.getLogger(__name__)
 
 
 class ConnectionStates(Enum):
@@ -66,7 +63,7 @@ class Connection(Component, ABC):
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize the connection.
@@ -108,6 +105,22 @@ class Connection(Component, ABC):
         """Raise exception if connection is not connected."""
         if not self.is_connected:
             raise ConnectionError("Connection is not connected! Connect first!")
+
+    @staticmethod
+    def _ensure_valid_envelope_for_external_comms(envelope: "Envelope") -> None:
+        """
+        Ensure the envelope sender and to are valid addresses for agent-to-agent communication.
+
+        :param envelope: the envelope
+        """
+        enforce(
+            not envelope.is_sender_public_id,
+            f"Sender field of envelope is public id, needs to be address. Found={envelope.sender}",
+        )
+        enforce(
+            not envelope.is_to_public_id,
+            f"To field of envelope is public id, needs to be address. Found={envelope.to}",
+        )
 
     @contextmanager
     def _connect_context(self) -> Generator:
@@ -221,7 +234,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
-        **kwargs
+        **kwargs,
     ) -> "Connection":
         """
         Load a connection from a configuration.
@@ -248,6 +261,7 @@ class Connection(Component, ABC):
             filter(lambda x: re.match(connection_class_name, x[0]), classes)
         )
         name_to_class = dict(connection_classes)
+        logger = get_logger(__name__, identity.name)
         logger.debug("Processing connection {}".format(connection_class_name))
         connection_class = name_to_class.get(connection_class_name, None)
         enforce(
@@ -258,7 +272,7 @@ class Connection(Component, ABC):
             configuration=configuration,
             identity=identity,
             crypto_store=crypto_store,
-            **kwargs
+            **kwargs,
         )
 
     @property

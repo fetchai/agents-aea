@@ -43,20 +43,76 @@ TestInteractCommand = test_interact.TestInteractCommand
 class TestConfigCases(AEATestCaseEmpty):
     """Test config set/get."""
 
-    def test_agent_force_set(self):
-        """Test agent test force set from path."""
+    def test_agent_nested_set_agent_crudcollection(self):
+        """Test agent test nested set from path."""
         key_name = "agent.private_key_paths.cosmos"
-        self.force_set_config(key_name, "testdata2000")
+        self.nested_set_config(key_name, "testdata2000")
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
         assert b"testdata2000" in result.stdout_bytes
 
+    def test_agent_nested_set_agent_crudcollection_all(self):
+        """Test agent test nested set from path."""
+        key_name = "agent.private_key_paths"
+        self.nested_set_config(key_name, {"cosmos": "testdata2000"})
+        result = self.run_cli_command(
+            "config", "get", f"{key_name}.cosmos", cwd=self._get_cwd()
+        )
+        assert b"testdata2000" in result.stdout_bytes
+
+    def test_agent_nested_set_agent_simple(self):
+        """Test agent test nested set from path."""
+        key_name = "agent.registry_path"
+        self.nested_set_config(key_name, "some_path")
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert b"some_path" in result.stdout_bytes
+
+    def test_agent_nested_set_skill_simple(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.skills.error.handlers.error_handler.args.some_key"
+        self.nested_set_config(key_name, "some_value")
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert b"some_value" in result.stdout_bytes
+
+    def test_agent_nested_set_skill_simple_nested(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.skills.error.handlers.error_handler.args.some_key"
+        self.nested_set_config(f"{key_name}.some_nested_key", "some_value")
+
+    def test_agent_nested_set_skill_all(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.skills.error.handlers.error_handler.args"
+        self.nested_set_config(key_name, {"some_key": "some_value"})
+        result = self.run_cli_command(
+            "config", "get", f"{key_name}.some_key", cwd=self._get_cwd()
+        )
+        assert b"some_value" in result.stdout_bytes
+
+    def test_agent_nested_set_skill_all_nested(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.skills.error.handlers.error_handler.args"
+        self.nested_set_config(
+            key_name, {"some_key": {"some_nested_key": "some_value"}}
+        )
+
+    def test_agent_nested_set_connection_simple(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.connections.stub.config.input_file"
+        self.nested_set_config(key_name, "some_value")
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert b"some_value" in result.stdout_bytes
+
+    def test_agent_nested_set_connection_dependency(self):
+        """Test agent test nested set from path."""
+        key_name = "vendor.fetchai.connections.stub.dependencies"
+        self.nested_set_config(key_name, {"dep": {"version": "==1.0.0"}})
+
     def test_agent_set(self):
         """Test agent test set from path."""
-        self.set_config("agent.author", "testauthor21")
-        result = self.run_cli_command(
-            "config", "get", "agent.author", cwd=self._get_cwd()
-        )
-        assert b"testauthor21" in result.stdout_bytes
+        value = "testvalue"
+        key_name = "agent.logging_config.disable_existing_loggers"
+        self.set_config(key_name, value)
+        result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
+        assert value in str(result.stdout_bytes)
 
     def test_agent_get_exception(self):
         """Test agent test get non exists key."""
@@ -102,7 +158,7 @@ class TestGenericCases(AEATestCaseEmpty):
     def test_fetch_and_delete(self):
         """Fetch and delete agent from repo."""
         agent_name = "some_agent_for_tests"
-        self.fetch_agent("fetchai/my_first_aea:0.12.0", agent_name)
+        self.fetch_agent("fetchai/my_first_aea:0.13.0", agent_name)
         assert os.path.exists(agent_name)
         self.delete_agents(agent_name)
         assert not os.path.exists(agent_name)
@@ -110,7 +166,7 @@ class TestGenericCases(AEATestCaseEmpty):
     def test_diff(self):
         """Test difference_to_fetched_agent."""
         agent_name = "some_agent_for_tests2"
-        self.fetch_agent("fetchai/my_first_aea:0.12.0", agent_name)
+        self.fetch_agent("fetchai/my_first_aea:0.13.0", agent_name)
         self.run_cli_command(
             "config", "set", "agent.default_ledger", "test_ledger", cwd=agent_name
         )
@@ -119,7 +175,7 @@ class TestGenericCases(AEATestCaseEmpty):
         )
         assert b"test_ledger" in result.stdout_bytes
         diff = self.difference_to_fetched_agent(
-            "fetchai/my_first_aea:0.12.0", agent_name
+            "fetchai/my_first_aea:0.13.0", agent_name
         )
         assert diff
         assert "test_ledger" in diff[1]
@@ -127,9 +183,9 @@ class TestGenericCases(AEATestCaseEmpty):
     def test_no_diff(self):
         """Test no difference for two aea configs."""
         agent_name = "some_agent_for_tests3"
-        self.fetch_agent("fetchai/my_first_aea:0.12.0", agent_name)
+        self.fetch_agent("fetchai/my_first_aea:0.13.0", agent_name)
         diff = self.difference_to_fetched_agent(
-            "fetchai/my_first_aea:0.12.0", agent_name
+            "fetchai/my_first_aea:0.13.0", agent_name
         )
         assert not diff
 
@@ -168,10 +224,10 @@ class TestAddAndRejectComponent(AEATestCaseEmpty):
 
     def test_add_and_eject(self):
         """Test add/reject components."""
-        result = self.add_item("skill", "fetchai/echo:0.8.0", local=True)
+        result = self.add_item("skill", "fetchai/echo:0.9.0", local=True)
         assert result.exit_code == 0
 
-        result = self.eject_item("skill", "fetchai/echo:0.8.0")
+        result = self.eject_item("skill", "fetchai/echo:0.9.0")
         assert result.exit_code == 0
 
 
@@ -218,7 +274,7 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
 
     def test_send_receive_envelope(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.8.0")
+        self.add_item("skill", "fetchai/echo:0.9.0")
 
         process = self.run_agent()
         is_running = self.is_running(process)

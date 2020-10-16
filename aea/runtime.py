@@ -16,12 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of runtime for economic agent (AEA)."""
 
 import asyncio
-import logging
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
@@ -34,11 +31,9 @@ from aea.connections.base import ConnectionStates
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.helpers.async_utils import Runnable
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.logging import WithLogger, get_logger
 from aea.multiplexer import AsyncMultiplexer
 from aea.skills.tasks import TaskManager
-
-
-logger = logging.getLogger(__name__)
 
 
 class _StopRuntime(Exception):
@@ -71,7 +66,7 @@ class RuntimeStates(Enum):
     error = "error"
 
 
-class BaseRuntime(Runnable):
+class BaseRuntime(Runnable, WithLogger):
     """Abstract runtime class to create implementations."""
 
     RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
@@ -85,7 +80,7 @@ class BaseRuntime(Runnable):
         agent: AbstractAgent,
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
-        threaded=False,
+        threaded: bool = False,
     ) -> None:
         """
         Init runtime.
@@ -96,6 +91,8 @@ class BaseRuntime(Runnable):
         :return: None
         """
         Runnable.__init__(self, threaded=threaded, loop=loop if not threaded else None)
+        logger = get_logger(__name__, agent.name)
+        WithLogger.__init__(self, logger=logger)
         self._agent: AbstractAgent = agent
         self._state: AsyncState = AsyncState(RuntimeStates.stopped, RuntimeStates)
         self._state.add_callback(self._log_runtime_state)
@@ -139,7 +136,10 @@ class BaseRuntime(Runnable):
             self._agent, "_connection_exception_policy", ExceptionPolicyEnum.propagate
         )
         return AsyncMultiplexer(
-            self._agent.connections, loop=self.loop, exception_policy=exception_policy
+            self._agent.connections,
+            loop=self.loop,
+            exception_policy=exception_policy,
+            agent_name=self._agent.name,
         )
 
     def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
@@ -185,16 +185,16 @@ class BaseRuntime(Runnable):
 
     def _log_runtime_state(self, state) -> None:
         """Log a runtime state changed."""
-        logger.debug(f"[{self._agent.name}]: Runtime state changed to {state}.")
+        self.logger.debug(f"[{self._agent.name}]: Runtime state changed to {state}.")
 
     def _teardown(self) -> None:
         """Tear down runtime."""
-        logger.debug("[{}]: Runtime teardown...".format(self._agent.name))
+        self.logger.debug("[{}]: Runtime teardown...".format(self._agent.name))
         if self._decision_maker is not None:  # pragma: nocover
             self.decision_maker.stop()
         self.task_manager.stop()
         self._agent.teardown()
-        logger.debug("[{}]: Runtime teardown completed".format(self._agent.name))
+        self.logger.debug("[{}]: Runtime teardown completed".format(self._agent.name))
 
     @property
     def is_running(self) -> bool:
@@ -290,7 +290,7 @@ class AsyncRuntime(BaseRuntime):
 
         self.multiplexer.stop()
         await self.multiplexer.wait_completed()
-        logger.debug("Runtime loop stopped!")
+        self.logger.debug("Runtime loop stopped!")
 
     async def run_runtime(self) -> None:
         """Run agent and starts multiplexer."""
@@ -310,16 +310,16 @@ class AsyncRuntime(BaseRuntime):
 
     async def _start_agent_loop(self) -> None:
         """Start agent main loop asynchronous way."""
-        logger.debug("[{}]: Runtime started".format(self._agent.name))
+        self.logger.debug("[{}]: Runtime started".format(self._agent.name))
 
         await self.multiplexer.connection_status.wait(ConnectionStates.connected)
 
         self.task_manager.start()
         if self._decision_maker is not None:  # pragma: nocover
             self.decision_maker.start()
-        logger.debug("[{}]: Calling setup method...".format(self._agent.name))
+        self.logger.debug("[{}]: Calling setup method...".format(self._agent.name))
         self._agent.setup()
-        logger.debug("[{}]: Run main loop...".format(self._agent.name))
+        self.logger.debug("[{}]: Run main loop...".format(self._agent.name))
         self.main_loop.start()
         self._state.set(RuntimeStates.running)
         try:

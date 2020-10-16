@@ -29,7 +29,7 @@ from tests.conftest import CUR_PATH
 
 def test_loading():
     """Test that we correctly load AEA package modules."""
-    agent_context_mock = Mock()
+    agent_context_mock = Mock(agent_name="name")
     skill_directory = os.path.join(CUR_PATH, "data", "dummy_skill")
 
     prefixes = [

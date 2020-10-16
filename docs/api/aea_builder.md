@@ -140,11 +140,20 @@ version field.
 
 the merged PyPI dependencies
 
+<a name="aea.aea_builder._DependenciesManager.install_dependencies"></a>
+#### install`_`dependencies
+
+```python
+ | install_dependencies() -> None
+```
+
+Install extra dependencies for components.
+
 <a name="aea.aea_builder.AEABuilder"></a>
 ## AEABuilder Objects
 
 ```python
-class AEABuilder()
+class AEABuilder(WithLogger)
 ```
 
 This class helps to build an AEA.
@@ -711,6 +720,15 @@ Remove protocol.
 
 the AEABuilder
 
+<a name="aea.aea_builder.AEABuilder.install_pypi_dependencies"></a>
+#### install`_`pypi`_`dependencies
+
+```python
+ | install_pypi_dependencies() -> None
+```
+
+Install components extra dependecies.
+
 <a name="aea.aea_builder.AEABuilder.build"></a>
 #### build
 
@@ -815,11 +833,11 @@ AEABuilder instance
 
 Return path to aea-config file for the given aea project path.
 
-<a name="aea.aea_builder.make_logger"></a>
-#### make`_`logger
+<a name="aea.aea_builder.make_component_logger"></a>
+#### make`_`component`_`logger
 
 ```python
-make_logger(configuration: ComponentConfiguration, agent_name: str) -> Optional[logging.Logger]
+make_component_logger(configuration: ComponentConfiguration, agent_name: str) -> Optional[logging.Logger]
 ```
 
 Make the logger for a component.

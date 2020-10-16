@@ -26,7 +26,7 @@ import click
 
 from aea import __version__
 from aea.aea import AEA
-from aea.aea_builder import AEABuilder
+from aea.aea_builder import AEABuilder, DEFAULT_ENV_DOTFILE
 from aea.cli.install import do_install
 from aea.cli.utils.click_utils import ConnectionsOption
 from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
@@ -51,7 +51,7 @@ from aea.helpers.base import load_env_file
     "env_file",
     type=click.Path(),
     required=False,
-    default=".env",
+    default=DEFAULT_ENV_DOTFILE,
     help="Specify an environment file (default: .env)",
 )
 @click.option(

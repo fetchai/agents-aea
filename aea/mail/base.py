@@ -30,7 +30,7 @@ from aea.mail import base_pb2
 from aea.protocols.base import Message
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class AEAConnectionError(Exception):
@@ -203,7 +203,9 @@ class EnvelopeContext:
                     f"Invalid package type {package_type} in uri for envelope context."
                 )
         except ValueError as e:
-            logger.debug(f"URI - {uri.path} - not a valid package_id id. Error: {e}")
+            _default_logger.debug(
+                f"URI - {uri.path} - not a valid package_id id. Error: {e}"
+            )
         return (skill_id, connection_id)
 
     def __str__(self):
@@ -322,6 +324,10 @@ class Envelope:
         :param message: the protocol-specific message.
         :param context: the optional envelope context.
         """
+        enforce(isinstance(to, str), f"To must be string. Found '{type(to)}'")
+        enforce(
+            isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
+        )
         if isinstance(message, Message):
             message = self._check_consistency(message, to, sender)
         self._to = to
@@ -338,6 +344,7 @@ class Envelope:
     @to.setter
     def to(self, to: Address) -> None:
         """Set address of receiver."""
+        enforce(isinstance(to, str), f"To must be string. Found '{type(to)}'")
         self._to = to
 
     @property
@@ -348,6 +355,9 @@ class Envelope:
     @sender.setter
     def sender(self, sender: Address) -> None:
         """Set address of sender."""
+        enforce(
+            isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
+        )
         self._sender = sender
 
     @property
@@ -405,6 +415,16 @@ class Envelope:
         if self.context is not None:
             connection_id = self.context.connection_id
         return connection_id
+
+    @property
+    def is_sender_public_id(self):
+        """Check if sender is a public id."""
+        return PublicId.is_valid_str(self.sender)
+
+    @property
+    def is_to_public_id(self):
+        """Check if to is a public id."""
+        return PublicId.is_valid_str(self.to)
 
     @staticmethod
     def _check_consistency(message: Message, to: str, sender: str) -> Message:

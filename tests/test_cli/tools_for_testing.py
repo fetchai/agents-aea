@@ -54,6 +54,8 @@ class AgentConfigMock:
             return_value=connection_private_key_paths
         )
         self.get = lambda x: getattr(self, x, None)
+        self.component_configurations = {}
+        self.package_dependencies = set()
 
     registry_path = "registry"
     name = "name"

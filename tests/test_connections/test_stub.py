@@ -140,11 +140,11 @@ class TestStubConnectionReception:
 
     def test_reception_c(self):
         """Test that the connection receives what has been enqueued in the input file."""
-        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.7.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
+        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.8.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
         expected_envelope = Envelope(
             to="0x5E22777dD831A459535AA4306AceC9cb22eC4cB5",
             sender="default_oef",
-            protocol_id=PublicId.from_str("fetchai/oef_search:0.7.0"),
+            protocol_id=PublicId.from_str("fetchai/oef_search:0.8.0"),
             message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
         )
         with open(self.input_file_path, "ab+") as f:
@@ -155,7 +155,9 @@ class TestStubConnectionReception:
 
     def test_reception_fails(self):
         """Test the case when an error occurs during the processing of a line."""
-        patch = mock.patch.object(aea.connections.stub.connection.logger, "error")
+        patch = mock.patch.object(
+            aea.connections.stub.connection._default_logger, "error"
+        )
         mocked_logger_error = patch.start()
         with mock.patch(
             "aea.connections.stub.connection._decode",

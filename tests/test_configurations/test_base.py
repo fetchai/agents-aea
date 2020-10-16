@@ -35,7 +35,10 @@ from aea.configurations.base import (
     ConnectionConfig,
     ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_GIT_REF,
+    DEFAULT_PYPI_INDEX_URL,
     DEFAULT_SKILL_CONFIG_FILE,
+    Dependency,
     PackageId,
     PackageType,
     PackageVersion,
@@ -48,6 +51,8 @@ from aea.configurations.base import (
     _check_aea_version,
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
+    dependencies_from_json,
+    dependencies_to_json,
 )
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
@@ -242,14 +247,33 @@ class TestSkillConfig:
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
         skill_config = loader.load(skill_config_path.open())
         new_configurations = {
-            "behaviours": {"new_behaviour": {"args": {}, "class_name": "SomeClass"}},
-            "handlers": {"new_handler": {"args": {}, "class_name": "SomeClass"}},
-            "models": {"new_model": {"args": {}, "class_name": "SomeClass"}},
+            "behaviours": {"new_behaviour": {"args": {}}},
+            "handlers": {"new_handler": {"args": {}}},
+            "models": {"new_model": {"args": {}}},
         }
 
         with pytest.raises(
             ValueError,
-            match="The custom configuration for skill fetchai/error:0.6.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+            match="The custom configuration for skill fetchai/error:0.7.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+        ):
+            skill_config.update(new_configurations)
+
+    def test_update_method_raises_error_if_we_try_to_change_classname_of_skill_component(
+        self,
+    ):
+        """Test that we raise error if we try to change the 'class_name' field of a skill component configuration."""
+        skill_config_path = Path(
+            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+        )
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+        skill_config = loader.load(skill_config_path.open())
+        new_configurations = {
+            "handlers": {"error_handler": {"class_name": "SomeClass", "args": {}}},
+        }
+
+        with pytest.raises(
+            ValueError,
+            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.7.0' are not allowed to change: {'class_name'}.",
         ):
             skill_config.update(new_configurations)
 
@@ -273,58 +297,87 @@ class TestAgentConfig:
         actual_json = actual_config.json
         assert expected_json == actual_json
 
-    def test_update(self):
-        """Test the update method."""
-        aea_config_path = Path(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE)
-        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
-        aea_config: AgentConfig = loader.load(aea_config_path.open())
 
-        dummy_skill_component_id = ComponentId(
+class TestAgentConfigUpdate:
+    """Test methods that change the agent configuration."""
+
+    def setup(self):
+        """Set up the tests."""
+        self.aea_config_path = Path(
+            CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE
+        )
+        self.loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        self.aea_config: AgentConfig = self.loader.load(self.aea_config_path.open())
+        self.dummy_skill_component_id = ComponentId(
             ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID
         )
 
-        new_dummy_skill_config = {
+        self.new_dummy_skill_config = {
             "behaviours": {"dummy": {"args": dict(behaviour_arg_1=42)}},
             "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
             "models": {"dummy": {"args": dict(model_arg_1=42)}},
         }
 
+    def test_component_configurations_setter(self):
+        """Test component configuration setter."""
+        assert self.aea_config.component_configurations == {}
+        new_component_configurations = {
+            self.dummy_skill_component_id: self.new_dummy_skill_config
+        }
+        self.aea_config.component_configurations = new_component_configurations
+
+    def test_component_configurations_setter_negative(self):
+        """Test component configuration setter with wrong configurations."""
+        assert self.aea_config.component_configurations == {}
+        new_component_configurations = {
+            self.dummy_skill_component_id: {
+                "handlers": {"dummy": {"class_name": "SomeClass"}}
+            }
+        }
+        with pytest.raises(
+            ValueError, match=r"Configuration of component .* is not valid.*"
+        ):
+            self.aea_config.component_configurations = new_component_configurations
+
+    def test_update(self):
+        """Test the update method."""
         new_private_key_paths = dict(ethereum="foo")
         expected_private_key_paths = dict(
             ethereum="foo", cosmos="cosmos_private_key.txt"
         )
-        aea_config.update(
+        self.aea_config.update(
             dict(
                 component_configurations={
-                    dummy_skill_component_id: new_dummy_skill_config
+                    self.dummy_skill_component_id: self.new_dummy_skill_config
                 },
                 private_key_paths=new_private_key_paths,
                 connection_private_key_paths=new_private_key_paths,
             )
         )
         assert (
-            aea_config.component_configurations[dummy_skill_component_id]
-            == new_dummy_skill_config
+            self.aea_config.component_configurations[self.dummy_skill_component_id]
+            == self.new_dummy_skill_config
         )
         assert (
-            dict(aea_config.private_key_paths.read_all()) == expected_private_key_paths
+            dict(self.aea_config.private_key_paths.read_all())
+            == expected_private_key_paths
         )
         assert (
-            dict(aea_config.connection_private_key_paths.read_all())
+            dict(self.aea_config.connection_private_key_paths.read_all())
             == expected_private_key_paths
         )
 
         # test idempotence
-        aea_config.update(
+        self.aea_config.update(
             dict(
                 component_configurations={
-                    dummy_skill_component_id: new_dummy_skill_config
+                    self.dummy_skill_component_id: self.new_dummy_skill_config
                 }
             )
         )
         assert (
-            aea_config.component_configurations[dummy_skill_component_id]
-            == new_dummy_skill_config
+            self.aea_config.component_configurations[self.dummy_skill_component_id]
+            == self.new_dummy_skill_config
         )
 
 
@@ -376,6 +429,11 @@ class PublicIdTestCase(TestCase):
         obj1 = PublicId(AUTHOR, "name", "1.0.0")
         obj2 = PublicId(AUTHOR, "name", "2.0.0")
         self.assertTrue(obj1 < obj2)
+
+    def test_is_valid_str(self):
+        """Test is_valid_str method."""
+        assert PublicId.is_valid_str("author/name:0.1.0")
+        assert not PublicId.is_valid_str("author!name:0.1.0")
 
 
 class AgentConfigTestCase(TestCase):
@@ -624,6 +682,12 @@ def test_package_id_str():
     assert str(package_id) == "(protocol, author/name:0.1.0)"
 
 
+def test_package_id_repr():
+    """Test PackageId.__repr__"""
+    package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    assert repr(package_id) == "PackageId(protocol, author/name:0.1.0)"
+
+
 def test_package_id_lt():
     """Test PackageId.__lt__"""
     package_id_1 = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
@@ -810,3 +874,98 @@ def test_configuration_class():
     assert PackageType.CONTRACT.configuration_class() == ContractConfig
     assert PackageType.SKILL.configuration_class() == SkillConfig
     assert PackageType.AGENT.configuration_class() == AgentConfig
+
+
+class TestDependencyGetPipInstallArgs:
+    """Test 'get_pip_install_args' of 'Dependency' class."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        cls.package_name = "package_name"
+        cls.version = "<0.2.0,>=0.1.0"
+        cls.custom_index = "https://test.pypi.org"
+        cls.git_url = "https://github.com/some-author/some-repository.git"
+        cls.ref = "develop"
+
+    def test_only_name_and_version(self):
+        """Test only with name and version."""
+        # no index and no git
+        dep = Dependency(self.package_name, self.version)
+        assert dep.get_pip_install_args() == [
+            f"{self.package_name}{self.version}",
+        ]
+
+    def test_name_version_index(self):
+        """Test the method with name, version and index."""
+        dep = Dependency(self.package_name, self.version, self.custom_index)
+        assert dep.get_pip_install_args() == [
+            "-i",
+            self.custom_index,
+            f"{self.package_name}{self.version}",
+        ]
+
+    def test_name_version_index_git(self):
+        """Test the method when name, version, index and git fields are provided."""
+        dep = Dependency(
+            self.package_name, self.version, self.custom_index, self.git_url
+        )
+        git_url = f"git+{self.git_url}@{DEFAULT_GIT_REF}#egg={self.package_name}"
+        assert dep.get_pip_install_args() == ["-i", self.custom_index, git_url]
+
+    def test_name_version_index_git_ref(self):
+        """Test the method when name, version, index, git and ref fields are provided."""
+        dep = Dependency(
+            self.package_name, self.version, self.custom_index, self.git_url, self.ref
+        )
+        git_url = f"git+{self.git_url}@{self.ref}#egg={self.package_name}"
+        assert dep.get_pip_install_args() == ["-i", self.custom_index, git_url]
+
+
+def test_dependencies_from_to_json():
+    """Test serialization and deserialization of Dependencies object."""
+    version_str = "==0.1.0"
+    git_url = "https://some-git-repo.git"
+    branch = "some-branch"
+    dep1 = Dependency("package_1", version_str, DEFAULT_PYPI_INDEX_URL, git_url, branch)
+    dep2 = Dependency("package_2", version_str)
+    expected_obj = {"package_1": dep1, "package_2": dep2}
+    expected_obj_json = dependencies_to_json(expected_obj)
+    assert expected_obj_json == {
+        "package_1": {
+            "version": "==0.1.0",
+            "index": DEFAULT_PYPI_INDEX_URL,
+            "git": git_url,
+            "ref": branch,
+        },
+        "package_2": {"version": version_str},
+    }
+
+    actual_obj = dependencies_from_json(expected_obj_json)
+    assert expected_obj == actual_obj
+
+
+def test_dependency_from_json_fail_more_than_one_key():
+    """Test failure of Dependency.from_json due to more than one key at the top level."""
+    bad_obj = {"field_1": {}, "field_2": {}}
+    keys = set(bad_obj.keys())
+    with pytest.raises(ValueError, match=f"Only one key allowed, found {keys}"):
+        Dependency.from_json(bad_obj)
+
+
+def test_dependency_from_json_fail_not_allowed_keys():
+    """Test failure of Dependency.from_json due to unallowed keys"""
+    bad_obj = {"field_1": {"not-allowed-key": "value"}}
+    with pytest.raises(ValueError, match="Not allowed keys: {'not-allowed-key'}"):
+        Dependency.from_json(bad_obj)
+
+
+def test_dependency_to_string():
+    """Test dependency.__str__ method."""
+    dependency = Dependency(
+        "package_1", "==0.1.0", "https://index.com", "https://some-repo.git", "branch"
+    )
+    assert (
+        str(dependency)
+        == "Dependency(name='package_1', version='==0.1.0', index='https://index.com', git='https://some-repo.git', ref='branch')"
+    )

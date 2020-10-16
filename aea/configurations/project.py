@@ -22,6 +22,7 @@ from shutil import rmtree
 from typing import Dict, List, Set
 
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
@@ -38,7 +39,7 @@ class Project:
 
     @classmethod
     def load(cls, working_dir: str, public_id: PublicId) -> "Project":
-        """Load project with given pubblic_id to working_dir."""
+        """Load project with given public_id to working_dir."""
         ctx = Context(cwd=working_dir)
         path = os.path.join(working_dir, public_id.author, public_id.name)
         fetch_agent(
@@ -55,13 +56,19 @@ class AgentAlias:
     """Agent alias representation."""
 
     def __init__(
-        self, project: Project, agent_name: str, config: List[Dict], agent: AEA
+        self,
+        project: Project,
+        agent_name: str,
+        config: List[Dict],
+        agent: AEA,
+        builder: AEABuilder,
     ):
-        """Init agent alias with project, config, name, agent."""
+        """Init agent alias with project, config, name, agent, builder."""
         self.project = project
         self.config = config
         self.agent_name = agent_name
         self.agent = agent
+        self.builder = builder
         self.project.agents.add(self.agent_name)
 
     def remove_from_project(self):

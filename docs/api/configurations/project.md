@@ -29,7 +29,7 @@ Init project with public_id and project's path.
  | load(cls, working_dir: str, public_id: PublicId) -> "Project"
 ```
 
-Load project with given pubblic_id to working_dir.
+Load project with given public_id to working_dir.
 
 <a name="aea.configurations.project.Project.remove"></a>
 #### remove
@@ -53,10 +53,10 @@ Agent alias representation.
 #### `__`init`__`
 
 ```python
- | __init__(project: Project, agent_name: str, config: List[Dict], agent: AEA)
+ | __init__(project: Project, agent_name: str, config: List[Dict], agent: AEA, builder: AEABuilder)
 ```
 
-Init agent alias with project, config, name, agent.
+Init agent alias with project, config, name, agent, builder.
 
 <a name="aea.configurations.project.AgentAlias.remove_from_project"></a>
 #### remove`_`from`_`project

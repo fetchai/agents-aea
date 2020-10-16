@@ -20,7 +20,16 @@
 import logging
 from unittest.mock import patch
 
-from aea.helpers.logging import AgentLoggerAdapter, WithLogger
+from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
+
+
+def test_get_logger():
+    """Test the get_logger function."""
+    module_path = "some.dotted.module.path"
+    agent_name = "agent_name"
+    expected_name = "some.agent_name.dotted.module.path"
+    logger = get_logger(module_path, agent_name)
+    assert logger.name == expected_name
 
 
 def test_agent_logger_adapter():

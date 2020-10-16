@@ -38,7 +38,7 @@ from packages.fetchai.protocols.oef_search.custom_types import (
 from packages.fetchai.protocols.oef_search.custom_types import Query as CustomQuery
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.oef_search.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.oef_search.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -46,7 +46,7 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = ProtocolId.from_str("fetchai/oef_search:0.7.0")
+    protocol_id = ProtocolId.from_str("fetchai/oef_search:0.8.0")
 
     AgentsInfo = CustomAgentsInfo
 
@@ -296,7 +296,7 @@ class OefSearchMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

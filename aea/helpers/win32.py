@@ -23,7 +23,7 @@ import logging
 import platform
 
 
-logger = logging.getLogger(__file__)
+_default_logger = logging.getLogger(__name__)
 
 
 def enable_ctrl_c_support() -> None:  # pragma: no cover
@@ -34,4 +34,4 @@ def enable_ctrl_c_support() -> None:  # pragma: no cover
     kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)  # type: ignore
 
     if not kernel32.SetConsoleCtrlHandler(None, False):
-        logger.debug(f"SetConsoleCtrlHandler Error: {ctypes.get_last_error()}")  # type: ignore
+        _default_logger.debug(f"SetConsoleCtrlHandler Error: {ctypes.get_last_error()}")  # type: ignore

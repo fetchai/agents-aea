@@ -183,5 +183,6 @@ class LedgerConnection(Connection):
                 sender=request.to,
                 protocol_id=response_message.protocol_id,
                 message=response_message,
+                context=request.context,
             )
         return response_envelope

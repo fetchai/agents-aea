@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.10.0
+aea fetch fetchai/generic_seller:0.11.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.13.0
+aea eject skill fetchai/generic_seller:0.14.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.10.0
+aea fetch fetchai/generic_buyer:0.11.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.12.0
+aea eject skill fetchai/generic_buyer:0.13.0
 cd ..
 ```
 
@@ -105,7 +105,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 
 
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
@@ -314,7 +314,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 
 
 class GenericFipaHandler(Handler):
@@ -892,7 +892,7 @@ class GenericStrategy(Model):
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
             "location": Location(
-                longitude=location["longitude"], latitude=location["latitude"]
+                latitude=location["latitude"], longitude=location["longitude"]
             )
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
@@ -920,7 +920,7 @@ class GenericStrategy(Model):
         )
 
         if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()
+            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
         else:
             self._data_for_sale = data_for_sale
         self._sale_quantity = len(data_for_sale)
@@ -1013,7 +1013,7 @@ The following properties and methods deal with different aspects of the strategy
                 client=counterparty_address,
             )
         else:
-            tx_nonce = uuid.uuid4().hex
+            tx_nonce = uuid.uuid4().hex  # pragma: nocover
         proposal = Description(
             {
                 "ledger_id": self.ledger_id,
@@ -1314,10 +1314,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/ledger_api:0.4.0
-- fetchai/oef_search:0.7.0
+- fetchai/default:0.7.0
+- fetchai/fipa:0.8.0
+- fetchai/ledger_api:0.5.0
+- fetchai/oef_search:0.8.0
 skills: []
 behaviours:
   service_registration:
@@ -1424,7 +1424,7 @@ from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
 DEFAULT_SEARCH_INTERVAL = 5.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 
 
 class GenericSearchBehaviour(TickerBehaviour):
@@ -1517,7 +1517,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 
 
 class GenericFipaHandler(Handler):
@@ -1686,7 +1686,9 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
         if strategy.is_ledger_tx:
             transfer_address = fipa_msg.info.get("address", None)
             if transfer_address is not None and isinstance(transfer_address, str):
-                fipa_dialogue.terms.counterparty_address = transfer_address
+                fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
+                    transfer_address
+                )
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
@@ -2247,7 +2249,7 @@ class GenericStrategy(Model):
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = Location(
-            longitude=location["longitude"], latitude=location["latitude"]
+            latitude=location["latitude"], longitude=location["longitude"]
         )
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
@@ -2776,11 +2778,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/ledger_api:0.4.0
-- fetchai/oef_search:0.7.0
-- fetchai/signing:0.4.0
+- fetchai/default:0.7.0
+- fetchai/fipa:0.8.0
+- fetchai/ledger_api:0.5.0
+- fetchai/oef_search:0.8.0
+- fetchai/signing:0.5.0
 skills: []
 behaviours:
   search:
@@ -2881,8 +2883,8 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
-  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
+  fetchai/ledger_api:0.5.0: fetchai/ledger:0.7.0
+  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
 ```
 
 ### Fund the buyer AEA
@@ -2898,12 +2900,12 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/ledger:0.6.0
-aea add protocol fetchai/fipa:0.7.0
+aea add connection fetchai/p2p_libp2p:0.11.0
+aea add connection fetchai/soef:0.10.0
+aea add connection fetchai/ledger:0.7.0
+aea add protocol fetchai/fipa:0.8.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
 aea run
 ```
 
@@ -2914,13 +2916,13 @@ Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take 
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/ledger:0.6.0
-aea add protocol fetchai/fipa:0.7.0
-aea add protocol fetchai/signing:0.4.0
+aea add connection fetchai/p2p_libp2p:0.11.0
+aea add connection fetchai/soef:0.10.0
+aea add connection fetchai/ledger:0.7.0
+aea add protocol fetchai/fipa:0.8.0
+aea add protocol fetchai/signing:0.5.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
 ```
 
 Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:

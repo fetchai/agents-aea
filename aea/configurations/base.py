@@ -34,6 +34,7 @@ from typing import (
     Any,
     Collection,
     Dict,
+    FrozenSet,
     Generic,
     List,
     Optional,
@@ -50,10 +51,11 @@ import packaging
 import semver
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
+from urllib3.util import Url, parse_url
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
-from aea.helpers.base import recursive_update
+from aea.helpers.base import RegexConstrainedString, recursive_update
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -80,16 +82,172 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "contract.yaml",
 ]
 
-Dependency = dict
-"""
-A dependency is a dictionary with the following (optional) keys:
+DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
+DEFAULT_GIT_REF = "master"
+
+
+class PyPIPackageName(RegexConstrainedString):
+    """A PyPI Package name."""
+
+    REGEX = re.compile(r"^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9])$")
+
+
+class GitRef(RegexConstrainedString):
+    """
+    A Git reference.
+
+    It can be a branch name, a commit hash or a tag.
+    """
+
+    REGEX = re.compile(r"^[A-Za-z0-9/.\-_]+$")
+
+
+class Dependency:
+    """
+    This class represents a PyPI dependency.
+
+    It contains the following information:
     - version: a version specifier(s) (e.g. '==0.1.0').
     - index: the PyPI index where to download the package from (default: https://pypi.org)
     - git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
     - ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
-If the 'git' field is set, the 'version' field will be ignored.
-These fields will be forwarded to the 'pip' command.
-"""
+
+    If the 'git' field is set, the 'version' field will be ignored.
+    These fields will be forwarded to the 'pip' command.
+    """
+
+    def __init__(
+        self,
+        name: Union[PyPIPackageName, str],
+        version: Union[str, SpecifierSet] = "",
+        index: Optional[Union[str, Url]] = None,
+        git: Optional[Union[str, Url]] = None,
+        ref: Optional[Union[GitRef, str]] = None,
+    ):
+        """
+        Initialize a PyPI dependency.
+
+        :param name: the package name.
+        :param version: the specifier set object
+        :param index: the URL to the PyPI server.
+        :param git: the URL to a git repository.
+        :param ref: the Git reference (branch/commit/tag).
+        """
+        self._name: PyPIPackageName = PyPIPackageName(name)
+        self._version: SpecifierSet = self._parse_version(version)
+        self._index: Optional[Url] = self._parse_url(
+            index
+        ) if index is not None else None
+        self._git: Optional[Url] = self._parse_url(git) if git is not None else None
+        self._ref: Optional[GitRef] = GitRef(ref) if ref is not None else None
+
+    @property
+    def name(self) -> str:
+        """Get the name."""
+        return str(self._name)
+
+    @property
+    def version(self) -> str:
+        """Get the version."""
+        return str(self._version)
+
+    @property
+    def index(self) -> Optional[str]:
+        """Get the index."""
+        return str(self._index) if self._index else None
+
+    @property
+    def git(self) -> Optional[str]:
+        """Get the git."""
+        return str(self._git) if self._git else None
+
+    @property
+    def ref(self) -> Optional[str]:
+        """Get the ref."""
+        return str(self._ref) if self._ref else None
+
+    @staticmethod
+    def _parse_version(version: Union[str, SpecifierSet]) -> SpecifierSet:
+        """
+        Parse a version specifier set.
+
+        :param version: the version, a string or a SpecifierSet instance.
+        :return: the SpecifierSet instance.
+        """
+        return version if isinstance(version, SpecifierSet) else SpecifierSet(version)
+
+    @staticmethod
+    def _parse_url(url: Union[str, Url]) -> Url:
+        """
+        Parse an URL.
+
+        :param url: the URL, in either string or an urllib3.Url instance.
+        :return: the urllib3.Url instance.
+        """
+        return url if isinstance(url, Url) else parse_url(url)
+
+    @classmethod
+    def from_json(cls, obj: Dict[str, Dict[str, str]]) -> "Dependency":
+        """Parse a dependency object from a dictionary."""
+        if len(obj) != 1:
+            raise ValueError(f"Only one key allowed, found {set(obj.keys())}")
+        name, attributes = list(obj.items())[0]
+        allowed_keys = {"version", "index", "git", "ref"}
+        not_allowed_keys = set(attributes.keys()).difference(allowed_keys)
+        if len(not_allowed_keys) > 0:
+            raise ValueError(f"Not allowed keys: {not_allowed_keys}")
+
+        version = attributes.get("version", "")
+        index = attributes.get("index", None)
+        git = attributes.get("git", None)
+        ref = attributes.get("ref", None)
+
+        return Dependency(name=name, version=version, index=index, git=git, ref=ref)
+
+    def to_json(self) -> Dict[str, Dict[str, str]]:
+        """Transform the object to JSON."""
+        result = {}
+        if self.version != "":
+            result["version"] = self.version
+        if self.index is not None:
+            result["index"] = self.index
+        if self.git is not None:
+            result["git"] = cast(str, self.git)
+        if self.ref is not None:
+            result["ref"] = cast(str, self.ref)
+        return {self.name: result}
+
+    def get_pip_install_args(self) -> List[str]:
+        """Get 'pip install' arguments."""
+        name = self.name
+        index = self.index
+        git_url = self.git
+        revision = self.ref if self.ref is not None else DEFAULT_GIT_REF
+        version_constraint = str(self.version)
+        command: List[str] = []
+        if index is not None:
+            command += ["-i", index]
+        if git_url is not None:
+            command += ["git+" + git_url + "@" + revision + "#egg=" + name]
+        else:
+            command += [name + version_constraint]
+        return command
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        return f"{self.__class__.__name__}(name='{self.name}', version='{self.version}', index='{self.index}', git='{self.git}', ref='{self.ref}')"
+
+    def __eq__(self, other):
+        """Compare with another object."""
+        return (
+            isinstance(other, Dependency)
+            and self._name == other._name
+            and self._version == other._version
+            and self._index == other._index
+            and self._git == other._git
+            and self._ref == other._ref
+        )
+
 
 Dependencies = Dict[str, Dependency]
 """
@@ -99,6 +257,36 @@ The package name must satisfy  <a href="https://www.python.org/dev/peps/pep-0426
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
+
+
+def dependencies_from_json(obj: Dict[str, Dict]) -> Dependencies:
+    """
+    Parse a JSON object to get an instance of Dependencies.
+
+    :param obj: a dictionary whose keys are package names and values are dictionary with package specifications.
+    :return: a Dependencies object.
+    """
+    return {key: Dependency.from_json({key: value}) for key, value in obj.items()}
+
+
+def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict]:
+    """
+    Transform a Dependencies object into a JSON object.
+
+    :param dependencies: an instance of "Dependencies" type.
+    :return: a dictionary whose keys are package names and
+             values are the JSON version of a Dependency object.
+    """
+    result = {}
+    for key, value in dependencies.items():
+        dep_to_json = value.to_json()
+        package_name = list(dep_to_json.items())[0][0]
+        enforce(
+            key == package_name, f"Names of dependency differ: {key} != {package_name}"
+        )
+        result[key] = dep_to_json[key]
+    return result
+
 
 VersionInfoClass = semver.VersionInfo
 PackageVersionLike = Union[str, semver.VersionInfo]
@@ -224,6 +412,16 @@ class ComponentType(Enum):
     def to_configuration_type(self) -> PackageType:
         """Get package type for component type."""
         return PackageType(self.value)
+
+    @staticmethod
+    def plurals() -> Collection[str]:
+        """
+        Get the collection of type names, plural.
+
+        >>> ComponentType.plurals()
+        ['protocols', 'connections', 'skills', 'contracts']
+        """
+        return list(map(lambda x: x.to_plural(), ComponentType))
 
     def to_plural(self) -> str:
         """
@@ -443,6 +641,17 @@ class PublicId(JSONSerializable):
     def to_latest(self) -> "PublicId":
         """Return the same public id, but with latest version."""
         return PublicId(self.author, self.name, self.LATEST_VERSION)
+
+    @classmethod
+    def is_valid_str(cls, public_id_string: str) -> bool:
+        """
+        Check if a string is a public id.
+
+        :param public_id_string: the public id in string format.
+        :return: bool indicating validity
+        """
+        match = re.match(cls.PUBLIC_ID_REGEX, public_id_string)
+        return match is not None
 
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
@@ -676,6 +885,10 @@ class PackageId:
             package_type=self.package_type.value, public_id=self.public_id,
         )
 
+    def __repr__(self):
+        """Get the object representation in string."""
+        return f"PackageId{self.__str__()}"
+
     def __eq__(self, other):
         """Compare with another object."""
         return (
@@ -759,6 +972,7 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
     def __init__(
         self,
@@ -873,12 +1087,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             fingerprint,
             fingerprint_ignore_patterns,
         )
-        self._pypi_dependencies = dependencies if dependencies is not None else {}
-
-    @property
-    def pypi_dependencies(self) -> Dependencies:
-        """Get PyPI dependencies."""
-        return self._pypi_dependencies
+        self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
 
     @property
     def component_type(self) -> ComponentType:
@@ -935,6 +1144,8 @@ class ConnectionConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
+
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["config"])
 
     def __init__(
         self,
@@ -1026,7 +1237,7 @@ class ConnectionConfig(ComponentConfiguration):
                 "restricted_to_protocols": sorted(
                     map(str, self.restricted_to_protocols)
                 ),
-                "dependencies": self.dependencies,
+                "dependencies": dependencies_to_json(self.dependencies),
             }
         )
 
@@ -1039,7 +1250,7 @@ class ConnectionConfig(ComponentConfiguration):
         }
         excluded_protocols = obj.get("excluded_protocols", set())
         excluded_protocols = {PublicId.from_str(id_) for id_ in excluded_protocols}
-        dependencies = obj.get("dependencies", {})
+        dependencies = dependencies_from_json(obj.get("dependencies", {}))
         protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
@@ -1078,6 +1289,8 @@ class ProtocolConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_PROTOCOL_CONFIG_FILE
     package_type = PackageType.PROTOCOL
+
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
     def __init__(
         self,
@@ -1119,14 +1332,14 @@ class ProtocolConfig(ComponentConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-                "dependencies": self.dependencies,
+                "dependencies": dependencies_to_json(self.dependencies),
             }
         )
 
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        dependencies = cast(Dependencies, obj.get("dependencies", {}))
+        dependencies = dependencies_from_json(obj.get("dependencies", {}))
         return ProtocolConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1173,6 +1386,14 @@ class SkillConfig(ComponentConfiguration):
 
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
+
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
+        ["behaviours", "handlers", "models", "is_abstract"]
+    )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(
+        ["behaviours", "handlers", "models"]
+    )
+    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["args"])
 
     def __init__(
         self,
@@ -1256,13 +1477,10 @@ class SkillConfig(ComponentConfiguration):
                 "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
                 "handlers": {key: h.json for key, h in self.handlers.read_all()},
                 "models": {key: m.json for key, m in self.models.read_all()},
-                "dependencies": self.dependencies,
+                "dependencies": dependencies_to_json(self.dependencies),
                 "is_abstract": self.is_abstract,
             }
         )
-        if result["is_abstract"] is False:
-            result.pop("is_abstract")
-
         return result
 
     @classmethod
@@ -1288,7 +1506,7 @@ class SkillConfig(ComponentConfiguration):
         skills = cast(
             List[PublicId], [PublicId.from_str(id_) for id_ in obj.get("skills", [])],
         )
-        dependencies = cast(Dependencies, obj.get("dependencies", {}))
+        dependencies = dependencies_from_json(obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
             name=name,
@@ -1352,6 +1570,14 @@ class SkillConfig(ComponentConfiguration):
                 component_config = cast(
                     SkillComponentConfiguration, registry.read(component_name)
                 )
+                component_data_keys = set(component_data.keys())
+                unallowed_keys = component_data_keys.difference(
+                    SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE
+                )
+                if len(unallowed_keys) > 0:
+                    raise ValueError(
+                        f"These fields of skill component configuration '{component_name}' of skill '{self.public_id}' are not allowed to change: {unallowed_keys}."
+                    )
                 recursive_update(component_config.args, component_data.get("args", {}))
 
         _update_skill_component_config("behaviours", data)
@@ -1365,6 +1591,27 @@ class AgentConfig(PackageConfiguration):
 
     default_configuration_filename = DEFAULT_AEA_CONFIG_FILE
     package_type = PackageType.AGENT
+
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
+        [
+            "description",
+            "registry_path",
+            "logging_config",
+            "private_key_paths",
+            "connection_private_key_paths",
+            "loop_mode",
+            "runtime_mode",
+            "execution_timeout",
+            "timeout",
+            "period",
+            "max_reactions",
+            "skill_exception_policy",
+            "connection_exception_policy",
+            "default_connection",
+            "default_ledger",
+            "default_routing",
+        ]
+    )
 
     def __init__(
         self,
@@ -1438,6 +1685,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        # this attribute will be set through the setter below
         self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
             component_configurations if component_configurations is not None else {}
@@ -1457,11 +1705,18 @@ class AgentConfig(PackageConfiguration):
             PackageType.CONTRACT: self.contracts,
             PackageType.SKILL: self.skills,
         }
-        for component_id, _ in d.items():
+        for component_id, component_configuration in d.items():
             enforce(
                 component_id.public_id
                 in package_type_to_set[component_id.package_type],
                 f"Component {component_id} not declared in the agent configuration.",
+            )
+            from aea.configurations.loader import (  # pylint: disable=import-outside-toplevel,cyclic-import
+                ConfigLoader,
+            )
+
+            ConfigLoader.validate_component_configuration(
+                component_id, component_configuration
             )
         self._component_configurations = d
 
@@ -1863,6 +2118,8 @@ class ContractConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_CONTRACT_CONFIG_FILE
     package_type = PackageType.CONTRACT
 
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset([])
+
     def __init__(
         self,
         name: str,
@@ -1943,14 +2200,16 @@ class ContractConfig(ComponentConfiguration):
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "class_name": self.class_name,
                 "contract_interface_paths": self.contract_interface_paths,
-                "dependencies": self.dependencies,
+                "dependencies": dependencies_to_json(self.dependencies),
             }
         )
 
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        dependencies = cast(Dependencies, obj.get("dependencies", {}))
+        dependencies = cast(
+            Dependencies, dependencies_from_json(obj.get("dependencies", {}))
+        )
         return ContractConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),

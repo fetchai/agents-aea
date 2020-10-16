@@ -21,6 +21,14 @@ import logging
 from logging import Logger, LoggerAdapter
 from typing import Any, MutableMapping, Optional, Tuple, cast
 
+from aea.helpers.base import _get_aea_logger_name_prefix
+
+
+def get_logger(module_path: str, agent_name: str) -> Logger:
+    """Get the logger based on a module path and agent name."""
+    logger = logging.getLogger(_get_aea_logger_name_prefix(module_path, agent_name))
+    return logger
+
 
 class AgentLoggerAdapter(LoggerAdapter):
     """This class is a logger adapter that prepends the agent name to log messages."""

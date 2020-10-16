@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for loading components."""
-import logging
 import re
 from typing import Dict, Type
 
@@ -29,9 +28,6 @@ from aea.contracts.base import Contract
 from aea.exceptions import AEAPackageLoadingError, enforce
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
-
-
-logger = logging.getLogger(__name__)
 
 
 def component_type_to_class(component_type: ComponentType) -> Type[Component]:

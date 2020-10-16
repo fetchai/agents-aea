@@ -32,7 +32,7 @@ from packages.fetchai.protocols.fipa.custom_types import (
 from packages.fetchai.protocols.fipa.custom_types import Query as CustomQuery
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.fipa.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.fipa.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
-    protocol_id = ProtocolId.from_str("fetchai/fipa:0.7.0")
+    protocol_id = ProtocolId.from_str("fetchai/fipa:0.8.0")
 
     Description = CustomDescription
 
@@ -299,7 +299,7 @@ class FipaMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

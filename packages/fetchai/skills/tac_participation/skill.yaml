@@ -1,6 +1,6 @@
 name: tac_participation
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 type: skill
 description: The tac participation skill implements the logic for an AEA to participate
   in the TAC.
@@ -11,14 +11,14 @@ fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmX3UbuLohnPSLM2W6LrWcZyo4zXCr1YN5Bznu61v27SZC
   dialogues.py: QmZrJ1d9mhtfkxRg5QfsKbbtVZFa6cKna4anRWHvzNTEdD
-  game.py: QmWkoofaEnbaNp2X63HCi6pnrpJ9b8i3t7bV36GqeuVNgo
+  game.py: QmY5dV1SLK2Y1mreasZJRDXMDnJ82Un9XjR6TD8KdEhaLF
   handlers.py: QmSseAwQqHsSmj2eBPPnC9eygNSSwL1kheRVsgbLqyeDvV
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.10.0
+- fetchai/erc1155:0.11.0
 protocols:
-- fetchai/oef_search:0.7.0
-- fetchai/tac:0.7.0
+- fetchai/oef_search:0.8.0
+- fetchai/tac:0.8.0
 skills: []
 behaviours:
   tac_search:
@@ -61,3 +61,4 @@ models:
     args: {}
     class_name: TacDialogues
 dependencies: {}
+is_abstract: false

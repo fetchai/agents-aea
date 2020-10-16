@@ -19,12 +19,13 @@
 
 """This test module contains the integration test for the weather skills."""
 
-import sys
 from random import uniform
 
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
+
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
     COSMOS,
@@ -38,34 +39,22 @@ from tests.conftest import (
 )
 
 
-def _is_not_tensorflow_installed():
-    try:
-        import tensorflow  # noqa
-
-        return False
-    except ImportError:
-        return True
-
-
 @pytest.mark.integration
-class TestMLSkills(AEATestCaseMany):
-    """Test that ml skills work."""
+class TestCarPark(AEATestCaseMany):
+    """Test that carpark skills work."""
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
-    @pytest.mark.skipif(
-        _is_not_tensorflow_installed(), reason="This test requires Tensorflow.",
-    )
-    def test_ml_skills(self, pytestconfig):
-        """Run the ml skills sequence."""
-        data_provider_aea_name = "ml_data_provider"
-        model_trainer_aea_name = "ml_model_trainer"
-        self.create_agents(data_provider_aea_name, model_trainer_aea_name)
+    def test_carpark(self):
+        """Run the weather skills sequence."""
+        carpark_aea_name = "my_carpark_aea"
+        carpark_client_aea_name = "my_carpark_client_aea"
+        self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # generate random location
@@ -74,19 +63,19 @@ class TestMLSkills(AEATestCaseMany):
             "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
-        # prepare data provider agent
-        self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.12.0")
+        # Setup agent one
+        self.set_agent_context(carpark_aea_name)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.13.0")
         setting_path = (
-            "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
+            "vendor.fetchai.skills.carpark_detection.models.strategy.args.is_ledger_tx"
         )
         self.set_config(setting_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -101,27 +90,27 @@ class TestMLSkills(AEATestCaseMany):
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (
-            "vendor.fetchai.skills.ml_data_provider.models.strategy.args.location"
+            "vendor.fetchai.skills.carpark_detection.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
-        # prepare model trainer agent
-        self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/ml_train:0.12.0")
+        # Setup agent two
+        self.set_agent_context(carpark_client_aea_name)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/carpark_client:0.13.0")
         setting_path = (
-            "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
+            "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
         )
         self.set_config(setting_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -134,36 +123,17 @@ class TestMLSkills(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
-        setting_path = "vendor.fetchai.skills.ml_train.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
-
-        self.set_agent_context(data_provider_aea_name)
-        data_provider_aea_process = self.run_agent()
-
-        check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
-            "Starting libp2p node...",
-            "Connecting to libp2p node...",
-            "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+        setting_path = (
+            "vendor.fetchai.skills.carpark_client.models.strategy.args.location"
         )
-        missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
-        )
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in data_provider_aea output.".format(
-            missing_strings
-        )
+        self.nested_set_config(setting_path, location)
 
-        self.set_agent_context(model_trainer_aea_name)
-        model_trainer_aea_process = self.run_agent()
+        # Fire the sub-processes and the threads.
+        self.set_agent_context(carpark_aea_name)
+        carpark_aea_process = self.run_agent()
 
         check_strings = (
             "Downloading golang dependencies. This may take a while...",
@@ -171,52 +141,71 @@ class TestMLSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in model_trainer_aea output.".format(
+        ), "Strings {} didn't appear in carpark_aea output.".format(missing_strings)
+
+        self.set_agent_context(carpark_client_aea_name)
+        carpark_client_aea_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            LIBP2P_SUCCESS_MESSAGE,
+        )
+        missing_strings = self.missing_from_output(
+            carpark_client_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in carpark_client_aea output.".format(
             missing_strings
         )
 
         check_strings = (
             "registering agent on SOEF.",
             "registering service on SOEF.",
-            "got a Call for Terms from",
-            "a Terms message:",
-            "got an Accept from",
-            "a Data message:",
+            "received CFP from sender=",
+            "sending a PROPOSE with proposal=",
+            "received ACCEPT from sender=",
+            "sending MATCH_ACCEPT_W_INFORM to sender=",
+            "received INFORM from sender=",
+            "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, is_terminating=False
+            carpark_aea_process, check_strings, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in data_provider_aea output.".format(
-            missing_strings
-        )
+        ), "Strings {} didn't appear in carpark_aea output.".format(missing_strings)
 
         check_strings = (
             "found agents=",
-            "sending CFT to agent=",
-            "received terms message from",
-            "sending dummy transaction digest ...",
-            "received data message from",
-            "Loss:",
+            "sending CFP to agent=",
+            "received proposal=",
+            "accepting the proposal from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
-            model_trainer_aea_process, check_strings, is_terminating=False
+            carpark_client_aea_process, check_strings, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in model_trainer_aea output.".format(
+        ), "Strings {} didn't appear in carpark_client_aea output.".format(
             missing_strings
         )
 
-        self.terminate_agents(data_provider_aea_process, model_trainer_aea_process)
+        self.terminate_agents(carpark_aea_process, carpark_client_aea_process)
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
@@ -224,25 +213,21 @@ class TestMLSkills(AEATestCaseMany):
 
 
 @pytest.mark.integration
-class TestMLSkillsFetchaiLedger(AEATestCaseMany):
-    """Test that ml skills work."""
+class TestCarParkFetchaiLedger(AEATestCaseMany):
+    """Test that carpark skills work."""
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
-    @pytest.mark.skipif(
-        sys.version_info >= (3, 8),
-        reason="cannot run on 3.8 as tensorflow not installable",
-    )
-    def test_ml_skills(self, pytestconfig):
-        """Run the ml skills sequence."""
-        data_provider_aea_name = "ml_data_provider"
-        model_trainer_aea_name = "ml_model_trainer"
-        self.create_agents(data_provider_aea_name, model_trainer_aea_name)
+    def test_carpark(self):
+        """Run the weather skills sequence."""
+        carpark_aea_name = "my_carpark_aea"
+        carpark_client_aea_name = "my_carpark_client_aea"
+        self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # generate random location
@@ -251,19 +236,19 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
-        # prepare data provider agent
-        self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.12.0")
+        # Setup agent one
+        self.set_agent_context(carpark_aea_name)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.13.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_data_provider:0.13.0", data_provider_aea_name
+            "fetchai/car_detector:0.14.0", carpark_aea_name
         )
         assert (
             diff == []
@@ -281,27 +266,27 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (
-            "vendor.fetchai.skills.ml_data_provider.models.strategy.args.location"
+            "vendor.fetchai.skills.carpark_detection.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
-        # prepare model trainer agent
-        self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/ml_train:0.12.0")
+        # Setup agent two
+        self.set_agent_context(carpark_client_aea_name)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/carpark_client:0.13.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.13.0", model_trainer_aea_name
+            "fetchai/car_data_buyer:0.14.0", carpark_client_aea_name
         )
         assert (
             diff == []
@@ -320,36 +305,17 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
-        setting_path = "vendor.fetchai.skills.ml_train.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
-
-        self.set_agent_context(data_provider_aea_name)
-        data_provider_aea_process = self.run_agent()
-
-        check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
-            "Starting libp2p node...",
-            "Connecting to libp2p node...",
-            "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+        setting_path = (
+            "vendor.fetchai.skills.carpark_client.models.strategy.args.location"
         )
-        missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
-        )
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in data_provider_aea output.".format(
-            missing_strings
-        )
+        self.nested_set_config(setting_path, location)
 
-        self.set_agent_context(model_trainer_aea_name)
-        model_trainer_aea_process = self.run_agent()
+        # Fire the sub-processes and the threads.
+        self.set_agent_context(carpark_aea_name)
+        carpark_aea_process = self.run_agent()
 
         check_strings = (
             "Downloading golang dependencies. This may take a while...",
@@ -357,38 +323,59 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in model_trainer_aea output.".format(
+        ), "Strings {} didn't appear in carpark_aea output.".format(missing_strings)
+
+        self.set_agent_context(carpark_client_aea_name)
+        carpark_client_aea_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            LIBP2P_SUCCESS_MESSAGE,
+        )
+        missing_strings = self.missing_from_output(
+            carpark_client_aea_process, check_strings, timeout=240, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in carpark_client_aea output.".format(
             missing_strings
         )
 
         check_strings = (
             "registering agent on SOEF.",
             "registering service on SOEF.",
-            "got a Call for Terms from",
-            "a Terms message:",
-            "got an Accept from",
-            "a Data message:",
+            "received CFP from sender=",
+            "sending a PROPOSE with proposal=",
+            "received ACCEPT from sender=",
+            "sending MATCH_ACCEPT_W_INFORM to sender=",
+            "received INFORM from sender=",
+            "checking whether transaction=",
+            "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in data_provider_aea output.".format(
-            missing_strings
-        )
+        ), "Strings {} didn't appear in carpark_aea output.".format(missing_strings)
 
         check_strings = (
             "found agents=",
-            "sending CFT to agent=",
-            "received terms message from",
+            "sending CFP to agent=",
+            "received proposal=",
+            "accepting the proposal from sender=",
+            "received MATCH_ACCEPT_W_INFORM from sender=",
             "requesting transfer transaction from ledger api...",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
@@ -396,19 +383,19 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             "sending transaction to ledger.",
             "transaction was successfully submitted. Transaction digest=",
             "informing counterparty=",
-            "received data message from",
-            "Loss:",
+            "received INFORM from sender=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
-            model_trainer_aea_process, check_strings, is_terminating=False
+            carpark_client_aea_process, check_strings, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in model_trainer_aea output.".format(
+        ), "Strings {} didn't appear in carpark_client_aea output.".format(
             missing_strings
         )
 
-        self.terminate_agents(data_provider_aea_process, model_trainer_aea_process)
+        self.terminate_agents(carpark_aea_process, carpark_client_aea_process)
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."

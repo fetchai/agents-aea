@@ -50,5 +50,5 @@ def _get_deps(click_context: click.core.Context) -> List[str]:
     for dependency_name, dependency_data in sorted(
         ctx.get_dependencies().items(), key=lambda x: x[0]
     ):
-        deps.append(dependency_name + dependency_data.get("version", ""))
+        deps.append(dependency_name + dependency_data.version)
     return deps

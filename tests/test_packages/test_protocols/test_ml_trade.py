@@ -41,7 +41,7 @@ from packages.fetchai.protocols.ml_trade.dialogues import (
 )
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 from packages.fetchai.protocols.ml_trade.message import (
-    logger as ml_trade_message_logger,
+    _default_logger as ml_trade_message_logger,
 )
 
 from tests.conftest import ROOT_DIR

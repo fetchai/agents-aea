@@ -16,12 +16,22 @@ This class implements the object that holds the resources of an AEA.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(agent_name: str = "standalone") -> None
 ```
 
 Instantiate the resources.
 
 :return None
+
+<a name="aea.registries.resources.Resources.agent_name"></a>
+#### agent`_`name
+
+```python
+ | @property
+ | agent_name() -> str
+```
+
+Get the agent name.
 
 <a name="aea.registries.resources.Resources.component_registry"></a>
 #### component`_`registry

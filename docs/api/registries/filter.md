@@ -7,7 +7,7 @@ This module contains registries.
 ## Filter Objects
 
 ```python
-class Filter()
+class Filter(WithLogger)
 ```
 
 This class implements the filter of an AEA.

@@ -127,6 +127,13 @@ def test_get_address_from_public_key():
     assert address == fet_crypto.address, "The address must be the same."
 
 
+def test_validate_address():
+    """Test the is_valid_address functionality."""
+    account = FetchAICrypto()
+    assert FetchAIApi.is_valid_address(account.address)
+    assert not FetchAIApi.is_valid_address(account.address + "wrong")
+
+
 # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
@@ -214,7 +221,7 @@ def get_wealth(address: str):
 @pytest.mark.ledger
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
-    with caplog.at_level(logging.DEBUG, logger="aea.crypto.fetchai"):
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.fetchai._default_logger"):
         fetchai_faucet_api = FetchAIFaucetApi()
         fc = FetchAICrypto()
         fetchai_faucet_api.get_wealth(fc.address)

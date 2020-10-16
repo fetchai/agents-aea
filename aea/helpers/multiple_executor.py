@@ -41,7 +41,7 @@ from typing import (
 )
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 TaskAwaitable = Union[Task, Future]
@@ -209,11 +209,11 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
             try:
                 await future
             except KeyboardInterrupt:  # pragma: nocover
-                logger.exception("KeyboardInterrupt in task!")
+                _default_logger.exception("KeyboardInterrupt in task!")
                 if not skip_exceptions:
                     raise
             except Exception as e:  # pylint: disable=broad-except  # handle any exception with own code.
-                logger.exception("Exception in task!")
+                _default_logger.exception("Exception in task!")
                 if not skip_exceptions:
                     await self._handle_exception(self._future_task[future], e)
 
@@ -234,14 +234,14 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
         :param exc: Exception raised
         :return: None
         """
-        logger.exception(f"Exception raised during {task.id} running.")
-        logger.info(f"Exception raised during {task.id} running.")
+        _default_logger.exception(f"Exception raised during {task.id} running.")
+        _default_logger.info(f"Exception raised during {task.id} running.")
         if self._task_fail_policy == ExecutorExceptionPolicies.propagate:
             raise exc
         if self._task_fail_policy == ExecutorExceptionPolicies.log_only:
             pass
         elif self._task_fail_policy == ExecutorExceptionPolicies.stop_all:
-            logger.info(
+            _default_logger.info(
                 "Stopping executor according to fail policy cause exception raised in task"
             )
             self.stop()

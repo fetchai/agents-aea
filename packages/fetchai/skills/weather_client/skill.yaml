@@ -1,6 +1,6 @@
 name: weather_client
 author: fetchai
-version: 0.11.0
+version: 0.12.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
@@ -15,12 +15,12 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/ledger_api:0.4.0
-- fetchai/oef_search:0.7.0
+- fetchai/default:0.7.0
+- fetchai/fipa:0.8.0
+- fetchai/ledger_api:0.5.0
+- fetchai/oef_search:0.8.0
 skills:
-- fetchai/generic_buyer:0.12.0
+- fetchai/generic_buyer:0.13.0
 behaviours:
   search:
     args:
@@ -74,3 +74,4 @@ models:
       service_id: weather_data
     class_name: Strategy
 dependencies: {}
+is_abstract: false

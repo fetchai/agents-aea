@@ -220,7 +220,9 @@ def test_add_key_fails_bad_key():
     tmpdir = tempfile.mkdtemp()
     os.chdir(tmpdir)
     try:
-        with mock.patch.object(aea.crypto.helpers.logger, "error") as mock_logger_error:
+        with mock.patch.object(
+            aea.crypto.helpers._default_logger, "error"
+        ) as mock_logger_error:
 
             result = runner.invoke(
                 cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]

@@ -47,7 +47,9 @@ class Strategy(Model):
         """
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
-        self._agent_location = Location(location["longitude"], location["latitude"])
+        self._agent_location = Location(
+            latitude=location["latitude"], longitude=location["longitude"]
+        )
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)

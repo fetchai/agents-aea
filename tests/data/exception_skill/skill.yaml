@@ -21,3 +21,4 @@ behaviours:
 handlers: {}
 models: {}
 dependencies: {}
+is_abstract: false

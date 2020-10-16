@@ -14,7 +14,8 @@ pip install aea[cli_gui]
 
 
 ## Starting the GUI
-Go to the directory in which you will create new AEAs. If you followed the quick start guide, this will be `my_aea`.
+
+Go to the directory in which you will create new AEAs. If you followed the quick start guide, this will be `my_aea`. It is important to start the GUI not from within an agent project but its parent directory instead.
 
 Start the local web-server.
 ``` bash

@@ -72,7 +72,7 @@ async def test_receiving_loop_terminated():
     multiplexer = Multiplexer([_make_dummy_connection()])
     multiplexer.connect()
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         multiplexer.connection_status.set(ConnectionStates.disconnected)
         await multiplexer._receiving_loop()
         mock_logger_debug.assert_called_with("Receiving loop terminated.")
@@ -114,7 +114,7 @@ def test_connect_twice_with_loop():
         multiplexer = Multiplexer([_make_dummy_connection()], loop=running_loop)
 
         with unittest.mock.patch.object(
-            aea.mail.base.logger, "debug"
+            multiplexer.logger, "debug"
         ) as mock_logger_debug:
             assert not multiplexer.connection_status.is_connected
             multiplexer.connect()
@@ -138,7 +138,7 @@ async def test_connect_twice_a_single_connection():
 
     assert not multiplexer.connection_status.is_connected
     await multiplexer._connect_one(connection.connection_id)
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         await multiplexer._connect_one(connection.connection_id)
         mock_logger_debug.assert_called_with(
             "Connection fetchai/dummy:0.1.0 already established."
@@ -213,7 +213,7 @@ async def test_disconnect_twice_a_single_connection():
     multiplexer = Multiplexer([_make_dummy_connection()])
 
     assert not multiplexer.connection_status.is_connected
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         await multiplexer._disconnect_one(connection.connection_id)
         mock_logger_debug.assert_called_with(
             "Connection fetchai/dummy:0.1.0 already disconnected."
@@ -293,7 +293,7 @@ async def test_sending_loop_does_not_start_if_multiplexer_not_connected():
     """Test that the sending loop is stopped does not start if the multiplexer is not connected."""
     multiplexer = Multiplexer([_make_dummy_connection()])
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         await multiplexer._send_loop()
         mock_logger_debug.assert_called_with(
             "Sending loop not started. The multiplexer is not connected."
@@ -307,7 +307,7 @@ async def test_sending_loop_cancelled():
 
     multiplexer.connect()
     await asyncio.sleep(0.1)
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         multiplexer.disconnect()
         mock_logger_debug.assert_any_call("Sending loop cancelled.")
 
@@ -320,7 +320,7 @@ async def test_receiving_loop_raises_exception():
 
     with unittest.mock.patch("asyncio.wait", side_effect=Exception("a weird error.")):
         with unittest.mock.patch.object(
-            aea.mail.base.logger, "error"
+            multiplexer.logger, "error"
         ) as mock_logger_error:
             multiplexer.connect()
             time.sleep(0.1)
@@ -367,7 +367,7 @@ def test_send_envelope_error_is_logged_by_send_loop():
         context=EnvelopeContext(connection_id=fake_connection_id),
     )
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "error") as mock_logger_error:
+    with unittest.mock.patch.object(multiplexer.logger, "error") as mock_logger_error:
         multiplexer.put(envelope)
         time.sleep(0.1)
         mock_logger_error.assert_called_with(
@@ -401,7 +401,7 @@ def test_send_message_no_supported_protocol():
 
         multiplexer.connect()
 
-        with mock.patch.object(aea.mail.base.logger, "warning") as mock_logger_warning:
+        with mock.patch.object(multiplexer.logger, "warning") as mock_logger_warning:
             protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             envelope = Envelope(
                 to=identity_1.address,
@@ -500,6 +500,48 @@ async def test_inbox_outbox():
 
     finally:
         await multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_threaded_mode():
+    """Test InBox OutBox objects in threaded mode."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = AsyncMultiplexer(connections, threaded=True)
+    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg.to = "to"
+    msg.sender = "sender"
+    context = EnvelopeContext(connection_id=connection_1.connection_id)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=msg.protocol_id,
+        message=msg,
+        context=context,
+    )
+    try:
+        multiplexer.start()
+        await asyncio.sleep(0.5)
+        inbox = InBox(multiplexer)
+        outbox = OutBox(multiplexer)
+
+        assert inbox.empty()
+        assert outbox.empty()
+
+        outbox.put(envelope)
+        received = await inbox.async_get()
+        assert received == envelope
+
+        assert inbox.empty()
+        assert outbox.empty()
+
+        outbox.put_message(msg, context=context)
+        await inbox.async_wait()
+        received = inbox.get_nowait()
+        assert received == envelope
+
+    finally:
+        multiplexer.stop()
 
 
 @pytest.mark.asyncio

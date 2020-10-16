@@ -54,12 +54,12 @@ Run from agent's directory.
 
 Result
 
-<a name="aea.test_tools.test_cases.BaseAEATestCase.force_set_config"></a>
-#### force`_`set`_`config
+<a name="aea.test_tools.test_cases.BaseAEATestCase.nested_set_config"></a>
+#### nested`_`set`_`config
 
 ```python
  | @classmethod
- | force_set_config(cls, dotted_path: str, value: Any) -> None
+ | nested_set_config(cls, dotted_path: str, value: Any) -> None
 ```
 
 Force set config.
@@ -145,7 +145,7 @@ None.
 
 ```python
  | @classmethod
- | create_agents(cls, *agents_names: str) -> None
+ | create_agents(cls, *agents_names: str, *, is_local: bool = True, is_empty: bool = False) -> None
 ```
 
 Create agents in current working directory.
@@ -153,6 +153,8 @@ Create agents in current working directory.
 **Arguments**:
 
 - `agents_names`: str agent names.
+- `is_local`: a flag for local folder add True by default.
+- `empty`: optional boolean flag for skip adding default dependencies.
 
 **Returns**:
 
@@ -163,7 +165,7 @@ None
 
 ```python
  | @classmethod
- | fetch_agent(cls, public_id: str, agent_name: str) -> None
+ | fetch_agent(cls, public_id: str, agent_name: str, is_local: bool = True) -> None
 ```
 
 Create agents in current working directory.
@@ -172,6 +174,7 @@ Create agents in current working directory.
 
 - `public_id`: str public id
 - `agents_name`: str agent name.
+- `is_local`: a flag for local folder add True by default.
 
 **Returns**:
 

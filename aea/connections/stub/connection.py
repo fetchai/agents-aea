@@ -36,7 +36,7 @@ from aea.helpers.base import exception_log_and_reraise
 from aea.mail.base import Envelope
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.stub")
 
 INPUT_FILE_KEY = "input_file"
 OUTPUT_FILE_KEY = "output_file"
@@ -44,7 +44,7 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.10.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.11.0")
 
 
 def _encode(e: Envelope, separator: bytes = SEPARATOR):
@@ -71,7 +71,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
             )
         )
 
-    to = split[0].decode("utf-8").strip()
+    to = split[0].decode("utf-8").strip().lstrip("\x00")
     sender = split[1].decode("utf-8").strip()
     protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
     # protobuf messages cannot be delimited as they can contain an arbitrary byte sequence; however
@@ -89,7 +89,8 @@ def lock_file(file_descriptor: IO[bytes]):
     :param file_descriptor: file descriptio of file to lock.
     """
     with exception_log_and_reraise(
-        logger.error, f"Couldn't acquire lock for file {file_descriptor.name}: {{}}"
+        _default_logger.error,
+        f"Couldn't acquire lock for file {file_descriptor.name}: {{}}",
     ):
         file_lock.lock(file_descriptor, file_lock.LOCK_EX)
 
@@ -102,7 +103,7 @@ def lock_file(file_descriptor: IO[bytes]):
 def write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None:
     """Write envelope to file."""
     encoded_envelope = _encode(envelope, separator=SEPARATOR)
-    logger.debug("write {}: to {}".format(encoded_envelope, file_pointer.name))
+    _default_logger.debug("write {}: to {}".format(encoded_envelope, file_pointer.name))
     write_with_lock(file_pointer, encoded_envelope)
 
 
@@ -122,14 +123,16 @@ def _process_line(line: bytes) -> Optional[Envelope]:
     :return: Envelope
     :raise: Exception
     """
-    logger.debug("processing: {!r}".format(line))
+    _default_logger.debug("processing: {!r}".format(line))
     envelope = None  # type: Optional[Envelope]
     try:
         envelope = _decode(line, separator=SEPARATOR)
     except ValueError as e:
-        logger.error("Bad formatted line: {!r}. {}".format(line, e))
+        _default_logger.error("Bad formatted line: {!r}. {}".format(line, e))
     except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-        logger.exception("Error when processing a line. Message: {}".format(str(e)))
+        _default_logger.exception(
+            "Error when processing a line. Message: {}".format(str(e))
+        )
     return envelope
 
 
@@ -219,7 +222,7 @@ class StubConnection(Connection):
         if self.in_queue is None:  # pragma: nocover
             raise ValueError("Input queue not initialized.")
 
-        logger.debug("Read messages!")
+        self.logger.debug("Read messages!")
         async for data in self._file_read_and_trunc(delay=self.read_delay):
             lines = self._split_messages(data)
             for line in lines:
@@ -228,7 +231,7 @@ class StubConnection(Connection):
                 if envelope is None:
                     continue
 
-                logger.debug(f"Add envelope {envelope}")
+                self.logger.debug(f"Add envelope {envelope}")
                 await self.in_queue.put(envelope)
 
     @classmethod
@@ -246,7 +249,7 @@ class StubConnection(Connection):
         """Receive an envelope."""
         self._ensure_connected()
         if self.in_queue is None:  # pragma: nocover
-            logger.error("Input queue not initialized.")
+            self.logger.error("Input queue not initialized.")
             return None
 
         try:
@@ -255,7 +258,7 @@ class StubConnection(Connection):
             self.logger.debug("Receive cancelled.")
             return None
         except Exception:  # pylint: disable=broad-except
-            logger.exception("Stub connection receive error:")
+            self.logger.exception("Stub connection receive error:")
             return None
 
     async def connect(self) -> None:
@@ -284,7 +287,7 @@ class StubConnection(Connection):
         except CancelledError:
             pass  # task was cancelled, that was expected
         except BaseException:  # pragma: nocover  # pylint: disable=broad-except
-            logger.exception(
+            self.logger.exception(
                 "during envelop read"
             )  # do not raise exception cause it's on task stop
 
@@ -313,6 +316,7 @@ class StubConnection(Connection):
         :return: None
         """
         self._ensure_connected()
+        self._ensure_valid_envelope_for_external_comms(envelope)
         await self.loop.run_in_executor(
             self._write_pool, write_envelope, envelope, self.output_file
         )

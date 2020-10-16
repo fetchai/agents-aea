@@ -29,7 +29,7 @@ from aiohttp import web  # type: ignore
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Envelope, EnvelopeContext, URI
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
@@ -42,7 +42,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.8.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
@@ -197,7 +197,7 @@ class WebhookChannel:
         payload_bytes = await request.read()
         version = str(request.version[0]) + "." + str(request.version[1])
 
-        context = EnvelopeContext(uri=URI("aea/mail/base.py"))
+        context = EnvelopeContext(connection_id=WebhookConnection.connection_id)
         http_message, _ = self._dialogues.create(
             counterparty=self.agent_address,
             performative=HttpMessage.Performative.REQUEST,

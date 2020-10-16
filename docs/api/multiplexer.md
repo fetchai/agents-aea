@@ -74,7 +74,7 @@ This class can handle multiple connections at once.
 #### `__`init`__`
 
 ```python
- | __init__(connections: Optional[Sequence[Connection]] = None, default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None, exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, threaded: bool = False)
+ | __init__(connections: Optional[Sequence[Connection]] = None, default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None, exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, threaded: bool = False, agent_name: str = "standalone")
 ```
 
 Initialize the connection multiplexer.

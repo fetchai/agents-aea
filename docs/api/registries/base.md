@@ -16,10 +16,14 @@ This class implements an abstract registry.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__(agent_name: str = "standalone")
 ```
 
 Initialize the registry.
+
+**Arguments**:
+
+- `agent_name`: the name of the agent
 
 <a name="aea.registries.base.Registry.register"></a>
 #### register
@@ -240,10 +244,14 @@ This class implements a simple dictionary-based registry for agent components.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 
@@ -368,10 +376,14 @@ This class implements a generic registry for skill components.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 
@@ -507,10 +519,14 @@ This class implements the handlers registry.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 

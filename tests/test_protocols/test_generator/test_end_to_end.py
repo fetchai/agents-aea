@@ -75,7 +75,7 @@ class TestEndToEndGenerator(UseOef):
         builder_1.set_name(agent_name_1)
         builder_1.add_private_key(DEFAULT_LEDGER, self.private_key_path_1)
         builder_1.set_default_ledger(DEFAULT_LEDGER)
-        builder_1.set_default_connection(PublicId.from_str("fetchai/oef:0.10.0"))
+        builder_1.set_default_connection(PublicId.from_str("fetchai/oef:0.11.0"))
         builder_1.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa")
         )
@@ -101,7 +101,7 @@ class TestEndToEndGenerator(UseOef):
         builder_2.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
-        builder_2.set_default_connection(PublicId.from_str("fetchai/oef:0.10.0"))
+        builder_2.set_default_connection(PublicId.from_str("fetchai/oef:0.11.0"))
         builder_2.add_component(
             ComponentType.PROTOCOL,
             Path(PATH_TO_T_PROTOCOL),
@@ -113,10 +113,10 @@ class TestEndToEndGenerator(UseOef):
 
         # create AEAs
         aea_1 = builder_1.build(
-            connection_ids=[PublicId.from_str("fetchai/oef:0.10.0")]
+            connection_ids=[PublicId.from_str("fetchai/oef:0.11.0")]
         )
         aea_2 = builder_2.build(
-            connection_ids=[PublicId.from_str("fetchai/oef:0.10.0")]
+            connection_ids=[PublicId.from_str("fetchai/oef:0.11.0")]
         )
 
         # dialogues

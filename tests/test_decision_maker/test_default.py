@@ -127,7 +127,7 @@ class TestDecisionMaker:
     @classmethod
     def _patch_logger(cls):
         cls.patch_logger_warning = mock.patch.object(
-            aea.decision_maker.default.logger, "warning"
+            aea.decision_maker.default._default_logger, "warning"
         )
         cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
 
@@ -246,7 +246,7 @@ class TestDecisionMaker2:
     @classmethod
     def _patch_logger(cls):
         cls.patch_logger_warning = mock.patch.object(
-            aea.decision_maker.default.logger, "warning"
+            aea.decision_maker.default._default_logger, "warning"
         )
         cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
 

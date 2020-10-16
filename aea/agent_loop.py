@@ -21,7 +21,6 @@
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
-import logging
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
@@ -40,10 +39,7 @@ from aea.helpers.async_utils import (
     Runnable,
 )
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
-from aea.helpers.logging import WithLogger
-
-
-logger = logging.getLogger(__name__)
+from aea.helpers.logging import WithLogger, get_logger
 
 
 class AgentLoopException(AEAException):
@@ -75,6 +71,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         :params agent: Agent or AEA to run.
         :params loop: optional asyncio event loop. if not specified a new loop will be created.
         """
+        logger = get_logger(__name__, agent.name)
         WithLogger.__init__(self, logger)
         Runnable.__init__(self, loop=loop, threaded=threaded)
 
@@ -123,7 +120,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
             with suppress(BaseException):
                 await t
         self._state.set(AgentLoopStates.stopped)
-        logger.debug("agent loop stopped")
+        self.logger.debug("agent loop stopped")
 
     async def _gather_tasks(self) -> None:
         """Wait till first task exception."""

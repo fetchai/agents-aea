@@ -26,7 +26,7 @@ from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class CryptoStore:
@@ -149,7 +149,7 @@ class Wallet:
         """
         crypto_object = self.crypto_objects.get(crypto_id, None)
         if crypto_object is None:
-            logger.warning(
+            _default_logger.warning(
                 "No crypto object for crypto_id={} in wallet!".format(crypto_id)
             )
             signature = None  # type: Optional[str]
@@ -167,7 +167,7 @@ class Wallet:
         """
         crypto_object = self.crypto_objects.get(crypto_id, None)
         if crypto_object is None:
-            logger.warning(
+            _default_logger.warning(
                 "No crypto object for crypto_id={} in wallet!".format(crypto_id)
             )
             signed_transaction = None  # type: Optional[Any]

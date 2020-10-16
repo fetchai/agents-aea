@@ -28,7 +28,7 @@ import time
 from typing import Dict, Union
 
 
-logger = logging.getLogger(
+_default_logger = logging.getLogger(
     "aea.packages.fetchai.skills.weather_station.dummy_weather_station_data"
 )
 
@@ -64,7 +64,9 @@ cur.execute(command)
 cur.close()
 con.commit()
 if con is not None:
-    logger.debug("Weather station: I closed the db after checking it is populated!")
+    _default_logger.debug(
+        "Weather station: I closed the db after checking it is populated!"
+    )
     con.close()
 
 
@@ -107,7 +109,7 @@ class Forecast:
                 tagged_data["wind_gust"],
             ),
         )
-        logger.info("Wheather station: I added data in the db!")
+        _default_logger.info("Wheather station: I added data in the db!")
         cur_.close()
         con_.commit()
         con_.close()
