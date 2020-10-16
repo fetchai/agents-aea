@@ -438,6 +438,20 @@ Attempts to update the transaction with a gas estimate.
 
 the transaction (potentially updated)
 
+<a name="aea.crypto.ethereum.EthereumApi.is_valid_address"></a>
+#### is`_`valid`_`address
+
+```python
+ | @classmethod
+ | is_valid_address(cls, address: Address) -> bool
+```
+
+Check if the address is valid.
+
+**Arguments**:
+
+- `address`: the address to validate
+
 <a name="aea.crypto.ethereum.EthereumFaucetApi"></a>
 ## EthereumFaucetApi Objects
 

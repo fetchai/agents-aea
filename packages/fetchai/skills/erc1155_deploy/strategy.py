@@ -84,7 +84,9 @@ class Strategy(Model):
 
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
-            "location": Location(location["longitude"], location["latitude"])
+            "location": Location(
+                latitude=location["latitude"], longitude=location["longitude"]
+            )
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         enforce(

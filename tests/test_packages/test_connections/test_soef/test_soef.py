@@ -120,7 +120,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.8.0")},
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
@@ -661,7 +661,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.8.0")},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
@@ -679,7 +679,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.8.0")},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )

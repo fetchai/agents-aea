@@ -7,7 +7,7 @@ This module contains the implementation of a generic agent.
 ## Agent Objects
 
 ```python
-class Agent(AbstractAgent)
+class Agent(AbstractAgent,  WithLogger)
 ```
 
 This class provides an abstract base class for a generic agent.
@@ -16,7 +16,7 @@ This class provides an abstract base class for a generic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, period: float = 1.0, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None) -> None
+ | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, period: float = 1.0, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, logger: Logger = _default_logger) -> None
 ```
 
 Instantiate the agent.

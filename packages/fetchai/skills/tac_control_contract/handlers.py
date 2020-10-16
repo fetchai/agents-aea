@@ -45,7 +45,7 @@ from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 
 
 TacHandler = BaseTacHandler

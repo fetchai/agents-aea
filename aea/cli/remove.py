@@ -125,13 +125,13 @@ class ItemRemoveHelper:
 
         Return example:
         {
-            PackageId(protocol, fetchai/default:0.6.0): {
-                PackageId(skill, fetchai/echo:0.8.0),
-                PackageId(skill, fetchai/error:0.6.0)
+            PackageId(protocol, fetchai/default:0.7.0): {
+                PackageId(skill, fetchai/echo:0.9.0),
+                PackageId(skill, fetchai/error:0.7.0)
             },
-            PackageId(connection, fetchai/stub:0.10.0): set(),
-            PackageId(skill, fetchai/error:0.6.0): set(),
-            PackageId(skill, fetchai/echo:0.8.0): set()}
+            PackageId(connection, fetchai/stub:0.11.0): set(),
+            PackageId(skill, fetchai/error:0.7.0): set(),
+            PackageId(skill, fetchai/echo:0.9.0): set()}
         )
         """
         return self.get_item_dependencies_with_reverse_dependencies(

@@ -100,7 +100,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.7.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.8.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -110,12 +110,12 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.10.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/oef_search:0.7.0)']"
+        "Package 'fetchai/oef:0.11.0' of type 'connection' cannot be added. "
+        "Missing dependencies: ['(protocol, fetchai/oef_search:0.8.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef:0.10.0" requires
-        # "fetchai/oef_search:0.7.0" and "fetchai/fipa:0.7.0" protocols.
+        # connection "fetchai/oef:0.11.0" requires
+        # "fetchai/oef_search:0.8.0" and "fetchai/fipa:0.8.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
@@ -577,7 +577,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         ---
         name: stub
         author: fetchai
-        version: 0.10.0
+        version: 0.11.0
         type: connection
         config:
             input_file: "{self.expected_input_file}"
@@ -597,7 +597,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
             aea = builder.build()
         assert aea.name == self.agent_name
         stub_connection = aea.resources.get_connection(
-            PublicId.from_str("fetchai/stub:0.10.0")
+            PublicId.from_str("fetchai/stub:0.11.0")
         )
         assert stub_connection.configuration.config == dict(
             input_file=self.expected_input_file, output_file=self.expected_output_file

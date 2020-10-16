@@ -777,7 +777,7 @@ class _CosmosApi(LedgerApi):
         response = requests.post(url=url, json=tx_signed)
         if response.status_code == 200:
             tx_digest = response.json()["txhash"]
-        else:
+        else:  # pragma: nocover
             _default_logger.error("Cannot send transaction: {}".format(response.json()))
         return tx_digest
 

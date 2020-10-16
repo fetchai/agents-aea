@@ -96,7 +96,9 @@ class Strategy(Model):
 
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
-            "location": Location(location["longitude"], location["latitude"])
+            "location": Location(
+                latitude=location["latitude"], longitude=location["longitude"]
+            )
         }
         service_key = kwargs.pop("service_key", DEFAULT_SERVICE_KEY)
         self._set_service_data = {"key": service_key, "value": self._register_as.value}

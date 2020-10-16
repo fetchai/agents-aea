@@ -93,7 +93,7 @@ class ProxyEnv(gym.Env):
         super().__init__()
         self._queue: Queue = Queue()
         self._action_counter: int = 0
-        self.gym_address = "fetchai/gym:0.8.0"
+        self.gym_address = "fetchai/gym:0.9.0"
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )

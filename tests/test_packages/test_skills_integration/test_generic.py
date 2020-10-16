@@ -52,8 +52,8 @@ class TestGenericSkills(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # generate random location
@@ -64,11 +64,11 @@ class TestGenericSkills(AEATestCaseMany):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/generic_seller:0.13.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/generic_seller:0.14.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
         )
@@ -103,11 +103,11 @@ class TestGenericSkills(AEATestCaseMany):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.12.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.13.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -231,8 +231,8 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # generate random location
@@ -243,17 +243,17 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/generic_seller:0.13.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/generic_seller:0.14.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.10.0", seller_aea_name
+            "fetchai/generic_seller:0.11.0", seller_aea_name
         )
         assert (
             diff == []
@@ -285,17 +285,17 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.12.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.13.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.10.0", buyer_aea_name
+            "fetchai/generic_buyer:0.11.0", buyer_aea_name
         )
         assert (
             diff == []

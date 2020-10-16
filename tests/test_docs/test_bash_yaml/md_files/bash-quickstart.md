@@ -41,7 +41,7 @@ v0.6.2
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.12.0
+aea fetch fetchai/my_first_aea:0.13.0
 cd my_first_aea
 ```
 ``` bash
@@ -49,19 +49,19 @@ aea create my_first_aea
 cd my_first_aea
 ```
 ``` bash
-aea add skill fetchai/echo:0.8.0
+aea add skill fetchai/echo:0.9.0
 ```
 ``` bash
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 ```
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.6.0,\x08\x01\x12\x011*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.7.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 ``` bash
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.10.0
+aea run --connections fetchai/stub:0.11.0
 ```
 ``` bash
     _     _____     _
@@ -92,7 +92,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.6.0,\x08\x01\x12\x011*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.7.0,\x08\x01\x12\x011*\x07\n\x05hello,' >> input_file
 ```
 ``` bash
 info: Echo Behaviour: act method called.

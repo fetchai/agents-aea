@@ -25,7 +25,7 @@ Abstract definition of a connection.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ConnectionConfig, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs)
+ | __init__(configuration: ConnectionConfig, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs, ,)
 ```
 
 Initialize the connection.
@@ -208,7 +208,7 @@ the connection object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore, **kwargs) -> "Connection"
+ | from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore, **kwargs, ,) -> "Connection"
 ```
 
 Load a connection from a configuration.

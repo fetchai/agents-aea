@@ -227,29 +227,44 @@ class BaseAEATestCase(ABC):
         return thread
 
     @classmethod
-    def create_agents(cls, *agents_names: str) -> None:
+    def create_agents(
+        cls, *agents_names: str, is_local: bool = True, is_empty: bool = False
+    ) -> None:
         """
         Create agents in current working directory.
 
         :param agents_names: str agent names.
+        :param is_local: a flag for local folder add True by default.
+        :param empty: optional boolean flag for skip adding default dependencies.
 
         :return: None
         """
+        cli_args = ["create", "--local", "--empty"]
+        if not is_local:  # pragma: nocover
+            cli_args.remove("--local")
+        if not is_empty:  # pragma: nocover
+            cli_args.remove("--empty")
         for name in set(agents_names):
-            cls.run_cli_command("create", "--local", name, "--author", cls.author)
+            cls.run_cli_command(*cli_args, name)
             cls.agents.add(name)
 
     @classmethod
-    def fetch_agent(cls, public_id: str, agent_name: str) -> None:
+    def fetch_agent(
+        cls, public_id: str, agent_name: str, is_local: bool = True
+    ) -> None:
         """
         Create agents in current working directory.
 
         :param public_id: str public id
         :param agents_name: str agent name.
+        :param is_local: a flag for local folder add True by default.
 
         :return: None
         """
-        cls.run_cli_command("fetch", "--local", public_id, "--alias", agent_name)
+        cli_args = ["fetch", "--local"]
+        if not is_local:  # pragma: nocover
+            cli_args.remove("--local")
+        cls.run_cli_command(*cli_args, public_id, "--alias", agent_name)
         cls.agents.add(agent_name)
 
     @classmethod
@@ -813,12 +828,15 @@ class AEATestCaseEmpty(BaseAEATestCase):
     This test case will create a default AEA project.
     """
 
+    IS_LOCAL = True
+    IS_EMPTY = False
+
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
         super(AEATestCaseEmpty, cls).setup_class()
         cls.agent_name = "agent-" + "".join(random.choices(string.ascii_lowercase, k=5))
-        cls.create_agents(cls.agent_name)
+        cls.create_agents(cls.agent_name, is_local=cls.IS_LOCAL, is_empty=cls.IS_EMPTY)
         cls.set_agent_context(cls.agent_name)
 
 

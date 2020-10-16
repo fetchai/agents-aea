@@ -112,7 +112,8 @@ class Parameters(Model):
 
         self._agent_location = {
             "location": Location(
-                self._location["longitude"], self._location["latitude"]
+                latitude=self._location["latitude"],
+                longitude=self._location["longitude"],
             )
         }
         self._set_service_data = self._service_data

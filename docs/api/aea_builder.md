@@ -144,7 +144,7 @@ the merged PyPI dependencies
 ## AEABuilder Objects
 
 ```python
-class AEABuilder()
+class AEABuilder(WithLogger)
 ```
 
 This class helps to build an AEA.
@@ -815,11 +815,11 @@ AEABuilder instance
 
 Return path to aea-config file for the given aea project path.
 
-<a name="aea.aea_builder.make_logger"></a>
-#### make`_`logger
+<a name="aea.aea_builder.make_component_logger"></a>
+#### make`_`component`_`logger
 
 ```python
-make_logger(configuration: ComponentConfiguration, agent_name: str) -> Optional[logging.Logger]
+make_component_logger(configuration: ComponentConfiguration, agent_name: str) -> Optional[logging.Logger]
 ```
 
 Make the logger for a component.

@@ -49,6 +49,7 @@ from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.exceptions import AEAEnforceError
 
 
 ROOT = Path(".")
@@ -451,6 +452,27 @@ def is_item_present(
     is_item_registered = registered_item_public_id is not None
 
     return is_item_registered and Path(item_path).exists()
+
+
+def get_item_id_present(
+    ctx: Context, item_type: str, item_public_id: PublicId
+) -> PublicId:
+    """
+    Get the item present in AEA.
+
+    :param ctx: context object.
+    :param item_type: type of an item.
+    :param item_public_id: PublicId of an item.
+
+    :return: boolean is item present.
+    :raises: AEAEnforceError
+    """
+    registered_item_public_id = get_item_public_id_by_author_name(
+        ctx.agent_config, item_type, item_public_id.author, item_public_id.name
+    )
+    if registered_item_public_id is None:
+        raise AEAEnforceError("Cannot find item.")  # pragma: nocover
+    return registered_item_public_id
 
 
 def get_item_public_id_by_author_name(
