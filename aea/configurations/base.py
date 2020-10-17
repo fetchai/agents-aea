@@ -952,12 +952,6 @@ class ComponentId(PackageId):
         return dict(**self.public_id.json, type=str(self.component_type))
 
 
-ProtocolId = PublicId
-ContractId = PublicId
-ConnectionId = PublicId
-SkillId = PublicId
-
-
 class PackageConfiguration(Configuration, ABC):
     """
     This class represent a package configuration.

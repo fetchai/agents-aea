@@ -22,7 +22,7 @@
 import logging
 from typing import Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 from aea.protocols.signing.custom_types import ErrorCode as CustomErrorCode
@@ -43,7 +43,7 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = ProtocolId.from_str("fetchai/signing:0.5.0")
+    protocol_id = PublicId.from_str("fetchai/signing:0.5.0")
 
     ErrorCode = CustomErrorCode
 

@@ -35,7 +35,6 @@ from aea.common import Address
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentType,
-    ProtocolId,
     PublicId,
     SkillComponentConfiguration,
     SkillConfig,
@@ -437,7 +436,7 @@ class Behaviour(AbstractBehaviour, ABC):
 class Handler(SkillComponent, ABC):
     """This class implements an abstract behaviour."""
 
-    SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = None  # type: Optional[PublicId]
 
     @abstractmethod
     def handle(self, message: Message) -> None:

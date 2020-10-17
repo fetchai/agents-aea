@@ -22,7 +22,7 @@
 import logging
 from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class TProtocolMessage(Message):
     """A protocol for testing purposes."""
 
-    protocol_id = ProtocolId.from_str("fetchai/t_protocol:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/t_protocol:0.1.0")
 
     DataModel = CustomDataModel
 

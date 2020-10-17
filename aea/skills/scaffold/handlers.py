@@ -21,7 +21,7 @@
 
 from typing import Optional
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -29,7 +29,7 @@ from aea.skills.base import Handler
 class MyScaffoldHandler(Handler):
     """This class scaffolds a handler."""
 
-    SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = None  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """

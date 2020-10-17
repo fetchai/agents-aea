@@ -36,7 +36,7 @@ from aea.aea import AEA
 from aea.configurations.base import (
     ConnectionConfig,
     ProtocolConfig,
-    ProtocolId,
+    PublicId,
     SkillConfig,
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
@@ -275,7 +275,7 @@ class TestAEAToACA:
 class AEAHandler(Handler):
     """The handler for the AEA."""
 
-    SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

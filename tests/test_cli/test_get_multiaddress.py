@@ -61,7 +61,7 @@ class TestGetMultiAddressCommandConnectionPositive(AEATestCaseEmpty):
         base58.b58decode(result.stdout)
 
 
-class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
+class TestGetMultiAddressCommandPublicIdPositive(AEATestCaseEmpty):
     """Test case for CLI get-multiaddress command with --connection flag."""
 
     def test_run(self, *mocks):
@@ -95,7 +95,7 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
         base58.b58decode(base58_addr)
 
 
-class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
+class TestGetMultiAddressCommandPublicIdURIPositive(AEATestCaseEmpty):
     """Test case for CLI get-multiaddress command with --connection flag and --uri."""
 
     def test_run(self, *mocks):
@@ -235,7 +235,7 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
             )
 
 
-class TestGetMultiAddressCommandNegativeBadConnectionId(AEATestCaseEmpty):
+class TestGetMultiAddressCommandNegativeBadPublicId(AEATestCaseEmpty):
     """Test case for CLI get-multiaddress when the connection id is missing."""
 
     def test_run(self, *mocks):
