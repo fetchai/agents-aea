@@ -1199,8 +1199,8 @@ class ConnectionConfig(ComponentConfiguration):
             dependencies,
         )
         self.class_name = class_name
-        self.protocols = protocols if protocols is not None else []
-        self.connections = connections if connections is not None else []
+        self.protocols = protocols if protocols is not None else set()
+        self.connections = connections if connections is not None else set()
         self.restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
         )
@@ -1419,9 +1419,9 @@ class SkillConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        protocols: List[PublicId] = None,
-        contracts: List[PublicId] = None,
-        skills: List[PublicId] = None,
+        protocols: Optional[Set[PublicId]] = None,
+        contracts: Optional[Set[PublicId]] = None,
+        skills: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         is_abstract: bool = False,
@@ -1437,9 +1437,9 @@ class SkillConfig(ComponentConfiguration):
             fingerprint_ignore_patterns,
             dependencies,
         )
-        self.protocols: List[PublicId] = (protocols if protocols is not None else [])
-        self.contracts: List[PublicId] = (contracts if contracts is not None else [])
-        self.skills: List[PublicId] = (skills if skills is not None else [])
+        self.protocols = protocols if protocols is not None else set()
+        self.contracts = contracts if contracts is not None else set()
+        self.skills = skills if skills is not None else set()
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.handlers: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
@@ -1510,17 +1510,9 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns = cast(
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
-        protocols = cast(
-            List[PublicId],
-            [PublicId.from_str(id_) for id_ in obj.get("protocols", [])],
-        )
-        contracts = cast(
-            List[PublicId],
-            [PublicId.from_str(id_) for id_ in obj.get("contracts", [])],
-        )
-        skills = cast(
-            List[PublicId], [PublicId.from_str(id_) for id_ in obj.get("skills", [])],
-        )
+        protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
+        contracts = {PublicId.from_str(id_) for id_ in obj.get("contracts", set())}
+        skills = {PublicId.from_str(id_) for id_ in obj.get("skills", set())}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
