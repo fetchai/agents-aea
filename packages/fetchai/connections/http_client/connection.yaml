@@ -11,6 +11,7 @@ fingerprint:
   __init__.py: QmPdKAks8A6XKAgZiopJzPZYXJumTeUqChd8UorqmLQQPU
   connection.py: QmRYrhEHdfjcct7KEzDZvbh2GAAhApFCYBf8uaS1HCkFvG
 fingerprint_ignore_patterns: []
+connections: []
 protocols:
 - fetchai/http:0.7.0
 class_name: HTTPClientConnection

@@ -13,6 +13,7 @@ fingerprint:
   tcp_client.py: QmWGuFbVA5syCvoFpL2rpYePVDAkmEi7Lt5DT6D1pz2p1f
   tcp_server.py: QmSSszevVoh4LZJoeWBpM25ebbYt4okP2uor1aXYFxcc3g
 fingerprint_ignore_patterns: []
+connections: []
 protocols: []
 class_name: TCPClientConnection
 config:

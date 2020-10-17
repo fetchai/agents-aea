@@ -12,7 +12,8 @@
     "aea_version",
     "class_name",
     "config",
-    "protocols"
+    "protocols",
+    "connections"
   ],
   "properties": {
     "name": {
@@ -43,6 +44,14 @@
       "type": "string"
     },
     "protocols": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
+    },
+    "connections": {
       "type": "array",
       "additionalProperties": false,
       "uniqueItems": true,

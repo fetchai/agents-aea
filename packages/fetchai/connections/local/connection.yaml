@@ -10,6 +10,7 @@ fingerprint:
   __init__.py: QmeeoX5E38Ecrb1rLdeFyyxReHLrcJoETnBcPbcNWVbiKG
   connection.py: QmbhmhzTKpHAd6Ea5yiueuboihMwdJ2xH1b1yYUj97Cfxd
 fingerprint_ignore_patterns: []
+connections: []
 protocols:
 - fetchai/oef_search:0.8.0
 class_name: OEFLocalConnection

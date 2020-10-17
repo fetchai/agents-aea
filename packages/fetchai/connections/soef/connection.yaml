@@ -10,6 +10,7 @@ fingerprint:
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
   connection.py: QmcMhHBfiGWRubtM68mvBMnHbnfXWRsuKSmEW4N5M6FNUa
 fingerprint_ignore_patterns: []
+connections: []
 protocols:
 - fetchai/oef_search:0.8.0
 class_name: SOEFConnection

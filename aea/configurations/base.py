@@ -1158,6 +1158,7 @@ class ConnectionConfig(ComponentConfiguration):
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
+        connections: Optional[Set[PublicId]] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
@@ -1199,6 +1200,7 @@ class ConnectionConfig(ComponentConfiguration):
         )
         self.class_name = class_name
         self.protocols = protocols if protocols is not None else []
+        self.connections = connections if connections is not None else []
         self.restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
         )
@@ -1238,6 +1240,7 @@ class ConnectionConfig(ComponentConfiguration):
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "protocols": sorted(map(str, self.protocols)),
+                "connections": sorted(map(str, self.connections)),
                 "class_name": self.class_name,
                 "config": self.config,
                 "excluded_protocols": sorted(map(str, self.excluded_protocols)),
@@ -1260,6 +1263,7 @@ class ConnectionConfig(ComponentConfiguration):
         excluded_protocols = {PublicId.from_str(id_) for id_ in excluded_protocols}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
+        connections = {PublicId.from_str(id_) for id_ in obj.get("connections", set())}
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1272,6 +1276,7 @@ class ConnectionConfig(ComponentConfiguration):
             ),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
+            connections=cast(Set[PublicId], connections),
             restricted_to_protocols=cast(Set[PublicId], restricted_to_protocols),
             excluded_protocols=cast(Set[PublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),

@@ -10,6 +10,7 @@ fingerprint:
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
   connection.py: Qmce7CQCmjXeYsQSERezU2JyBKECVce9yWgB9dKBLYyj3U
 fingerprint_ignore_patterns: []
+connections: []
 protocols:
 - fetchai/gym:0.7.0
 class_name: GymConnection
