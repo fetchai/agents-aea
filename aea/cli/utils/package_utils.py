@@ -22,7 +22,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Optional, Set, Tuple
 
 import click
 from jsonschema import ValidationError
@@ -40,11 +40,7 @@ from aea.configurations.base import (
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
-    DEFAULT_SKILL,
-    LOCAL_PROTOCOLS,
-)
+from aea.configurations.constants import LOCAL_PACKAGES
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
@@ -514,14 +510,9 @@ def is_local_item(item_public_id: PublicId) -> bool:
     If the provided item has version 'latest', only the prefixes are compared.
     Otherwise, the function will try to match the exact version occurrence among the local packages.
     """
-    local_packages: List[PublicId] = [
-        DEFAULT_CONNECTION,
-        *LOCAL_PROTOCOLS,
-        DEFAULT_SKILL,
-    ]
     if item_public_id.package_version.is_latest:
-        return any(item_public_id.same_prefix(other) for other in local_packages)
-    return item_public_id in local_packages
+        return any(item_public_id.same_prefix(other) for other in LOCAL_PACKAGES)
+    return item_public_id in LOCAL_PACKAGES
 
 
 def try_get_balance(  # pylint: disable=unused-argument
