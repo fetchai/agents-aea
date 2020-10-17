@@ -23,6 +23,7 @@ import base64
 import functools
 import gzip
 import json
+import os
 import pprint
 import re
 from abc import ABC, abstractmethod
@@ -1109,6 +1110,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """Check that the configuration file is consistent against a directory."""
         self.check_fingerprint(directory)
         self.check_aea_version()
+        self.check_public_id_consistency(directory)
 
     def check_fingerprint(self, directory: Path) -> None:
         """
@@ -1131,6 +1133,18 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         :raises ValueError if the version of the aea framework falls within a specifier.
         """
         _check_aea_version(self)
+
+    def check_public_id_consistency(self, directory: Path) -> None:
+        """
+        Check that the public ids in the init file match the config.
+
+        :raises ValueError if:
+            - the argument is not a valid package directory
+            - the public ids do not match.
+        """
+        if not directory.exists() or not directory.is_dir():
+            raise ValueError("Directory {} is not valid.".format(directory))
+        _compare_public_ids(self, directory)
 
 
 class ConnectionConfig(ComponentConfiguration):
@@ -2313,3 +2327,31 @@ def _check_aea_version(package_configuration: PackageConfiguration):
                 package_configuration.aea_version_specifiers,
             )
         )
+
+
+def _compare_public_ids(
+    package_configuration: PackageConfiguration, package_directory: Path
+) -> None:
+    """Compare the public ids in config and init file."""
+    if package_configuration.package_type != PackageType.SKILL:
+        return
+    filename = "__init__.py"
+    public_id_in_init = _get_public_id_from_file(package_directory, filename)
+    if public_id_in_init == package_configuration.public_id:  # unfinished
+        raise ValueError(
+            "The public id specified in {} for package {} does not match the one specific in {}.yaml".format(
+                filename, package_directory, package_configuration.package_type.value,
+            )
+        )
+
+
+def _get_public_id_from_file(
+    package_directory: Path, filename: str
+) -> Optional[PublicId]:
+    """Get the public id from an init if present."""
+    public_id = None  # Optional[PublicId]
+    fp = os.path.join(package_directory, filename)
+    with open(fp, "r") as _:
+        pass
+        # unfinished
+    return public_id
