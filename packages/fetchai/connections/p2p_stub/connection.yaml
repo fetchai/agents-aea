@@ -11,7 +11,8 @@ fingerprint:
   __init__.py: QmW9XFKGsea4u3fupkFMcQutgsjqusCMBMyTcTmLLmQ4tR
   connection.py: QmaGhDBVKjeYm8fmHYYgFXD8mpZNVXDv4bmPtrnPcMtLP4
 fingerprint_ignore_patterns: []
-connections: []
+connections:
+- fetchai/stub:0.11.0
 protocols: []
 class_name: P2PStubConnection
 config:
