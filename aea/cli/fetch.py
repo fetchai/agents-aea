@@ -102,7 +102,7 @@ def fetch_agent_locally(
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(public_id.name)
         )
-    else:
+    if target_dir is not None:
         os.makedirs(target_path)
 
     ctx.clean_paths.append(target_path)

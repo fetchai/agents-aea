@@ -40,11 +40,11 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     Dependency,
     ProtocolConfig,
-    PublicId,
     SkillConfig,
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.configurations.loader import load_component_configuration
+from aea.connections.stub.connection import StubConnection
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
@@ -60,6 +60,7 @@ from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,
+    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     _make_dummy_connection,
 )
@@ -525,11 +526,7 @@ def test_find_import_order():
             AEAException, match=r"Cannot load skills, there is a cyclic dependency."
         ):
             builder._find_import_order(
-                [
-                    ComponentId(
-                        ComponentType.SKILL, PublicId("dummy_author", "dummy", "0.1.0")
-                    ),
-                ],
+                [ComponentId(ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID)],
                 Path(os.path.join(CUR_PATH, "data", "dummy_aea")),
                 True,
             )
@@ -596,9 +593,8 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         with cd(self._get_cwd()):
             aea = builder.build()
         assert aea.name == self.agent_name
-        stub_connection = aea.resources.get_connection(
-            PublicId.from_str("fetchai/stub:0.11.0")
-        )
+        stub_connection_id = StubConnection.connection_id
+        stub_connection = aea.resources.get_connection(stub_connection_id)
         assert stub_connection.configuration.config == dict(
             input_file=self.expected_input_file, output_file=self.expected_output_file
         )
@@ -649,9 +645,7 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         with cd(self._get_cwd()):
             aea = builder.build()
 
-        dummy_skill = aea.resources.get_skill(
-            PublicId("dummy_author", "dummy", "0.1.0")
-        )
+        dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
         dummy_behaviour = dummy_skill.behaviours["dummy"]
         assert dummy_behaviour.config == {"behaviour_arg_1": 42, "behaviour_arg_2": "2"}
         dummy_handler = dummy_skill.handlers["dummy"]
@@ -698,9 +692,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
         with cd(self._get_cwd()):
             aea = builder.build()
 
-        dummy_skill = aea.resources.get_skill(
-            PublicId("dummy_author", "dummy", "0.1.0")
-        )
+        dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
         assert dummy_skill is None, "Shouldn't have found the skill in Resources."
 
 

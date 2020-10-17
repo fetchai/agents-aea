@@ -33,7 +33,7 @@ from aea.mail.base import Envelope
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
-    connection_id = PublicId("fetchai", "dummy", "0.1.0")
+    connection_id = PublicId.from_str("fetchai/dummy:0.1.0")
 
     def __init__(self, **kwargs):
         """Initialize."""
