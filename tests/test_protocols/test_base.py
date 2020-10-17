@@ -154,8 +154,8 @@ class TestBaseSerializations:
     def test_body_setter(self):
         """Test the body setter."""
         m_dict = {"Hello": "World"}
-        self.message2.body = m_dict
-        assert "Hello" in self.message2.body.keys()
+        self.message2._body = m_dict
+        assert "Hello" in self.message2._body.keys()
 
 
 class TestProtocolFromDir:
