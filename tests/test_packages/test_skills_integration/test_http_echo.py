@@ -38,6 +38,7 @@ class TestHttpEchoSkill(AEATestCaseEmpty):
         """Run the echo skill sequence."""
         self.add_item("connection", "fetchai/http_server:0.10.0")
         self.add_item("skill", "fetchai/http_echo:0.8.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
         self.set_config("agent.default_connection", "fetchai/http_server:0.10.0")
         self.set_config(
             "vendor.fetchai.connections.http_server.config.api_spec_path", API_SPEC_PATH
