@@ -25,3 +25,4 @@ dependencies:
   colorlog: {}
   oef:
     version: ==0.8.1
+is_abstract: false

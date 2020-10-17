@@ -1145,7 +1145,7 @@ class ConnectionConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
 
-    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["config"])
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["config", "is_abstract"])
 
     def __init__(
         self,
@@ -1163,6 +1163,7 @@ class ConnectionConfig(ComponentConfiguration):
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         connection_id: Optional[PublicId] = None,
+        is_abstract: bool = False,
         **config,
     ):
         """Initialize a connection configuration object."""
@@ -1207,6 +1208,7 @@ class ConnectionConfig(ComponentConfiguration):
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.config = config if len(config) > 0 else {}
+        self.is_abstract = is_abstract
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1215,6 +1217,11 @@ class ConnectionConfig(ComponentConfiguration):
             ComponentId(ComponentType.PROTOCOL, protocol_id)
             for protocol_id in self.protocols
         )
+
+    @property
+    def is_abstract_component(self) -> bool:
+        """Check whether the component is abstract."""
+        return self.is_abstract
 
     @property
     def json(self) -> Dict:
@@ -1238,6 +1245,7 @@ class ConnectionConfig(ComponentConfiguration):
                     map(str, self.restricted_to_protocols)
                 ),
                 "dependencies": dependencies_to_json(self.dependencies),
+                "is_abstract": self.is_abstract,
             }
         )
 
@@ -1268,6 +1276,7 @@ class ConnectionConfig(ComponentConfiguration):
             excluded_protocols=cast(Set[PublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
+            is_abstract=obj.get("is_abstract", False),
             **cast(dict, obj.get("config", {})),
         )
 
@@ -1282,6 +1291,7 @@ class ConnectionConfig(ComponentConfiguration):
         """
         new_config = data.get("config", {})
         recursive_update(self.config, new_config)
+        self.is_abstract = data.get("is_abstract", self.is_abstract)
 
 
 class ProtocolConfig(ComponentConfiguration):

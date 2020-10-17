@@ -24,3 +24,4 @@ dependencies:
     version: '>=1.10.11a1'
   dep4:
     version: <=1.11.12b2
+is_abstract: false

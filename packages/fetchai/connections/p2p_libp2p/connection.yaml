@@ -42,3 +42,4 @@ config:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
+is_abstract: false

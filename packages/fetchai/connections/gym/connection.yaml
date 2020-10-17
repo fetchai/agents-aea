@@ -20,3 +20,4 @@ restricted_to_protocols:
 - fetchai/gym:0.7.0
 dependencies:
   gym: {}
+is_abstract: false

@@ -72,6 +72,9 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "is_abstract": {
+      "$ref": "skill-config_schema.json#/properties/is_abstract"
     }
   }
 }
