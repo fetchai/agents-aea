@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the aries_alice skill."""
+
+from aea.configurations.base import PublicId
+
+
+PUBLIC_ID = PublicId.from_str("fetchai/aries_alice:0.9.0")

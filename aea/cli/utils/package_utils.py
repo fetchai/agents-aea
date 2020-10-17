@@ -43,7 +43,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_SKILL,
-    LOCAL_PROTOCOLS,
+    DISTRIBUTED_PROTOCOLS,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
@@ -507,21 +507,21 @@ def get_items(agent_config: AgentConfig, item_type: str) -> Set[PublicId]:
     return getattr(agent_config, item_type_plural)
 
 
-def is_local_item(item_public_id: PublicId) -> bool:
+def is_distributed_item(item_public_id: PublicId) -> bool:
     """
-    Check whether the item public id correspond to a local package.
+    Check whether the item public id correspond to a package in the distribution.
 
     If the provided item has version 'latest', only the prefixes are compared.
-    Otherwise, the function will try to match the exact version occurrence among the local packages.
+    Otherwise, the function will try to match the exact version occurrence among the distributed packages.
     """
-    local_packages: List[PublicId] = [
+    distributed_packages: List[PublicId] = [
         DEFAULT_CONNECTION,
-        *LOCAL_PROTOCOLS,
+        *DISTRIBUTED_PROTOCOLS,
         DEFAULT_SKILL,
     ]
     if item_public_id.package_version.is_latest:
-        return any(item_public_id.same_prefix(other) for other in local_packages)
-    return item_public_id in local_packages
+        return any(item_public_id.same_prefix(other) for other in distributed_packages)
+    return item_public_id in distributed_packages
 
 
 def try_get_balance(  # pylint: disable=unused-argument

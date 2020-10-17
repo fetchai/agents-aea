@@ -154,7 +154,7 @@ class FipaHandler(Handler):
                 counterparty=LEDGER_API_ADDRESS,
                 performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
                 ledger_id=strategy.ledger_id,
-                contract_id="fetchai/erc1155:0.11.0",
+                contract_id=strategy.contract_id,
                 contract_address=fipa_msg.proposal.values["contract_address"],
                 callable="get_hash_single",
                 kwargs=ContractApiMessage.Kwargs(

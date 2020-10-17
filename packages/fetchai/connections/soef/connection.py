@@ -1114,7 +1114,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.8.0")
+                OefSearchMessage.protocol_id
             ]
 
         super().__init__(**kwargs)

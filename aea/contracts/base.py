@@ -40,6 +40,7 @@ _default_logger = logging.getLogger(__name__)
 class Contract(Component):
     """Abstract definition of a contract."""
 
+    contract_id = None  # type: ContractId
     contract_interface: Any = None
 
     def __init__(self, contract_config: ContractConfig, **kwargs):
