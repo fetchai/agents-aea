@@ -818,7 +818,8 @@ class ProtocolGenerator:
 
         cls_str += self.indent + "# Check correct contents\n"
         cls_str += (
-            self.indent + "actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
+            self.indent
+            + "actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE\n"
         )
         cls_str += self.indent + "expected_nb_of_contents = 0\n"
         counter = 1

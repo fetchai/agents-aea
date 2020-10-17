@@ -57,8 +57,8 @@ class HttpSerializer(Serializer):
             performative.version = version
             headers = msg.headers
             performative.headers = headers
-            bodyy = msg.bodyy
-            performative.bodyy = bodyy
+            body = msg.body
+            performative.body = body
             http_msg.request.CopyFrom(performative)
         elif performative_id == HttpMessage.Performative.RESPONSE:
             performative = http_pb2.HttpMessage.Response_Performative()  # type: ignore
@@ -70,8 +70,8 @@ class HttpSerializer(Serializer):
             performative.status_text = status_text
             headers = msg.headers
             performative.headers = headers
-            bodyy = msg.bodyy
-            performative.bodyy = bodyy
+            body = msg.body
+            performative.body = body
             http_msg.response.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
@@ -108,8 +108,8 @@ class HttpSerializer(Serializer):
             performative_content["version"] = version
             headers = http_pb.request.headers
             performative_content["headers"] = headers
-            bodyy = http_pb.request.bodyy
-            performative_content["bodyy"] = bodyy
+            body = http_pb.request.body
+            performative_content["body"] = body
         elif performative_id == HttpMessage.Performative.RESPONSE:
             version = http_pb.response.version
             performative_content["version"] = version
@@ -119,8 +119,8 @@ class HttpSerializer(Serializer):
             performative_content["status_text"] = status_text
             headers = http_pb.response.headers
             performative_content["headers"] = headers
-            bodyy = http_pb.response.bodyy
-            performative_content["bodyy"] = bodyy
+            body = http_pb.response.body
+            performative_content["body"] = body
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 

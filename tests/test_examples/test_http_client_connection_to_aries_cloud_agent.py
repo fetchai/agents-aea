@@ -123,7 +123,7 @@ class TestAEAToACA:
             ),
             headers="",
             version="",
-            bodyy=b"",
+            body=b"",
         )
         request_http_message.to = "ACA"
         request_envelope = Envelope(
@@ -218,7 +218,7 @@ class TestAEAToACA:
             ),
             headers="",
             version="",
-            bodyy=b"",
+            body=b"",
         )
         request_http_message.to = "ACA"
         request_envelope = Envelope(

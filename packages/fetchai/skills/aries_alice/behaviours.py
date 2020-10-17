@@ -77,7 +77,7 @@ class AliceBehaviour(TickerBehaviour):
             url=url,
             headers="",
             version="",
-            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
+            body=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         # send
         self.context.outbox.put_message(

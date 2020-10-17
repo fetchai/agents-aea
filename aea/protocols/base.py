@@ -63,8 +63,8 @@ class Message:
         """
         self._to = None  # type: Optional[Address]
         self._sender = None  # type: Optional[Address]
-        self._body = copy(body) if body else {}  # type: Dict[str, Any]
-        self._body.update(kwargs)
+        self.__body = copy(body) if body else {}  # type: Dict[str, Any]
+        self.__body.update(kwargs)
         try:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
@@ -116,23 +116,23 @@ class Message:
         self._to = to
 
     @property
-    def body(self) -> Dict:
+    def _body(self) -> Dict:
         """
         Get the body of the message (in dictionary form).
 
         :return: the body
         """
-        return self._body
+        return self.__body
 
-    @body.setter
-    def body(self, body: Dict) -> None:
+    @_body.setter
+    def _body(self, body: Dict) -> None:
         """
         Set the body of hte message.
 
         :param body: the body.
         :return: None
         """
-        self._body = body
+        self.__body = body
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
@@ -194,7 +194,7 @@ class Message:
             # and self.message_id == other.message_id  # noqa: E800
             # and self.target == other.target  # noqa: E800
             # and self.performative == other.performative  # noqa: E800
-            and self.body == other.body
+            and self._body == other._body
         )
 
     def __str__(self):
@@ -204,7 +204,7 @@ class Message:
             + ",".join(
                 map(
                     lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
-                    self.body.items(),
+                    self._body.items(),
                 )
             )
             + ")"
@@ -258,7 +258,7 @@ class ProtobufSerializer(Serializer):
     def encode(msg: Message) -> bytes:
         """Encode a message into bytes using Protobuf."""
         body_json = Struct()
-        body_json.update(msg.body)  # pylint: disable=no-member
+        body_json.update(msg._body)  # pylint: disable=no-member,protected-access
         body_bytes = body_json.SerializeToString()
         return body_bytes
 

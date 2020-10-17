@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="fetch.aea.Http",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\nhttp.proto\x12\x0e\x66\x65tch.aea.Http"\xf1\x03\n\x0bHttpMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x43\n\x07request\x18\x05 \x01(\x0b\x32\x30.fetch.aea.Http.HttpMessage.Request_PerformativeH\x00\x12\x45\n\x08response\x18\x06 \x01(\x0b\x32\x31.fetch.aea.Http.HttpMessage.Response_PerformativeH\x00\x1a\x64\n\x14Request_Performative\x12\x0e\n\x06method\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\r\n\x05\x62odyy\x18\x05 \x01(\x0c\x1ar\n\x15Response_Performative\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x13\n\x0bstatus_code\x18\x02 \x01(\x05\x12\x13\n\x0bstatus_text\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\r\n\x05\x62odyy\x18\x05 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\nhttp.proto\x12\x0e\x66\x65tch.aea.Http"\xef\x03\n\x0bHttpMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x43\n\x07request\x18\x05 \x01(\x0b\x32\x30.fetch.aea.Http.HttpMessage.Request_PerformativeH\x00\x12\x45\n\x08response\x18\x06 \x01(\x0b\x32\x31.fetch.aea.Http.HttpMessage.Response_PerformativeH\x00\x1a\x63\n\x14Request_Performative\x12\x0e\n\x06method\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\x0c\x1aq\n\x15Response_Performative\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x13\n\x0bstatus_code\x18\x02 \x01(\x05\x12\x13\n\x0bstatus_text\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
@@ -101,8 +101,8 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="bodyy",
-            full_name="fetch.aea.Http.HttpMessage.Request_Performative.bodyy",
+            name="body",
+            full_name="fetch.aea.Http.HttpMessage.Request_Performative.body",
             index=4,
             number=5,
             type=12,
@@ -128,7 +128,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=296,
-    serialized_end=396,
+    serialized_end=395,
 )
 
 _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
@@ -211,8 +211,8 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="bodyy",
-            full_name="fetch.aea.Http.HttpMessage.Response_Performative.bodyy",
+            name="body",
+            full_name="fetch.aea.Http.HttpMessage.Response_Performative.body",
             index=4,
             number=5,
             type=12,
@@ -237,8 +237,8 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=398,
-    serialized_end=512,
+    serialized_start=397,
+    serialized_end=510,
 )
 
 _HTTPMESSAGE = _descriptor.Descriptor(
@@ -377,7 +377,7 @@ _HTTPMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=31,
-    serialized_end=528,
+    serialized_end=526,
 )
 
 _HTTPMESSAGE_REQUEST_PERFORMATIVE.containing_type = _HTTPMESSAGE

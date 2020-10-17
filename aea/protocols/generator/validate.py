@@ -32,7 +32,7 @@ from aea.protocols.generator.common import (
 
 # The following names are reserved for standard message fields and cannot be
 # used as user defined names for performative or contents
-RESERVED_NAMES = {"body", "message_id", "dialogue_reference", "target", "performative"}
+RESERVED_NAMES = {"message_id", "dialogue_reference", "target", "performative"}
 
 # Regular expression patterns for various fields in protocol specifications
 PERFORMATIVE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"

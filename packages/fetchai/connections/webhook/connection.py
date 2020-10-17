@@ -205,7 +205,7 @@ class WebhookChannel:
             url=str(request.url),
             version=version,
             headers=json.dumps(dict(request.headers)),
-            bodyy=payload_bytes if payload_bytes is not None else b"",
+            body=payload_bytes if payload_bytes is not None else b"",
         )
         envelope = Envelope(
             to=http_message.to,
