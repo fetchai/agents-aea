@@ -228,7 +228,7 @@ class _DependenciesManager:
     def install_dependencies(self) -> None:
         """Install extra dependencies for components."""
         for name, d in self.pypi_dependencies.items():
-            install_dependency(name, d)
+            install_dependency(name, d, _default_logger)
 
 
 class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods

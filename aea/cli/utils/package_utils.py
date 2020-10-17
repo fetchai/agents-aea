@@ -224,7 +224,7 @@ def copy_package_directory(src: Path, dst: str) -> Path:
 
 
 def find_item_locally(
-    ctx, item_type, item_public_id
+    ctx: Context, item_type: str, item_public_id: PublicId
 ) -> Tuple[Path, ComponentConfiguration]:
     """
     Find an item in the local registry.
@@ -241,7 +241,11 @@ def find_item_locally(
     item_name = item_public_id.name
 
     # check in registry
-    registry_path = os.path.join(ctx.cwd, ctx.agent_config.registry_path)
+    registry_path = (
+        os.path.join(ctx.cwd, ctx.agent_config.registry_path)
+        if ctx.registry_path is None
+        else ctx.registry_path
+    )
     package_path = Path(
         registry_path, item_public_id.author, item_type_plural, item_name
     )
