@@ -54,7 +54,7 @@ class Message:
             """Get the string representation."""
             return str(self.value)
 
-    def __init__(self, body: Optional[Dict] = None, **kwargs):
+    def __init__(self, _body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
 
@@ -63,7 +63,7 @@ class Message:
         """
         self._to = None  # type: Optional[Address]
         self._sender = None  # type: Optional[Address]
-        self.__body = copy(body) if body else {}  # type: Dict[str, Any]
+        self.__body = copy(_body) if _body else {}  # type: Dict[str, Any]
         self.__body.update(kwargs)
         try:
             self._is_consistent()
