@@ -269,7 +269,7 @@ class ProtobufSerializer(Serializer):
         body_json.ParseFromString(obj)
 
         body = dict(body_json)
-        msg = Message(body=body)
+        msg = Message(_body=body)
         return msg
 
 

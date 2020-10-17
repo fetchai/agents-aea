@@ -123,7 +123,7 @@ class TestBaseSerializations:
     def setup_class(cls):
         """Set up the use case."""
         cls.message = Message(content="hello")
-        cls.message2 = Message(body={"content": "hello"})
+        cls.message2 = Message(_body={"content": "hello"})
 
     def test_default_protobuf_serialization(self):
         """Test that the default Protobuf serialization works."""
