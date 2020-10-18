@@ -34,4 +34,4 @@ ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oe
 
 [DESIGN]
 min-public-methods=1
-max-public-methods=35
+max-public-methods=36

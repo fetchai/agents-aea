@@ -34,6 +34,7 @@ class TestGymSkill(AEATestCaseEmpty):
         """Run the gym skill sequence."""
         self.add_item("skill", "fetchai/gym:0.9.0")
         self.add_item("connection", "fetchai/gym:0.9.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
         self.run_install()
 
         # change default connection

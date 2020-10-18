@@ -219,7 +219,7 @@ class TestGenericCases(AEATestCaseEmpty):
             assert f.read() == "hi"
 
 
-class TestAddAndRejectComponent(AEATestCaseEmpty):
+class TestAddAndEjectComponent(AEATestCaseEmpty):
     """Test add/reject components."""
 
     def test_add_and_eject(self):
@@ -228,6 +228,18 @@ class TestAddAndRejectComponent(AEATestCaseEmpty):
         assert result.exit_code == 0
 
         result = self.eject_item("skill", "fetchai/echo:0.9.0")
+        assert result.exit_code == 0
+
+
+class TestAddAndRemoveComponent(AEATestCaseEmpty):
+    """Test add/remove components."""
+
+    def test_add_and_eject(self):
+        """Test add/reject components."""
+        result = self.add_item("skill", "fetchai/echo:0.9.0", local=True)
+        assert result.exit_code == 0
+
+        result = self.remove_item("skill", "fetchai/echo:0.9.0")
         assert result.exit_code == 0
 
 

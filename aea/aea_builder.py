@@ -231,7 +231,7 @@ class _DependenciesManager:
             install_dependency(name, d, _default_logger)
 
 
-class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
+class AEABuilder(WithLogger):
     """
     This class helps to build an AEA.
 
