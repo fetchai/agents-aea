@@ -291,7 +291,7 @@ class ProtobufSerializer(Serializer):
             dialogue_message_pb.dialogue_responder_reference = msg.dialogue_reference[1]
             dialogue_message_pb.target = msg.target
 
-            new_body = copy(msg._body)
+            new_body = copy(msg._body)  # pylint: disable=protected-access
             new_body.pop("message_id")
             new_body.pop("dialogue_reference")
             new_body.pop("target")
@@ -307,7 +307,7 @@ class ProtobufSerializer(Serializer):
             )
         else:
             body_json = Struct()
-            body_json.update(msg._body)  # pylint: disable=no-member
+            body_json.update(msg._body)  # pylint: disable=no-member,protected-access
             message_pb.body.CopyFrom(body_json)  # pylint: disable=no-member
 
         return message_pb.SerializeToString()
