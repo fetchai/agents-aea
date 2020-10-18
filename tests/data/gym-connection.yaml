@@ -9,7 +9,9 @@ fingerprint:
 aea_version: '>=0.6.0, <0.7.0'
 description: "The gym connection wraps an OpenAI gym."
 class_name: GymConnection
-protocols: ["fetchai/gym:0.7.0"]
+connections: []
+protocols:
+- fetchai/gym:0.7.0
 restricted_to_protocols: ["fetchai/gym:0.7.0"]
 excluded_protocols: []
 config:

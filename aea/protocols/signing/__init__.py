@@ -22,5 +22,4 @@
 from aea.protocols.signing.message import SigningMessage
 from aea.protocols.signing.serialization import SigningSerializer
 
-
 SigningMessage.serializer = SigningSerializer

@@ -55,7 +55,7 @@ from urllib3.util import Url, parse_url
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
-from aea.helpers.base import RegexConstrainedString, recursive_update
+from aea.helpers.base import RegexConstrainedString, load_module, recursive_update
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -69,6 +69,8 @@ DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
 DEFAULT_README_FILE = "README.md"
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
+
+PACKAGE_PUBLIC_ID_VAR_NAME = "PUBLIC_ID"
 
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     ".DS_Store",
@@ -952,12 +954,6 @@ class ComponentId(PackageId):
         return dict(**self.public_id.json, type=str(self.component_type))
 
 
-ProtocolId = PublicId
-ContractId = PublicId
-ConnectionId = PublicId
-SkillId = PublicId
-
-
 class PackageConfiguration(Configuration, ABC):
     """
     This class represent a package configuration.
@@ -1115,6 +1111,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """Check that the configuration file is consistent against a directory."""
         self.check_fingerprint(directory)
         self.check_aea_version()
+        self.check_public_id_consistency(directory)
 
     def check_fingerprint(self, directory: Path) -> None:
         """
@@ -1138,6 +1135,18 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """
         _check_aea_version(self)
 
+    def check_public_id_consistency(self, directory: Path) -> None:
+        """
+        Check that the public ids in the init file match the config.
+
+        :raises ValueError if:
+            - the argument is not a valid package directory
+            - the public ids do not match.
+        """
+        if not directory.exists() or not directory.is_dir():
+            raise ValueError("Directory {} is not valid.".format(directory))
+        _compare_public_ids(self, directory)
+
 
 class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
@@ -1145,7 +1154,7 @@ class ConnectionConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
     package_type = PackageType.CONNECTION
 
-    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["config"])
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["config", "is_abstract"])
 
     def __init__(
         self,
@@ -1158,11 +1167,13 @@ class ConnectionConfig(ComponentConfiguration):
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
+        connections: Optional[Set[PublicId]] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         connection_id: Optional[PublicId] = None,
+        is_abstract: bool = False,
         **config,
     ):
         """Initialize a connection configuration object."""
@@ -1197,7 +1208,8 @@ class ConnectionConfig(ComponentConfiguration):
             dependencies,
         )
         self.class_name = class_name
-        self.protocols = protocols if protocols is not None else []
+        self.protocols = protocols if protocols is not None else set()
+        self.connections = connections if connections is not None else set()
         self.restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
         )
@@ -1207,6 +1219,7 @@ class ConnectionConfig(ComponentConfiguration):
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.config = config if len(config) > 0 else {}
+        self.is_abstract = is_abstract
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1215,6 +1228,11 @@ class ConnectionConfig(ComponentConfiguration):
             ComponentId(ComponentType.PROTOCOL, protocol_id)
             for protocol_id in self.protocols
         )
+
+    @property
+    def is_abstract_component(self) -> bool:
+        """Check whether the component is abstract."""
+        return self.is_abstract
 
     @property
     def json(self) -> Dict:
@@ -1231,6 +1249,7 @@ class ConnectionConfig(ComponentConfiguration):
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "protocols": sorted(map(str, self.protocols)),
+                "connections": sorted(map(str, self.connections)),
                 "class_name": self.class_name,
                 "config": self.config,
                 "excluded_protocols": sorted(map(str, self.excluded_protocols)),
@@ -1238,6 +1257,7 @@ class ConnectionConfig(ComponentConfiguration):
                     map(str, self.restricted_to_protocols)
                 ),
                 "dependencies": dependencies_to_json(self.dependencies),
+                "is_abstract": self.is_abstract,
             }
         )
 
@@ -1252,6 +1272,7 @@ class ConnectionConfig(ComponentConfiguration):
         excluded_protocols = {PublicId.from_str(id_) for id_ in excluded_protocols}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
+        connections = {PublicId.from_str(id_) for id_ in obj.get("connections", set())}
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1264,10 +1285,12 @@ class ConnectionConfig(ComponentConfiguration):
             ),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
+            connections=cast(Set[PublicId], connections),
             restricted_to_protocols=cast(Set[PublicId], restricted_to_protocols),
             excluded_protocols=cast(Set[PublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
+            is_abstract=obj.get("is_abstract", False),
             **cast(dict, obj.get("config", {})),
         )
 
@@ -1282,6 +1305,7 @@ class ConnectionConfig(ComponentConfiguration):
         """
         new_config = data.get("config", {})
         recursive_update(self.config, new_config)
+        self.is_abstract = data.get("is_abstract", self.is_abstract)
 
 
 class ProtocolConfig(ComponentConfiguration):
@@ -1404,9 +1428,9 @@ class SkillConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        protocols: List[PublicId] = None,
-        contracts: List[PublicId] = None,
-        skills: List[PublicId] = None,
+        protocols: Optional[Set[PublicId]] = None,
+        contracts: Optional[Set[PublicId]] = None,
+        skills: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         is_abstract: bool = False,
@@ -1422,9 +1446,9 @@ class SkillConfig(ComponentConfiguration):
             fingerprint_ignore_patterns,
             dependencies,
         )
-        self.protocols: List[PublicId] = (protocols if protocols is not None else [])
-        self.contracts: List[PublicId] = (contracts if contracts is not None else [])
-        self.skills: List[PublicId] = (skills if skills is not None else [])
+        self.protocols = protocols if protocols is not None else set()
+        self.contracts = contracts if contracts is not None else set()
+        self.skills = skills if skills is not None else set()
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.handlers: CRUDCollection[SkillComponentConfiguration] = CRUDCollection()
@@ -1495,17 +1519,9 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns = cast(
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
-        protocols = cast(
-            List[PublicId],
-            [PublicId.from_str(id_) for id_ in obj.get("protocols", [])],
-        )
-        contracts = cast(
-            List[PublicId],
-            [PublicId.from_str(id_) for id_ in obj.get("contracts", [])],
-        )
-        skills = cast(
-            List[PublicId], [PublicId.from_str(id_) for id_ in obj.get("skills", [])],
-        )
+        protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
+        contracts = {PublicId.from_str(id_) for id_ in obj.get("contracts", set())}
+        skills = {PublicId.from_str(id_) for id_ in obj.get("skills", set())}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
@@ -2319,3 +2335,41 @@ def _check_aea_version(package_configuration: PackageConfiguration):
                 package_configuration.aea_version_specifiers,
             )
         )
+
+
+def _compare_public_ids(
+    component_configuration: ComponentConfiguration, package_directory: Path
+) -> None:
+    """Compare the public ids in config and init file."""
+    if component_configuration.package_type != PackageType.SKILL:
+        return
+    filename = "__init__.py"
+    public_id_in_init = _get_public_id_from_file(
+        component_configuration, package_directory, filename
+    )
+    if (
+        public_id_in_init is not None
+        and public_id_in_init != component_configuration.public_id
+    ):
+        raise ValueError(  # pragma: nocover
+            f"The public id specified in {filename} for package {package_directory} does not match the one specific in {component_configuration.package_type.value}.yaml"
+        )
+
+
+def _get_public_id_from_file(
+    component_configuration: ComponentConfiguration,
+    package_directory: Path,
+    filename: str,
+) -> Optional[PublicId]:
+    """
+    Get the public id from an init if present.
+
+    :param component_configuration: the component configuration.
+    :param package_directory: the path to the package directory.
+    :param filename: the file
+    :return: the public id, if found.
+    """
+    path_to_file = Path(package_directory, filename)
+    module = load_module(component_configuration.prefix_import_path, path_to_file)
+    package_public_id = getattr(module, PACKAGE_PUBLIC_ID_VAR_NAME, None)
+    return package_public_id

@@ -22,5 +22,4 @@
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-
 DefaultMessage.serializer = DefaultSerializer

@@ -101,7 +101,7 @@ class Strategy(Model):
         }
 
         super().__init__(**kwargs)
-
+        self._contract_id = str(ERC1155Contract.contract_id)
         self.is_behaviour_active = True
         self._is_contract_deployed = self._contract_address is not None
         self._is_tokens_created = self._token_ids is not None
@@ -115,6 +115,11 @@ class Strategy(Model):
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
+
+    @property
+    def contract_id(self) -> str:
+        """Get the contract id."""
+        return self._contract_id
 
     @property
     def mint_quantities(self) -> List[int]:

@@ -55,8 +55,11 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
 )
+from aea.configurations.constants import (
+    DEFAULT_SEARCH_SERVICE_ADDRESS as _DEFAULT_SEARCH_SERVICE_ADDRESS,
+)
+from aea.configurations.constants import DEFAULT_SKILL
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
@@ -225,10 +228,10 @@ class _DependenciesManager:
     def install_dependencies(self) -> None:
         """Install extra dependencies for components."""
         for name, d in self.pypi_dependencies.items():
-            install_dependency(name, d)
+            install_dependency(name, d, _default_logger)
 
 
-class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
+class AEABuilder(WithLogger):
     """
     This class helps to build an AEA.
 
@@ -286,7 +289,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
-    DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
+    DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
 
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
 
@@ -1213,10 +1216,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 ComponentId(ComponentType.CONTRACT, p_id)
                 for p_id in agent_configuration.contracts
             ],
-            [
-                ComponentId(ComponentType.CONNECTION, p_id)
-                for p_id in agent_configuration.connections
-            ],
         )
         for component_id in component_ids:
             component_path = self._find_component_directory_from_component_id(
@@ -1227,6 +1226,25 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+
+        connection_ids = [
+            ComponentId(ComponentType.CONNECTION, p_id)
+            for p_id in agent_configuration.connections
+        ]
+        if len(connection_ids) != 0:
+            connection_import_order = self._find_import_order(
+                connection_ids, aea_project_path, skip_consistency_check
+            )
+
+            for connection_id in connection_import_order:
+                component_path = self._find_component_directory_from_component_id(
+                    aea_project_path, connection_id
+                )
+                self.add_component(
+                    connection_id.component_type,
+                    component_path,
+                    skip_consistency_check=skip_consistency_check,
+                )
 
         skill_ids = [
             ComponentId(ComponentType.SKILL, p_id)
@@ -1254,45 +1272,50 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     def _find_import_order(
         self,
-        skill_ids: List[ComponentId],
+        component_ids: List[ComponentId],
         aea_project_path: Path,
         skip_consistency_check: bool,
     ) -> List[ComponentId]:
-        """Find import order for skills.
+        """Find import order for skills/connections.
 
-        We need to handle skills separately, since skills can depend on each other.
+        We need to handle skills and connections separately, since skills/connections can depend on each other.
 
         That is, we need to:
-        - load the skill configurations to find the import order
+        - load the skill/connection configurations to find the import order
         - detect if there are cycles
-        - import skills from the leaves of the dependency graph, by finding a topological ordering.
+        - import skills/connections from the leaves of the dependency graph, by finding a topological ordering.
         """
         # the adjacency list for the inverse dependency graph
         dependency_to_supported_dependencies: Dict[
             ComponentId, Set[ComponentId]
         ] = defaultdict(set)
-        for skill_id in skill_ids:
+        for component_id in component_ids:
             component_path = self._find_component_directory_from_component_id(
-                aea_project_path, skill_id
+                aea_project_path, component_id
             )
-            configuration = cast(
-                SkillConfig,
-                load_component_configuration(
-                    skill_id.component_type, component_path, skip_consistency_check
-                ),
+            configuration = load_component_configuration(
+                component_id.component_type, component_path, skip_consistency_check
             )
 
-            if skill_id not in dependency_to_supported_dependencies:
-                dependency_to_supported_dependencies[skill_id] = set()
-            for dependency in configuration.skills:
+            if component_id not in dependency_to_supported_dependencies:
+                dependency_to_supported_dependencies[component_id] = set()
+            if isinstance(configuration, SkillConfig):
+                dependencies, component_type = configuration.skills, "skills"
+            elif isinstance(configuration, ConnectionConfig):
+                dependencies, component_type = configuration.connections, "connections"
+            else:
+                raise AEAException("Not a valid configuration type.")
+            for dependency in dependencies:
                 dependency_to_supported_dependencies[
                     ComponentId(ComponentType.SKILL, dependency)
-                ].add(skill_id)
+                ].add(component_id)
 
         try:
             order = find_topological_order(dependency_to_supported_dependencies)
         except ValueError:
-            raise AEAException("Cannot load skills, there is a cyclic dependency.")
+            raise AEAException(
+                f"Cannot load {component_type}, there is a cyclic dependency."
+            )
 
         return order
 

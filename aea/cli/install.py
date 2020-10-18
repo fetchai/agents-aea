@@ -65,7 +65,7 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
             logger.debug("Installing all the dependencies...")
             dependencies = ctx.get_dependencies()
             for name, d in dependencies.items():
-                install_dependency(name, d)
+                install_dependency(name, d, logger)
     except AEAException as e:
         raise click.ClickException(str(e))
 

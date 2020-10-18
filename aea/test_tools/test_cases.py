@@ -450,6 +450,21 @@ class BaseAEATestCase(ABC):
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
+    def remove_item(cls, item_type: str, public_id: str) -> Result:
+        """
+        Remove an item from the agent.
+
+        Run from agent's directory.
+
+        :param item_type: str item type.
+        :param public_id: public id of the item.
+
+        :return: Result
+        """
+        cli_args = ["remove", item_type, public_id]
+        return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
+
+    @classmethod
     def scaffold_item(cls, item_type: str, name: str) -> Result:
         """
         Scaffold an item for the agent.

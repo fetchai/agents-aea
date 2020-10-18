@@ -27,7 +27,7 @@ from threading import Thread
 from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ComponentType, ProtocolId, PublicId, SkillConfig
+from aea.configurations.base import ComponentType, PublicId, SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.helpers import create_private_key
 from aea.protocols.base import Address, Message
@@ -312,7 +312,7 @@ class TestEndToEndGenerator(UseOef):
 class Agent1Handler(Handler):
     """The handler for agent 1."""
 
-    SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[PublicId]
 
     def __init__(self, dialogues: TProtocolDialogues, **kwargs):
         """Initialize the handler."""
@@ -347,7 +347,7 @@ class Agent1Handler(Handler):
 class Agent2Handler(Handler):
     """The handler for agent 2."""
 
-    SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[PublicId]
 
     def __init__(
         self, message: TProtocolMessage, dialogues: TProtocolDialogues, **kwargs

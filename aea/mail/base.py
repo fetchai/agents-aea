@@ -24,7 +24,7 @@ from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
-from aea.configurations.base import PackageId, ProtocolId, PublicId
+from aea.configurations.base import PackageId, PublicId
 from aea.exceptions import enforce
 from aea.mail import base_pb2
 from aea.protocols.base import Message
@@ -269,6 +269,8 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         """
         Decode the envelope.
 
+        The default serializer doesn't decode the message field.
+
         :param envelope_bytes: the encoded envelope
         :return: the envelope
         """
@@ -280,6 +282,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         raw_protocol_id = envelope_pb.protocol_id  # pylint: disable=no-member
         protocol_id = PublicId.from_str(raw_protocol_id)
         message = envelope_pb.message  # pylint: disable=no-member
+
         uri_raw = envelope_pb.uri  # pylint: disable=no-member
         if uri_raw != "":  # empty string means this field is not set in proto3
             uri = URI(uri_raw=uri_raw)
@@ -311,7 +314,7 @@ class Envelope:
         self,
         to: Address,
         sender: Address,
-        protocol_id: ProtocolId,
+        protocol_id: PublicId,
         message: Union[Message, bytes],
         context: Optional[EnvelopeContext] = None,
     ):
@@ -361,12 +364,12 @@ class Envelope:
         self._sender = sender
 
     @property
-    def protocol_id(self) -> ProtocolId:
+    def protocol_id(self) -> PublicId:
         """Get protocol id."""
         return self._protocol_id
 
     @protocol_id.setter
-    def protocol_id(self, protocol_id: ProtocolId) -> None:
+    def protocol_id(self, protocol_id: PublicId) -> None:
         """Set the protocol id."""
         self._protocol_id = protocol_id
 

@@ -9,7 +9,6 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/p2p_libp2p:0.11.0
 - fetchai/soef:0.10.0
-- fetchai/stub:0.11.0
 contracts: []
 protocols:
 - fetchai/default:0.7.0

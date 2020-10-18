@@ -8,9 +8,10 @@ license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   __init__.py: QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC
-  connection.py: QmRRre8r1yAj2w7EPp7hMc53zkc74PUfSMf4Cuwpzds4Q2
+  connection.py: QmSdcuep4xkD11D7cycyJmptgNxRVGByYZScF7uN43RxCZ
   readme.md: QmTac8uG5sT9igmMhfUbWMpyNUG5Dsj3JJZBBdfT1wTfvA
 fingerprint_ignore_patterns: []
+connections: []
 protocols: []
 class_name: StubConnection
 config:
@@ -19,3 +20,4 @@ config:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
+is_abstract: false

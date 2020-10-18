@@ -23,6 +23,7 @@ from typing import Dict, List, Set
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
+from aea.cli.fetch import fetch_agent_locally
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
@@ -38,13 +39,27 @@ class Project:
         self.agents: Set[str] = set()
 
     @classmethod
-    def load(cls, working_dir: str, public_id: PublicId) -> "Project":
-        """Load project with given public_id to working_dir."""
-        ctx = Context(cwd=working_dir)
+    def load(
+        cls,
+        working_dir: str,
+        public_id: PublicId,
+        is_local: bool = False,
+        registry_path: str = "packages",
+    ) -> "Project":
+        """
+        Load project with given public_id to working_dir.
+
+        :param working_dir: the working directory
+        :param public_id: the public id
+        :param is_local: whether to fetch from local or remote
+        """
+        ctx = Context(cwd=working_dir, registry_path=registry_path)
         path = os.path.join(working_dir, public_id.author, public_id.name)
-        fetch_agent(
-            ctx, public_id, target_dir=os.path.join(public_id.author, public_id.name)
-        )
+        target_dir = os.path.join(public_id.author, public_id.name)
+        if is_local:
+            fetch_agent_locally(ctx, public_id, target_dir=target_dir)
+        else:
+            fetch_agent(ctx, public_id, target_dir=target_dir)
         return cls(public_id, path)
 
     def remove(self) -> None:

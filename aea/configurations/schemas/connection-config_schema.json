@@ -50,6 +50,14 @@
         "$ref": "definitions.json#/definitions/public_id"
       }
     },
+    "connections": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
+    },
     "restricted_to_protocols": {
       "type": "array",
       "uniqueItems": true,
@@ -72,6 +80,9 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "is_abstract": {
+      "$ref": "skill-config_schema.json#/properties/is_abstract"
     }
   }
 }

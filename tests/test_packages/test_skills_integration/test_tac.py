@@ -74,6 +74,7 @@ class TestTacSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
         self.add_item("connection", "fetchai/soef:0.10.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
         self.add_item("skill", "fetchai/tac_control:0.9.0")
         self.set_config("agent.default_ledger", FETCHAI)
         setting_path = "agent.default_routing"
@@ -115,6 +116,7 @@ class TestTacSkills(AEATestCaseMany):
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
             self.add_item("connection", "fetchai/soef:0.10.0")
             self.add_item("connection", "fetchai/ledger:0.7.0")
+            self.remove_item("connection", "fetchai/stub:0.11.0")
             self.add_item("skill", "fetchai/tac_participation:0.10.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.11.0")
             self.set_config("agent.default_ledger", FETCHAI)
@@ -292,6 +294,7 @@ class TestTacSkillsContract(AEATestCaseMany):
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
         self.add_item("connection", "fetchai/soef:0.10.0")
         self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.10.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
@@ -340,6 +343,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
             self.add_item("connection", "fetchai/soef:0.10.0")
             self.add_item("connection", "fetchai/ledger:0.7.0")
+            self.remove_item("connection", "fetchai/stub:0.11.0")
             self.add_item("skill", "fetchai/tac_participation:0.10.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.11.0")
             self.set_config("agent.default_ledger", ETHEREUM)

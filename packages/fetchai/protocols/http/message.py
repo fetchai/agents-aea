@@ -22,7 +22,7 @@
 import logging
 from typing import Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = ProtocolId.from_str("fetchai/http:0.7.0")
+    protocol_id = PublicId.from_str("fetchai/http:0.7.0")
 
     class Performative(Message.Performative):
         """Performatives for the http protocol."""

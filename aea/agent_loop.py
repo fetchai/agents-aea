@@ -206,7 +206,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         try:
             with ExecTimeoutThreadGuard(execution_timeout):
                 return fn(*(args or []), **(kwargs or {}))
-        except TimeoutException:  #  pragma: nocover
+        except TimeoutException:  # pragma: nocover
             self.logger.warning(
                 "`{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
                     fn, execution_timeout

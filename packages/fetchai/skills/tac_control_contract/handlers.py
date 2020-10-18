@@ -21,7 +21,7 @@
 
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.protocols.signing.message import SigningMessage
@@ -57,7 +57,7 @@ OefSearchHandler = BaseOefSearchHandler
 class ContractApiHandler(Handler):
     """Implement the contract api handler."""
 
-    SUPPORTED_PROTOCOL = ContractApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = ContractApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -181,7 +181,7 @@ class ContractApiHandler(Handler):
 class SigningHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -293,7 +293,7 @@ class SigningHandler(Handler):
 class LedgerApiHandler(Handler):
     """Implement the ledger api handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""

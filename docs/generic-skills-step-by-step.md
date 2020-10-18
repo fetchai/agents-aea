@@ -292,7 +292,7 @@ Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a
 ``` python
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
@@ -320,7 +320,7 @@ LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 class GenericFipaHandler(Handler):
     """This class implements a FIPA handler."""
 
-    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -590,7 +590,7 @@ The remaining handlers are as follows:
 class GenericLedgerApiHandler(Handler):
     """Implement the ledger handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -744,7 +744,7 @@ class GenericLedgerApiHandler(Handler):
 class GenericOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -1494,7 +1494,7 @@ Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a
 import pprint
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
@@ -1523,7 +1523,7 @@ LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 class GenericFipaHandler(Handler):
     """This class implements a FIPA handler."""
 
-    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """
@@ -1776,7 +1776,7 @@ To handle the messages in the `oef_search` protocol used by the <a href="../simp
 class GenericOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -1907,7 +1907,7 @@ The last handlers we need are the `GenericSigningHandler` and the `GenericLedger
 class GenericSigningHandler(Handler):
     """Implement the signing handler."""
 
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -2019,7 +2019,7 @@ class GenericSigningHandler(Handler):
 class GenericLedgerApiHandler(Handler):
     """Implement the ledger handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""

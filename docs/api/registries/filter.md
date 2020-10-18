@@ -50,7 +50,7 @@ Get decision maker (out) queue.
 #### get`_`active`_`handlers
 
 ```python
- | get_active_handlers(protocol_id: PublicId, skill_id: Optional[SkillId] = None) -> List[Handler]
+ | get_active_handlers(protocol_id: PublicId, skill_id: Optional[PublicId] = None) -> List[Handler]
 ```
 
 Get active handlers based on protocol id and optional skill id.

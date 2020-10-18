@@ -25,7 +25,7 @@ from threading import Thread
 from typing import Any, Callable, Tuple, Type, Union
 
 from aea.aea import AEA
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -169,7 +169,7 @@ class AeaTool:
         cls,
         to: str = "test",
         sender: str = "test",
-        protocol_id: ProtocolId = DefaultMessage.protocol_id,
+        protocol_id: PublicId = DefaultMessage.protocol_id,
         message: Message = None,
     ) -> Envelope:
         """

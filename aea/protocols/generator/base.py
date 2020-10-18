@@ -601,7 +601,7 @@ class ProtocolGenerator:
         # Imports
         cls_str += self.indent + "import logging\n"
         cls_str += self._import_from_typing_module() + "\n\n"
-        cls_str += self.indent + "from aea.configurations.base import ProtocolId\n"
+        cls_str += self.indent + "from aea.configurations.base import PublicId\n"
         cls_str += self.indent + "from aea.exceptions import AEAEnforceError, enforce\n"
         cls_str += MESSAGE_IMPORT + "\n"
         if self._import_from_custom_types_module() != "":
@@ -626,13 +626,10 @@ class ProtocolGenerator:
         )
 
         # Class attributes
-        cls_str += (
-            self.indent
-            + 'protocol_id = ProtocolId.from_str("{}/{}:{}")\n'.format(
-                self.protocol_specification.author,
-                self.protocol_specification.name,
-                self.protocol_specification.version,
-            )
+        cls_str += self.indent + 'protocol_id = PublicId.from_str("{}/{}:{}")\n'.format(
+            self.protocol_specification.author,
+            self.protocol_specification.name,
+            self.protocol_specification.version,
         )
         for custom_type in self.spec.all_custom_types:
             cls_str += "\n"
@@ -1487,6 +1484,10 @@ class ProtocolGenerator:
 
         # Imports
         cls_str += self.indent + "from typing import Any, Dict, cast\n\n"
+        cls_str += (
+            self.indent
+            + "from aea.mail.base_pb2 import DialogueMessage, Message as ProtobufMessage\n"
+        )
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += self.indent + "from {} import (\n    {}_pb2,\n)\n".format(
@@ -1530,30 +1531,24 @@ class ProtocolGenerator:
         cls_str += self.indent + "msg = cast({}Message, msg)\n".format(
             self.protocol_specification_in_camel_case
         )
-        cls_str += self.indent + "{}_msg = {}_pb2.{}Message()\n".format(
+        cls_str += self.indent + "message_pb = ProtobufMessage()\n"
+        cls_str += self.indent + "dialogue_message_pb = DialogueMessage()\n"
+        cls_str += self.indent + "{}_msg = {}_pb2.{}Message()\n\n".format(
             self.protocol_specification.name,
             self.protocol_specification.name,
             self.protocol_specification_in_camel_case,
         )
-        cls_str += self.indent + "{}_msg.message_id = msg.message_id\n".format(
-            self.protocol_specification.name
-        )
+        cls_str += self.indent + "dialogue_message_pb.message_id = msg.message_id\n"
         cls_str += self.indent + "dialogue_reference = msg.dialogue_reference\n"
         cls_str += (
             self.indent
-            + "{}_msg.dialogue_starter_reference = dialogue_reference[0]\n".format(
-                self.protocol_specification.name
-            )
+            + "dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]\n"
         )
         cls_str += (
             self.indent
-            + "{}_msg.dialogue_responder_reference = dialogue_reference[1]\n".format(
-                self.protocol_specification.name
-            )
+            + "dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]\n"
         )
-        cls_str += self.indent + "{}_msg.target = msg.target\n\n".format(
-            self.protocol_specification.name
-        )
+        cls_str += self.indent + "dialogue_message_pb.target = msg.target\n\n"
         cls_str += self.indent + "performative_id = msg.performative\n"
         counter = 1
         for performative, contents in self.spec.speech_acts.items():
@@ -1591,12 +1586,17 @@ class ProtocolGenerator:
         )
         self._change_indent(-1)
 
-        cls_str += self.indent + "{}_bytes = {}_msg.SerializeToString()\n".format(
-            self.protocol_specification.name, self.protocol_specification.name
+        cls_str += (
+            self.indent
+            + "dialogue_message_pb.content = {}_msg.SerializeToString()\n\n".format(
+                self.protocol_specification.name,
+            )
         )
-        cls_str += self.indent + "return {}_bytes\n\n".format(
-            self.protocol_specification.name
+        cls_str += (
+            self.indent + "message_pb.dialogue_message.CopyFrom(dialogue_message_pb)\n"
         )
+        cls_str += self.indent + "message_bytes = message_pb.SerializeToString()\n"
+        cls_str += self.indent + "return message_bytes\n"
         self._change_indent(-1)
 
         # decoder
@@ -1612,25 +1612,24 @@ class ProtocolGenerator:
             self.protocol_specification_in_camel_case
         )
         cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "message_pb = ProtobufMessage()\n"
         cls_str += self.indent + "{}_pb = {}_pb2.{}Message()\n".format(
             self.protocol_specification.name,
             self.protocol_specification.name,
             self.protocol_specification_in_camel_case,
         )
-        cls_str += self.indent + "{}_pb.ParseFromString(obj)\n".format(
-            self.protocol_specification.name
-        )
-        cls_str += self.indent + "message_id = {}_pb.message_id\n".format(
-            self.protocol_specification.name
-        )
+        cls_str += self.indent + "message_pb.ParseFromString(obj)\n"
+        cls_str += self.indent + "message_id = message_pb.dialogue_message.message_id\n"
         cls_str += (
             self.indent
-            + "dialogue_reference = ({}_pb.dialogue_starter_reference, {}_pb.dialogue_responder_reference)\n".format(
-                self.protocol_specification.name, self.protocol_specification.name
-            )
+            + "dialogue_reference = (message_pb.dialogue_message.dialogue_starter_reference, message_pb.dialogue_message.dialogue_responder_reference)\n"
         )
-        cls_str += self.indent + "target = {}_pb.target\n\n".format(
-            self.protocol_specification.name
+        cls_str += self.indent + "target = message_pb.dialogue_message.target\n\n"
+        cls_str += (
+            self.indent
+            + "{}_pb.ParseFromString(message_pb.dialogue_message.content)\n".format(
+                self.protocol_specification.name
+            )
         )
         cls_str += (
             self.indent
@@ -1757,8 +1756,8 @@ class ProtocolGenerator:
 
         # heading
         proto_buff_schema_str = self.indent + 'syntax = "proto3";\n\n'
-        proto_buff_schema_str += self.indent + "package fetch.aea.{};\n\n".format(
-            self.protocol_specification_in_camel_case
+        proto_buff_schema_str += self.indent + "package aea.{}.{};\n\n".format(
+            self.protocol_specification.author, self.protocol_specification.name
         )
         proto_buff_schema_str += self.indent + "message {}Message{{\n\n".format(
             self.protocol_specification_in_camel_case
@@ -1821,18 +1820,6 @@ class ProtocolGenerator:
                 proto_buff_schema_str += self.indent + "}\n\n"
         proto_buff_schema_str += "\n"
 
-        # meta-data
-        proto_buff_schema_str += self.indent + "// Standard {}Message fields\n".format(
-            self.protocol_specification_in_camel_case
-        )
-        proto_buff_schema_str += self.indent + "int32 message_id = 1;\n"
-        proto_buff_schema_str += (
-            self.indent + "string dialogue_starter_reference = 2;\n"
-        )
-        proto_buff_schema_str += (
-            self.indent + "string dialogue_responder_reference = 3;\n"
-        )
-        proto_buff_schema_str += self.indent + "int32 target = 4;\n"
         proto_buff_schema_str += self.indent + "oneof performative{\n"
         self._change_indent(1)
         tag_no = 5
