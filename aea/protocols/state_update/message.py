@@ -27,7 +27,9 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 
-_default_logger = logging.getLogger("aea.protocols.state_update.message")
+_default_logger = logging.getLogger(
+    "aea.packages.fetchai.protocols.state_update.message"
+)
 
 DEFAULT_BODY_SIZE = 4
 

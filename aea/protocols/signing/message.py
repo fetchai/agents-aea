@@ -34,8 +34,7 @@ from aea.protocols.signing.custom_types import (
 )
 from aea.protocols.signing.custom_types import Terms as CustomTerms
 
-
-_default_logger = logging.getLogger("aea.protocols.signing.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.signing.message")
 
 DEFAULT_BODY_SIZE = 4
 

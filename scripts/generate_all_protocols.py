@@ -215,7 +215,6 @@ def replace_in_directory(name: str):
     log(f"Replace prefix of import statements in directory '{name}'")
     replace_replacement_pairs = [
         (f"from packages.fetchai.protocols.{name}", f"from aea.protocols.{name}"),
-        (f"aea.packages.fetchai.protocols.{name}", f"aea.protocols.{name}"),
     ]
     package_dir = Path("protocols", name)
     for submodule in package_dir.rglob("*.py"):
