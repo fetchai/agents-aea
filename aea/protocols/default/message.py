@@ -27,6 +27,7 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 from aea.protocols.default.custom_types import ErrorCode as CustomErrorCode
 
+
 _default_logger = logging.getLogger("aea.protocols.default.message")
 
 DEFAULT_BODY_SIZE = 4
