@@ -83,7 +83,9 @@ def fetch_agent_locally(
     :param target_dir: the target directory to which the agent is fetched.
     :return: None
     """
-    packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
+    packages_path = (
+        DEFAULT_REGISTRY_PATH if ctx.registry_path is None else ctx.registry_path
+    )
     source_path = try_get_item_source_path(
         packages_path, public_id.author, "agents", public_id.name
     )
