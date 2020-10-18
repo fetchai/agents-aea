@@ -186,6 +186,10 @@ class TestSearchAgentsLocal:
         cls.runner = CliRunner()
 
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         cls.cli_config_file = f"{cls.t}/cli_config.yaml"
         cls.cli_config_patch = mock.patch(

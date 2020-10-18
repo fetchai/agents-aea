@@ -41,6 +41,7 @@ from tests.conftest import (
     CUR_PATH,
     CliRunner,
     PROTOCOL_CONFIGURATION_SCHEMA,
+    ROOT_DIR,
 )
 
 
@@ -54,6 +55,10 @@ class TestGenerateProtocol:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         shutil.copyfile(
             Path(CUR_PATH, "data", "sample_specification.yaml"),
             Path(cls.t, "sample_specification.yaml"),
@@ -131,6 +136,10 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         cls.protocol_name = "t_protocol"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         shutil.copyfile(
             Path(CUR_PATH, "data", "sample_specification.yaml"),
             Path(cls.t, "sample_specification.yaml"),
@@ -208,6 +217,10 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         shutil.copyfile(
             Path(CUR_PATH, "data", "sample_specification.yaml"),
             Path(cls.t, "sample_specification.yaml"),
@@ -295,6 +308,10 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         shutil.copyfile(
             Path(CUR_PATH, "data", "sample_specification.yaml"),
             Path(cls.t, "sample_specification.yaml"),
@@ -372,6 +389,10 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
 
         # create an agent

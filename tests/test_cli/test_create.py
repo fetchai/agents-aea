@@ -71,6 +71,10 @@ class TestCreate:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         cls.cli_config_file = f"{cls.t}/cli_config.yaml"
         cls.cli_config_patch = patch(
@@ -195,7 +199,7 @@ class TestCreate:
         )
         comparison = filecmp.dircmp(
             str(stub_connection_dirpath),
-            str(Path(ROOT_DIR, "aea", "connections", "stub")),
+            str(Path(ROOT_DIR, "packages", "fetchai", "connections", "stub")),
         )
         assert comparison.diff_files == []
 
@@ -214,7 +218,7 @@ class TestCreate:
         )
         comparison = filecmp.dircmp(
             str(default_protocol_dirpath),
-            str(Path(ROOT_DIR, "aea", "protocols", "default")),
+            str(Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")),
         )
         assert comparison.diff_files == []
 
@@ -232,7 +236,8 @@ class TestCreate:
             self.agent_name, "vendor", "fetchai", "skills", "error"
         )
         comparison = filecmp.dircmp(
-            str(default_protocol_dirpath), str(Path(ROOT_DIR, "aea", "skills", "error"))
+            str(default_protocol_dirpath),
+            str(Path(ROOT_DIR, "packages", "fetchai", "skills", "error")),
         )
         assert comparison.diff_files == []
 
@@ -279,6 +284,10 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         # create a directory with the agent name -> make 'aea create fail.
@@ -380,6 +389,10 @@ class TestCreateFailsWhenExceptionOccurs:
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
@@ -419,6 +432,10 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         """Set the test up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         cls.runner = CliRunner()

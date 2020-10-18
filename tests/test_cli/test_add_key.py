@@ -55,6 +55,10 @@ class TestAddFetchKey:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         cls.agent_folder = Path(cls.t, cls.agent_name)
         os.chdir(cls.t)
 
@@ -108,6 +112,10 @@ class TestAddEthereumhKey:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.agent_folder = Path(cls.t, cls.agent_name)
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
@@ -159,6 +167,10 @@ class TestAddManyKeys:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         cls.agent_folder = Path(cls.t, cls.agent_name)
         os.chdir(cls.t)
 
@@ -218,6 +230,10 @@ def test_add_key_fails_bad_key():
     runner = CliRunner()
     agent_name = "myagent"
     tmpdir = tempfile.mkdtemp()
+    dir_path = Path("packages")
+    tmp_dir = tmpdir / dir_path
+    src_dir = oldcwd / Path(ROOT_DIR, dir_path)
+    shutil.copytree(str(src_dir), str(tmp_dir))
     os.chdir(tmpdir)
     try:
         with mock.patch.object(
@@ -263,6 +279,10 @@ def test_add_key_fails_bad_ledger_id():
     runner = CliRunner()
     agent_name = "myagent"
     tmpdir = tempfile.mkdtemp()
+    dir_path = Path("packages")
+    tmp_dir = tmpdir / dir_path
+    src_dir = oldcwd / Path(ROOT_DIR, dir_path)
+    shutil.copytree(str(src_dir), str(tmp_dir))
     os.chdir(tmpdir)
     try:
         result = runner.invoke(
