@@ -22,7 +22,7 @@
 import logging
 from typing import Dict, Optional, Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
-    protocol_id = ProtocolId.from_str("fetchai/tac:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/tac:0.8.0")
 
     ErrorCode = CustomErrorCode
 

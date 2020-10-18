@@ -21,7 +21,7 @@ import pprint
 import subprocess  # nosec
 import sys
 from logging import Logger
-from typing import List, Optional
+from typing import List
 
 import click
 
@@ -30,23 +30,21 @@ from aea.exceptions import AEAException, enforce
 
 
 def install_dependency(
-    dependency_name: str, dependency: Dependency, logger: Optional[Logger] = None
+    dependency_name: str, dependency: Dependency, logger: Logger
 ) -> None:
     """
     Install python dependency to the current python environment.
 
     :param dependency_name: name of the python package
     :param dependency: Dependency specification
-    :param logger: the logger.
 
     :return: None
     """
-    click.echo(f"Installing {pprint.pformat(dependency_name)}...")
+    click.echo("Installing {}...".format(pprint.pformat(dependency_name)))
     try:
         pip_args = dependency.get_pip_install_args()
         command = [sys.executable, "-m", "pip", "install", *pip_args]
-        if logger:
-            logger.debug("Calling '{}'".format(" ".join(command)))
+        logger.debug("Calling '{}'".format(" ".join(command)))
         return_code = run_install_subprocess(command)
         if return_code == 1:
             # try a second time

@@ -340,7 +340,7 @@ The top level message class for agent to agent communication.
 #### `__`init`__`
 
 ```python
- | __init__(to: Address, sender: Address, protocol_id: ProtocolId, message: Union[Message, bytes], context: Optional[EnvelopeContext] = None)
+ | __init__(to: Address, sender: Address, protocol_id: PublicId, message: Union[Message, bytes], context: Optional[EnvelopeContext] = None)
 ```
 
 Initialize a Message object.
@@ -398,7 +398,7 @@ Set address of sender.
 
 ```python
  | @property
- | protocol_id() -> ProtocolId
+ | protocol_id() -> PublicId
 ```
 
 Get protocol id.
@@ -408,7 +408,7 @@ Get protocol id.
 
 ```python
  | @protocol_id.setter
- | protocol_id(protocol_id: ProtocolId) -> None
+ | protocol_id(protocol_id: PublicId) -> None
 ```
 
 Set the protocol id.
