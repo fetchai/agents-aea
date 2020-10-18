@@ -24,6 +24,7 @@ from pathlib import Path
 
 import click
 
+from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import try_to_load_agent_config, update_item_config
 from aea.cli.utils.context import Context
@@ -125,4 +126,9 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     update_item_config("agent", Path(ctx.cwd), **{item_type_plural: supported_items})
 
     shutil.rmtree(src)
-    click.echo("Successfully ejected {} {} to {}.".format(item_type, public_id, dst))
+    fingerprint_item(ctx, item_type, new_public_id)
+    click.echo(
+        "Successfully ejected {} {} to {} as {}.".format(
+            item_type, public_id, dst, new_public_id
+        )
+    )

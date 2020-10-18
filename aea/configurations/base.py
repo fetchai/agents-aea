@@ -2344,7 +2344,7 @@ def _compare_public_ids(
         public_id_in_init is not None
         and public_id_in_init != component_configuration.public_id
     ):
-        raise ValueError(
+        raise ValueError(  # pragma: nocover
             f"The public id specified in {filename} for package {package_directory} does not match the one specific in {component_configuration.package_type.value}.yaml"
         )
 
