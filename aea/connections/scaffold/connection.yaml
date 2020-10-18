@@ -11,6 +11,7 @@ fingerprint:
   connection.py: QmT7MNg8gkmWMzthN3k77i6UVhwXBeC2bGiNrUmXQcjWit
   readme.md: Qmdt71SaCCwAG1c24VktXDm4pxgUBiPMg4bWfUTiqorypf
 fingerprint_ignore_patterns: []
+connections: []
 protocols: []
 class_name: MyScaffoldConnection
 config:
@@ -18,3 +19,4 @@ config:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
+is_abstract: false

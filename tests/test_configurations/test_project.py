@@ -28,6 +28,8 @@ from aea.configurations.project import AgentAlias, Project
 from aea.helpers.base import cd
 from aea.test_tools.click_testing import CliRunner
 
+from tests.conftest import ROOT_DIR
+
 
 class TestProjectAndAgentAlias:
     """Check project and agent alias."""
@@ -45,7 +47,10 @@ class TestProjectAndAgentAlias:
 
     def test_project(self):
         """Test project laoded and removed."""
-        project = Project.load(self.t, self.project_public_id)
+        registry_path = os.path.join(ROOT_DIR, "packages")
+        project = Project.load(
+            self.t, self.project_public_id, is_local=True, registry_path=registry_path
+        )
         assert os.path.exists(self.project_path)
 
         with cd(self.project_path):

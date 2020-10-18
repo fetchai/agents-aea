@@ -11,6 +11,7 @@ fingerprint:
   connection.py: QmSdcuep4xkD11D7cycyJmptgNxRVGByYZScF7uN43RxCZ
   readme.md: QmTac8uG5sT9igmMhfUbWMpyNUG5Dsj3JJZBBdfT1wTfvA
 fingerprint_ignore_patterns: []
+connections: []
 protocols: []
 class_name: StubConnection
 config:
@@ -19,3 +20,4 @@ config:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
+is_abstract: false

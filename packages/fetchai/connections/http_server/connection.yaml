@@ -11,6 +11,7 @@ fingerprint:
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
   connection.py: QmfGG7pydLZLTGWoKvRmP4ERyfjawdYgb54jV1DQdRPNNP
 fingerprint_ignore_patterns: []
+connections: []
 protocols:
 - fetchai/http:0.7.0
 class_name: HTTPServerConnection
@@ -28,3 +29,4 @@ dependencies:
     version: ==0.13.2
   openapi-spec-validator:
     version: ==0.2.8
+is_abstract: false

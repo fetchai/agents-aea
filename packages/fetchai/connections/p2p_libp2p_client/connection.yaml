@@ -12,6 +12,7 @@ fingerprint:
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
   connection.py: QmNdyKcUpZW8LnqEcYLbQepFegLQGSM5KAHwV9WyWqtXvp
 fingerprint_ignore_patterns: []
+connections: []
 protocols: []
 class_name: P2PLibp2pClientConnection
 config:
@@ -23,3 +24,4 @@ config:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
+is_abstract: false

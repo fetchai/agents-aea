@@ -12,6 +12,7 @@ fingerprint:
   connection.py: QmUNtBiXaVD2VJy4nfMYDfNxrrwQiDktJxJyRnNCvtLoA7
   object_translator.py: QmZNGxNywRZJTfcd2GYzbxkrXqUFRFEs8wnL3NeBW78poe
 fingerprint_ignore_patterns: []
+connections: []
 protocols:
 - fetchai/default:0.7.0
 - fetchai/oef_search:0.8.0
@@ -25,3 +26,4 @@ dependencies:
   colorlog: {}
   oef:
     version: ==0.8.1
+is_abstract: false
