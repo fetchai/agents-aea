@@ -22,7 +22,7 @@
 import logging
 from typing import Dict, Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
-    protocol_id = ProtocolId.from_str("fetchai/gym:0.7.0")
+    protocol_id = PublicId.from_str("fetchai/gym:0.7.0")
 
     AnyObject = CustomAnyObject
 

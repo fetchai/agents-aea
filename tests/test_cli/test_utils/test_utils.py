@@ -42,9 +42,9 @@ from aea.cli.utils.package_utils import (
     find_item_locally,
     get_package_path_unified,
     get_wallet_from_context,
+    is_distributed_item,
     is_fingerprint_correct,
     is_item_present_unified,
-    is_local_item,
     try_get_balance,
     try_get_item_source_path,
     try_get_item_target_path,
@@ -462,9 +462,9 @@ def test_is_item_present_unified(mock_, vendor):
         (STATE_UPDATE_PROTOCOL.to_latest(), True),
     ],
 )
-def test_is_local_item(public_id, expected_outcome):
-    """Test the 'is_local_item' CLI utility function."""
-    assert is_local_item(public_id) is expected_outcome
+def test_is_distributed_item(public_id, expected_outcome):
+    """Test the 'is_distributed_item' CLI utility function."""
+    assert is_distributed_item(public_id) is expected_outcome
 
 
 class TestGetWalletFromtx(AEATestCaseEmpty):

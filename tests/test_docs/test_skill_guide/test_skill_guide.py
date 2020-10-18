@@ -142,6 +142,12 @@ class TestBuildSkill(AEATestCaseMany):
         with open(path, "w") as file:
             file.write(yaml_code_block[0])  # block one is yaml
 
+        path = Path(self.t, search_aea, "skills", skill_name, "__init__.py")
+        original = Path(AEA_DIR, "skills", "scaffold", "__init__.py")
+        assert filecmp.cmp(path, original)
+        with open(path, "w") as file:
+            file.write(self.code_blocks[3])  # block four is init
+
         # update fingerprint
         self.fingerprint_item("skill", skill_id)
 

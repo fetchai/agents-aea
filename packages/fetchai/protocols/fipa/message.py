@@ -22,7 +22,7 @@
 import logging
 from typing import Dict, Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
-    protocol_id = ProtocolId.from_str("fetchai/fipa:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/fipa:0.8.0")
 
     Description = CustomDescription
 

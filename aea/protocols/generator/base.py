@@ -601,7 +601,7 @@ class ProtocolGenerator:
         # Imports
         cls_str += self.indent + "import logging\n"
         cls_str += self._import_from_typing_module() + "\n\n"
-        cls_str += self.indent + "from aea.configurations.base import ProtocolId\n"
+        cls_str += self.indent + "from aea.configurations.base import PublicId\n"
         cls_str += self.indent + "from aea.exceptions import AEAEnforceError, enforce\n"
         cls_str += MESSAGE_IMPORT + "\n"
         if self._import_from_custom_types_module() != "":
@@ -626,13 +626,10 @@ class ProtocolGenerator:
         )
 
         # Class attributes
-        cls_str += (
-            self.indent
-            + 'protocol_id = ProtocolId.from_str("{}/{}:{}")\n'.format(
-                self.protocol_specification.author,
-                self.protocol_specification.name,
-                self.protocol_specification.version,
-            )
+        cls_str += self.indent + 'protocol_id = PublicId.from_str("{}/{}:{}")\n'.format(
+            self.protocol_specification.author,
+            self.protocol_specification.name,
+            self.protocol_specification.version,
         )
         for custom_type in self.spec.all_custom_types:
             cls_str += "\n"

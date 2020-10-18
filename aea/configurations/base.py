@@ -55,7 +55,7 @@ from urllib3.util import Url, parse_url
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
-from aea.helpers.base import RegexConstrainedString, recursive_update
+from aea.helpers.base import RegexConstrainedString, load_module, recursive_update
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -69,6 +69,8 @@ DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
 DEFAULT_README_FILE = "README.md"
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
+
+PACKAGE_PUBLIC_ID_VAR_NAME = "PUBLIC_ID"
 
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     ".DS_Store",
@@ -952,12 +954,6 @@ class ComponentId(PackageId):
         return dict(**self.public_id.json, type=str(self.component_type))
 
 
-ProtocolId = PublicId
-ContractId = PublicId
-ConnectionId = PublicId
-SkillId = PublicId
-
-
 class PackageConfiguration(Configuration, ABC):
     """
     This class represent a package configuration.
@@ -1115,6 +1111,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """Check that the configuration file is consistent against a directory."""
         self.check_fingerprint(directory)
         self.check_aea_version()
+        self.check_public_id_consistency(directory)
 
     def check_fingerprint(self, directory: Path) -> None:
         """
@@ -1137,6 +1134,18 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         :raises ValueError if the version of the aea framework falls within a specifier.
         """
         _check_aea_version(self)
+
+    def check_public_id_consistency(self, directory: Path) -> None:
+        """
+        Check that the public ids in the init file match the config.
+
+        :raises ValueError if:
+            - the argument is not a valid package directory
+            - the public ids do not match.
+        """
+        if not directory.exists() or not directory.is_dir():
+            raise ValueError("Directory {} is not valid.".format(directory))
+        _compare_public_ids(self, directory)
 
 
 class ConnectionConfig(ComponentConfiguration):
@@ -2326,3 +2335,41 @@ def _check_aea_version(package_configuration: PackageConfiguration):
                 package_configuration.aea_version_specifiers,
             )
         )
+
+
+def _compare_public_ids(
+    component_configuration: ComponentConfiguration, package_directory: Path
+) -> None:
+    """Compare the public ids in config and init file."""
+    if component_configuration.package_type != PackageType.SKILL:
+        return
+    filename = "__init__.py"
+    public_id_in_init = _get_public_id_from_file(
+        component_configuration, package_directory, filename
+    )
+    if (
+        public_id_in_init is not None
+        and public_id_in_init != component_configuration.public_id
+    ):
+        raise ValueError(  # pragma: nocover
+            f"The public id specified in {filename} for package {package_directory} does not match the one specific in {component_configuration.package_type.value}.yaml"
+        )
+
+
+def _get_public_id_from_file(
+    component_configuration: ComponentConfiguration,
+    package_directory: Path,
+    filename: str,
+) -> Optional[PublicId]:
+    """
+    Get the public id from an init if present.
+
+    :param component_configuration: the component configuration.
+    :param package_directory: the path to the package directory.
+    :param filename: the file
+    :return: the public id, if found.
+    """
+    path_to_file = Path(package_directory, filename)
+    module = load_module(component_configuration.prefix_import_path, path_to_file)
+    package_public_id = getattr(module, PACKAGE_PUBLIC_ID_VAR_NAME, None)
+    return package_public_id

@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the tac negotiation skill."""
+
+from aea.configurations.base import PublicId
+
+
+PUBLIC_ID = PublicId.from_str("fetchai/tac_negotiation:0.11.0")

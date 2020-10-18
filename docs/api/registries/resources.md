@@ -103,7 +103,7 @@ None
 #### get`_`protocol
 
 ```python
- | get_protocol(protocol_id: ProtocolId) -> Optional[Protocol]
+ | get_protocol(protocol_id: PublicId) -> Optional[Protocol]
 ```
 
 Get protocol for given protocol id.
@@ -133,7 +133,7 @@ the list of protocols.
 #### remove`_`protocol
 
 ```python
- | remove_protocol(protocol_id: ProtocolId) -> None
+ | remove_protocol(protocol_id: PublicId) -> None
 ```
 
 Remove a protocol from the set of resources.
@@ -167,7 +167,7 @@ None
 #### get`_`contract
 
 ```python
- | get_contract(contract_id: ContractId) -> Optional[Contract]
+ | get_contract(contract_id: PublicId) -> Optional[Contract]
 ```
 
 Get contract for given contract id.
@@ -197,7 +197,7 @@ the list of contracts.
 #### remove`_`contract
 
 ```python
- | remove_contract(contract_id: ContractId) -> None
+ | remove_contract(contract_id: PublicId) -> None
 ```
 
 Remove a contract from the set of resources.
@@ -231,7 +231,7 @@ None
 #### get`_`connection
 
 ```python
- | get_connection(connection_id: ConnectionId) -> Optional[Connection]
+ | get_connection(connection_id: PublicId) -> Optional[Connection]
 ```
 
 Get connection for given connection id.
@@ -261,7 +261,7 @@ the list of connections.
 #### remove`_`connection
 
 ```python
- | remove_connection(connection_id: ConnectionId) -> None
+ | remove_connection(connection_id: PublicId) -> None
 ```
 
 Remove a connection from the set of resources.
@@ -295,7 +295,7 @@ None
 #### get`_`skill
 
 ```python
- | get_skill(skill_id: SkillId) -> Optional[Skill]
+ | get_skill(skill_id: PublicId) -> Optional[Skill]
 ```
 
 Get the skill for a given skill id.
@@ -325,7 +325,7 @@ the list of skills.
 #### remove`_`skill
 
 ```python
- | remove_skill(skill_id: SkillId) -> None
+ | remove_skill(skill_id: PublicId) -> None
 ```
 
 Remove a skill from the set of resources.
@@ -342,7 +342,7 @@ None
 #### get`_`handler
 
 ```python
- | get_handler(protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]
+ | get_handler(protocol_id: PublicId, skill_id: PublicId) -> Optional[Handler]
 ```
 
 Get a specific handler.
@@ -360,7 +360,7 @@ the handler
 #### get`_`handlers
 
 ```python
- | get_handlers(protocol_id: ProtocolId) -> List[Handler]
+ | get_handlers(protocol_id: PublicId) -> List[Handler]
 ```
 
 Get all handlers for a given protocol.
@@ -390,7 +390,7 @@ the list of handlers
 #### get`_`behaviour
 
 ```python
- | get_behaviour(skill_id: SkillId, behaviour_name: str) -> Optional[Behaviour]
+ | get_behaviour(skill_id: PublicId, behaviour_name: str) -> Optional[Behaviour]
 ```
 
 Get a specific behaviours for a given skill.
@@ -408,7 +408,7 @@ the behaviour, if it is present, else None
 #### get`_`behaviours
 
 ```python
- | get_behaviours(skill_id: SkillId) -> List[Behaviour]
+ | get_behaviours(skill_id: PublicId) -> List[Behaviour]
 ```
 
 Get all behaviours for a given skill.
