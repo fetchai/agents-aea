@@ -23,7 +23,6 @@ import base64
 import functools
 import gzip
 import json
-import os
 import pprint
 import re
 from abc import ABC, abstractmethod
@@ -56,7 +55,7 @@ from urllib3.util import Url, parse_url
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
-from aea.helpers.base import RegexConstrainedString, recursive_update
+from aea.helpers.base import RegexConstrainedString, load_module, recursive_update
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -70,6 +69,8 @@ DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
 DEFAULT_README_FILE = "README.md"
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
+
+PACKAGE_PUBLIC_ID_VAR_NAME = "PUBLIC_ID"
 
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     ".DS_Store",
@@ -2330,28 +2331,38 @@ def _check_aea_version(package_configuration: PackageConfiguration):
 
 
 def _compare_public_ids(
-    package_configuration: PackageConfiguration, package_directory: Path
+    component_configuration: ComponentConfiguration, package_directory: Path
 ) -> None:
     """Compare the public ids in config and init file."""
-    if package_configuration.package_type != PackageType.SKILL:
+    if component_configuration.package_type != PackageType.SKILL:
         return
     filename = "__init__.py"
-    public_id_in_init = _get_public_id_from_file(package_directory, filename)
-    if public_id_in_init == package_configuration.public_id:  # unfinished
+    public_id_in_init = _get_public_id_from_file(
+        component_configuration, package_directory, filename
+    )
+    if (
+        public_id_in_init is not None
+        and public_id_in_init != component_configuration.public_id
+    ):
         raise ValueError(
-            "The public id specified in {} for package {} does not match the one specific in {}.yaml".format(
-                filename, package_directory, package_configuration.package_type.value,
-            )
+            f"The public id specified in {filename} for package {package_directory} does not match the one specific in {component_configuration.package_type.value}.yaml"
         )
 
 
 def _get_public_id_from_file(
-    package_directory: Path, filename: str
+    component_configuration: ComponentConfiguration,
+    package_directory: Path,
+    filename: str,
 ) -> Optional[PublicId]:
-    """Get the public id from an init if present."""
-    public_id = None  # Optional[PublicId]
-    fp = os.path.join(package_directory, filename)
-    with open(fp, "r") as _:
-        pass
-        # unfinished
-    return public_id
+    """
+    Get the public id from an init if present.
+
+    :param component_configuration: the component configuration.
+    :param package_directory: the path to the package directory.
+    :param filename: the file
+    :return: the public id, if found.
+    """
+    path_to_file = Path(package_directory, filename)
+    module = load_module(component_configuration.prefix_import_path, path_to_file)
+    package_public_id = getattr(module, PACKAGE_PUBLIC_ID_VAR_NAME, None)
+    return package_public_id
