@@ -21,6 +21,8 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.gym import gym_pb2
@@ -40,12 +42,15 @@ class GymSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(GymMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         gym_msg = gym_pb2.GymMessage()
-        gym_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        gym_msg.dialogue_starter_reference = dialogue_reference[0]
-        gym_msg.dialogue_responder_reference = dialogue_reference[1]
-        gym_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == GymMessage.Performative.ACT:
@@ -82,8 +87,11 @@ class GymSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        gym_bytes = gym_msg.SerializeToString()
-        return gym_bytes
+        dialogue_message_pb.content = gym_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -93,15 +101,17 @@ class GymSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'Gym' message.
         """
+        message_pb = ProtobufMessage()
         gym_pb = gym_pb2.GymMessage()
-        gym_pb.ParseFromString(obj)
-        message_id = gym_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            gym_pb.dialogue_starter_reference,
-            gym_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = gym_pb.target
+        target = message_pb.dialogue_message.target
 
+        gym_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = gym_pb.WhichOneof("performative")
         performative_id = GymMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

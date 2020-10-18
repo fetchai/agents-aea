@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.Fipa;
+package aea.fetchai.fipa;
 
 message FipaMessage{
 
@@ -48,11 +48,6 @@ message FipaMessage{
     message Match_Accept_Performative{}
 
 
-    // Standard FipaMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Accept_Performative accept = 5;
         Accept_W_Inform_Performative accept_w_inform = 6;

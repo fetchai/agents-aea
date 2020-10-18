@@ -31,16 +31,15 @@ The format for the above fields, except `message`, is specified below. For those
 
 ``` proto
 
-    // Meta fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
-    oneof performative{
-        ...
+    message DialogueMessage {
+        int32 message_id = 1;
+        string dialogue_starter_reference = 2;
+        string dialogue_responder_reference = 3;
+        int32 target = 4;
+        bytes content = 5;
     }
 ```
- where `...` is replaced with the protocol specific performatives (see <a href="../protocol-generator">here</a> for details).
+ where `content` is replaced with the protocol specific content (see <a href="../protocol-generator">here</a> for details).
 </li>
 
 <li> It MUST implement protocols according to their specification (see <a href="../protocol-generator">here</a> for details).
@@ -84,11 +83,6 @@ message DefaultMessage{
     }
 
 
-    // Standard DefaultMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Bytes_Performative bytes = 5;
         Error_Performative error = 6;

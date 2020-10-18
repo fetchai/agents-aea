@@ -21,6 +21,8 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 from aea.protocols.signing import signing_pb2
 from aea.protocols.signing.custom_types import (
@@ -46,12 +48,15 @@ class SigningSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(SigningMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         signing_msg = signing_pb2.SigningMessage()
-        signing_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        signing_msg.dialogue_starter_reference = dialogue_reference[0]
-        signing_msg.dialogue_responder_reference = dialogue_reference[1]
-        signing_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == SigningMessage.Performative.SIGN_TRANSACTION:
@@ -88,8 +93,11 @@ class SigningSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        signing_bytes = signing_msg.SerializeToString()
-        return signing_bytes
+        dialogue_message_pb.content = signing_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -99,15 +107,17 @@ class SigningSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'Signing' message.
         """
+        message_pb = ProtobufMessage()
         signing_pb = signing_pb2.SigningMessage()
-        signing_pb.ParseFromString(obj)
-        message_id = signing_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            signing_pb.dialogue_starter_reference,
-            signing_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = signing_pb.target
+        target = message_pb.dialogue_message.target
 
+        signing_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = signing_pb.WhichOneof("performative")
         performative_id = SigningMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

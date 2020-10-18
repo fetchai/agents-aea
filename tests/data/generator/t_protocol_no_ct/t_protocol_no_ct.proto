@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.TProtocolNoCt;
+package aea.fetchai.t_protocol_no_ct;
 
 message TProtocolNoCtMessage{
 
@@ -78,11 +78,6 @@ message TProtocolNoCtMessage{
     message Performative_Empty_Contents_Performative{}
 
 
-    // Standard TProtocolNoCtMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Performative_Empty_Contents_Performative performative_empty_contents = 5;
         Performative_Mt_Performative performative_mt = 6;
