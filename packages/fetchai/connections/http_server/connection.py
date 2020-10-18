@@ -191,7 +191,7 @@ class Request(OpenAPIRequest):
             method=self.method,
             url=url,
             headers=self.parameters.header,
-            bodyy=self.body if self.body is not None else b"",
+            body=self.body if self.body is not None else b"",
             version="",
         )
         dialogue = cast(HttpDialogue, http_dialogue)
@@ -229,7 +229,7 @@ class Response(web.Response):
             response = cls(
                 status=http_message.status_code,
                 reason=http_message.status_text,
-                body=http_message.bodyy,
+                body=http_message.body,
                 headers=headers,
             )
         else:  # pragma: nocover

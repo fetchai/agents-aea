@@ -136,7 +136,7 @@ class AEAProject:
         self.temp_dir = tempfile.mkdtemp(dir=self.parent_dir)
         os.chdir(self.temp_dir)
 
-        run_aea("create", self.name)
+        run_aea("create", "--local", self.name, "--author", "fetchai")
         os.chdir(self.name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -215,7 +215,6 @@ def replace_in_directory(name: str):
     log(f"Replace prefix of import statements in directory '{name}'")
     replace_replacement_pairs = [
         (f"from packages.fetchai.protocols.{name}", f"from aea.protocols.{name}"),
-        (f"aea.packages.fetchai.protocols.{name}", f"aea.protocols.{name}"),
     ]
     package_dir = Path("protocols", name)
     for submodule in package_dir.rglob("*.py"):

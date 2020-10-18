@@ -141,7 +141,7 @@ class TestWebhookConnection:
         dialogue = self.dialogues.update(message)
         assert dialogue is not None
         assert message.method.upper() == "POST"
-        assert message.bodyy.decode("utf-8") == json.dumps(payload)
+        assert message.body.decode("utf-8") == json.dumps(payload)
         await call_task
 
     @pytest.mark.asyncio
@@ -158,7 +158,7 @@ class TestWebhookConnection:
             method="get",
             url="/",
             headers="",
-            bodyy="",
+            body="",
             version="",
         )
         envelope = Envelope(

@@ -20,13 +20,13 @@ speech_acts:
     url: pt:str
     version: pt:str
     headers: pt:str
-    bodyy: pt:bytes
+    body: pt:bytes
   response:
     version: pt:str
     status_code: pt:int
     status_text: pt:str
     headers: pt:str
-    bodyy: pt:bytes
+    body: pt:bytes
 ...
 ---
 initiation: [request]

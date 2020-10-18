@@ -56,7 +56,7 @@ class Message:
             """Get the string representation."""
             return str(self.value)
 
-    def __init__(self, body: Optional[Dict] = None, **kwargs):
+    def __init__(self, _body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
 
@@ -65,8 +65,9 @@ class Message:
         """
         self._to: Optional[Address] = None
         self._sender: Optional[Address] = None
-        self._body: Dict[str, Any] = copy(body) if body else {}
-        self._body.update(kwargs)
+        self.__body: Dict[str, Any] = copy(_body) if _body else {}
+        self.__body.update(kwargs)
+
         try:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
@@ -118,23 +119,23 @@ class Message:
         self._to = to
 
     @property
-    def body(self) -> Dict:
+    def _body(self) -> Dict:
         """
         Get the body of the message (in dictionary form).
 
         :return: the body
         """
-        return self._body
+        return self.__body
 
-    @body.setter
-    def body(self, body: Dict) -> None:
+    @_body.setter
+    def _body(self, body: Dict) -> None:
         """
         Set the body of hte message.
 
         :param body: the body.
         :return: None
         """
-        self._body = body
+        self.__body = body
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
@@ -196,7 +197,7 @@ class Message:
             # and self.message_id == other.message_id  # noqa: E800
             # and self.target == other.target  # noqa: E800
             # and self.performative == other.performative  # noqa: E800
-            and self.body == other.body
+            and self._body == other._body
         )
 
     def __str__(self):
@@ -206,7 +207,7 @@ class Message:
             + ",".join(
                 map(
                     lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
-                    self.body.items(),
+                    self._body.items(),
                 )
             )
             + ")"
@@ -290,7 +291,7 @@ class ProtobufSerializer(Serializer):
             dialogue_message_pb.dialogue_responder_reference = msg.dialogue_reference[1]
             dialogue_message_pb.target = msg.target
 
-            new_body = copy(msg.body)
+            new_body = copy(msg._body)  # pylint: disable=protected-access
             new_body.pop("message_id")
             new_body.pop("dialogue_reference")
             new_body.pop("target")
@@ -306,7 +307,7 @@ class ProtobufSerializer(Serializer):
             )
         else:
             body_json = Struct()
-            body_json.update(msg.body)  # pylint: disable=no-member
+            body_json.update(msg._body)  # pylint: disable=no-member,protected-access
             message_pb.body.CopyFrom(body_json)  # pylint: disable=no-member
 
         return message_pb.SerializeToString()
@@ -324,7 +325,7 @@ class ProtobufSerializer(Serializer):
         message_type = message_pb.WhichOneof("message")
         if message_type == "body":
             body = dict(message_pb.body)  # pylint: disable=no-member
-            msg = Message(body=body)
+            msg = Message(_body=body)
             return msg
         if message_type == "dialogue_message":
             dialogue_message_pb = (
@@ -345,7 +346,7 @@ class ProtobufSerializer(Serializer):
                 dialogue_starter_reference,
                 dialogue_responder_reference,
             )
-            return Message(body=body)
+            return Message(_body=body)
         raise ValueError("Message type not recognized.")  # pragma: nocover
 
 

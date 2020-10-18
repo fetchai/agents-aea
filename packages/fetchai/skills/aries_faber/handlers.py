@@ -192,7 +192,7 @@ class FaberHTTPHandler(Handler):
                 )
                 return
 
-            content_bytes = message.bodyy  # type: ignore
+            content_bytes = message.body  # type: ignore
             content = json.loads(content_bytes)
             self.context.logger.info("Received message: " + str(content))
             if "version" in content:  # response to /status
@@ -238,7 +238,7 @@ class FaberHTTPHandler(Handler):
                     "something went wrong when adding the incoming HTTP webhook request message to the dialogue."
                 )
                 return
-            content_bytes = message.bodyy
+            content_bytes = message.body
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
             if "connection_id" in content:

@@ -32,7 +32,7 @@ from aea.protocols.generator.common import (
 
 # The following names are reserved for standard message fields and cannot be
 # used as user defined names for performative or contents
-RESERVED_NAMES = {"body", "message_id", "dialogue_reference", "target", "performative"}
+RESERVED_NAMES = {"_body", "message_id", "dialogue_reference", "target", "performative"}
 
 # Regular expression patterns for various fields in protocol specifications
 PERFORMATIVE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
@@ -283,19 +283,19 @@ def _validate_performatives(performative: str) -> Tuple[bool, str]:
     :param performative: a performative.
     :return: Boolean result, and associated message.
     """
-    if not _is_valid_regex(PERFORMATIVE_REGEX_PATTERN, performative):
-        return (
-            False,
-            "Invalid name for performative '{}'. Performative names must match the following regular expression: {} ".format(
-                performative, PERFORMATIVE_REGEX_PATTERN
-            ),
-        )
-
     if _is_reserved_name(performative):
         return (
             False,
             "Invalid name for performative '{}'. This name is reserved.".format(
                 performative,
+            ),
+        )
+
+    if not _is_valid_regex(PERFORMATIVE_REGEX_PATTERN, performative):
+        return (
+            False,
+            "Invalid name for performative '{}'. Performative names must match the following regular expression: {} ".format(
+                performative, PERFORMATIVE_REGEX_PATTERN
             ),
         )
 

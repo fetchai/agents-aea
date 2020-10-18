@@ -188,7 +188,7 @@ class AliceHttpHandler(Handler):
                     "alice -> http_handler -> handle() -> REQUEST: something went wrong when adding the incoming HTTP webhook request message to the dialogue."
                 )
                 return
-            content_bytes = message.bodyy
+            content_bytes = message.body
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
             if "connection_id" in content:
@@ -205,7 +205,7 @@ class AliceHttpHandler(Handler):
                     "alice -> http_handler -> handle() -> RESPONSE: something went wrong when adding the incoming HTTP response message to the dialogue."
                 )
                 return
-            content_bytes = message.bodyy
+            content_bytes = message.body
             content = content_bytes.decode("utf-8")
             if "Error" in content:
                 self.context.logger.error(

@@ -474,7 +474,7 @@ class TProtocolNoCtMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_PT:
                 expected_nb_of_contents = 5

@@ -139,7 +139,7 @@ class TestHTTPClientConnect:
             url="bad url",
             headers="",
             version="",
-            bodyy=b"",
+            body=b"",
         )
         request_envelope = Envelope(
             to=self.connection_address,
@@ -183,7 +183,7 @@ class TestHTTPClientConnect:
             url="bad url",
             headers="",
             version="",
-            bodyy=b"",
+            body=b"",
         )
         request_envelope = Envelope(
             to=self.connection_address,
@@ -228,7 +228,7 @@ class TestHTTPClientConnect:
             url="https://not-a-google.com",
             headers="",
             version="",
-            bodyy=b"",
+            body=b"",
         )
         request_envelope = Envelope(
             to=self.connection_address,
@@ -273,7 +273,7 @@ class TestHTTPClientConnect:
             url="https://not-a-google.com",
             headers="",
             version="",
-            bodyy=b"",
+            body=b"",
         )
         request_envelope = Envelope(
             to=self.connection_address,
@@ -305,9 +305,7 @@ class TestHTTPClientConnect:
         assert envelope is not None and envelope.message is not None
         message = envelope.message
         response_dialogue = self.http_dialogs.update(message)
-        assert message.status_code == response_mock.status, message.bodyy.decode(
-            "utf-8"
-        )
+        assert message.status_code == response_mock.status, message.body.decode("utf-8")
         assert sending_dialogue == response_dialogue
         await self.http_client_connection.disconnect()
 
@@ -322,7 +320,7 @@ class TestHTTPClientConnect:
             status_code=500,
             headers="",
             status_text="",
-            bodyy=b"",
+            body=b"",
             version="",
         )
         incorrect_http_message.to = self.connection_address

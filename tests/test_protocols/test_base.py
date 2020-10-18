@@ -123,12 +123,12 @@ class TestBaseSerializations:
     def setup_class(cls):
         """Set up the use case."""
         cls.message = Message(content="hello")
-        cls.message2 = Message(body={"content": "hello"})
+        cls.message2 = Message(_body={"content": "hello"})
         cls.message3 = Message(
             message_id=1,
             target=0,
             dialogue_reference=("", ""),
-            body={"content": "hello"},
+            _body={"content": "hello"},
         )
 
     def test_default_protobuf_serialization(self):
@@ -179,8 +179,8 @@ class TestBaseSerializations:
     def test_body_setter(self):
         """Test the body setter."""
         m_dict = {"Hello": "World"}
-        self.message2.body = m_dict
-        assert "Hello" in self.message2.body.keys()
+        self.message2._body = m_dict
+        assert "Hello" in self.message2._body.keys()
 
 
 class TestProtocolFromDir:

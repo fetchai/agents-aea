@@ -122,7 +122,7 @@ class TestClientServer:
         self.setup_client()
 
     def _make_request(
-        self, path: str, method: str = "get", headers: str = "", bodyy: bytes = b""
+        self, path: str, method: str = "get", headers: str = "", body: bytes = b""
     ) -> Envelope:
         """Make request envelope."""
         request_http_message, _ = self._client_dialogues.create(
@@ -132,7 +132,7 @@ class TestClientServer:
             url=f"http://{self.host}:{self.port}{path}",
             headers="",
             version="",
-            bodyy=b"",
+            body=b"",
         )
         request_envelope = Envelope(
             to=request_http_message.to,
@@ -156,7 +156,7 @@ class TestClientServer:
             headers=incoming_message.headers,
             status_code=status_code,
             status_text=status_text,
-            bodyy=incoming_message.bodyy,
+            body=incoming_message.body,
         )
         response_envelope = Envelope(
             to=message.to,
@@ -170,7 +170,7 @@ class TestClientServer:
     @pytest.mark.asyncio
     async def test_post_with_payload(self):
         """Test client and server with post request."""
-        initial_request = self._make_request("/test", "POST", bodyy=b"1234567890")
+        initial_request = self._make_request("/test", "POST", body=b"1234567890")
         await self.client.send(initial_request)
         request = await asyncio.wait_for(self.server.receive(), timeout=5)
         # this is "inside" the server agent
@@ -178,8 +178,8 @@ class TestClientServer:
         await self.server.send(initial_response)
         response = await asyncio.wait_for(self.client.receive(), timeout=5)
         assert (
-            cast(HttpMessage, initial_request.message).bodyy
-            == cast(HttpMessage, response.message).bodyy
+            cast(HttpMessage, initial_request.message).body
+            == cast(HttpMessage, response.message).body
         )
         assert (
             initial_request.message.dialogue_reference[0]

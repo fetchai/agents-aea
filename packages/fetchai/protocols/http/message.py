@@ -102,10 +102,10 @@ class HttpMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def bodyy(self) -> bytes:
-        """Get the 'bodyy' content from the message."""
-        enforce(self.is_set("bodyy"), "'bodyy' content is not set.")
-        return cast(bytes, self.get("bodyy"))
+    def body(self) -> bytes:
+        """Get the 'body' content from the message."""
+        enforce(self.is_set("body"), "'body' content is not set.")
+        return cast(bytes, self.get("body"))
 
     @property
     def headers(self) -> str:
@@ -187,7 +187,7 @@ class HttpMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == HttpMessage.Performative.REQUEST:
                 expected_nb_of_contents = 5
@@ -216,9 +216,9 @@ class HttpMessage(Message):
                     ),
                 )
                 enforce(
-                    type(self.bodyy) == bytes,
-                    "Invalid type for content 'bodyy'. Expected 'bytes'. Found '{}'.".format(
-                        type(self.bodyy)
+                    type(self.body) == bytes,
+                    "Invalid type for content 'body'. Expected 'bytes'. Found '{}'.".format(
+                        type(self.body)
                     ),
                 )
             elif self.performative == HttpMessage.Performative.RESPONSE:
@@ -248,9 +248,9 @@ class HttpMessage(Message):
                     ),
                 )
                 enforce(
-                    type(self.bodyy) == bytes,
-                    "Invalid type for content 'bodyy'. Expected 'bytes'. Found '{}'.".format(
-                        type(self.bodyy)
+                    type(self.body) == bytes,
+                    "Invalid type for content 'body'. Expected 'bytes'. Found '{}'.".format(
+                        type(self.body)
                     ),
                 )
 

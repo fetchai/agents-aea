@@ -163,7 +163,7 @@ class TestHTTPServer:
             version=incoming_message.version,
             status_code=200,
             status_text="Success",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=envelope.sender,
@@ -197,7 +197,7 @@ class TestHTTPServer:
             headers=f"Content-Type: {content_type}",
             status_code=200,
             status_text="Success",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=envelope.sender,
@@ -233,7 +233,7 @@ class TestHTTPServer:
             url="/pets",
             version=incoming_message.version,
             headers=incoming_message.headers,
-            bodyy=b"Request body",
+            body=b"Request body",
         )
         incorrect_message.to = incoming_message.sender
 
@@ -275,7 +275,7 @@ class TestHTTPServer:
             headers=incoming_message.headers,
             status_code=200,
             status_text="Success",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=message.to,
@@ -314,7 +314,7 @@ class TestHTTPServer:
             version=incoming_message.version,
             status_code=201,
             status_text="Created",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=message.to,
@@ -392,7 +392,7 @@ class TestHTTPServer:
             version="",
             status_code=200,
             status_text="Success",
-            bodyy=b"",
+            body=b"",
         )
         message.to = str(HTTPServerConnection.connection_id)
         message.sender = "from_key"
@@ -438,7 +438,7 @@ class TestHTTPServer:
             headers=incoming_message.headers,
             status_code=201,
             status_text="Created",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=message.to,
@@ -466,7 +466,7 @@ class TestHTTPServer:
             headers="",
             status_code=200,
             status_text="Success",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         envelope = Envelope(
             to="receiver",
