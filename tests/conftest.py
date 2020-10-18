@@ -51,7 +51,7 @@ from aea.configurations.base import DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAM
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_LEDGER
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
@@ -197,14 +197,6 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
-LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
-P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.10.0")
-HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
-STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
-DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
-DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)

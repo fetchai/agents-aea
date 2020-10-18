@@ -38,7 +38,7 @@ from typing import (
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_SKILL
+from aea.configurations.constants import DEFAULT_SEARCH_SERVICE_ADDRESS, DEFAULT_SKILL
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.wallet import Wallet
@@ -88,7 +88,7 @@ class AEA(Agent):
         default_connection: Optional[PublicId] = None,
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
-        search_service_address: str = "fetchai/soef:*",
+        search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
         **kwargs,
     ) -> None:
         """

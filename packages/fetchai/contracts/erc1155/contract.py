@@ -44,6 +44,8 @@ PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.11.0")
 class ERC1155Contract(Contract):
     """The ERC1155 contract class which acts as a bridge between AEA framework and ERC1155 ABI."""
 
+    contract_id = PUBLIC_ID
+
     @classmethod
     def generate_token_ids(
         cls, token_type: int, nb_tokens: int, starting_index: int = 0

@@ -55,8 +55,11 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
 )
+from aea.configurations.constants import (
+    DEFAULT_SEARCH_SERVICE_ADDRESS as _DEFAULT_SEARCH_SERVICE_ADDRESS,
+)
+from aea.configurations.constants import DEFAULT_SKILL
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
@@ -225,7 +228,7 @@ class _DependenciesManager:
     def install_dependencies(self) -> None:
         """Install extra dependencies for components."""
         for name, d in self.pypi_dependencies.items():
-            install_dependency(name, d)
+            install_dependency(name, d, _default_logger)
 
 
 class AEABuilder(WithLogger):
@@ -286,7 +289,7 @@ class AEABuilder(WithLogger):
     DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
-    DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
+    DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
 
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
 

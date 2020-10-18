@@ -21,7 +21,7 @@
 
 from enum import Enum
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import enforce
 from aea.protocols.base import Message
 from aea.protocols.scaffold.serialization import MyScaffoldSerializer
@@ -30,7 +30,7 @@ from aea.protocols.scaffold.serialization import MyScaffoldSerializer
 class MyScaffoldMessage(Message):
     """The scaffold message class."""
 
-    protocol_id = ProtocolId.from_str("fetchai/scaffold:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/scaffold:0.1.0")
     serializer = MyScaffoldSerializer
 
     class Performative(Enum):

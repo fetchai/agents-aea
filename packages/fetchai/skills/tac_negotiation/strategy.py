@@ -42,7 +42,7 @@ from aea.helpers.search.models import (
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
-from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as CONTRACT_ID
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
@@ -60,7 +60,6 @@ DEFAULT_SEARCH_QUERY = {
     "constraint_type": "==",
 }
 DEFAULT_SEARCH_RADIUS = 5.0
-CONTRACT_ID = str(PUBLIC_ID)
 
 
 class Strategy(Model):
@@ -111,7 +110,7 @@ class Strategy(Model):
         }
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
-        self._contract_id = CONTRACT_ID
+        self._contract_id = str(CONTRACT_ID)
 
         super().__init__(**kwargs)
 
