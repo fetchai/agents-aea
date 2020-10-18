@@ -35,6 +35,7 @@ from aea.configurations.base import (
     AgentConfig,
     ComponentConfiguration,
     DEFAULT_AEA_CONFIG_FILE,
+    PACKAGE_PUBLIC_ID_VAR_NAME,
     PackageType,
     PublicId,
     _compute_fingerprint,
@@ -575,3 +576,30 @@ def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
     }
     wallet = Wallet(private_key_paths)
     return wallet
+
+
+def update_item_public_id_in_init(
+    item_type: str, package_path: Path, item_id: PublicId
+) -> None:
+    """
+    Update item config and item config file.
+
+    :param item_type: type of item.
+    :param package_path: path to a package folder.
+    :param item_id: public_id
+
+    :return: None
+    """
+    if item_type != "skill":
+        return
+    init_filepath = os.path.join(package_path, "__init__.py")
+    with open(init_filepath, "r") as f:
+        file_content = f.readlines()
+    with open(init_filepath, "w") as f:
+        for line in file_content:
+            if PACKAGE_PUBLIC_ID_VAR_NAME in line:
+                f.write(
+                    f'{PACKAGE_PUBLIC_ID_VAR_NAME} = PublicId.from_str("{str(item_id)}")'
+                )
+            else:
+                f.write(line)
