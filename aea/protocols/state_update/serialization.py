@@ -21,6 +21,8 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 from aea.protocols.state_update import state_update_pb2
 from aea.protocols.state_update.message import StateUpdateMessage
@@ -38,12 +40,15 @@ class StateUpdateSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(StateUpdateMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         state_update_msg = state_update_pb2.StateUpdateMessage()
-        state_update_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        state_update_msg.dialogue_starter_reference = dialogue_reference[0]
-        state_update_msg.dialogue_responder_reference = dialogue_reference[1]
-        state_update_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == StateUpdateMessage.Performative.INITIALIZE:
@@ -69,8 +74,11 @@ class StateUpdateSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        state_update_bytes = state_update_msg.SerializeToString()
-        return state_update_bytes
+        dialogue_message_pb.content = state_update_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -80,15 +88,17 @@ class StateUpdateSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'StateUpdate' message.
         """
+        message_pb = ProtobufMessage()
         state_update_pb = state_update_pb2.StateUpdateMessage()
-        state_update_pb.ParseFromString(obj)
-        message_id = state_update_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            state_update_pb.dialogue_starter_reference,
-            state_update_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = state_update_pb.target
+        target = message_pb.dialogue_message.target
 
+        state_update_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = state_update_pb.WhichOneof("performative")
         performative_id = StateUpdateMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

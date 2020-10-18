@@ -60,11 +60,11 @@ class TestProgrammaticAEA(BaseAEATestCase):
         assert os.path.exists(Path(self.t, DEFAULT_PRIVATE_KEY_FILE))
 
         message_text_1 = b"other_agent,my_aea,fetchai/default:0.7.0,"
-        message_text_2 = b"\x01*\x07\n\x05hello,"
+        message_text_2 = b"hello,"
         path = os.path.join(self.t, "output_file")
-        with open(path, "rb") as file:
-            msg = file.read()
-        assert message_text_1 in msg and message_text_2 in msg
+        msg = Path(path).read_bytes()
+        assert message_text_1 in msg
+        assert message_text_2 in msg
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""

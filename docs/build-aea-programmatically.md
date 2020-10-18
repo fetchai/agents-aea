@@ -121,7 +121,7 @@ We run the AEA from a different thread so that we can still use the main thread 
 We use the input and output text files to send an envelope to our AEA and receive a response (from the echo skill)
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = b"my_aea,other_agent,fetchai/default:0.7.0,\x08\x01\x12\x011*\x07\n\x05hello,"
+        message_text = b"my_aea,other_agent,fetchai/default:0.7.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
             print(b"input message: " + message_text)
@@ -147,7 +147,7 @@ Finally stop our AEA and wait for it to finish
 ## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_aea,other_agent,fetchai/default:0.7.0,\x08\x01*\x07\n\x05hello
+    input message: my_aea,other_agent,fetchai/default:0.7.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
     output message: other_agent,my_aea,fetchai/default:0.7.0,...\x05hello
 
 
@@ -239,7 +239,7 @@ def run():
         time.sleep(4)
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = b"my_aea,other_agent,fetchai/default:0.7.0,\x08\x01\x12\x011*\x07\n\x05hello,"
+        message_text = b"my_aea,other_agent,fetchai/default:0.7.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
             print(b"input message: " + message_text)

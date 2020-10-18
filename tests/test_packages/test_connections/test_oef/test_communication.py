@@ -25,7 +25,7 @@ import sys
 import time
 import unittest
 from contextlib import suppress
-from typing import Dict, cast
+from typing import cast
 from unittest import mock
 from unittest.mock import patch
 
@@ -45,6 +45,8 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.mail.base import Envelope
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.multiplexer import Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -721,6 +723,30 @@ class TestFIPA(UseOef):
 
     def test_serialisation_fipa(self):
         """Tests a Value Error flag for wrong CFP query."""
+
+        def _encode_fipa_cfp(msg: FipaMessage) -> bytes:
+            """Helper function to serialize FIPA CFP message."""
+            message_pb = ProtobufMessage()
+            dialogue_message_pb = DialogueMessage()
+            fipa_msg = fipa_pb2.FipaMessage()
+
+            dialogue_message_pb.message_id = msg.message_id
+            dialogue_reference = msg.dialogue_reference
+            dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+            dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+            dialogue_message_pb.target = msg.target
+
+            performative = fipa_pb2.FipaMessage.Cfp_Performative()  # type: ignore
+            # the following are commented to make the decoding to fail.
+            # query = msg.query  # noqa: E800
+            # Query.encode(performative.query, query)  # noqa: E800
+            fipa_msg.cfp.CopyFrom(performative)
+            dialogue_message_pb.content = fipa_msg.SerializeToString()
+
+            message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+            fipa_bytes = message_pb.SerializeToString()
+            return fipa_bytes
+
         with pytest.raises(ValueError):
             msg = FipaMessage(
                 performative=FipaMessage.Performative.CFP,
@@ -743,15 +769,7 @@ class TestFIPA(UseOef):
                 query=Query([Constraint("something", ConstraintType(">", 1))]),
             )
             cfp_msg.set("query", "hello")
-            fipa_msg = fipa_pb2.FipaMessage()
-            fipa_msg.message_id = cfp_msg.message_id
-            dialogue_reference = cast(Dict[str, str], cfp_msg.dialogue_reference)
-            fipa_msg.dialogue_starter_reference = dialogue_reference[0]
-            fipa_msg.dialogue_responder_reference = dialogue_reference[1]
-            fipa_msg.target = cfp_msg.target
-            performative = fipa_pb2.FipaMessage.Cfp_Performative()
-            fipa_msg.cfp.CopyFrom(performative)
-            fipa_bytes = fipa_msg.SerializeToString()
+            fipa_bytes = _encode_fipa_cfp(cfp_msg)
 
             # The encoded message is not a valid FIPA message.
             FipaMessage.serializer.decode(fipa_bytes)
@@ -767,16 +785,7 @@ class TestFIPA(UseOef):
                 FipaMessage, "Performative"
             ) as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
-                fipa_msg = fipa_pb2.FipaMessage()
-                fipa_msg.message_id = cfp_msg.message_id
-                dialogue_reference = cast(Dict[str, str], cfp_msg.dialogue_reference)
-                fipa_msg.dialogue_starter_reference = dialogue_reference[0]
-                fipa_msg.dialogue_responder_reference = dialogue_reference[1]
-                fipa_msg.target = cfp_msg.target
-                performative = fipa_pb2.FipaMessage.Cfp_Performative()
-                fipa_msg.cfp.CopyFrom(performative)
-                fipa_bytes = fipa_msg.SerializeToString()
-
+                fipa_bytes = _encode_fipa_cfp(cfp_msg)
                 # The encoded message is not a FIPA message
                 FipaMessage.serializer.decode(fipa_bytes)
 

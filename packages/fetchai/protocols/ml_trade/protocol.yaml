@@ -11,9 +11,9 @@ fingerprint:
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
   dialogues.py: QmVvP34aKWEtHrKmccNMvEdDnx5B7xpE5aEGzr6GU2u8UK
   message.py: QmRngQrA8xB3DTFeGFdijkNgNEmjNAgb1wUZCF7pXRqSf3
-  ml_trade.proto: QmeB21MQduEGQCrtiYZQzPpRqHL4CWEkvvcaKZ9GsfE8f6
-  ml_trade_pb2.py: QmZVvugPysR1og6kWCJkvo3af2s9pQRHfuj4BptE7gU1EU
-  serialization.py: QmTamQzo8ZNM6T7QnsA7qNzs2uJ7CHTUczzCsHwU9Q6Z5K
+  ml_trade.proto: QmXqDTBhno2kMLdAbNiZWcAHpjiJ95qXL4doUnhdmCNkhk
+  ml_trade_pb2.py: QmU1MrfXLsJMo91yenRNTdnGFUA9UDcxJsayHYqHN2uwjp
+  serialization.py: QmNnEyqVdHuXXQLjAvbyibmdRbWBZG8tNEQy32s7SAVtcE
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

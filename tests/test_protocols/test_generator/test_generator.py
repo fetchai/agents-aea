@@ -1203,17 +1203,12 @@ class ProtocolGeneratorTestCase(TestCase):
                     print(proto_buff_schema_str)
                     expected = (
                         'syntax = "proto3";\n\n'
-                        "package fetch.aea.SomeName;\n\n"
+                        "package aea.some_author.some_name;\n\n"
                         "message SomeNameMessage{\n\n"
                         "    // Custom Types\n"
                         "    message SomeCustomType{\n"
                         "        bytes description = 1;    }\n\n\n"
                         "    // Performatives and contents\n\n"
-                        "    // Standard SomeNameMessage fields\n"
-                        "    int32 message_id = 1;\n"
-                        "    string dialogue_starter_reference = 2;\n"
-                        "    string dialogue_responder_reference = 3;\n"
-                        "    int32 target = 4;\n"
                         "    oneof performative{\n"
                         "    }\n"
                         "}\n"

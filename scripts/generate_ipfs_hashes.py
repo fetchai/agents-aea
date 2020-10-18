@@ -435,7 +435,7 @@ def update_hashes(timeout: float = 15.0) -> int:
                 key, package_hash, _ = ipfs_hashing(
                     client, configuration_obj, package_type
                 )
-                if package_path.parent == TEST_PATH:
+                if TEST_PATH in package_path.parents:
                     test_package_hashes[key] = package_hash
                 else:
                     package_hashes[key] = package_hash
