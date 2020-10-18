@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetchai.aea;
+package aea;
 
 import "google/protobuf/struct.proto";
 
