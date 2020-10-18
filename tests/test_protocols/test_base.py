@@ -28,15 +28,21 @@ from typing import Callable, List, Tuple, Type
 
 import pytest
 
-from aea import AEA_DIR
 from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, ProtobufSerializer, Protocol
-from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel
-from aea.protocols.signing.dialogues import SigningDialogue, SigningDialogues
-from aea.protocols.state_update.dialogues import (
+
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue,
+    DefaultDialogues,
+)
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogue,
+    SigningDialogues,
+)
+from packages.fetchai.protocols.state_update.dialogues import (
     StateUpdateDialogue,
     StateUpdateDialogues,
 )
@@ -195,7 +201,9 @@ class TestProtocolFromDir:
 
     def test_protocol_load_positive(self):
         """Test protocol loaded correctly."""
-        default_protocol = Protocol.from_dir(Path(AEA_DIR, "protocols", "default"))
+        default_protocol = Protocol.from_dir(
+            Path("packages", "fetchai", "protocols", "default")
+        )
         assert str(default_protocol.public_id) == str(
             DEFAULT_PROTOCOL
         ), "Protocol not loaded correctly."

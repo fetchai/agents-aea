@@ -29,7 +29,6 @@ from unittest.mock import patch
 
 import pytest
 
-from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -40,13 +39,13 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
 from aea.runtime import RuntimeStates, _StopRuntime
 from aea.skills.base import Skill, SkillContext
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.serialization import DefaultSerializer
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 from tests.common.utils import (
@@ -394,13 +393,14 @@ def test_initialize_aea_programmatically_build_resources():
             )
 
             default_protocol = Protocol.from_dir(
-                str(Path(AEA_DIR, "protocols", "default"))
+                str(Path("packages", "fetchai", "protocols", "default"))
             )
             resources.add_protocol(default_protocol)
             resources.add_connection(connection)
 
             error_skill = Skill.from_dir(
-                str(Path(AEA_DIR, "skills", "error")), agent_context=aea.context
+                str(Path("packages", "fetchai", "skills", "error")),
+                agent_context=aea.context,
             )
             dummy_skill = Skill.from_dir(
                 str(Path(CUR_PATH, "data", "dummy_skill")), agent_context=aea.context

@@ -37,9 +37,6 @@ from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.contract_api.dialogues import (
@@ -56,6 +53,13 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogue as BaseSigningDialogue,
+)
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogues as BaseSigningDialogues,
+)
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.tac_control.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )

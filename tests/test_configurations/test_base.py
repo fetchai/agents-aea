@@ -242,7 +242,12 @@ class TestSkillConfig:
     def test_update_method_raises_error_if_skill_component_not_allowed(self):
         """Test that we raise error if the custom configuration contain unexpected skill components."""
         skill_config_path = Path(
-            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+            ROOT_DIR,
+            "packages",
+            "fetchai",
+            "skills",
+            "error",
+            DEFAULT_SKILL_CONFIG_FILE,
         )
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
         skill_config = loader.load(skill_config_path.open())
@@ -263,7 +268,12 @@ class TestSkillConfig:
     ):
         """Test that we raise error if we try to change the 'class_name' field of a skill component configuration."""
         skill_config_path = Path(
-            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+            ROOT_DIR,
+            "packages",
+            "fetchai",
+            "skills",
+            "error",
+            DEFAULT_SKILL_CONFIG_FILE,
         )
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
         skill_config = loader.load(skill_config_path.open())

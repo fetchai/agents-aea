@@ -32,14 +32,14 @@ from aea.helpers.transaction.base import (
     Terms,
     TransactionDigest,
 )
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_NAME
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
     FipaDialogue,
     FipaDialogues,

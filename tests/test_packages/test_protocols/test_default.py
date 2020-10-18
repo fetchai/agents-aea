@@ -24,8 +24,7 @@ from unittest.mock import patch
 
 import pytest
 
-import aea
-from aea.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.message import DefaultMessage, _default_logger
 
 
 def test_default_bytes_serialization():
@@ -43,7 +42,7 @@ def test_default_bytes_serialization():
 
     with pytest.raises(ValueError):
         with mock.patch(
-            "aea.protocols.default.message.DefaultMessage.Performative"
+            "packages.fetchai.protocols.default.message.DefaultMessage.Performative"
         ) as mock_type_enum:
             mock_type_enum.BYTES.value = "unknown"
             assert DefaultMessage.serializer.encode(expected_msg), ""
@@ -100,9 +99,7 @@ def test_default_valid_performatives():
 
 def test_light_protocol_rule_3_target_0():
     """Test that if message_id is not 1, target must be > 0"""
-    with patch.object(
-        aea.protocols.default.message._default_logger, "error"
-    ) as mock_logger:
+    with patch.object(_default_logger, "error") as mock_logger:
         message_id = 2
         target = 0
         DefaultMessage(
@@ -118,9 +115,7 @@ def test_light_protocol_rule_3_target_0():
 
 def test_light_protocol_rule_3_target_less_than_message_id():
     """Test that if message_id is not 1, target must be > message_id"""
-    with patch.object(
-        aea.protocols.default.message._default_logger, "error"
-    ) as mock_logger:
+    with patch.object(_default_logger, "error") as mock_logger:
         message_id = 2
         target = 2
         DefaultMessage(

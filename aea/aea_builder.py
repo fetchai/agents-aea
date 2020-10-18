@@ -33,7 +33,6 @@ from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Unio
 import jsonschema
 from packaging.specifiers import SpecifierSet
 
-from aea import AEA_DIR
 from aea.aea import AEA
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
@@ -295,13 +294,16 @@ class AEABuilder(WithLogger):
 
     # pylint: disable=attribute-defined-outside-init
 
-    def __init__(self, with_default_packages: bool = True):
+    def __init__(
+        self, with_default_packages: bool = True, registry_dir: str = "packages"
+    ):
         """
         Initialize the builder.
 
         :param with_default_packages: add the default packages.
         """
         WithLogger.__init__(self, logger=_default_logger)
+        self.registry_dir = os.path.join(os.getcwd(), registry_dir)
         self._with_default_packages = with_default_packages
         self._reset(is_full_reset=True)
 
@@ -511,11 +513,15 @@ class AEABuilder(WithLogger):
     def _add_default_packages(self) -> None:
         """Add default packages."""
         # add default protocol
-        self.add_protocol(Path(AEA_DIR, "protocols", DEFAULT_PROTOCOL.name))
+        self.add_protocol(
+            Path(self.registry_dir, "fetchai", "protocols", DEFAULT_PROTOCOL.name)
+        )
         # add stub connection
-        self.add_connection(Path(AEA_DIR, "connections", DEFAULT_CONNECTION.name))
+        self.add_connection(
+            Path(self.registry_dir, "fetchai", "connections", DEFAULT_CONNECTION.name)
+        )
         # add error skill
-        self.add_skill(Path(AEA_DIR, "skills", DEFAULT_SKILL.name))
+        self.add_skill(Path(self.registry_dir, "fetchai", "skills", DEFAULT_SKILL.name))
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
         """

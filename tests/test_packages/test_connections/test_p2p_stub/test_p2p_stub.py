@@ -29,9 +29,9 @@ import pytest
 from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.p2p_stub.connection import P2PStubConnection
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 SEPARATOR = ","

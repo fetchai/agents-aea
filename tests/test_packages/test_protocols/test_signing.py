@@ -29,7 +29,8 @@ from aea.helpers.transaction.base import (
     SignedTransaction,
     Terms,
 )
-from aea.protocols.signing.message import SigningMessage
+
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 from tests.conftest import COSMOS
 

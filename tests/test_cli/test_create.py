@@ -208,7 +208,7 @@ class TestCreate:
         assert stub_connection_dirpath.is_dir()
 
     def test_default_protocol_is_equal_to_library_default_protocol(self):
-        """Check that the stub connection directory is equal to the package's one (aea.protocols.default)."""
+        """Check that the stub connection directory is equal to the package's one (packages.fetchai.protocols.default)."""
         default_protocol_dirpath = Path(
             self.agent_name, "vendor", "fetchai", "protocols", "default"
         )

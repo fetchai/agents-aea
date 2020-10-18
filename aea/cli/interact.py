@@ -21,7 +21,7 @@
 
 import codecs
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, TYPE_CHECKING, Union
 
 import click
 
@@ -34,17 +34,24 @@ from aea.configurations.base import (
     PackageType,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.connections.stub.connection import (
-    DEFAULT_INPUT_FILE_NAME,
-    DEFAULT_OUTPUT_FILE_NAME,
-    StubConnection,
-)
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
-from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import Dialogues
+
+
+if TYPE_CHECKING:
+    from packages.fetchai.connections.stub.connection import (  # noqa: F401
+        DEFAULT_INPUT_FILE_NAME,
+        DEFAULT_OUTPUT_FILE_NAME,
+        StubConnection,
+    )
+    from packages.fetchai.protocols.default.dialogues import (  # noqa: F401
+        DefaultDialogue,
+        DefaultDialogues,
+    )
+    from packages.fetchai.protocols.default.message import DefaultMessage  # noqa: F401
 
 
 @click.command()
@@ -58,6 +65,16 @@ def interact(click_context: click.core.Context):  # pylint: disable=unused-argum
 
 def _run_interaction_channel():
     # load agent configuration file
+    from packages.fetchai.connections.stub.connection import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+        DEFAULT_INPUT_FILE_NAME,
+        DEFAULT_OUTPUT_FILE_NAME,
+        StubConnection,
+    )
+    from packages.fetchai.protocols.default.dialogues import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+        DefaultDialogue,
+        DefaultDialogues,
+    )
+
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
     agent_configuration = loader.load(Path(DEFAULT_AEA_CONFIG_FILE).open())
     agent_name = agent_configuration.name
@@ -102,7 +119,7 @@ def _run_interaction_channel():
 
 
 def _process_envelopes(
-    agent_name: str, inbox: InBox, outbox: OutBox, dialogues: DefaultDialogues,
+    agent_name: str, inbox: InBox, outbox: OutBox, dialogues: Dialogues,
 ) -> None:
     """
     Process envelopes.
@@ -133,6 +150,10 @@ def _check_for_incoming_envelope(inbox: InBox):
 
 
 def _construct_message(action_name: str, envelope: Envelope):
+    from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+        DefaultMessage,
+    )
+
     action_name = action_name.title()
     msg = (
         DefaultMessage.serializer.decode(envelope.message)
@@ -149,9 +170,13 @@ def _construct_message(action_name: str, envelope: Envelope):
 
 
 def _try_construct_envelope(
-    agent_name: str, dialogues: DefaultDialogues
+    agent_name: str, dialogues: Dialogues
 ) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
+    from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+        DefaultMessage,
+    )
+
     envelope = None  # type: Optional[Envelope]
     try:
         performative_str = "bytes"

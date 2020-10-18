@@ -40,12 +40,13 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
-from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
-from aea.configurations.loader import ConfigLoader
-from aea.connections.stub.connection import (
+from aea.configurations.constants import (
     DEFAULT_INPUT_FILE_NAME,
+    DEFAULT_LEDGER,
     DEFAULT_OUTPUT_FILE_NAME,
+    DEFAULT_PRIVATE_KEY_FILE,
 )
+from aea.configurations.loader import ConfigLoader
 from aea.exceptions import enforce
 from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope

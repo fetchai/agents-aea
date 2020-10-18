@@ -296,7 +296,7 @@ from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -1054,8 +1054,8 @@ from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
-from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
-from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
+from packages.fetchai.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
+from packages.fetchai.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
@@ -1496,7 +1496,7 @@ from typing import Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
@@ -2425,8 +2425,8 @@ from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
-from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
-from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
+from packages.fetchai.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
+from packages.fetchai.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue

@@ -19,7 +19,7 @@ from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection, write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.message import DefaultMessage
 ```
 
 Unlike an `AEA`, an `Agent` does not require a `Wallet`, `LedgerApis` or `Resources` module.
@@ -170,7 +170,7 @@ from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection, write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 INPUT_FILE = "input_file"

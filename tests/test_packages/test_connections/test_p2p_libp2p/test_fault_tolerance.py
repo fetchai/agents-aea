@@ -28,8 +28,9 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
+
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
 from tests.conftest import (
     _make_libp2p_connection,

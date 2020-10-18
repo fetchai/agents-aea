@@ -22,7 +22,7 @@
 import copy
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, cast
 
 from aea.common import Address
 from aea.crypto.wallet import Wallet
@@ -38,14 +38,25 @@ from aea.helpers.transaction.base import SignedMessage, SignedTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.signing.dialogues import SigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
-from aea.protocols.signing.message import SigningMessage
-from aea.protocols.state_update.dialogues import StateUpdateDialogue
-from aea.protocols.state_update.dialogues import (
-    StateUpdateDialogues as BaseStateUpdateDialogues,
-)
-from aea.protocols.state_update.message import StateUpdateMessage
+
+
+if TYPE_CHECKING:
+    from packages.fetchai.protocols.signing.dialogues import (  # noqa: F401
+        SigningDialogue,
+    )
+    from packages.fetchai.protocols.signing.dialogues import (  # noqa: F401
+        SigningDialogues as BaseSigningDialogues,
+    )
+    from packages.fetchai.protocols.signing.message import SigningMessage  # noqa: F401
+    from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F401
+        StateUpdateDialogue,
+    )
+    from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F401
+        StateUpdateDialogues as BaseStateUpdateDialogues,
+    )
+    from packages.fetchai.protocols.state_update.message import (  # noqa: F401
+        StateUpdateMessage,
+    )
 
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -56,66 +67,6 @@ ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 QUANTITY_SHIFT = 100
 
 _default_logger = logging.getLogger(__name__)
-
-
-class SigningDialogues(BaseSigningDialogues):
-    """This class keeps track of all oef_search dialogues."""
-
-    def __init__(self, self_address: Address, **kwargs) -> None:
-        """
-        Initialize dialogues.
-
-        :param self_address: the address of the entity for whom dialogues are maintained
-        :return: None
-        """
-
-        def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message, receiver_address: Address
-        ) -> BaseDialogue.Role:
-            """Infer the role of the agent from an incoming/outgoing first message
-
-            :param message: an incoming/outgoing first message
-            :param receiver_address: the address of the receiving agent
-            :return: The role of the agent
-            """
-            return SigningDialogue.Role.DECISION_MAKER
-
-        BaseSigningDialogues.__init__(
-            self,
-            self_address=self_address,
-            role_from_first_message=role_from_first_message,
-            **kwargs,
-        )
-
-
-class StateUpdateDialogues(BaseStateUpdateDialogues):
-    """This class keeps track of all oef_search dialogues."""
-
-    def __init__(self, self_address: Address, **kwargs) -> None:
-        """
-        Initialize dialogues.
-
-        :param self_address: the address of the entity for whom dialogues are maintained
-        :return: None
-        """
-
-        def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message, receiver_address: Address
-        ) -> BaseDialogue.Role:
-            """Infer the role of the agent from an incoming/outgoing first message
-
-            :param message: an incoming/outgoing first message
-            :param receiver_address: the address of the receiving agent
-            :return: The role of the agent
-            """
-            return StateUpdateDialogue.Role.DECISION_MAKER
-
-        BaseStateUpdateDialogues.__init__(
-            self,
-            self_address=self_address,
-            role_from_first_message=role_from_first_message,
-            **kwargs,
-        )
 
 
 class GoalPursuitReadiness:
@@ -555,6 +506,97 @@ class Preferences(BasePreferences):
 class DecisionMakerHandler(BaseDecisionMakerHandler):
     """This class implements the decision maker."""
 
+    # pylint: disable=import-outside-toplevel
+    from packages.fetchai.protocols.signing.dialogues import (  # noqa: F811
+        SigningDialogue,
+    )
+    from packages.fetchai.protocols.signing.dialogues import (  # noqa: F811
+        SigningDialogues as BaseSigningDialogues,
+    )
+    from packages.fetchai.protocols.signing.message import SigningMessage  # noqa: F811
+    from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F811
+        StateUpdateDialogues as BaseStateUpdateDialogues,
+    )
+    from packages.fetchai.protocols.state_update.message import (  # noqa: F811
+        StateUpdateMessage,
+    )
+
+    class SigningDialogues(BaseSigningDialogues):
+        """This class keeps track of all oef_search dialogues."""
+
+        def __init__(self, self_address: Address, **kwargs) -> None:
+            """
+            Initialize dialogues.
+
+            :param self_address: the address of the entity for whom dialogues are maintained
+            :return: None
+            """
+
+            def role_from_first_message(  # pylint: disable=unused-argument
+                message: Message, receiver_address: Address
+            ) -> BaseDialogue.Role:
+                """Infer the role of the agent from an incoming/outgoing first message
+
+                :param message: an incoming/outgoing first message
+                :param receiver_address: the address of the receiving agent
+                :return: The role of the agent
+                """
+                from packages.fetchai.protocols.signing.dialogues import (  # pylint: disable=import-outside-toplevel
+                    SigningDialogue,
+                )
+
+                return SigningDialogue.Role.DECISION_MAKER
+
+            # pylint: disable=import-outside-toplevel
+            from packages.fetchai.protocols.signing.dialogues import (
+                SigningDialogues as BaseSigningDialogues,
+            )
+
+            BaseSigningDialogues.__init__(
+                self,
+                self_address=self_address,
+                role_from_first_message=role_from_first_message,
+                **kwargs,
+            )
+
+    class StateUpdateDialogues(BaseStateUpdateDialogues):
+        """This class keeps track of all oef_search dialogues."""
+
+        def __init__(self, self_address: Address, **kwargs) -> None:
+            """
+            Initialize dialogues.
+
+            :param self_address: the address of the entity for whom dialogues are maintained
+            :return: None
+            """
+
+            def role_from_first_message(  # pylint: disable=unused-argument
+                message: Message, receiver_address: Address
+            ) -> BaseDialogue.Role:
+                """Infer the role of the agent from an incoming/outgoing first message
+
+                :param message: an incoming/outgoing first message
+                :param receiver_address: the address of the receiving agent
+                :return: The role of the agent
+                """
+                from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+                    StateUpdateDialogue,
+                )
+
+                return StateUpdateDialogue.Role.DECISION_MAKER
+
+            # pylint: disable=import-outside-toplevel
+            from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F401
+                StateUpdateDialogues as BaseStateUpdateDialogues,
+            )
+
+            BaseStateUpdateDialogues.__init__(
+                self,
+                self_address=self_address,
+                role_from_first_message=role_from_first_message,
+                **kwargs,
+            )
+
     def __init__(self, identity: Identity, wallet: Wallet):
         """
         Initialize the decision maker.
@@ -570,8 +612,12 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         super().__init__(
             identity=identity, wallet=wallet, **kwargs,
         )
-        self.signing_dialogues = SigningDialogues(self.self_address)
-        self.state_update_dialogues = StateUpdateDialogues(self.self_address)
+        self.signing_dialogues = DecisionMakerHandler.SigningDialogues(
+            self.self_address
+        )
+        self.state_update_dialogues = DecisionMakerHandler.StateUpdateDialogues(
+            self.self_address
+        )
 
     def handle(self, message: Message) -> None:
         """
@@ -580,6 +626,9 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param message: the internal message
         :return: None
         """
+        from packages.fetchai.protocols.signing.message import SigningMessage
+        from packages.fetchai.protocols.state_update.message import StateUpdateMessage
+
         if isinstance(message, SigningMessage):
             self._handle_signing_message(message)
         elif isinstance(message, StateUpdateMessage):
@@ -605,6 +654,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 )
             )
 
+        from packages.fetchai.protocols.signing.dialogues import SigningDialogue
+
         signing_dialogue = cast(
             Optional[SigningDialogue], self.signing_dialogues.update(signing_msg)
         )
@@ -615,6 +666,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 )
             )
             return
+
+        from packages.fetchai.protocols.signing.message import SigningMessage
 
         # check if the transaction is acceptable and process it accordingly
         if signing_msg.performative == SigningMessage.Performative.SIGN_MESSAGE:
@@ -638,6 +691,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
+        from packages.fetchai.protocols.signing.message import SigningMessage
+
         performative = SigningMessage.Performative.ERROR
         kwargs = {
             "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
@@ -671,6 +726,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
+        from packages.fetchai.protocols.signing.message import SigningMessage
+
         performative = SigningMessage.Performative.ERROR
         kwargs = {
             "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
@@ -711,6 +768,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param state_update_message: the state update message
         :return: None
         """
+        from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F811
+            StateUpdateDialogue,
+        )
+
         state_update_dialogue = cast(
             Optional[StateUpdateDialogue],
             self.state_update_dialogues.update(state_update_msg),
@@ -722,6 +783,8 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 )
             )
             return
+
+        from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
         if state_update_msg.performative == StateUpdateMessage.Performative.INITIALIZE:
             self.logger.warning(

@@ -260,9 +260,9 @@ import signal
 import time
 
 from aea.mail.base import Envelope
-from aea.protocols.default.dialogues import DefaultDialogues
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
+from packages.fetchai.protocols.default.dialogues import DefaultDialogues
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import AEATestCase
 
 

@@ -24,14 +24,16 @@ import re
 from asyncio import CancelledError
 from asyncio.tasks import Task
 from concurrent.futures.thread import ThreadPoolExecutor
-from contextlib import contextmanager
 from pathlib import Path
-from typing import AsyncIterable, IO, List, Optional, Union
+from typing import AsyncIterable, List, Optional
 
 from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    DEFAULT_INPUT_FILE_NAME,
+    DEFAULT_OUTPUT_FILE_NAME,
+)
 from aea.connections.base import Connection, ConnectionStates
-from aea.helpers import file_lock
-from aea.helpers.base import exception_log_and_reraise
+from aea.helpers.file_io import envelope_from_bytes, lock_file, write_envelope
 from aea.mail.base import Envelope
 
 
@@ -39,100 +41,9 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.stub")
 
 INPUT_FILE_KEY = "input_file"
 OUTPUT_FILE_KEY = "output_file"
-DEFAULT_INPUT_FILE_NAME = "./input_file"
-DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
 PUBLIC_ID = PublicId.from_str("fetchai/stub:0.11.0")
-
-
-def _encode(e: Envelope, separator: bytes = SEPARATOR):
-    result = b""
-    result += e.to.encode("utf-8")
-    result += separator
-    result += e.sender.encode("utf-8")
-    result += separator
-    result += str(e.protocol_id).encode("utf-8")
-    result += separator
-    result += e.message_bytes
-    result += separator
-
-    return result
-
-
-def _decode(e: bytes, separator: bytes = SEPARATOR):
-    split = e.split(separator)
-
-    if len(split) < 5 or split[-1] not in [b"", b"\n"]:
-        raise ValueError(
-            "Expected at least 5 values separated by commas and last value being empty or new line, got {}".format(
-                len(split)
-            )
-        )
-
-    to = split[0].decode("utf-8").strip().lstrip("\x00")
-    sender = split[1].decode("utf-8").strip()
-    protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
-    # protobuf messages cannot be delimited as they can contain an arbitrary byte sequence; however
-    # we know everything remaining constitutes the protobuf message.
-    message = SEPARATOR.join(split[3:-1])
-    # message = codecs.decode(message, "unicode-escape").encode("utf-8")  # noqa: E800
-
-    return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
-
-
-@contextmanager
-def lock_file(file_descriptor: IO[bytes]):
-    """Lock file in context manager.
-
-    :param file_descriptor: file descriptio of file to lock.
-    """
-    with exception_log_and_reraise(
-        _default_logger.error,
-        f"Couldn't acquire lock for file {file_descriptor.name}: {{}}",
-    ):
-        file_lock.lock(file_descriptor, file_lock.LOCK_EX)
-
-    try:
-        yield
-    finally:
-        file_lock.unlock(file_descriptor)
-
-
-def write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None:
-    """Write envelope to file."""
-    encoded_envelope = _encode(envelope, separator=SEPARATOR)
-    _default_logger.debug("write {}: to {}".format(encoded_envelope, file_pointer.name))
-    write_with_lock(file_pointer, encoded_envelope)
-
-
-def write_with_lock(file_pointer: IO[bytes], data: Union[bytes]) -> None:
-    """Write bytes to file protected with file lock."""
-    with lock_file(file_pointer):
-        file_pointer.write(data)
-        file_pointer.flush()
-
-
-def _process_line(line: bytes) -> Optional[Envelope]:
-    """
-    Process a line of the file.
-
-    Decode the line to get the envelope, and put it in the agent's inbox.
-
-    :return: Envelope
-    :raise: Exception
-    """
-    _default_logger.debug("processing: {!r}".format(line))
-    envelope = None  # type: Optional[Envelope]
-    try:
-        envelope = _decode(line, separator=SEPARATOR)
-    except ValueError as e:
-        _default_logger.error("Bad formatted line: {!r}. {}".format(line, e))
-    except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-        _default_logger.exception(
-            "Error when processing a line. Message: {}".format(str(e))
-        )
-    return envelope
 
 
 class StubConnection(Connection):
@@ -225,7 +136,7 @@ class StubConnection(Connection):
         async for data in self._file_read_and_trunc(delay=self.read_delay):
             lines = self._split_messages(data)
             for line in lines:
-                envelope = _process_line(line)
+                envelope = envelope_from_bytes(line, SEPARATOR, self.logger)
 
                 if envelope is None:
                     continue
@@ -317,5 +228,10 @@ class StubConnection(Connection):
         self._ensure_connected()
         self._ensure_valid_envelope_for_external_comms(envelope)
         await self.loop.run_in_executor(
-            self._write_pool, write_envelope, envelope, self.output_file
+            self._write_pool,
+            write_envelope,
+            envelope,
+            self.output_file,
+            SEPARATOR,
+            self.logger,
         )

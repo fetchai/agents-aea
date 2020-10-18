@@ -72,7 +72,7 @@ Also, we can add a component that was instantiated programmatically. :
 ``` python
     # create skill and handler manually
     from aea.protocols.base import Message
-    from aea.protocols.default.message import DefaultMessage
+    from packages.fetchai.protocols.default.message import DefaultMessage
     from aea.skills.base import Handler
 
     class DummyHandler(Handler):
@@ -201,7 +201,7 @@ def run():
 
     # create skill and handler manually
     from aea.protocols.base import Message
-    from aea.protocols.default.message import DefaultMessage
+    from packages.fetchai.protocols.default.message import DefaultMessage
     from aea.skills.base import Handler
 
     class DummyHandler(Handler):

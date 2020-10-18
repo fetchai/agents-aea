@@ -17,10 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the state_update protocol."""
+"""This module contains the support resources for the signing protocol."""
 
-from aea.protocols.state_update.message import StateUpdateMessage
-from aea.protocols.state_update.serialization import StateUpdateSerializer
+from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.protocols.signing.serialization import SigningSerializer
 
 
-StateUpdateMessage.serializer = StateUpdateSerializer
+SigningMessage.serializer = SigningSerializer

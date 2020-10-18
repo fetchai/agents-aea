@@ -26,11 +26,11 @@ import pytest
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Address
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, DialogueMessage
 from aea.skills.base import Skill
 from aea.test_tools.test_skill import BaseSkillTestCase
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage

@@ -93,14 +93,9 @@ def _get_all_packages() -> List[Tuple[PackageType, Path]]:
         map(
             package_type_and_path,
             [
-                CORE_PATH / "protocols" / "default",
                 CORE_PATH / "protocols" / "scaffold",
-                CORE_PATH / "protocols" / "signing",
-                CORE_PATH / "protocols" / "state_update",
-                CORE_PATH / "connections" / "stub",
                 CORE_PATH / "connections" / "scaffold",
                 CORE_PATH / "contracts" / "scaffold",
-                CORE_PATH / "skills" / "error",
                 CORE_PATH / "skills" / "scaffold",
             ],
         )
