@@ -38,7 +38,7 @@ from aea.mail.base_pb2 import DialogueMessage
 from aea.mail.base_pb2 import Message as ProtobufMessage
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 Address = str
 
@@ -70,7 +70,7 @@ class Message:
         try:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
-            logger.error(e)
+            _default_logger.error(e)
 
     @property
     def has_sender(self) -> bool:
@@ -92,6 +92,10 @@ class Message:
     def sender(self, sender: Address) -> None:
         """Set the sender of the message."""
         enforce(self._sender is None, "Sender already set.")
+        enforce(
+            isinstance(sender, str),
+            f"Sender must be string type. Found '{type(sender)}'",
+        )
         self._sender = sender
 
     @property
@@ -110,6 +114,7 @@ class Message:
     def to(self, to: Address) -> None:
         """Set address of receiver."""
         enforce(self._to is None, "To already set.")
+        enforce(isinstance(to, str), f"To must be string type. Found '{type(to)}'")
         self._to = to
 
     @property

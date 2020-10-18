@@ -19,8 +19,8 @@
 
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import datetime
-import logging
 from asyncio import AbstractEventLoop
+from logging import Logger
 from multiprocessing.pool import AsyncResult
 from typing import (
     Any,
@@ -48,18 +48,19 @@ from aea.decision_maker.default import (
 )
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.logging import AgentLoggerAdapter, WithLogger
+from aea.helpers.logging import AgentLoggerAdapter, get_logger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
+from aea.runtime import _StopRuntime
 from aea.skills.base import Behaviour, Handler
 from aea.skills.error.handlers import ErrorHandler
 
 
-class AEA(Agent, WithLogger):
+class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
     RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
@@ -98,7 +99,7 @@ class AEA(Agent, WithLogger):
         :param resources: the resources (protocols and skills) of the agent.
         :param loop: the event loop to run the connections.
         :param period: period to call agent's act
-        :param exeution_timeout: amount of time to limit single act/handle to execute.
+        :param execution_timeout: amount of time to limit single act/handle to execute.
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
         :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
         :param skill_exception_policy: the skill exception policy enum
@@ -116,6 +117,10 @@ class AEA(Agent, WithLogger):
         self._skills_exception_policy = skill_exception_policy
         self._connection_exception_policy = connection_exception_policy
 
+        aea_logger = AgentLoggerAdapter(
+            logger=get_logger(__name__, identity.name), agent_name=identity.name,
+        )
+
         super().__init__(
             identity=identity,
             connections=[],
@@ -123,12 +128,8 @@ class AEA(Agent, WithLogger):
             period=period,
             loop_mode=loop_mode,
             runtime_mode=runtime_mode,
+            logger=cast(Logger, aea_logger),
         )
-
-        aea_logger = AgentLoggerAdapter(
-            logger=logging.getLogger(__name__), agent_name=identity.name
-        )
-        WithLogger.__init__(self, logger=cast(logging.Logger, aea_logger))
 
         self.max_reactions = max_reactions
         decision_maker_handler = decision_maker_handler_class(
@@ -241,8 +242,8 @@ class AEA(Agent, WithLogger):
 
         if error_handler is None:
             self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
-            self.stop()
-            return None, []
+            raise _StopRuntime()
+
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
@@ -341,7 +342,7 @@ class AEA(Agent, WithLogger):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-        return super(AEA, self).get_message_handlers() + [
+        return super().get_message_handlers() + [
             (self.filter.handle_internal_message, self.filter.get_internal_message,),
         ]
 
@@ -363,9 +364,10 @@ class AEA(Agent, WithLogger):
 
         if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
             log_exception(exception, function)
-            self.stop()
-            raise AEAException(
-                f"AEA was terminated cause exception `{exception}` in skills {function}! Please check logs."
+            raise _StopRuntime(
+                AEAException(
+                    f"AEA was terminated cause exception `{exception}` in skills {function}! Please check logs."
+                )
             )
 
         if self._skills_exception_policy == ExceptionPolicyEnum.just_log:
@@ -386,7 +388,7 @@ class AEA(Agent, WithLogger):
 
         :return: None
         """
-        self.logger.debug("[{}]: Calling teardown method...".format(self.name))
+        self.logger.debug("Calling teardown method...")
         self.resources.teardown()
 
     def get_task_result(self, task_id: int) -> AsyncResult:

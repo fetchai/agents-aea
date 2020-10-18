@@ -30,7 +30,7 @@ from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 def verify_or_create_private_keys(
@@ -106,10 +106,10 @@ def try_validate_private_key_path(
             private_key_path, e
         )
         if exit_on_error:
-            logger.exception(error_msg)  # show exception traceback on exit
+            _default_logger.exception(error_msg)  # show exception traceback on exit
             sys.exit(1)
         else:  # pragma: no cover
-            logger.error(error_msg)
+            _default_logger.error(error_msg)
             raise
 
 

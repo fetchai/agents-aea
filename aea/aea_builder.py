@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains utilities for building an AEA."""
 
 import itertools
@@ -24,22 +25,10 @@ import logging
 import logging.config
 import os
 import pprint
-from collections import defaultdict, deque
+from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
-from typing import (
-    Any,
-    Collection,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
 from packaging.specifiers import SpecifierSet
@@ -77,16 +66,18 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import load_module
+from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.logging import AgentLoggerAdapter
+from aea.helpers.install_dependency import install_dependency
+from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 
 
 PathLike = Union[os.PathLike, Path, str]
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
+DEFAULT_ENV_DOTFILE = ".env"
 
 
 class _DependenciesManager:
@@ -231,8 +222,13 @@ class _DependenciesManager:
             )
         return all_pypi_dependencies
 
+    def install_dependencies(self) -> None:
+        """Install extra dependencies for components."""
+        for name, d in self.pypi_dependencies.items():
+            install_dependency(name, d)
 
-class AEABuilder:
+
+class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     """
     This class helps to build an AEA.
 
@@ -292,6 +288,8 @@ class AEABuilder:
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
 
+    loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+
     # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, with_default_packages: bool = True):
@@ -300,6 +298,7 @@ class AEABuilder:
 
         :param with_default_packages: add the default packages.
         """
+        WithLogger.__init__(self, logger=_default_logger)
         self._with_default_packages = with_default_packages
         self._reset(is_full_reset=True)
 
@@ -420,7 +419,7 @@ class AEABuilder:
             _class = getattr(module, class_name)
             self._decision_maker_handler_class = _class
         except Exception as e:  # pragma: nocover
-            logger.error(
+            self.logger.error(
                 "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
                     dotted_path, class_name, file_path, e
                 )
@@ -850,6 +849,10 @@ class AEABuilder:
 
         return sorted_selected_connections_ids
 
+    def install_pypi_dependencies(self) -> None:
+        """Install components extra dependecies."""
+        self._package_dependency_manager.install_dependencies()
+
     def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
         """
         Build the AEA.
@@ -866,11 +869,11 @@ class AEABuilder:
         :raises ValueError: if we cannot
         """
         self._check_we_can_build()
-        resources = Resources()
         wallet = Wallet(
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
         identity = self._build_identity_from_wallet(wallet)
+        resources = Resources(identity.name)
         self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)
         self._load_and_add_components(ComponentType.CONTRACT, resources, identity.name)
         self._load_and_add_components(
@@ -1080,10 +1083,10 @@ class AEABuilder:
             all_pypi_dependencies, configuration.pypi_dependencies
         )
         for pkg_name, dep_info in all_pypi_dependencies.items():
-            set_specifier = SpecifierSet(dep_info.get("version", ""))
+            set_specifier = SpecifierSet(dep_info.version)
             if not is_satisfiable(set_specifier):
                 raise AEAException(
-                    f"Conflict on package {pkg_name}: specifier set '{dep_info['version']}' not satisfiable."
+                    f"Conflict on package {pkg_name}: specifier set '{dep_info.version}' not satisfiable."
                 )
 
     @staticmethod
@@ -1264,12 +1267,10 @@ class AEABuilder:
         - detect if there are cycles
         - import skills from the leaves of the dependency graph, by finding a topological ordering.
         """
-        # the adjacency list for the dependency graph
-        depends_on: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
         # the adjacency list for the inverse dependency graph
-        supports: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
-        # nodes with no incoming edges
-        roots = copy(skill_ids)
+        dependency_to_supported_dependencies: Dict[
+            ComponentId, Set[ComponentId]
+        ] = defaultdict(set)
         for skill_id in skill_ids:
             component_path = self._find_component_directory_from_component_id(
                 aea_project_path, skill_id
@@ -1281,31 +1282,16 @@ class AEABuilder:
                 ),
             )
 
-            if len(configuration.skills) != 0:
-                roots.remove(skill_id)
-
-            depends_on[skill_id].update(
-                [
-                    ComponentId(ComponentType.SKILL, skill)
-                    for skill in configuration.skills
-                ]
-            )
+            if skill_id not in dependency_to_supported_dependencies:
+                dependency_to_supported_dependencies[skill_id] = set()
             for dependency in configuration.skills:
-                supports[ComponentId(ComponentType.SKILL, dependency)].add(skill_id)
+                dependency_to_supported_dependencies[
+                    ComponentId(ComponentType.SKILL, dependency)
+                ].add(skill_id)
 
-        # find topological order (Kahn's algorithm)
-        queue: Deque[ComponentId] = deque()
-        order = []
-        queue.extend(roots)
-        while len(queue) > 0:
-            current = queue.pop()
-            order.append(current)
-            for node in supports[current]:  # pragma: nocover
-                depends_on[node].discard(current)
-                if len(depends_on[node]) == 0:
-                    queue.append(node)
-
-        if any(len(edges) > 0 for edges in depends_on.values()):
+        try:
+            order = find_topological_order(dependency_to_supported_dependencies)
+        except ValueError:
             raise AEAException("Cannot load skills, there is a cyclic dependency.")
 
         return order
@@ -1335,16 +1321,48 @@ class AEABuilder:
         )
         builder = AEABuilder(with_default_packages=False)
 
-        # load agent configuration file
-        configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
+        load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
-        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
-        agent_configuration = loader.load(configuration_file.open())
+        # load agent configuration file
+        configuration_file = cls.get_configuration_file_path(aea_project_path)
+        agent_configuration = cls.loader.load(configuration_file.open())
 
         builder.set_from_configuration(
             agent_configuration, aea_project_path, skip_consistency_check
         )
         return builder
+
+    @classmethod
+    def from_config_json(
+        cls,
+        json_data: List[Dict],
+        aea_project_path: PathLike,
+        skip_consistency_check: bool = False,
+    ) -> "AEABuilder":
+        """
+        Load agent configuration for alreaady provided json data.
+
+        :param json_data: list of dicts with agent configuration
+        :param aea_project_path: path to project root
+        :param skip_consistency_check: skip consistency check on configs load.
+
+        :return: AEABuilder instance
+        """
+        aea_project_path = Path(aea_project_path)
+        builder = AEABuilder(with_default_packages=False)
+
+        # load agent configuration file
+        agent_configuration = cls.loader.load_agent_config_from_json(json_data)
+
+        builder.set_from_configuration(
+            agent_configuration, aea_project_path, skip_consistency_check
+        )
+        return builder
+
+    @staticmethod
+    def get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path:
+        """Return path to aea-config file for the given aea project path."""
+        return Path(aea_project_path) / DEFAULT_AEA_CONFIG_FILE
 
     def _load_and_add_components(
         self,
@@ -1365,26 +1383,20 @@ class AEABuilder:
         for configuration in self._package_dependency_manager.get_components_by_type(
             component_type
         ).values():
-            if configuration.is_abstract_component:
-                load_aea_package(configuration)
-                continue
-
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
                 if configuration.component_type != ComponentType.SKILL:
                     component.logger = cast(
-                        logging.Logger, make_logger(configuration, agent_name)
+                        logging.Logger, make_component_logger(configuration, agent_name)
                     )
             else:
-                configuration = deepcopy(configuration)
-                configuration.update(
-                    self._custom_component_configurations.get(
-                        configuration.component_id, {}
-                    )
-                )
-                _logger = make_logger(configuration, agent_name)
+                new_configuration = self._overwrite_custom_configuration(configuration)
+                if new_configuration.is_abstract_component:
+                    load_aea_package(configuration)
+                    continue
+                _logger = make_component_logger(new_configuration, agent_name)
                 component = load_component_from_config(
-                    configuration, logger=_logger, **kwargs
+                    new_configuration, logger=_logger, **kwargs
                 )
 
             resources.add_component(component)
@@ -1398,8 +1410,25 @@ class AEABuilder:
                 "Please call 'reset() if you want to build another agent."
             )
 
+    def _overwrite_custom_configuration(self, configuration: ComponentConfiguration):
+        """
+        Overwrite custom configurations.
 
-def make_logger(
+        It deep-copies the configuration, to avoid undesired side-effects.
+
+        :param configuration: the configuration object.
+        :param custom_config: the configurations to apply.
+        :return: the new configuration instance.
+        """
+        new_configuration = deepcopy(configuration)
+        custom_config = self._custom_component_configurations.get(
+            new_configuration.component_id, {}
+        )
+        new_configuration.update(custom_config)
+        return new_configuration
+
+
+def make_component_logger(
     configuration: ComponentConfiguration, agent_name: str,
 ) -> Optional[logging.Logger]:
     """
@@ -1413,5 +1442,5 @@ def make_logger(
         # skip because skill object already have their own logger from the skill context.
         return None
     logger_name = f"aea.packages.{configuration.author}.{configuration.component_type.to_plural()}.{configuration.name}"
-    _logger = AgentLoggerAdapter(logging.getLogger(logger_name), agent_name)
+    _logger = AgentLoggerAdapter(get_logger(logger_name, agent_name), agent_name)
     return cast(logging.Logger, _logger)

@@ -20,14 +20,77 @@ Make the JSONSchema base URI, cross-platform.
 
 the string in URI form.
 
+<a name="aea.configurations.loader.BaseConfigLoader"></a>
+## BaseConfigLoader Objects
+
+```python
+class BaseConfigLoader()
+```
+
+Base class for configuration loader classes.
+
+<a name="aea.configurations.loader.BaseConfigLoader.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(schema_filename: str)
+```
+
+Initialize the base configuration loader.
+
+**Arguments**:
+
+- `schema_filename`: the path to the schema.
+
+<a name="aea.configurations.loader.BaseConfigLoader.validator"></a>
+#### validator
+
+```python
+ | @property
+ | validator() -> Draft4Validator
+```
+
+Get the json schema validator.
+
+<a name="aea.configurations.loader.BaseConfigLoader.validate"></a>
+#### validate
+
+```python
+ | validate(json_data: Dict) -> None
+```
+
+Validate a JSON object.
+
+**Arguments**:
+
+- `json_data`: the JSON data.
+
+**Returns**:
+
+None.
+
+<a name="aea.configurations.loader.BaseConfigLoader.required_fields"></a>
+#### required`_`fields
+
+```python
+ | @property
+ | required_fields() -> List[str]
+```
+
+Get the required fields.
+
+**Returns**:
+
+list of required fields.
+
 <a name="aea.configurations.loader.ConfigLoader"></a>
 ## ConfigLoader Objects
 
 ```python
-class ConfigLoader(Generic[T])
+class ConfigLoader(Generic[T],  BaseConfigLoader)
 ```
 
-This class implement parsing, serialization and validation functionalities for the 'aea' configuration files.
+Parsing, serialization and validation for package configuration files.
 
 <a name="aea.configurations.loader.ConfigLoader.__init__"></a>
 #### `__`init`__`
@@ -42,30 +105,6 @@ Initialize the parser for configuration files.
 
 - `schema_filename`: the path to the JSON-schema file in 'aea/configurations/schemas'.
 - `configuration_class`: the configuration class (e.g. AgentConfig, SkillConfig etc.)
-
-<a name="aea.configurations.loader.ConfigLoader.validator"></a>
-#### validator
-
-```python
- | @property
- | validator() -> Draft4Validator
-```
-
-Get the json schema validator.
-
-<a name="aea.configurations.loader.ConfigLoader.required_fields"></a>
-#### required`_`fields
-
-```python
- | @property
- | required_fields() -> List[str]
-```
-
-Get required fields.
-
-**Returns**:
-
-list of required fields.
 
 <a name="aea.configurations.loader.ConfigLoader.configuration_class"></a>
 #### configuration`_`class
@@ -102,7 +141,7 @@ the configuration object.
  | validate(json_data: Dict) -> None
 ```
 
-Validate a JSON object.
+Validate a JSON object against the right JSON schema.
 
 **Arguments**:
 
@@ -156,6 +195,48 @@ None
 ```
 
 Get the configuration loader from the type.
+
+<a name="aea.configurations.loader.ConfigLoader.load_agent_config_from_json"></a>
+#### load`_`agent`_`config`_`from`_`json
+
+```python
+ | load_agent_config_from_json(configuration_json: List[Dict]) -> AgentConfig
+```
+
+Load agent configuration from configuration json data.
+
+**Arguments**:
+
+- `configuration_json`: list of dicts with aea configuration
+
+**Returns**:
+
+AgentConfig instance
+
+<a name="aea.configurations.loader.ConfigLoader.validate_component_configuration"></a>
+#### validate`_`component`_`configuration
+
+```python
+ | @staticmethod
+ | validate_component_configuration(component_id: ComponentId, configuration: Dict) -> None
+```
+
+Validate the component configuration of an agent configuration file.
+
+This check is to detect inconsistencies in the specified fields.
+
+**Arguments**:
+
+- `component_id`: the component id.
+- `configuration`: the configuration dictionary.
+
+**Returns**:
+
+None
+
+**Raises**:
+
+- `ValueError`: if the configuration is not valid.
 
 <a name="aea.configurations.loader.ConfigLoaders"></a>
 ## ConfigLoaders Objects

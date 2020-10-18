@@ -45,16 +45,17 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
 class Resources:
     """This class implements the object that holds the resources of an AEA."""
 
-    def __init__(self) -> None:
+    def __init__(self, agent_name: str = "standalone") -> None:
         """
         Instantiate the resources.
 
         :return None
         """
-        self._component_registry = AgentComponentRegistry()
-        self._handler_registry = HandlerRegistry()
-        self._behaviour_registry = ComponentRegistry[Behaviour]()
-        self._model_registry = ComponentRegistry[Model]()
+        self._agent_name = agent_name
+        self._component_registry = AgentComponentRegistry(agent_name=agent_name)
+        self._handler_registry = HandlerRegistry(agent_name=agent_name)
+        self._behaviour_registry = ComponentRegistry[Behaviour](agent_name=agent_name)
+        self._model_registry = ComponentRegistry[Model](agent_name=agent_name)
 
         self._registries = [
             self._component_registry,
@@ -62,6 +63,11 @@ class Resources:
             self._behaviour_registry,
             self._model_registry,
         ]  # type: List[Registry]
+
+    @property
+    def agent_name(self) -> str:
+        """Get the agent name."""
+        return self._agent_name
 
     @property
     def component_registry(self) -> AgentComponentRegistry:

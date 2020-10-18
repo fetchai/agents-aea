@@ -34,7 +34,7 @@ from aea.helpers.base import load_module
 
 
 contract_registry: Registry["Contract"] = Registry["Contract"]()
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class Contract(Component):
@@ -113,7 +113,7 @@ class Contract(Component):
             filter(lambda x: re.match(contract_class_name, x[0]), classes)
         )
         name_to_class = dict(contract_classes)
-        logger.debug(f"Processing contract {contract_class_name}")
+        _default_logger.debug(f"Processing contract {contract_class_name}")
         contract_class = name_to_class.get(contract_class_name, None)
         enforce(
             contract_class is not None,
@@ -197,11 +197,13 @@ class Contract(Component):
 def _try_to_register_contract(configuration: ContractConfig):
     """Register a contract to the registry."""
     if str(configuration.public_id) in contract_registry.specs:  # pragma: nocover
-        logger.warning(
+        _default_logger.warning(
             f"Skipping registration of contract {configuration.public_id} since already registered."
         )
         return
-    logger.debug(f"Registering contract {configuration.public_id}")  # pragma: nocover
+    _default_logger.debug(
+        f"Registering contract {configuration.public_id}"
+    )  # pragma: nocover
     try:  # pragma: nocover
         contract_registry.register(
             id_=str(configuration.public_id),
@@ -211,6 +213,8 @@ def _try_to_register_contract(configuration: ContractConfig):
         )
     except AEAException as e:  # pragma: nocover
         if "Cannot re-register id:" in str(e):
-            logger.warning("Already registered: {}".format(configuration.class_name))
+            _default_logger.warning(
+                "Already registered: {}".format(configuration.class_name)
+            )
         else:
             raise e

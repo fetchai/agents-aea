@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for the configurable part of a skill configuration in the agent configuration file.",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "author",
+    "version",
+    "type"
+  ],
+  "properties": {
+    "name": {
+      "$ref": "definitions.json#/definitions/resource_name"
+    },
+    "author": {
+      "$ref": "definitions.json#/definitions/author"
+    },
+    "version": {
+      "$ref": "definitions.json#/definitions/package_version"
+    },
+    "type": {
+      "$ref": "definitions.json#/definitions/component_type"
+    },
+    "handlers": {
+      "$ref": "#/definitions/handlers"
+    },
+    "behaviours": {
+      "$ref": "#/definitions/behaviours"
+    },
+    "models": {
+      "$ref": "#/definitions/models"
+    },
+    "is_abstract": {
+      "$ref": "skill-config_schema.json#/properties/is_abstract"
+    }
+  },
+  "definitions": {
+    "handlers": {
+      "type": "object",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/handler"
+        }
+      }
+    },
+    "behaviours": {
+      "type": "object",
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/behaviour"
+        }
+      }
+    },
+    "models": {
+      "type": "object",
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/model"
+        }
+      }
+    },
+    "behaviour": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "args"
+      ],
+      "properties": {
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "handler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "args"
+      ],
+      "properties": {
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "args"
+      ],
+      "properties": {
+        "args": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

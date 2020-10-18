@@ -22,15 +22,13 @@
 import inspect
 import json
 import os
-import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, Generic, List, TextIO, Tuple, Type, TypeVar, Union, cast
+from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
 
 import jsonschema
 import yaml
 from jsonschema import Draft4Validator
-from yaml import SafeLoader
 
 from aea.configurations.base import (
     AgentConfig,
@@ -45,12 +43,16 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.exceptions import enforce
-from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
+
+_PREFIX_BASE_CONFIGURABLE_PARTS = "base"
+_SCHEMAS_CONFIGURABLE_PARTS_DIRNAME = "configurable_parts"
+_POSTFIX_CUSTOM_CONFIG = "-custom_config.json"
+STARTING_INDEX_CUSTOM_CONFIGS = 1
 
 T = TypeVar(
     "T",
@@ -77,8 +79,63 @@ def make_jsonschema_base_uri(base_uri_path: Path) -> str:
     return root_path
 
 
-class ConfigLoader(Generic[T]):
-    """This class implement parsing, serialization and validation functionalities for the 'aea' configuration files."""
+def _get_path_to_custom_config_schema_from_type(component_type: ComponentType) -> str:
+    """
+    Get the path to the custom config schema
+
+    :param component_type: a component type.
+    :return: the path to the JSON schema file.
+    """
+    path_prefix: Path = Path(_SCHEMAS_DIR) / _SCHEMAS_CONFIGURABLE_PARTS_DIRNAME
+    if component_type in {ComponentType.SKILL, ComponentType.CONNECTION}:
+        filename_prefix = component_type.value
+    else:
+        filename_prefix = _PREFIX_BASE_CONFIGURABLE_PARTS
+    full_path = path_prefix / (filename_prefix + _POSTFIX_CUSTOM_CONFIG)
+    return str(full_path)
+
+
+class BaseConfigLoader:
+    """Base class for configuration loader classes."""
+
+    def __init__(self, schema_filename: str):
+        """
+        Initialize the base configuration loader.
+
+        :param schema_filename: the path to the schema.
+        """
+        base_uri = Path(_SCHEMAS_DIR)
+        self._schema = json.load((base_uri / schema_filename).open())
+        root_path = make_jsonschema_base_uri(base_uri)
+        self._resolver = jsonschema.RefResolver(root_path, self._schema)
+        self._validator = Draft4Validator(self._schema, resolver=self._resolver)
+
+    @property
+    def validator(self) -> Draft4Validator:
+        """Get the json schema validator."""
+        return self._validator
+
+    def validate(self, json_data: Dict) -> None:
+        """
+        Validate a JSON object.
+
+        :param json_data: the JSON data.
+        :return: None.
+        """
+        self.validator.validate(json_data)
+
+    @property
+    def required_fields(self) -> List[str]:
+        """
+        Get the required fields.
+
+        :return: list of required fields.
+        """
+        return self._schema["required"]
+
+
+class ConfigLoader(Generic[T], BaseConfigLoader):
+    """Parsing, serialization and validation for package configuration files."""
 
     def __init__(self, schema_filename: str, configuration_class: Type[T]):
         """
@@ -87,26 +144,8 @@ class ConfigLoader(Generic[T]):
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
         :param configuration_class: the configuration class (e.g. AgentConfig, SkillConfig etc.)
         """
-        base_uri = Path(_SCHEMAS_DIR)
-        self._schema = json.load((base_uri / schema_filename).open())
-        root_path = make_jsonschema_base_uri(base_uri)
-        self._resolver = jsonschema.RefResolver(root_path, self._schema)
-        self._validator = Draft4Validator(self._schema, resolver=self._resolver)
+        super().__init__(schema_filename)
         self._configuration_class = configuration_class  # type: Type[T]
-
-    @property
-    def validator(self) -> Draft4Validator:
-        """Get the json schema validator."""
-        return self._validator
-
-    @property
-    def required_fields(self) -> List[str]:
-        """
-        Get required fields.
-
-        :return: list of required fields.
-        """
-        return self._schema["required"]
 
     @property
     def configuration_class(self) -> Type[T]:
@@ -153,14 +192,29 @@ class ConfigLoader(Generic[T]):
 
     def validate(self, json_data: Dict) -> None:
         """
-        Validate a JSON object.
+        Validate a JSON object against the right JSON schema.
 
         :param json_data: the JSON data.
         :return: None.
         """
         if self.configuration_class.package_type == PackageType.AGENT:
             json_data_copy = deepcopy(json_data)
-            json_data_copy.pop("component_configurations", None)
+
+            # validate component_configurations
+            component_configurations = json_data_copy.pop(
+                "component_configurations", {}
+            )
+            for idx, component_configuration_json in enumerate(
+                component_configurations
+            ):
+                component_id = self._split_component_id_and_config(
+                    idx, component_configuration_json
+                )
+                self.validate_component_configuration(
+                    component_id, component_configuration_json
+                )
+
+            # validate agent config
             self._validator.validate(instance=json_data_copy)
         else:
             self._validator.validate(instance=json_data)
@@ -196,26 +250,6 @@ class ConfigLoader(Generic[T]):
         configuration_type = PackageType(configuration_type)
         return ConfigLoaders.from_package_type(configuration_type)
 
-    def _validate(self, json_data: Dict) -> None:
-        """
-        Validate a configuration file.
-
-        :param json_data: the JSON object of the configuration file to validate.
-        :return: None
-        :raises ValidationError: if the file doesn't comply with the JSON schema.
-              | ValueError: if other consistency checks fail.
-        """
-        # this might raise ValidationError.
-        self.validate(json_data)
-
-        expected_type = self.configuration_class.package_type
-        if expected_type != PackageType.AGENT and "type" in json_data:
-            actual_type = PackageType(json_data["type"])
-            if expected_type != actual_type:
-                raise ValueError(
-                    f"The field type is not correct: expected {expected_type}, found {actual_type}."
-                )
-
     def _load_component_config(self, file_pointer: TextIO) -> T:
         """Load a component configuration."""
         configuration_file_json = yaml_load(file_pointer)
@@ -223,20 +257,26 @@ class ConfigLoader(Generic[T]):
 
     def _load_from_json(self, configuration_file_json: Dict) -> T:
         """Load component configuration from JSON object."""
-        self._validate(configuration_file_json)
+        self.validate(configuration_file_json)
         key_order = list(configuration_file_json.keys())
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
         return configuration_obj
 
-    def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
-        """Load an agent configuration."""
-        configuration_file_jsons = yaml_load_all(file_pointer)
+    def load_agent_config_from_json(
+        self, configuration_json: List[Dict]
+    ) -> AgentConfig:
+        """
+        Load agent configuration from configuration json data.
 
-        if len(configuration_file_jsons) == 0:
+        :param configuration_json: list of dicts with aea configuration
+
+        :return: AgentConfig instance
+        """
+        if len(configuration_json) == 0:
             raise ValueError("Agent configuration file was empty.")
-        agent_config_json = configuration_file_jsons[0]
-        self._validate(agent_config_json)
+        agent_config_json = configuration_json[0]
+        self.validate(agent_config_json)
         key_order = list(agent_config_json.keys())
         agent_configuration_obj = cast(
             AgentConfig, self.configuration_class.from_json(agent_config_json)
@@ -245,28 +285,48 @@ class ConfigLoader(Generic[T]):
             key_order
         )
 
+        component_configurations = self._get_component_configurations(
+            configuration_json
+        )
+        agent_configuration_obj.component_configurations = component_configurations
+        return agent_configuration_obj
+
+    def _get_component_configurations(
+        self, configuration_file_jsons
+    ) -> Dict[ComponentId, Dict]:
+        """
+        Get the component configurations from the tail pages of the aea-config.yaml file.
+
+        :param configuration_file_jsons: the JSON objects of the custom configurations of a aea-config.yaml file.
+        :return: a dictionary whose keys are component ids and values are the configurations.
+        """
         component_configurations: Dict[ComponentId, Dict] = {}
         # load the other components.
-        for i, component_configuration_json in enumerate(configuration_file_jsons[1:]):
-            component_id, component_config = self._process_component_section(
+        for i, component_configuration_json in enumerate(
+            configuration_file_jsons[STARTING_INDEX_CUSTOM_CONFIGS:]
+        ):
+            component_id = self._process_component_section(
                 i, component_configuration_json
             )
             if component_id in component_configurations:
                 raise ValueError(
                     f"Configuration of component {component_id} occurs more than once."
                 )
-            component_configurations[component_id] = component_config
+            component_configurations[component_id] = component_configuration_json
+        return component_configurations
 
-        agent_configuration_obj.component_configurations = component_configurations
-        return agent_configuration_obj
+    def _load_agent_config(self, file_pointer: TextIO) -> AgentConfig:
+        """Load an agent configuration."""
+        configuration_file_jsons = yaml_load_all(file_pointer)
+        return self.load_agent_config_from_json(configuration_file_jsons)
 
     def _dump_agent_config(
         self, configuration: AgentConfig, file_pointer: TextIO
     ) -> None:
         """Dump agent configuration."""
         agent_config_part = configuration.ordered_json
+        self.validate(agent_config_part)
         agent_config_part.pop("component_configurations")
-        self.validator.validate(instance=agent_config_part)
         result = [agent_config_part] + configuration.component_configurations_json()
         yaml_dump_all(result, file_pointer)
 
@@ -277,8 +337,8 @@ class ConfigLoader(Generic[T]):
         yaml_dump(result, file_pointer)
 
     def _process_component_section(
-        self, i: int, component_configuration_json: Dict
-    ) -> Tuple[ComponentId, Dict]:
+        self, component_index: int, component_configuration_json: Dict
+    ) -> ComponentId:
         """
         Process a component configuration in an agent configuration file.
 
@@ -287,50 +347,50 @@ class ConfigLoader(Generic[T]):
         - validate the component configuration
         - check that there are only configurable fields
 
-        :param i: the index of the component in the file.
+        :param component_index: the index of the component in the file.
         :param component_configuration_json: the JSON object.
         :return: the processed component configuration.
         """
-        component_id, result = self._split_component_id_and_config(
-            i, component_configuration_json
+        component_id = self._split_component_id_and_config(
+            component_index, component_configuration_json
         )
-        self._validate_component_configuration(component_id, result)
-        self._check_only_configurable_fields(component_id, result)
-        return component_id, result
+        self.validate_component_configuration(
+            component_id, component_configuration_json
+        )
+        return component_id
 
     @staticmethod
     def _split_component_id_and_config(
-        i: int, component_configuration_json: Dict
-    ) -> Tuple[ComponentId, Dict]:
+        component_index: int, component_configuration_json: Dict
+    ) -> ComponentId:
         """
         Split component id and configuration.
 
-        :param i: the position of the component configuration in the agent config file..
+        :param component_index: the position of the component configuration in the agent config file..
         :param component_configuration_json: the JSON object to process.
         :return: the component id and the configuration object.
         :raises ValueError: if the component id cannot be extracted.
         """
-        result = deepcopy(component_configuration_json)
         # author, name, version, type are mandatory fields
         missing_fields = {"author", "name", "version", "type"}.difference(
             component_configuration_json.keys()
         )
         if len(missing_fields) > 0:
             raise ValueError(
-                f"There are missing fields in component id {i + 1}: {missing_fields}."
+                f"There are missing fields in component id {component_index + 1}: {missing_fields}."
             )
-        component_name = result.pop("name")
-        component_author = result.pop("author")
-        component_version = result.pop("version")
-        component_type = ComponentType(result.pop("type"))
+        component_name = component_configuration_json.pop("name")
+        component_author = component_configuration_json.pop("author")
+        component_version = component_configuration_json.pop("version")
+        component_type = ComponentType(component_configuration_json.pop("type"))
         component_public_id = PublicId(
             component_author, component_name, component_version
         )
         component_id = ComponentId(component_type, component_public_id)
-        return component_id, result
+        return component_id
 
     @staticmethod
-    def _validate_component_configuration(
+    def validate_component_configuration(
         component_id: ComponentId, configuration: Dict
     ) -> None:
         """
@@ -343,56 +403,17 @@ class ConfigLoader(Generic[T]):
         :return: None
         :raises ValueError: if the configuration is not valid.
         """
-        # we need to populate the required fields to validate the configurations.
-        temporary_config = deepcopy(configuration)
-        # common to every package
-        temporary_config["name"] = component_id.name
-        temporary_config["author"] = component_id.author
-        temporary_config["version"] = component_id.version
-        temporary_config["license"] = "some_license"
-        temporary_config["aea_version"] = "0.1.0"
-        if component_id.component_type == ComponentType.PROTOCOL:
-            pass  # no other required field
-        elif component_id.component_type == ComponentType.CONNECTION:
-            temporary_config["class_name"] = "SomeClassName"
-            temporary_config["protocols"] = []
-            temporary_config.setdefault("config", {})
-        elif component_id.component_type == ComponentType.CONTRACT:
-            temporary_config["class_name"] = "SomeClassName"
-        elif component_id.component_type == ComponentType.SKILL:
-            temporary_config["protocols"] = []
-            temporary_config["contracts"] = []
-            temporary_config["skills"] = []
-        loader = ConfigLoaders.from_package_type(component_id.package_type)
+        schema_file = _get_path_to_custom_config_schema_from_type(
+            component_id.component_type
+        )
         try:
-            loader._load_from_json(temporary_config)  # pylint: disable=protected-access
+            BaseConfigLoader(schema_file).validate(
+                dict(**component_id.json, **configuration)
+            )
         except jsonschema.ValidationError as e:
             raise ValueError(
-                f"Configuration of component {component_id} is not valid."
+                f"Configuration of component {component_id} is not valid. {e}"
             ) from e
-        # all good!
-
-    @staticmethod
-    def _check_only_configurable_fields(
-        component_id: ComponentId, configuration: Dict
-    ) -> None:
-        """
-        Check that there are only configurable fields.
-
-        :param component_id: the component id.
-        :param configuration: the configuration object.
-        :return: None
-        """
-        configurable_fields = (
-            component_id.package_type.configuration_class().configurable_fields
-        )
-        non_configurable_fields = set(configuration.keys()).difference(
-            configurable_fields
-        )
-        enforce(
-            len(non_configurable_fields) == 0,
-            f"Bad configuration for component {component_id}: {non_configurable_fields} are non-configurable fields.",
-        )
 
 
 class ConfigLoaders:
@@ -474,26 +495,3 @@ def _load_configuration_object(
             )
         )
     return configuration_object
-
-
-def _config_loader():
-    envvar_matcher = re.compile(r"\${([^}^{]+)\}")
-
-    def envvar_constructor(_loader, node):  # pragma: no cover
-        """Extract the matched value, expand env variable, and replace the match."""
-        node_value = node.value
-        match = envvar_matcher.match(node_value)
-        env_var = match.group()[2:-1]
-
-        # check for defaults
-        var_name, default_value = env_var.split(":")
-        var_name = var_name.strip()
-        default_value = default_value.strip()
-        var_value = os.getenv(var_name, default_value)
-        return var_value + node_value[match.end() :]
-
-    yaml.add_implicit_resolver("!envvar", envvar_matcher, None, SafeLoader)
-    yaml.add_constructor("!envvar", envvar_constructor, SafeLoader)
-
-
-_config_loader()

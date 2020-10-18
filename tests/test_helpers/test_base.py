@@ -18,15 +18,14 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helper module."""
 
-import io
 import os
 import platform
 import re
 import signal
 import time
-from collections import OrderedDict
 from pathlib import Path
 from subprocess import Popen  # nosec
+from typing import Dict, Set
 from unittest.mock import patch
 
 import pytest
@@ -35,17 +34,15 @@ from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
     exception_log_and_reraise,
+    find_topological_order,
     load_env_file,
     load_module,
     locate,
+    recursive_update,
     retry_decorator,
     send_control_c,
     try_decorator,
     win_popen_kwargs,
-    yaml_dump,
-    yaml_dump_all,
-    yaml_load,
-    yaml_load_all,
 )
 
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -107,16 +104,6 @@ def test_regex_constrained_string_initialization():
     RegexConstrainedString(b"abcde")
     RegexConstrainedString(RegexConstrainedString(""))
     RegexConstrainedString(RegexConstrainedString("abcde"))
-
-
-def test_yaml_dump_load():
-    """Test yaml dump/load works."""
-    data = OrderedDict({"a": 12, "b": None})
-    stream = io.StringIO()
-    yaml_dump(data, stream)
-    stream.seek(0)
-    loaded_data = yaml_load(stream)
-    assert loaded_data == data
 
 
 def test_load_module():
@@ -209,7 +196,7 @@ def test_send_control_c():
     # because o/w pytest would be stopped.
     process = Popen(  # nosec
         ["timeout" if platform.system() == "Windows" else "sleep", "5"],
-        **win_popen_kwargs()
+        **win_popen_kwargs(),
     )
     time.sleep(0.001)
     send_control_c(process)
@@ -233,11 +220,99 @@ def test_send_control_c_windows():
                 mock_kill.assert_called_with(pid, mock_signal.CTRL_C_EVENT)
 
 
-def test_yaml_dump_all_load_all():
-    """Test yaml_dump_all and yaml_load_all."""
-    f = io.StringIO()
-    data = [{"a": "12"}, {"b": "13"}]
-    yaml_dump_all(data, f)
+def test_recursive_update_no_recursion():
+    """Test the 'recursive update' utility, in the case there's no recursion."""
+    to_update = dict(not_updated=0, an_integer=1, a_list=[1, 2, 3], a_tuple=(1, 2, 3))
 
-    f.seek(0)
-    assert yaml_load_all(f) == data
+    new_integer, new_list, new_tuple = 2, [3], (3,)
+    new_values = dict(an_integer=new_integer, a_list=new_list, a_tuple=new_tuple)
+    recursive_update(to_update, new_values)
+    assert to_update == dict(
+        not_updated=0, an_integer=new_integer, a_list=new_list, a_tuple=new_tuple
+    )
+
+
+def test_recursive_update_with_recursion():
+    """Test the 'recursive update' utility with recursion."""
+    # here we try to update an integer and add a new value
+    to_update = dict(subdict=dict(to_update=1))
+    new_values = dict(subdict=dict(to_update=2))
+
+    recursive_update(to_update, new_values)
+    assert to_update == dict(subdict=dict(to_update=2))
+
+
+def test_recursive_update_negative_different_type():
+    """Test the 'recursive update' utility, when the types are different."""
+    # here we try to update an integer with a boolean - it raises error.
+    to_update = dict(subdict=dict(to_update=1))
+    new_values = dict(subdict=dict(to_update=False))
+
+    with pytest.raises(
+        ValueError,
+        match="Trying to replace value '1' with value 'False' which is of different type.",
+    ):
+        recursive_update(to_update, new_values)
+
+
+def test_recursive_update_negative_unknown_field():
+    """Test the 'recursive update' utility, when there are unknown fields."""
+    # here we try to update an integer with a boolean - it raises error.
+    to_update = dict(subdict=dict(field=1))
+    new_values = dict(subdict=dict(new_field=False))
+
+    with pytest.raises(
+        ValueError,
+        match="Key 'new_field' is not contained in the dictionary to update.",
+    ):
+        recursive_update(to_update, new_values)
+
+
+class TestTopologicalOrder:
+    """Test the computation of topological order."""
+
+    def test_empty_graph(self):
+        """Test the function with empty input."""
+        order = find_topological_order({})
+        assert order == []
+
+    def test_one_node(self):
+        """Test the function with only one node."""
+        order = find_topological_order({0: set()})
+        assert order == [0]
+
+    def test_one_node_with_cycle(self):
+        """Test the function with only one node and a loop."""
+        with pytest.raises(ValueError, match="Graph has at least one cycle."):
+            find_topological_order({0: {0}})
+
+    def test_two_nodes_no_edges(self):
+        """Test the function with two nodes, but no edges."""
+        order = find_topological_order({0: set(), 1: set()})
+        assert order == [0, 1]
+
+    def test_two_nodes_no_cycle(self):
+        """Test the function with two nodes, but no cycles."""
+        order = find_topological_order({0: {1}})
+        assert order == [0, 1]
+
+    def test_two_nodes_with_cycle(self):
+        """Test the function with two nodes and a cycle between them."""
+        with pytest.raises(ValueError, match="Graph has at least one cycle."):
+            find_topological_order({0: {1}, 1: {0}})
+
+    def test_two_nodes_clique(self):
+        """Test the function with a clique of two nodes."""
+        with pytest.raises(ValueError, match="Graph has at least one cycle."):
+            find_topological_order({0: {1, 0}, 1: {0, 1}})
+
+    @pytest.mark.parametrize("chain_length", [3, 5, 10, 100])
+    def test_chain(self, chain_length):
+        """Test the function with a chain."""
+        adj_list: Dict[int, Set[int]] = {}
+        for i in range(chain_length - 1):
+            adj_list[i] = {i + 1}
+        adj_list[chain_length - 1] = set()
+
+        order = find_topological_order(adj_list)
+        assert order == list(range(chain_length))

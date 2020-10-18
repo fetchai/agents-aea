@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for aea.cli.utils module."""
 
 from builtins import FileNotFoundError
@@ -28,7 +27,7 @@ from click import BadParameter, ClickException
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import AEAJsonPathType, PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -42,6 +41,7 @@ from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
     get_package_path_unified,
+    get_wallet_from_context,
     is_fingerprint_correct,
     is_item_present_unified,
     is_local_item,
@@ -59,6 +59,9 @@ from aea.configurations.constants import (
     SIGNING_PROTOCOL,
     STATE_UPDATE_PROTOCOL,
 )
+from aea.crypto.wallet import Wallet
+from aea.helpers.base import cd
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import FETCHAI
 from tests.test_cli.tools_for_testing import (
@@ -289,7 +292,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.7.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -303,7 +306,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.7.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -322,7 +325,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.7.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -331,7 +334,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.7.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -345,7 +348,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.7.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -389,29 +392,6 @@ class IsFingerprintCorrectTestCase(TestCase):
         package_path = "package_dir"
         result = is_fingerprint_correct(package_path, item_config)
         self.assertFalse(result)
-
-
-@mock.patch("aea.cli.config.click.ParamType")
-class AEAJsonPathTypeTestCase(TestCase):
-    """Test case for AEAJsonPathType class."""
-
-    @mock.patch("aea.cli.utils.click_utils.Path.exists", return_value=True)
-    def test_convert_root_vendor_positive(self, *mocks):
-        """Test for convert method with root "vendor" positive result."""
-        value = "vendor.author.protocols.package_name.attribute_name"
-        ctx_mock = ContextMock()
-        ctx_mock.obj = mock.Mock()
-        ctx_mock.obj.set_config = mock.Mock()
-        obj = AEAJsonPathType()
-        obj.convert(value, "param", ctx_mock)
-
-    @mock.patch("aea.cli.utils.click_utils.Path.exists", return_value=False)
-    def test_convert_root_vendor_path_not_exists(self, *mocks):
-        """Test for convert method with root "vendor" path not exists."""
-        value = "vendor.author.protocols.package_name.attribute_name"
-        obj = AEAJsonPathType()
-        with self.assertRaises(BadParameter):
-            obj.convert(value, "param", "ctx")
 
 
 @mock.patch("aea.cli.utils.package_utils.LedgerApis", mock.MagicMock())
@@ -485,3 +465,13 @@ def test_is_item_present_unified(mock_, vendor):
 def test_is_local_item(public_id, expected_outcome):
     """Test the 'is_local_item' CLI utility function."""
     assert is_local_item(public_id) is expected_outcome
+
+
+class TestGetWalletFromtx(AEATestCaseEmpty):
+    """Test get_wallet_from_context."""
+
+    def test_get_wallet_from_ctx(self):
+        """Test get_wallet_from_context."""
+        ctx = mock.Mock()
+        with cd(self._get_cwd()):
+            assert isinstance(get_wallet_from_context(ctx), Wallet)

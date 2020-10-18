@@ -65,7 +65,7 @@ async def test_connect_raises_exception():
 
 
 @pytest.mark.asyncio
-async def test_disconnect_when_already_disconnected(caplog):
+async def test_disconnect_when_already_disconnected():
     """Test that disconnecting a connection already disconnected works correctly."""
     port = get_unused_tcp_port()
     tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)

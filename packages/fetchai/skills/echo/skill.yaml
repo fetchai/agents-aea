@@ -1,6 +1,6 @@
 name: echo
 author: fetchai
-version: 0.7.0
+version: 0.9.0
 type: skill
 description: The echo skill implements simple echo functionality.
 license: Apache-2.0
@@ -14,7 +14,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.5.0
+- fetchai/default:0.7.0
 skills: []
 behaviours:
   echo:
@@ -30,3 +30,4 @@ models:
     args: {}
     class_name: DefaultDialogues
 dependencies: {}
+is_abstract: false

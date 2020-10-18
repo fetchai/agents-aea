@@ -45,8 +45,8 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
 
         # for logging
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -59,7 +59,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
-        check_strings = "My libp2p addresses: ["
+        check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
             missing_strings == []
@@ -90,7 +90,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
 
         # setup a full node: with public uri, relay service, and delegate service
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -116,7 +116,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
-        check_strings = "My libp2p addresses: ['/dns4/"
+        check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
             missing_strings == []

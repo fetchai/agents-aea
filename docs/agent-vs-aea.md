@@ -126,7 +126,8 @@ We run the agent from a different thread so that we can still use the main threa
 We use the input and output text files to send an envelope to our agent and receive a response
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = b"my_agent,other_agent,fetchai/default:0.5.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
+        message_text = b"my_agent,other_agent,fetchai/default:0.7.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
 
@@ -251,7 +252,8 @@ def run():
         time.sleep(3)
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = b"my_agent,other_agent,fetchai/default:0.5.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
+        message_text = b"my_agent,other_agent,fetchai/default:0.7.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
 

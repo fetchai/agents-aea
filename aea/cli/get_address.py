@@ -25,9 +25,8 @@ import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import verify_or_create_private_keys_ctx
+from aea.cli.utils.package_utils import get_wallet_from_context
 from aea.crypto.registries import crypto_registry
-from aea.crypto.wallet import Wallet
 
 
 @click.command()
@@ -41,11 +40,12 @@ from aea.crypto.wallet import Wallet
 @check_aea_project
 def get_address(click_context, type_):
     """Get the address associated with the private key."""
-    address = _try_get_address(click_context, type_)
+    ctx = cast(Context, click_context.obj)
+    address = _try_get_address(ctx, type_)
     click.echo(address)
 
 
-def _try_get_address(click_context, type_):
+def _try_get_address(ctx: Context, type_: str):
     """
     Try to get address.
 
@@ -54,15 +54,8 @@ def _try_get_address(click_context, type_):
 
     :return: address.
     """
-    ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys_ctx(ctx=ctx)
-
-    private_key_paths = {
-        config_pair[0]: config_pair[1]
-        for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
+    wallet = get_wallet_from_context(ctx)
     try:
-        wallet = Wallet(private_key_paths)
         address = wallet.addresses[type_]
         return address
     except ValueError as e:  # pragma: no cover

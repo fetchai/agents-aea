@@ -36,6 +36,7 @@ MODULES_TO_PATH = {
     "aea.common": "api/common.md",
     "aea.exceptions": "api/exceptions.md",
     "aea.launcher": "api/launcher.md",
+    "aea.manager": "api/manager.md",
     "aea.multiplexer": "api/multiplexer.md",
     "aea.runner": "api/runner.md",
     "aea.runtime": "api/runtime.md",
@@ -44,6 +45,7 @@ MODULES_TO_PATH = {
     "aea.configurations.base": "api/configurations/base.md",
     "aea.configurations.constants": "api/configurations/constants.md",
     "aea.configurations.loader": "api/configurations/loader.md",
+    "aea.configurations.project": "api/configurations/project.md",
     "aea.configurations.pypi": "api/configurations/pypi.md",
     "aea.connections.base": "api/connections/base.md",
     "aea.connections.stub.connection": "api/connections/stub/connection.md",
@@ -75,6 +77,7 @@ MODULES_TO_PATH = {
     "aea.helpers.multiple_executor": "api/helpers/multiple_executor.md",
     "aea.helpers.pipe": "api/helpers/pipe.md",
     "aea.helpers.win32": "api/helpers/win32.md",
+    "aea.helpers.yaml_utils": "api/helpers/yaml_utils.md",
     "aea.identity.base": "api/identity/base.md",
     "aea.mail.base": "api/mail/base.md",
     "aea.protocols.base": "api/protocols/base.md",
@@ -102,7 +105,8 @@ MODULES_TO_PATH = {
     "aea.skills.tasks": "api/skills/tasks.md",
     "aea.skills.error.handlers": "api/skills/error/handlers.md",
     "aea.test_tools.generic": "api/test_tools/generic.md",
-    "aea.test_tools.test_cases": "api/helpers/test_cases.md",
+    "aea.test_tools.test_cases": "api/test_tools/test_cases.md",
+    "aea.test_tools.test_skill": "api/test_tools/test_skill.md",
 }
 
 

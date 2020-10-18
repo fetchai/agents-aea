@@ -29,7 +29,7 @@ from aea.protocols.base import Message
 from packages.fetchai.protocols.tac.custom_types import ErrorCode as CustomErrorCode
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.tac.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.tac.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
-    protocol_id = ProtocolId.from_str("fetchai/tac:0.6.0")
+    protocol_id = ProtocolId.from_str("fetchai/tac:0.8.0")
 
     ErrorCode = CustomErrorCode
 
@@ -741,7 +741,7 @@ class TacMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

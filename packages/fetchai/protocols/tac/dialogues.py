@@ -66,6 +66,7 @@ class TacDialogue(Dialogue):
         ),
         TacMessage.Performative.TRANSACTION: frozenset(
             {
+                TacMessage.Performative.TRANSACTION,
                 TacMessage.Performative.TRANSACTION_CONFIRMATION,
                 TacMessage.Performative.TAC_ERROR,
                 TacMessage.Performative.CANCELLED,

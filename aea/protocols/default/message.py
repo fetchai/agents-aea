@@ -28,7 +28,7 @@ from aea.protocols.base import Message
 from aea.protocols.default.custom_types import ErrorCode as CustomErrorCode
 
 
-logger = logging.getLogger("aea.protocols.default.message")
+_default_logger = logging.getLogger("aea.protocols.default.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
-    protocol_id = ProtocolId.from_str("fetchai/default:0.5.0")
+    protocol_id = ProtocolId.from_str("fetchai/default:0.7.0")
 
     ErrorCode = CustomErrorCode
 
@@ -240,7 +240,7 @@ class DefaultMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

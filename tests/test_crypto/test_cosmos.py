@@ -91,3 +91,10 @@ def test_generate_nonce():
     assert len(nonce) > 0 and int(
         nonce, 16
     ), "The len(nonce) must not be 0 and must be hex"
+
+
+def test_validate_address():
+    """Test the is_valid_address functionality."""
+    account = CosmosCrypto()
+    assert CosmosApi.is_valid_address(account.address)
+    assert not CosmosApi.is_valid_address(account.address + "wrong")

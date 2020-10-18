@@ -55,7 +55,7 @@ ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
 QUANTITY_SHIFT = 100
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class SigningDialogues(BaseSigningDialogues):
@@ -304,7 +304,7 @@ class OwnershipState(BaseOwnershipState):
         if self.is_initialized:
             is_affordable = self.is_affordable_transaction(terms)
         else:
-            logger.warning(
+            _default_logger.warning(
                 "Cannot verify whether transaction is affordable as ownership state is not initialized. Assuming it is!"
             )
             is_affordable = True
@@ -535,7 +535,7 @@ class Preferences(BasePreferences):
                 self.utility_diff_from_transaction(ownership_state, terms) >= 0.0
             )
         else:
-            logger.warning(
+            _default_logger.warning(
                 "Cannot verify whether transaction improves utility as preferences are not initialized. Assuming it does!"
             )
             is_utility_enhancing = True
@@ -585,7 +585,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         elif isinstance(message, StateUpdateMessage):
             self._handle_state_update_message(message)
         else:  # pragma: no cover
-            logger.error(
+            self.logger.error(
                 "[{}]: cannot handle message={} of type={}".format(
                     self.agent_name, message, type(message)
                 )
@@ -599,7 +599,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :return: None
         """
         if not self.context.goal_pursuit_readiness.is_ready:
-            logger.debug(
+            self.logger.debug(
                 "[{}]: Preferences and ownership state not initialized!".format(
                     self.agent_name
                 )
@@ -609,7 +609,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             Optional[SigningDialogue], self.signing_dialogues.update(signing_msg)
         )
         if signing_dialogue is None:  # pragma: no cover
-            logger.error(
+            self.logger.error(
                 "[{}]: Could not construct signing dialogue. Aborting!".format(
                     self.agent_name
                 )
@@ -622,7 +622,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         elif signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
             self._handle_transaction_signing(signing_msg, signing_dialogue)
         else:  # pragma: no cover
-            logger.error(
+            self.logger.error(
                 "[{}]: Unexpected transaction message performative".format(
                     self.agent_name
                 )
@@ -716,7 +716,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             self.state_update_dialogues.update(state_update_msg),
         )
         if state_update_dialogue is None:  # pragma: no cover
-            logger.error(
+            self.logger.error(
                 "[{}]: Could not construct state_update dialogue. Aborting!".format(
                     self.agent_name
                 )
@@ -724,7 +724,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             return
 
         if state_update_msg.performative == StateUpdateMessage.Performative.INITIALIZE:
-            logger.warning(
+            self.logger.warning(
                 "[{}]: Applying ownership_state and preferences initialization!".format(
                     self.agent_name
                 )
@@ -741,7 +741,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 GoalPursuitReadiness.Status.READY
             )
         elif state_update_msg.performative == StateUpdateMessage.Performative.APPLY:
-            logger.info("[{}]: Applying state update!".format(self.agent_name))
+            self.logger.info("[{}]: Applying state update!".format(self.agent_name))
             self.context.ownership_state.apply_delta(
                 delta_amount_by_currency_id=state_update_msg.amount_by_currency_id,
                 delta_quantities_by_good_id=state_update_msg.quantities_by_good_id,

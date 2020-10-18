@@ -14,7 +14,7 @@ class_name: DummyConnection
 config: {}
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/default:0.5.0
+- fetchai/default:0.7.0
 dependencies:
   dep1:
     version: ==1.0.0

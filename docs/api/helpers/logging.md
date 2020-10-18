@@ -3,6 +3,15 @@
 
 Logging helpers.
 
+<a name="aea.helpers.logging.get_logger"></a>
+#### get`_`logger
+
+```python
+get_logger(module_path: str, agent_name: str) -> Logger
+```
+
+Get the logger based on a module path and agent name.
+
 <a name="aea.helpers.logging.AgentLoggerAdapter"></a>
 ## AgentLoggerAdapter Objects
 

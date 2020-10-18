@@ -18,7 +18,6 @@
 #
 # ------------------------------------------------------------------------------
 
-
 """Core definitions for the AEA command-line tool."""
 
 import click
@@ -54,6 +53,8 @@ from aea.cli.reset_password import reset_password
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
+from aea.cli.transfer import transfer
+from aea.cli.upgrade import upgrade
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
@@ -65,6 +66,7 @@ from aea.helpers.win32 import enable_ctrl_c_support
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")
 @click.option(
+    "-s",
     "--skip-consistency-check",
     "skip_consistency_check",
     is_flag=True,
@@ -143,3 +145,5 @@ cli.add_command(reset_password)
 cli.add_command(run)
 cli.add_command(scaffold)
 cli.add_command(search)
+cli.add_command(transfer)
+cli.add_command(upgrade)

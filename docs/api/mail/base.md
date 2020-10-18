@@ -481,6 +481,26 @@ Get the connection id from an envelope context, if set.
 
 connection id
 
+<a name="aea.mail.base.Envelope.is_sender_public_id"></a>
+#### is`_`sender`_`public`_`id
+
+```python
+ | @property
+ | is_sender_public_id()
+```
+
+Check if sender is a public id.
+
+<a name="aea.mail.base.Envelope.is_to_public_id"></a>
+#### is`_`to`_`public`_`id
+
+```python
+ | @property
+ | is_to_public_id()
+```
+
+Check if to is a public id.
+
 <a name="aea.mail.base.Envelope.__eq__"></a>
 #### `__`eq`__`
 

@@ -40,7 +40,7 @@ from aea.exceptions import enforce
 from aea.helpers.base import try_decorator
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 _ETHEREUM = "ethereum"
 GAS_ID = "gwei"
@@ -332,7 +332,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         gas_estimate = self._try_get_gas_estimate(transaction)
         if gas_estimate is not None and tx_fee <= gas_estimate:  # pragma: no cover
-            logger.warning(
+            _default_logger.warning(
                 "Needed to increase tx_fee to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
                     gas_estimate
                 )
@@ -382,7 +382,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
             tx_signed.rawTransaction
         )
         tx_digest = hex_value.hex()
-        logger.debug("Successfully sent transaction with digest: {}".format(tx_digest))
+        _default_logger.debug(
+            "Successfully sent transaction with digest: {}".format(tx_digest)
+        )
         return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
@@ -498,11 +500,20 @@ class EthereumApi(LedgerApi, EthereumHelper):
             # try estimate the gas and update the transaction dict
             _tx = cast(TxParams, tx)
             gas_estimate = self.api.eth.estimateGas(transaction=_tx)
-            logger.debug("gas estimate: {}".format(gas_estimate))
+            _default_logger.debug("gas estimate: {}".format(gas_estimate))
             tx["gas"] = gas_estimate
         except Exception as e:  # pylint: disable=broad-except # pragma: nocover
-            logger.debug("Error when trying to estimate gas: {}".format(e))
+            _default_logger.debug("Error when trying to estimate gas: {}".format(e))
         return tx
+
+    @classmethod
+    def is_valid_address(cls, address: Address) -> bool:
+        """
+        Check if the address is valid.
+
+        :param address: the address to validate
+        """
+        return Web3.isAddress(address)
 
 
 class EthereumFaucetApi(FaucetApi):
@@ -534,17 +545,17 @@ class EthereumFaucetApi(FaucetApi):
         """
         response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
         if response.status_code // 100 == 5:
-            logger.error("Response: {}".format(response.status_code))
+            _default_logger.error("Response: {}".format(response.status_code))
         elif response.status_code // 100 in [3, 4]:
             response_dict = json.loads(response.text)
-            logger.warning(
+            _default_logger.warning(
                 "Response: {}\nMessage: {}".format(
                     response.status_code, response_dict.get("message")
                 )
             )
         elif response.status_code // 100 == 2:
             response_dict = json.loads(response.text)
-            logger.info(
+            _default_logger.info(
                 "Response: {}\nMessage: {}".format(
                     response.status_code, response_dict.get("message")
                 )

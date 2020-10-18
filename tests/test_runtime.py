@@ -17,7 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for aea runtime."""
+import asyncio
 import os
+import time
 from pathlib import Path
 from typing import Type
 from unittest.mock import patch
@@ -26,10 +28,16 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
-from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
+from aea.runtime import (
+    AsyncRuntime,
+    BaseRuntime,
+    RuntimeStates,
+    ThreadedRuntime,
+    _StopRuntime,
+)
 
-from tests.common.utils import run_in_thread, wait_for_condition
-from tests.conftest import CUR_PATH
+from tests.common.utils import wait_for_condition
+from tests.conftest import CUR_PATH, DUMMY_SKILL_PUBLIC_ID
 
 
 class TestAsyncRuntime:
@@ -46,33 +54,57 @@ class TestAsyncRuntime:
         builder.add_private_key(DEFAULT_LEDGER, private_key_path)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         self.agent = builder.build()
-        self.runtime = self.RUNTIME(self.agent)
+        self.runtime = self.RUNTIME(self.agent, threaded=True)
+
+    def teardown(self):
+        """Tear down."""
+        self.runtime.stop()
+        self.runtime.wait_completed(sync=True)
 
     def test_start_stop(self):
         """Test runtime tart/stop."""
-        with run_in_thread(self.runtime.start, timeout=20):
+        self.runtime.start()
+        wait_for_condition(lambda: self.runtime.is_running, timeout=20)
+        self.runtime.stop()
+        self.runtime.wait_completed(sync=True)
+
+    def test_stop_with_stopped_exception(self):
+        """Test runtime stopped by stopruntime exception."""
+        behaviour = self.agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
+        with patch.object(
+            behaviour, "act", side_effect=_StopRuntime(reraise=ValueError("expected"))
+        ):
+            self.runtime.start()
             wait_for_condition(lambda: self.runtime.is_running, timeout=20)
-            self.runtime.stop()
-            wait_for_condition(lambda: not self.runtime.is_running, timeout=20)
+            time.sleep(1)
+            assert self.runtime.is_stopped
+
+        with pytest.raises(ValueError, match="expected"):
+            self.runtime.wait_completed(timeout=10, sync=True)
 
     def test_double_start(self):
         """Test runtime double start do nothing."""
-        with patch.object(self.runtime, "_start", side_effect=ValueError("oops")):
-            with pytest.raises(ValueError, match="oops"):
-                self.runtime.start()
+        assert self.runtime.start()
+        assert not self.runtime.start()
+        wait_for_condition(lambda: self.runtime.is_running, timeout=20)
 
-            self.runtime._state.set(RuntimeStates.running)
-            self.runtime.start()
+    def test_set_loop(self):
+        """Test set loop method."""
+        loop = asyncio.new_event_loop()
+        self.runtime.set_loop(loop)
+        assert self.runtime.loop is loop
 
     def test_double_stop(self):
         """Test runtime double stop do nothing."""
-        with patch.object(self.runtime, "_stop", side_effect=ValueError("oops")):
-            self.runtime._state.set(RuntimeStates.running)
-            with pytest.raises(ValueError, match="oops"):
-                self.runtime.stop()
+        self.runtime.start()
+        wait_for_condition(lambda: self.runtime.is_running, timeout=20)
+        self.runtime.stop()
+        self.runtime.wait_completed(sync=True)
+        assert self.runtime.is_stopped
 
-            self.runtime._state.set(RuntimeStates.stopped)
-            self.runtime.stop()
+        self.runtime.stop()
+        self.runtime.wait_completed(sync=True)
+        assert self.runtime.is_stopped
 
     def test_error_state(self):
         """Test runtime fails on start."""
@@ -80,9 +112,9 @@ class TestAsyncRuntime:
             self.runtime, "_start_agent_loop", side_effect=ValueError("oops")
         ):
             with pytest.raises(ValueError, match="oops"):
-                self.runtime.start()
+                self.runtime.start_and_wait_completed(sync=True)
 
-        assert self.runtime.state == RuntimeStates.error
+        assert self.runtime.state == RuntimeStates.error, self.runtime.state
 
 
 class TestThreadedRuntime(TestAsyncRuntime):
@@ -96,8 +128,6 @@ class TestThreadedRuntime(TestAsyncRuntime):
             self.runtime.main_loop, "start", side_effect=ValueError("oops")
         ):
             with pytest.raises(ValueError, match="oops"):
-                self.runtime.start()
+                self.runtime.start_and_wait_completed(sync=True)
 
-        assert self.runtime.state == RuntimeStates.error
-
-        self.runtime._stop()
+        assert self.runtime.state == RuntimeStates.error, self.runtime.state

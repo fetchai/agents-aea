@@ -118,6 +118,13 @@ def test_api_none():
     assert eth_api.api is not None, "The api property is None."
 
 
+def test_validate_address():
+    """Test the is_valid_address functionality."""
+    account = EthereumCrypto()
+    assert EthereumApi.is_valid_address(account.address)
+    assert not EthereumApi.is_valid_address(account.address + "wrong")
+
+
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
@@ -190,7 +197,7 @@ def test_construct_sign_and_submit_transfer_transaction():
 @pytest.mark.ledger
 def test_get_wealth_positive(caplog):
     """Test the balance is zero for a new account."""
-    with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum"):
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
         ethereum_faucet_api = EthereumFaucetApi()
         ec = EthereumCrypto()
         ethereum_faucet_api.get_wealth(ec.address)

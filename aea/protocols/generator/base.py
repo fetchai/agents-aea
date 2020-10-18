@@ -20,7 +20,6 @@
 # pylint: skip-file
 
 import itertools
-import logging
 import os
 import shutil
 from datetime import date
@@ -53,9 +52,6 @@ from aea.protocols.generator.common import (
     try_run_protoc,
 )
 from aea.protocols.generator.extract_specification import extract
-
-
-logger = logging.getLogger(__name__)
 
 
 def _copyright_header_str(author: str) -> str:
@@ -614,7 +610,7 @@ class ProtocolGenerator:
             cls_str += self._import_from_custom_types_module()
         cls_str += (
             self.indent
-            + '\nlogger = logging.getLogger("aea.packages.{}.protocols.{}.message")\n'.format(
+            + '\n_default_logger = logging.getLogger("aea.packages.{}.protocols.{}.message")\n'.format(
                 self.protocol_specification.author, self.protocol_specification.name
             )
         )
@@ -876,7 +872,7 @@ class ProtocolGenerator:
             self.indent + "except (AEAEnforceError, ValueError, KeyError) as e:\n"
         )
         self._change_indent(1)
-        cls_str += self.indent + "logger.error(str(e))\n"
+        cls_str += self.indent + "_default_logger.error(str(e))\n"
         cls_str += self.indent + "return False\n\n"
         self._change_indent(-1)
         cls_str += self.indent + "return True\n"
@@ -1926,7 +1922,7 @@ class ProtocolGenerator:
             shutil.rmtree(output_folder)
             raise SyntaxError("Error in the protocol buffer schema code:\n" + msg)
 
-    def generate_full_mode(self) -> None:
+    def generate_full_mode(self) -> Optional[str]:
         """
         Run the generator in "full" mode:
 
@@ -1936,7 +1932,7 @@ class ProtocolGenerator:
         d) applies black formatting
         e) applies isort formatting
 
-        :return: None
+        :return: optional warning message
         """
         # Run protobuf only mode
         self.generate_protobuf_only_mode()
@@ -1988,13 +1984,14 @@ class ProtocolGenerator:
         try_run_isort_formatting(self.path_to_generated_protocol_package)
 
         # Warn if specification has custom types
+        incomplete_generation_warning_msg = None  # type: Optional[str]
         if len(self.spec.all_custom_types) > 0:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
                 self.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
             )
-            logger.warning(incomplete_generation_warning_msg)
+        return incomplete_generation_warning_msg
 
-    def generate(self, protobuf_only: bool = False) -> None:
+    def generate(self, protobuf_only: bool = False) -> Optional[str]:
         """
         Run the generator. If in "full" mode (protobuf_only is False), it:
 
@@ -2007,9 +2004,11 @@ class ProtocolGenerator:
         If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
 
         :param protobuf_only: mode of running the generator.
-        :return: None
+        :return: optional warning message.
         """
+        message = None
         if protobuf_only:
             self.generate_protobuf_only_mode()
         else:
-            self.generate_full_mode()
+            message = self.generate_full_mode()
+        return message

@@ -1,16 +1,16 @@
 name: oef_search
 author: fetchai
-version: 0.6.0
+version: 0.8.0
 type: protocol
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
-  README.md: QmaGSTqxvQFKccBnLovhBbfSH3C3Sorrj7kFyZqW9qptLa
+  README.md: QmcBVa7T4QJoUoYtr5LP1oz25xQwaX7HJQTLgDnJR1VicW
   __init__.py: Qmdr5ks5X4YtnpH6yKUcNu9uouyv3EGmrKFhyvNH7ZBjvT
   custom_types.py: QmYAkKYj9gGHaij7uTejoJe9KRhNcsU4sJC1utMfhUYhg3
   dialogues.py: QmQPLnW3jAs6tLLmhkX4C7texGRHM9bfdjs83dUH5TkJ4v
-  message.py: QmWFvjX7spNHQx6QQevBRXmFyJBuenyAPYAjxVLYvKdC7B
+  message.py: QmZfLEzhveXqvWLuwQUoAxCarRgahsxkkHVtYEhv3LLKLw
   oef_search.proto: QmTUS3PAEi5kD6PxC2XQAtE2jbiA6WP3HjwtUxs5PRWTA9
   oef_search_pb2.py: QmRmtzfGBbkJSneEF8qkUn4UjenbzBzzgwoGeSANCGktBz
   serialization.py: QmcMQLbz6fkvZeqUXyE9WwH4TEJ3Dzy6pV4txLAVw9sdwb

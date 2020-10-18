@@ -64,8 +64,6 @@ class TestContractRegistry:
     @classmethod
     def setup_class(cls):
         """Set the tests up."""
-        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, "exception")
-        cls.mocked_logger = cls.patch.start()
 
         cls.oldcwd = os.getcwd()
         cls.agent_name = "agent_dir_test"
@@ -79,9 +77,11 @@ class TestContractRegistry:
         )
 
         cls.registry = AgentComponentRegistry()
+        cls.patch = unittest.mock.patch.object(cls.registry.logger, "exception")
+        cls.mocked_logger = cls.patch.start()
         cls.registry.register(contract.component_id, cast(Contract, contract))
         cls.expected_contract_ids = {
-            PublicId.from_str("fetchai/erc1155:0.10.0"),
+            PublicId.from_str("fetchai/erc1155:0.11.0"),
         }
 
     def test_fetch_all(self):
@@ -92,14 +92,14 @@ class TestContractRegistry:
 
     def test_fetch(self):
         """Test that the `fetch` method works as expected."""
-        contract_id = PublicId.from_str("fetchai/erc1155:0.10.0")
+        contract_id = PublicId.from_str("fetchai/erc1155:0.11.0")
         contract = self.registry.fetch(ComponentId(ComponentType.CONTRACT, contract_id))
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.10.0")
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.11.0")
         component_id = ComponentId(ComponentType.CONTRACT, contract_id_removed)
         contract_removed = self.registry.fetch(component_id)
         self.registry.unregister(contract_removed.component_id)
@@ -133,8 +133,6 @@ class TestProtocolRegistry:
     @classmethod
     def setup_class(cls):
         """Set the tests up."""
-        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, "exception")
-        cls.mocked_logger = cls.patch.start()
 
         cls.oldcwd = os.getcwd()
         cls.agent_name = "agent_dir_test"
@@ -144,6 +142,8 @@ class TestProtocolRegistry:
         os.chdir(cls.agent_folder)
 
         cls.registry = AgentComponentRegistry()
+        cls.patch = unittest.mock.patch.object(cls.registry.logger, "exception")
+        cls.mocked_logger = cls.patch.start()
 
         protocol_1 = Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
         protocol_2 = Protocol.from_dir(
@@ -154,7 +154,7 @@ class TestProtocolRegistry:
 
         cls.expected_protocol_ids = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/fipa:0.6.0"),
+            PublicId.from_str("fetchai/fipa:0.8.0"),
         }
 
     def test_fetch_all(self):
@@ -199,11 +199,11 @@ class TestResources:
     @classmethod
     def _patch_logger(cls):
         cls.patch_logger_exception = unittest.mock.patch.object(
-            aea.registries.base.logger, "exception"
+            aea.registries.base._default_logger, "exception"
         )
         cls.mocked_logger_exception = cls.patch_logger_exception.__enter__()
         cls.patch_logger_warning = unittest.mock.patch.object(
-            aea.registries.base.logger, "warning"
+            aea.registries.base._default_logger, "warning"
         )
         cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
 
@@ -215,7 +215,7 @@ class TestResources:
     @classmethod
     def setup_class(cls):
         """Set the tests up."""
-        cls._patch_logger()
+        # cls._patch_logger() # noqa: E800
 
         # create temp agent folder
         cls.oldcwd = os.getcwd()
@@ -232,19 +232,21 @@ class TestResources:
         )
         cls.resources.add_component(
             Skill.from_dir(
-                Path(CUR_PATH, "data", "dummy_skill"), agent_context=MagicMock(),
+                Path(CUR_PATH, "data", "dummy_skill"),
+                agent_context=MagicMock(agent_name="name"),
             )
         )
         cls.resources.add_component(
             Skill.from_dir(
-                Path(aea.AEA_DIR, "skills", "error"), agent_context=MagicMock(),
+                Path(aea.AEA_DIR, "skills", "error"),
+                agent_context=MagicMock(agent_name="name"),
             )
         )
 
         cls.error_skill_public_id = DEFAULT_SKILL
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
-        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.10.0")
+        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.11.0")
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
@@ -336,7 +338,7 @@ class TestResources:
         """Test that the 'add connection' and 'remove connection' methods work correctly."""
         a_connection = Connection.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
-            identity=MagicMock(),
+            identity=Identity("name", "address"),
             crypto_store=MagicMock(),
         )
         self.resources.add_component(a_connection)
@@ -348,7 +350,7 @@ class TestResources:
         """Test get all connections."""
         a_connection = Connection.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
-            identity=MagicMock(),
+            identity=Identity("name", "address"),
             crypto_store=MagicMock(),
         )
         self.resources.add_component(a_connection)
@@ -474,7 +476,7 @@ class TestResources:
     @classmethod
     def teardown_class(cls):
         """Tear the tests down."""
-        cls._unpatch_logger()
+        # cls._unpatch_logger() # noqa: E800
         os.chdir(cls.oldcwd)
         try:
             shutil.rmtree(cls.t)
@@ -504,7 +506,8 @@ class TestFilter:
 
         resources.add_component(
             Skill.from_dir(
-                Path(CUR_PATH, "data", "dummy_skill"), agent_context=MagicMock(),
+                Path(CUR_PATH, "data", "dummy_skill"),
+                agent_context=MagicMock(agent_name="name"),
             )
         )
 
@@ -621,7 +624,8 @@ class TestComponentRegistry:
     def test_ids_non_empty(self):
         """Test ids, non-empty case."""
         dummy_skill = Skill.from_dir(
-            Path(CUR_PATH, "data", "dummy_skill"), agent_context=MagicMock(),
+            Path(CUR_PATH, "data", "dummy_skill"),
+            agent_context=MagicMock(agent_name="name"),
         )
         behaviour = next(iter(dummy_skill.behaviours.values()))
         skill_component_id = (dummy_skill.public_id, behaviour.name)
@@ -654,7 +658,7 @@ class TestComponentRegistry:
             self.registry, "fetch_all", return_value=[mock_item]
         ):
             with unittest.mock.patch.object(
-                aea.registries.base.logger, "debug"
+                self.registry.logger, "debug"
             ) as mock_debug:
                 self.registry.setup()
                 mock_debug.assert_called_with(

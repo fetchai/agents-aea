@@ -27,6 +27,7 @@ from typing import Any, Dict, List, Optional, cast
 from vyper.utils import keccak256
 
 from aea.common import Address
+from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
@@ -34,8 +35,10 @@ from aea.crypto.ethereum import EthereumApi
 from aea.crypto.fetchai import FetchAIApi
 
 
-logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
+_default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
+
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.11.0")
 
 
 class ERC1155Contract(Contract):
@@ -541,33 +544,37 @@ class ERC1155Contract(Contract):
         :param ledger_api: the ledger API
         :return: the transaction hash in a dict
         """
-        instance = cls.get_instance(ledger_api, contract_address)
-        from_address_hash = instance.functions.getAddress(from_address).call()
-        to_address_hash = instance.functions.getAddress(to_address).call()
-        value_eth_wei = ledger_api.api.toWei(value, "ether")
-        tx_hash = cls._get_hash_single(
-            _from=from_address_hash,
-            _to=to_address_hash,
-            _id=token_id,
-            _from_value=from_supply,
-            _to_value=to_supply,
-            _value_eth_wei=value_eth_wei,
-            _nonce=trade_nonce,
-        )
-        if (
-            tx_hash
-            != instance.functions.getSingleHash(
-                from_address,
-                to_address,
-                token_id,
-                from_supply,
-                to_supply,
-                value_eth_wei,
-                trade_nonce,
-            ).call()
-        ):
-            raise ValueError("On-chain and off-chain hash computation do not agree!")
-        return tx_hash
+        if ledger_api.identifier == EthereumApi.identifier:
+            instance = cls.get_instance(ledger_api, contract_address)
+            from_address_hash = instance.functions.getAddress(from_address).call()
+            to_address_hash = instance.functions.getAddress(to_address).call()
+            value_eth_wei = ledger_api.api.toWei(value, "ether")
+            tx_hash = cls._get_hash_single(
+                _from=from_address_hash,
+                _to=to_address_hash,
+                _id=token_id,
+                _from_value=from_supply,
+                _to_value=to_supply,
+                _value_eth_wei=value_eth_wei,
+                _nonce=trade_nonce,
+            )
+            if (
+                tx_hash
+                != instance.functions.getSingleHash(
+                    from_address,
+                    to_address,
+                    token_id,
+                    from_supply,
+                    to_supply,
+                    value_eth_wei,
+                    trade_nonce,
+                ).call()
+            ):
+                raise ValueError(
+                    "On-chain and off-chain hash computation do not agree!"
+                )
+            return tx_hash
+        raise NotImplementedError
 
     @staticmethod
     def _get_hash_single(
@@ -632,33 +639,37 @@ class ERC1155Contract(Contract):
         :param trade_nonce: the trade nonce
         :return: the transaction hash in a dict
         """
-        instance = cls.get_instance(ledger_api, contract_address)
-        from_address_hash = instance.functions.getAddress(from_address).call()
-        to_address_hash = instance.functions.getAddress(to_address).call()
-        value_eth_wei = ledger_api.api.toWei(value, "ether")
-        tx_hash = cls._get_hash_batch(
-            _from=from_address_hash,
-            _to=to_address_hash,
-            _ids=token_ids,
-            _from_values=from_supplies,
-            _to_values=to_supplies,
-            _value_eth_wei=value_eth_wei,
-            _nonce=trade_nonce,
-        )
-        if (
-            tx_hash
-            != instance.functions.getHash(
-                from_address,
-                to_address,
-                token_ids,
-                from_supplies,
-                to_supplies,
-                value_eth_wei,
-                trade_nonce,
-            ).call()
-        ):
-            raise ValueError("On-chain and off-chain hash computation do not agree!")
-        return tx_hash
+        if ledger_api.identifier == EthereumApi.identifier:
+            instance = cls.get_instance(ledger_api, contract_address)
+            from_address_hash = instance.functions.getAddress(from_address).call()
+            to_address_hash = instance.functions.getAddress(to_address).call()
+            value_eth_wei = ledger_api.api.toWei(value, "ether")
+            tx_hash = cls._get_hash_batch(
+                _from=from_address_hash,
+                _to=to_address_hash,
+                _ids=token_ids,
+                _from_values=from_supplies,
+                _to_values=to_supplies,
+                _value_eth_wei=value_eth_wei,
+                _nonce=trade_nonce,
+            )
+            if (
+                tx_hash
+                != instance.functions.getHash(
+                    from_address,
+                    to_address,
+                    token_ids,
+                    from_supplies,
+                    to_supplies,
+                    value_eth_wei,
+                    trade_nonce,
+                ).call()
+            ):
+                raise ValueError(
+                    "On-chain and off-chain hash computation do not agree!"
+                )
+            return tx_hash
+        raise NotImplementedError
 
     @staticmethod
     def _get_hash_batch(
@@ -724,11 +735,13 @@ class ERC1155Contract(Contract):
         :param agent_address: the address to use
         :return: the generated trade nonce
         """
-        instance = cls.get_instance(ledger_api, contract_address)
-        trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
-        while instance.functions.is_nonce_used(agent_address, trade_nonce).call():
+        if ledger_api.identifier == EthereumApi.identifier:
+            instance = cls.get_instance(ledger_api, contract_address)
             trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
-        return {"trade_nonce": trade_nonce}
+            while instance.functions.is_nonce_used(agent_address, trade_nonce).call():
+                trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
+            return {"trade_nonce": trade_nonce}
+        raise NotImplementedError
 
     @staticmethod
     def _try_estimate_gas(ledger_api: LedgerApi, tx: Dict[str, Any]) -> Dict[str, Any]:
@@ -742,10 +755,12 @@ class ERC1155Contract(Contract):
         try:
             # try estimate the gas and update the transaction dict
             gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-            logger.debug("[ERC1155Contract]: gas estimate: {}".format(gas_estimate))
+            _default_logger.debug(
+                "[ERC1155Contract]: gas estimate: {}".format(gas_estimate)
+            )
             tx["gas"] = gas_estimate
         except Exception as e:  # pylint: disable=broad-except
-            logger.debug(
+            _default_logger.debug(
                 "[ERC1155Contract]: Error when trying to estimate gas: {}".format(e)
             )
         return tx

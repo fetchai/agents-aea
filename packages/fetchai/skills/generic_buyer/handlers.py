@@ -45,7 +45,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 
 
 class GenericFipaHandler(Handler):
@@ -198,7 +198,9 @@ class GenericFipaHandler(Handler):
         if strategy.is_ledger_tx:
             transfer_address = fipa_msg.info.get("address", None)
             if transfer_address is not None and isinstance(transfer_address, str):
-                fipa_dialogue.terms.counterparty_address = transfer_address
+                fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
+                    transfer_address
+                )
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )

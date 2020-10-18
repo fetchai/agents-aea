@@ -3,16 +3,156 @@
 
 Classes to handle AEA configurations.
 
-<a name="aea.configurations.base.Dependency"></a>
-#### Dependency
+<a name="aea.configurations.base.PyPIPackageName"></a>
+## PyPIPackageName Objects
 
-A dependency is a dictionary with the following (optional) keys:
-    - version: a version specifier(s) (e.g. '==0.1.0').
-    - index: the PyPI index where to download the package from (default: https://pypi.org)
-    - git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
-    - ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
+```python
+class PyPIPackageName(RegexConstrainedString)
+```
+
+A PyPI Package name.
+
+<a name="aea.configurations.base.GitRef"></a>
+## GitRef Objects
+
+```python
+class GitRef(RegexConstrainedString)
+```
+
+A Git reference.
+
+It can be a branch name, a commit hash or a tag.
+
+<a name="aea.configurations.base.Dependency"></a>
+## Dependency Objects
+
+```python
+class Dependency()
+```
+
+This class represents a PyPI dependency.
+
+It contains the following information:
+- version: a version specifier(s) (e.g. '==0.1.0').
+- index: the PyPI index where to download the package from (default: https://pypi.org)
+- git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
+- ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
+
 If the 'git' field is set, the 'version' field will be ignored.
 These fields will be forwarded to the 'pip' command.
+
+<a name="aea.configurations.base.Dependency.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[Union[str, Url]] = None, git: Optional[Union[str, Url]] = None, ref: Optional[Union[GitRef, str]] = None)
+```
+
+Initialize a PyPI dependency.
+
+**Arguments**:
+
+- `name`: the package name.
+- `version`: the specifier set object
+- `index`: the URL to the PyPI server.
+- `git`: the URL to a git repository.
+- `ref`: the Git reference (branch/commit/tag).
+
+<a name="aea.configurations.base.Dependency.name"></a>
+#### name
+
+```python
+ | @property
+ | name() -> str
+```
+
+Get the name.
+
+<a name="aea.configurations.base.Dependency.version"></a>
+#### version
+
+```python
+ | @property
+ | version() -> str
+```
+
+Get the version.
+
+<a name="aea.configurations.base.Dependency.index"></a>
+#### index
+
+```python
+ | @property
+ | index() -> Optional[str]
+```
+
+Get the index.
+
+<a name="aea.configurations.base.Dependency.git"></a>
+#### git
+
+```python
+ | @property
+ | git() -> Optional[str]
+```
+
+Get the git.
+
+<a name="aea.configurations.base.Dependency.ref"></a>
+#### ref
+
+```python
+ | @property
+ | ref() -> Optional[str]
+```
+
+Get the ref.
+
+<a name="aea.configurations.base.Dependency.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, obj: Dict[str, Dict[str, str]]) -> "Dependency"
+```
+
+Parse a dependency object from a dictionary.
+
+<a name="aea.configurations.base.Dependency.to_json"></a>
+#### to`_`json
+
+```python
+ | to_json() -> Dict[str, Dict[str, str]]
+```
+
+Transform the object to JSON.
+
+<a name="aea.configurations.base.Dependency.get_pip_install_args"></a>
+#### get`_`pip`_`install`_`args
+
+```python
+ | get_pip_install_args() -> List[str]
+```
+
+Get 'pip install' arguments.
+
+<a name="aea.configurations.base.Dependency.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__() -> str
+```
+
+Get the string representation.
+
+<a name="aea.configurations.base.Dependency.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Compare with another object.
 
 <a name="aea.configurations.base.Dependencies"></a>
 #### Dependencies
@@ -22,6 +162,101 @@ The package name must satisfy  <a href="https://www.python.org/dev/peps/pep-0426
 
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
+
+<a name="aea.configurations.base.dependencies_from_json"></a>
+#### dependencies`_`from`_`json
+
+```python
+dependencies_from_json(obj: Dict[str, Dict]) -> Dependencies
+```
+
+Parse a JSON object to get an instance of Dependencies.
+
+**Arguments**:
+
+- `obj`: a dictionary whose keys are package names and values are dictionary with package specifications.
+
+**Returns**:
+
+a Dependencies object.
+
+<a name="aea.configurations.base.dependencies_to_json"></a>
+#### dependencies`_`to`_`json
+
+```python
+dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict]
+```
+
+Transform a Dependencies object into a JSON object.
+
+**Arguments**:
+
+- `dependencies`: an instance of "Dependencies" type.
+
+**Returns**:
+
+a dictionary whose keys are package names and
+values are the JSON version of a Dependency object.
+
+<a name="aea.configurations.base.PackageVersion"></a>
+## PackageVersion Objects
+
+```python
+@functools.total_ordering
+class PackageVersion()
+```
+
+A package version.
+
+<a name="aea.configurations.base.PackageVersion.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(version_like: PackageVersionLike)
+```
+
+Initialize a package version.
+
+**Arguments**:
+
+- `version_like`: a string, os a semver.VersionInfo object.
+
+<a name="aea.configurations.base.PackageVersion.is_latest"></a>
+#### is`_`latest
+
+```python
+ | @property
+ | is_latest() -> bool
+```
+
+Check whether the version is 'latest'.
+
+<a name="aea.configurations.base.PackageVersion.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__() -> str
+```
+
+Get the string representation.
+
+<a name="aea.configurations.base.PackageVersion.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other) -> bool
+```
+
+Check equality.
+
+<a name="aea.configurations.base.PackageVersion.__lt__"></a>
+#### `__`lt`__`
+
+```python
+ | __lt__(other)
+```
+
+Compare with another object.
 
 <a name="aea.configurations.base.PackageType"></a>
 ## PackageType Objects
@@ -87,6 +322,19 @@ Enum of component types supported.
 ```
 
 Get package type for component type.
+
+<a name="aea.configurations.base.ComponentType.plurals"></a>
+#### plurals
+
+```python
+ | @staticmethod
+ | plurals() -> Collection[str]
+```
+
+Get the collection of type names, plural.
+
+>>> ComponentType.plurals()
+['protocols', 'connections', 'skills', 'contracts']
 
 <a name="aea.configurations.base.ComponentType.to_plural"></a>
 #### to`_`plural
@@ -324,12 +572,17 @@ The concatenation of those three elements gives the public identifier:
 >>> another_public_id = PublicId("author", "my_package", "0.1.0")
 >>> assert hash(public_id) == hash(another_public_id)
 >>> assert public_id == another_public_id
+>>> latest_public_id = PublicId("author", "my_package", "latest")
+>>> latest_public_id
+<author/my_package:latest>
+>>> latest_public_id.package_version.is_latest
+True
 
 <a name="aea.configurations.base.PublicId.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(author: str, name: str, version: PackageVersionLike)
+ | __init__(author: str, name: str, version: Optional[PackageVersionLike] = None)
 ```
 
 Initialize the public identifier.
@@ -362,17 +615,17 @@ Get the name.
  | version() -> str
 ```
 
-Get the version.
+Get the version string.
 
-<a name="aea.configurations.base.PublicId.version_info"></a>
-#### version`_`info
+<a name="aea.configurations.base.PublicId.package_version"></a>
+#### package`_`version
 
 ```python
  | @property
- | version_info() -> PackageVersion
+ | package_version() -> PackageVersion
 ```
 
-Get the package version.
+Get the package version object.
 
 <a name="aea.configurations.base.PublicId.latest"></a>
 #### latest
@@ -383,6 +636,42 @@ Get the package version.
 ```
 
 Get the public id in `latest` form.
+
+<a name="aea.configurations.base.PublicId.same_prefix"></a>
+#### same`_`prefix
+
+```python
+ | same_prefix(other: "PublicId") -> bool
+```
+
+Check if the other public id has the same author and name of this.
+
+<a name="aea.configurations.base.PublicId.to_latest"></a>
+#### to`_`latest
+
+```python
+ | to_latest() -> "PublicId"
+```
+
+Return the same public id, but with latest version.
+
+<a name="aea.configurations.base.PublicId.is_valid_str"></a>
+#### is`_`valid`_`str
+
+```python
+ | @classmethod
+ | is_valid_str(cls, public_id_string: str) -> bool
+```
+
+Check if a string is a public id.
+
+**Arguments**:
+
+- `public_id_string`: the public id in string format.
+
+**Returns**:
+
+bool indicating validity
 
 <a name="aea.configurations.base.PublicId.from_str"></a>
 #### from`_`str
@@ -684,6 +973,15 @@ Get the hash.
 
 Get the string representation.
 
+<a name="aea.configurations.base.PackageId.__repr__"></a>
+#### `__`repr`__`
+
+```python
+ | __repr__()
+```
+
+Get the object representation in string.
+
 <a name="aea.configurations.base.PackageId.__eq__"></a>
 #### `__`eq`__`
 
@@ -764,6 +1062,16 @@ Get the component identifier without the version.
 ```
 
 Get the prefix import path for this component.
+
+<a name="aea.configurations.base.ComponentId.json"></a>
+#### json
+
+```python
+ | @property
+ | json() -> Dict
+```
+
+Get the JSON representation.
 
 <a name="aea.configurations.base.PackageConfiguration"></a>
 ## PackageConfiguration Objects
@@ -853,6 +1161,23 @@ Get the public id.
 
 Get the package dependencies.
 
+<a name="aea.configurations.base.PackageConfiguration.update"></a>
+#### update
+
+```python
+ | update(data: Dict) -> None
+```
+
+Update configuration with other data.
+
+**Arguments**:
+
+- `data`: the data to replace.
+
+**Returns**:
+
+None
+
 <a name="aea.configurations.base.ComponentConfiguration"></a>
 ## ComponentConfiguration Objects
 
@@ -870,16 +1195,6 @@ Class to represent an agent component configuration.
 ```
 
 Set component configuration.
-
-<a name="aea.configurations.base.ComponentConfiguration.pypi_dependencies"></a>
-#### pypi`_`dependencies
-
-```python
- | @property
- | pypi_dependencies() -> Dependencies
-```
-
-Get PyPI dependencies.
 
 <a name="aea.configurations.base.ComponentConfiguration.component_type"></a>
 #### component`_`type
@@ -945,23 +1260,6 @@ Check that the AEA version matches the specifier set.
 
 :raises ValueError if the version of the aea framework falls within a specifier.
 
-<a name="aea.configurations.base.ComponentConfiguration.update"></a>
-#### update
-
-```python
- | update(data: Dict) -> None
-```
-
-Update configuration with other data.
-
-**Arguments**:
-
-- `data`: the data to replace.
-
-**Returns**:
-
-None
-
 <a name="aea.configurations.base.ConnectionConfig"></a>
 ## ConnectionConfig Objects
 
@@ -1019,9 +1317,11 @@ Initialize from a JSON object.
 
 Update configuration with other data.
 
+This method does side-effect on the configuration object.
+
 **Arguments**:
 
-- `data`: the data to replace.
+- `data`: the data to populate or replace.
 
 **Returns**:
 
@@ -1336,6 +1636,26 @@ Return the JSON representation.
 ```
 
 Initialize from a JSON object.
+
+<a name="aea.configurations.base.AgentConfig.update"></a>
+#### update
+
+```python
+ | update(data: Dict) -> None
+```
+
+Update configuration with other data.
+
+To update the component parts, populate the field "component_configurations" as a
+mapping from ComponentId to configurations.
+
+**Arguments**:
+
+- `data`: the data to replace.
+
+**Returns**:
+
+None
 
 <a name="aea.configurations.base.SpeechActContentConfig"></a>
 ## SpeechActContentConfig Objects

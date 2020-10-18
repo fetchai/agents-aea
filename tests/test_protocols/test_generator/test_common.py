@@ -54,6 +54,11 @@ logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
 
+def isort_is_not_installed_side_effect(*args, **kwargs):
+    """Isort not installed."""
+    return not args[0] == "isort"
+
+
 def black_is_not_installed_side_effect(*args, **kwargs):
     """Black not installed."""
     return not args[0] == "black"
@@ -358,6 +363,17 @@ class TestCommon(TestCase):
         self, mocked_is_installed
     ):
         """Negative test for the 'check_prerequisites' method: black isn't installed"""
+        with self.assertRaises(FileNotFoundError):
+            check_prerequisites()
+
+    @mock.patch(
+        "aea.protocols.generator.common.is_installed",
+        side_effect=isort_is_not_installed_side_effect,
+    )
+    def test_check_prerequisites_negative_isort_is_not_installed(
+        self, mocked_is_installed
+    ):
+        """Negative test for the 'check_prerequisites' method: isort isn't installed"""
         with self.assertRaises(FileNotFoundError):
             check_prerequisites()
 

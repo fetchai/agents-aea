@@ -22,7 +22,7 @@
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.crypto.ethereum import EthereumHelper
+from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.signing.message import SigningMessage
@@ -48,7 +48,7 @@ from packages.fetchai.skills.erc1155_deploy.dialogues import (
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 
 
 class FipaHandler(Handler):
@@ -172,7 +172,7 @@ class FipaHandler(Handler):
                 counterparty=LEDGER_API_ADDRESS,
                 performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
                 ledger_id=strategy.ledger_id,
-                contract_id="fetchai/erc1155:0.10.0",
+                contract_id="fetchai/erc1155:0.11.0",
                 contract_address=strategy.contract_address,
                 callable="get_atomic_swap_single_transaction",
                 kwargs=ContractApiMessage.Kwargs(
@@ -329,8 +329,9 @@ class LedgerApiHandler(Handler):
 
         :param ledger_api_message: the ledger api message
         """
-        is_transaction_successful = EthereumHelper.is_transaction_settled(
-            ledger_api_msg.transaction_receipt.receipt
+        is_transaction_successful = LedgerApis.is_transaction_settled(
+            ledger_api_msg.transaction_receipt.ledger_id,
+            ledger_api_msg.transaction_receipt.receipt,
         )
         if is_transaction_successful:
             self.context.logger.info(

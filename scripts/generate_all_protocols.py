@@ -320,7 +320,8 @@ def main():
     _check_preliminaries()
     with AEAProject():
         # remove default protocol, since we are going to regenerate it
-        run_aea("remove", "protocol", "fetchai/default:0.5.0")
+        run_aea("remove", "skill", "fetchai/error:0.7.0")
+        run_aea("remove", "protocol", "fetchai/default:0.7.0")
 
         for package_path in PROTOCOL_PATHS:
             log("=" * 100)

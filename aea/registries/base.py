@@ -20,7 +20,6 @@
 """This module contains registries."""
 
 import copy
-import logging
 from abc import ABC, abstractmethod
 from operator import itemgetter
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
@@ -33,11 +32,9 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
-from aea.helpers.logging import WithLogger
+from aea.helpers.logging import WithLogger, get_logger
 from aea.skills.base import Behaviour, Handler, Model
 
-
-logger = logging.getLogger(__name__)
 
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
@@ -47,8 +44,13 @@ SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 class Registry(Generic[ItemId, Item], WithLogger, ABC):
     """This class implements an abstract registry."""
 
-    def __init__(self):
-        """Initialize the registry."""
+    def __init__(self, agent_name: str = "standalone"):
+        """
+        Initialize the registry.
+
+        :param agent_name: the name of the agent
+        """
+        logger = get_logger(__name__, agent_name)
         super().__init__(logger)
 
     @abstractmethod
@@ -142,17 +144,17 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
             raise ValueError(f"Item already registered with item id '{public_id}'")
         self._public_id_to_item[public_id] = item
 
-    def unregister(
+    def unregister(  # pylint: disable=arguments-differ
         self, public_id: PublicId
-    ) -> None:  # pylint: disable=arguments-differ,unused-argument
+    ) -> None:
         """Unregister an item."""
         if public_id not in self._public_id_to_item:
             raise ValueError(f"No item registered with item id '{public_id}'")
         self._public_id_to_item.pop(public_id)
 
-    def fetch(
+    def fetch(  # pylint: disable=arguments-differ
         self, public_id: PublicId
-    ) -> Optional[Item]:  # pylint: disable=arguments-differ,unused-argument
+    ) -> Optional[Item]:
         """
         Fetch an item associated with a public id.
 
@@ -189,13 +191,15 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
 class AgentComponentRegistry(Registry[ComponentId, Component]):
     """This class implements a simple dictionary-based registry for agent components."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
+        :param kwargs: kwargs
+
         :return: None
         """
-        super().__init__()
+        super().__init__(**kwargs)
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
         self._registered_keys: Set[ComponentId] = set()
 
@@ -327,13 +331,15 @@ class ComponentRegistry(
 ):
     """This class implements a generic registry for skill components."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
+        :param kwargs: kwargs
+
         :return: None
         """
-        super().__init__()
+        super().__init__(**kwargs)
         self._items: PublicIdRegistry[
             Dict[str, SkillComponentType]
         ] = PublicIdRegistry()
@@ -504,13 +510,15 @@ class ComponentRegistry(
 class HandlerRegistry(ComponentRegistry[Handler]):
     """This class implements the handlers registry."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
+        :param kwargs: kwargs
+
         :return: None
         """
-        super().__init__()
+        super().__init__(**kwargs)
         # nested public id registries; one for protocol ids, one for skill ids
         self._items_by_protocol_and_skill = PublicIdRegistry[
             PublicIdRegistry[Handler]

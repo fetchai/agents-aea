@@ -1,6 +1,6 @@
 name: ml_data_provider
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: skill
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
@@ -12,16 +12,16 @@ fingerprint:
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmUExSjdSxrtTDzMB8tZ5J9tFrgd78LhdMuvptpViSPfAW
   handlers.py: QmbmS4C1GdumnVkA5dc7czWRkjb9HGzY7YeATrnuMVU2X9
-  strategy.py: QmaCViuN7q33drEtnJLSFjvBnr4Q6GF9LrJCCdv9AVukxk
+  strategy.py: QmZd2L6byxxh6HNpRNk4qaCiUhxmodid757JYXnb8NWLDq
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.5.0
-- fetchai/ledger_api:0.3.0
-- fetchai/ml_trade:0.5.0
-- fetchai/oef_search:0.6.0
+- fetchai/default:0.7.0
+- fetchai/ledger_api:0.5.0
+- fetchai/ml_trade:0.7.0
+- fetchai/oef_search:0.8.0
 skills:
-- fetchai/generic_seller:0.13.0
+- fetchai/generic_seller:0.14.0
 behaviours:
   service_registration:
     args:
@@ -70,3 +70,4 @@ dependencies:
   numpy: {}
   tensorflow:
     version: ==1.14.0
+is_abstract: false

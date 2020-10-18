@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Module with package utils of the aea cli."""
 
 import os
 import re
 import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 import click
 from jsonschema import ValidationError
@@ -34,6 +33,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     AgentConfig,
+    ComponentConfiguration,
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,
     PublicId,
@@ -49,6 +49,7 @@ from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.exceptions import AEAEnforceError
 
 
 ROOT = Path(".")
@@ -222,14 +223,18 @@ def copy_package_directory(src: Path, dst: str) -> Path:
     return Path(dst)
 
 
-def find_item_locally(ctx, item_type, item_public_id) -> Path:
+def find_item_locally(
+    ctx, item_type, item_public_id
+) -> Tuple[Path, ComponentConfiguration]:
     """
     Find an item in the local registry.
 
     :param ctx: the CLI context.
     :param item_type: the type of the item to load. One of: protocols, connections, skills
     :param item_public_id: the public id of the item to find.
-    :return: path to the package directory (either in registry or in aea directory).
+
+    :return: tuple of path to the package directory (either in registry or in aea directory) and component configuration
+
     :raises SystemExit: if the search fails.
     """
     item_type_plural = item_type + "s"
@@ -271,7 +276,7 @@ def find_item_locally(ctx, item_type, item_public_id) -> Path:
             "Cannot find {} with author and version specified.".format(item_type)
         )
 
-    return package_path
+    return package_path, item_configuration
 
 
 def find_item_in_distribution(  # pylint: disable=unused-argument
@@ -396,8 +401,7 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
     logger.debug(
         "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
     )
-    item_type_plural = item_type + "s"
-    supported_items = getattr(ctx.agent_config, item_type_plural)
+    supported_items = get_items(ctx.agent_config, item_type)
     supported_items.add(item_public_id)
     ctx.agent_loader.dump(
         ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
@@ -440,14 +444,67 @@ def is_item_present(
     :return: boolean is item present.
     """
     # check item presence only by author/package_name pair, without version.
-    item_type_plural = item_type + "s"
-    items_in_config = set(
-        map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural))
-    )
+
     item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
-    return (item_public_id.author, item_public_id.name,) in items_in_config and Path(
-        item_path
-    ).exists()
+    registered_item_public_id = get_item_public_id_by_author_name(
+        ctx.agent_config, item_type, item_public_id.author, item_public_id.name
+    )
+    is_item_registered = registered_item_public_id is not None
+
+    return is_item_registered and Path(item_path).exists()
+
+
+def get_item_id_present(
+    ctx: Context, item_type: str, item_public_id: PublicId
+) -> PublicId:
+    """
+    Get the item present in AEA.
+
+    :param ctx: context object.
+    :param item_type: type of an item.
+    :param item_public_id: PublicId of an item.
+
+    :return: boolean is item present.
+    :raises: AEAEnforceError
+    """
+    registered_item_public_id = get_item_public_id_by_author_name(
+        ctx.agent_config, item_type, item_public_id.author, item_public_id.name
+    )
+    if registered_item_public_id is None:
+        raise AEAEnforceError("Cannot find item.")  # pragma: nocover
+    return registered_item_public_id
+
+
+def get_item_public_id_by_author_name(
+    agent_config: AgentConfig, item_type: str, author: str, name: str
+) -> Optional[PublicId]:
+    """
+    Get component public_id by author and namme.
+
+    :param agent_config: AgentConfig
+    :param item_type: str. component type: connection, skill, contract, protocol
+    :param author: str. author name
+    :param name: str. component name
+
+    :return: PublicId
+    """
+    items_in_config = {
+        (x.author, x.name): x for x in get_items(agent_config, item_type)
+    }
+    return items_in_config.get((author, name), None)
+
+
+def get_items(agent_config: AgentConfig, item_type: str) -> Set[PublicId]:
+    """
+    Get all items of certain type registered in AgentConfig.
+
+    :param agent_config: AgentConfig
+    :param item_type: str. component type: connection, skill, contract, protocol
+
+    :return: set of public ids
+    """
+    item_type_plural = item_type + "s"
+    return getattr(agent_config, item_type_plural)
 
 
 def is_local_item(item_public_id: PublicId) -> bool:
@@ -482,10 +539,35 @@ def try_get_balance(  # pylint: disable=unused-argument
     try:
         if type_ not in DEFAULT_LEDGER_CONFIGS:  # pragma: no cover
             raise ValueError("No ledger api config for {} available.".format(type_))
-        address = wallet.addresses[type_]
+        address = wallet.addresses.get(type_)
+        if address is None:  # pragma: no cover
+            raise ValueError("No key '{}' in wallet.".format(type_))
         balance = LedgerApis.get_balance(type_, address)
         if balance is None:  # pragma: no cover
             raise ValueError("No balance returned!")
         return balance
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
+
+
+def get_wallet_from_context(ctx: Context) -> Wallet:
+    """
+    Get wallet from current click Context.
+
+    :param ctx: click context
+
+    :return: wallet
+    """
+    verify_or_create_private_keys_ctx(ctx=ctx)
+    wallet = get_wallet_from_agent_config(ctx.agent_config)
+    return wallet
+
+
+def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
+    """Get wallet from agent_cofig provided."""
+    private_key_paths: Dict[str, Optional[str]] = {
+        config_pair[0]: config_pair[1]
+        for config_pair in agent_config.private_key_paths.read_all()
+    }
+    wallet = Wallet(private_key_paths)
+    return wallet

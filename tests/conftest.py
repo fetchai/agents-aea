@@ -171,6 +171,7 @@ NON_GENESIS_CONFIG = {
     "local_uri": "127.0.0.1:9001",
     "log_file": "libp2p_node.log",
     "public_uri": "127.0.0.1:9001",
+    "ledger_id": "cosmos",
 }
 NON_GENESIS_CONFIG_TWO = {
     "delegate_uri": "127.0.0.1:11002",
@@ -178,6 +179,7 @@ NON_GENESIS_CONFIG_TWO = {
     "local_uri": "127.0.0.1:9002",
     "log_file": "libp2p_node.log",
     "public_uri": "127.0.0.1:9002",
+    "ledger_id": "cosmos",
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
 PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
@@ -198,12 +200,14 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.8.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.10.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
+
+DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
 MAX_FLAKY_RERUNS = 3
 MAX_FLAKY_RERUNS_ETH = 1
@@ -278,7 +282,7 @@ skill_config_files = [
     os.path.join(FETCHAI_PREF, "skills", "thermometer_client", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "weather_client", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "weather_station", SKILL_YAML),
-    os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML),
+    DUMMY_SKILL_PATH,
     os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "dependencies_skill", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "exception_skill", SKILL_YAML),

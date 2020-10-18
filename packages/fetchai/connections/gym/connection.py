@@ -41,9 +41,9 @@ from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDial
 from packages.fetchai.protocols.gym.message import GymMessage
 
 
-logger = logging.getLogger("aea.packages.fetchai.connections.gym")
+_default_logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.8.0")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.9.0")
 
 
 class GymDialogues(BaseGymDialogues):
@@ -90,7 +90,7 @@ class GymChannel:
         self._threaded_pool: ThreadPoolExecutor = ThreadPoolExecutor(
             self.THREAD_POOL_SIZE
         )
-        self.logger: Union[logging.Logger, logging.LoggerAdapter] = logger
+        self.logger: Union[logging.Logger, logging.LoggerAdapter] = _default_logger
         self._dialogues = GymDialogues()
 
     def _get_message_and_dialogue(

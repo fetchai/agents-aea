@@ -20,7 +20,9 @@
 
 import asyncio
 import logging
+import os
 import shutil
+import sys
 import tempfile
 import time
 import unittest.mock
@@ -30,8 +32,10 @@ from unittest import mock
 from unittest.mock import MagicMock, call, patch
 
 import pytest
+from pexpect.exceptions import EOF  # type: ignore
 
 import aea
+from aea.cli.core import cli
 from aea.configurations.base import PublicId
 from aea.connections.base import ConnectionStates
 from aea.exceptions import AEAEnforceError
@@ -40,11 +44,17 @@ from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
+from aea.test_tools.click_testing import CliRunner
 
 from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_PUBLIC_ID,
+)
 
-from tests.common.utils import wait_for_condition
-from tests.conftest import (
+from .conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    ROOT_DIR,
     UNKNOWN_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,
@@ -52,6 +62,8 @@ from tests.conftest import (
     _make_stub_connection,
     logger,
 )
+from tests.common.pexpect_popen import PexpectWrapper
+from tests.common.utils import wait_for_condition
 
 
 @pytest.mark.asyncio
@@ -60,7 +72,7 @@ async def test_receiving_loop_terminated():
     multiplexer = Multiplexer([_make_dummy_connection()])
     multiplexer.connect()
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         multiplexer.connection_status.set(ConnectionStates.disconnected)
         await multiplexer._receiving_loop()
         mock_logger_debug.assert_called_with("Receiving loop terminated.")
@@ -102,7 +114,7 @@ def test_connect_twice_with_loop():
         multiplexer = Multiplexer([_make_dummy_connection()], loop=running_loop)
 
         with unittest.mock.patch.object(
-            aea.mail.base.logger, "debug"
+            multiplexer.logger, "debug"
         ) as mock_logger_debug:
             assert not multiplexer.connection_status.is_connected
             multiplexer.connect()
@@ -126,12 +138,24 @@ async def test_connect_twice_a_single_connection():
 
     assert not multiplexer.connection_status.is_connected
     await multiplexer._connect_one(connection.connection_id)
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         await multiplexer._connect_one(connection.connection_id)
         mock_logger_debug.assert_called_with(
             "Connection fetchai/dummy:0.1.0 already established."
         )
         await multiplexer._disconnect_one(connection.connection_id)
+
+
+@pytest.mark.asyncio
+async def test_run_bad_conneect():
+    """Test that connecting twice a single connection behaves correctly."""
+    connection = _make_dummy_connection()
+    multiplexer = AsyncMultiplexer([connection])
+    f = asyncio.Future()
+    f.set_result(None)
+    with unittest.mock.patch.object(multiplexer, "connect", return_value=f):
+        with pytest.raises(ValueError, match="Multiplexer is not connected properly."):
+            await multiplexer.run()
 
 
 def test_multiplexer_connect_all_raises_error():
@@ -189,7 +213,7 @@ async def test_disconnect_twice_a_single_connection():
     multiplexer = Multiplexer([_make_dummy_connection()])
 
     assert not multiplexer.connection_status.is_connected
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         await multiplexer._disconnect_one(connection.connection_id)
         mock_logger_debug.assert_called_with(
             "Connection fetchai/dummy:0.1.0 already disconnected."
@@ -269,7 +293,7 @@ async def test_sending_loop_does_not_start_if_multiplexer_not_connected():
     """Test that the sending loop is stopped does not start if the multiplexer is not connected."""
     multiplexer = Multiplexer([_make_dummy_connection()])
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         await multiplexer._send_loop()
         mock_logger_debug.assert_called_with(
             "Sending loop not started. The multiplexer is not connected."
@@ -283,7 +307,7 @@ async def test_sending_loop_cancelled():
 
     multiplexer.connect()
     await asyncio.sleep(0.1)
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         multiplexer.disconnect()
         mock_logger_debug.assert_any_call("Sending loop cancelled.")
 
@@ -296,7 +320,7 @@ async def test_receiving_loop_raises_exception():
 
     with unittest.mock.patch("asyncio.wait", side_effect=Exception("a weird error.")):
         with unittest.mock.patch.object(
-            aea.mail.base.logger, "error"
+            multiplexer.logger, "error"
         ) as mock_logger_error:
             multiplexer.connect()
             time.sleep(0.1)
@@ -343,7 +367,7 @@ def test_send_envelope_error_is_logged_by_send_loop():
         context=EnvelopeContext(connection_id=fake_connection_id),
     )
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "error") as mock_logger_error:
+    with unittest.mock.patch.object(multiplexer.logger, "error") as mock_logger_error:
         multiplexer.put(envelope)
         time.sleep(0.1)
         mock_logger_error.assert_called_with(
@@ -377,7 +401,7 @@ def test_send_message_no_supported_protocol():
 
         multiplexer.connect()
 
-        with mock.patch.object(aea.mail.base.logger, "warning") as mock_logger_warning:
+        with mock.patch.object(multiplexer.logger, "warning") as mock_logger_warning:
             protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             envelope = Envelope(
                 to=identity_1.address,
@@ -476,6 +500,48 @@ async def test_inbox_outbox():
 
     finally:
         await multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_threaded_mode():
+    """Test InBox OutBox objects in threaded mode."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = AsyncMultiplexer(connections, threaded=True)
+    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg.to = "to"
+    msg.sender = "sender"
+    context = EnvelopeContext(connection_id=connection_1.connection_id)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=msg.protocol_id,
+        message=msg,
+        context=context,
+    )
+    try:
+        multiplexer.start()
+        await asyncio.sleep(0.5)
+        inbox = InBox(multiplexer)
+        outbox = OutBox(multiplexer)
+
+        assert inbox.empty()
+        assert outbox.empty()
+
+        outbox.put(envelope)
+        received = await inbox.async_get()
+        assert received == envelope
+
+        assert inbox.empty()
+        assert outbox.empty()
+
+        outbox.put_message(msg, context=context)
+        await inbox.async_wait()
+        received = inbox.get_nowait()
+        assert received == envelope
+
+    finally:
+        multiplexer.stop()
 
 
 @pytest.mark.asyncio
@@ -661,3 +727,85 @@ class TestExceptionHandlingOnConnectionSend:
                 call.disconnect_all(),
                 call.check_and_set_disconnected_state(),
             ]
+
+
+class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defined-outside-init
+    """Test multiplexer disconnects on  agent process keyboard interrupted."""
+
+    def setup(self):
+        """Set the test up."""
+        self.proc = None
+        self.runner = CliRunner()
+        self.agent_name = "myagent"
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(self.t, "packages"))
+        os.chdir(self.t)
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", "--local", self.agent_name]
+        )
+        assert result.exit_code == 0
+
+        os.chdir(Path(self.t, self.agent_name))
+
+    def test_multiplexer_disconnected_on_early_interruption(self):
+        """Test multiplexer disconnected properly on termination before connected."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
+        )
+        assert result.exit_code == 0, result.stdout_bytes
+
+        self.proc = PexpectWrapper(  # nosec
+            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
+            env=os.environ,
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
+        )
+
+        self.proc.expect_all(
+            ["Finished downloading golang dependencies"], timeout=50,
+        )
+        self.proc.control_c()
+        self.proc.expect_all(
+            ["Multiplexer .*disconnected."], timeout=20, strict=False,
+        )
+
+        self.proc.expect_all(
+            [EOF], timeout=20,
+        )
+
+    def test_multiplexer_disconnected_on_termination_after_connected(self):
+        """Test multiplexer disconnected properly on termination after connected."""
+        self.proc = PexpectWrapper(  # nosec
+            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
+            env=os.environ,
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
+        )
+
+        self.proc.expect_all(
+            ["Start processing messages..."], timeout=20,
+        )
+        self.proc.control_c()
+        self.proc.expect_all(
+            ["Multiplexer disconnecting...", "Multiplexer disconnected.", EOF],
+            timeout=20,
+        )
+
+    def teardown(self):
+        """Tear the test down."""
+        if self.proc:
+            self.proc.wait_to_complete(10)
+        os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except (OSError, IOError):
+            pass

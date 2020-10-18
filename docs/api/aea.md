@@ -7,7 +7,7 @@ This module contains the implementation of an autonomous economic agent (AEA).
 ## AEA Objects
 
 ```python
-class AEA(Agent,  WithLogger)
+class AEA(Agent)
 ```
 
 This class implements an autonomous economic agent.
@@ -30,7 +30,7 @@ Instantiate the agent.
 - `resources`: the resources (protocols and skills) of the agent.
 - `loop`: the event loop to run the connections.
 - `period`: period to call agent's act
-- `exeution_timeout`: amount of time to limit single act/handle to execute.
+- `execution_timeout`: amount of time to limit single act/handle to execute.
 - `max_reactions`: the processing rate of envelopes per tick (i.e. single loop).
 - `decision_maker_handler_class`: the class implementing the decision maker handler to be used.
 - `skill_exception_policy`: the skill exception policy enum

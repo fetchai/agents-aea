@@ -41,7 +41,6 @@ from pathlib import Path
 from typing import Collection, Dict, List, Optional, Tuple, Type, cast
 
 import ipfshttpclient
-import yaml
 
 from aea.configurations.base import (
     AgentConfig,
@@ -53,7 +52,8 @@ from aea.configurations.base import (
     SkillConfig,
     _compute_fingerprint,
 )
-from aea.helpers.base import yaml_dump, yaml_dump_all
+from aea.configurations.loader import ConfigLoaders
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 
 
 AUTHOR = "fetchai"
@@ -235,7 +235,7 @@ class IPFSDaemon:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Terminate the ipfs daemon."""
         self.process.send_signal(signal.SIGTERM)
-        self.process.wait(timeout=10)
+        self.process.wait(timeout=30)
         poll = self.process.poll()
         if poll is None:
             self.process.terminate()
@@ -256,10 +256,10 @@ def load_configuration(
     configuration_filepath = (
         package_path / configuration_class.default_configuration_filename
     )
-    configuration_obj = cast(
-        PackageConfiguration,
-        configuration_class.from_json(yaml.safe_load(configuration_filepath.open())),
-    )
+
+    loader = ConfigLoaders.from_package_type(package_type)
+    with configuration_filepath.open() as fp:
+        configuration_obj = loader.load(fp)
     configuration_obj._directory = package_path  # pylint: disable=protected-access
     return cast(PackageConfiguration, configuration_obj)
 

@@ -1,5 +1,42 @@
 # Release History
 
+## 0.6.3 (2020-10-16)
+
+- Adds skill testing tools and documentation
+- Adds human readable log output regarding configuration for p2p_libp2p connection
+- Adds support to install PyPI dependencies from AEABuilder and MultiAgentManager
+- Adds CLI upgrade command to upgrade entire agent project and components
+- Extends CLI remove command to include option to remove dependencies
+- Extends SOEF chain identifier support
+- Adds CLI transfer command to transfer wealth
+- Adds integration tests for skills generic buyer and seller using skill testing tool
+- Adds validation of component configurations when setting componenet configuration overrides
+- Multiple refactoring of internal configuration and helper objects and methods
+- Fix a bug on CLI push local with latest rather than version specifier
+- Adds readmes in all agent projects
+- Adds agent name in logger paths of runnable objects
+- Fixes tac skills to work with and without erc1155 contract
+- Adds additional validations on message flow
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
+## 0.6.2 (2020-10-01)
+
+- Adds MultiAgentManager to manage multiple agent projects programmatically
+- Improves SOEF connection reliability on unregister
+- Extends configuration classes to handle overriding configurations programmatically
+- Improves configuration schemas and validations
+- Fixes Multiplexer termination errors
+- Allow finer-grained override of component configurations from aea-config
+- Fixes tac controller to work with Ethereum contracts again
+- Fixes multiple deploy and development scripts
+- Introduces isort to development dependencies for automated import sorting
+- Adds reset password command to CLI
+- Adds support for abbreviated public ids (latest) to CLI and configurations
+- Adds additional docstring linters for improved api documentation checks
+- Multiple docs updates including additional explanations of ACN architecture
+- Multiple additional tests and test stability fixes
+
 ## 0.6.1 (2020-09-17)
 
 - Adds a standalone script to deploy an ACN node
