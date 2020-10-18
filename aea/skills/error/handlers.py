@@ -22,7 +22,7 @@
 import base64
 from typing import Optional
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -32,7 +32,7 @@ from aea.skills.base import Handler
 class ErrorHandler(Handler):
     """This class implements the error handler."""
 
-    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """

@@ -26,7 +26,7 @@ from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, cast
 
 from aea.common import Address
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.search.models import Description
@@ -222,7 +222,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.8.0"):
+        if envelope.protocol_id == OefSearchMessage.protocol_id:
             await self._handle_oef_message(envelope)
         else:
             OEFLocalConnection._ensure_valid_envelope_for_external_comms(  # pylint: disable=protected-access

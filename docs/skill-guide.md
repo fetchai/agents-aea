@@ -361,6 +361,38 @@ Importantly, the keys `my_search_behaviour` and `my_search_handler` are used in 
 
 We place this code in `my_aea/skills/my_search/skill.yaml`.
 
+Similarly, we replace `my_aea/skills/my_search/__init__.py` as follows:
+
+``` python
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This module contains the implementation of the error skill."""
+
+from aea.configurations.base import PublicId
+
+
+PUBLIC_ID = PublicId.from_str("fetchai/my_search:0.1.0")
+
+```
+Again, ensure the author field matches your own.
+
 ## Step 6: Update fingerprint
 
 We need to update the fingerprint of our skill next:
@@ -683,7 +715,7 @@ Finally, we have a handler, placed in `handlers.py`:
 ``` python
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -699,7 +731,7 @@ LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""

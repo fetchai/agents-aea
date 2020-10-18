@@ -131,7 +131,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id="fetchai/erc1155:0.11.0",
+            contract_id=strategy.contract_id,
             callable="get_deploy_transaction",
             kwargs=ContractApiMessage.Kwargs(
                 {"deployer_address": self.context.agent_address}
@@ -157,7 +157,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id="fetchai/erc1155:0.11.0",
+            contract_id=strategy.contract_id,
             contract_address=strategy.contract_address,
             callable="get_create_batch_transaction",
             kwargs=ContractApiMessage.Kwargs(
@@ -187,7 +187,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id="fetchai/erc1155:0.11.0",
+            contract_id=strategy.contract_id,
             contract_address=strategy.contract_address,
             callable="get_mint_batch_transaction",
             kwargs=ContractApiMessage.Kwargs(

@@ -37,7 +37,7 @@ class InstallDependencyTestCase(TestCase):
             "aea.helpers.install_dependency.subprocess.Popen", return_value=result
         ):
             with self.assertRaises(AEAException):
-                install_dependency("test", Dependency("test", "==10.0.0"))
+                install_dependency("test", Dependency("test", "==10.0.0"), mock.Mock())
 
     def test__install_dependency_ok(self, *mocks):
         """Test for install_dependency method ok."""
@@ -46,4 +46,4 @@ class InstallDependencyTestCase(TestCase):
         with mock.patch(
             "aea.helpers.install_dependency.subprocess.Popen", return_value=result
         ):
-            install_dependency("test", Dependency("test", "==10.0.0"))
+            install_dependency("test", Dependency("test", "==10.0.0"), mock.Mock())

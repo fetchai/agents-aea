@@ -47,7 +47,6 @@ from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
 from tests.conftest import (
-    HTTP_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     get_host,
@@ -479,7 +478,7 @@ class TestHTTPServer:
         with patch.object(
             self.http_connection.channel,
             "restricted_to_protocols",
-            new=[HTTP_PROTOCOL_PUBLIC_ID],
+            new=[HttpMessage.protocol_id],
         ):
             with pytest.raises(ValueError):
                 await self.http_connection.send(envelope)

@@ -38,7 +38,7 @@ class TestProjectAndAgentAlias:
         self.t = tempfile.mkdtemp()
         os.chdir(self.t)
         self.runner = CliRunner()
-        self.project_public_id = PublicId("fetchai", "my_first_aea", "0.11.0")
+        self.project_public_id = PublicId.from_str("fetchai/my_first_aea:0.13.0")
         self.project_path = os.path.join(
             self.t, self.project_public_id.author, self.project_public_id.name
         )

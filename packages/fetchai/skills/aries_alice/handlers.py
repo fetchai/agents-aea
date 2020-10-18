@@ -25,7 +25,7 @@ import json
 from typing import Dict, Optional, cast
 from urllib.parse import urlparse
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -49,7 +49,7 @@ from packages.fetchai.skills.aries_alice.strategy import (
 class AliceDefaultHandler(Handler):
     """This class represents alice's handler for default messages."""
 
-    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -151,7 +151,7 @@ class AliceDefaultHandler(Handler):
 class AliceHttpHandler(Handler):
     """This class represents alice's handler for HTTP messages."""
 
-    SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -235,7 +235,7 @@ class AliceHttpHandler(Handler):
 class AliceOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
