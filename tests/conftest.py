@@ -23,7 +23,9 @@ import inspect
 import logging
 import os
 import platform
+import random
 import socket
+import string
 import sys
 import threading
 import time
@@ -1026,3 +1028,15 @@ def env_path_separator() -> str:
         return ";"
     else:
         return ":"
+
+
+def random_string(length: int = 8) -> str:
+    """Generate a random string.
+
+    :param length: how long random string should be
+
+    :return: random chars str
+    """
+    return "".join(
+        random.choice(string.ascii_lowercase) for _ in range(length)  # nosec
+    )

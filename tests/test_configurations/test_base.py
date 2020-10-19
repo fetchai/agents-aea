@@ -67,6 +67,7 @@ from tests.conftest import (
     connection_config_files,
     contract_config_files,
     protocol_config_files,
+    random_string,
     skill_config_files,
 )
 
@@ -979,3 +980,11 @@ def test_dependency_to_string():
         str(dependency)
         == "Dependency(name='package_1', version='==0.1.0', index='https://index.com', git='https://some-repo.git', ref='branch')"
     )
+
+
+def test_check_public_id_consistency_negative():
+    """Test ComponentId.check_public_id_consistency raises error when directory does not exists."""
+    random_dir_name = random_string()
+    with pytest.raises(ValueError, match=f"Directory {random_dir_name} is not valid."):
+        component_configuration = ProtocolConfig("name", "author")
+        component_configuration.check_public_id_consistency(Path(random_dir_name))
