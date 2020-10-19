@@ -58,7 +58,11 @@ from aea.configurations.constants import (
 from aea.configurations.constants import (
     DEFAULT_SEARCH_SERVICE_ADDRESS as _DEFAULT_SEARCH_SERVICE_ADDRESS,
 )
-from aea.configurations.constants import DEFAULT_SKILL
+from aea.configurations.constants import (
+    DEFAULT_SKILL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
+)
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
@@ -511,6 +515,15 @@ class AEABuilder(WithLogger):
         self.add_protocol(
             Path(self.registry_dir, "fetchai", "protocols", DEFAULT_PROTOCOL.name)
         )
+        # add signing protocol
+        self.add_protocol(
+            Path(self.registry_dir, "fetchai", "protocols", SIGNING_PROTOCOL.name)
+        )
+        # add state update protocol
+        self.add_protocol(
+            Path(self.registry_dir, "fetchai", "protocols", STATE_UPDATE_PROTOCOL.name)
+        )
+
         # add stub connection
         self.add_connection(
             Path(self.registry_dir, "fetchai", "connections", DEFAULT_CONNECTION.name)

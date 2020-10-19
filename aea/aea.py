@@ -137,7 +137,7 @@ class AEA(Agent):
         self.max_reactions = max_reactions
 
         if decision_maker_handler_class is None:
-            from aea.decision_maker.default import (  # pylint: disable=import-outside-toplevel
+            from aea.decision_maker.default import (  # isort:skip  # pylint: disable=import-outside-toplevel
                 DecisionMakerHandler as DefaultDecisionMakerHandler,
             )
 

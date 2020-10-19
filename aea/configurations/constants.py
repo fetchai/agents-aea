@@ -30,6 +30,8 @@ from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 
 DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.11.0")
 DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.7.0")
+SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.5.0")
+STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:0.5.0")
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.7.0")
 DEFAULT_LEDGER = FetchAICrypto.identifier
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
