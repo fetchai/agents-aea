@@ -22,14 +22,14 @@
 import logging
 from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class TProtocolMessage(Message):
     """A protocol for testing purposes."""
 
-    protocol_id = ProtocolId.from_str("fetchai/t_protocol:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/t_protocol:0.1.0")
 
     DataModel = CustomDataModel
 
@@ -498,7 +498,7 @@ class TProtocolMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == TProtocolMessage.Performative.PERFORMATIVE_CT:
                 expected_nb_of_contents = 1
@@ -1165,7 +1165,7 @@ class TProtocolMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

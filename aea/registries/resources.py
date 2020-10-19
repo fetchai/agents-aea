@@ -22,13 +22,7 @@ from contextlib import suppress
 from typing import List, Optional, cast
 
 from aea.components.base import Component
-from aea.configurations.base import (
-    ComponentId,
-    ComponentType,
-    ConnectionId,
-    ContractId,
-    SkillId,
-)
+from aea.configurations.base import ComponentId, ComponentType, PublicId
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
@@ -36,7 +30,6 @@ from aea.registries.base import (
     AgentComponentRegistry,
     ComponentRegistry,
     HandlerRegistry,
-    ProtocolId,
     Registry,
 )
 from aea.skills.base import Behaviour, Handler, Model, Skill
@@ -45,16 +38,17 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
 class Resources:
     """This class implements the object that holds the resources of an AEA."""
 
-    def __init__(self) -> None:
+    def __init__(self, agent_name: str = "standalone") -> None:
         """
         Instantiate the resources.
 
         :return None
         """
-        self._component_registry = AgentComponentRegistry()
-        self._handler_registry = HandlerRegistry()
-        self._behaviour_registry = ComponentRegistry[Behaviour]()
-        self._model_registry = ComponentRegistry[Model]()
+        self._agent_name = agent_name
+        self._component_registry = AgentComponentRegistry(agent_name=agent_name)
+        self._handler_registry = HandlerRegistry(agent_name=agent_name)
+        self._behaviour_registry = ComponentRegistry[Behaviour](agent_name=agent_name)
+        self._model_registry = ComponentRegistry[Model](agent_name=agent_name)
 
         self._registries = [
             self._component_registry,
@@ -62,6 +56,11 @@ class Resources:
             self._behaviour_registry,
             self._model_registry,
         ]  # type: List[Registry]
+
+    @property
+    def agent_name(self) -> str:
+        """Get the agent name."""
+        return self._agent_name
 
     @property
     def component_registry(self) -> AgentComponentRegistry:
@@ -109,7 +108,7 @@ class Resources:
         """
         self._component_registry.register(protocol.component_id, protocol)
 
-    def get_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
+    def get_protocol(self, protocol_id: PublicId) -> Optional[Protocol]:
         """
         Get protocol for given protocol id.
 
@@ -130,7 +129,7 @@ class Resources:
         protocols = self._component_registry.fetch_by_type(ComponentType.PROTOCOL)
         return cast(List[Protocol], protocols)
 
-    def remove_protocol(self, protocol_id: ProtocolId) -> None:
+    def remove_protocol(self, protocol_id: PublicId) -> None:
         """
         Remove a protocol from the set of resources.
 
@@ -150,7 +149,7 @@ class Resources:
         """
         self._component_registry.register(contract.component_id, contract)
 
-    def get_contract(self, contract_id: ContractId) -> Optional[Contract]:
+    def get_contract(self, contract_id: PublicId) -> Optional[Contract]:
         """
         Get contract for given contract id.
 
@@ -171,7 +170,7 @@ class Resources:
         contracts = self._component_registry.fetch_by_type(ComponentType.CONTRACT)
         return cast(List[Contract], contracts)
 
-    def remove_contract(self, contract_id: ContractId) -> None:
+    def remove_contract(self, contract_id: PublicId) -> None:
         """
         Remove a contract from the set of resources.
 
@@ -191,7 +190,7 @@ class Resources:
         """
         self._component_registry.register(connection.component_id, connection)
 
-    def get_connection(self, connection_id: ConnectionId) -> Optional[Connection]:
+    def get_connection(self, connection_id: PublicId) -> Optional[Connection]:
         """
         Get connection for given connection id.
 
@@ -212,7 +211,7 @@ class Resources:
         connections = self._component_registry.fetch_by_type(ComponentType.CONNECTION)
         return cast(List[Connection], connections)
 
-    def remove_connection(self, connection_id: ConnectionId) -> None:
+    def remove_connection(self, connection_id: PublicId) -> None:
         """
         Remove a connection from the set of resources.
 
@@ -245,7 +244,7 @@ class Resources:
             for model in skill.models.values():
                 self._model_registry.register((skill.public_id, model.name), model)
 
-    def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
+    def get_skill(self, skill_id: PublicId) -> Optional[Skill]:
         """
         Get the skill for a given skill id.
 
@@ -266,7 +265,7 @@ class Resources:
         skills = self._component_registry.fetch_by_type(ComponentType.SKILL)
         return cast(List[Skill], skills)
 
-    def remove_skill(self, skill_id: SkillId) -> None:
+    def remove_skill(self, skill_id: PublicId) -> None:
         """
         Remove a skill from the set of resources.
 
@@ -282,7 +281,7 @@ class Resources:
             self._model_registry.unregister_by_skill(skill_id)
 
     def get_handler(
-        self, protocol_id: ProtocolId, skill_id: SkillId
+        self, protocol_id: PublicId, skill_id: PublicId
     ) -> Optional[Handler]:
         """
         Get a specific handler.
@@ -296,7 +295,7 @@ class Resources:
         )
         return handler
 
-    def get_handlers(self, protocol_id: ProtocolId) -> List[Handler]:
+    def get_handlers(self, protocol_id: PublicId) -> List[Handler]:
         """
         Get all handlers for a given protocol.
 
@@ -316,7 +315,7 @@ class Resources:
         return handlers
 
     def get_behaviour(
-        self, skill_id: SkillId, behaviour_name: str
+        self, skill_id: PublicId, behaviour_name: str
     ) -> Optional[Behaviour]:
         """
         Get a specific behaviours for a given skill.
@@ -328,7 +327,7 @@ class Resources:
         behaviour = self._behaviour_registry.fetch((skill_id, behaviour_name))
         return behaviour
 
-    def get_behaviours(self, skill_id: SkillId) -> List[Behaviour]:
+    def get_behaviours(self, skill_id: PublicId) -> List[Behaviour]:
         """
         Get all behaviours for a given skill.
 

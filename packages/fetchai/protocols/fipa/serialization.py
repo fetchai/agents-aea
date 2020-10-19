@@ -21,6 +21,8 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.fipa import fipa_pb2
@@ -40,12 +42,15 @@ class FipaSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(FipaMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         fipa_msg = fipa_pb2.FipaMessage()
-        fipa_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        fipa_msg.dialogue_starter_reference = dialogue_reference[0]
-        fipa_msg.dialogue_responder_reference = dialogue_reference[1]
-        fipa_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == FipaMessage.Performative.CFP:
@@ -85,8 +90,11 @@ class FipaSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        fipa_bytes = fipa_msg.SerializeToString()
-        return fipa_bytes
+        dialogue_message_pb.content = fipa_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -96,15 +104,17 @@ class FipaSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'Fipa' message.
         """
+        message_pb = ProtobufMessage()
         fipa_pb = fipa_pb2.FipaMessage()
-        fipa_pb.ParseFromString(obj)
-        message_id = fipa_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            fipa_pb.dialogue_starter_reference,
-            fipa_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = fipa_pb.target
+        target = message_pb.dialogue_message.target
 
+        fipa_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = fipa_pb.WhichOneof("performative")
         performative_id = FipaMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

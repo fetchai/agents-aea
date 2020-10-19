@@ -36,14 +36,14 @@ Read an envelope from a file.
 
 envelope
 
-<a name="aea.test_tools.generic.force_set_config"></a>
-#### force`_`set`_`config
+<a name="aea.test_tools.generic.nested_set_config"></a>
+#### nested`_`set`_`config
 
 ```python
-force_set_config(dotted_path: str, value: Any) -> None
+nested_set_config(dotted_path: str, value: Any, author: str = DEFAULT_AUTHOR) -> None
 ```
 
-Set an AEA config without validation.
+Set an AEA config with nested values.
 
 Run from agent's directory.
 
@@ -59,6 +59,7 @@ Allowed dotted_path:
 
 - `dotted_path`: dotted path to a setting.
 - `value`: a value to assign. Must be of yaml serializable type.
+- `author`: the author name, used to parse the dotted path.
 
 **Returns**:
 

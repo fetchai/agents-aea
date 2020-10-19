@@ -22,12 +22,12 @@
 import logging
 from typing import Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.http.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.http.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = ProtocolId.from_str("fetchai/http:0.6.0")
+    protocol_id = PublicId.from_str("fetchai/http:0.7.0")
 
     class Performative(Message.Performative):
         """Performatives for the http protocol."""
@@ -102,10 +102,10 @@ class HttpMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def bodyy(self) -> bytes:
-        """Get the 'bodyy' content from the message."""
-        enforce(self.is_set("bodyy"), "'bodyy' content is not set.")
-        return cast(bytes, self.get("bodyy"))
+    def body(self) -> bytes:
+        """Get the 'body' content from the message."""
+        enforce(self.is_set("body"), "'body' content is not set.")
+        return cast(bytes, self.get("body"))
 
     @property
     def headers(self) -> str:
@@ -187,7 +187,7 @@ class HttpMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == HttpMessage.Performative.REQUEST:
                 expected_nb_of_contents = 5
@@ -216,9 +216,9 @@ class HttpMessage(Message):
                     ),
                 )
                 enforce(
-                    type(self.bodyy) == bytes,
-                    "Invalid type for content 'bodyy'. Expected 'bytes'. Found '{}'.".format(
-                        type(self.bodyy)
+                    type(self.body) == bytes,
+                    "Invalid type for content 'body'. Expected 'bytes'. Found '{}'.".format(
+                        type(self.body)
                     ),
                 )
             elif self.performative == HttpMessage.Performative.RESPONSE:
@@ -248,9 +248,9 @@ class HttpMessage(Message):
                     ),
                 )
                 enforce(
-                    type(self.bodyy) == bytes,
-                    "Invalid type for content 'bodyy'. Expected 'bytes'. Found '{}'.".format(
-                        type(self.bodyy)
+                    type(self.body) == bytes,
+                    "Invalid type for content 'body'. Expected 'bytes'. Found '{}'.".format(
+                        type(self.body)
                     ),
                 )
 
@@ -278,7 +278,7 @@ class HttpMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

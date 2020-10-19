@@ -37,7 +37,9 @@ from aea.protocols.dialogue.base import DialogueLabel
 import packages
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.message import logger as fipa_message_logger
+from packages.fetchai.protocols.fipa.message import (
+    _default_logger as fipa_message_logger,
+)
 
 from tests.conftest import ROOT_DIR
 

@@ -21,6 +21,8 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 from aea.protocols.default import default_pb2
 from aea.protocols.default.custom_types import ErrorCode
@@ -39,12 +41,15 @@ class DefaultSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(DefaultMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         default_msg = default_pb2.DefaultMessage()
-        default_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        default_msg.dialogue_starter_reference = dialogue_reference[0]
-        default_msg.dialogue_responder_reference = dialogue_reference[1]
-        default_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == DefaultMessage.Performative.BYTES:
@@ -64,8 +69,11 @@ class DefaultSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        default_bytes = default_msg.SerializeToString()
-        return default_bytes
+        dialogue_message_pb.content = default_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -75,15 +83,17 @@ class DefaultSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'Default' message.
         """
+        message_pb = ProtobufMessage()
         default_pb = default_pb2.DefaultMessage()
-        default_pb.ParseFromString(obj)
-        message_id = default_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            default_pb.dialogue_starter_reference,
-            default_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = default_pb.target
+        target = message_pb.dialogue_message.target
 
+        default_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = default_pb.WhichOneof("performative")
         performative_id = DefaultMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

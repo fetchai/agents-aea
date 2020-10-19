@@ -115,7 +115,6 @@ def _launch_threads(agents: List[Path]) -> int:
     for agent_directory in agents:
         with cd(agent_directory):
             aeas.append(AEABuilder.from_aea_project(".").build())
-
     runner = AEARunner(
         agents=aeas, mode="threaded", fail_policy=ExecutorExceptionPolicies.log_only
     )

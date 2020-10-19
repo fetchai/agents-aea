@@ -86,12 +86,15 @@ class PexpectWrapper(PopenSpawn):
             logfile=sys.stdout,
         )
 
-    def expect_all(self, pattern_list: List[str], timeout: float = 10) -> None:
+    def expect_all(
+        self, pattern_list: List[str], timeout: float = 10, strict: bool = True
+    ) -> None:
         """
         Wait for all patterns appear in process output.
 
         :param pattern_list: list of string to expect
         :param timeout: timeout in seconds
+        :param strict: if non strict, it allows regular expression
 
         :return: None
         """
@@ -102,7 +105,10 @@ class PexpectWrapper(PopenSpawn):
             time_spent = time.time() - start_time
             if time_spent > timeout:
                 raise TIMEOUT(timeout)
-            idx = self.expect_exact(pattern_list, timeout - time_spent)
+            if strict:
+                idx = self.expect_exact(pattern_list, timeout - time_spent)
+            else:
+                idx = self.expect(pattern_list, timeout - time_spent)
             pattern_list.pop(idx)
 
     def wait_eof(self, timeout: float = 10) -> None:

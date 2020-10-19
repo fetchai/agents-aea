@@ -30,7 +30,7 @@ Initialize the contract.
 
 ```python
  | @property
- | id() -> ContractId
+ | id() -> PublicId
 ```
 
 Get the name.

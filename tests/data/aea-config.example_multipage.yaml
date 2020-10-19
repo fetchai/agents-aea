@@ -39,22 +39,18 @@ behaviours:
     args:
       behaviour_arg_1: 1
       behaviour_arg_2: '2'
-    class_name: DummyBehaviour
 handlers:
   dummy:
     args:
       handler_arg_1: 1
       handler_arg_2: '2'
-    class_name: DummyHandler
   dummy_internal:
     args:
       handler_arg_1: 1
       handler_arg_2: '2'
-    class_name: DummyInternalHandler
 models:
   dummy:
     args:
       model_arg_1: 1
       model_arg_2: '2'
-    class_name: DummyModel
 ...

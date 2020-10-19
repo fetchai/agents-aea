@@ -10,22 +10,23 @@ This module contains multiaddress class.
 class MultiAddr()
 ```
 
-Protocol Labs' Multiaddress representation of a network address
+Protocol Labs' Multiaddress representation of a network address.
 
 <a name="aea.helpers.multiaddr.base.MultiAddr.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(host: str, port: int, public_key: str)
+ | __init__(host: str, port: int, public_key: Optional[str] = None, multihash_id: Optional[str] = None)
 ```
 
-Initialize a multiaddress
+Initialize a multiaddress.
 
 **Arguments**:
 
 - `host`: ip host of the address
-- `host`: port number of the address
-- `host`: hex encoded public key. Must conform to Bitcoin EC encoding standard for Secp256k1
+- `port`: port number of the address
+- `public_key`: hex encoded public key. Must conform to Bitcoin EC encoding standard for Secp256k1
+- `multihash_id`: a multihash of the public key
 
 <a name="aea.helpers.multiaddr.base.MultiAddr.compute_peerid"></a>
 #### compute`_`peerid
@@ -48,6 +49,20 @@ libp2p PeerID from Bitcoin EC encoded Secp256k1 public key.
 
 the peer id.
 
+<a name="aea.helpers.multiaddr.base.MultiAddr.from_string"></a>
+#### from`_`string
+
+```python
+ | @classmethod
+ | from_string(cls, maddr: str) -> "MultiAddr"
+```
+
+Construct a MultiAddr object from its string format
+
+**Arguments**:
+
+- `maddr`: multiaddress string
+
 <a name="aea.helpers.multiaddr.base.MultiAddr.public_key"></a>
 #### public`_`key
 
@@ -68,6 +83,26 @@ Get the public key.
 
 Get the peer id.
 
+<a name="aea.helpers.multiaddr.base.MultiAddr.host"></a>
+#### host
+
+```python
+ | @property
+ | host() -> str
+```
+
+Get the peer host.
+
+<a name="aea.helpers.multiaddr.base.MultiAddr.port"></a>
+#### port
+
+```python
+ | @property
+ | port() -> int
+```
+
+Get the peer port.
+
 <a name="aea.helpers.multiaddr.base.MultiAddr.format"></a>
 #### format
 
@@ -75,7 +110,7 @@ Get the peer id.
  | format() -> str
 ```
 
-Canonical representation of a multiaddress
+Canonical representation of a multiaddress.
 
 <a name="aea.helpers.multiaddr.base.MultiAddr.__str__"></a>
 #### `__`str`__`

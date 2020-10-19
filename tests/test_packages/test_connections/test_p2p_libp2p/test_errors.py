@@ -37,6 +37,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
     P2PLibp2pConnection,
     _golang_module_build_async,
     _golang_module_run,
+    _ip_all_private_or_all_public,
 )
 
 from tests.conftest import COSMOS, _make_libp2p_connection
@@ -216,3 +217,19 @@ def test_libp2pconnection_awaitable_proc_cancelled():
     proc = AwaitableProc(["sleep", "100"], shell=False)
     proc_task = asyncio.ensure_future(proc.start())
     proc_task.cancel()
+
+
+def test_libp2pconnection_mixed_ip_address():
+    """Test correct public uri ip and entry peers ips configuration."""
+    assert _ip_all_private_or_all_public([]) is True
+    assert _ip_all_private_or_all_public(["127.0.0.1", "127.0.0.1"]) is True
+    assert _ip_all_private_or_all_public(["localhost", "127.0.0.1"]) is True
+    assert _ip_all_private_or_all_public(["10.0.0.1", "127.0.0.1"]) is False
+    assert _ip_all_private_or_all_public(["fetch.ai", "127.0.0.1"]) is False
+    assert _ip_all_private_or_all_public(["104.26.2.97", "127.0.0.1"]) is False
+    assert (
+        _ip_all_private_or_all_public(
+            ["fetch.ai", "agents-p2p-dht.sandbox.fetch-ai.com"]
+        )
+        is True
+    )

@@ -59,6 +59,7 @@ TYPE_TO_CONFIG_FILE = {
     "agents": "aea-config.yaml",
 }
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
+TEST_PROTOCOLS = ["t_protocol", "t_protocol_no_ct"]
 
 
 def get_protocol_specification_header_regex(public_id: PublicId) -> Pattern:
@@ -259,6 +260,8 @@ def get_all_package_ids() -> Set[PackageId]:
     now_by_type = split_hashes_by_type(now)
     for type_, name_to_hashes in now_by_type.items():
         for name, _ in name_to_hashes.items():
+            if name in TEST_PROTOCOLS:
+                continue
             configuration_file_path = get_configuration_file_path(type_, name)
             public_id = get_public_id_from_yaml(configuration_file_path)
             package_id = PackageId(PackageType(type_[:-1]), public_id)
@@ -354,7 +357,7 @@ def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
             semver.VersionInfo.parse(x.public_id.version),
             x.public_id.author,
             x.public_id.name,
-            x.package_type,
+            x.package_type.value,
         ),
         reverse=True,
     )

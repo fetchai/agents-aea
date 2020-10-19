@@ -20,24 +20,15 @@
 """This module contains registries."""
 
 import copy
-import logging
 from abc import ABC, abstractmethod
 from operator import itemgetter
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.components.base import Component
-from aea.configurations.base import (
-    ComponentId,
-    ComponentType,
-    ProtocolId,
-    PublicId,
-    SkillId,
-)
-from aea.helpers.logging import WithLogger
+from aea.configurations.base import ComponentId, ComponentType, PublicId
+from aea.helpers.logging import WithLogger, get_logger
 from aea.skills.base import Behaviour, Handler, Model
 
-
-logger = logging.getLogger(__name__)
 
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
@@ -47,8 +38,13 @@ SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 class Registry(Generic[ItemId, Item], WithLogger, ABC):
     """This class implements an abstract registry."""
 
-    def __init__(self):
-        """Initialize the registry."""
+    def __init__(self, agent_name: str = "standalone"):
+        """
+        Initialize the registry.
+
+        :param agent_name: the name of the agent
+        """
+        logger = get_logger(__name__, agent_name)
         super().__init__(logger)
 
     @abstractmethod
@@ -189,13 +185,15 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
 class AgentComponentRegistry(Registry[ComponentId, Component]):
     """This class implements a simple dictionary-based registry for agent components."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
+        :param kwargs: kwargs
+
         :return: None
         """
-        super().__init__()
+        super().__init__(**kwargs)
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
         self._registered_keys: Set[ComponentId] = set()
 
@@ -323,25 +321,27 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
 
 class ComponentRegistry(
-    Registry[Tuple[SkillId, str], SkillComponentType], Generic[SkillComponentType]
+    Registry[Tuple[PublicId, str], SkillComponentType], Generic[SkillComponentType]
 ):
     """This class implements a generic registry for skill components."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
+        :param kwargs: kwargs
+
         :return: None
         """
-        super().__init__()
+        super().__init__(**kwargs)
         self._items: PublicIdRegistry[
             Dict[str, SkillComponentType]
         ] = PublicIdRegistry()
-        self._dynamically_added: Dict[SkillId, Set[str]] = {}
+        self._dynamically_added: Dict[PublicId, Set[str]] = {}
 
     def register(
         self,
-        item_id: Tuple[SkillId, str],
+        item_id: Tuple[PublicId, str],
         item: SkillComponentType,
         is_dynamically_added: bool = False,
     ) -> None:
@@ -372,7 +372,7 @@ class ComponentRegistry(
         if is_dynamically_added:
             self._dynamically_added.setdefault(skill_id, set()).add(item_name)
 
-    def unregister(self, item_id: Tuple[SkillId, str]) -> None:
+    def unregister(self, item_id: Tuple[PublicId, str]) -> None:
         """
         Unregister a item.
 
@@ -383,7 +383,7 @@ class ComponentRegistry(
         self._unregister_from_main_index(item_id)
 
     def _unregister_from_main_index(
-        self, item_id: Tuple[SkillId, str]
+        self, item_id: Tuple[PublicId, str]
     ) -> SkillComponentType:
         """
         Unregister a item.
@@ -414,7 +414,7 @@ class ComponentRegistry(
                 self._dynamically_added.pop(skill_id, None)
         return item
 
-    def fetch(self, item_id: Tuple[SkillId, str]) -> Optional[SkillComponentType]:
+    def fetch(self, item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]:
         """
         Fetch an item.
 
@@ -428,7 +428,7 @@ class ComponentRegistry(
             return None
         return name_to_item.get(item_name, None)
 
-    def fetch_by_skill(self, skill_id: SkillId) -> List[SkillComponentType]:
+    def fetch_by_skill(self, skill_id: PublicId) -> List[SkillComponentType]:
         """Fetch all the items of a given skill."""
         temp: Optional[Dict[str, SkillComponentType]] = self._items.fetch(skill_id)
         name_to_item: Dict[str, SkillComponentType] = {} if temp is None else temp
@@ -438,7 +438,7 @@ class ComponentRegistry(
         """Fetch all the items."""
         return [item for items in self._items.fetch_all() for item in items.values()]
 
-    def unregister_by_skill(self, skill_id: SkillId) -> None:
+    def unregister_by_skill(self, skill_id: PublicId) -> None:
         """Unregister all the components by skill."""
         if skill_id not in self._items.ids():
             raise ValueError(
@@ -447,9 +447,9 @@ class ComponentRegistry(
         self._items.unregister(skill_id)
         self._dynamically_added.pop(skill_id, None)
 
-    def ids(self) -> Set[Tuple[SkillId, str]]:
+    def ids(self) -> Set[Tuple[PublicId, str]]:
         """Get the item ids."""
-        result: Set[Tuple[SkillId, str]] = set()
+        result: Set[Tuple[PublicId, str]] = set()
         for skill_id in self._items.ids():
             name_to_item = cast(
                 Dict[str, SkillComponentType], self._items.fetch(skill_id)
@@ -504,13 +504,15 @@ class ComponentRegistry(
 class HandlerRegistry(ComponentRegistry[Handler]):
     """This class implements the handlers registry."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Instantiate the registry.
 
+        :param kwargs: kwargs
+
         :return: None
         """
-        super().__init__()
+        super().__init__(**kwargs)
         # nested public id registries; one for protocol ids, one for skill ids
         self._items_by_protocol_and_skill = PublicIdRegistry[
             PublicIdRegistry[Handler]
@@ -518,7 +520,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
 
     def register(
         self,
-        item_id: Tuple[SkillId, str],
+        item_id: Tuple[PublicId, str],
         item: Handler,
         is_dynamically_added: bool = False,
     ) -> None:
@@ -561,7 +563,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         registry.register(skill_id, item)
         super().register(item_id, item, is_dynamically_added=is_dynamically_added)
 
-    def unregister(self, item_id: Tuple[SkillId, str]) -> None:
+    def unregister(self, item_id: Tuple[PublicId, str]) -> None:
         """
         Unregister a item.
 
@@ -573,7 +575,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         handler = super()._unregister_from_main_index(item_id)
 
         # remove from index by protocol and skill
-        protocol_id = cast(ProtocolId, handler.SUPPORTED_PROTOCOL)
+        protocol_id = cast(PublicId, handler.SUPPORTED_PROTOCOL)
         protocol_handlers_by_skill = cast(
             PublicIdRegistry, self._items_by_protocol_and_skill.fetch(protocol_id)
         )
@@ -581,7 +583,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         if len(protocol_handlers_by_skill.ids()) == 0:
             self._items_by_protocol_and_skill.unregister(protocol_id)
 
-    def unregister_by_skill(self, skill_id: SkillId) -> None:
+    def unregister_by_skill(self, skill_id: PublicId) -> None:
         """Unregister all the components by skill."""
         # unregister from the main index.
         if skill_id not in self._items.ids():
@@ -596,7 +598,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
 
         # unregister from the protocol-skill index
         for handler in handlers:
-            protocol_id = cast(ProtocolId, handler.SUPPORTED_PROTOCOL)
+            protocol_id = cast(PublicId, handler.SUPPORTED_PROTOCOL)
             if protocol_id in self._items_by_protocol_and_skill.ids():
                 skill_id_to_handler = cast(
                     PublicIdRegistry,
@@ -604,7 +606,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
                 )
                 skill_id_to_handler.unregister(skill_id)
 
-    def fetch_by_protocol(self, protocol_id: ProtocolId) -> List[Handler]:
+    def fetch_by_protocol(self, protocol_id: PublicId) -> List[Handler]:
         """
         Fetch the handler by the pair protocol id and skill id.
 
@@ -624,7 +626,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         return handlers
 
     def fetch_by_protocol_and_skill(
-        self, protocol_id: ProtocolId, skill_id: SkillId
+        self, protocol_id: PublicId, skill_id: PublicId
     ) -> Optional[Handler]:
         """
         Fetch the handler by the pair protocol id and skill id.

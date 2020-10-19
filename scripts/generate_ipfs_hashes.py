@@ -53,7 +53,7 @@ from aea.configurations.base import (
     _compute_fingerprint,
 )
 from aea.configurations.loader import ConfigLoaders
-from aea.helpers.base import yaml_dump, yaml_dump_all
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 
 
 AUTHOR = "fetchai"
@@ -117,6 +117,8 @@ def _get_all_packages() -> List[Tuple[PackageType, Path]]:
         (PackageType.AGENT, TEST_PATH / "dummy_aea"),
         (PackageType.CONNECTION, TEST_PATH / "dummy_connection"),
         (PackageType.CONTRACT, TEST_PATH / "dummy_contract"),
+        (PackageType.PROTOCOL, TEST_PATH / "generator" / "t_protocol"),
+        (PackageType.PROTOCOL, TEST_PATH / "generator" / "t_protocol_no_ct"),
         (PackageType.SKILL, TEST_PATH / "dependencies_skill"),
         (PackageType.SKILL, TEST_PATH / "exception_skill"),
         (PackageType.SKILL, TEST_PATH / "dummy_skill"),
@@ -233,7 +235,7 @@ class IPFSDaemon:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Terminate the ipfs daemon."""
         self.process.send_signal(signal.SIGTERM)
-        self.process.wait(timeout=10)
+        self.process.wait(timeout=30)
         poll = self.process.poll()
         if poll is None:
             self.process.terminate()
@@ -433,7 +435,7 @@ def update_hashes(timeout: float = 15.0) -> int:
                 key, package_hash, _ = ipfs_hashing(
                     client, configuration_obj, package_type
                 )
-                if package_path.parent == TEST_PATH:
+                if TEST_PATH in package_path.parents:
                     test_package_hashes[key] = package_hash
                 else:
                     package_hashes[key] = package_hash

@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the generic buyer skill."""
+
+from aea.configurations.base import PublicId
+
+
+PUBLIC_ID = PublicId.from_str("fetchai/generic_buyer:0.13.0")

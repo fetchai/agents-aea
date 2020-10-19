@@ -120,7 +120,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.8.0")},
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
@@ -339,7 +339,7 @@ class TestSoef:
             await asyncio.wait_for(self.connection.receive(), timeout=1)
 
     @pytest.mark.asyncio
-    async def test_send_excluded_protocol(self, caplog):
+    async def test_send_excluded_protocol(self):
         """Test fail on unsupported protocol."""
         envelope = Envelope(
             to="soef",
@@ -354,7 +354,7 @@ class TestSoef:
             await self.connection.send(envelope)
 
     @pytest.mark.asyncio
-    async def test_bad_message(self, caplog):
+    async def test_bad_message(self):
         """Test fail on bad message."""
         envelope = Envelope(
             to="soef",
@@ -366,7 +366,7 @@ class TestSoef:
             await self.connection.send(envelope)
 
     @pytest.mark.asyncio
-    async def test_bad_performative(self, caplog):
+    async def test_bad_performative(self):
         """Test fail on bad perfromative."""
         agent_location = Location(52.2057092, 2.1183431)
         service_instance = {"location": agent_location}
@@ -390,7 +390,7 @@ class TestSoef:
             await self.connection.send(envelope)
 
     @pytest.mark.asyncio
-    async def test_bad_search_query(self, caplog):
+    async def test_bad_search_query(self):
         """Test fail on invalid query for search."""
         await self.test_register_service()
         closeness_query = Query([], model=models.AGENT_LOCATION_MODEL)
@@ -661,7 +661,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.8.0")},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
@@ -679,7 +679,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
+            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.8.0")},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )

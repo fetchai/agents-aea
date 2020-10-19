@@ -39,6 +39,7 @@ None
 ```
 
 Run the generator in "protobuf only" mode:
+
 a) validate the protocol specification.
 b) create the protocol buffer schema file.
 
@@ -50,10 +51,11 @@ None
 #### generate`_`full`_`mode
 
 ```python
- | generate_full_mode() -> None
+ | generate_full_mode() -> Optional[str]
 ```
 
 Run the generator in "full" mode:
+
 a) validates the protocol specification.
 b) creates the protocol buffer schema file.
 c) generates python modules.
@@ -62,16 +64,17 @@ e) applies isort formatting
 
 **Returns**:
 
-None
+optional warning message
 
 <a name="aea.protocols.generator.base.ProtocolGenerator.generate"></a>
 #### generate
 
 ```python
- | generate(protobuf_only: bool = False) -> None
+ | generate(protobuf_only: bool = False) -> Optional[str]
 ```
 
 Run the generator. If in "full" mode (protobuf_only is False), it:
+
 a) validates the protocol specification.
 b) creates the protocol buffer schema file.
 c) generates python modules.
@@ -86,5 +89,5 @@ If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
 
 **Returns**:
 
-None
+optional warning message.
 

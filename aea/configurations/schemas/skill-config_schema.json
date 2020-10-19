@@ -7,6 +7,7 @@
     "name",
     "author",
     "version",
+    "type",
     "license",
     "aea_version",
     "protocols",
@@ -24,7 +25,7 @@
       "$ref": "definitions.json#/definitions/package_version"
     },
     "type": {
-      "$ref": "definitions.json#/definitions/component_type"
+      "enum": ["skill"]
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"
@@ -63,6 +64,26 @@
       }
     },
     "handlers": {
+      "$ref": "#/definitions/handlers"
+    },
+    "behaviours": {
+      "$ref": "#/definitions/behaviours"
+    },
+    "models": {
+      "$ref": "#/definitions/models"
+    },
+    "dependencies": {
+      "$ref": "definitions.json#/definitions/dependencies"
+    },
+    "description": {
+      "$ref": "definitions.json#/definitions/description"
+    },
+    "is_abstract": {
+      "type": "boolean"
+    }
+  },
+  "definitions": {
+    "handlers": {
       "type": "object",
       "additionalProperties": false,
       "uniqueItems": true,
@@ -90,17 +111,6 @@
         }
       }
     },
-    "dependencies": {
-      "$ref": "definitions.json#/definitions/dependencies"
-    },
-    "description": {
-      "$ref": "definitions.json#/definitions/description"
-    },
-    "is_abstract": {
-      "type": "boolean"
-    }
-  },
-  "definitions": {
     "behaviour": {
       "type": "object",
       "additionalProperties": false,

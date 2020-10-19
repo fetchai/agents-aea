@@ -22,7 +22,7 @@
 import logging
 from typing import Dict, Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -32,7 +32,7 @@ from packages.fetchai.protocols.fipa.custom_types import (
 from packages.fetchai.protocols.fipa.custom_types import Query as CustomQuery
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.fipa.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.fipa.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
-    protocol_id = ProtocolId.from_str("fetchai/fipa:0.7.0")
+    protocol_id = PublicId.from_str("fetchai/fipa:0.8.0")
 
     Description = CustomDescription
 
@@ -187,7 +187,7 @@ class FipaMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == FipaMessage.Performative.CFP:
                 expected_nb_of_contents = 1
@@ -299,7 +299,7 @@ class FipaMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

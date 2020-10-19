@@ -24,6 +24,8 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
+
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
@@ -40,6 +42,9 @@ from tests.conftest import (
     NON_GENESIS_CONFIG,
     NON_GENESIS_CONFIG_TWO,
 )
+
+
+MAX_FLAKY_RERUNS_ETH -= 1
 
 
 class TestTacSkills(AEATestCaseMany):
@@ -61,22 +66,23 @@ class TestTacSkills(AEATestCaseMany):
         )
 
         default_routing = {
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.add_item("skill", "fetchai/tac_control:0.8.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
+        self.add_item("skill", "fetchai/tac_control:0.9.0")
         self.set_config("agent.default_ledger", FETCHAI)
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.10.0", tac_controller_name
+            "fetchai/tac_controller:0.11.0", tac_controller_name
         )
         assert (
             diff == []
@@ -93,11 +99,11 @@ class TestTacSkills(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         default_routing = {
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # prepare agents for test
@@ -106,18 +112,19 @@ class TestTacSkills(AEATestCaseMany):
             (tac_aea_two, NON_GENESIS_CONFIG_TWO),
         ):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-            self.add_item("connection", "fetchai/soef:0.9.0")
-            self.add_item("connection", "fetchai/ledger:0.6.0")
-            self.add_item("skill", "fetchai/tac_participation:0.9.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.10.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+            self.add_item("connection", "fetchai/soef:0.10.0")
+            self.add_item("connection", "fetchai/ledger:0.7.0")
+            self.remove_item("connection", "fetchai/stub:0.11.0")
+            self.add_item("skill", "fetchai/tac_participation:0.10.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.11.0")
             self.set_config("agent.default_ledger", FETCHAI)
             setting_path = "agent.default_routing"
-            self.force_set_config(setting_path, default_routing)
+            self.nested_set_config(setting_path, default_routing)
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.11.0", agent_name
+                "fetchai/tac_participant:0.12.0", agent_name
             )
             assert (
                 diff == []
@@ -135,9 +142,7 @@ class TestTacSkills(AEATestCaseMany):
 
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-            self.force_set_config(setting_path, config)
-            setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-            self.force_set_config(setting_path, COSMOS)
+            self.nested_set_config(setting_path, config)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -155,7 +160,7 @@ class TestTacSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             tac_controller_process, check_strings, timeout=240, is_terminating=False
@@ -177,7 +182,7 @@ class TestTacSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=240, is_terminating=False
@@ -192,7 +197,7 @@ class TestTacSkills(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             tac_aea_two_process, check_strings, timeout=240, is_terminating=False
@@ -227,17 +232,21 @@ class TestTacSkills(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "received cfp from",
+            "received decline from",
+            "received propose from",
+            "received accept from",
+            "received match_accept_w_inform from",
             "sending CFP to agent=",
-            "accepting propose",
-            "sending signing_msg=",
-            "message signed by decision maker.",
-            "sending transaction to controller.",
-            "sending match accept to",
-            # "Received transaction confirmation from the controller: transaction_id=", # noqa: E800
+            "sending propose to",
+            "sending accept to",
+            "requesting signature, sending sign_message to decision_maker, message=",
+            "received signed_message from decision_maker, message=",
+            "sending transaction to controller, tx=",
+            "received transaction confirmation from the controller:",
             "Applying state update!",
             "found potential buyers agents=",
             "sending CFP to agent=",
-            "declining propose",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=240, is_terminating=False
@@ -274,25 +283,26 @@ class TestTacSkillsContract(AEATestCaseMany):
         )
 
         default_routing = {
-            "fetchai/contract_api:0.5.0": "fetchai/ledger:0.6.0",
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/contract_api:0.6.0": "fetchai/ledger:0.7.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/tac_control_contract:0.9.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
+        self.add_item("skill", "fetchai/tac_control_contract:0.10.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.11.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.12.0", tac_controller_name
         )
         assert (
             diff == []
@@ -312,15 +322,15 @@ class TestTacSkillsContract(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
-        self.force_set_config(setting_path, ETHEREUM)
+        self.set_config(setting_path, ETHEREUM)
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
-        self.force_set_config(setting_path, True)
+        self.set_config(setting_path, True, "bool")
 
         default_routing = {
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # prepare agents for test
@@ -329,15 +339,16 @@ class TestTacSkillsContract(AEATestCaseMany):
             (tac_aea_two, NON_GENESIS_CONFIG_TWO, FUNDED_ETH_PRIVATE_KEY_3),
         ):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-            self.add_item("connection", "fetchai/soef:0.9.0")
-            self.add_item("connection", "fetchai/ledger:0.6.0")
-            self.add_item("skill", "fetchai/tac_participation:0.9.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.10.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+            self.add_item("connection", "fetchai/soef:0.10.0")
+            self.add_item("connection", "fetchai/ledger:0.7.0")
+            self.remove_item("connection", "fetchai/stub:0.11.0")
+            self.add_item("skill", "fetchai/tac_participation:0.10.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.11.0")
             self.set_config("agent.default_ledger", ETHEREUM)
             setting_path = "agent.default_routing"
-            self.force_set_config(setting_path, default_routing)
+            self.nested_set_config(setting_path, default_routing)
             self.set_config(
                 "vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract",
                 True,
@@ -350,7 +361,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant_contract:0.1.0", agent_name
+                "fetchai/tac_participant_contract:0.2.0", agent_name
             )
             assert (
                 diff == []
@@ -369,11 +380,11 @@ class TestTacSkillsContract(AEATestCaseMany):
 
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-            self.force_set_config(setting_path, config)
+            self.nested_set_config(setting_path, config)
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-            self.force_set_config(setting_path, COSMOS)
+            self.set_config(setting_path, COSMOS)
             setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
-            self.force_set_config(setting_path, ETHEREUM)
+            self.set_config(setting_path, ETHEREUM)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -393,7 +404,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
             "registering agent on SOEF.",
             "requesting contract deployment transaction...",
             "Start processing messages...",
@@ -427,7 +438,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
             "Start processing messages...",
             "searching for TAC, search_id=",
             "found the TAC controller. Registering...",
@@ -445,7 +456,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
             "Start processing messages...",
             "searching for TAC, search_id=",
             "found the TAC controller. Registering...",
@@ -490,7 +501,24 @@ class TestTacSkillsContract(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "found potential buyers agents=",
             "sending CFP to agent=",
+            "received cfp from",
+            "received propose from",
+            "received decline from",
+            "received accept from",
+            "received match_accept_w_inform from",
+            "sending propose to",
+            "sending accept to",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.11.0, message=",
+            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.11.0, message=",
+            "received raw transaction=",
+            "received raw message=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "proposing the message to the decision maker. Waiting for confirmation ...",
+            "received signed_message from decision_maker, message=",
+            "received signed_transaction from decision_maker, message=",
+            "sending send_signed_transaction to ledger ethereum, message=",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=300, is_terminating=False
@@ -506,7 +534,24 @@ class TestTacSkillsContract(AEATestCaseMany):
             "searching for sellers, search_id=",
             "searching for buyers, search_id=",
             "found potential sellers agents=",
+            "found potential buyers agents=",
             "sending CFP to agent=",
+            "received cfp from",
+            "received propose from",
+            "received decline from",
+            "received accept from",
+            "received match_accept_w_inform from",
+            "sending propose to",
+            "sending accept to",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.11.0, message=",
+            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.11.0, message=",
+            "received raw transaction=",
+            "received raw message=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "proposing the message to the decision maker. Waiting for confirmation ...",
+            "received signed_message from decision_maker, message=",
+            "received signed_transaction from decision_maker, message=",
+            "sending send_signed_transaction to ledger ethereum, message=",
         )
         missing_strings = self.missing_from_output(
             tac_aea_two_process, check_strings, timeout=360, is_terminating=False

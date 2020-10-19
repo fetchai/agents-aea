@@ -53,7 +53,7 @@ from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.generic import (
-    force_set_config,
+    nested_set_config,
     read_envelope_from_file,
     write_envelope_to_file,
 )
@@ -61,7 +61,7 @@ from aea.test_tools.generic import (
 from tests.conftest import ROOT_DIR
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 
@@ -125,10 +125,10 @@ class BaseAEATestCase(ABC):
         )
 
     @classmethod
-    def force_set_config(cls, dotted_path: str, value: Any) -> None:
+    def nested_set_config(cls, dotted_path: str, value: Any) -> None:
         """Force set config."""
         with cd(cls._get_cwd()):
-            force_set_config(dotted_path, value)
+            nested_set_config(dotted_path, value)
 
     @classmethod
     def disable_aea_logging(cls) -> None:
@@ -227,29 +227,44 @@ class BaseAEATestCase(ABC):
         return thread
 
     @classmethod
-    def create_agents(cls, *agents_names: str) -> None:
+    def create_agents(
+        cls, *agents_names: str, is_local: bool = True, is_empty: bool = False
+    ) -> None:
         """
         Create agents in current working directory.
 
         :param agents_names: str agent names.
+        :param is_local: a flag for local folder add True by default.
+        :param empty: optional boolean flag for skip adding default dependencies.
 
         :return: None
         """
+        cli_args = ["create", "--local", "--empty"]
+        if not is_local:  # pragma: nocover
+            cli_args.remove("--local")
+        if not is_empty:  # pragma: nocover
+            cli_args.remove("--empty")
         for name in set(agents_names):
-            cls.run_cli_command("create", "--local", name, "--author", cls.author)
+            cls.run_cli_command(*cli_args, name)
             cls.agents.add(name)
 
     @classmethod
-    def fetch_agent(cls, public_id: str, agent_name: str) -> None:
+    def fetch_agent(
+        cls, public_id: str, agent_name: str, is_local: bool = True
+    ) -> None:
         """
         Create agents in current working directory.
 
         :param public_id: str public id
         :param agents_name: str agent name.
+        :param is_local: a flag for local folder add True by default.
 
         :return: None
         """
-        cls.run_cli_command("fetch", "--local", public_id, "--alias", agent_name)
+        cli_args = ["fetch", "--local"]
+        if not is_local:  # pragma: nocover
+            cli_args.remove("--local")
+        cls.run_cli_command(*cli_args, public_id, "--alias", agent_name)
         cls.agents.add(agent_name)
 
     @classmethod
@@ -432,6 +447,21 @@ class BaseAEATestCase(ABC):
         cli_args = ["add", "--local", item_type, public_id]
         if not local:  # pragma: nocover
             cli_args.remove("--local")
+        return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
+
+    @classmethod
+    def remove_item(cls, item_type: str, public_id: str) -> Result:
+        """
+        Remove an item from the agent.
+
+        Run from agent's directory.
+
+        :param item_type: str item type.
+        :param public_id: public id of the item.
+
+        :return: Result
+        """
+        cli_args = ["remove", item_type, public_id]
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
@@ -728,14 +758,14 @@ class BaseAEATestCase(ABC):
         if is_terminating:
             cls.terminate_agents(process)
         if missing_strings != []:
-            logger.info(
+            _default_logger.info(
                 "Non-empty missing strings, stderr:\n{}".format(cls.stderr[process.pid])
             )
-            logger.info("=====================")
-            logger.info(
+            _default_logger.info("=====================")
+            _default_logger.info(
                 "Non-empty missing strings, stdout:\n{}".format(cls.stdout[process.pid])
             )
-            logger.info("=====================")
+            _default_logger.info("=====================")
         return missing_strings
 
     @classmethod
@@ -813,12 +843,15 @@ class AEATestCaseEmpty(BaseAEATestCase):
     This test case will create a default AEA project.
     """
 
+    IS_LOCAL = True
+    IS_EMPTY = False
+
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
         super(AEATestCaseEmpty, cls).setup_class()
         cls.agent_name = "agent-" + "".join(random.choices(string.ascii_lowercase, k=5))
-        cls.create_agents(cls.agent_name)
+        cls.create_agents(cls.agent_name, is_local=cls.IS_LOCAL, is_empty=cls.IS_EMPTY)
         cls.set_agent_context(cls.agent_name)
 
 

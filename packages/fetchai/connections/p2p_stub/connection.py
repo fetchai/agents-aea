@@ -29,7 +29,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.8.0")
 
 
 class P2PStubConnection(StubConnection):
@@ -74,6 +74,7 @@ class P2PStubConnection(StubConnection):
         """
         if self.loop is None:
             raise ValueError("Loop not initialized.")  # pragma: nocover
+        self._ensure_valid_envelope_for_external_comms(envelope)
         target_file = Path(os.path.join(self.namespace, "{}.in".format(envelope.to)))
 
         with open(target_file, "ab") as file:

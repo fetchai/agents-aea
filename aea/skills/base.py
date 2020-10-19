@@ -35,7 +35,6 @@ from aea.common import Address
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import (
     ComponentType,
-    ProtocolId,
     PublicId,
     SkillComponentConfiguration,
     SkillConfig,
@@ -43,7 +42,7 @@ from aea.configurations.base import (
 from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
 from aea.exceptions import AEAException, enforce
-from aea.helpers.base import load_module
+from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
@@ -437,7 +436,7 @@ class Behaviour(AbstractBehaviour, ABC):
 class Handler(SkillComponent, ABC):
     """This class implements an abstract behaviour."""
 
-    SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = None  # type: Optional[PublicId]
 
     @abstractmethod
     def handle(self, message: Message) -> None:
@@ -749,6 +748,7 @@ class Skill(Component):
         skill_context = SkillContext()
         skill_context.set_agent_context(agent_context)
         logger_name = f"aea.packages.{configuration.author}.skills.{configuration.name}"
+        logger_name = _get_aea_logger_name_prefix(logger_name, agent_context.agent_name)
         _logger = AgentLoggerAdapter(
             logging.getLogger(logger_name), agent_context.agent_name
         )

@@ -16,10 +16,14 @@ This class implements an abstract registry.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__(agent_name: str = "standalone")
 ```
 
 Initialize the registry.
+
+**Arguments**:
+
+- `agent_name`: the name of the agent
 
 <a name="aea.registries.base.Registry.register"></a>
 #### register
@@ -35,7 +39,7 @@ Register an item.
 
 - `item_id`: the public id of the item.
 - `item`: the item.
-- `is_dynamicall_added`: whether or not the item is dynamicall added.
+- `is_dynamically_added`: whether or not the item is dynamically added.
 
 **Returns**:
 
@@ -93,6 +97,20 @@ Fetch all the items.
 
 the list of items.
 
+<a name="aea.registries.base.Registry.ids"></a>
+#### ids
+
+```python
+ | @abstractmethod
+ | ids() -> Set[ItemId]
+```
+
+Return the set of all the used item ids.
+
+**Returns**:
+
+the set of item ids.
+
 <a name="aea.registries.base.Registry.setup"></a>
 #### setup
 
@@ -121,6 +139,98 @@ Teardown the registry.
 
 None
 
+<a name="aea.registries.base.PublicIdRegistry"></a>
+## PublicIdRegistry Objects
+
+```python
+class PublicIdRegistry(Generic[Item],  Registry[PublicId, Item])
+```
+
+This class implement a registry whose keys are public ids.
+
+In particular, it is able to handle the case when the public id
+points to the 'latest' version of a package.
+
+<a name="aea.registries.base.PublicIdRegistry.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__()
+```
+
+Initialize the registry.
+
+<a name="aea.registries.base.PublicIdRegistry.register"></a>
+#### register
+
+```python
+ | register(public_id: PublicId, item: Item, is_dynamically_added: bool = False) -> None
+```
+
+Register an item.
+
+<a name="aea.registries.base.PublicIdRegistry.unregister"></a>
+#### unregister
+
+```python
+ | unregister(public_id: PublicId) -> None
+```
+
+Unregister an item.
+
+<a name="aea.registries.base.PublicIdRegistry.fetch"></a>
+#### fetch
+
+```python
+ | fetch(public_id: PublicId) -> Optional[Item]
+```
+
+Fetch an item associated with a public id.
+
+**Arguments**:
+
+- `public_id`: the public id.
+
+**Returns**:
+
+an item, or None if the key is not present.
+
+<a name="aea.registries.base.PublicIdRegistry.fetch_all"></a>
+#### fetch`_`all
+
+```python
+ | fetch_all() -> List[Item]
+```
+
+Fetch all the items.
+
+<a name="aea.registries.base.PublicIdRegistry.ids"></a>
+#### ids
+
+```python
+ | ids() -> Set[PublicId]
+```
+
+Get all the item ids.
+
+<a name="aea.registries.base.PublicIdRegistry.setup"></a>
+#### setup
+
+```python
+ | setup() -> None
+```
+
+Set up the items.
+
+<a name="aea.registries.base.PublicIdRegistry.teardown"></a>
+#### teardown
+
+```python
+ | teardown() -> None
+```
+
+Tear down the items.
+
 <a name="aea.registries.base.AgentComponentRegistry"></a>
 ## AgentComponentRegistry Objects
 
@@ -134,10 +244,14 @@ This class implements a simple dictionary-based registry for agent components.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 
@@ -156,7 +270,7 @@ Register a component.
 
 - `component_id`: the id of the component.
 - `component`: the component object.
-- `is_dynamicall_added`: whether or not the item is dynamicall added.
+- `is_dynamically_added`: whether or not the item is dynamically added.
 
 <a name="aea.registries.base.AgentComponentRegistry.unregister"></a>
 #### unregister
@@ -213,6 +327,15 @@ Fetch all the components by a given type..
 - `component_type`: a component type
 :return the list of registered components of a given type.
 
+<a name="aea.registries.base.AgentComponentRegistry.ids"></a>
+#### ids
+
+```python
+ | ids() -> Set[ComponentId]
+```
+
+Get the item ids.
+
 <a name="aea.registries.base.AgentComponentRegistry.setup"></a>
 #### setup
 
@@ -244,7 +367,7 @@ None
 
 ```python
 class ComponentRegistry(
-    Registry[Tuple[SkillId, str], SkillComponentType],  Generic[SkillComponentType])
+    Registry[Tuple[PublicId, str], SkillComponentType],  Generic[SkillComponentType])
 ```
 
 This class implements a generic registry for skill components.
@@ -253,10 +376,14 @@ This class implements a generic registry for skill components.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 
@@ -266,7 +393,7 @@ None
 #### register
 
 ```python
- | register(item_id: Tuple[SkillId, str], item: SkillComponentType, is_dynamically_added: bool = False) -> None
+ | register(item_id: Tuple[PublicId, str], item: SkillComponentType, is_dynamically_added: bool = False) -> None
 ```
 
 Register a item.
@@ -275,7 +402,7 @@ Register a item.
 
 - `item_id`: a pair (skill id, item name).
 - `item`: the item to register.
-- `is_dynamicall_added`: whether or not the item is dynamicall added.
+- `is_dynamically_added`: whether or not the item is dynamically added.
 
 **Returns**:
 
@@ -286,7 +413,7 @@ None
 #### unregister
 
 ```python
- | unregister(item_id: Tuple[SkillId, str]) -> None
+ | unregister(item_id: Tuple[PublicId, str]) -> None
 ```
 
 Unregister a item.
@@ -304,7 +431,7 @@ None
 #### fetch
 
 ```python
- | fetch(item_id: Tuple[SkillId, str]) -> Optional[SkillComponentType]
+ | fetch(item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]
 ```
 
 Fetch an item.
@@ -321,7 +448,7 @@ the Item
 #### fetch`_`by`_`skill
 
 ```python
- | fetch_by_skill(skill_id: SkillId) -> List[Item]
+ | fetch_by_skill(skill_id: PublicId) -> List[SkillComponentType]
 ```
 
 Fetch all the items of a given skill.
@@ -339,10 +466,19 @@ Fetch all the items.
 #### unregister`_`by`_`skill
 
 ```python
- | unregister_by_skill(skill_id: SkillId) -> None
+ | unregister_by_skill(skill_id: PublicId) -> None
 ```
 
 Unregister all the components by skill.
+
+<a name="aea.registries.base.ComponentRegistry.ids"></a>
+#### ids
+
+```python
+ | ids() -> Set[Tuple[PublicId, str]]
+```
+
+Get the item ids.
 
 <a name="aea.registries.base.ComponentRegistry.setup"></a>
 #### setup
@@ -383,10 +519,14 @@ This class implements the handlers registry.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 
@@ -396,7 +536,7 @@ None
 #### register
 
 ```python
- | register(item_id: Tuple[SkillId, str], item: Handler, is_dynamically_added: bool = False) -> None
+ | register(item_id: Tuple[PublicId, str], item: Handler, is_dynamically_added: bool = False) -> None
 ```
 
 Register a handler.
@@ -405,7 +545,7 @@ Register a handler.
 
 - `item_id`: the item id.
 - `item`: the handler.
-- `is_dynamicall_added`: whether or not the item is dynamicall added.
+- `is_dynamically_added`: whether or not the item is dynamically added.
 
 **Returns**:
 
@@ -419,7 +559,7 @@ None
 #### unregister
 
 ```python
- | unregister(item_id: Tuple[SkillId, str]) -> None
+ | unregister(item_id: Tuple[PublicId, str]) -> None
 ```
 
 Unregister a item.
@@ -437,7 +577,7 @@ None
 #### unregister`_`by`_`skill
 
 ```python
- | unregister_by_skill(skill_id: SkillId) -> None
+ | unregister_by_skill(skill_id: PublicId) -> None
 ```
 
 Unregister all the components by skill.
@@ -446,7 +586,7 @@ Unregister all the components by skill.
 #### fetch`_`by`_`protocol
 
 ```python
- | fetch_by_protocol(protocol_id: ProtocolId) -> List[Handler]
+ | fetch_by_protocol(protocol_id: PublicId) -> List[Handler]
 ```
 
 Fetch the handler by the pair protocol id and skill id.
@@ -463,7 +603,7 @@ the handlers registered for the protocol_id and skill_id
 #### fetch`_`by`_`protocol`_`and`_`skill
 
 ```python
- | fetch_by_protocol_and_skill(protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]
+ | fetch_by_protocol_and_skill(protocol_id: PublicId, skill_id: PublicId) -> Optional[Handler]
 ```
 
 Fetch the handler by the pair protocol id and skill id.

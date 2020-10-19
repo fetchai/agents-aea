@@ -22,7 +22,7 @@
 import logging
 from typing import Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -32,7 +32,7 @@ from packages.fetchai.protocols.ml_trade.custom_types import (
 from packages.fetchai.protocols.ml_trade.custom_types import Query as CustomQuery
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.ml_trade.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.ml_trade.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = ProtocolId.from_str("fetchai/ml_trade:0.6.0")
+    protocol_id = PublicId.from_str("fetchai/ml_trade:0.7.0")
 
     Description = CustomDescription
 
@@ -180,7 +180,7 @@ class MlTradeMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == MlTradeMessage.Performative.CFP:
                 expected_nb_of_contents = 1
@@ -251,7 +251,7 @@ class MlTradeMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

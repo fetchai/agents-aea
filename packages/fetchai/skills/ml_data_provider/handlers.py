@@ -22,7 +22,7 @@
 import pickle  # nosec
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -190,7 +190,7 @@ class MlTradeHandler(Handler):
 class LedgerApiHandler(Handler):
     """Implement the ledger handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -290,7 +290,7 @@ class LedgerApiHandler(Handler):
 class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""

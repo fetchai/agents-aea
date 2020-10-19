@@ -47,7 +47,7 @@ class MySearchBehaviour(TickerBehaviour):
 
         search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
-        agent_location = Location(longitude=location["longitude"], latitude=location["latitude"])
+        agent_location = Location(latitude=location["latitude"], longitude=location["longitude"])
         radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         close_to_my_service = Constraint(
@@ -108,7 +108,7 @@ class MySearchBehaviour(TickerBehaviour):
 
 Searches are proactive and, as such, well placed in a <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>. Specifically, we subclass the <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> as it allows us to repeatedly search at a defined tick interval.
 
-We place this code in `my_aea/skills/my_search/behaviours.py`.
+We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import OefSearchDialogues` with your author handle (run `aea init` to set or check the author name).
 
 ## Step 3: Develop a Handler
 
@@ -259,7 +259,7 @@ Note, how the handler simply reacts to incoming events (i.e. messages). It could
 
 Also note, how we have access to other objects in the skill via `self.context`, the <a href="../api/skills/base#skillcontext-objects">`SkillContext`</a>.
 
-We place this code in `my_aea/skills/my_search/handlers.py`.
+We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import (` with your author handle (run `aea init` to set or check the author name).
 
 ## Step 4: Add dialogues model
 
@@ -329,7 +329,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.7.0
+- fetchai/oef_search:0.8.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -361,6 +361,38 @@ Importantly, the keys `my_search_behaviour` and `my_search_handler` are used in 
 
 We place this code in `my_aea/skills/my_search/skill.yaml`.
 
+Similarly, we replace `my_aea/skills/my_search/__init__.py` as follows:
+
+``` python
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This module contains the implementation of the error skill."""
+
+from aea.configurations.base import PublicId
+
+
+PUBLIC_ID = PublicId.from_str("fetchai/my_search:0.1.0")
+
+```
+Again, ensure the author field matches your own.
+
 ## Step 6: Update fingerprint
 
 We need to update the fingerprint of our skill next:
@@ -373,32 +405,32 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.7.0
+aea add protocol fetchai/oef_search:0.8.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 We also need to add the soef and p2p connections and install the AEA's dependencies:
 ``` bash
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/p2p_libp2p:0.10.0
+aea add connection fetchai/soef:0.10.0
+aea add connection fetchai/p2p_libp2p:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
 ```
 
 Finally, in the `aea-config.yaml` add the following lines:
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
+  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
 ```
 
 This will ensure that search requests are processed by the correct connection.
 
 ## Step 8: Run a service provider AEA
 
-In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA:
+In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.13.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.14.0 && cd simple_service_registration && aea install
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -583,7 +615,7 @@ class Strategy(Model):
         """
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
-            "location": Location(longitude=location["longitude"], latitude=location["latitude"])
+            "location": Location(latitude=location["latitude"], longitude=location["longitude"])
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         assert (
@@ -683,7 +715,7 @@ Finally, we have a handler, placed in `handlers.py`:
 ``` python
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -693,13 +725,13 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
 
 
 class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -803,7 +835,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.7.0
+- fetchai/oef_search:0.8.0
 skills: []
 behaviours:
   service:
@@ -841,7 +873,7 @@ aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
-Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+Then, update the configuration of the search AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
 
 ``` yaml
 config:

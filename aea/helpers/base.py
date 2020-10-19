@@ -31,97 +31,16 @@ import subprocess  # nosec
 import sys
 import time
 import types
-from collections import OrderedDict, UserString
+from collections import UserString, defaultdict, deque
+from copy import copy
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, List, TextIO, Union
+from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
 
-import yaml
 from dotenv import load_dotenv
 
 
-logger = logging.getLogger(__name__)
-
-
-def _ordered_loading(fun: Callable):
-    # for pydocstyle
-    def ordered_load(stream: TextIO):
-        object_pairs_hook = OrderedDict
-
-        class OrderedLoader(yaml.SafeLoader):
-            """A wrapper for safe yaml loader."""
-
-            pass
-
-        def construct_mapping(loader, node):
-            loader.flatten_mapping(node)
-            return object_pairs_hook(loader.construct_pairs(node))
-
-        OrderedLoader.add_constructor(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
-        )
-        return fun(stream, Loader=OrderedLoader)  # nosec
-
-    return ordered_load
-
-
-def _ordered_dumping(fun: Callable):
-    # for pydocstyle
-    def ordered_dump(data, stream=None, **kwds):
-        class OrderedDumper(yaml.SafeDumper):
-            """A wrapper for safe yaml loader."""
-
-            pass
-
-        def _dict_representer(dumper, data):
-            return dumper.represent_mapping(
-                yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items()
-            )
-
-        OrderedDumper.add_representer(OrderedDict, _dict_representer)
-        return fun(data, stream, Dumper=OrderedDumper, **kwds)  # nosec
-
-    return ordered_dump
-
-
-@_ordered_loading
-def yaml_load(*args, **kwargs) -> Dict[str, Any]:
-    """
-    Load a yaml from a file pointer in an ordered way.
-
-    :return: the yaml
-    """
-    return yaml.load(*args, **kwargs)  # nosec
-
-
-@_ordered_loading
-def yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]:
-    """
-    Load a multi-paged yaml from a file pointer in an ordered way.
-
-    :return: the yaml
-    """
-    return list(yaml.load_all(*args, **kwargs))  # nosec
-
-
-@_ordered_dumping
-def yaml_dump(*args, **kwargs) -> None:
-    """
-    Dump multi-paged yaml data to a yaml file in an ordered way.
-
-    :return None
-    """
-    yaml.dump(*args, **kwargs)  # nosec
-
-
-@_ordered_dumping
-def yaml_dump_all(*args, **kwargs) -> None:
-    """
-    Dump multi-paged yaml data to a yaml file in an ordered way.
-
-    :return None
-    """
-    yaml.dump_all(*args, **kwargs)  # nosec
+_default_logger = logging.getLogger(__name__)
 
 
 def _get_module(spec):
@@ -143,12 +62,12 @@ def locate(path: str) -> Any:
         spec_name = ".".join(parts[: n + 1])
         module_location = os.path.join(file_location, "__init__.py")
         spec = importlib.util.spec_from_file_location(spec_name, module_location)
-        logger.debug("Trying to import {}".format(module_location))
+        _default_logger.debug("Trying to import {}".format(module_location))
         nextmodule = _get_module(spec)
         if nextmodule is None:
             module_location = file_location + ".py"
             spec = importlib.util.spec_from_file_location(spec_name, module_location)
-            logger.debug("Trying to import {}".format(module_location))
+            _default_logger.debug("Trying to import {}".format(module_location))
             nextmodule = _get_module(spec)
 
         if nextmodule:
@@ -390,3 +309,108 @@ def exception_log_and_reraise(log_method: Callable, message: str):
     except BaseException as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
         log_method(message.format(e))
         raise
+
+
+def recursive_update(to_update: Dict, new_values: Dict) -> None:
+    """
+    Update a dictionary by replacing conflicts with the new values.
+
+    It does side-effects to the first dictionary.
+
+    >>> to_update = dict(a=1, b=2, subdict=dict(subfield1=1))
+    >>> new_values = dict(b=3, subdict=dict(subfield1=2))
+    >>> recursive_update(to_update, new_values)
+    >>> to_update
+    {'a': 1, 'b': 3, 'subdict': {'subfield1': 2}}
+
+    :param to_update: the dictionary to update.
+    :param new_values: the dictionary of new values to replace.
+    :return: None
+    """
+    for key, value in new_values.items():
+        if key not in to_update:
+            raise ValueError(
+                f"Key '{key}' is not contained in the dictionary to update."
+            )
+
+        value_to_update = to_update[key]
+        value_type = type(value)
+        value_to_update_type = type(value_to_update)
+        if value_type != value_to_update_type:
+            raise ValueError(
+                f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."
+            )
+
+        if value_type == value_to_update_type == dict:
+            recursive_update(value_to_update, value)
+        else:
+            to_update[key] = value
+
+
+def _get_aea_logger_name_prefix(module_name: str, agent_name: str) -> str:
+    """
+    Get the logger name prefix.
+
+    It consists of a dotted path with:
+    - the name of the package, 'aea';
+    - the agent name;
+    - the rest of the dotted path.
+
+    >>> _get_aea_logger_name_prefix("aea.path.to.package", "myagent")
+    'aea.myagent.path.to.package'
+
+    :param module_name: the module name.
+    :param agent_name: the agent name.
+    :return: the logger name prefix.
+    """
+    module_name_parts = module_name.split(".")
+    root = module_name_parts[0]
+    postfix = module_name_parts[1:]
+    return ".".join([root, agent_name, *postfix])
+
+
+T = TypeVar("T")
+
+
+def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
+    """
+    Compute the topological order of a graph (using Kahn's algorithm).
+
+    :param adjacency_list: the adjacency list of the graph.
+    :return: the topological order for the graph (as a sequence of nodes)
+    :raises ValueError: if the graph contains a cycle.
+    """
+    # compute inverse adjacency list and the roots of the DAG.
+    adjacency_list = copy(adjacency_list)
+    visited: Set[T] = set()
+    roots: Set[T] = set()
+    inverse_adjacency_list: Dict[T, Set[T]] = defaultdict(set)
+    # compute both roots and inv. adj. list in one pass.
+    for start_node, end_nodes in adjacency_list.items():
+        if start_node not in visited:
+            roots.add(start_node)
+        visited.update([start_node, *end_nodes])
+        for end_node in end_nodes:
+            roots.discard(end_node)
+            inverse_adjacency_list[end_node].add(start_node)
+
+    # compute the topological order
+    queue: Deque[T] = deque()
+    order = []
+    queue.extendleft(sorted(roots))
+    while len(queue) > 0:
+        current = queue.pop()
+        order.append(current)
+        next_nodes = adjacency_list.get(current, set())
+        for node in next_nodes:
+            inverse_adjacency_list[node].discard(current)
+            if len(inverse_adjacency_list[node]) == 0:
+                queue.append(node)
+
+        # remove all the edges
+        adjacency_list[current] = set()
+
+    if any(len(edges) > 0 for edges in inverse_adjacency_list.values()):
+        raise ValueError("Graph has at least one cycle.")
+
+    return order

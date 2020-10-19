@@ -24,6 +24,7 @@ from pathlib import Path
 
 import click
 
+from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import try_to_load_agent_config, update_item_config
 from aea.cli.utils.context import Context
@@ -32,6 +33,7 @@ from aea.cli.utils.package_utils import (
     copy_package_directory,
     get_package_path,
     is_item_present,
+    update_item_public_id_in_init,
 )
 from aea.configurations.base import DEFAULT_VERSION, PublicId
 
@@ -88,13 +90,11 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     :raises: ClickException if item is absent at source path or present at destenation path.
     """
     item_type_plural = item_type + "s"
-    supported_items = getattr(ctx.agent_config, item_type_plural)
-    if (
-        not is_item_present(ctx, item_type, public_id)
-        or public_id not in supported_items
-    ):  # pragma: no cover
+    if not is_item_present(ctx, item_type, public_id):  # pragma: no cover
         raise click.ClickException(
-            "{} {} not found in agent items.".format(item_type.title(), public_id)
+            "{} {} not found in agent's vendor items.".format(
+                item_type.title(), public_id
+            )
         )
     src = get_package_path(ctx, item_type, public_id)
     dst = get_package_path(ctx, item_type, public_id, is_vendor=False)
@@ -115,9 +115,20 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     update_item_config(
         item_type, Path(dst), author=new_public_id.author, version=new_public_id.version
     )
+    update_item_public_id_in_init(item_type, Path(dst), new_public_id)
+    supported_items = getattr(ctx.agent_config, item_type_plural)
+    for p_id in supported_items:
+        if p_id.author == public_id.author and p_id.name == public_id.name:
+            present_public_id = p_id
+            break
     supported_items.add(new_public_id)
-    supported_items.remove(public_id)
+    supported_items.remove(present_public_id)
     update_item_config("agent", Path(ctx.cwd), **{item_type_plural: supported_items})
 
     shutil.rmtree(src)
-    click.echo("Successfully ejected {} {} to {}.".format(item_type, public_id, dst))
+    fingerprint_item(ctx, item_type, new_public_id)
+    click.echo(
+        "Successfully ejected {} {} to {} as {}.".format(
+            item_type, public_id, dst, new_public_id
+        )
+    )

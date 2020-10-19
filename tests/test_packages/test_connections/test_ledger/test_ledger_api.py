@@ -27,7 +27,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.common import Address
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
@@ -278,7 +278,7 @@ async def test_unsupported_protocol(ledger_apis_connection: LedgerConnection):
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
         sender="test",
-        protocol_id=ProtocolId.from_str("author/package_name:0.1.0"),
+        protocol_id=PublicId.from_str("author/package_name:0.1.0"),
         message=b"message",
     )
     with pytest.raises(ValueError):

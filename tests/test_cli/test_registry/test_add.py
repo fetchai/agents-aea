@@ -25,7 +25,7 @@ from aea.cli.registry.add import fetch_package
 from aea.configurations.base import PublicId
 
 
-@mock.patch("aea.cli.registry.add.request_api", return_value={"file": "url"})
+@mock.patch("aea.cli.registry.utils.request_api", return_value={"file": "url"})
 @mock.patch("aea.cli.registry.add.download_file", return_value="filepath")
 @mock.patch("aea.cli.registry.add.extract")
 class FetchPackageTestCase(TestCase):

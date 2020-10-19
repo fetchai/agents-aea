@@ -30,6 +30,8 @@ from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
 from aea.test_tools.test_cases import AEATestCaseMany
 
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
+
 from tests.conftest import (
     AUTHOR,
     COSMOS,
@@ -76,7 +78,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.13.0",
+            "fetchai/simple_service_registration:0.14.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -91,15 +93,15 @@ class TestBuildSkill(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         default_routing = {
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # replace location
         setting_path = "vendor.fetchai.skills.simple_service_registration.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         search_aea = "search_aea"
         self.create_agents(search_aea)
@@ -107,11 +109,11 @@ class TestBuildSkill(AEATestCaseMany):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
 
         # manually change the files:
         path = Path(self.t, search_aea, "skills", skill_name, "behaviours.py")
@@ -140,6 +142,12 @@ class TestBuildSkill(AEATestCaseMany):
         with open(path, "w") as file:
             file.write(yaml_code_block[0])  # block one is yaml
 
+        path = Path(self.t, search_aea, "skills", skill_name, "__init__.py")
+        original = Path(AEA_DIR, "skills", "scaffold", "__init__.py")
+        assert filecmp.cmp(path, original)
+        with open(path, "w") as file:
+            file.write(self.code_blocks[3])  # block four is init
+
         # update fingerprint
         self.fingerprint_item("skill", skill_id)
 
@@ -156,15 +164,13 @@ class TestBuildSkill(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = "skills.{}.behaviours.my_search_behaviour.args.location".format(
             skill_name
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         # run agents
         self.set_agent_context(simple_service_registration_aea)
@@ -176,7 +182,7 @@ class TestBuildSkill(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,
@@ -199,7 +205,7 @@ class TestBuildSkill(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             search_aea_process, check_strings, timeout=240, is_terminating=False

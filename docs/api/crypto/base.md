@@ -310,6 +310,21 @@ Get the hash of a message.
 
 the hash of the message.
 
+<a name="aea.crypto.base.Helper.is_valid_address"></a>
+#### is`_`valid`_`address
+
+```python
+ | @classmethod
+ | @abstractmethod
+ | is_valid_address(cls, address: Address) -> bool
+```
+
+Check if the address is valid.
+
+**Arguments**:
+
+- `address`: the address to validate
+
 <a name="aea.crypto.base.LedgerApi"></a>
 ## LedgerApi Objects
 

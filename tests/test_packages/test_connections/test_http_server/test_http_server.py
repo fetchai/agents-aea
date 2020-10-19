@@ -47,7 +47,6 @@ from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
 from tests.conftest import (
-    HTTP_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     get_host,
@@ -119,7 +118,7 @@ class TestHTTPServer:
             ROOT_DIR, "tests", "data", "petstore_sim.yaml"
         )
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.6.0")
+        self.protocol_id = PublicId.from_str("fetchai/http:0.7.0")
 
         self.configuration = ConnectionConfig(
             host=self.host,
@@ -164,7 +163,7 @@ class TestHTTPServer:
             version=incoming_message.version,
             status_code=200,
             status_text="Success",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=envelope.sender,
@@ -198,7 +197,7 @@ class TestHTTPServer:
             headers=f"Content-Type: {content_type}",
             status_code=200,
             status_text="Success",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=envelope.sender,
@@ -234,7 +233,7 @@ class TestHTTPServer:
             url="/pets",
             version=incoming_message.version,
             headers=incoming_message.headers,
-            bodyy=b"Request body",
+            body=b"Request body",
         )
         incorrect_message.to = incoming_message.sender
 
@@ -276,7 +275,7 @@ class TestHTTPServer:
             headers=incoming_message.headers,
             status_code=200,
             status_text="Success",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=message.to,
@@ -315,7 +314,7 @@ class TestHTTPServer:
             version=incoming_message.version,
             status_code=201,
             status_text="Created",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=message.to,
@@ -393,7 +392,7 @@ class TestHTTPServer:
             version="",
             status_code=200,
             status_text="Success",
-            bodyy=b"",
+            body=b"",
         )
         message.to = str(HTTPServerConnection.connection_id)
         message.sender = "from_key"
@@ -439,7 +438,7 @@ class TestHTTPServer:
             headers=incoming_message.headers,
             status_code=201,
             status_text="Created",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         response_envelope = Envelope(
             to=message.to,
@@ -467,7 +466,7 @@ class TestHTTPServer:
             headers="",
             status_code=200,
             status_text="Success",
-            bodyy=b"Response body",
+            body=b"Response body",
         )
         envelope = Envelope(
             to="receiver",
@@ -479,7 +478,7 @@ class TestHTTPServer:
         with patch.object(
             self.http_connection.channel,
             "restricted_to_protocols",
-            new=[HTTP_PROTOCOL_PUBLIC_ID],
+            new=[HttpMessage.protocol_id],
         ):
             with pytest.raises(ValueError):
                 await self.http_connection.send(envelope)

@@ -18,19 +18,32 @@
 # ------------------------------------------------------------------------------
 """Test module for aea.cli.remove.remove_item method."""
 import os
+from pathlib import Path
 from unittest import TestCase, mock
+from unittest.mock import patch
 
 import pytest
 from click import ClickException
 
+from aea.cli.core import cli
 from aea.cli.remove import remove_item
-from aea.configurations.base import PublicId
+from aea.configurations.base import (
+    AgentConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    PackageId,
+    PackageType,
+    PublicId,
+)
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
+from aea.configurations.loader import ConfigLoader
+from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
 
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
@@ -40,7 +53,9 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 class RemoveItemTestCase(TestCase):
     """Test case for remove_item method."""
 
-    def test_remove_item_item_folder_not_exists(self, *mocks):
+    def test_remove_item_item_folder_not_exists(
+        self, *mocks
+    ):  # pylint: disable=unused-argument
         """Test for save_agent_locally item folder not exists."""
         public_id = PublicIdMock.from_str("author/name:0.1.0")
         with self.assertRaises(ClickException):
@@ -73,8 +88,67 @@ class TestRemovePackageWithLatestVersion(AEATestCaseEmpty):
         assert item_name in items_folders
 
         # remove the package
-        self.run_cli_command(*["remove", type_, str(public_id)], cwd=self._get_cwd())
+        with patch("aea.cli.remove.RemoveItem.is_required_by", False):
+            self.run_cli_command(
+                *["remove", type_, str(public_id)], cwd=self._get_cwd()
+            )
 
         # check that the 'aea remove' took effect.
         items_folders = os.listdir(items_path)
         assert item_name not in items_folders
+
+
+class TestRemoveConfig(
+    AEATestCaseEmpty
+):  # pylint: disable=attribute-defined-outside-init
+    """Test component configuration also removed from agent config."""
+
+    ITEM_TYPE = "connection"
+    ITEM_PUBLIC_ID = SOEF_PUBLIC_ID
+
+    @staticmethod
+    def loader() -> ConfigLoader:
+        """Return Agent config loader."""
+        return ConfigLoader.from_configuration_type(PackageType.AGENT)
+
+    def load_config(self) -> AgentConfig:
+        """Load AgentConfig from current directory."""
+        with cd(self._get_cwd()):
+            agent_loader = self.loader()
+            path = Path(DEFAULT_AEA_CONFIG_FILE)
+            with path.open(mode="r", encoding="utf-8") as fp:
+                agent_config = agent_loader.load(fp)
+            return agent_config
+
+    def test_component_configuration_removed_from_agent_config(self):
+        """Test component configuration removed from agent config."""
+        with cd(self._get_cwd()):
+            self.run_cli_command(
+                "add", "--local", self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)
+            )
+            self.runner.invoke(
+                cli,
+                [
+                    "config",
+                    "set",
+                    "vendor.fetchai.connections.soef.config.api_key",
+                    "some_api_key",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
+            config = self.load_config()
+
+            assert (
+                PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
+                in config.component_configurations
+            )
+
+            self.run_cli_command("remove", self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID))
+
+            config = self.load_config()
+
+            assert (
+                PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
+                not in config.component_configurations
+            )

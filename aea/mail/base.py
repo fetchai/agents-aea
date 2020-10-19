@@ -24,13 +24,13 @@ from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
-from aea.configurations.base import PackageId, ProtocolId, PublicId
+from aea.configurations.base import PackageId, PublicId
 from aea.exceptions import enforce
 from aea.mail import base_pb2
 from aea.protocols.base import Message
 
 
-logger = logging.getLogger(__name__)
+_default_logger = logging.getLogger(__name__)
 
 
 class AEAConnectionError(Exception):
@@ -203,7 +203,9 @@ class EnvelopeContext:
                     f"Invalid package type {package_type} in uri for envelope context."
                 )
         except ValueError as e:
-            logger.debug(f"URI - {uri.path} - not a valid package_id id. Error: {e}")
+            _default_logger.debug(
+                f"URI - {uri.path} - not a valid package_id id. Error: {e}"
+            )
         return (skill_id, connection_id)
 
     def __str__(self):
@@ -267,6 +269,8 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         """
         Decode the envelope.
 
+        The default serializer doesn't decode the message field.
+
         :param envelope_bytes: the encoded envelope
         :return: the envelope
         """
@@ -278,6 +282,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         raw_protocol_id = envelope_pb.protocol_id  # pylint: disable=no-member
         protocol_id = PublicId.from_str(raw_protocol_id)
         message = envelope_pb.message  # pylint: disable=no-member
+
         uri_raw = envelope_pb.uri  # pylint: disable=no-member
         if uri_raw != "":  # empty string means this field is not set in proto3
             uri = URI(uri_raw=uri_raw)
@@ -309,7 +314,7 @@ class Envelope:
         self,
         to: Address,
         sender: Address,
-        protocol_id: ProtocolId,
+        protocol_id: PublicId,
         message: Union[Message, bytes],
         context: Optional[EnvelopeContext] = None,
     ):
@@ -322,6 +327,10 @@ class Envelope:
         :param message: the protocol-specific message.
         :param context: the optional envelope context.
         """
+        enforce(isinstance(to, str), f"To must be string. Found '{type(to)}'")
+        enforce(
+            isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
+        )
         if isinstance(message, Message):
             message = self._check_consistency(message, to, sender)
         self._to = to
@@ -338,6 +347,7 @@ class Envelope:
     @to.setter
     def to(self, to: Address) -> None:
         """Set address of receiver."""
+        enforce(isinstance(to, str), f"To must be string. Found '{type(to)}'")
         self._to = to
 
     @property
@@ -348,15 +358,18 @@ class Envelope:
     @sender.setter
     def sender(self, sender: Address) -> None:
         """Set address of sender."""
+        enforce(
+            isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
+        )
         self._sender = sender
 
     @property
-    def protocol_id(self) -> ProtocolId:
+    def protocol_id(self) -> PublicId:
         """Get protocol id."""
         return self._protocol_id
 
     @protocol_id.setter
-    def protocol_id(self, protocol_id: ProtocolId) -> None:
+    def protocol_id(self, protocol_id: PublicId) -> None:
         """Set the protocol id."""
         self._protocol_id = protocol_id
 
@@ -405,6 +418,16 @@ class Envelope:
         if self.context is not None:
             connection_id = self.context.connection_id
         return connection_id
+
+    @property
+    def is_sender_public_id(self):
+        """Check if sender is a public id."""
+        return PublicId.is_valid_str(self.sender)
+
+    @property
+    def is_to_public_id(self):
+        """Check if to is a public id."""
+        return PublicId.is_valid_str(self.to)
 
     @staticmethod
     def _check_consistency(message: Message, to: str, sender: str) -> Message:

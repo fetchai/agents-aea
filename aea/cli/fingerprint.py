@@ -19,12 +19,13 @@
 
 """Implementation of the 'aea add' subcommand."""
 from pathlib import Path
-from typing import Dict, cast
+from typing import Dict
 
 import click
 
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import pass_ctx
 from aea.configurations.base import (  # noqa: F401 # pylint: disable=unused-import
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -38,52 +39,51 @@ from aea.configurations.loader import ConfigLoader
 
 @click.group()
 @click.pass_context
-def fingerprint(click_context):  # pylint: disable=unused-argument
+def fingerprint(click_context: click.core.Context):  # pylint: disable=unused-argument
     """Fingerprint a resource."""
 
 
 @fingerprint.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def connection(click_context, connection_public_id: PublicId):
+@pass_ctx
+def connection(ctx: Context, connection_public_id: PublicId):
     """Fingerprint a connection and add the fingerprints to the configuration file."""
-    _fingerprint_item(click_context, "connection", connection_public_id)
+    fingerprint_item(ctx, "connection", connection_public_id)
 
 
 @fingerprint.command()
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def contract(click_context, contract_public_id: PublicId):
+@pass_ctx
+def contract(ctx: Context, contract_public_id: PublicId):
     """Fingerprint a contract and add the fingerprints to the configuration file."""
-    _fingerprint_item(click_context, "contract", contract_public_id)
+    fingerprint_item(ctx, "contract", contract_public_id)
 
 
 @fingerprint.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def protocol(click_context, protocol_public_id):
+@pass_ctx
+def protocol(ctx: Context, protocol_public_id: PublicId):
     """Fingerprint a protocol and add the fingerprints to the configuration file.."""
-    _fingerprint_item(click_context, "protocol", protocol_public_id)
+    fingerprint_item(ctx, "protocol", protocol_public_id)
 
 
 @fingerprint.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def skill(click_context, skill_public_id: PublicId):
+@pass_ctx
+def skill(ctx: Context, skill_public_id: PublicId):
     """Fingerprint a skill and add the fingerprints to the configuration file."""
-    _fingerprint_item(click_context, "skill", skill_public_id)
+    fingerprint_item(ctx, "skill", skill_public_id)
 
 
-def _fingerprint_item(click_context, item_type, item_public_id) -> None:
+def fingerprint_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     """
     Fingerprint components of an item.
 
-    :param click_context: the click context.
+    :param ctx: the context.
     :param item_type: the item type.
     :param item_public_id: the item public id.
     :return: None
     """
-    ctx = cast(Context, click_context.obj)
     item_type_plural = item_type + "s"
 
     click.echo(

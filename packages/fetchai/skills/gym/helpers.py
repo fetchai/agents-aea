@@ -60,7 +60,7 @@ class ProxyEnv(gym.Env):
         self._is_rl_agent_trained = False
         self._step_count = 0
         self._active_dialogue = None  # type: Optional[GymDialogue]
-        self.gym_address = "fetchai/gym:0.8.0"
+        self.gym_address = "fetchai/gym:0.9.0"
 
     @property
     def gym_dialogues(self) -> GymDialogues:

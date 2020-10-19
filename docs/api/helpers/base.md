@@ -3,58 +3,6 @@
 
 Miscellaneous helpers.
 
-<a name="aea.helpers.base.yaml_load"></a>
-#### yaml`_`load
-
-```python
-@_ordered_loading
-yaml_load(*args, **kwargs) -> Dict[str, Any]
-```
-
-Load a yaml from a file pointer in an ordered way.
-
-**Returns**:
-
-the yaml
-
-<a name="aea.helpers.base.yaml_load_all"></a>
-#### yaml`_`load`_`all
-
-```python
-@_ordered_loading
-yaml_load_all(*args, **kwargs) -> List[Dict[str, Any]]
-```
-
-Load a multi-paged yaml from a file pointer in an ordered way.
-
-**Returns**:
-
-the yaml
-
-<a name="aea.helpers.base.yaml_dump"></a>
-#### yaml`_`dump
-
-```python
-@_ordered_dumping
-yaml_dump(*args, **kwargs) -> None
-```
-
-Dump multi-paged yaml data to a yaml file in an ordered way.
-
-:return None
-
-<a name="aea.helpers.base.yaml_dump_all"></a>
-#### yaml`_`dump`_`all
-
-```python
-@_ordered_dumping
-yaml_dump_all(*args, **kwargs) -> None
-```
-
-Dump multi-paged yaml data to a yaml file in an ordered way.
-
-:return None
-
 <a name="aea.helpers.base.locate"></a>
 #### locate
 
@@ -268,4 +216,51 @@ Run code in context to log and re raise exception.
 
 - `log_method`: function to print log
 - `message`: message template to add error text.
+
+<a name="aea.helpers.base.recursive_update"></a>
+#### recursive`_`update
+
+```python
+recursive_update(to_update: Dict, new_values: Dict) -> None
+```
+
+Update a dictionary by replacing conflicts with the new values.
+
+It does side-effects to the first dictionary.
+
+>>> to_update = dict(a=1, b=2, subdict=dict(subfield1=1))
+>>> new_values = dict(b=3, subdict=dict(subfield1=2))
+>>> recursive_update(to_update, new_values)
+>>> to_update
+{'a': 1, 'b': 3, 'subdict': {'subfield1': 2}}
+
+**Arguments**:
+
+- `to_update`: the dictionary to update.
+- `new_values`: the dictionary of new values to replace.
+
+**Returns**:
+
+None
+
+<a name="aea.helpers.base.find_topological_order"></a>
+#### find`_`topological`_`order
+
+```python
+find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]
+```
+
+Compute the topological order of a graph (using Kahn's algorithm).
+
+**Arguments**:
+
+- `adjacency_list`: the adjacency list of the graph.
+
+**Returns**:
+
+the topological order for the graph (as a sequence of nodes)
+
+**Raises**:
+
+- `ValueError`: if the graph contains a cycle.
 

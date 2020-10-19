@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.11.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.12.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -36,12 +36,12 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.8.0
+aea add skill fetchai/gym:0.9.0
 ```
 
 ### Add a gym connection
 ``` bash
-aea add connection fetchai/gym:0.8.0
+aea add connection fetchai/gym:0.9.0
 aea config set agent.default_connection fetchai/gym:0.7.0
 ```
 

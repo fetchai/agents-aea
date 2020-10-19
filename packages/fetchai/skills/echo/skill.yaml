@@ -1,20 +1,20 @@
 name: echo
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 type: skill
 description: The echo skill implements simple echo functionality.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: Qmd884WK35W5JuT6i1gXQFspxVPnCpeXv9kqWXnUaUAx4E
-  __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
+  __init__.py: QmNN9MJRi8UcMHEipvRQaJui2vSfjNRRSHKX7QsGc11zRJ
   behaviours.py: QmXARXRvJkpzuqnYNhJhv42Sk6J4KzRW2AKvC6FJWLU9JL
   dialogues.py: QmbfLMqP1aScVV68rEUpenKiWA5KsnT1Zq48jVnk5jFmQ5
   handlers.py: QmfD1dbce2WoPF54DNgu9DUNZrHeTucA5LyDoiFr8j5pTx
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
+- fetchai/default:0.7.0
 skills: []
 behaviours:
   echo:
@@ -30,3 +30,4 @@ models:
     args: {}
     class_name: DefaultDialogues
 dependencies: {}
+is_abstract: false

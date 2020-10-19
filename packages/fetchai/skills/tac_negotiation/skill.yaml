@@ -1,6 +1,6 @@
 name: tac_negotiation
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 type: skill
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
@@ -8,21 +8,21 @@ license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmZucue4N3TX7BPe9CDZybfMQc1zpYbRKEVXAUGYRpcUfD
-  __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
+  __init__.py: QmeFiTH6vHBd754rep2LrK96NMhZqKA4A9Qwfv9eZv6GzW
   behaviours.py: QmcBCRFpM6ZtcuNZ12HUuwKgQKVdiAqQ6jDNMvzTGMpDdx
-  dialogues.py: QmdPAjBTpgrW9qP8SnAjKHWxBQRiGUqmgiiXMdrPKAJUKj
-  handlers.py: QmeSaLfQV3rzHuHPhzsBps9z4AbX1MNevTs2YTjnZaWuEA
+  dialogues.py: QmXnRTML2HBWTX3CQ1xJ41tpq2VsgkQY4BoboE3AoMpb99
+  handlers.py: QmRw88tEdnnyrBBcehufuh6YFmjoQwsNjTaBbMWarXnYJx
   helpers.py: QmTJbGL8V6CLhbVhLekqKkHbu7cJMfBcv8DtWLSpkKP5tk
-  strategy.py: QmYcwqZ9ejjK2zxN8nKoc3kvBoGamTxwGQqXJrWV5s8STx
-  transactions.py: QmSFgjuvFMymkpCErkEFDiy5o2WCXPJXzVvmWyNjCFFT22
+  strategy.py: QmUANbcuvYMiyrpdPbMS8xyAUb4h4LujyFtCzimSheVRJu
+  transactions.py: QmXdxq36sFqKUAiLri9QUPNhSa1ELN1EbAJKPWzHQVWtTW
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.10.0
+- fetchai/erc1155:0.11.0
 protocols:
-- fetchai/fipa:0.7.0
-- fetchai/oef_search:0.7.0
+- fetchai/fipa:0.8.0
+- fetchai/oef_search:0.8.0
 skills:
-- fetchai/tac_participation:0.9.0
+- fetchai/tac_participation:0.10.0
 behaviours:
   clean_up:
     args:
@@ -33,9 +33,15 @@ behaviours:
       search_interval: 5.0
     class_name: GoodsRegisterAndSearchBehaviour
 handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
   fipa:
     args: {}
     class_name: FipaNegotiationHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
   oef:
     args: {}
     class_name: OefSearchHandler
@@ -43,12 +49,18 @@ handlers:
     args: {}
     class_name: SigningHandler
 models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
   default_dialogues:
     args: {}
     class_name: DefaultDialogues
   fipa_dialogues:
     args: {}
     class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
@@ -72,3 +84,4 @@ models:
       pending_transaction_timeout: 30
     class_name: Transactions
 dependencies: {}
+is_abstract: false

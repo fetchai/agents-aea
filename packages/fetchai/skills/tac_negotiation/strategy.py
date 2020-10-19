@@ -22,9 +22,11 @@
 import copy
 import random
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
+from aea.common import Address
 from aea.decision_maker.default import OwnershipState, Preferences
+from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -37,9 +39,10 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.protocols.signing.message import SigningMessage
+from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as CONTRACT_ID
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
@@ -92,7 +95,9 @@ class Strategy(Model):
 
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
-            "location": Location(location["longitude"], location["latitude"])
+            "location": Location(
+                latitude=location["latitude"], longitude=location["longitude"]
+            )
         }
         service_key = kwargs.pop("service_key", DEFAULT_SERVICE_KEY)
         self._set_service_data = {"key": service_key, "value": self._register_as.value}
@@ -104,6 +109,8 @@ class Strategy(Model):
             "constraint_type": "==",
         }
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+
+        self._contract_id = str(CONTRACT_ID)
 
         super().__init__(**kwargs)
 
@@ -144,6 +151,20 @@ class Strategy(Model):
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
+
+    @property
+    def contract_id(self) -> str:
+        """Get the contract id."""
+        return self._contract_id
+
+    @property
+    def contract_address(self) -> str:
+        """Get the contract address."""
+        contract_address = self.context.shared_state.get(
+            "erc1155_contract_address", None
+        )
+        enforce(contract_address is not None, "ERC1155Contract address not set!")
+        return contract_address
 
     def get_location_description(self) -> Description:
         """
@@ -400,9 +421,7 @@ class Strategy(Model):
             proposals.append(proposal)
         return proposals
 
-    def is_profitable_transaction(
-        self, signing_msg: SigningMessage, role: FipaDialogue.Role
-    ) -> bool:
+    def is_profitable_transaction(self, terms: Terms, role: FipaDialogue.Role) -> bool:
         """
         Check if a transaction is profitable.
 
@@ -411,7 +430,7 @@ class Strategy(Model):
         - check if the transaction is consistent with the locks (enough money/holdings)
         - check that we gain score.
 
-        :param signing_msg: the signing_msg
+        :param terms: the terms
         :param role: the role of the agent (seller or buyer)
 
         :return: True if the transaction is good (as stated above), False otherwise.
@@ -422,12 +441,87 @@ class Strategy(Model):
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller
         )
-        if not ownership_state_after_locks.is_affordable_transaction(signing_msg.terms):
+        if not ownership_state_after_locks.is_affordable_transaction(terms):
             return False
         preferences = cast(
             Preferences, self.context.decision_maker_handler_context.preferences
         )
         proposal_delta_score = preferences.utility_diff_from_transaction(
-            ownership_state_after_locks, signing_msg.terms
+            ownership_state_after_locks, terms
         )
         return proposal_delta_score >= 0
+
+    @staticmethod
+    def terms_from_proposal(
+        proposal: Description,
+        sender: Address,
+        counterparty: Address,
+        role: FipaDialogue.Role,
+    ) -> Terms:
+        """
+        Get the terms from a proposal.
+
+        :param proposal: the proposal
+        :param sender: the sender of the proposal
+        :param counterparty: the receiver of the proposal
+        :return: the terms
+        """
+        is_seller = role == FipaDialogue.Role.SELLER
+        goods_component = copy.copy(proposal.values)
+        [  # pylint: disable=expression-not-assigned
+            goods_component.pop(key)
+            for key in ["fee", "price", "currency_id", "nonce", "ledger_id"]
+        ]
+        # switch signs based on whether seller or buyer role
+        amount = proposal.values["price"] if is_seller else -proposal.values["price"]
+        fee = proposal.values["fee"]
+        if is_seller:
+            for good_id in goods_component.keys():
+                goods_component[good_id] = goods_component[good_id] * (-1)
+        amount_by_currency_id = {proposal.values["currency_id"]: amount}
+        fee_by_currency_id = {proposal.values["currency_id"]: fee}
+        nonce = proposal.values["nonce"]
+        ledger_id = proposal.values["ledger_id"]
+        terms = Terms(
+            ledger_id=ledger_id,
+            sender_address=sender,
+            counterparty_address=counterparty,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=goods_component,
+            is_sender_payable_tx_fee=not is_seller,
+            nonce=nonce,
+            fee_by_currency_id=fee_by_currency_id,
+        )
+        return terms
+
+    @staticmethod
+    def kwargs_from_terms(
+        terms: Terms, signature: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Get the contract api message kwargs from the terms.
+
+        :param terms: the terms
+        :param signature: the signature
+        :return: the kwargs
+        """
+        all_tokens = {**terms.amount_by_currency_id, **terms.quantities_by_good_id}
+        token_ids = [int(key) for key in all_tokens.keys()]
+        from_supplies = [
+            0 if int(value) <= 0 else int(value) for value in all_tokens.values()
+        ]
+        to_supplies = [
+            0 if int(value) >= 0 else -int(value) for value in all_tokens.values()
+        ]
+        kwargs = {
+            "from_address": terms.sender_address,
+            "to_address": terms.counterparty_address,
+            "token_ids": token_ids,
+            "from_supplies": from_supplies,
+            "to_supplies": to_supplies,
+            "value": 0,
+            "trade_nonce": int(terms.nonce),
+        }
+        if signature is not None:
+            kwargs["signature"] = signature
+        return kwargs

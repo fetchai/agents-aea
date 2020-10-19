@@ -39,10 +39,10 @@ from tests.test_cli.tools_for_testing import ContextMock
 class GenerateWealthTestCase(TestCase):
     """Test case for _generate_wealth method."""
 
-    @mock.patch("aea.cli.generate_wealth.Wallet")
+    @mock.patch("aea.cli.utils.package_utils.Wallet")
     @mock.patch("aea.cli.generate_wealth.click.echo")
     @mock.patch("aea.cli.generate_wealth.try_generate_testnet_wealth")
-    @mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys_ctx")
+    @mock.patch("aea.cli.utils.package_utils.verify_or_create_private_keys_ctx")
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
         ctx = ContextMock()
@@ -50,7 +50,7 @@ class GenerateWealthTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys_ctx")
+@mock.patch("aea.cli.utils.package_utils.verify_or_create_private_keys_ctx")
 @mock.patch("aea.cli.generate_wealth._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""
@@ -107,7 +107,7 @@ class TestWealthCommandsNegative(AEATestCaseMany):
         self.add_private_key()
 
         settings = {"unsupported_crypto": "path"}
-        self.force_set_config("agent.private_key_paths", settings)
+        self.nested_set_config("agent.private_key_paths", settings)
         with pytest.raises(AEATestingException) as excinfo:
             self.generate_wealth()
 

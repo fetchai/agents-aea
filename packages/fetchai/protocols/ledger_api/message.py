@@ -22,7 +22,7 @@
 import logging
 from typing import Optional, Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -41,7 +41,7 @@ from packages.fetchai.protocols.ledger_api.custom_types import (
 )
 
 
-logger = logging.getLogger("aea.packages.fetchai.protocols.ledger_api.message")
+_default_logger = logging.getLogger("aea.packages.fetchai.protocols.ledger_api.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -49,7 +49,7 @@ DEFAULT_BODY_SIZE = 4
 class LedgerApiMessage(Message):
     """A protocol for ledger APIs requests and responses."""
 
-    protocol_id = ProtocolId.from_str("fetchai/ledger_api:0.4.0")
+    protocol_id = PublicId.from_str("fetchai/ledger_api:0.5.0")
 
     RawTransaction = CustomRawTransaction
 
@@ -259,7 +259,7 @@ class LedgerApiMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == LedgerApiMessage.Performative.GET_BALANCE:
                 expected_nb_of_contents = 2
@@ -394,7 +394,7 @@ class LedgerApiMessage(Message):
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
-            logger.error(str(e))
+            _default_logger.error(str(e))
             return False
 
         return True

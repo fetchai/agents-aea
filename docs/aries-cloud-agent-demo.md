@@ -180,7 +180,7 @@ Now you can create **Alice_AEA** and **Faber_AEA** in terminals 3 and 4 respecti
 In the third terminal, fetch **Alice_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_alice:0.11.0
+aea fetch fetchai/aries_alice:0.12.0
 cd aries_alice
 ```
 
@@ -191,11 +191,11 @@ The following steps create **Alice_AEA** from scratch:
 ``` bash
 aea create aries_alice
 cd aries_alice
-aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/http_client:0.9.0
-aea add connection fetchai/webhook:0.7.0
-aea add skill fetchai/aries_alice:0.8.0
+aea add connection fetchai/p2p_libp2p:0.11.0
+aea add connection fetchai/soef:0.10.0
+aea add connection fetchai/http_client:0.10.0
+aea add connection fetchai/webhook:0.8.0
+aea add skill fetchai/aries_alice:0.9.0
 ```
 </p>
 </details>
@@ -265,7 +265,7 @@ Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take 
 In the fourth terminal, fetch **Faber_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_faber:0.11.0
+aea fetch fetchai/aries_faber:0.12.0
 cd aries_faber
 ```
 
@@ -276,11 +276,11 @@ The following steps create **Faber_AEA** from scratch:
 ``` bash
 aea create aries_faber
 cd aries_faber
-aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/http_client:0.9.0
-aea add connection fetchai/webhook:0.7.0
-aea add skill fetchai/aries_faber:0.7.0
+aea add connection fetchai/p2p_libp2p:0.11.0
+aea add connection fetchai/soef:0.10.0
+aea add connection fetchai/http_client:0.10.0
+aea add connection fetchai/webhook:0.8.0
+aea add skill fetchai/aries_faber:0.8.0
 ```
 </p>
 </details>

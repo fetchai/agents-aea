@@ -1,6 +1,6 @@
 name: aries_faber
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: skill
 description: The aries_faber skill implements the faber player in the aries cloud
   agent demo
@@ -8,17 +8,17 @@ license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmdkSNCYx5dNGDAAveapQgoyM7Y7iYeQzR7KN2Sso3CJG4
-  __init__.py: QmNPVQ6UajvJodqTLWbLvQZkKCfrNn1nYPrQXai3xdj6F7
-  behaviours.py: QmQUmnhHmEFjGp9SvkLqcBrmCe2CSFngzqTHNadqJXQMgw
+  __init__.py: QmRB8ZTyM23HnkV5yA81YgqaRvL8uCsSVqGksTt49YUh73
+  behaviours.py: QmYWrG5vc28dAVwXHt2mGGKrCqKGDw2JX1r4rycoqhBhm2
   dialogues.py: Qmeynv4h5ArYBJ2wkQurW7VXdDP1VXNbg5GiADkgMPFqj3
-  handlers.py: QmXpCVgMTLyewXPmXMmPHUpnZhQZ35GFAhZtcpujAd3WZ8
-  strategy.py: QmPPL4aZhf2jtCHjQyuzh9gyWiNYRt9V29UYvPvp9Lbqhw
+  handlers.py: QmQudQp2NRdC31SiyWhyVy6TK4SVCanuUQ4XcqTYUDgAho
+  strategy.py: QmdcUrzKHX2CAe1zXRpoFBzj4vSmqGjuhh8MaRmBSpx8gi
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/http:0.6.0
-- fetchai/oef_search:0.7.0
+- fetchai/default:0.7.0
+- fetchai/http:0.7.0
+- fetchai/oef_search:0.8.0
 skills: []
 behaviours:
   faber:
@@ -57,3 +57,4 @@ models:
       search_radius: 5.0
     class_name: FaberStrategy
 dependencies: {}
+is_abstract: false

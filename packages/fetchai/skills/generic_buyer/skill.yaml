@@ -1,24 +1,24 @@
 name: generic_buyer
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.6.0, <0.7.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
-  __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
-  behaviours.py: QmX7Km1haWpc8bXm24kD7d5F14me9sSfAo5X3JZtBhGUph
+  __init__.py: Qmb8QqKHNLY3G3jMk8FMcobatKCyJVEQXeLs32H4vaRRX8
+  behaviours.py: QmejRk9gBDRqrbnTirmqmsR8mH6KXxPMk6Ex6KsjYHB2aL
   dialogues.py: QmY3uJpB2UpWsa9SipZQzMjYr7WtSycuF5YS3SLyCuh78N
-  handlers.py: QmTHw6Eg4zga1yzeskxu3qUKYcj56kLeogpJSYUwsvs29o
-  strategy.py: QmchU21Gb1pmNoGmFTDass7zhNE8rCvWGNh1UYFK5DzhoK
+  handlers.py: Qmdv9TWrYYzfYQH5vEjHvHA3PG1SydF3V4QqnV25uLRMtf
+  strategy.py: Qmd8ojtvdQ1W62PpY7KM3epFzhYVzQBEhc3kPLuXjps5eN
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/ledger_api:0.4.0
-- fetchai/oef_search:0.7.0
+- fetchai/default:0.7.0
+- fetchai/fipa:0.8.0
+- fetchai/ledger_api:0.5.0
+- fetchai/oef_search:0.8.0
 skills: []
 behaviours:
   search:

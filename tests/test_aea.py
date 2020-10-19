@@ -32,7 +32,7 @@ import pytest
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import PublicId, SkillConfig
+from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException
@@ -43,9 +43,10 @@ from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
+from aea.runtime import RuntimeStates, _StopRuntime
 from aea.skills.base import Skill, SkillContext
 
-from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 from tests.common.utils import (
@@ -137,7 +138,6 @@ def test_double_start():
     with run_in_thread(agent.start, timeout=20):
         try:
             wait_for_condition(lambda: agent.is_running, timeout=20)
-
             t = Thread(target=agent.start)
             t.start()
             time.sleep(1)
@@ -160,10 +160,10 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.9.0")
+        local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.9.0")])
+        agent = builder.build(connection_ids=[local_connection_id])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = agent.resources.get_connection(local_connection_id)
@@ -190,7 +190,9 @@ def test_react():
             handler = agent.resources.get_handler(
                 default_protocol_public_id, dummy_skill_public_id
             )
+
             assert handler is not None, "Handler is not set."
+
             wait_for_condition(
                 lambda: len(handler.handled_messages) > 0,
                 timeout=20,
@@ -212,10 +214,10 @@ def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.9.0")
+        local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.9.0")])
+        aea = builder.build(connection_ids=[local_connection_id])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         local_connection = aea.resources.get_connection(local_connection_id)
@@ -310,10 +312,10 @@ def test_initialize_aea_programmatically():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
-        local_connection_id = PublicId.from_str("fetchai/local:0.9.0")
+        local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.9.0")])
+        aea = builder.build(connection_ids=[local_connection_id])
         local_connection = aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
@@ -489,7 +491,7 @@ def test_add_behaviour_dynamically():
     with run_in_thread(agent.start, timeout=5, on_exit=agent.stop):
         wait_for_condition(lambda: agent.is_running, timeout=10)
 
-        dummy_skill_id = PublicId("dummy_author", "dummy", "0.1.0")
+        dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
         dummy_skill = agent.resources.get_skill(dummy_skill_id)
 
         wait_for_condition(lambda: dummy_skill is not None, timeout=10)
@@ -530,10 +532,8 @@ def test_error_handler_is_not_set():
         message=msg,
     )
 
-    with patch.object(agent, "stop") as mocked_stop:
+    with pytest.raises(_StopRuntime):
         agent.handle_envelope(envelope)
-
-    mocked_stop.assert_called()
 
 
 def test_no_handlers_registered():
@@ -562,11 +562,15 @@ def test_no_handlers_registered():
             protocol_id=DefaultMessage.protocol_id,
             message=msg,
         )
-        with patch.object(aea.filter, "get_active_handlers", return_value=[]):
+        with patch.object(
+            aea.filter, "get_active_handlers", return_value=[]
+        ), patch.object(
+            aea.runtime.multiplexer, "put",
+        ):
             aea.handle_envelope(envelope)
-            mock_logger.assert_any_call(
-                f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'."
-            )
+        mock_logger.assert_any_call(
+            f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'."
+        )
 
 
 class TestContextNamespace:
@@ -721,7 +725,6 @@ class TestAeaExceptionPolicy:
         with patch.object(self.aea._logger, "exception") as patched:
             t = Thread(target=self.aea.start)
             t.start()
-
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             time.sleep(1)
@@ -736,14 +739,17 @@ class TestAeaExceptionPolicy:
         with pytest.raises(ExpectedExcepton):
             self.aea.start()
 
-        assert not self.aea.is_running
+        assert self.aea.runtime.state == RuntimeStates.error
 
     def test_act_stop_and_exit(self) -> None:
         """Test stop and exit policy on behaviour act."""
         self.aea._skills_exception_policy = ExceptionPolicyEnum.stop_and_exit
         self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
 
-        self.aea.start()
+        with pytest.raises(
+            AEAException, match=r"AEA was terminated cause exception .*"
+        ):
+            self.aea.start()
 
         assert not self.aea.is_running
 
@@ -772,7 +778,6 @@ class TestAeaExceptionPolicy:
 
     def teardown(self) -> None:
         """Stop AEA if not stopped."""
-        self.aea.teardown()
         self.aea.stop()
 
 
@@ -802,7 +807,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
-        self.aea_tool.aea.runtime.main_loop.teardown()
+        self.aea_tool.aea.runtime.main_loop._teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -841,7 +846,7 @@ class BaseTimeExecutionCase(TestCase):
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
         self.envelope = AeaTool.dummy_envelope()
-        self.aea_tool.aea.runtime.main_loop.setup()
+        self.aea_tool.aea.runtime.main_loop._setup()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""

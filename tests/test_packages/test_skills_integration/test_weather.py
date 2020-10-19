@@ -16,13 +16,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This test module contains the integration test for the thermometer skills."""
+"""This test module contains the integration test for the weather skills."""
 
 from random import uniform
 
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
+
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
     COSMOS,
@@ -37,22 +39,21 @@ from tests.conftest import (
 
 
 @pytest.mark.integration
-class TestThermometerSkill(AEATestCaseMany):
-    """Test that thermometer skills work."""
+class TestWeatherSkills(AEATestCaseMany):
+    """Test that weather skills work."""
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
-    def test_thermometer(self):
-        """Run the thermometer skills sequence."""
-
-        thermometer_aea_name = "my_thermometer"
-        thermometer_client_aea_name = "my_thermometer_client"
-        self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
+    def test_weather(self):
+        """Run the weather skills sequence."""
+        weather_station_aea_name = "my_weather_station"
+        weather_client_aea_name = "my_weather_client"
+        self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # generate random location
@@ -61,19 +62,21 @@ class TestThermometerSkill(AEATestCaseMany):
             "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
-        # add packages for agent one and run it
-        self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/thermometer:0.12.0")
-        setting_path = (
-            "vendor.fetchai.skills.thermometer.models.strategy.args.is_ledger_tx"
+        # prepare agent one (weather station)
+        self.set_agent_context(weather_station_aea_name)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/weather_station:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        dotted_path = (
+            "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
         )
-        self.set_config(setting_path, False, "bool")
+        self.set_config(dotted_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -87,25 +90,29 @@ class TestThermometerSkill(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
-        setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
-
-        # add packages for agent two and run it
-        self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.11.0")
         setting_path = (
-            "vendor.fetchai.skills.thermometer_client.models.strategy.args.is_ledger_tx"
+            "vendor.fetchai.skills.weather_station.models.strategy.args.location"
         )
-        self.set_config(setting_path, False, "bool")
+        self.nested_set_config(setting_path, location)
+
+        # prepare agent two (weather client)
+        self.set_agent_context(weather_client_aea_name)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/weather_client:0.12.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        dotted_path = (
+            "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
+        )
+        self.set_config(dotted_path, False, "bool")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         # add keys
@@ -118,37 +125,17 @@ class TestThermometerSkill(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = (
-            "vendor.fetchai.skills.thermometer_client.models.strategy.args.location"
+            "vendor.fetchai.skills.weather_client.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
-        # run AEAs
-        self.set_agent_context(thermometer_aea_name)
-        thermometer_aea_process = self.run_agent()
-
-        check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
-            "Starting libp2p node...",
-            "Connecting to libp2p node...",
-            "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
-        )
-        missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
-        )
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
-
-        self.set_agent_context(thermometer_client_aea_name)
-        thermometer_client_aea_process = self.run_agent()
+        # run agents
+        self.set_agent_context(weather_station_aea_name)
+        weather_station_process = self.run_agent()
 
         check_strings = (
             "Downloading golang dependencies. This may take a while...",
@@ -156,19 +143,32 @@ class TestThermometerSkill(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            thermometer_client_aea_process,
-            check_strings,
-            timeout=240,
-            is_terminating=False,
+            weather_station_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
-            missing_strings
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
+
+        self.set_agent_context(weather_client_aea_name)
+        weather_client_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            LIBP2P_SUCCESS_MESSAGE,
         )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings, timeout=240, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
 
         check_strings = (
             "registering agent on SOEF.",
@@ -181,11 +181,11 @@ class TestThermometerSkill(AEATestCaseMany):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, is_terminating=False
+            weather_station_process, check_strings, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
         check_strings = (
             "found agents=",
@@ -197,15 +197,13 @@ class TestThermometerSkill(AEATestCaseMany):
             "received the following data=",
         )
         missing_strings = self.missing_from_output(
-            thermometer_client_aea_process, check_strings, is_terminating=False
+            weather_client_process, check_strings, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
-            missing_strings
-        )
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
 
-        self.terminate_agents(thermometer_aea_process, thermometer_client_aea_process)
+        self.terminate_agents(weather_station_process, weather_client_process)
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
@@ -213,22 +211,21 @@ class TestThermometerSkill(AEATestCaseMany):
 
 
 @pytest.mark.integration
-class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
-    """Test that thermometer skills work."""
+class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
+    """Test that weather skills work."""
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
-    def test_thermometer(self):
-        """Run the thermometer skills sequence."""
-
-        thermometer_aea_name = "my_thermometer"
-        thermometer_client_aea_name = "my_thermometer_client"
-        self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
+    def test_weather(self):
+        """Run the weather skills sequence."""
+        weather_station_aea_name = "my_weather_station"
+        weather_client_aea_name = "my_weather_client"
+        self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.4.0": "fetchai/ledger:0.6.0",
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
+            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
         }
 
         # generate random location
@@ -237,19 +234,20 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
-        # add packages for agent one and run it
-        self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/thermometer:0.12.0")
+        # add packages for agent one
+        self.set_agent_context(weather_station_aea_name)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/weather_station:0.13.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_aea:0.11.0", thermometer_aea_name
+            "fetchai/weather_station:0.14.0", weather_station_aea_name
         )
         assert (
             diff == []
@@ -266,25 +264,28 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.set_config(setting_path, COSMOS)
 
         # replace location
-        setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
-        self.force_set_config(setting_path, location)
+        setting_path = (
+            "vendor.fetchai.skills.weather_station.models.strategy.args.location"
+        )
+        self.nested_set_config(setting_path, location)
 
-        # add packages for agent two and run it
-        self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/ledger:0.6.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.11.0")
+        # add packages for agent two
+        self.set_agent_context(weather_client_aea_name)
+        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.10.0")
+        self.remove_item("connection", "fetchai/stub:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.7.0")
+        self.add_item("skill", "fetchai/weather_client:0.12.0")
         setting_path = "agent.default_routing"
-        self.force_set_config(setting_path, default_routing)
+        self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.11.0", thermometer_client_aea_name
+            "fetchai/weather_client:0.14.0", weather_client_aea_name
         )
         assert (
             diff == []
@@ -303,37 +304,16 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
-        self.force_set_config(setting_path, NON_GENESIS_CONFIG)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.force_set_config(setting_path, COSMOS)
+        self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
 
         # replace location
         setting_path = (
-            "vendor.fetchai.skills.thermometer_client.models.strategy.args.location"
+            "vendor.fetchai.skills.weather_client.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
-        # run AEAs
-        self.set_agent_context(thermometer_aea_name)
-        thermometer_aea_process = self.run_agent()
-
-        check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
-            "Starting libp2p node...",
-            "Connecting to libp2p node...",
-            "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
-        )
-        missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
-        )
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
-
-        self.set_agent_context(thermometer_client_aea_name)
-        thermometer_client_aea_process = self.run_agent()
+        self.set_agent_context(weather_station_aea_name)
+        weather_station_process = self.run_agent()
 
         check_strings = (
             "Downloading golang dependencies. This may take a while...",
@@ -341,19 +321,32 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            thermometer_client_aea_process,
-            check_strings,
-            timeout=240,
-            is_terminating=False,
+            weather_station_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
-            missing_strings
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
+
+        self.set_agent_context(weather_client_aea_name)
+        weather_client_process = self.run_agent()
+
+        check_strings = (
+            "Downloading golang dependencies. This may take a while...",
+            "Finished downloading golang dependencies.",
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            LIBP2P_SUCCESS_MESSAGE,
         )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings, timeout=240, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
 
         check_strings = (
             "registering agent on SOEF.",
@@ -367,11 +360,11 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
+            weather_station_process, check_strings, timeout=240, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
         check_strings = (
             "found agents=",
@@ -390,15 +383,13 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             "received the following data=",
         )
         missing_strings = self.missing_from_output(
-            thermometer_client_aea_process, check_strings, is_terminating=False
+            weather_client_process, check_strings, is_terminating=False
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
-            missing_strings
-        )
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
 
-        self.terminate_agents(thermometer_aea_process, thermometer_client_aea_process)
+        self.terminate_agents(weather_station_process, weather_client_process)
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
