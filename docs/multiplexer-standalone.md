@@ -9,10 +9,12 @@ from threading import Thread
 from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.stub.connection import StubConnection, write_with_lock
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
+
+from packages.fetchai.connections.stub.connection import StubConnection
 
 
 INPUT_FILE = "input.txt"
@@ -120,10 +122,12 @@ from threading import Thread
 from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.stub.connection import StubConnection, write_with_lock
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
+
+from packages.fetchai.connections.stub.connection import StubConnection
 
 
 INPUT_FILE = "input.txt"

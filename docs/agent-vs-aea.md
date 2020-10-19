@@ -16,9 +16,11 @@ from typing import List
 from aea.agent import Agent
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.connections.stub.connection import StubConnection, write_with_lock
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+
+from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default.message import DefaultMessage
 ```
 
@@ -167,9 +169,11 @@ from typing import List
 from aea.agent import Agent
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.connections.stub.connection import StubConnection, write_with_lock
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+
+from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 
