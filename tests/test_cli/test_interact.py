@@ -30,6 +30,8 @@ from aea.helpers.base import send_control_c
 from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
 
+from packages.fetchai.protocols.default.message import DefaultMessage
+
 from tests.conftest import MAX_FLAKY_RERUNS
 
 
@@ -67,10 +69,6 @@ class TestInteractCommand(AEATestCaseMany):
 class ConstructMessageTestCase(TestCase):
     """Test case for _construct_message method."""
 
-    @mock.patch(
-        "packages.fetchai.protocols.default.message.DefaultMessage.serializer.decode",
-        return_value="Decoded message",
-    )
     def test__construct_message_positive(self, *mocks):
         """Test _construct_message method for positive result."""
         envelope = mock.Mock()
@@ -79,26 +77,30 @@ class ConstructMessageTestCase(TestCase):
         envelope.protocol_id = "protocol-id"
 
         envelope.message = "Message"
-        result = _construct_message("action", envelope)
-        expected_result = (
-            "\nAction envelope:"
-            "\nto: receiver"
-            "\nsender: sender"
-            "\nprotocol_id: protocol-id"
-            "\nmessage: Message\n"
-        )
-        self.assertEqual(result, expected_result)
+        message_class = DefaultMessage
+        with mock.patch.object(
+            message_class.serializer, "decode", return_value="Decoded message"
+        ):
+            result = _construct_message("action", envelope, message_class)
+            expected_result = (
+                "\nAction envelope:"
+                "\nto: receiver"
+                "\nsender: sender"
+                "\nprotocol_id: protocol-id"
+                "\nmessage: Message\n"
+            )
+            self.assertEqual(result, expected_result)
 
-        envelope.message = b"Encoded message"
-        result = _construct_message("action", envelope)
-        expected_result = (
-            "\nAction envelope:"
-            "\nto: receiver"
-            "\nsender: sender"
-            "\nprotocol_id: protocol-id"
-            "\nmessage: Decoded message\n"
-        )
-        self.assertEqual(result, expected_result)
+            envelope.message = b"Encoded message"
+            result = _construct_message("action", envelope, message_class)
+            expected_result = (
+                "\nAction envelope:"
+                "\nto: receiver"
+                "\nsender: sender"
+                "\nprotocol_id: protocol-id"
+                "\nmessage: Decoded message\n"
+            )
+            self.assertEqual(result, expected_result)
 
 
 def _raise_keyboard_interrupt():
@@ -120,25 +122,26 @@ class TryConstructEnvelopeTestCase(TestCase):
         msg_mock.to = "to"
         msg_mock.sender = "sender"
         dialogues_mock.create.return_value = msg_mock, None
-        envelope = _try_construct_envelope("agent_name", dialogues_mock)
+        message_class = mock.Mock()
+        envelope = _try_construct_envelope("agent_name", dialogues_mock, message_class)
         self.assertIsInstance(envelope, Envelope)
 
     @mock.patch("builtins.input", return_value="")
     def test__try_construct_envelope_positive_no_input_message(self, *mocks):
         """Test _try_construct_envelope for no input message result."""
-        envelope = _try_construct_envelope("agent_name", "dialogues")
+        envelope = _try_construct_envelope("agent_name", "dialogues", "message_class")
         self.assertEqual(envelope, None)
 
     @mock.patch("builtins.input", _raise_keyboard_interrupt)
     def test__try_construct_envelope_keyboard_interrupt(self, *mocks):
         """Test _try_construct_envelope for keyboard interrupt result."""
         with self.assertRaises(KeyboardInterrupt):
-            _try_construct_envelope("agent_name", "dialogues")
+            _try_construct_envelope("agent_name", "dialogues", mock.Mock())
 
     @mock.patch("builtins.input", _raise_exception)
     def test__try_construct_envelope_exception_raised(self, *mocks):
         """Test _try_construct_envelope for exception raised result."""
-        envelope = _try_construct_envelope("agent_name", "dialogues")
+        envelope = _try_construct_envelope("agent_name", "dialogues", "message_class")
         self.assertEqual(envelope, None)
 
 
@@ -160,24 +163,25 @@ class ProcessEnvelopesTestCase(TestCase):
         inbox.get_nowait = lambda: "Not None"
         outbox = mock.Mock()
         dialogues = mock.Mock()
+        message_class = mock.Mock()
 
         try_construct_envelope_mock.return_value = None
         constructed_message = "Constructed message"
         construct_message_mock.return_value = constructed_message
 
         # no envelope and inbox not empty behaviour
-        _process_envelopes(agent_name, inbox, outbox, dialogues)
+        _process_envelopes(agent_name, inbox, outbox, dialogues, message_class)
         click_echo_mock.assert_called_once_with(constructed_message)
 
         # no envelope and inbox empty behaviour
         inbox.empty = lambda: True
-        _process_envelopes(agent_name, inbox, outbox, dialogues)
+        _process_envelopes(agent_name, inbox, outbox, dialogues, message_class)
         click_echo_mock.assert_called_with("Received no new envelope!")
 
         # present envelope behaviour
         try_construct_envelope_mock.return_value = "Not None envelope"
         outbox.put = mock.Mock()
-        _process_envelopes(agent_name, inbox, outbox, dialogues)
+        _process_envelopes(agent_name, inbox, outbox, dialogues, message_class)
         outbox.put.assert_called_once_with("Not None envelope")
         click_echo_mock.assert_called_with(constructed_message)
 
@@ -192,9 +196,10 @@ class ProcessEnvelopesTestCase(TestCase):
         inbox.get_nowait = lambda: None
         outbox = mock.Mock()
         dialogues = mock.Mock()
+        message_class = mock.Mock()
 
         with self.assertRaises(ValueError):
-            _process_envelopes(agent_name, inbox, outbox, dialogues)
+            _process_envelopes(agent_name, inbox, outbox, dialogues, message_class)
 
 
 class TestInteractEcho(AEATestCaseEmpty):

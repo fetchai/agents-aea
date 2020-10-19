@@ -40,13 +40,6 @@ def test_default_bytes_serialization():
     actual_msg = DefaultMessage.serializer.decode(msg_bytes)
     assert expected_msg == actual_msg
 
-    with pytest.raises(ValueError):
-        with mock.patch(
-            "packages.fetchai.protocols.default.message.DefaultMessage.Performative"
-        ) as mock_type_enum:
-            mock_type_enum.BYTES.value = "unknown"
-            assert DefaultMessage.serializer.encode(expected_msg), ""
-
 
 def test_default_error_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""

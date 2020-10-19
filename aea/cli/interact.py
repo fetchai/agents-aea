@@ -22,7 +22,7 @@
 import codecs
 import os
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union
+from typing import Optional, TYPE_CHECKING, Type, Union
 
 import click
 
@@ -120,6 +120,9 @@ def _run_interaction_channel():
         DefaultDialogue,
         DefaultDialogues,
     )
+    from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+        DefaultMessage,
+    )
 
     # load stub connection
     configuration = ConnectionConfig(
@@ -151,7 +154,7 @@ def _run_interaction_channel():
     try:
         multiplexer.connect()
         while True:  # pragma: no cover
-            _process_envelopes(agent_name, inbox, outbox, dialogues)
+            _process_envelopes(agent_name, inbox, outbox, dialogues, DefaultMessage)
 
     except KeyboardInterrupt:
         click.echo("Interaction interrupted!")
@@ -162,7 +165,11 @@ def _run_interaction_channel():
 
 
 def _process_envelopes(
-    agent_name: str, inbox: InBox, outbox: OutBox, dialogues: Dialogues,
+    agent_name: str,
+    inbox: InBox,
+    outbox: OutBox,
+    dialogues: Dialogues,
+    message_class: Type[Message],
 ) -> None:
     """
     Process envelopes.
@@ -171,35 +178,34 @@ def _process_envelopes(
     :param inbox: an inbox object.
     :param outbox: an outbox object.
     :param dialogues: the dialogues object.
+    :param message_class: the message class.
 
     :return: None.
     """
-    envelope = _try_construct_envelope(agent_name, dialogues)
+    envelope = _try_construct_envelope(agent_name, dialogues, message_class)
     if envelope is None:
-        _check_for_incoming_envelope(inbox)
+        _check_for_incoming_envelope(inbox, message_class)
     else:
         outbox.put(envelope)
-        click.echo(_construct_message("sending", envelope))
+        click.echo(_construct_message("sending", envelope, message_class))
 
 
-def _check_for_incoming_envelope(inbox: InBox):
+def _check_for_incoming_envelope(inbox: InBox, message_class: Type[Message]):
     if not inbox.empty():
         envelope = inbox.get_nowait()
         if envelope is None:
             raise ValueError("Could not recover envelope from inbox.")
-        click.echo(_construct_message("received", envelope))
+        click.echo(_construct_message("received", envelope, message_class))
     else:
         click.echo("Received no new envelope!")
 
 
-def _construct_message(action_name: str, envelope: Envelope):
-    from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
-        DefaultMessage,
-    )
-
+def _construct_message(
+    action_name: str, envelope: Envelope, message_class: Type[Message]
+):
     action_name = action_name.title()
     msg = (
-        DefaultMessage.serializer.decode(envelope.message)
+        message_class.serializer.decode(envelope.message)
         if isinstance(envelope.message, bytes)
         else envelope.message
     )
@@ -213,33 +219,24 @@ def _construct_message(action_name: str, envelope: Envelope):
 
 
 def _try_construct_envelope(
-    agent_name: str, dialogues: Dialogues
+    agent_name: str, dialogues: Dialogues, message_class: Type[Message]
 ) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
-    from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
-        DefaultMessage,
-    )
-
     envelope = None  # type: Optional[Envelope]
     try:
         performative_str = "bytes"
-        performative = DefaultMessage.Performative(performative_str)
+        performative = message_class.Performative(performative_str)
         click.echo(
-            "Provide message of protocol fetchai/default:0.7.0 for performative {}:".format(
-                performative_str
-            )
+            f"Provide message of protocol '{str(message_class.protocol_id)}' for performative {performative_str}:"
         )
         message_escaped = input()  # nosec
         message_escaped = message_escaped.strip()
         if message_escaped == "":
             raise InterruptInputException
-        if performative == DefaultMessage.Performative.BYTES:
-            message_decoded = codecs.decode(
-                message_escaped.encode("utf-8"), "unicode-escape"
-            )
-            message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
-        else:
-            message = message_escaped  # pragma: no cover
+        message_decoded = codecs.decode(
+            message_escaped.encode("utf-8"), "unicode-escape"
+        )
+        message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
         msg, _ = dialogues.create(
             counterparty=agent_name, performative=performative, content=message,
         )
