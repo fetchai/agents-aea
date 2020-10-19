@@ -1,6 +1,14 @@
 
 These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface.
 
+## Preperation
+
+Get the packages directory from the AEA repository:
+
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+
 ## Imports
 
 First, import the necessary common Python libraries and classes.

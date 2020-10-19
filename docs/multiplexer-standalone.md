@@ -1,6 +1,6 @@
 The `Multiplexer` can be used stand-alone. This way a developer can utilise the protocols and connections independent of the `Agent` or `AEA` classes.
 
-First, import the Python and application specific libraries and set the static variables.
+First, import the Python and application specific libraries and set the static variables. (Get the packages directory from the AEA repository `svn export https://github.com/fetchai/agents-aea.git/trunk/packages`.)
 ``` python
 import os
 import time

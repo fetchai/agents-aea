@@ -966,11 +966,7 @@ class AEABuilder(WithLogger):
 
         :return: decision maker handler class
         """
-        return (
-            self._decision_maker_handler_class
-            if self._decision_maker_handler_class is not None
-            else None
-        )
+        return self._decision_maker_handler_class
 
     def _get_skill_exception_policy(self) -> ExceptionPolicyEnum:
         """

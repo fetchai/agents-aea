@@ -255,6 +255,13 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 
 The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
+First, get the packages directory from the AEA repository:
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+
+Then write the test:
+
 ``` python
 import signal
 import time
