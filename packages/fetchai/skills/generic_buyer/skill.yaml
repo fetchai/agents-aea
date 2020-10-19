@@ -19,6 +19,8 @@ protocols:
 - fetchai/fipa:0.8.0
 - fetchai/ledger_api:0.5.0
 - fetchai/oef_search:0.8.0
+- fetchai/signing:0.5.0
+- fetchai/state_update:0.5.0
 skills: []
 behaviours:
   search:
