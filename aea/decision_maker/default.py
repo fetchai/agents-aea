@@ -40,7 +40,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: nocover
     from packages.fetchai.protocols.signing.dialogues import (  # noqa: F401
         SigningDialogue,
     )
