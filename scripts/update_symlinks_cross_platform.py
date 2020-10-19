@@ -41,7 +41,15 @@ SYMLINKS = [
     (TEST_DUMMY_AEA_DIR / "skills" / "dummy", TEST_DATA / "dummy_skill"),
     (
         TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "protocols" / "default",
-        ROOT_PATH / "aea" / "protocols" / "default",
+        FETCHAI_PACKAGES / "protocols" / "default",
+    ),
+    (
+        TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "protocols" / "signing",
+        FETCHAI_PACKAGES / "protocols" / "signing",
+    ),
+    (
+        TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "protocols" / "state_update",
+        FETCHAI_PACKAGES / "protocols" / "state_update",
     ),
     (
         TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "protocols" / "fipa",
@@ -57,7 +65,7 @@ SYMLINKS = [
     ),
     (
         TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "skills" / "error",
-        ROOT_PATH / "aea" / "skills" / "error",
+        FETCHAI_PACKAGES / "fetchai" / "skills" / "error",
     ),
 ]  # type: List[Tuple[Path, Path]]
 """A list of pairs: (link_path, target_path)"""

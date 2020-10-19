@@ -56,9 +56,9 @@ PROTOCOL_PATHS = list(
     map(
         operator.methodcaller("absolute"),
         [
-            Path("aea", "protocols", "default"),
-            Path("aea", "protocols", "signing"),
-            Path("aea", "protocols", "state_update"),
+            Path("packages", "fetchai", "protocols", "default"),
+            Path("packages", "fetchai", "protocols", "signing"),
+            Path("packages", "fetchai", "protocols", "state_update"),
             Path("packages", "fetchai", "protocols", "contract_api"),
             Path("packages", "fetchai", "protocols", "fipa"),
             Path("packages", "fetchai", "protocols", "gym"),
@@ -136,7 +136,7 @@ class AEAProject:
         self.temp_dir = tempfile.mkdtemp(dir=self.parent_dir)
         os.chdir(self.temp_dir)
 
-        run_aea("create", "--local", self.name, "--author", "fetchai")
+        run_aea("create", "--local", "--empty", self.name, "--author", "fetchai")
         os.chdir(self.name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -318,9 +318,6 @@ def main():
     """Run the script."""
     _check_preliminaries()
     with AEAProject():
-        # remove default protocol, since we are going to regenerate it
-        run_aea("remove", "skill", "fetchai/error:0.7.0")
-        run_aea("remove", "protocol", "fetchai/default:0.7.0")
 
         for package_path in PROTOCOL_PATHS:
             log("=" * 100)
