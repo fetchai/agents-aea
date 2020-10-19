@@ -55,4 +55,6 @@ def do_register(
     username = validate_author_name(username)
     token = register_new_account(username, email, password, password_confirmation)
     update_cli_config({AUTH_TOKEN_KEY: token})
+    if click.confirm('Do you want to subscribe?'):
+        click.echo("Please visit aea-registry.fetch.ai/mailing-list to subscribe")
     click.echo("Successfully registered and logged in: {}".format(username))
