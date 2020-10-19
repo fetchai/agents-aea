@@ -41,6 +41,8 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
 )
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
@@ -156,7 +158,11 @@ class TestCreate:
 
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
-        assert self.agent_config["protocols"] == [str(DEFAULT_PROTOCOL)]
+        assert self.agent_config["protocols"] == [
+            str(DEFAULT_PROTOCOL),
+            str(SIGNING_PROTOCOL),
+            str(STATE_UPDATE_PROTOCOL),
+        ]
 
     def test_skills_field_is_not_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
