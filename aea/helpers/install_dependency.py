@@ -17,13 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 """Helper to install python dependecies."""
-import pprint
 import subprocess  # nosec
 import sys
 from logging import Logger
 from typing import List
-
-import click
 
 from aea.configurations.base import Dependency
 from aea.exceptions import AEAException, enforce
@@ -40,7 +37,6 @@ def install_dependency(
 
     :return: None
     """
-    click.echo("Installing {}...".format(pprint.pformat(dependency_name)))
     try:
         pip_args = dependency.get_pip_install_args()
         command = [sys.executable, "-m", "pip", "install", *pip_args]

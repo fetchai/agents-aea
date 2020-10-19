@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea install' subcommand."""
 
+import pprint
 import sys
 from typing import Optional, cast
 
@@ -65,6 +66,7 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
             logger.debug("Installing all the dependencies...")
             dependencies = ctx.get_dependencies()
             for name, d in dependencies.items():
+                click.echo("Installing {}...".format(pprint.pformat(name)))
                 install_dependency(name, d, logger)
     except AEAException as e:
         raise click.ClickException(str(e))
