@@ -64,7 +64,9 @@ from aea.skills.base import Behaviour, Handler
 
 
 if TYPE_CHECKING:
-    from packages.fetchai.skills.error.handlers import ErrorHandler  # noqa: F401
+    from packages.fetchai.skills.error.handlers import (  # noqa: F401 # pragma: nocover
+        ErrorHandler,
+    )
 
 
 class AEA(Agent):
@@ -272,6 +274,10 @@ class AEA(Agent):
             protocol.public_id, envelope.skill_id
         )
 
+        if len(handlers) == 0:
+            error_handler.send_unsupported_skill(envelope)
+            return None, []
+
         if isinstance(envelope.message, Message):
             msg = envelope.message
             return msg, handlers
@@ -283,10 +289,6 @@ class AEA(Agent):
         except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
             self.logger.warning("Decoding error. Exception: {}".format(str(e)))
             error_handler.send_decoding_error(envelope)
-            return None, []
-
-        if len(handlers) == 0:
-            error_handler.send_unsupported_skill(envelope)
             return None, []
 
     def handle_envelope(self, envelope: Envelope) -> None:

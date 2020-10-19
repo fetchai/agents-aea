@@ -1310,7 +1310,7 @@ class AEABuilder(WithLogger):
             elif isinstance(configuration, ConnectionConfig):
                 dependencies, component_type = configuration.connections, "connections"
             else:
-                raise AEAException("Not a valid configuration type.")
+                raise AEAException("Not a valid configuration type.")  # pragma: nocover
             for dependency in dependencies:
                 dependency_to_supported_dependencies[
                     ComponentId(ComponentType.SKILL, dependency)

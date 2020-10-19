@@ -47,7 +47,7 @@ from packages.fetchai.protocols.state_update.dialogues import (
     StateUpdateDialogues,
 )
 
-from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
+from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
 
 
 def role_from_first_message_dd(
@@ -197,6 +197,7 @@ class TestProtocolFromDir:
         """Set the tests up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
         os.chdir(cls.t)
 
     def test_protocol_load_positive(self):

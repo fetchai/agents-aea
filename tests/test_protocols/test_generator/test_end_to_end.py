@@ -61,6 +61,7 @@ class TestEndToEndGenerator(UseOef):
         """Set the test up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
         os.chdir(cls.t)
         cls.private_key_path_1 = os.path.join(cls.t, DEFAULT_PRIVATE_KEY_FILE + "_1")
         cls.private_key_path_2 = os.path.join(cls.t, DEFAULT_PRIVATE_KEY_FILE + "_2")
