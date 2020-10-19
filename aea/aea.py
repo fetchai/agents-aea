@@ -47,10 +47,6 @@ from aea.configurations.constants import (
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import DecisionMakerHandler
-from aea.decision_maker.default import (
-    DecisionMakerHandler as DefaultDecisionMakerHandler,
-)
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
@@ -87,9 +83,7 @@ class AEA(Agent):
         period: float = 0.05,
         execution_timeout: float = 0,
         max_reactions: int = 20,
-        decision_maker_handler_class: Type[
-            DecisionMakerHandler
-        ] = DefaultDecisionMakerHandler,
+        decision_maker_handler_class: Optional[Type["DecisionMakerHandler"]] = None,  # type: ignore
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
@@ -141,6 +135,13 @@ class AEA(Agent):
         )
 
         self.max_reactions = max_reactions
+
+        if decision_maker_handler_class is None:
+            from aea.decision_maker.default import (  # isort:skip  # pylint: disable=import-outside-toplevel
+                DecisionMakerHandler as DefaultDecisionMakerHandler,
+            )
+
+            decision_maker_handler_class = DefaultDecisionMakerHandler
         decision_maker_handler = decision_maker_handler_class(
             identity=identity, wallet=wallet
         )

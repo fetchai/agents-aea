@@ -16,6 +16,8 @@ protocols:
 - fetchai/ledger_api:0.5.0
 - fetchai/ml_trade:0.7.0
 - fetchai/oef_search:0.8.0
+- fetchai/signing:0.5.0
+- fetchai/state_update:0.5.0
 skills:
 - fetchai/error:0.7.0
 - fetchai/generic_seller:0.14.0

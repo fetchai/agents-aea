@@ -58,15 +58,15 @@ from aea.configurations.constants import (
 from aea.configurations.constants import (
     DEFAULT_SEARCH_SERVICE_ADDRESS as _DEFAULT_SEARCH_SERVICE_ADDRESS,
 )
-from aea.configurations.constants import DEFAULT_SKILL
+from aea.configurations.constants import (
+    DEFAULT_SKILL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
+)
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import DecisionMakerHandler
-from aea.decision_maker.default import (
-    DecisionMakerHandler as DefaultDecisionMakerHandler,
-)
 from aea.exceptions import AEAException
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
@@ -281,9 +281,6 @@ class AEABuilder(WithLogger):
     DEFAULT_AGENT_ACT_PERIOD = 0.05  # seconds
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
-    DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
-        DecisionMakerHandler
-    ] = DefaultDecisionMakerHandler
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
@@ -353,7 +350,9 @@ class AEABuilder(WithLogger):
         self._period: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
-        self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
+        self._decision_maker_handler_class: Optional[  # type: ignore
+            Type["DecisionMakerHandler"]
+        ] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
@@ -516,6 +515,15 @@ class AEABuilder(WithLogger):
         self.add_protocol(
             Path(self.registry_dir, "fetchai", "protocols", DEFAULT_PROTOCOL.name)
         )
+        # add signing protocol
+        self.add_protocol(
+            Path(self.registry_dir, "fetchai", "protocols", SIGNING_PROTOCOL.name)
+        )
+        # add state update protocol
+        self.add_protocol(
+            Path(self.registry_dir, "fetchai", "protocols", STATE_UPDATE_PROTOCOL.name)
+        )
+
         # add stub connection
         self.add_connection(
             Path(self.registry_dir, "fetchai", "connections", DEFAULT_CONNECTION.name)
@@ -951,7 +959,9 @@ class AEABuilder(WithLogger):
             else self.DEFAULT_MAX_REACTIONS
         )
 
-    def _get_decision_maker_handler_class(self) -> Type[DecisionMakerHandler]:
+    def _get_decision_maker_handler_class(
+        self,
+    ) -> Optional[Type["DecisionMakerHandler"]]:  # type: ignore
         """
         Return the decision maker handler class.
 
@@ -960,7 +970,7 @@ class AEABuilder(WithLogger):
         return (
             self._decision_maker_handler_class
             if self._decision_maker_handler_class is not None
-            else self.DEFAULT_DECISION_MAKER_HANDLER_CLASS
+            else None
         )
 
     def _get_skill_exception_policy(self) -> ExceptionPolicyEnum:
