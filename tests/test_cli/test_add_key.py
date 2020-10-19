@@ -196,9 +196,7 @@ class TestAddManyKeys:
     def test_add_many_keys(self, pytestconfig):
         """Test that the keys are added correctly."""
 
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, FETCHAI_PRIVATE_KEY_FILE],
-        )
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FETCHAI],)
         assert result.exit_code == 0
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "add-key", ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE],
