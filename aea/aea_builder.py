@@ -67,6 +67,7 @@ from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.wallet import Wallet
+from aea.decision_maker.base import DecisionMakerHandler
 from aea.exceptions import AEAException
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
@@ -350,9 +351,7 @@ class AEABuilder(WithLogger):
         self._period: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
-        self._decision_maker_handler_class: Optional[  # type: ignore
-            Type["DecisionMakerHandler"]
-        ] = None
+        self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
@@ -961,7 +960,7 @@ class AEABuilder(WithLogger):
 
     def _get_decision_maker_handler_class(
         self,
-    ) -> Optional[Type["DecisionMakerHandler"]]:  # type: ignore
+    ) -> Optional[Type[DecisionMakerHandler]]:
         """
         Return the decision maker handler class.
 
