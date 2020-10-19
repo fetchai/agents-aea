@@ -41,7 +41,7 @@ from packages.fetchai.connections.stub.connection import (
     lock_file,
     write_envelope,
 )
-from packages.fetchai.protocols.default.message import DefaultMessage, _default_logger
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import ROOT_DIR, _make_stub_connection
 
@@ -152,21 +152,6 @@ class TestStubConnectionReception:
 
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope == actual_envelope
-
-    def test_reception_fails(self):
-        """Test the case when an error occurs during the processing of a line."""
-        patch = mock.patch.object(_default_logger, "error")
-        mocked_logger_error = patch.start()
-        with mock.patch(
-            "packages.fetchai.connections.stub.connection._decode",
-            side_effect=Exception("an error."),
-        ):
-            envelope_from_bytes(b"")
-            mocked_logger_error.assert_called_with(
-                "Error when processing a line. Message: an error.", exc_info=True
-            )
-
-        patch.stop()
 
     def teardown(self):
         """Tear down the test."""
@@ -388,7 +373,9 @@ async def test_bad_envelope():
 async def test_load_from_dir():
     """Test stub connection can be loaded from dir."""
     StubConnection.from_dir(
-        ROOT_DIR + "/aea/connections/stub", Identity("name", "address"), CryptoStore(),
+        ROOT_DIR + "/packages/fetchai/connections/stub",
+        Identity("name", "address"),
+        CryptoStore(),
     )
 
 
