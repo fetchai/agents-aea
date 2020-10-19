@@ -109,6 +109,7 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.connection_id = "fetchai/local:0.10.0"
 
         os.chdir(cls.t)

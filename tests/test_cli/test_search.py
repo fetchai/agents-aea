@@ -351,9 +351,9 @@ class TestSearchWithRegistryInSubfolderLocal:
         # copy the packages directory in the temporary test directory.
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
-        # remove all the skills except the echo skill (to make testing easier).
+        # remove all the skills except the echo and error skill (to make testing easier).
         for p in Path(cls.t, "packages", "fetchai", "skills").iterdir():
-            if p.name != "echo" and p.is_dir():
+            if p.name not in ["echo", "error"] and p.is_dir():
                 shutil.rmtree(p)
 
         cls.result = cls.runner.invoke(
@@ -415,12 +415,10 @@ class TestSearchInAgentDirectoryLocal:
         # copy the packages directory in the temporary test directory.
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
-        # remove all the skills except the echo skill (to make testing easier).
-        [
-            shutil.rmtree(p)
-            for p in Path(cls.t, "packages", "fetchai", "skills").iterdir()
-            if p.name != "echo" and p.is_dir()
-        ]
+        # remove all the skills except the echo and error skill (to make testing easier).
+        for p in Path(cls.t, "packages", "fetchai", "skills").iterdir():
+            if p.name not in ["echo", "error"] and p.is_dir():
+                shutil.rmtree(p)
 
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]

@@ -68,7 +68,7 @@ class ConstructMessageTestCase(TestCase):
     """Test case for _construct_message method."""
 
     @mock.patch(
-        "aea.cli.interact.DefaultMessage.serializer.decode",
+        "packages.fetchai.protocols.default.message.DefaultMessage.serializer.decode",
         return_value="Decoded message",
     )
     def test__construct_message_positive(self, *mocks):
