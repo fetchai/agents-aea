@@ -325,6 +325,50 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
             assert latest_agent_items == agent_items
 
 
+class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
+    """Test that the command 'aea upgrade' works."""
+
+    capture_log = True
+
+    @classmethod
+    def setup(cls):
+        """Set up test case."""
+        super(TestNonVendorProject, cls).setup()
+        cls.agent_name = "generic_buyer_0.9.0"
+        cls.run_cli_command(
+            "fetch", "fetchai/generic_buyer:0.9.0", "--alias", cls.agent_name
+        )
+        cls.agents.add(cls.agent_name)
+        cls.set_agent_context(cls.agent_name)
+
+    @patch("aea.cli.upgrade.ItemUpgrader.is_non_vendor", True)
+    @patch(
+        "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value="0.99.0"
+    )
+    @patch("aea.cli.upgrade.ItemUpgrader.remove_item")
+    @patch("aea.cli.upgrade.ItemUpgrader.add_item")
+    def test_non_vendor_nothing_to_upgrade(
+        self, *mocks
+    ):  # pylint: disable=unused-argument
+        """Test upgrade project dependencies not removed cause non vendor."""
+        with cd(self.agent_name):
+            base_agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+
+            self.runner.invoke(  # pylint: disable=no-member
+                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+            )
+            agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+            assert base_agent_items == agent_items
+
+
 class TestUpgradeConnectionLocally(BaseTestCase):
     """Test that the command 'aea upgrade connection' works."""
 
@@ -353,6 +397,25 @@ class TestUpgradeConnectionLocally(BaseTestCase):
             self.runner.invoke(
                 cli,
                 ["upgrade", *self.LOCAL, self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
+
+    @patch("aea.cli.upgrade.ItemUpgrader.is_non_vendor", True)
+    def test_upgrade_non_vendor(self):
+        """Test do not upgrade non vendor package."""
+        with pytest.raises(
+            ClickException,
+            match=r"The .* with id '.*' already has version .*. Nothing to upgrade.",
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    "upgrade",
+                    *self.LOCAL,
+                    self.ITEM_TYPE,
+                    f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:100.0.0",
+                ],
                 standalone_mode=False,
                 catch_exceptions=False,
             )

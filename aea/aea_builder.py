@@ -231,7 +231,7 @@ class _DependenciesManager:
             install_dependency(name, d, _default_logger)
 
 
-class AEABuilder(WithLogger):
+class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     """
     This class helps to build an AEA.
 
@@ -1093,7 +1093,7 @@ class AEABuilder(WithLogger):
                 )
 
     @staticmethod
-    def _find_component_directory_from_component_id(
+    def find_component_directory_from_component_id(
         aea_project_directory: Path, component_id: ComponentId
     ) -> Path:
         """Find a component directory from component id."""
@@ -1218,7 +1218,7 @@ class AEABuilder(WithLogger):
             ],
         )
         for component_id in component_ids:
-            component_path = self._find_component_directory_from_component_id(
+            component_path = self.find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
             self.add_component(
@@ -1237,7 +1237,7 @@ class AEABuilder(WithLogger):
             )
 
             for connection_id in connection_import_order:
-                component_path = self._find_component_directory_from_component_id(
+                component_path = self.find_component_directory_from_component_id(
                     aea_project_path, connection_id
                 )
                 self.add_component(
@@ -1258,7 +1258,7 @@ class AEABuilder(WithLogger):
             skill_ids, aea_project_path, skip_consistency_check
         )
         for skill_id in skill_import_order:
-            component_path = self._find_component_directory_from_component_id(
+            component_path = self.find_component_directory_from_component_id(
                 aea_project_path, skill_id
             )
             self.add_component(
@@ -1290,7 +1290,7 @@ class AEABuilder(WithLogger):
             ComponentId, Set[ComponentId]
         ] = defaultdict(set)
         for component_id in component_ids:
-            component_path = self._find_component_directory_from_component_id(
+            component_path = self.find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
             configuration = load_component_configuration(
