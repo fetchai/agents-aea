@@ -20,6 +20,7 @@
 """Implementation of the 'aea interact' subcommand."""
 
 import codecs
+import os
 from pathlib import Path
 from typing import Optional, TYPE_CHECKING, Union
 
@@ -33,10 +34,19 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,
 )
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
+)
 from aea.configurations.loader import ConfigLoader
+from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
+from aea.protocols.base import Protocol
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues
 
@@ -63,7 +73,43 @@ def interact(click_context: click.core.Context):  # pylint: disable=unused-argum
     _run_interaction_channel()
 
 
+def _load_packages(agent_identity: Identity):
+    """Load packages in the current interpreter."""
+    Protocol.from_dir(
+        os.path.join(
+            "vendor", DEFAULT_PROTOCOL.author, "protocols", DEFAULT_PROTOCOL.name
+        )
+    )
+    Protocol.from_dir(
+        os.path.join(
+            "vendor", SIGNING_PROTOCOL.author, "protocols", SIGNING_PROTOCOL.name
+        )
+    )
+    Protocol.from_dir(
+        os.path.join(
+            "vendor",
+            STATE_UPDATE_PROTOCOL.author,
+            "protocols",
+            STATE_UPDATE_PROTOCOL.name,
+        )
+    )
+    Connection.from_dir(
+        os.path.join(
+            "vendor", DEFAULT_CONNECTION.author, "connections", DEFAULT_CONNECTION.name
+        ),
+        agent_identity,
+        CryptoStore(),
+    )
+
+
 def _run_interaction_channel():
+    loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+    agent_configuration = loader.load(Path(DEFAULT_AEA_CONFIG_FILE).open())
+    agent_name = agent_configuration.name
+
+    identity_stub = Identity(agent_name + "_interact", "interact")
+    _load_packages(identity_stub)
+
     # load agent configuration file
     from packages.fetchai.connections.stub.connection import (  # noqa: F811 # pylint: disable=import-outside-toplevel
         DEFAULT_INPUT_FILE_NAME,
@@ -75,16 +121,13 @@ def _run_interaction_channel():
         DefaultDialogues,
     )
 
-    loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
-    agent_configuration = loader.load(Path(DEFAULT_AEA_CONFIG_FILE).open())
-    agent_name = agent_configuration.name
     # load stub connection
     configuration = ConnectionConfig(
         input_file=DEFAULT_OUTPUT_FILE_NAME,
         output_file=DEFAULT_INPUT_FILE_NAME,
         connection_id=StubConnection.connection_id,
     )
-    identity_stub = Identity(agent_name + "_interact", "interact")
+
     stub_connection = StubConnection(
         configuration=configuration, identity=identity_stub
     )
