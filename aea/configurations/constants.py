@@ -28,11 +28,11 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 
 
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.12.0")
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.8.0")
-SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.6.0")
-STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:0.6.0")
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.8.0")
+DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:latest")
+DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:latest")
+SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:latest")
+STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:latest")
+DEFAULT_SKILL = PublicId.from_str("fetchai/error:latest")
 DEFAULT_LEDGER = FetchAICrypto.identifier
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
 DEFAULT_REGISTRY_PATH = DRP
