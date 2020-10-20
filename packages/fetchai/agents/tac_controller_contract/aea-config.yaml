@@ -36,6 +36,7 @@ default_routing:
   fetchai/contract_api:0.6.0: fetchai/ledger:0.7.0
   fetchai/ledger_api:0.5.0: fetchai/ledger:0.7.0
   fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+connection_private_key_paths: {}
 ---
 name: soef
 author: fetchai

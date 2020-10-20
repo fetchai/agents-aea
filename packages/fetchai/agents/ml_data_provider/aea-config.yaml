@@ -32,3 +32,4 @@ registry_path: ../packages
 default_routing:
   fetchai/ledger_api:0.5.0: fetchai/ledger:0.7.0
   fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+connection_private_key_paths: {}

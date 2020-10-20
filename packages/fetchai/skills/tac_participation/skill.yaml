@@ -18,6 +18,7 @@ contracts:
 - fetchai/erc1155:0.11.0
 protocols:
 - fetchai/oef_search:0.8.0
+- fetchai/state_update:0.5.0
 - fetchai/tac:0.8.0
 skills: []
 behaviours:
