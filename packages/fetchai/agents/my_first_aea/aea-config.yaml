@@ -23,3 +23,5 @@ logging_config:
   version: 1
 private_key_paths: {}
 registry_path: ../packages
+default_routing: {}
+connection_private_key_paths: {}
