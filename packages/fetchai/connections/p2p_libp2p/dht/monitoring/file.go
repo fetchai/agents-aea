@@ -23,6 +23,7 @@ package monitoring
 import (
 	"fmt"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -30,48 +31,106 @@ type FileGauge struct {
 	value float64
 }
 
-func (fm *FileGauge) Set(value float64) {
-	fm.value = value
+func (fg *FileGauge) Set(value float64) {
+	fg.value = value
 }
 
-func (fm FileGauge) Get() float64 {
-	return fm.value
+func (fg FileGauge) Get() float64 {
+	return fg.value
 }
 
-func (fm *FileGauge) Inc() {
-	fm.value += 1.
+func (fg *FileGauge) Inc() {
+	fg.value += 1.
 }
 
-func (fm *FileGauge) Dec() {
-	fm.value -= 1.
+func (fg *FileGauge) Dec() {
+	fg.value -= 1.
 }
 
-func (fm *FileGauge) Add(count float64) {
-	fm.value += count
+func (fg *FileGauge) Add(count float64) {
+	fg.value += count
 }
 
-func (fm *FileGauge) Sub(count float64) {
-	fm.value -= count
+func (fg *FileGauge) Sub(count float64) {
+	fg.value -= count
+}
+
+type FileCounter struct {
+	value float64
+}
+
+func (fc *FileCounter) Inc() {
+	fc.value += 1.
+}
+
+func (fc *FileCounter) Add(count float64) {
+	fc.value += count
+}
+
+func (fc FileCounter) Get() float64 {
+	return fc.value
+}
+
+type FileHistogram struct {
+	buckets []float64
+	counts  []uint64
+}
+
+func (fh *FileHistogram) Observe(value float64) {
+	var i int = 0
+	for value > fh.buckets[i] {
+		i++
+	}
+	for j := i; j < len(fh.counts); j++ {
+		fh.counts[j] += 1
+	}
 }
 
 type FileMonitoring struct {
-	Namespace string
-	gaugeDict map[string]*FileGauge
+	Namespace   string
+	gaugeDict   map[string]*FileGauge
+	counterDict map[string]*FileCounter
+	histoDict   map[string]*FileHistogram
+
+	timer *Timer
 
 	path    string
+	write   bool
 	closing chan struct{}
 }
 
-func NewFileMonitoring(namespace string) *FileMonitoring {
+func NewFileMonitoring(namespace string, write bool) *FileMonitoring {
 	fm := &FileMonitoring{
 		Namespace: namespace,
 	}
 
+	fm.counterDict = map[string]*FileCounter{}
 	fm.gaugeDict = map[string]*FileGauge{}
+	fm.histoDict = map[string]*FileHistogram{}
+
+	fm.timer = &Timer{
+		list: map[string]time.Time{},
+		lock: sync.RWMutex{},
+	}
+
 	cwd, _ := os.Getwd()
 	fm.path = cwd + "/" + fm.Namespace + ".stats"
+	fm.write = write
 
 	return fm
+}
+
+func (fm *FileMonitoring) NewCounter(name string, description string) (Counter, error) {
+	counter := &FileCounter{}
+	fm.counterDict[name] = counter
+
+	return counter, nil
+
+}
+
+func (fm *FileMonitoring) GetCounter(name string) (Counter, bool) {
+	counter, ok := fm.counterDict[name]
+	return counter, ok
 }
 
 func (fm *FileMonitoring) NewGauge(name string, description string) (Gauge, error) {
@@ -86,8 +145,23 @@ func (fm *FileMonitoring) GetGauge(name string) (Gauge, bool) {
 	return gauge, ok
 }
 
+func (fm *FileMonitoring) NewHistogram(name string, description string, buckets []float64) (Histogram, error) {
+	histogram := &FileHistogram{
+		buckets: buckets,
+		counts:  make([]uint64, len(buckets)+1),
+	}
+	fm.histoDict[name] = histogram
+
+	return histogram, nil
+}
+
+func (fm *FileMonitoring) GetHistogram(name string) (Histogram, bool) {
+	histo, ok := fm.histoDict[name]
+	return histo, ok
+}
+
 func (fm *FileMonitoring) Start() {
-	if fm.closing != nil {
+	if fm.closing != nil || !fm.write {
 		return
 	}
 	fm.closing = make(chan struct{})
@@ -117,9 +191,17 @@ func (fm FileMonitoring) getStats() string {
 		strValue := fmt.Sprintf("%e", value.Get())
 		stats += fm.Namespace + "_" + name + " " + strValue + "\n"
 	}
+	for name, value := range fm.counterDict {
+		strValue := fmt.Sprintf("%e", value.Get())
+		stats += fm.Namespace + "_" + name + " " + strValue + "\n"
+	}
 	return stats
 }
 
 func (fm *FileMonitoring) Info() string {
 	return "FileMonitoring on " + fm.path
+}
+
+func (fm *FileMonitoring) Timer() *Timer {
+	return fm.timer
 }

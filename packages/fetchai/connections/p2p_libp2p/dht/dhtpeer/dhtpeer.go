@@ -75,6 +75,11 @@ const (
 	monitoringNamespace                 = "acn"
 )
 
+var (
+	latencyBucketsMilliSeconds = []float64{1., 10., 20., 50., 100., 200., 500., 1000.}
+	latencyBucketsMicroSeconds = []float64{100., 500., 1e3, 1e4, 1e5, 5e5, 1e6}
+)
+
 // DHTPeer A full libp2p node for the Agents Communication Network.
 // It is required to have a local address and a public one
 // and can acts as a relay for `DHTClient`.
@@ -238,13 +243,20 @@ func New(opts ...Option) (*DHTPeer, error) {
 	}
 
 	// if peer is joining an existing network, announce my agent address if set
-	if len(dhtPeer.bootstrapPeers) > 0 && dhtPeer.myAgentAddress != "" {
-		err := dhtPeer.registerAgentAddress(dhtPeer.myAgentAddress)
-		if err != nil {
-			dhtPeer.Close()
-			return nil, err
-		}
+	if len(dhtPeer.bootstrapPeers) > 0 {
 		dhtPeer.addressAnnounced = true
+		if dhtPeer.myAgentAddress != "" {
+			opLatencyRegister, _ := dhtPeer.monitor.GetHistogram("op_latency_register")
+			timer := dhtPeer.monitor.Timer()
+			start := timer.NewTimer()
+			err := dhtPeer.registerAgentAddress(dhtPeer.myAgentAddress)
+			if err != nil {
+				dhtPeer.Close()
+				return nil, err
+			}
+			duration := timer.GetTimer(start)
+			opLatencyRegister.Observe(float64(duration.Microseconds()))
+		}
 	}
 
 	// aea addresses lookup
@@ -277,7 +289,7 @@ func (dhtPeer *DHTPeer) setupMonitoring() {
 	if dhtPeer.monitoringPort != 0 {
 		dhtPeer.monitor = monitoring.NewPrometheusMonitoring(monitoringNamespace, dhtPeer.monitoringPort)
 	} else {
-		dhtPeer.monitor = monitoring.NewFileMonitoring(monitoringNamespace)
+		dhtPeer.monitor = monitoring.NewFileMonitoring(monitoringNamespace, false)
 	}
 
 	dhtPeer.addMonitoringMetrics()
@@ -290,10 +302,34 @@ func (dhtPeer *DHTPeer) startMonitoring() {
 }
 
 func (dhtPeer *DHTPeer) addMonitoringMetrics() {
-	dhtPeer.monitor.NewGauge("delegate_connections_nbr",
+	buckets := latencyBucketsMicroSeconds
+	// acn primitives
+	dhtPeer.monitor.NewHistogram("dht_op_latency_store",
+		"Histogram for time to store a key in the DHT", buckets)
+	dhtPeer.monitor.NewHistogram("dht_op_latency_lookup",
+		"Histogram for time to find a key in the DHT", buckets)
+	// acn main service
+	dhtPeer.monitor.NewHistogram("op_latency_register",
+		"Histogram for end-to-end time to register an agent in the acn", buckets)
+	dhtPeer.monitor.NewHistogram("op_latency_route",
+		"Histogram for end-to-end time to route an envelope to its destination, excluding time to send envelope itself",
+		buckets)
+	dhtPeer.monitor.NewGauge("op_route_count",
+		"Number of ongoing envelope routing requests")
+	dhtPeer.monitor.NewCounter("op_route_count_all",
+		"Total number envelope routing requests, successful or not")
+	dhtPeer.monitor.NewCounter("op_route_count_success",
+		"Total number envelope routed successfully")
+	// acn delegate service
+	dhtPeer.monitor.NewGauge("service_delegate_clients_count",
 		"Number of active delagate connections")
-	dhtPeer.monitor.NewGauge("delegate_clients_total",
+	dhtPeer.monitor.NewCounter("service_delegate_clients_count_all",
 		"Number of all delagate clients, connected or disconnected")
+	// acn relay service
+	dhtPeer.monitor.NewGauge("service_relay_clients_count",
+		"Number of active relay clients")
+	dhtPeer.monitor.NewCounter("service_relay_clients_count_all",
+		"Total number of all relayed clients, connected or disconnected")
 }
 
 func (dhtPeer *DHTPeer) setupLogger() {
@@ -408,10 +444,11 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	defer dhtPeer.goroutines.Done()
 	defer conn.Close()
 
-	nbrConns, _ := dhtPeer.monitor.GetGauge("delegate_connections_nbr")
-	nbrClients, _ := dhtPeer.monitor.GetGauge("delegate_clients_total")
-	nbrConns.Inc()
-	nbrClients.Inc()
+	nbrConns, _ := dhtPeer.monitor.GetGauge("service_delegate_clients_count")
+	nbrClients, _ := dhtPeer.monitor.GetCounter("service_delegate_clients_count_all")
+	opLatencyRegister, _ := dhtPeer.monitor.GetHistogram("op_latency_register")
+	timer := dhtPeer.monitor.Timer()
+	start := timer.NewTimer()
 
 	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
@@ -442,6 +479,12 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 
 	err = utils.WriteBytesConn(conn, []byte("DONE"))
 	ignore(err)
+
+	duration := timer.GetTimer(start)
+	opLatencyRegister.Observe(float64(duration.Microseconds()))
+
+	nbrConns.Inc()
+	nbrClients.Inc()
 
 	for {
 		// read envelopes
@@ -488,6 +531,16 @@ func (dhtPeer *DHTPeer) MultiAddr() string {
 func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, linfo, _ := dhtPeer.getLoggers()
 
+	routeCount, _ := dhtPeer.monitor.GetGauge("op_route_count")
+	routeCountAll, _ := dhtPeer.monitor.GetCounter("op_route_count_all")
+	routeCountSuccess, _ := dhtPeer.monitor.GetCounter("op_route_count_success")
+	opLatencyRoute, _ := dhtPeer.monitor.GetHistogram("op_latency_route")
+	timer := dhtPeer.monitor.Timer()
+
+	routeCount.Inc()
+	routeCountAll.Inc()
+	start := timer.NewTimer()
+
 	target := envel.To
 
 	if target == dhtPeer.myAgentAddress {
@@ -499,10 +552,14 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 			time.Sleep(time.Duration(100) * time.Millisecond)
 		}
 		if dhtPeer.processEnvelope != nil {
+			duration := timer.GetTimer(start)
+			opLatencyRoute.Observe(float64(duration.Microseconds()))
 			err := dhtPeer.processEnvelope(envel)
+			routeCount.Dec()
 			if err != nil {
 				return err
 			}
+			routeCountSuccess.Inc()
 		} else {
 			lwarn().Str("op", "route").Str("addr", target).
 				Msgf("ProcessEnvelope not set, ignoring envelope %s", envel.String())
@@ -510,6 +567,10 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	} else if conn, exists := dhtPeer.tcpAddresses[target]; exists {
 		linfo().Str("op", "route").Str("addr", target).
 			Msgf("destination is a delegate client %s", conn.RemoteAddr().String())
+		routeCount.Dec()
+		routeCountSuccess.Inc()
+		duration := timer.GetTimer(start)
+		opLatencyRoute.Observe(float64(duration.Microseconds()))
 		return utils.WriteEnvelopeConn(conn, envel)
 	} else {
 		var peerID peer.ID
@@ -521,15 +582,17 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 			if err != nil {
 				lerror(err).Str("op", "route").Str("addr", target).
 					Msgf("CRITICAL couldn't parse peer id from relay client id")
+				routeCount.Dec()
 				return err
 			}
 		} else {
 			linfo().Str("op", "route").Str("addr", target).
-				Msg("did NOT found destination address locally, looking for it in the DHT...")
+				Msg("did NOT find destination address locally, looking for it in the DHT...")
 			peerID, err = dhtPeer.lookupAddressDHT(target)
 			if err != nil {
 				lerror(err).Str("op", "route").Str("addr", target).
 					Msg("while looking up address on the DHT")
+				routeCount.Dec()
 				return err
 			}
 		}
@@ -545,8 +608,12 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 		if err != nil {
 			lerror(err).Str("op", "route").Str("addr", target).
 				Msgf("timeout, couldn't open stream to target %s", peerID.Pretty())
+			routeCount.Dec()
 			return err
 		}
+
+		duration := timer.GetTimer(start)
+		opLatencyRoute.Observe(float64(duration.Microseconds()))
 
 		linfo().Str("op", "route").Str("addr", target).
 			Msg("sending envelope to target...")
@@ -555,9 +622,11 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 			errReset := stream.Reset()
 			ignore(errReset)
 		} else {
+			routeCountSuccess.Inc()
 			stream.Close()
 		}
 
+		routeCount.Dec()
 		return err
 	}
 
@@ -567,6 +636,10 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	lerror, lwarn, linfo, _ := dhtPeer.getLoggers()
 	var err error
+
+	dhtLookupLatency, _ := dhtPeer.monitor.GetHistogram("dht_op_latency_lookup")
+	timer := dhtPeer.monitor.Timer()
+
 	addressCID, err := utils.ComputeCID(address)
 	if err != nil {
 		return "", err
@@ -581,13 +654,14 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	var connected bool = false
 	var stream network.Stream
 
-	start := time.Now()
+	start := timer.NewTimer()
 
 	for !connected {
 		providers := dhtPeer.dht.FindProvidersAsync(ctx, addressCID, 0)
 
 		for provider = range providers {
-			elapsed = time.Since(start)
+			duration := timer.GetTimer(start)
+			dhtLookupLatency.Observe(float64(duration.Microseconds()))
 
 			linfo().Str("op", "lookup").Str("addr", address).
 				Msgf("found provider %s after %s", provider, elapsed.String())
@@ -754,6 +828,10 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 		Msgf("Got a new notif stream")
 
 	if !dhtPeer.addressAnnounced {
+		opLatencyRegister, _ := dhtPeer.monitor.GetHistogram("op_latency_register")
+		timer := dhtPeer.monitor.Timer()
+		start := timer.NewTimer()
+
 		// workaround: to avoid getting `failed to find any peer in table`
 		//  when calling dht.Provide (happens occasionally)
 		ldebug().Msg("waiting for notifying peer to be added to dht routing table...")
@@ -801,12 +879,20 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 			}
 
 		}
+		duration := timer.GetTimer(start)
+		opLatencyRegister.Observe(float64(duration.Microseconds()))
 	}
 	dhtPeer.addressAnnounced = true
 }
 
 func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	lerror, _, linfo, _ := dhtPeer.getLoggers()
+
+	nbrClients, _ := dhtPeer.monitor.GetCounter("service_relay_clients_count_all")
+
+	opLatencyRegister, _ := dhtPeer.monitor.GetHistogram("op_latency_register")
+	timer := dhtPeer.monitor.Timer()
+	start := timer.NewTimer()
 
 	linfo().Str("op", "register").
 		Msg("Got a new aea register stream")
@@ -835,6 +921,8 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	err = utils.WriteBytes(stream, []byte("donePeerID"))
 	ignore(err)
 
+	nbrClients.Inc()
+
 	linfo().Str("op", "register").
 		Str("addr", string(clientAddr)).
 		Msgf("Received address registration request for peer id %s", string(clientPeerID))
@@ -853,10 +941,16 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 			return
 		}
 	}
+
+	duration := timer.GetTimer(start)
+	opLatencyRegister.Observe(float64(duration.Microseconds()))
 }
 
 func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 	_, _, linfo, _ := dhtPeer.getLoggers()
+
+	dhtStoreLatency, _ := dhtPeer.monitor.GetHistogram("dht_op_latency_store")
+	timer := dhtPeer.monitor.Timer()
 
 	addressCID, err := utils.ComputeCID(addr)
 	if err != nil {
@@ -870,8 +964,11 @@ func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 	linfo().Str("op", "register").
 		Str("addr", addr).
 		Msgf("Announcing address to the dht with cid key %s", addressCID.String())
+	start := timer.NewTimer()
 	err = dhtPeer.dht.Provide(ctx, addressCID, true)
 	if err != context.DeadlineExceeded {
+		duration := timer.GetTimer(start)
+		dhtStoreLatency.Observe(float64(duration.Microseconds()))
 		return err
 	}
 	return nil

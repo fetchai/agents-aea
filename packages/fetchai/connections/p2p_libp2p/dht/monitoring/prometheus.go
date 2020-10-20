@@ -23,6 +23,8 @@ package monitoring
 import (
 	"net/http"
 	"strconv"
+	"sync"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -37,10 +39,13 @@ type PrometheusMonitoring struct {
 	Namespace string
 	Port      uint16
 
-	running    bool
-	httpServer http.Server
-	//gaugeDict map[string]PrometheusGauge
-	gaugeDict map[string]prometheus.Gauge
+	running     bool
+	httpServer  http.Server
+	counterDict map[string]prometheus.Counter
+	gaugeDict   map[string]prometheus.Gauge
+	histoDict   map[string]prometheus.Histogram
+
+	timer *Timer
 }
 
 func NewPrometheusMonitoring(namespace string, port uint16) *PrometheusMonitoring {
@@ -48,9 +53,33 @@ func NewPrometheusMonitoring(namespace string, port uint16) *PrometheusMonitorin
 		Namespace: namespace,
 		Port:      port,
 	}
+
+	pmts.counterDict = map[string]prometheus.Counter{}
 	pmts.gaugeDict = map[string]prometheus.Gauge{}
+	pmts.histoDict = map[string]prometheus.Histogram{}
+
+	pmts.timer = &Timer{
+		list: map[string]time.Time{},
+		lock: sync.RWMutex{},
+	}
 
 	return pmts
+}
+
+func (pmts *PrometheusMonitoring) NewCounter(name string, description string) (Counter, error) {
+	counter := promauto.NewCounter(prometheus.CounterOpts{
+		Namespace: pmts.Namespace,
+		Name:      name,
+		Help:      description,
+	})
+	pmts.counterDict[name] = counter
+
+	return counter, nil
+}
+
+func (pmts *PrometheusMonitoring) GetCounter(name string) (Counter, bool) {
+	counter, ok := pmts.counterDict[name]
+	return counter, ok
 }
 
 func (pmts *PrometheusMonitoring) NewGauge(name string, description string) (Gauge, error) {
@@ -67,6 +96,23 @@ func (pmts *PrometheusMonitoring) NewGauge(name string, description string) (Gau
 func (pmts *PrometheusMonitoring) GetGauge(name string) (Gauge, bool) {
 	gauge, ok := pmts.gaugeDict[name]
 	return gauge, ok
+}
+
+func (pmts *PrometheusMonitoring) NewHistogram(name string, description string, buckets []float64) (Histogram, error) {
+	histogram := promauto.NewHistogram(prometheus.HistogramOpts{
+		Namespace: pmts.Namespace,
+		Name:      name,
+		Help:      description,
+		Buckets:   buckets,
+	})
+	pmts.histoDict[name] = histogram
+
+	return histogram, nil
+}
+
+func (pmts *PrometheusMonitoring) GetHistogram(name string) (Histogram, bool) {
+	histogram, ok := pmts.histoDict[name]
+	return histogram, ok
 }
 
 func (pmts *PrometheusMonitoring) Start() {
@@ -86,4 +132,7 @@ func (pmts *PrometheusMonitoring) Stop() {
 
 func (pmts *PrometheusMonitoring) Info() string {
 	return "Prometheus at " + strconv.FormatInt(int64(pmts.Port), 10)
+}
+func (pmts *PrometheusMonitoring) Timer() *Timer {
+	return pmts.timer
 }

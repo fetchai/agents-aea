@@ -20,6 +20,12 @@
 
 package monitoring
 
+import (
+	"errors"
+	"sync"
+	"time"
+)
+
 type Gauge interface {
 	Set(value float64)
 	Inc()
@@ -34,18 +40,59 @@ type Counter interface {
 }
 
 type Histogram interface {
-	observe(value float64)
+	Observe(value float64)
 }
 
 type Summary interface {
-	observe(value float64)
+	Observe(value float64)
+}
+
+type Timer struct {
+	list map[string]time.Time
+	lock sync.RWMutex
+}
+
+func (tm *Timer) NewTimer() time.Time {
+	return time.Now()
+}
+
+func (tm *Timer) GetTimer(timer time.Time) time.Duration {
+	end := time.Now()
+	return end.Sub(timer)
+}
+
+func (tm *Timer) NewTimerNamed(name string) string {
+	tm.lock.Lock()
+	defer tm.lock.Unlock()
+	tm.list[name] = time.Now()
+	return name
+}
+
+func (tm *Timer) GetTimerNamed(timer string) (time.Duration, error) {
+	end := time.Now()
+	tm.lock.RLock()
+	start, ok := tm.list[timer]
+	tm.lock.RUnlock()
+	if !ok {
+		return time.Duration(0), errors.New("Unknown timer " + timer)
+	}
+	tm.lock.Lock()
+	delete(tm.list, timer)
+	tm.lock.Unlock()
+	return end.Sub(start), nil
 }
 
 type MonitoringService interface {
+	NewCounter(name string, description string) (Counter, error)
+	GetCounter(name string) (Counter, bool)
 	NewGauge(name string, description string) (Gauge, error)
 	GetGauge(name string) (Gauge, bool)
-	//NewSummary(name string, description string, ) (Summary, error)
+	NewHistogram(name string, description string, buckets []float64) (Histogram, error)
+	GetHistogram(name string) (Histogram, bool)
+	//NewSummary(name string, description string, objectives map[float64]float64) (Summary, error)
+	//GetSummary(name string) (Summary, bool)
 	Start()
 	Stop()
 	Info() string
+	Timer() *Timer
 }
