@@ -573,9 +573,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         configuration += dedent(
             f"""
         ---
-        name: stub
-        author: fetchai
-        version: 0.11.0
+        public_id: fetchai/stub:0.11.0
         type: connection
         config:
             input_file: "{self.expected_input_file}"
@@ -615,9 +613,7 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         configuration += dedent(
             f"""
         ---
-        name: dummy
-        author: dummy_author
-        version: 0.1.0
+        public_id: dummy_author/dummy:0.1.0
         type: skill
         behaviours:
           dummy:
@@ -676,9 +672,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
         configuration += dedent(
             """
         ---
-        name: dummy
-        author: dummy_author
-        version: 0.1.0
+        public_id: dummy_author/dummy:0.1.0
         type: skill
         is_abstract: true
         ...
@@ -708,9 +702,7 @@ class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmp
         configuration += dedent(
             """
         ---
-        name: non_existing_package
-        author: some_author
-        version: 0.1.0
+        public_id: some_author/non_existing_package:0.1.0
         type: protocol
         ...
         """
