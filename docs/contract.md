@@ -32,7 +32,7 @@ contract_api_msg = ContractApiMessage(
     ),
 )
 ```
-Any additional argumets needed by the contract's constructor method should be added to `kwargs`.
+Any additional arguments needed by the contract's constructor method should be added to `kwargs`.
 
 This message will be handled by the `fetchai/ledger:0.7.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. To send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.7.0` connection using the `fetchai/ledger_api:0.5.0` protocol. For details on how to implement the message handling, see the handlers in the `erc1155_deploy` skill.
 
