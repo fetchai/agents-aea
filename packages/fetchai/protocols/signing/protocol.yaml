@@ -6,7 +6,7 @@ description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmcZzuS6qt2wE75iznTytDp8NGWTBR7jsXonjNWYhYAHcw
+  README.md: QmWEUMDL94Giz4ThP1bdgFdNY3iGgpmyYVQZjCqDzas4eG
   __init__.py: QmUcmsCfop25uvwR6XQR3GGaJ63pbDsEPQPJeXM7nASuQW
   custom_types.py: Qmc7sAyCQbAaVs5dZf9hFkTrB2BG8VAioWzbyKBAybrQ1J
   dialogues.py: QmeDmrSHy6CHVY7ksGZ6fwdUHgAB4fmG9FJ2WBn9DfVb6s

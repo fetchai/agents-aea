@@ -6,7 +6,7 @@ description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmVeL8oxzxhNfcNT9ssWHRCRDHaxenGmkbAbbYtKDicGtw
+  README.md: QmeRhdCn5AiJ1vzqCz4rzXx5b1pbL29mRKgwec3i41Gy6g
   __init__.py: QmcZFuqoBkEx1fYytpLr7142vtXf9qh8cpeRYVZcaWdmrD
   contract_api.proto: QmSZpXyFMf2MNgVud8iPinaaerx1CManffgHNMx8FcD8jY
   contract_api_pb2.py: QmYEVg28AVRiLDkbddDto51bumh38gRuouagn6wspDtZVN

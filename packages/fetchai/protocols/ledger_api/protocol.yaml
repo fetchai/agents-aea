@@ -6,7 +6,7 @@ description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmQV5DJ4kZDNbRPRvAZkGYCmKK5SWdUxUDWGuMWyUY2SYH
+  README.md: QmaagaEnm8xJ5WyHcS8HyxkBo9awijRLTkbLMvRvQv6q7y
   __init__.py: QmX6ta6j6ust7qhVk1kZygzZK3gTTg7hSCBbSMKUxJgWgG
   custom_types.py: QmWRrvFStMhVJy8P2WD6qjDgk14ZnxErN7XymxUtof7HQo
   dialogues.py: QmRtWkAfR9WTvygMJ36R758RzdY2mGQs2fgtHCfjxmeaHy
