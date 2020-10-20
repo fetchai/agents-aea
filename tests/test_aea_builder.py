@@ -575,7 +575,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         ---
         name: stub
         author: fetchai
-        version: 0.11.0
+        version: {str(StubConnection.connection_id.version)}
         type: connection
         config:
             input_file: "{self.expected_input_file}"

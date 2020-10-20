@@ -45,6 +45,7 @@ class Project:
         public_id: PublicId,
         is_local: bool = False,
         registry_path: str = "packages",
+        skip_consistency_check: bool = False,
     ) -> "Project":
         """
         Load project with given public_id to working_dir.
@@ -52,8 +53,11 @@ class Project:
         :param working_dir: the working directory
         :param public_id: the public id
         :param is_local: whether to fetch from local or remote
+        :param registry_path: the path to the registry locally
+        :param skip_consistency_check: consistency checks flag
         """
         ctx = Context(cwd=working_dir, registry_path=registry_path)
+        ctx.set_config("skip_consistency_check", skip_consistency_check)
         path = os.path.join(working_dir, public_id.author, public_id.name)
         target_dir = os.path.join(public_id.author, public_id.name)
         if is_local:
