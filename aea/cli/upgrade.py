@@ -100,19 +100,20 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     items_to_upgrade_dependencies = set()
 
     for package_id, deps in agent_items.items():
+        item_upgrader = ItemUpgrader(
+            ctx, str(package_id.package_type), package_id.public_id.to_latest()
+        )
+
         if deps:
             continue
 
         with suppress(UpgraderException):
-            item_upgrader = ItemUpgrader(
-                ctx, str(package_id.package_type), package_id.public_id.to_latest()
-            )
             new_version = item_upgrader.check_upgrade_is_required()
             items_to_upgrade.add((package_id, new_version))
             upgraders.append(item_upgrader)
-            shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
-            items_to_upgrade_dependencies.update(item_upgrader.dependencies)
-            items_to_upgrade_dependencies.add(package_id)
+        items_to_upgrade_dependencies.add(package_id)
+        items_to_upgrade_dependencies.update(item_upgrader.dependencies)
+        shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
 
     if not items_to_upgrade:
         click.echo("Everything is already up to date!")
