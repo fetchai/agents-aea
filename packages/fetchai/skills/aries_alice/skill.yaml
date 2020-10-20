@@ -5,7 +5,7 @@ type: skill
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmfS1ezD77No8WQkvrkPs4oSXHFbULRxatGzRhMbSMntSx
   __init__.py: QmcP4spDi6uMHASQD3nEMijNXfftvDyC4pGSvzjFsGAjtf

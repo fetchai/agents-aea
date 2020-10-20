@@ -4,7 +4,7 @@ version: 0.7.0
 type: skill
 description: The error skill implements basic error handling required by all AEAs.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmPGDeDxEZR4Fk4gD5a9a8Pm54NVQepTaZaVtDEuSMRYeN
   handlers.py: QmZiic7ryUmmpoczUc77pPuBapdDREubU8rYUCPY1eJwfm

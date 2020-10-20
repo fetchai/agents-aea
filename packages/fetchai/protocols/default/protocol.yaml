@@ -4,7 +4,7 @@ version: 0.7.0
 type: protocol
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: Qma6jLUtwFdNMLAq5Z79tAv8vgBBDjw3RVUfr5ab36nAug
   __init__.py: QmRWWkHpiBGcYVXSvnxZLFD9QCyKcdtvbZ6GhLHLUWFa6G

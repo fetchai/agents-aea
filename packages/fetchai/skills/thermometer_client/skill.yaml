@@ -5,7 +5,7 @@ type: skill
 description: The thermometer client skill implements the skill to purchase temperature
   data.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmSn1bh9J7RT241DGT4812rTNGe2S2YLpEvy8ApNqNNqjf
   __init__.py: QmdKCsMU6G4ukcrWi8uUUkreD2aKHvDZqi33dhxRg9twEJ

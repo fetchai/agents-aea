@@ -4,7 +4,7 @@ version: 0.5.0
 type: protocol
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmZaiA3tRSsvofPcAdjKEZZh9RAyZL9Wk8vXHUoGy9enLi
   __init__.py: Qmd7GvLL2hzSbbk5JNcHyRDNH7yvhS3SaxitBbQcvA9i7U

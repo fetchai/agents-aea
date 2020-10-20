@@ -13,7 +13,7 @@ author: fetchai
 version: 0.5.0
 description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 speech_acts:
   get_balance:
     ledger_id: pt:str

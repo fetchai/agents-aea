@@ -5,7 +5,7 @@ type: skill
 description: The aries_faber skill implements the faber player in the aries cloud
   agent demo
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmdkSNCYx5dNGDAAveapQgoyM7Y7iYeQzR7KN2Sso3CJG4
   __init__.py: QmRB8ZTyM23HnkV5yA81YgqaRvL8uCsSVqGksTt49YUh73

@@ -4,7 +4,7 @@ version: 0.8.0
 type: protocol
 description: A protocol for FIPA ACL.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmNkfdMXEkJ8L1UXnrgGTFBxYJKYdjaf7nnsrHHW7PYw6T
   __init__.py: QmR6pcWX14FsQip4eYJRNeiQdrNMPj6y4m6Tsgd6hd7yU6

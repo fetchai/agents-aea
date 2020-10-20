@@ -4,7 +4,7 @@ version: 0.12.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmP5vjtJk1TirWqzFcgvQYTZeZwaV3Qs5HKVW1WNWgMTPM
   __init__.py: QmUUAZ4ajMcfZGJrMpCT8RPtpu2BM4t6fz7b8khubUjHgq
