@@ -37,25 +37,19 @@ default_routing:
   fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 connection_private_key_paths: {}
 ---
-name: soef
-author: fetchai
-version: 0.11.0
+public_id: fetchai/soef:0.11.0
 type: connection
 config:
   chain_identifier: ethereum
 ---
-name: tac_participation
-author: fetchai
-version: 0.11.0
+public_id: fetchai/tac_participation:0.11.0
 type: skill
 models:
   game:
     args:
       is_using_contract: true
 ---
-name: tac_negotiation
-author: fetchai
-version: 0.12.0
+public_id: fetchai/tac_negotiation:0.12.0
 type: skill
 models:
   strategy:

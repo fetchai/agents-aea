@@ -570,12 +570,12 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         cwd = self._get_cwd()
         aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
         configuration = aea_config_file.read_text()
+        connection_name = StubConnection.connection_id.name
+        connection_version = StubConnection.connection_id.version
         configuration += dedent(
             f"""
         ---
-        name: stub
-        author: fetchai
-        version: {str(StubConnection.connection_id.version)}
+        public_id: fetchai/{connection_name}:{connection_version}
         type: connection
         config:
             input_file: "{self.expected_input_file}"
@@ -615,9 +615,7 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         configuration += dedent(
             f"""
         ---
-        name: dummy
-        author: dummy_author
-        version: 0.1.0
+        public_id: dummy_author/dummy:0.1.0
         type: skill
         behaviours:
           dummy:
@@ -676,9 +674,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
         configuration += dedent(
             """
         ---
-        name: dummy
-        author: dummy_author
-        version: 0.1.0
+        public_id: dummy_author/dummy:0.1.0
         type: skill
         is_abstract: true
         ...
@@ -708,9 +704,7 @@ class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmp
         configuration += dedent(
             """
         ---
-        name: non_existing_package
-        author: some_author
-        version: 0.1.0
+        public_id: some_author/non_existing_package:0.1.0
         type: protocol
         ...
         """

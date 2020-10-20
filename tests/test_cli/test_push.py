@@ -223,7 +223,7 @@ class TestPushLocallyWithLatest(AEATestCaseEmpty):
             "push",
             "--local",
             component_type,
-            f"{DEFAULT_AUTHOR}/{item_name}{version}",
+            f"{self.author}/{item_name}{version}",
             cwd=self._get_cwd(),
         )
 

@@ -1822,9 +1822,7 @@ class AgentConfig(PackageConfiguration):
         for component_id, config in self.component_configurations.items():
             result.append(
                 OrderedDict(
-                    name=component_id.name,
-                    author=component_id.author,
-                    version=component_id.version,
+                    public_id=str(component_id.public_id),
                     type=str(component_id.component_type),
                     **config,
                 )
@@ -1934,13 +1932,9 @@ class AgentConfig(PackageConfiguration):
         component_configurations = {}
         for config in obj.get("component_configurations", []):
             tmp = deepcopy(config)
-            name = tmp.pop("name")
-            author = tmp.pop("author")
-            version = tmp.pop("version")
+            public_id = PublicId.from_str(tmp.pop("public_id"))
             type_ = tmp.pop("type")
-            component_id = ComponentId(
-                ComponentType(type_), PublicId(author, name, version)
-            )
+            component_id = ComponentId(ComponentType(type_), public_id)
             component_configurations[component_id] = tmp
         agent_config.component_configurations = component_configurations
 
