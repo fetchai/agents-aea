@@ -127,6 +127,13 @@ def test_get_address_from_public_key():
     assert address == fet_crypto.address, "The address must be the same."
 
 
+def test_validate_address():
+    """Test the is_valid_address functionality."""
+    account = FetchAICrypto()
+    assert FetchAIApi.is_valid_address(account.address)
+    assert not FetchAIApi.is_valid_address(account.address + "wrong")
+
+
 # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger

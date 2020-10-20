@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains utilities for building an AEA."""
 
 import itertools
@@ -24,27 +25,14 @@ import logging
 import logging.config
 import os
 import pprint
-from collections import defaultdict, deque
+from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
-from typing import (
-    Any,
-    Collection,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
 from packaging.specifiers import SpecifierSet
 
-from aea import AEA_DIR
 from aea.aea import AEA
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
@@ -66,19 +54,24 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
+)
+from aea.configurations.constants import (
+    DEFAULT_SEARCH_SERVICE_ADDRESS as _DEFAULT_SEARCH_SERVICE_ADDRESS,
+)
+from aea.configurations.constants import (
     DEFAULT_SKILL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
 )
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
-from aea.decision_maker.default import (
-    DecisionMakerHandler as DefaultDecisionMakerHandler,
-)
 from aea.exceptions import AEAException
-from aea.helpers.base import load_module
+from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.install_dependency import install_dependency
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
@@ -87,6 +80,7 @@ from aea.registries.resources import Resources
 PathLike = Union[os.PathLike, Path, str]
 
 _default_logger = logging.getLogger(__name__)
+DEFAULT_ENV_DOTFILE = ".env"
 
 
 class _DependenciesManager:
@@ -231,8 +225,13 @@ class _DependenciesManager:
             )
         return all_pypi_dependencies
 
+    def install_dependencies(self) -> None:
+        """Install extra dependencies for components."""
+        for name, d in self.pypi_dependencies.items():
+            install_dependency(name, d, _default_logger)
 
-class AEABuilder(WithLogger):
+
+class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     """
     This class helps to build an AEA.
 
@@ -283,26 +282,26 @@ class AEABuilder(WithLogger):
     DEFAULT_AGENT_ACT_PERIOD = 0.05  # seconds
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
-    DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
-        DecisionMakerHandler
-    ] = DefaultDecisionMakerHandler
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
-    DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
+    DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
 
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
 
     # pylint: disable=attribute-defined-outside-init
 
-    def __init__(self, with_default_packages: bool = True):
+    def __init__(
+        self, with_default_packages: bool = True, registry_dir: str = "packages"
+    ):
         """
         Initialize the builder.
 
         :param with_default_packages: add the default packages.
         """
         WithLogger.__init__(self, logger=_default_logger)
+        self.registry_dir = os.path.join(os.getcwd(), registry_dir)
         self._with_default_packages = with_default_packages
         self._reset(is_full_reset=True)
 
@@ -512,11 +511,24 @@ class AEABuilder(WithLogger):
     def _add_default_packages(self) -> None:
         """Add default packages."""
         # add default protocol
-        self.add_protocol(Path(AEA_DIR, "protocols", DEFAULT_PROTOCOL.name))
+        self.add_protocol(
+            Path(self.registry_dir, "fetchai", "protocols", DEFAULT_PROTOCOL.name)
+        )
+        # add signing protocol
+        self.add_protocol(
+            Path(self.registry_dir, "fetchai", "protocols", SIGNING_PROTOCOL.name)
+        )
+        # add state update protocol
+        self.add_protocol(
+            Path(self.registry_dir, "fetchai", "protocols", STATE_UPDATE_PROTOCOL.name)
+        )
+
         # add stub connection
-        self.add_connection(Path(AEA_DIR, "connections", DEFAULT_CONNECTION.name))
+        self.add_connection(
+            Path(self.registry_dir, "fetchai", "connections", DEFAULT_CONNECTION.name)
+        )
         # add error skill
-        self.add_skill(Path(AEA_DIR, "skills", DEFAULT_SKILL.name))
+        self.add_skill(Path(self.registry_dir, "fetchai", "skills", DEFAULT_SKILL.name))
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
         """
@@ -853,6 +865,10 @@ class AEABuilder(WithLogger):
 
         return sorted_selected_connections_ids
 
+    def install_pypi_dependencies(self) -> None:
+        """Install components extra dependecies."""
+        self._package_dependency_manager.install_dependencies()
+
     def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
         """
         Build the AEA.
@@ -942,17 +958,15 @@ class AEABuilder(WithLogger):
             else self.DEFAULT_MAX_REACTIONS
         )
 
-    def _get_decision_maker_handler_class(self) -> Type[DecisionMakerHandler]:
+    def _get_decision_maker_handler_class(
+        self,
+    ) -> Optional[Type[DecisionMakerHandler]]:
         """
         Return the decision maker handler class.
 
         :return: decision maker handler class
         """
-        return (
-            self._decision_maker_handler_class
-            if self._decision_maker_handler_class is not None
-            else self.DEFAULT_DECISION_MAKER_HANDLER_CLASS
-        )
+        return self._decision_maker_handler_class
 
     def _get_skill_exception_policy(self) -> ExceptionPolicyEnum:
         """
@@ -1083,14 +1097,14 @@ class AEABuilder(WithLogger):
             all_pypi_dependencies, configuration.pypi_dependencies
         )
         for pkg_name, dep_info in all_pypi_dependencies.items():
-            set_specifier = SpecifierSet(dep_info.get("version", ""))
+            set_specifier = SpecifierSet(dep_info.version)
             if not is_satisfiable(set_specifier):
                 raise AEAException(
-                    f"Conflict on package {pkg_name}: specifier set '{dep_info['version']}' not satisfiable."
+                    f"Conflict on package {pkg_name}: specifier set '{dep_info.version}' not satisfiable."
                 )
 
     @staticmethod
-    def _find_component_directory_from_component_id(
+    def find_component_directory_from_component_id(
         aea_project_directory: Path, component_id: ComponentId
     ) -> Path:
         """Find a component directory from component id."""
@@ -1213,13 +1227,9 @@ class AEABuilder(WithLogger):
                 ComponentId(ComponentType.CONTRACT, p_id)
                 for p_id in agent_configuration.contracts
             ],
-            [
-                ComponentId(ComponentType.CONNECTION, p_id)
-                for p_id in agent_configuration.connections
-            ],
         )
         for component_id in component_ids:
-            component_path = self._find_component_directory_from_component_id(
+            component_path = self.find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
             self.add_component(
@@ -1227,6 +1237,25 @@ class AEABuilder(WithLogger):
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+
+        connection_ids = [
+            ComponentId(ComponentType.CONNECTION, p_id)
+            for p_id in agent_configuration.connections
+        ]
+        if len(connection_ids) != 0:
+            connection_import_order = self._find_import_order(
+                connection_ids, aea_project_path, skip_consistency_check
+            )
+
+            for connection_id in connection_import_order:
+                component_path = self.find_component_directory_from_component_id(
+                    aea_project_path, connection_id
+                )
+                self.add_component(
+                    connection_id.component_type,
+                    component_path,
+                    skip_consistency_check=skip_consistency_check,
+                )
 
         skill_ids = [
             ComponentId(ComponentType.SKILL, p_id)
@@ -1240,7 +1269,7 @@ class AEABuilder(WithLogger):
             skill_ids, aea_project_path, skip_consistency_check
         )
         for skill_id in skill_import_order:
-            component_path = self._find_component_directory_from_component_id(
+            component_path = self.find_component_directory_from_component_id(
                 aea_project_path, skill_id
             )
             self.add_component(
@@ -1254,62 +1283,50 @@ class AEABuilder(WithLogger):
 
     def _find_import_order(
         self,
-        skill_ids: List[ComponentId],
+        component_ids: List[ComponentId],
         aea_project_path: Path,
         skip_consistency_check: bool,
     ) -> List[ComponentId]:
-        """Find import order for skills.
+        """Find import order for skills/connections.
 
-        We need to handle skills separately, since skills can depend on each other.
+        We need to handle skills and connections separately, since skills/connections can depend on each other.
 
         That is, we need to:
-        - load the skill configurations to find the import order
+        - load the skill/connection configurations to find the import order
         - detect if there are cycles
-        - import skills from the leaves of the dependency graph, by finding a topological ordering.
+        - import skills/connections from the leaves of the dependency graph, by finding a topological ordering.
         """
-        # the adjacency list for the dependency graph
-        depends_on: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
         # the adjacency list for the inverse dependency graph
-        supports: Dict[ComponentId, Set[ComponentId]] = defaultdict(set)
-        # nodes with no incoming edges
-        roots = copy(skill_ids)
-        for skill_id in skill_ids:
-            component_path = self._find_component_directory_from_component_id(
-                aea_project_path, skill_id
+        dependency_to_supported_dependencies: Dict[
+            ComponentId, Set[ComponentId]
+        ] = defaultdict(set)
+        for component_id in component_ids:
+            component_path = self.find_component_directory_from_component_id(
+                aea_project_path, component_id
             )
-            configuration = cast(
-                SkillConfig,
-                load_component_configuration(
-                    skill_id.component_type, component_path, skip_consistency_check
-                ),
+            configuration = load_component_configuration(
+                component_id.component_type, component_path, skip_consistency_check
             )
 
-            if len(configuration.skills) != 0:
-                roots.remove(skill_id)
+            if component_id not in dependency_to_supported_dependencies:
+                dependency_to_supported_dependencies[component_id] = set()
+            if isinstance(configuration, SkillConfig):
+                dependencies, component_type = configuration.skills, "skills"
+            elif isinstance(configuration, ConnectionConfig):
+                dependencies, component_type = configuration.connections, "connections"
+            else:
+                raise AEAException("Not a valid configuration type.")  # pragma: nocover
+            for dependency in dependencies:
+                dependency_to_supported_dependencies[
+                    ComponentId(ComponentType.SKILL, dependency)
+                ].add(component_id)
 
-            depends_on[skill_id].update(
-                [
-                    ComponentId(ComponentType.SKILL, skill)
-                    for skill in configuration.skills
-                ]
+        try:
+            order = find_topological_order(dependency_to_supported_dependencies)
+        except ValueError:
+            raise AEAException(
+                f"Cannot load {component_type}, there is a cyclic dependency."
             )
-            for dependency in configuration.skills:
-                supports[ComponentId(ComponentType.SKILL, dependency)].add(skill_id)
-
-        # find topological order (Kahn's algorithm)
-        queue: Deque[ComponentId] = deque()
-        order = []
-        queue.extend(roots)
-        while len(queue) > 0:
-            current = queue.pop()
-            order.append(current)
-            for node in supports[current]:  # pragma: nocover
-                depends_on[node].discard(current)
-                if len(depends_on[node]) == 0:
-                    queue.append(node)
-
-        if any(len(edges) > 0 for edges in depends_on.values()):
-            raise AEAException("Cannot load skills, there is a cyclic dependency.")
 
         return order
 
@@ -1337,6 +1354,8 @@ class AEABuilder(WithLogger):
             aea_project_path=aea_project_path, exit_on_error=False
         )
         builder = AEABuilder(with_default_packages=False)
+
+        load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # load agent configuration file
         configuration_file = cls.get_configuration_file_path(aea_project_path)

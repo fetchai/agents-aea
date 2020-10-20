@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """A module with config tools of the aea cli."""
-
 import logging
 import logging.config
 import os
@@ -226,7 +224,7 @@ def handle_dotted_path(
         )
         json_path = parts[4:]
         if not path_to_resource_directory.exists():
-            raise AEAException(
+            raise AEAException(  # pragma: nocover
                 "Resource vendor/{}/{}/{} does not exist.".format(
                     resource_author, resource_type_plural, resource_name
                 )
@@ -320,7 +318,7 @@ def _try_get_configuration_object_from_aea_config(
     """
     if component_id is None:
         # this is the case when the prefix of the json path is 'agent'.
-        return None
+        return None  # pragma: nocover
     type_, author, name = (
         component_id.component_type,
         component_id.author,

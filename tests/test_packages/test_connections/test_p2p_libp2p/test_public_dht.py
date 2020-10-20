@@ -27,8 +27,9 @@ import pytest
 
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
-from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
     PUBLIC_DHT_DELEGATE_URI_1,
@@ -356,8 +357,8 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_connectivity(self):
         """Test connectivity."""
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
 
         # for logging
         log_file = "libp2p_node_{}.log".format(self.agent_name)
@@ -380,7 +381,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
         is_running = self.is_running(process, timeout=AEA_LIBP2P_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
-        check_strings = "My libp2p addresses: ["
+        check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
             missing_strings == []
@@ -404,7 +405,7 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
 
     def test_connectivity(self):
         """Test connectivity."""
-        self.add_item("connection", "fetchai/p2p_libp2p_client:0.7.0")
+        self.add_item("connection", "fetchai/p2p_libp2p_client:0.9.0")
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.nested_set_config(
             config_path,

@@ -66,7 +66,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.9.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.11.0")
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -191,7 +191,7 @@ class Request(OpenAPIRequest):
             method=self.method,
             url=url,
             headers=self.parameters.header,
-            bodyy=self.body if self.body is not None else b"",
+            body=self.body if self.body is not None else b"",
             version="",
         )
         dialogue = cast(HttpDialogue, http_dialogue)
@@ -229,7 +229,7 @@ class Response(web.Response):
             response = cls(
                 status=http_message.status_code,
                 reason=http_message.status_text,
-                body=http_message.bodyy,
+                body=http_message.body,
                 headers=headers,
             )
         else:  # pragma: nocover

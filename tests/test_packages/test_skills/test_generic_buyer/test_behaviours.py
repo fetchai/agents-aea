@@ -49,16 +49,13 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
-    def test_search_behaviour_setup_is_ledger_tx(self):
+    def test_setup_is_ledger_tx(self):
         """Test the setup method of the search behaviour where is_ledger_tx is True."""
         # operation
         self.search_behaviour.setup()
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=LedgerApiMessage,
@@ -70,7 +67,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_search_behaviour_setup_not_is_ledger_tx(self):
+    def test_setup_not_is_ledger_tx(self):
         """Test the setup method of the search behaviour where is_ledger_tx is False."""
         # setup
         self.strategy._is_ledger_tx = False
@@ -84,7 +81,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # after
         assert self.strategy.is_searching
 
-    def test_search_behaviour_act_is_searching(self):
+    def test_act_is_searching(self):
         """Test the act method of the search behaviour where is_searching is True."""
         # setup
         self.strategy._is_searching = True
@@ -93,11 +90,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.search_behaviour.act()
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
-
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=OefSearchMessage,
@@ -108,7 +101,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_search_behaviour_act_not_is_searching(self):
+    def test_act_not_is_searching(self):
         """Test the act method of the search behaviour where is_searching is False."""
         # setup
         self.strategy._is_searching = False
@@ -117,4 +110,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.search_behaviour.act()
 
         # after
-        assert self.get_quantity_in_outbox() == 0
+        self.assert_quantity_in_outbox(0)
+
+    def test_teardown(self):
+        """Test the teardown method of the search behaviour."""
+        assert self.search_behaviour.teardown() is None
+        self.assert_quantity_in_outbox(0)

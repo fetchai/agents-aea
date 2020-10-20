@@ -36,11 +36,7 @@ from aea.cli.utils.package_utils import (
     try_get_item_target_path,
 )
 from aea.configurations.base import CRUDCollection, DEFAULT_AEA_CONFIG_FILE, PublicId
-from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
-)
+from aea.configurations.constants import DISTRIBUTED_PACKAGES
 
 
 @click.command(name="publish")
@@ -111,8 +107,8 @@ def _save_agent_locally(ctx: Context) -> None:
     for item_type_plural in ("connections", "contracts", "protocols", "skills"):
         dependencies = getattr(ctx.agent_config, item_type_plural)
         for public_id in dependencies:
-            if public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
-                continue
+            if public_id in DISTRIBUTED_PACKAGES:
+                continue  # pragma: nocover
             _check_is_item_in_local_registry(
                 PublicId.from_str(str(public_id)),
                 item_type_plural,

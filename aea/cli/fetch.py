@@ -69,7 +69,10 @@ def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
 
 @clean_after
 def fetch_agent_locally(
-    ctx: Context, public_id: PublicId, alias: Optional[str] = None
+    ctx: Context,
+    public_id: PublicId,
+    alias: Optional[str] = None,
+    target_dir: Optional[str] = None,
 ) -> None:
     """
     Fetch Agent from local packages.
@@ -77,9 +80,12 @@ def fetch_agent_locally(
     :param ctx: a Context object.
     :param public_id: public ID of agent to be fetched.
     :param alias: an optional alias.
+    :param target_dir: the target directory to which the agent is fetched.
     :return: None
     """
-    packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
+    packages_path = (
+        DEFAULT_REGISTRY_PATH if ctx.registry_path is None else ctx.registry_path
+    )
     source_path = try_get_item_source_path(
         packages_path, public_id.author, "agents", public_id.name
     )
@@ -92,12 +98,14 @@ def fetch_agent_locally(
             )
         )
 
-    folder_name = public_id.name if alias is None else alias
+    folder_name = target_dir or (public_id.name if alias is None else alias)
     target_path = os.path.join(ctx.cwd, folder_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(public_id.name)
         )
+    if target_dir is not None:
+        os.makedirs(target_path)  # pragma: nocover
 
     ctx.clean_paths.append(target_path)
     copy_tree(source_path, target_path)

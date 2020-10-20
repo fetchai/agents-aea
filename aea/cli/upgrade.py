@@ -17,141 +17,27 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea upgrade' subcommand."""
-from collections import defaultdict
 from contextlib import suppress
 from pathlib import Path
-from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple, cast
+from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
 
 from aea.cli.add import add_item
 from aea.cli.registry.utils import get_latest_version_available_in_registry
-from aea.cli.remove import remove_item
+from aea.cli.remove import (
+    ItemRemoveHelper,
+    RemoveItem,
+    remove_unused_component_configurations,
+)
 from aea.cli.utils.click_utils import PublicIdParameter
-from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
     get_item_public_id_by_author_name,
     is_item_present,
 )
-from aea.configurations.base import (
-    AgentConfig,
-    ComponentType,
-    PackageConfiguration,
-    PackageId,
-    PublicId,
-)
-
-
-class ItemRemoveHelper:
-    """Helper to check dependencies on removing component from agent config."""
-
-    def __init__(self, agent_config: AgentConfig) -> None:
-        """Init helper."""
-        self._agent_config = agent_config
-
-    def get_agent_dependencies_with_reverse_dependencies(
-        self,
-    ) -> Dict[PackageId, Set[PackageId]]:
-        """
-        Get all reverse dependencices in agent.
-
-        :return: dict with PackageId: and set of PackageIds that uses this package
-
-        Return example:
-        {
-            PackageId(protocol, fetchai/default:0.6.0): {
-                PackageId(skill, fetchai/echo:0.8.0),
-                PackageId(skill, fetchai/error:0.6.0)
-            },
-            PackageId(connection, fetchai/stub:0.10.0): set(),
-            PackageId(skill, fetchai/error:0.6.0): set(),
-            PackageId(skill, fetchai/echo:0.8.0): set()}
-        )
-        """
-        return self.get_item_dependencies_with_reverse_dependencies(
-            self._agent_config, None
-        )
-
-    @staticmethod
-    def get_item_config(package_id: PackageId) -> PackageConfiguration:
-        """Get item config for item,_type and public_id."""
-        return load_item_config(
-            str(package_id.package_type),
-            package_path=Path("vendor")
-            / package_id.public_id.author
-            / f"{str(package_id.package_type)}s"
-            / package_id.public_id.name,
-        )
-
-    @staticmethod
-    def _get_item_requirements(
-        item: PackageConfiguration,
-    ) -> Generator[PackageId, None, None]:
-        """
-        List all the requiemenents for item provided.
-
-        :return: generator with package ids: (type, public_id)
-        """
-        for item_type in map(str, ComponentType):
-            items = getattr(item, f"{item_type}s", set())
-            for item_public_id in items:
-                yield PackageId(item_type, item_public_id)
-
-    def get_item_dependencies_with_reverse_dependencies(
-        self, item: PackageConfiguration, package_id: Optional[PackageId] = None
-    ) -> Dict[PackageId, Set[PackageId]]:
-        """
-        Get item dependencies.
-
-        It's recursive and provides all the sub dependencies.
-
-        :return: dict with PackageId: and set of PackageIds that uses this package
-        """
-        result: defaultdict = defaultdict(set)
-
-        for dep_package_id in self._get_item_requirements(item):
-            if package_id is None:
-                _ = result[dep_package_id]  # init default dict value
-            else:
-                result[dep_package_id].add(package_id)
-            dep_item = self.get_item_config(dep_package_id)
-            for item_key, deps in self.get_item_dependencies_with_reverse_dependencies(
-                dep_item, dep_package_id
-            ).items():
-                result[item_key] = result[item_key].union(deps)
-
-        return result
-
-    def check_remove(
-        self, item_type: str, item_public_id: PublicId
-    ) -> Tuple[Set[PackageId], Set[PackageId], Dict[PackageId, Set[PackageId]]]:
-        """
-        Check item can be removed from agent.
-
-        required by - set of components that requires this component
-        can be deleted - set of dependencies used only by component so can be deleted
-        can not be deleted  - dict - keys - packages can not be deleted, values are set of packages requireed by.
-
-        :return: Tuple[required by, can be deleted, can not be deleted.]
-        """
-        package_id = PackageId(item_type, item_public_id)
-        item = self.get_item_config(package_id)
-        agent_deps = self.get_agent_dependencies_with_reverse_dependencies()
-        item_deps = self.get_item_dependencies_with_reverse_dependencies(
-            item, package_id
-        )
-        can_be_removed = set()
-        can_not_be_removed = dict()
-
-        for dep_key, deps in item_deps.items():
-            if agent_deps[dep_key] == deps:
-                can_be_removed.add(dep_key)
-            else:
-                can_not_be_removed[dep_key] = agent_deps[dep_key] - deps
-
-        return agent_deps[package_id], can_be_removed, can_not_be_removed
+from aea.configurations.base import PackageId, PublicId
 
 
 @click.group(invoke_without_command=True)
@@ -206,7 +92,6 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     click.echo("Starting project upgrade...")
 
     item_remover = ItemRemoveHelper(ctx.agent_config)
-
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
     items_to_upgrade = set()
     upgraders: List[ItemUpgrader] = []
@@ -215,19 +100,21 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     items_to_upgrade_dependencies = set()
 
     for package_id, deps in agent_items.items():
+        item_upgrader = ItemUpgrader(
+            ctx, str(package_id.package_type), package_id.public_id.to_latest()
+        )
+
         if deps:
             continue
 
         with suppress(UpgraderException):
-            item_upgrader = ItemUpgrader(
-                ctx, str(package_id.package_type), package_id.public_id.to_latest()
-            )
             new_version = item_upgrader.check_upgrade_is_required()
             items_to_upgrade.add((package_id, new_version))
             upgraders.append(item_upgrader)
-            shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
-            items_to_upgrade_dependencies.update(item_upgrader.dependencies)
-            items_to_upgrade_dependencies.add(package_id)
+
+        items_to_upgrade_dependencies.add(package_id)
+        items_to_upgrade_dependencies.update(item_upgrader.dependencies)
+        shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
 
     if not items_to_upgrade:
         click.echo("Everything is already up to date!")
@@ -240,19 +127,34 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         # add it to remove
         shared_deps_to_remove.add(dep)
 
-    if shared_deps_to_remove:
-        click.echo(
-            f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
-        )
-        for dep in shared_deps_to_remove:
-            remove_item(ctx, str(dep.package_type), dep.public_id)
-        click.echo("Shared dependencies removed.")
+    with remove_unused_component_configurations(ctx):
+        if shared_deps_to_remove:
+            click.echo(
+                f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
+            )
+            for dep in shared_deps_to_remove:
+                if ItemUpgrader(
+                    ctx, str(dep.package_type), dep.public_id
+                ).is_non_vendor:
+                    # non vendor package, do not remove!
+                    continue
+                RemoveItem(
+                    ctx,
+                    str(dep.package_type),
+                    dep.public_id,
+                    with_dependencies=False,
+                    force=True,
+                ).remove_item()
+            click.echo("Shared dependencies removed.")
 
-    for upgrader in upgraders:
-        upgrader.remove_item()
-        upgrader.remove_dependencies_for_item()
-        upgrader.add_item()
+        for upgrader in upgraders:
+            upgrader.remove_item()
+            upgrader.add_item()
+
     click.echo("Finished project upgrade. Everything is up to date now!")
+    click.echo(
+        'Please manually update package versions in your non-vendor packages as well as in "default_connection" and "default_routing"'
+    )
 
 
 class UpgraderException(Exception):
@@ -293,6 +195,7 @@ class ItemUpgrader:
         :param item_public_id: item to upgrade.
         """
         self.ctx = ctx
+        self.ctx.set_config("with_dependencies", True)
         self.item_type = item_type
         self.item_public_id = item_public_id
         self.current_item_public_id = self.get_current_item()
@@ -320,7 +223,11 @@ class ItemUpgrader:
 
     def check_item_present(self) -> None:
         """Check item going to be upgraded already registered in agent."""
-        if not is_item_present(self.ctx, self.item_type, self.item_public_id):
+        if not is_item_present(
+            self.ctx, self.item_type, self.item_public_id
+        ) and not is_item_present(
+            self.ctx, self.item_type, self.item_public_id, is_vendor=False
+        ):
             raise NotAddedException()
 
     def get_dependencies(
@@ -335,6 +242,14 @@ class ItemUpgrader:
             self.item_type, self.current_item_public_id
         )
 
+    @property
+    def is_non_vendor(self) -> bool:
+        """Check is package specified is non vendor."""
+        path = ItemRemoveHelper.get_component_directory(
+            PackageId(self.item_type, self.item_public_id)
+        )
+        return "vendor" not in Path(path).parts[:2]
+
     def check_upgrade_is_required(self) -> str:
         """
         Check upgrade is required otherwise raise UpgraderException.
@@ -345,6 +260,9 @@ class ItemUpgrader:
             # check if we trying to upgrade some component dependency
             raise IsRequiredException(self.in_requirements)
 
+        if self.is_non_vendor:
+            raise AlreadyActualVersionException(self.current_item_public_id.version)
+
         if self.item_public_id.version != "latest":
             new_item = self.item_public_id
         else:
@@ -354,21 +272,24 @@ class ItemUpgrader:
 
         if self.current_item_public_id.version == new_item.version:
             raise AlreadyActualVersionException(new_item.version)
+
         return new_item.version
 
     def remove_item(self) -> None:
         """Remove item from agent."""
-        remove_item(self.ctx, self.item_type, self.item_public_id)
-
-    def remove_dependencies_for_item(self) -> None:
-        """Remove all the dependecies not shared."""
-        for dep_package_id in self.deps_can_be_removed:
-            remove_item(
-                self.ctx, str(dep_package_id.package_type), dep_package_id.public_id
-            )
+        remove_item = RemoveItem(
+            self.ctx,
+            self.item_type,
+            self.item_public_id,
+            with_dependencies=True,
+            force=True,
+        )
+        remove_item.remove()
+        click.echo(f"Item { self.item_type} {self.item_public_id} removed!")
 
     def add_item(self) -> None:
         """Add new package version to agent."""
+        click.echo(f"Adding item {self.item_type} {self.item_public_id}.")
         add_item(self.ctx, str(self.item_type), self.item_public_id)
 
 
@@ -383,41 +304,22 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
     :return: None
     """
     try:
-        item_upgrader = ItemUpgrader(ctx, item_type, item_public_id)
-        click.echo(
-            "Upgrading {} '{}/{}' from version '{}' to '{}' for the agent '{}'...".format(
-                item_type,
-                item_public_id.author,
-                item_public_id.name,
-                item_upgrader.current_item_public_id.version,
-                item_public_id.version,
-                ctx.agent_config.agent_name,
-            )
-        )
-        version = item_upgrader.check_upgrade_is_required()
-
-        item_upgrader.remove_item()
-
-        if item_upgrader.deps_can_be_removed:
+        with remove_unused_component_configurations(ctx):
+            item_upgrader = ItemUpgrader(ctx, item_type, item_public_id)
             click.echo(
-                "Removing dependencies for {} '{}/{}:{}' ...".format(
+                "Upgrading {} '{}/{}' from version '{}' to '{}' for the agent '{}'...".format(
                     item_type,
                     item_public_id.author,
                     item_public_id.name,
                     item_upgrader.current_item_public_id.version,
+                    item_public_id.version,
+                    ctx.agent_config.agent_name,
                 )
             )
-            item_upgrader.remove_dependencies_for_item()
-            click.echo(
-                "Dependencies for {} '{}/{}:{}' removed.".format(
-                    item_type,
-                    item_public_id.author,
-                    item_public_id.name,
-                    item_upgrader.current_item_public_id.version,
-                )
-            )
+            version = item_upgrader.check_upgrade_is_required()
 
-        item_upgrader.add_item()
+            item_upgrader.remove_item()
+            item_upgrader.add_item()
 
         click.echo(
             "The {} '{}/{}' for the agent '{}' has been successfully upgraded from version '{}' to '{}'.".format(

@@ -43,13 +43,13 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
-from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.click_testing import CliRunner
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_PUBLIC_ID,
 )
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from .conftest import (
     AUTHOR,

@@ -23,16 +23,13 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import TestCase, mock
 
 import yaml
 
 from aea.cli import cli
-from aea.cli.install import _install_dependency
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
-from aea.exceptions import AEAException
 
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner, ROOT_DIR
 
 
 class TestInstall:
@@ -43,6 +40,10 @@ class TestInstall:
         """Set the test up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         # copy the 'dummy_aea' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
         cls.runner = CliRunner()
@@ -109,6 +110,10 @@ class TestInstallFailsWhenDependencyDoesNotExist:
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
@@ -193,18 +198,3 @@ class TestInstallWithRequirementFailsWhenFileIsBad:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
-
-@mock.patch("aea.cli.install.subprocess.Popen")
-@mock.patch("aea.cli.install.subprocess.Popen.wait")
-@mock.patch("aea.cli.install.sys.exit")
-class InstallDependencyTestCase(TestCase):
-    """Test case for _install_dependency method."""
-
-    def test__install_dependency_with_git_url(self, *mocks):
-        """Test for _install_dependency method with git url."""
-        dependency = {
-            "git": "url",
-        }
-        with self.assertRaises(AEAException):
-            _install_dependency("dependency_name", dependency)

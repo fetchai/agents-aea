@@ -1,31 +1,31 @@
 ``` bash
-aea fetch fetchai/ml_data_provider:0.13.0
+aea fetch fetchai/ml_data_provider:0.15.0
 cd ml_data_provider
 aea install
 ``` 
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/ledger:0.6.0
-aea add skill fetchai/ml_data_provider:0.12.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/ml_data_provider:0.14.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea install
 ```
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.13.0
+aea fetch fetchai/ml_model_trainer:0.15.0
 cd ml_model_trainer
 aea install
 ```
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/ledger:0.6.0
-aea add skill fetchai/ml_train:0.12.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/ml_train:0.14.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea install
 ```
 ``` bash
@@ -54,13 +54,13 @@ aea delete ml_model_trainer
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
-  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
+  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
-  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
+  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 ``` yaml
 config:

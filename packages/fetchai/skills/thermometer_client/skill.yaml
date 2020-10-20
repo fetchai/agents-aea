@@ -1,14 +1,14 @@
 name: thermometer_client
 author: fetchai
-version: 0.11.0
+version: 0.13.0
 type: skill
 description: The thermometer client skill implements the skill to purchase temperature
   data.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmSn1bh9J7RT241DGT4812rTNGe2S2YLpEvy8ApNqNNqjf
-  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  __init__.py: QmSV4LhTLxaxoqdyq4ZczxLJxtvvxoKBNrLtAK9XYzARP9
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
@@ -16,12 +16,13 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/ledger_api:0.4.0
-- fetchai/oef_search:0.7.0
+- fetchai/default:0.8.0
+- fetchai/fipa:0.9.0
+- fetchai/ledger_api:0.6.0
+- fetchai/oef_search:0.9.0
+- fetchai/signing:0.6.0
 skills:
-- fetchai/generic_buyer:0.12.0
+- fetchai/generic_buyer:0.14.0
 behaviours:
   search:
     args:
@@ -75,3 +76,4 @@ models:
       service_id: thermometer_data
     class_name: Strategy
 dependencies: {}
+is_abstract: false

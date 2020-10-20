@@ -265,7 +265,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 self._recv_loop_task = self._loop.create_task(self._receiving_loop())
                 self._send_loop_task = self._loop.create_task(self._send_loop())
                 self.logger.debug("Multiplexer connected and running.")
-            except (CancelledError, asyncio.CancelledError):
+            except (CancelledError, asyncio.CancelledError):  # pragma: nocover
                 await self._stop()
                 raise asyncio.CancelledError()
             except Exception:

@@ -20,8 +20,9 @@
 """Implementation of the 'aea interact' subcommand."""
 
 import codecs
+import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, TYPE_CHECKING, Type, Union
 
 import click
 
@@ -33,18 +34,34 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,
 )
-from aea.configurations.loader import ConfigLoader
-from aea.connections.stub.connection import (
-    DEFAULT_INPUT_FILE_NAME,
-    DEFAULT_OUTPUT_FILE_NAME,
-    StubConnection,
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
 )
+from aea.configurations.loader import ConfigLoader
+from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
-from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
-from aea.protocols.default.message import DefaultMessage
+from aea.protocols.base import Protocol
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import Dialogues
+
+
+if TYPE_CHECKING:  # pragma: nocover
+    from packages.fetchai.connections.stub.connection import (  # noqa: F401
+        DEFAULT_INPUT_FILE_NAME,
+        DEFAULT_OUTPUT_FILE_NAME,
+        StubConnection,
+    )
+    from packages.fetchai.protocols.default.dialogues import (  # noqa: F401
+        DefaultDialogue,
+        DefaultDialogues,
+    )
+    from packages.fetchai.protocols.default.message import DefaultMessage  # noqa: F401
 
 
 @click.command()
@@ -56,18 +73,64 @@ def interact(click_context: click.core.Context):  # pylint: disable=unused-argum
     _run_interaction_channel()
 
 
+def _load_packages(agent_identity: Identity):
+    """Load packages in the current interpreter."""
+    Protocol.from_dir(
+        os.path.join(
+            "vendor", DEFAULT_PROTOCOL.author, "protocols", DEFAULT_PROTOCOL.name
+        )
+    )
+    Protocol.from_dir(
+        os.path.join(
+            "vendor", SIGNING_PROTOCOL.author, "protocols", SIGNING_PROTOCOL.name
+        )
+    )
+    Protocol.from_dir(
+        os.path.join(
+            "vendor",
+            STATE_UPDATE_PROTOCOL.author,
+            "protocols",
+            STATE_UPDATE_PROTOCOL.name,
+        )
+    )
+    Connection.from_dir(
+        os.path.join(
+            "vendor", DEFAULT_CONNECTION.author, "connections", DEFAULT_CONNECTION.name
+        ),
+        agent_identity,
+        CryptoStore(),
+    )
+
+
 def _run_interaction_channel():
-    # load agent configuration file
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
     agent_configuration = loader.load(Path(DEFAULT_AEA_CONFIG_FILE).open())
     agent_name = agent_configuration.name
+
+    identity_stub = Identity(agent_name + "_interact", "interact")
+    _load_packages(identity_stub)
+
+    # load agent configuration file
+    from packages.fetchai.connections.stub.connection import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+        DEFAULT_INPUT_FILE_NAME,
+        DEFAULT_OUTPUT_FILE_NAME,
+        StubConnection,
+    )
+    from packages.fetchai.protocols.default.dialogues import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+        DefaultDialogue,
+        DefaultDialogues,
+    )
+    from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+        DefaultMessage,
+    )
+
     # load stub connection
     configuration = ConnectionConfig(
         input_file=DEFAULT_OUTPUT_FILE_NAME,
         output_file=DEFAULT_INPUT_FILE_NAME,
         connection_id=StubConnection.connection_id,
     )
-    identity_stub = Identity(agent_name + "_interact", "interact")
+
     stub_connection = StubConnection(
         configuration=configuration, identity=identity_stub
     )
@@ -91,7 +154,7 @@ def _run_interaction_channel():
     try:
         multiplexer.connect()
         while True:  # pragma: no cover
-            _process_envelopes(agent_name, inbox, outbox, dialogues)
+            _process_envelopes(agent_name, inbox, outbox, dialogues, DefaultMessage)
 
     except KeyboardInterrupt:
         click.echo("Interaction interrupted!")
@@ -102,7 +165,11 @@ def _run_interaction_channel():
 
 
 def _process_envelopes(
-    agent_name: str, inbox: InBox, outbox: OutBox, dialogues: DefaultDialogues,
+    agent_name: str,
+    inbox: InBox,
+    outbox: OutBox,
+    dialogues: Dialogues,
+    message_class: Type[Message],
 ) -> None:
     """
     Process envelopes.
@@ -111,31 +178,34 @@ def _process_envelopes(
     :param inbox: an inbox object.
     :param outbox: an outbox object.
     :param dialogues: the dialogues object.
+    :param message_class: the message class.
 
     :return: None.
     """
-    envelope = _try_construct_envelope(agent_name, dialogues)
+    envelope = _try_construct_envelope(agent_name, dialogues, message_class)
     if envelope is None:
-        _check_for_incoming_envelope(inbox)
+        _check_for_incoming_envelope(inbox, message_class)
     else:
         outbox.put(envelope)
-        click.echo(_construct_message("sending", envelope))
+        click.echo(_construct_message("sending", envelope, message_class))
 
 
-def _check_for_incoming_envelope(inbox: InBox):
+def _check_for_incoming_envelope(inbox: InBox, message_class: Type[Message]):
     if not inbox.empty():
         envelope = inbox.get_nowait()
         if envelope is None:
             raise ValueError("Could not recover envelope from inbox.")
-        click.echo(_construct_message("received", envelope))
+        click.echo(_construct_message("received", envelope, message_class))
     else:
         click.echo("Received no new envelope!")
 
 
-def _construct_message(action_name: str, envelope: Envelope):
+def _construct_message(
+    action_name: str, envelope: Envelope, message_class: Type[Message]
+):
     action_name = action_name.title()
     msg = (
-        DefaultMessage.serializer.decode(envelope.message)
+        message_class.serializer.decode(envelope.message)
         if isinstance(envelope.message, bytes)
         else envelope.message
     )
@@ -149,29 +219,24 @@ def _construct_message(action_name: str, envelope: Envelope):
 
 
 def _try_construct_envelope(
-    agent_name: str, dialogues: DefaultDialogues
+    agent_name: str, dialogues: Dialogues, message_class: Type[Message]
 ) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
     envelope = None  # type: Optional[Envelope]
     try:
         performative_str = "bytes"
-        performative = DefaultMessage.Performative(performative_str)
+        performative = message_class.Performative(performative_str)
         click.echo(
-            "Provide message of protocol fetchai/default:0.6.0 for performative {}:".format(
-                performative_str
-            )
+            f"Provide message of protocol '{str(message_class.protocol_id)}' for performative {performative_str}:"
         )
         message_escaped = input()  # nosec
         message_escaped = message_escaped.strip()
         if message_escaped == "":
             raise InterruptInputException
-        if performative == DefaultMessage.Performative.BYTES:
-            message_decoded = codecs.decode(
-                message_escaped.encode("utf-8"), "unicode-escape"
-            )
-            message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
-        else:
-            message = message_escaped  # pragma: no cover
+        message_decoded = codecs.decode(
+            message_escaped.encode("utf-8"), "unicode-escape"
+        )
+        message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
         msg, _ = dialogues.create(
             counterparty=agent_name, performative=performative, content=message,
         )

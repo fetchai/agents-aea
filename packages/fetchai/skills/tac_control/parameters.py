@@ -26,6 +26,7 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.search.models import Location
 from aea.skills.base import Model
 
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as CONTRACT_ID
 from packages.fetchai.skills.tac_control.helpers import (
     generate_currency_id_to_name,
     generate_good_id_to_name,
@@ -112,7 +113,8 @@ class Parameters(Model):
 
         self._agent_location = {
             "location": Location(
-                self._location["longitude"], self._location["latitude"]
+                latitude=self._location["latitude"],
+                longitude=self._location["longitude"],
             )
         }
         self._set_service_data = self._service_data
@@ -122,10 +124,13 @@ class Parameters(Model):
         }
 
         super().__init__(**kwargs)
+        self._contract_id = str(CONTRACT_ID)
         self._currency_id_to_name = generate_currency_id_to_name(
             self.nb_currencies, self.currency_ids
         )
-        self._good_id_to_name = generate_good_id_to_name(self.nb_goods, self.good_ids)
+        self._good_id_to_name = generate_good_id_to_name(
+            self.nb_goods, self.good_ids, starting_index=1
+        )
         self._registration_end_time = (
             self._registration_start_time
             + datetime.timedelta(seconds=self._registration_timeout)
@@ -173,6 +178,11 @@ class Parameters(Model):
         if self._contract_address is not None:
             raise AEAEnforceError("Contract address already provided.")
         self._contract_address = contract_address
+
+    @property
+    def contract_id(self) -> str:
+        """Get the contract id."""
+        return self._contract_id
 
     @property
     def is_contract_deployed(self) -> bool:

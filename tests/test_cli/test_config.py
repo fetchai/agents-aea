@@ -30,9 +30,9 @@ from aea.cli import cli
 from aea.cli.utils.constants import ALLOWED_PATH_ROOTS
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.loader import ConfigLoader
-from aea.helpers.base import yaml_load
+from aea.helpers.yaml_utils import yaml_load
 
-from tests.conftest import CLI_LOG_OPTION, CUR_PATH, CliRunner
+from tests.conftest import CLI_LOG_OPTION, CUR_PATH, CliRunner, ROOT_DIR
 
 
 class TestConfigGet:
@@ -43,6 +43,10 @@ class TestConfigGet:
         """Set the test up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
         os.chdir(Path(cls.t, "dummy_aea"))
         cls.runner = CliRunner()
@@ -233,6 +237,10 @@ class TestConfigSet:
         """Set the test up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
         os.chdir(Path(cls.t, "dummy_aea"))
         cls.runner = CliRunner()
@@ -493,6 +501,10 @@ class TestConfigNestedGetSet:
         """Set the test up."""
         self.cwd = os.getcwd()
         self.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = self.t / dir_path
+        src_dir = self.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(self.t, "dummy_aea"))
         os.chdir(Path(self.t, "dummy_aea"))
         self.runner = CliRunner()

@@ -20,19 +20,21 @@
 
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import (
     CRUDCollection,
+    ComponentConfiguration,
     PackageConfiguration,
     PackageType,
     PublicId,
     SkillConfig,
+    dependencies_from_json,
 )
-from aea.connections.stub.connection import write_envelope
 from aea.exceptions import enforce
-from aea.helpers.base import yaml_dump, yaml_dump_all
+from aea.helpers.file_io import write_envelope
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 from aea.mail.base import Envelope
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
@@ -98,14 +100,13 @@ def _nested_set(
     def get_nested_ordered_dict_from_keys_and_value(
         keys: List[str], value: Any
     ) -> Dict:
-        _dic = {}  # type: Dict[str, Any]
-        for key in keys[:-1]:
-            _dic = _dic.setdefault(key, OrderedDict())
-        _dic[keys[-1]] = (
+        _dic = (
             OrderedDict(get_nested_ordered_dict_from_dict(value))
             if isinstance(value, dict)
             else value
         )
+        for key in keys[::-1]:
+            _dic = OrderedDict({key: _dic})
         return _dic
 
     root_key = keys[0]
@@ -116,7 +117,7 @@ def _nested_set(
         root_attr = getattr(configuration_obj, root_key)
         length = len(keys)
         if length < 3 or keys[2] not in SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
-            raise ValueError(f"Invalid keys={keys}.")
+            raise ValueError(f"Invalid keys={keys}.")  # pragma: nocover
         skill_component_id = keys[1]
         skill_component_config = root_attr.read(skill_component_id)
         if length == 3 and isinstance(value, dict):  # root.skill_component_id.args
@@ -127,12 +128,14 @@ def _nested_set(
             dic = get_nested_ordered_dict_from_keys_and_value(keys[3:], value)
             skill_component_config.args.update(dic)
         else:
-            raise NotImplementedError
+            raise ValueError(  # pragma: nocover
+                f"Invalid keys={keys} and values={value}."
+            )
         root_attr.update(skill_component_id, skill_component_config)
     else:
         root_attr = getattr(configuration_obj, root_key)
         if isinstance(root_attr, CRUDCollection):
-            if isinstance(value, dict) and len(keys) == 1:
+            if isinstance(value, dict) and len(keys) == 1:  # root.
                 for _key, _value in value.items():
                     dic = get_nested_ordered_dict_from_keys_and_value([_key], _value)
                     root_attr.update(_key, dic[_key])
@@ -140,7 +143,17 @@ def _nested_set(
                 dic = get_nested_ordered_dict_from_keys_and_value(keys[1:], value)
                 root_attr.update(keys[1], dic[keys[1]])
             else:
-                raise NotImplementedError
+                raise ValueError(  # pragma: nocover
+                    f"Invalid keys={keys} and values={value}."
+                )
+        elif root_key == "dependencies":
+            enforce(
+                isinstance(configuration_obj, ComponentConfiguration),
+                "Cannot only set dependencies to ComponentConfiguration instances.",
+            )
+            configuration_obj = cast(ComponentConfiguration, configuration_obj)
+            new_pypi_dependencies = dependencies_from_json(value)
+            configuration_obj.pypi_dependencies = new_pypi_dependencies
         else:
             dic = get_nested_ordered_dict_from_keys_and_value(keys, value)
             setattr(configuration_obj, root_key, dic[root_key])

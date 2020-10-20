@@ -42,8 +42,11 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
+    DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_PATH,
     DEFAULT_SKILL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
 )
 
 
@@ -99,7 +102,7 @@ def create_aea(
 
     if author is not None:
         if local:
-            do_init(author, False, False)
+            do_init(author, False, False, False)
         else:
             raise click.ClickException(
                 "Author is not set up. Please use 'aea init' to initialize."
@@ -146,6 +149,9 @@ def create_aea(
             click.echo("Adding default packages ...")
             if local:
                 ctx.set_config("is_local", True)
+            add_item(ctx, "protocol", DEFAULT_PROTOCOL)
+            add_item(ctx, "protocol", SIGNING_PROTOCOL)
+            add_item(ctx, "protocol", STATE_UPDATE_PROTOCOL)
             add_item(ctx, "connection", DEFAULT_CONNECTION)
             add_item(ctx, "skill", DEFAULT_SKILL)
 

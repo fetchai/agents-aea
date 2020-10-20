@@ -22,7 +22,7 @@
 import logging
 from typing import Optional, Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -46,7 +46,7 @@ DEFAULT_BODY_SIZE = 4
 class ContractApiMessage(Message):
     """A protocol for contract APIs requests and responses."""
 
-    protocol_id = ProtocolId.from_str("fetchai/contract_api:0.5.0")
+    protocol_id = PublicId.from_str("fetchai/contract_api:0.7.0")
 
     Kwargs = CustomKwargs
 
@@ -245,7 +245,7 @@ class ContractApiMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if (
                 self.performative

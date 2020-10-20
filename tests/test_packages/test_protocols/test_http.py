@@ -53,7 +53,7 @@ def test_request_serialization():
         url="url",
         version="some_version",
         headers="some_headers",
-        bodyy=b"some_bodyy",
+        body=b"some_body",
     )
     msg.to = "receiver"
     envelope = Envelope(
@@ -85,7 +85,7 @@ def test_response_serialization():
         status_code=1,
         status_text="some_status_text",
         headers="some_headers",
-        bodyy=b"some_bodyy",
+        body=b"some_body",
     )
     msg.to = "receiver"
     envelope = Envelope(
@@ -125,7 +125,7 @@ def test_encoding_unknown_performative():
         url="url",
         version="some_version",
         headers="some_headers",
-        bodyy=b"some_bodyy",
+        body=b"some_body",
     )
 
     with pytest.raises(ValueError, match="Performative not valid:"):
@@ -141,7 +141,7 @@ def test_decoding_unknown_performative():
         url="url",
         version="some_version",
         headers="some_headers",
-        bodyy=b"some_bodyy",
+        body=b"some_body",
     )
 
     encoded_msg = HttpMessage.serializer.encode(msg)
@@ -164,7 +164,7 @@ def test_incorrect_message(mocked_enforce):
             url="url",
             version="some_version",
             headers="some_headers",
-            bodyy=b"some_bodyy",
+            body=b"some_body",
         )
 
         mock_logger.assert_any_call("some error")

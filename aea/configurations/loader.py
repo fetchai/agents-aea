@@ -22,7 +22,6 @@
 import inspect
 import json
 import os
-import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
@@ -30,7 +29,6 @@ from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
 import jsonschema
 import yaml
 from jsonschema import Draft4Validator
-from yaml import SafeLoader
 
 from aea.configurations.base import (
     AgentConfig,
@@ -45,7 +43,7 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.helpers.base import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
+from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
@@ -194,7 +192,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
     def validate(self, json_data: Dict) -> None:
         """
-        Validate a JSON object.
+        Validate a JSON object against the right JSON schema.
 
         :param json_data: the JSON data.
         :return: None.
@@ -212,7 +210,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
                 component_id = self._split_component_id_and_config(
                     idx, component_configuration_json
                 )
-                self._validate_component_configuration(
+                self.validate_component_configuration(
                     component_id, component_configuration_json
                 )
 
@@ -252,26 +250,6 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         configuration_type = PackageType(configuration_type)
         return ConfigLoaders.from_package_type(configuration_type)
 
-    def _validate(self, json_data: Dict) -> None:
-        """
-        Validate a configuration file.
-
-        :param json_data: the JSON object of the configuration file to validate.
-        :return: None
-        :raises ValidationError: if the file doesn't comply with the JSON schema.
-              | ValueError: if other consistency checks fail.
-        """
-        # this might raise ValidationError.
-        self.validate(json_data)
-
-        expected_type = self.configuration_class.package_type
-        if expected_type != PackageType.AGENT and "type" in json_data:
-            actual_type = PackageType(json_data["type"])
-            if expected_type != actual_type:
-                raise ValueError(
-                    f"The field type is not correct: expected {expected_type}, found {actual_type}."
-                )
-
     def _load_component_config(self, file_pointer: TextIO) -> T:
         """Load a component configuration."""
         configuration_file_json = yaml_load(file_pointer)
@@ -279,7 +257,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
     def _load_from_json(self, configuration_file_json: Dict) -> T:
         """Load component configuration from JSON object."""
-        self._validate(configuration_file_json)
+        self.validate(configuration_file_json)
         key_order = list(configuration_file_json.keys())
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
@@ -298,7 +276,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         if len(configuration_json) == 0:
             raise ValueError("Agent configuration file was empty.")
         agent_config_json = configuration_json[0]
-        self._validate(agent_config_json)
+        self.validate(agent_config_json)
         key_order = list(agent_config_json.keys())
         agent_configuration_obj = cast(
             AgentConfig, self.configuration_class.from_json(agent_config_json)
@@ -376,7 +354,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         component_id = self._split_component_id_and_config(
             component_index, component_configuration_json
         )
-        self._validate_component_configuration(
+        self.validate_component_configuration(
             component_id, component_configuration_json
         )
         return component_id
@@ -412,7 +390,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         return component_id
 
     @staticmethod
-    def _validate_component_configuration(
+    def validate_component_configuration(
         component_id: ComponentId, configuration: Dict
     ) -> None:
         """
@@ -517,26 +495,3 @@ def _load_configuration_object(
             )
         )
     return configuration_object
-
-
-def _config_loader():
-    envvar_matcher = re.compile(r"\${([^}^{]+)\}")
-
-    def envvar_constructor(_loader, node):  # pragma: no cover
-        """Extract the matched value, expand env variable, and replace the match."""
-        node_value = node.value
-        match = envvar_matcher.match(node_value)
-        env_var = match.group()[2:-1]
-
-        # check for defaults
-        var_name, default_value = env_var.split(":")
-        var_name = var_name.strip()
-        default_value = default_value.strip()
-        var_value = os.getenv(var_name, default_value)
-        return var_value + node_value[match.end() :]
-
-    yaml.add_implicit_resolver("!envvar", envvar_matcher, None, SafeLoader)
-    yaml.add_constructor("!envvar", envvar_constructor, SafeLoader)
-
-
-_config_loader()

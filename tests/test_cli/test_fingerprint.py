@@ -23,13 +23,13 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli import cli
-from aea.cli.fingerprint import _fingerprint_item
+from aea.cli.fingerprint import fingerprint_item
 
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ConfigLoaderMock, ContextMock, PublicIdMock
 
 
-@mock.patch("aea.cli.fingerprint._fingerprint_item")
+@mock.patch("aea.cli.fingerprint.fingerprint_item")
 class FingerprintCommandTestCase(TestCase):
     """Test case for CLI fingerprint command."""
 
@@ -75,25 +75,25 @@ def _raise_exception(*args, **kwargs):
 
 @mock.patch("aea.cli.fingerprint.Path.open", mock.mock_open())
 class FingerprintItemTestCase(TestCase):
-    """Test case for _fingerprint_item method."""
+    """Test case for fingerprint_item method."""
 
     @mock.patch("aea.cli.fingerprint.Path.exists", return_value=False)
     @mock.patch(
         "aea.cli.fingerprint.ConfigLoader.from_configuration_type",
         return_value=ConfigLoaderMock(),
     )
-    def test__fingerprint_item_package_not_found(self, *mocks):
-        """Test for _fingerprint_item package not found result."""
+    def test_fingerprint_item_package_not_found(self, *mocks):
+        """Test for fingerprint_item package not found result."""
         public_id = PublicIdMock()
         with self.assertRaises(ClickException) as cm:
-            _fingerprint_item(ContextMock(), "skill", public_id)
+            fingerprint_item(ContextMock(), "skill", public_id)
         self.assertIn("Package not found at path", cm.exception.message)
 
     @mock.patch(
         "aea.cli.fingerprint.ConfigLoader.from_configuration_type", _raise_exception
     )
-    def test__fingerprint_item_exception(self, *mocks):
-        """Test for _fingerprint_item exception raised."""
+    def test_fingerprint_item_exception(self, *mocks):
+        """Test for fingerprint_item exception raised."""
         public_id = PublicIdMock()
         with self.assertRaises(ClickException):
-            _fingerprint_item(ContextMock(), "skill", public_id)
+            fingerprint_item(ContextMock(), "skill", public_id)

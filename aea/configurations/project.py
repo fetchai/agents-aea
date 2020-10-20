@@ -22,6 +22,8 @@ from shutil import rmtree
 from typing import Dict, List, Set
 
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
+from aea.cli.fetch import fetch_agent_locally
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
@@ -37,13 +39,31 @@ class Project:
         self.agents: Set[str] = set()
 
     @classmethod
-    def load(cls, working_dir: str, public_id: PublicId) -> "Project":
-        """Load project with given public_id to working_dir."""
-        ctx = Context(cwd=working_dir)
+    def load(
+        cls,
+        working_dir: str,
+        public_id: PublicId,
+        is_local: bool = False,
+        registry_path: str = "packages",
+        skip_consistency_check: bool = False,
+    ) -> "Project":
+        """
+        Load project with given public_id to working_dir.
+
+        :param working_dir: the working directory
+        :param public_id: the public id
+        :param is_local: whether to fetch from local or remote
+        :param registry_path: the path to the registry locally
+        :param skip_consistency_check: consistency checks flag
+        """
+        ctx = Context(cwd=working_dir, registry_path=registry_path)
+        ctx.set_config("skip_consistency_check", skip_consistency_check)
         path = os.path.join(working_dir, public_id.author, public_id.name)
-        fetch_agent(
-            ctx, public_id, target_dir=os.path.join(public_id.author, public_id.name)
-        )
+        target_dir = os.path.join(public_id.author, public_id.name)
+        if is_local:
+            fetch_agent_locally(ctx, public_id, target_dir=target_dir)
+        else:
+            fetch_agent(ctx, public_id, target_dir=target_dir)
         return cls(public_id, path)
 
     def remove(self) -> None:
@@ -55,13 +75,19 @@ class AgentAlias:
     """Agent alias representation."""
 
     def __init__(
-        self, project: Project, agent_name: str, config: List[Dict], agent: AEA
+        self,
+        project: Project,
+        agent_name: str,
+        config: List[Dict],
+        agent: AEA,
+        builder: AEABuilder,
     ):
-        """Init agent alias with project, config, name, agent."""
+        """Init agent alias with project, config, name, agent, builder."""
         self.project = project
         self.config = config
         self.agent_name = agent_name
         self.agent = agent
+        self.builder = builder
         self.project.agents.add(self.agent_name)
 
     def remove_from_project(self):

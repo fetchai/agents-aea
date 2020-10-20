@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains the tests for the `aea add connection` sub-command."""
 
 import os
@@ -29,10 +30,11 @@ from unittest.mock import patch
 import pytest
 from click.exceptions import ClickException
 
-from aea.cli import cli, upgrade
+from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.configurations.base import (
     AgentConfig,
+    ComponentId,
     DEFAULT_AEA_CONFIG_FILE,
     PackageId,
     PackageType,
@@ -80,7 +82,7 @@ class BaseTestCase:
             agent_loader.dump(agent_config, fp)
 
     @classmethod
-    def setup_class(cls):
+    def setup(cls):
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
@@ -137,7 +139,8 @@ class BaseTestCase:
         original_config = self.load_config()
 
         config_data = original_config.json
-        config_data[f"{self.ITEM_TYPE}s"].remove(str(self.ITEM_PUBLIC_ID))
+        if str(self.ITEM_PUBLIC_ID) in config_data[f"{self.ITEM_TYPE}s"]:
+            config_data[f"{self.ITEM_TYPE}s"].remove(str(self.ITEM_PUBLIC_ID))
         config_data[f"{self.ITEM_TYPE}s"].append(
             f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:0.0.1"
         )
@@ -148,7 +151,7 @@ class BaseTestCase:
             self.dump_config(original_config)
 
     @classmethod
-    def teardown_class(cls):
+    def teardown(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
         try:
@@ -167,9 +170,9 @@ class TestRemoveAndDependencies(BaseTestCase):
     DEPENDENCY_PUBLIC_ID = OefSearchMessage.protocol_id
 
     @classmethod
-    def setup_class(cls):
+    def setup(cls):
         """Set the test up."""
-        super(TestRemoveAndDependencies, cls).setup_class()
+        super(TestRemoveAndDependencies, cls).setup()
         cls.DEPENDENCY_PACKAGE_ID = PackageId(
             cls.DEPENDENCY_TYPE, cls.DEPENDENCY_PUBLIC_ID
         )
@@ -180,62 +183,31 @@ class TestRemoveAndDependencies(BaseTestCase):
         )
         assert result.exit_code == 0
 
-    def setup(self):
-        """Save agent config."""
-        self._agent_config = (  # pylint: disable=attribute-defined-outside-init
-            self.load_config()
-        )
-
-    def teardown(self):
-        """Restore agent config."""
-        self.dump_config(self._agent_config)
-
-    def check_remove(self, item_type, public_id):
-        """Check remove can be performed with remove helper."""
-        return upgrade.ItemRemoveHelper(self.load_config()).check_remove(
-            item_type, public_id
-        )
-
-    def test_package_can_be_removed_with_its_dependency(self):
-        """Test package (soef) can be removed with its dependency (oef_search)."""
-        required_by, can_be_removed, can_not_be_removed = self.check_remove(
-            self.ITEM_TYPE, self.ITEM_PUBLIC_ID
-        )
-
-        assert not required_by, required_by
-        assert self.DEPENDENCY_PACKAGE_ID in can_be_removed
-        assert self.DEPENDENCY_PACKAGE_ID not in can_not_be_removed
-
-    def test_package_can_be_removed_but_not_dependency(self):
-        """Test package (soef) can be removed but not its shared dependency (oef_search) with other package (oef)."""
-        with self.with_oef_installed():
-            required_by, can_be_removed, can_not_be_removed = self.check_remove(
-                self.ITEM_TYPE, self.ITEM_PUBLIC_ID
-            )
-
-            assert not required_by, required_by
-            assert self.DEPENDENCY_PACKAGE_ID not in can_be_removed
-            assert self.DEPENDENCY_PACKAGE_ID in can_not_be_removed
-
-    def test_package_can_not_be_removed_cause_required_by_another_package(self):
-        """Test package (oef_search) can not be removed cause required by another package (soef)."""
-        required_by, can_be_removed, can_not_be_removed = self.check_remove(
-            self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID
-        )
-
-        assert PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID) in required_by
-        assert not can_be_removed
-        assert not can_not_be_removed
-
     def test_upgrade_and_dependency_removed(self):
         """
         Test dependency removed after upgrade.
 
         Done with mocking _add_item_deps to avoid dependencies installation.
+
+        Also checks dependency configuration removed with component
         """
         assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
 
-        with self.with_config_update(), patch("aea.cli.add._add_item_deps"):
+        # add empty component config to aea-config.py
+        agent_config = self.load_config()
+        component_id = ComponentId(self.DEPENDENCY_TYPE, self.DEPENDENCY_PUBLIC_ID)
+        agent_config.component_configurations[component_id] = {}  # just empty
+        agent_config.component_configurations[
+            ComponentId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
+        ] = {}  # just empty
+        self.dump_config(agent_config)
+
+        agent_config = self.load_config()
+        assert component_id in agent_config.component_configurations
+
+        with patch(
+            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value=True
+        ), patch("aea.cli.add._add_item_deps"):
             result = self.runner.invoke(
                 cli,
                 [
@@ -252,6 +224,14 @@ class TestRemoveAndDependencies(BaseTestCase):
                 assert result.exit_code == 0
 
                 assert self.DEPENDENCY_PUBLIC_ID not in self.load_config().protocols
+                agent_config = self.load_config()
+
+                # check configuration was removed too
+                assert component_id not in agent_config.component_configurations
+                assert (
+                    ComponentId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
+                    in agent_config.component_configurations
+                )
             finally:
                 # restore component removed
                 result = self.runner.invoke(
@@ -298,16 +278,24 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
     capture_log = True
 
     @classmethod
-    def setup_class(cls):
+    def setup(cls):
         """Set up test case."""
-        super(TestUpgradeProject, cls).setup_class()
+        super(TestUpgradeProject, cls).setup()
         cls.agent_name = "generic_buyer_0.9.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.9.0", "--alias", cls.agent_name
+            "--skip-consistency-check",
+            "fetch",
+            "fetchai/generic_buyer:0.10.0",
+            "--alias",
+            cls.agent_name,
         )
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:latest", "--alias", cls.latest_agent_name
+            "--skip-consistency-check",
+            "fetch",
+            "fetchai/generic_buyer:latest",
+            "--alias",
+            cls.latest_agent_name,
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -323,7 +311,10 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
 
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
-                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+                cli,
+                ["--skip-consistency-check", "upgrade"],
+                standalone_mode=False,
+                catch_exceptions=False,
             )
             agent_items = set(
                 ItemRemoveHelper(self.load_config())
@@ -335,7 +326,10 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         # upgrade again to check it workd with upgraded version
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
-                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+                cli,
+                ["--skip-consistency-check", "upgrade"],
+                standalone_mode=False,
+                catch_exceptions=False,
             )
             agent_items = set(
                 ItemRemoveHelper(self.load_config())
@@ -343,6 +337,50 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
                 .keys()
             )
             assert latest_agent_items == agent_items
+
+
+class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
+    """Test that the command 'aea upgrade' works."""
+
+    capture_log = True
+
+    @classmethod
+    def setup(cls):
+        """Set up test case."""
+        super(TestNonVendorProject, cls).setup()
+        cls.agent_name = "generic_buyer_0.9.0"
+        cls.run_cli_command(
+            "fetch", "fetchai/generic_buyer:0.9.0", "--alias", cls.agent_name
+        )
+        cls.agents.add(cls.agent_name)
+        cls.set_agent_context(cls.agent_name)
+
+    @patch("aea.cli.upgrade.ItemUpgrader.is_non_vendor", True)
+    @patch(
+        "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value="0.99.0"
+    )
+    @patch("aea.cli.upgrade.ItemUpgrader.remove_item")
+    @patch("aea.cli.upgrade.ItemUpgrader.add_item")
+    def test_non_vendor_nothing_to_upgrade(
+        self, *mocks
+    ):  # pylint: disable=unused-argument
+        """Test upgrade project dependencies not removed cause non vendor."""
+        with cd(self.agent_name):
+            base_agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+
+            self.runner.invoke(  # pylint: disable=no-member
+                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+            )
+            agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+            assert base_agent_items == agent_items
 
 
 class TestUpgradeConnectionLocally(BaseTestCase):
@@ -353,9 +391,9 @@ class TestUpgradeConnectionLocally(BaseTestCase):
     LOCAL: List[str] = ["--local"]
 
     @classmethod
-    def setup_class(cls):
+    def setup(cls):
         """Set the test up."""
-        super(TestUpgradeConnectionLocally, cls).setup_class()
+        super(TestUpgradeConnectionLocally, cls).setup()
 
         result = cls.runner.invoke(
             cli,
@@ -373,6 +411,25 @@ class TestUpgradeConnectionLocally(BaseTestCase):
             self.runner.invoke(
                 cli,
                 ["upgrade", *self.LOCAL, self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
+
+    @patch("aea.cli.upgrade.ItemUpgrader.is_non_vendor", True)
+    def test_upgrade_non_vendor(self):
+        """Test do not upgrade non vendor package."""
+        with pytest.raises(
+            ClickException,
+            match=r"The .* with id '.*' already has version .*. Nothing to upgrade.",
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    "upgrade",
+                    *self.LOCAL,
+                    self.ITEM_TYPE,
+                    f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:100.0.0",
+                ],
                 standalone_mode=False,
                 catch_exceptions=False,
             )
@@ -475,7 +532,7 @@ class TestUpgradeConnectionLocally(BaseTestCase):
                     catch_exceptions=False,
                 )
 
-    def test_package_can_notupgraded_cause_required(self):
+    def test_package_can_not_upgraded_cause_required(self):
         """Test no package in registry."""
         with self.with_config_update():
             with patch(
@@ -502,8 +559,10 @@ class TestUpgradeConnectionLocally(BaseTestCase):
                 )
 
     @classmethod
-    def teardown_class(cls):
+    def teardown(cls):
         """Tear the test down."""
+        super(TestUpgradeConnectionLocally, cls).teardown()
+
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -516,12 +575,16 @@ class TestUpgradeConnectionRemoteRegistry(TestUpgradeConnectionLocally):
 
     LOCAL: List[str] = []
 
+    def test_upgrade_to_latest_but_same_version(self):
+        """Skip."""
+        pass
+
 
 class TestUpgradeProtocolLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade protocol --local' works."""
 
     ITEM_TYPE = "protocol"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.6.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.8.0")
 
 
 class TestUpgradeProtocolRemoteRegistry(TestUpgradeProtocolLocally):
@@ -529,12 +592,16 @@ class TestUpgradeProtocolRemoteRegistry(TestUpgradeProtocolLocally):
 
     LOCAL: List[str] = []
 
+    def test_upgrade_to_latest_but_same_version(self):
+        """Skip."""
+        pass
+
 
 class TestUpgradeSkillLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade skill --local' works."""
 
     ITEM_TYPE = "skill"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.8.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.10.0")
 
 
 class TestUpgradeSkillRemoteRegistry(TestUpgradeSkillLocally):
@@ -542,15 +609,31 @@ class TestUpgradeSkillRemoteRegistry(TestUpgradeSkillLocally):
 
     LOCAL: List[str] = []
 
+    def test_upgrade_to_latest_but_same_version(self):
+        """Skip."""
+        pass
+
+    def test_upgrade_required_mock(self):
+        """Skip."""
+        pass
+
+    def test_do_upgrade(self):
+        """Skip."""
+        pass
+
 
 class TestUpgradeContractLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade contract' works."""
 
     ITEM_TYPE = "contract"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.10.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.12.0")
 
 
 class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):
     """Test that the command 'aea upgrade contract --local' works."""
 
     LOCAL: List[str] = []
+
+    def test_upgrade_to_latest_but_same_version(self):
+        """Skip."""
+        pass

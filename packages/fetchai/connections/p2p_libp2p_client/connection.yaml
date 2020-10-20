@@ -1,17 +1,18 @@
 name: p2p_libp2p_client
 author: fetchai
-version: 0.7.0
+version: 0.9.0
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
   DHT.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmUp9UrXSqEYeRxrEsGDhGPTjFrwKmuT3bjHJfGrfP8yjk
+  README.md: QmYo5C3vMjX46hmtcfTw3nLtAsuAmvG85vDGGJFzFMYkWu
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: Qmawy5s8D3kipvpxdQwmzDVY3pteLBJQomvjZ2q95sYqdw
+  connection.py: QmcnEJAga8o1mbfZYJSTZFEnDb8LVixaqeHvdQspt5EqbP
 fingerprint_ignore_patterns: []
+connections: []
 protocols: []
 class_name: P2PLibp2pClientConnection
 config:
@@ -23,3 +24,4 @@ config:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
+is_abstract: false

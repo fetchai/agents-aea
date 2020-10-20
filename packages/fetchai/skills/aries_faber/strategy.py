@@ -72,7 +72,9 @@ class FaberStrategy(Model):
         # Search
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
-        self._agent_location = Location(location["longitude"], location["latitude"])
+        self._agent_location = Location(
+            latitude=location["latitude"], longitude=location["longitude"]
+        )
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         super().__init__(**kwargs)

@@ -27,7 +27,7 @@ from pathlib import Path
 
 from aea.cli import cli
 
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner, ROOT_DIR
 
 
 class TestDelete:
@@ -40,6 +40,10 @@ class TestDelete:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
 
@@ -108,6 +112,10 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         result = cls.runner.invoke(

@@ -39,7 +39,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.9.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -254,6 +254,7 @@ class P2PLibp2pClientConnection(Connection):
 
         :return: None
         """
+        self._ensure_valid_envelope_for_external_comms(envelope)
         await self._send(envelope.encode())
 
     async def _process_messages(self) -> None:

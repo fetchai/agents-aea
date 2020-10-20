@@ -3,21 +3,23 @@ author: dummy_author
 version: 1.0.0
 description: dummy_aea agent description
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/local:0.9.0
+- fetchai/local:0.11.0
 contracts:
-- fetchai/erc1155:0.10.0
+- fetchai/erc1155:0.12.0
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/oef_search:0.7.0
+- fetchai/default:0.8.0
+- fetchai/fipa:0.9.0
+- fetchai/oef_search:0.9.0
+- fetchai/signing:0.6.0
+- fetchai/state_update:0.6.0
 skills:
 - dummy_author/dummy:0.1.0
-- fetchai/error:0.6.0
-default_connection: fetchai/local:0.9.0
+- fetchai/error:0.8.0
+default_connection: fetchai/local:0.11.0
 default_ledger: cosmos
 logging_config:
   disable_existing_loggers: false
@@ -29,3 +31,4 @@ connection_private_key_paths:
   cosmos: cosmos_private_key.txt
   ethereum: ethereum_private_key.txt
 registry_path: ../../packages
+default_routing: {}

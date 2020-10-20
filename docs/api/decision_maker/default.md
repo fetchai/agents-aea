@@ -3,58 +3,6 @@
 
 This module contains the decision maker class.
 
-<a name="aea.decision_maker.default.SigningDialogues"></a>
-## SigningDialogues Objects
-
-```python
-class SigningDialogues(BaseSigningDialogues)
-```
-
-This class keeps track of all oef_search dialogues.
-
-<a name="aea.decision_maker.default.SigningDialogues.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(self_address: Address, **kwargs) -> None
-```
-
-Initialize dialogues.
-
-**Arguments**:
-
-- `self_address`: the address of the entity for whom dialogues are maintained
-
-**Returns**:
-
-None
-
-<a name="aea.decision_maker.default.StateUpdateDialogues"></a>
-## StateUpdateDialogues Objects
-
-```python
-class StateUpdateDialogues(BaseStateUpdateDialogues)
-```
-
-This class keeps track of all oef_search dialogues.
-
-<a name="aea.decision_maker.default.StateUpdateDialogues.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(self_address: Address, **kwargs) -> None
-```
-
-Initialize dialogues.
-
-**Arguments**:
-
-- `self_address`: the address of the entity for whom dialogues are maintained
-
-**Returns**:
-
-None
-
 <a name="aea.decision_maker.default.GoalPursuitReadiness"></a>
 ## GoalPursuitReadiness Objects
 
@@ -468,6 +416,58 @@ class DecisionMakerHandler(BaseDecisionMakerHandler)
 ```
 
 This class implements the decision maker.
+
+<a name="aea.decision_maker.default.DecisionMakerHandler.SigningDialogues"></a>
+## SigningDialogues Objects
+
+```python
+class SigningDialogues(BaseSigningDialogues)
+```
+
+This class keeps track of all oef_search dialogues.
+
+<a name="aea.decision_maker.default.DecisionMakerHandler.SigningDialogues.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(self_address: Address, **kwargs) -> None
+```
+
+Initialize dialogues.
+
+**Arguments**:
+
+- `self_address`: the address of the entity for whom dialogues are maintained
+
+**Returns**:
+
+None
+
+<a name="aea.decision_maker.default.DecisionMakerHandler.StateUpdateDialogues"></a>
+## StateUpdateDialogues Objects
+
+```python
+class StateUpdateDialogues(BaseStateUpdateDialogues)
+```
+
+This class keeps track of all oef_search dialogues.
+
+<a name="aea.decision_maker.default.DecisionMakerHandler.StateUpdateDialogues.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(self_address: Address, **kwargs) -> None
+```
+
+Initialize dialogues.
+
+**Arguments**:
+
+- `self_address`: the address of the entity for whom dialogues are maintained
+
+**Returns**:
+
+None
 
 <a name="aea.decision_maker.default.DecisionMakerHandler.__init__"></a>
 #### `__`init`__`

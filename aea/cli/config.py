@@ -224,7 +224,7 @@ class ConfigGetSet:
             )
         if config_class == SkillConfig:
             if top_level_key not in SkillConfig.FIELDS_WITH_NESTED_FIELDS:
-                return
+                return  # pragma: nocover
             if len(self.json_path) < 3:
                 path = ".".join(self.json_path)
                 raise click.ClickException(f"Path '{path}' not valid for skill.")
@@ -344,5 +344,5 @@ class ConfigGetSet:
             self.agent_config_loader.validate(configuration_obj.json)
             with open(self.agent_config_file_path, "w") as file_pointer:
                 self.agent_config_loader.dump(configuration_obj, file_pointer)
-        except Exception as e:
+        except Exception as e:  # pragma: nocover
             raise click.ClickException(f"Attribute or value not valid. {e}")

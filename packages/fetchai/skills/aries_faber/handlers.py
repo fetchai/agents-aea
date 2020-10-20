@@ -23,15 +23,15 @@ import json
 import random
 from typing import Dict, Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_faber.dialogues import (
@@ -58,7 +58,7 @@ SUPPORT_REVOCATION = False
 class FaberHTTPHandler(Handler):
     """This class represents faber's handler for default messages."""
 
-    SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -192,7 +192,7 @@ class FaberHTTPHandler(Handler):
                 )
                 return
 
-            content_bytes = message.bodyy  # type: ignore
+            content_bytes = message.body  # type: ignore
             content = json.loads(content_bytes)
             self.context.logger.info("Received message: " + str(content))
             if "version" in content:  # response to /status
@@ -238,7 +238,7 @@ class FaberHTTPHandler(Handler):
                     "something went wrong when adding the incoming HTTP webhook request message to the dialogue."
                 )
                 return
-            content_bytes = message.bodyy
+            content_bytes = message.body
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
             if "connection_id" in content:
@@ -259,7 +259,7 @@ class FaberHTTPHandler(Handler):
 class FaberOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""

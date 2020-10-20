@@ -28,20 +28,26 @@ from typing import Callable, List, Tuple, Type
 
 import pytest
 
-from aea import AEA_DIR
 from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, ProtobufSerializer, Protocol
-from aea.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel
-from aea.protocols.signing.dialogues import SigningDialogue, SigningDialogues
-from aea.protocols.state_update.dialogues import (
+
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue,
+    DefaultDialogues,
+)
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogue,
+    SigningDialogues,
+)
+from packages.fetchai.protocols.state_update.dialogues import (
     StateUpdateDialogue,
     StateUpdateDialogues,
 )
 
-from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
+from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
 
 
 def role_from_first_message_dd(
@@ -123,7 +129,13 @@ class TestBaseSerializations:
     def setup_class(cls):
         """Set up the use case."""
         cls.message = Message(content="hello")
-        cls.message2 = Message(body={"content": "hello"})
+        cls.message2 = Message(_body={"content": "hello"})
+        cls.message3 = Message(
+            message_id=1,
+            target=0,
+            dialogue_reference=("", ""),
+            _body={"content": "hello"},
+        )
 
     def test_default_protobuf_serialization(self):
         """Test that the default Protobuf serialization works."""
@@ -144,6 +156,25 @@ class TestBaseSerializations:
         actual_msg = self.message
         assert expected_msg == actual_msg
 
+    def test_default_protobuf_serialization_with_dialogue_info(self):
+        """Test that the default Protobuf serialization with dialogue info works."""
+        message_bytes = ProtobufSerializer().encode(self.message3)
+        envelope = Envelope(
+            to="receiver",
+            sender="sender",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            message=message_bytes,
+        )
+        envelope_bytes = envelope.encode()
+
+        expected_envelope = Envelope.decode(envelope_bytes)
+        actual_envelope = envelope
+        assert expected_envelope == actual_envelope
+
+        expected_msg = ProtobufSerializer().decode(expected_envelope.message)
+        actual_msg = self.message3
+        assert expected_msg == actual_msg
+
     def test_set(self):
         """Test that the set method works."""
         key, value = "temporary_key", "temporary_value"
@@ -154,8 +185,8 @@ class TestBaseSerializations:
     def test_body_setter(self):
         """Test the body setter."""
         m_dict = {"Hello": "World"}
-        self.message2.body = m_dict
-        assert "Hello" in self.message2.body.keys()
+        self.message2._body = m_dict
+        assert "Hello" in self.message2._body.keys()
 
 
 class TestProtocolFromDir:
@@ -166,11 +197,14 @@ class TestProtocolFromDir:
         """Set the tests up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
         os.chdir(cls.t)
 
     def test_protocol_load_positive(self):
         """Test protocol loaded correctly."""
-        default_protocol = Protocol.from_dir(Path(AEA_DIR, "protocols", "default"))
+        default_protocol = Protocol.from_dir(
+            Path("packages", "fetchai", "protocols", "default")
+        )
         assert str(default_protocol.public_id) == str(
             DEFAULT_PROTOCOL
         ), "Protocol not loaded correctly."

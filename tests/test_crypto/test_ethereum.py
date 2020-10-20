@@ -118,6 +118,13 @@ def test_api_none():
     assert eth_api.api is not None, "The api property is None."
 
 
+def test_validate_address():
+    """Test the is_valid_address functionality."""
+    account = EthereumCrypto()
+    assert EthereumApi.is_valid_address(account.address)
+    assert not EthereumApi.is_valid_address(account.address + "wrong")
+
+
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger

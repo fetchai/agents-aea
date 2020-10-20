@@ -34,6 +34,8 @@ from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.exceptions import enforce
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 
 
 _default_logger = logging.getLogger(__name__)
@@ -54,17 +56,18 @@ class Message:
             """Get the string representation."""
             return str(self.value)
 
-    def __init__(self, body: Optional[Dict] = None, **kwargs):
+    def __init__(self, _body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
 
         :param body: the dictionary of values to hold.
         :param kwargs: any additional value to add to the body. It will overwrite the body values.
         """
-        self._to = None  # type: Optional[Address]
-        self._sender = None  # type: Optional[Address]
-        self._body = copy(body) if body else {}  # type: Dict[str, Any]
-        self._body.update(kwargs)
+        self._to: Optional[Address] = None
+        self._sender: Optional[Address] = None
+        self.__body: Dict[str, Any] = copy(_body) if _body else {}
+        self.__body.update(kwargs)
+
         try:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
@@ -90,6 +93,10 @@ class Message:
     def sender(self, sender: Address) -> None:
         """Set the sender of the message."""
         enforce(self._sender is None, "Sender already set.")
+        enforce(
+            isinstance(sender, str),
+            f"Sender must be string type. Found '{type(sender)}'",
+        )
         self._sender = sender
 
     @property
@@ -108,26 +115,27 @@ class Message:
     def to(self, to: Address) -> None:
         """Set address of receiver."""
         enforce(self._to is None, "To already set.")
+        enforce(isinstance(to, str), f"To must be string type. Found '{type(to)}'")
         self._to = to
 
     @property
-    def body(self) -> Dict:
+    def _body(self) -> Dict:
         """
         Get the body of the message (in dictionary form).
 
         :return: the body
         """
-        return self._body
+        return self.__body
 
-    @body.setter
-    def body(self, body: Dict) -> None:
+    @_body.setter
+    def _body(self, body: Dict) -> None:
         """
         Set the body of hte message.
 
         :param body: the body.
         :return: None
         """
-        self._body = body
+        self.__body = body
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
@@ -189,7 +197,7 @@ class Message:
             # and self.message_id == other.message_id  # noqa: E800
             # and self.target == other.target  # noqa: E800
             # and self.performative == other.performative  # noqa: E800
-            and self.body == other.body
+            and self._body == other._body
         )
 
     def __str__(self):
@@ -199,7 +207,7 @@ class Message:
             + ",".join(
                 map(
                     lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
-                    self.body.items(),
+                    self._body.items(),
                 )
             )
             + ")"
@@ -208,6 +216,22 @@ class Message:
     def encode(self) -> bytes:
         """Encode the message."""
         return self.serializer.encode(self)
+
+    @property
+    def has_dialogue_info(self) -> bool:
+        """
+        Check whether a message has the dialogue fields populated.
+
+        More precisely, it checks whether the fields 'message_id',
+        'target' and 'dialogue_reference' are set.
+
+        :return: True if the message has the dialogue fields set, False otherwise.
+        """
+        return (
+            self.is_set("message_id")
+            and self.is_set("target")
+            and self.is_set("dialogue_reference")
+        )
 
 
 class Encoder(ABC):
@@ -251,21 +275,79 @@ class ProtobufSerializer(Serializer):
 
     @staticmethod
     def encode(msg: Message) -> bytes:
-        """Encode a message into bytes using Protobuf."""
-        body_json = Struct()
-        body_json.update(msg.body)  # pylint: disable=no-member
-        body_bytes = body_json.SerializeToString()
-        return body_bytes
+        """
+        Encode a message into bytes using Protobuf.
+
+        - if one of message_id, target and dialogue_reference are not defined,
+          serialize only the message body/
+        - otherwise, extract those fields from the body and instantiate
+          a Message struct.
+        """
+        message_pb = ProtobufMessage()
+        if msg.has_dialogue_info:
+            dialogue_message_pb = DialogueMessage()
+            dialogue_message_pb.message_id = msg.message_id
+            dialogue_message_pb.dialogue_starter_reference = msg.dialogue_reference[0]
+            dialogue_message_pb.dialogue_responder_reference = msg.dialogue_reference[1]
+            dialogue_message_pb.target = msg.target
+
+            new_body = copy(msg._body)  # pylint: disable=protected-access
+            new_body.pop("message_id")
+            new_body.pop("dialogue_reference")
+            new_body.pop("target")
+
+            body_json = Struct()
+            body_json.update(new_body)  # pylint: disable=no-member
+
+            dialogue_message_pb.content = (  # pylint: disable=no-member
+                body_json.SerializeToString()
+            )
+            message_pb.dialogue_message.CopyFrom(  # pylint: disable=no-member
+                dialogue_message_pb
+            )
+        else:
+            body_json = Struct()
+            body_json.update(msg._body)  # pylint: disable=no-member,protected-access
+            message_pb.body.CopyFrom(body_json)  # pylint: disable=no-member
+
+        return message_pb.SerializeToString()
 
     @staticmethod
     def decode(obj: bytes) -> Message:
-        """Decode bytes into a message using Protobuf."""
-        body_json = Struct()
-        body_json.ParseFromString(obj)
+        """
+        Decode bytes into a message using Protobuf.
 
-        body = dict(body_json)
-        msg = Message(body=body)
-        return msg
+        First, try to parse the input as a Protobuf 'Message';
+        if it fails, parse the bytes as struct.
+        """
+        message_pb = ProtobufMessage()
+        message_pb.ParseFromString(obj)
+        message_type = message_pb.WhichOneof("message")
+        if message_type == "body":
+            body = dict(message_pb.body)  # pylint: disable=no-member
+            msg = Message(_body=body)
+            return msg
+        if message_type == "dialogue_message":
+            dialogue_message_pb = (
+                message_pb.dialogue_message  # pylint: disable=no-member
+            )
+            message_id = dialogue_message_pb.message_id
+            target = dialogue_message_pb.target
+            dialogue_starter_reference = dialogue_message_pb.dialogue_starter_reference
+            dialogue_responder_reference = (
+                dialogue_message_pb.dialogue_responder_reference
+            )
+            body_json = Struct()
+            body_json.ParseFromString(dialogue_message_pb.content)
+            body = dict(body_json)
+            body["message_id"] = message_id
+            body["target"] = target
+            body["dialogue_reference"] = (
+                dialogue_starter_reference,
+                dialogue_responder_reference,
+            )
+            return Message(_body=body)
+        raise ValueError("Message type not recognized.")  # pragma: nocover
 
 
 class Protocol(Component):

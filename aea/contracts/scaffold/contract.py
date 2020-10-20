@@ -21,12 +21,15 @@
 
 from typing import Any, Dict
 
+from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
 class MyScaffoldContract(Contract):
     """The scaffold contract class for a smart contract."""
+
+    contract_id = PublicId.from_str("fetchai/scaffold:0.1.0")
 
     @classmethod
     def get_raw_transaction(

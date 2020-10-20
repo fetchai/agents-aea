@@ -30,6 +30,8 @@ from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
 from aea.test_tools.test_cases import AEATestCaseMany
 
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
+
 from tests.conftest import (
     AUTHOR,
     COSMOS,
@@ -76,7 +78,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.13.0",
+            "fetchai/simple_service_registration:0.15.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -94,7 +96,7 @@ class TestBuildSkill(AEATestCaseMany):
         self.set_config(setting_path, COSMOS)
 
         default_routing = {
-            "fetchai/oef_search:0.7.0": "fetchai/soef:0.9.0",
+            "fetchai/oef_search:0.9.0": "fetchai/soef:0.11.0",
         }
 
         # replace location
@@ -107,9 +109,9 @@ class TestBuildSkill(AEATestCaseMany):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.9.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.10.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
@@ -139,6 +141,12 @@ class TestBuildSkill(AEATestCaseMany):
         yaml_code_block = extract_code_blocks(self.doc_path, filter="yaml")
         with open(path, "w") as file:
             file.write(yaml_code_block[0])  # block one is yaml
+
+        path = Path(self.t, search_aea, "skills", skill_name, "__init__.py")
+        original = Path(AEA_DIR, "skills", "scaffold", "__init__.py")
+        assert filecmp.cmp(path, original)
+        with open(path, "w") as file:
+            file.write(self.code_blocks[3])  # block four is init
 
         # update fingerprint
         self.fingerprint_item("skill", skill_id)
@@ -174,7 +182,7 @@ class TestBuildSkill(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,
@@ -197,7 +205,7 @@ class TestBuildSkill(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             search_aea_process, check_strings, timeout=240, is_terminating=False
