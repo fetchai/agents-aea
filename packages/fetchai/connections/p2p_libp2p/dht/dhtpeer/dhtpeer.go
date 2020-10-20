@@ -214,7 +214,6 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	// setup monitoring
 	dhtPeer.setupMonitoring()
-	go dhtPeer.startMonitoring()
 
 	// relay service
 	if dhtPeer.enableRelay {
@@ -282,6 +281,12 @@ func New(opts ...Option) (*DHTPeer, error) {
 		ready.Wait()
 	}
 
+	// start monitoring
+	ready := &sync.WaitGroup{}
+	ready.Add(1)
+	go dhtPeer.startMonitoring(ready)
+	ready.Wait()
+
 	return dhtPeer, nil
 }
 
@@ -295,10 +300,11 @@ func (dhtPeer *DHTPeer) setupMonitoring() {
 	dhtPeer.addMonitoringMetrics()
 }
 
-func (dhtPeer *DHTPeer) startMonitoring() {
+func (dhtPeer *DHTPeer) startMonitoring(ready *sync.WaitGroup) {
 	_, _, linfo, _ := dhtPeer.getLoggers()
 	linfo().Msg("Starting monitoring service: " + dhtPeer.monitor.Info())
 	dhtPeer.monitor.Start()
+	ready.Done()
 }
 
 func (dhtPeer *DHTPeer) addMonitoringMetrics() {
