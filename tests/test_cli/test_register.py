@@ -54,7 +54,9 @@ class RegisterTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
-        do_register_mock.assert_called_once_with(username, email, fake_pwd, fake_pwd)
+        do_register_mock.assert_called_once_with(
+            username, email, fake_pwd, fake_pwd, False
+        )
 
 
 @mock.patch("aea.cli.register.validate_author_name", lambda x: x)
@@ -66,17 +68,27 @@ class DoRegisterTestCase(TestCase):
     """Test case for do_register method."""
 
     def test_do_register_positive(
-        self,
-        update_cli_config_mock,
-        confirm_mock,
-        echo_mock,
-        *mocks
+        self, update_cli_config_mock, confirm_mock, echo_mock, *mocks
     ):
         """Test for do_register method positive result."""
         username = "username"
         email = "email@example.com"
         fake_pwd = "fake_pwd"  # nosec
+        subscribe = False
 
-        do_register(username, email, fake_pwd, fake_pwd)
+        do_register(username, email, fake_pwd, fake_pwd, subscribe)
         update_cli_config_mock.assert_called_once_with({AUTH_TOKEN_KEY: "token"})
         confirm_mock.assert_called_once()
+
+    def test_do_register_subscribe_true_positive(
+        self, update_cli_config_mock, confirm_mock, echo_mock, *mocks
+    ):
+        """Test for do_register method subscribe flaf = True positive result."""
+        username = "username"
+        email = "email@example.com"
+        fake_pwd = "fake_pwd"  # nosec
+        subscribe = True
+
+        do_register(username, email, fake_pwd, fake_pwd, subscribe)
+        update_cli_config_mock.assert_called_once_with({AUTH_TOKEN_KEY: "token"})
+        confirm_mock.assert_not_called()
