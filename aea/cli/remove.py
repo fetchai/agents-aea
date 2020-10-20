@@ -143,10 +143,17 @@ class ItemRemoveHelper:
     def get_item_config(cls, package_id: PackageId) -> PackageConfiguration:
         """Get item config for item,_type and public_id."""
 
-        return load_item_config(
+        item_config = load_item_config(
             str(package_id.package_type),
             package_path=cls.get_component_directory(package_id),
         )
+        if (package_id.author != item_config.author) or (
+            package_id.name != item_config.name
+        ):
+            raise click.ClickException(
+                f"Error loading {package_id} configuration, author/name do not match: {item_config.public_id}"
+            )
+        return item_config
 
     @staticmethod
     def get_component_directory(package_id: PackageId) -> Path:
@@ -193,8 +200,10 @@ class ItemRemoveHelper:
                 _ = result[dep_package_id]  # init default dict value
             else:
                 result[dep_package_id].add(package_id)
-            if not self.is_present_in_agent_config(dep_package_id):
+
+            if not self.is_present_in_agent_config(dep_package_id):  # pragma: nocover
                 continue
+
             dep_item = self.get_item_config(dep_package_id)
             for item_key, deps in self.get_item_dependencies_with_reverse_dependencies(
                 dep_item, dep_package_id
@@ -306,7 +315,7 @@ class RemoveItem:
             ) = ItemRemoveHelper(self.agent_config).check_remove(
                 self.item_type, self.current_item
             )
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: nocover
             pass  # item registered but not present on filesystem
 
     def get_current_item(self) -> PublicId:
