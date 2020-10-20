@@ -31,3 +31,4 @@ registry_path: ../packages
 default_routing:
   fetchai/http:0.7.0: fetchai/http_client:0.10.0
   fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+connection_private_key_paths: {}
