@@ -366,8 +366,8 @@ class TestSearchWithRegistryInSubfolderLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.9.0")
-        public_id_error = PublicId.from_str("fetchai/error:0.7.0")
+        public_id_echo = PublicId.from_str("fetchai/echo:0.10.0")
+        public_id_error = PublicId.from_str("fetchai/error:0.8.0")
         expected = [
             ('Searching for ""...\n' "Skills found:\n\n"),
             (
@@ -444,8 +444,8 @@ class TestSearchInAgentDirectoryLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.9.0")
-        public_id_error = PublicId.from_str("fetchai/error:0.7.0")
+        public_id_echo = PublicId.from_str("fetchai/echo:0.10.0")
+        public_id_error = PublicId.from_str("fetchai/error:0.8.0")
         expected = [
             ('Searching for ""...\n' "Skills found:\n\n"),
             (

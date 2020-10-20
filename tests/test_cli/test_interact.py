@@ -208,7 +208,7 @@ class TestInteractEcho(AEATestCaseEmpty):
     @pytest.mark.integration
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
-        self.add_item("skill", "fetchai/echo:0.9.0")
+        self.add_item("skill", "fetchai/echo:0.10.0")
         self.run_agent()
         process = self.run_interaction()
 
@@ -216,7 +216,7 @@ class TestInteractEcho(AEATestCaseEmpty):
             process,
             [
                 "Starting AEA interaction channel...",
-                "Provide message of protocol 'fetchai/default:0.7.0' for performative bytes",
+                "Provide message of protocol 'fetchai/default:0.8.0' for performative bytes",
             ],
             timeout=10,
             is_terminating=False,
@@ -232,9 +232,9 @@ class TestInteractEcho(AEATestCaseEmpty):
                 "Sending envelope:",
                 f"to: {self.agent_name}",
                 f"sender: {self.agent_name}_interact",
-                "protocol_id: fetchai/default:0.7.0",
+                "protocol_id: fetchai/default:0.8.0",
                 "message_id=1,target=0,performative=bytes,content=b'hello')",
-                "Provide message of protocol 'fetchai/default:0.7.0' for performative bytes:",
+                "Provide message of protocol 'fetchai/default:0.8.0' for performative bytes:",
             ],
             timeout=10,
             is_terminating=False,
@@ -250,9 +250,9 @@ class TestInteractEcho(AEATestCaseEmpty):
                 "Received envelope:",
                 f"to: {self.agent_name}_interact",
                 f"sender: {self.agent_name}",
-                "protocol_id: fetchai/default:0.7.0",
+                "protocol_id: fetchai/default:0.8.0",
                 "message_id=2,target=1,performative=bytes,content=b'hello')",
-                "Provide message of protocol 'fetchai/default:0.7.0' for performative bytes:",
+                "Provide message of protocol 'fetchai/default:0.8.0' for performative bytes:",
             ],
             timeout=10,
             is_terminating=False,
@@ -266,7 +266,7 @@ class TestInteractEcho(AEATestCaseEmpty):
             [
                 "Interrupting input, checking inbox ...",
                 "Received no new envelope!",
-                "Provide message of protocol 'fetchai/default:0.7.0' for performative bytes:",
+                "Provide message of protocol 'fetchai/default:0.8.0' for performative bytes:",
             ],
             timeout=10,
             is_terminating=False,

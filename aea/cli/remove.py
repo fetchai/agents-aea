@@ -27,6 +27,7 @@ from typing import Dict, Generator, Optional, Set, Tuple, cast
 
 import click
 
+from aea.aea_builder import AEABuilder
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
@@ -125,29 +126,48 @@ class ItemRemoveHelper:
 
         Return example:
         {
-            PackageId(protocol, fetchai/default:0.7.0): {
-                PackageId(skill, fetchai/echo:0.9.0),
-                PackageId(skill, fetchai/error:0.7.0)
+            PackageId(protocol, fetchai/pck1:0.1.0): {
+                PackageId(skill, fetchai/pck2:0.2.0),
+                PackageId(skill, fetchai/pck3:0.3.0)
             },
-            PackageId(connection, fetchai/stub:0.11.0): set(),
-            PackageId(skill, fetchai/error:0.7.0): set(),
-            PackageId(skill, fetchai/echo:0.9.0): set()}
+            PackageId(connection, fetchai/pck4:0.1.0): set(),
+            PackageId(skill, fetchai/pck5:0.1.0): set(),
+            PackageId(skill, fetchai/pck6:0.2.0): set()}
         )
         """
         return self.get_item_dependencies_with_reverse_dependencies(
             self._agent_config, None
         )
 
-    @staticmethod
-    def get_item_config(package_id: PackageId) -> PackageConfiguration:
+    @classmethod
+    def get_item_config(cls, package_id: PackageId) -> PackageConfiguration:
         """Get item config for item,_type and public_id."""
-        return load_item_config(
+
+        item_config = load_item_config(
             str(package_id.package_type),
-            package_path=Path("vendor")
-            / package_id.public_id.author
-            / f"{str(package_id.package_type)}s"
-            / package_id.public_id.name,
+            package_path=cls.get_component_directory(package_id),
         )
+        if (package_id.author != item_config.author) or (
+            package_id.name != item_config.name
+        ):
+            raise click.ClickException(
+                f"Error loading {package_id} configuration, author/name do not match: {item_config.public_id}"
+            )
+        return item_config
+
+    @staticmethod
+    def get_component_directory(package_id: PackageId) -> Path:
+        """Return path for package."""
+        try:
+            return AEABuilder.find_component_directory_from_component_id(
+                Path("."),
+                ComponentId(str(package_id.package_type), package_id.public_id),
+            )
+
+        except ValueError:
+            raise click.ClickException(
+                f"Can not find folder for the package: {package_id.package_type} {package_id.public_id}"
+            )
 
     @staticmethod
     def _get_item_requirements(
@@ -180,8 +200,10 @@ class ItemRemoveHelper:
                 _ = result[dep_package_id]  # init default dict value
             else:
                 result[dep_package_id].add(package_id)
-            if not self.is_present_in_agent_config(dep_package_id):
+
+            if not self.is_present_in_agent_config(dep_package_id):  # pragma: nocover
                 continue
+
             dep_item = self.get_item_config(dep_package_id)
             for item_key, deps in self.get_item_dependencies_with_reverse_dependencies(
                 dep_item, dep_package_id
@@ -293,7 +315,7 @@ class RemoveItem:
             ) = ItemRemoveHelper(self.agent_config).check_remove(
                 self.item_type, self.current_item
             )
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: nocover
             pass  # item registered but not present on filesystem
 
     def get_current_item(self) -> PublicId:
@@ -373,36 +395,9 @@ class RemoveItem:
 
     def _get_item_folder(self) -> Path:
         """Get item package folder."""
-        item_folder = Path(
-            self.cwd,
-            "vendor",
-            self.item_id.author,
-            self.item_type_plural,
-            self.item_name,
+        return Path(self.cwd) / ItemRemoveHelper.get_component_directory(
+            PackageId(self.item_type, self.item_id)
         )
-        if not item_folder.exists():
-            # check if it is present in custom packages.
-            item_folder = Path(self.cwd, self.item_type_plural, self.item_name)
-            if not item_folder.exists():
-                raise click.ClickException(
-                    "{} {} not found. Aborting.".format(
-                        self.item_type.title(), self.item_name
-                    )
-                )
-            if (
-                item_folder.exists()
-                and not self.agent_config.author == self.item_id.author
-            ):  # pragma: no cover
-                raise click.ClickException(
-                    "{} {} author is different from {} agent author. "
-                    "Please fix the author field.".format(
-                        self.item_name, self.item_type, self.agent_name
-                    )
-                )
-            logger.debug(
-                "Removing local {} {}.".format(self.item_type, self.item_name)
-            )  # pragma: no cover
-        return item_folder
 
     def _remove_package(self) -> None:
         """Remove package from filesystem."""
