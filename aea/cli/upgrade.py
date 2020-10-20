@@ -111,6 +111,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
             new_version = item_upgrader.check_upgrade_is_required()
             items_to_upgrade.add((package_id, new_version))
             upgraders.append(item_upgrader)
+
         items_to_upgrade_dependencies.add(package_id)
         items_to_upgrade_dependencies.update(item_upgrader.dependencies)
         shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
@@ -151,6 +152,9 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
             upgrader.add_item()
 
     click.echo("Finished project upgrade. Everything is up to date now!")
+    click.echo(
+        'Please manually update package versions in your non-vendor packages as well as in "default_connection" and "default_routing"'
+    )
 
 
 class UpgraderException(Exception):
