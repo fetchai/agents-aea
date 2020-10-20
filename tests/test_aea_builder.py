@@ -466,7 +466,7 @@ def test_find_component_failed():
         ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
     )
     with pytest.raises(ValueError, match=r"Package .* not found"):
-        builder._find_component_directory_from_component_id(
+        builder.find_component_directory_from_component_id(
             Path("/some_dir"), a_protocol.component_id
         )
 
