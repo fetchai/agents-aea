@@ -116,7 +116,7 @@ func main() {
 			opts = append(opts, dhtpeer.RegisterAgentAddress(aeaAddr, agent.Connected))
 		}
 		if nodePortMonitoring != 0 {
-			opts = append(opts, dhtpeer.EnableMonitoring(nodePortMonitoring))
+			opts = append(opts, dhtpeer.EnablePrometheusMonitoring(nodePortMonitoring))
 		}
 		node, err = dhtpeer.New(opts...)
 	}

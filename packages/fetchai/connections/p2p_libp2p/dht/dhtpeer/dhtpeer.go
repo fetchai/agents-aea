@@ -68,11 +68,22 @@ func ignore(err error) {
 }
 
 const (
-	addressLookupTimeout                = 20 * time.Second
-	routingTableConnectionUpdateTimeout = 5 * time.Second
-	newStreamTimeout                    = 5 * time.Second
-	addressRegisterTimeout              = 3 * time.Second
-	monitoringNamespace                 = "acn"
+	addressLookupTimeout                 = 20 * time.Second
+	routingTableConnectionUpdateTimeout  = 5 * time.Second
+	newStreamTimeout                     = 5 * time.Second
+	addressRegisterTimeout               = 3 * time.Second
+	monitoringNamespace                  = "acn"
+	metricDHTOpLatencyStore              = "dht_op_latency_store"
+	metricDHTOpLatencyLookup             = "dht_op_latency_lookup"
+	metricOpLatencyRegister              = "op_latency_register"
+	metricOpLatencyRoute                 = "op_latency_route"
+	metricOpRouteCount                   = "op_route_count"
+	metricOpRouteCountAll                = "op_route_count_all"
+	metricOpRouteCountSuccess            = "op_route_count_success"
+	metricServiceDelegateClientsCount    = "service_delegate_clients_count"
+	metricServiceDelegateClientsCountAll = "service_delegate_clients_count_all"
+	metricServiceRelayClientsCount       = "service_relay_clients_count"
+	metricServiceRelayClientsCountAll    = "service_relay_clients_count_all"
 )
 
 var (
@@ -249,7 +260,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	if len(dhtPeer.bootstrapPeers) > 0 {
 		dhtPeer.addressAnnounced = true
 		if dhtPeer.myAgentAddress != "" {
-			opLatencyRegister, _ := dhtPeer.monitor.GetHistogram("op_latency_register")
+			opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
 			timer := dhtPeer.monitor.Timer()
 			start := timer.NewTimer()
 			err := dhtPeer.registerAgentAddress(dhtPeer.myAgentAddress)
@@ -311,41 +322,41 @@ func (dhtPeer *DHTPeer) addMonitoringMetrics() {
 	buckets := latencyBucketsMicroSeconds
 	var err error
 	// acn primitives
-	_, err = dhtPeer.monitor.NewHistogram("dht_op_latency_store",
+	_, err = dhtPeer.monitor.NewHistogram(metricDHTOpLatencyStore,
 		"Histogram for time to store a key in the DHT", buckets)
 	ignore(err)
-	_, err = dhtPeer.monitor.NewHistogram("dht_op_latency_lookup",
+	_, err = dhtPeer.monitor.NewHistogram(metricDHTOpLatencyLookup,
 		"Histogram for time to find a key in the DHT", buckets)
 	ignore(err)
 	// acn main service
-	_, err = dhtPeer.monitor.NewHistogram("op_latency_register",
+	_, err = dhtPeer.monitor.NewHistogram(metricOpLatencyRegister,
 		"Histogram for end-to-end time to register an agent in the acn", buckets)
 	ignore(err)
-	_, err = dhtPeer.monitor.NewHistogram("op_latency_route",
+	_, err = dhtPeer.monitor.NewHistogram(metricOpLatencyRoute,
 		"Histogram for end-to-end time to route an envelope to its destination, excluding time to send envelope itself",
 		buckets)
 	ignore(err)
-	_, err = dhtPeer.monitor.NewGauge("op_route_count",
+	_, err = dhtPeer.monitor.NewGauge(metricOpRouteCount,
 		"Number of ongoing envelope routing requests")
 	ignore(err)
-	_, err = dhtPeer.monitor.NewCounter("op_route_count_all",
+	_, err = dhtPeer.monitor.NewCounter(metricOpRouteCountAll,
 		"Total number envelope routing requests, successful or not")
 	ignore(err)
-	_, err = dhtPeer.monitor.NewCounter("op_route_count_success",
+	_, err = dhtPeer.monitor.NewCounter(metricOpRouteCountSuccess,
 		"Total number envelope routed successfully")
 	ignore(err)
 	// acn delegate service
-	_, err = dhtPeer.monitor.NewGauge("service_delegate_clients_count",
+	_, err = dhtPeer.monitor.NewGauge(metricServiceDelegateClientsCount,
 		"Number of active delagate connections")
 	ignore(err)
-	_, err = dhtPeer.monitor.NewCounter("service_delegate_clients_count_all",
+	_, err = dhtPeer.monitor.NewCounter(metricServiceDelegateClientsCountAll,
 		"Number of all delagate clients, connected or disconnected")
 	ignore(err)
 	// acn relay service
-	_, err = dhtPeer.monitor.NewGauge("service_relay_clients_count",
+	_, err = dhtPeer.monitor.NewGauge(metricServiceRelayClientsCount,
 		"Number of active relay clients")
 	ignore(err)
-	_, err = dhtPeer.monitor.NewCounter("service_relay_clients_count_all",
+	_, err = dhtPeer.monitor.NewCounter(metricServiceRelayClientsCountAll,
 		"Total number of all relayed clients, connected or disconnected")
 	ignore(err)
 }
@@ -462,9 +473,9 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	defer dhtPeer.goroutines.Done()
 	defer conn.Close()
 
-	nbrConns, _ := dhtPeer.monitor.GetGauge("service_delegate_clients_count")
-	nbrClients, _ := dhtPeer.monitor.GetCounter("service_delegate_clients_count_all")
-	opLatencyRegister, _ := dhtPeer.monitor.GetHistogram("op_latency_register")
+	nbrConns, _ := dhtPeer.monitor.GetGauge(metricServiceDelegateClientsCount)
+	nbrClients, _ := dhtPeer.monitor.GetCounter(metricServiceDelegateClientsCountAll)
+	opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
 	timer := dhtPeer.monitor.Timer()
 	start := timer.NewTimer()
 
@@ -549,10 +560,10 @@ func (dhtPeer *DHTPeer) MultiAddr() string {
 func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, linfo, _ := dhtPeer.getLoggers()
 
-	routeCount, _ := dhtPeer.monitor.GetGauge("op_route_count")
-	routeCountAll, _ := dhtPeer.monitor.GetCounter("op_route_count_all")
-	routeCountSuccess, _ := dhtPeer.monitor.GetCounter("op_route_count_success")
-	opLatencyRoute, _ := dhtPeer.monitor.GetHistogram("op_latency_route")
+	routeCount, _ := dhtPeer.monitor.GetGauge(metricOpRouteCount)
+	routeCountAll, _ := dhtPeer.monitor.GetCounter(metricOpRouteCountAll)
+	routeCountSuccess, _ := dhtPeer.monitor.GetCounter(metricOpRouteCountSuccess)
+	opLatencyRoute, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRoute)
 	timer := dhtPeer.monitor.Timer()
 
 	routeCount.Inc()
@@ -655,7 +666,7 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, error) {
 	lerror, lwarn, linfo, _ := dhtPeer.getLoggers()
 	var err error
 
-	dhtLookupLatency, _ := dhtPeer.monitor.GetHistogram("dht_op_latency_lookup")
+	dhtLookupLatency, _ := dhtPeer.monitor.GetHistogram(metricDHTOpLatencyLookup)
 	timer := dhtPeer.monitor.Timer()
 
 	addressCID, err := utils.ComputeCID(address)
@@ -846,7 +857,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 		Msgf("Got a new notif stream")
 
 	if !dhtPeer.addressAnnounced {
-		opLatencyRegister, _ := dhtPeer.monitor.GetHistogram("op_latency_register")
+		opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
 		timer := dhtPeer.monitor.Timer()
 		start := timer.NewTimer()
 
@@ -906,9 +917,9 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
-	nbrClients, _ := dhtPeer.monitor.GetCounter("service_relay_clients_count_all")
+	nbrClients, _ := dhtPeer.monitor.GetCounter(metricServiceRelayClientsCountAll)
 
-	opLatencyRegister, _ := dhtPeer.monitor.GetHistogram("op_latency_register")
+	opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
 	timer := dhtPeer.monitor.Timer()
 	start := timer.NewTimer()
 
@@ -967,7 +978,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 	_, _, linfo, _ := dhtPeer.getLoggers()
 
-	dhtStoreLatency, _ := dhtPeer.monitor.GetHistogram("dht_op_latency_store")
+	dhtStoreLatency, _ := dhtPeer.monitor.GetHistogram(metricDHTOpLatencyStore)
 	timer := dhtPeer.monitor.Timer()
 
 	addressCID, err := utils.ComputeCID(addr)
