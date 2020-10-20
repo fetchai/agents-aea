@@ -1,4 +1,8 @@
-function install_python{
+# usage
+# from cmd: @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/feature/install_scripts/scripts/install.ps1'))"
+# from powershell: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/feature/install_scripts/scripts/install.ps1'))
+
+function install_python {
 	echo "Installing python"
     Invoke-WebRequest https://www.python.org/ftp/python/3.8.6/python-3.8.6-amd64-webinstall.exe -OutFile python-3.8.6-amd64-webinstall.exe
     ./python-3.8.6-amd64-webinstall.exe /install /passive PrependPath=1 Include_test=0 Include_tcltk=0| Out-Null
@@ -15,7 +19,7 @@ function install_aea {
         exit 1
 	}
 
-    aea --help 2>&1 |out-null; 
+    aea --help 2>&1 |out-null;
     if ($LastExitCode -eq 0) {
         echo "AEA successfully installed"
     }else{
@@ -43,7 +47,7 @@ function check_python {
 
 function main{
     refresh-path
-    check_python 
+    check_python
     refresh-path
     install_aea
     pause
