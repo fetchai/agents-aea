@@ -212,6 +212,10 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	/* setup DHTPeer message handlers and services */
 
+	// setup monitoring
+	dhtPeer.setupMonitoring()
+	go dhtPeer.startMonitoring()
+
 	// relay service
 	if dhtPeer.enableRelay {
 		// Allow clients to register their agents addresses
@@ -277,10 +281,6 @@ func New(opts ...Option) (*DHTPeer, error) {
 		go dhtPeer.handleDelegateService(ready)
 		ready.Wait()
 	}
-
-	// setup monitoring
-	dhtPeer.setupMonitoring()
-	go dhtPeer.startMonitoring()
 
 	return dhtPeer, nil
 }
