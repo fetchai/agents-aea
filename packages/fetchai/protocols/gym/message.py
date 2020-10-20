@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
-    protocol_id = PublicId.from_str("fetchai/gym:0.7.0")
+    protocol_id = PublicId.from_str("fetchai/gym:0.8.0")
 
     AnyObject = CustomAnyObject
 

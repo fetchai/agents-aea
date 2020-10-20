@@ -30,7 +30,7 @@ from aea.mail.base import Envelope
 from packages.fetchai.connections.stub.connection import StubConnection, write_envelope
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.8.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.9.0")
 
 
 class P2PStubConnection(StubConnection):
