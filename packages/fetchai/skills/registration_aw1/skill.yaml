@@ -1,0 +1,46 @@
+name: registration_aw1
+author: fetchai
+version: 0.1.0
+type: skill
+description: The scaffold skill is a scaffold for your own skill implementation.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmUVY3sShwwnypNPRCYhAcuYH2nXu6S21ChQmEsCVpfg2y
+  behaviours.py: QmV8pJLkdN6cK4fi3W2hTBqrkSVAc2L6zLGn9grAoZVoAe
+  dialogues.py: QmYswuH1ts6gFSVXyY8m7YLtts8fATYKQ2pcP7dEXMfp9v
+  handlers.py: QmX6nMK4uuDEDfvUUApgcAg5bdqYM2jGFuA9pbXiHHtxcz
+  strategy.py: QmWUh63RsTcphMgwy9Pxe5iN4gosnfiRoKD1NNufnsA35L
+fingerprint_ignore_patterns: []
+contracts: []
+protocols: []
+skills: []
+behaviours:
+  registration:
+    args: {}
+    class_name: AW1RegistrationBehaviour
+handlers:
+  registration:
+    args: {}
+    class_name: AW1RegistrationHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  register_dialogues:
+    args: {}
+    class_name: RegisterDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      developer_handle: PUT_YOUR_DEVELOPER_HANDLE_HERE
+      ethereum_address: PUT_YOUR_ETHEREUM_ADDRESS_HERE
+      shared_storage_key: agents_found
+      signature_of_fetchai_address: PUT_YOUR_SIGNATURE_HERE
+      tweet: PUT_THE_LINK_TO_YOUR_TWEET_HERE
+      whitelist: []
+    class_name: Strategy
+dependencies: {}
+is_abstract: false
