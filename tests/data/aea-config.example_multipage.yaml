@@ -30,9 +30,7 @@ connection_private_key_paths:
    ethereum: ethereum_private_key.txt
 registry_path: ../../packages
 ---
-name: dummy
-author: dummy_author
-version: 0.1.0
+public_id: dummy_author/dummy:0.1.0
 type: skill
 behaviours:
   dummy:
