@@ -284,10 +284,18 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.agent_name = "generic_buyer_0.9.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.9.0", "--alias", cls.agent_name
+            "--skip-consistency-check",
+            "fetch",
+            "fetchai/generic_buyer:0.10.0",
+            "--alias",
+            cls.agent_name,
         )
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:latest", "--alias", cls.latest_agent_name
+            "--skip-consistency-check",
+            "fetch",
+            "fetchai/generic_buyer:latest",
+            "--alias",
+            cls.latest_agent_name,
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -303,7 +311,10 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
 
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
-                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+                cli,
+                ["--skip-consistency-check", "upgrade"],
+                standalone_mode=False,
+                catch_exceptions=False,
             )
             agent_items = set(
                 ItemRemoveHelper(self.load_config())
@@ -315,7 +326,10 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         # upgrade again to check it workd with upgraded version
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
-                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+                cli,
+                ["--skip-consistency-check", "upgrade"],
+                standalone_mode=False,
+                catch_exceptions=False,
             )
             agent_items = set(
                 ItemRemoveHelper(self.load_config())
@@ -507,7 +521,7 @@ class TestUpgradeProtocolLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade protocol --local' works."""
 
     ITEM_TYPE = "protocol"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.7.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.8.0")
 
 
 class TestUpgradeProtocolRemoteRegistry(TestUpgradeProtocolLocally):
@@ -524,7 +538,7 @@ class TestUpgradeSkillLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade skill --local' works."""
 
     ITEM_TYPE = "skill"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.9.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.10.0")
 
 
 class TestUpgradeSkillRemoteRegistry(TestUpgradeSkillLocally):
@@ -549,7 +563,7 @@ class TestUpgradeContractLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade contract' works."""
 
     ITEM_TYPE = "contract"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.11.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.12.0")
 
 
 class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):

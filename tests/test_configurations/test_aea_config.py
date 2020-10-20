@@ -61,7 +61,7 @@ connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.11.0
+default_connection: fetchai/stub:0.12.0
 default_ledger: cosmos
 private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt

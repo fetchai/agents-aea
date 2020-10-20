@@ -1,14 +1,14 @@
 name: tcp
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 type: connection
 description: The tcp connection implements a tcp server and client.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmcNrbfgCwfDUbiRLJuQVRdRb6PKcz3Pz81LxsLkq6SWdw
+  README.md: QmUX88Wbd7sfvc6t7UHkbNfoywd4NU6FH5Rsp894C2NM7m
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
-  base.py: Qme9w4MnmgUg8eoYtXsFCjJ9PVhTGQywyjzPDZRs8FvDjj
+  base.py: QmeBaZdmV7CoC2SJhuKTwjRrinMZR9faGGWUnUuJbrdGa6
   connection.py: QmcQnyUagAhE7UsSBxiBSqsuF4mTMdU26LZLhUhdq5QygR
   tcp_client.py: QmWGuFbVA5syCvoFpL2rpYePVDAkmEi7Lt5DT6D1pz2p1f
   tcp_server.py: QmSSszevVoh4LZJoeWBpM25ebbYt4okP2uor1aXYFxcc3g

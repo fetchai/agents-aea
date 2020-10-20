@@ -48,7 +48,7 @@ from packages.fetchai.skills.erc1155_client.dialogues import (
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class FipaHandler(Handler):

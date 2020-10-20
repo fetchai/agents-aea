@@ -1,17 +1,17 @@
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.12.0
+aea fetch fetchai/tac_controller_contract:0.13.0
 cd tac_controller_contract
 aea install
 ```
 ``` bash
 aea create tac_controller_contract
 cd tac_controller_contract
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add skill fetchai/tac_control_contract:0.10.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/tac_control_contract:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
@@ -25,12 +25,12 @@ aea generate-wealth ethereum
 aea get-wealth ethereum
 ```
 ``` bash
-aea fetch fetchai/tac_participant:0.12.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.13.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 cd ..
-aea fetch fetchai/tac_participant:0.12.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.13.0 --alias tac_participant_two
 cd tac_participant_two
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
@@ -42,26 +42,26 @@ aea create tac_participant_two
 ```
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add skill fetchai/tac_participation:0.10.0
-aea add skill fetchai/tac_negotiation:0.11.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/tac_participation:0.11.0
+aea add skill fetchai/tac_negotiation:0.12.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 ```
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add skill fetchai/tac_participation:0.10.0
-aea add skill fetchai/tac_negotiation:0.11.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/tac_participation:0.11.0
+aea add skill fetchai/tac_negotiation:0.12.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
@@ -125,5 +125,5 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef_search:0.8.0', 'fetchai/fipa:0.8.0']
+protocols: ['fetchai/oef_search:0.9.0', 'fetchai/fipa:0.9.0']
 ```

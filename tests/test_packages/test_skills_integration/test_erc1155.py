@@ -58,9 +58,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
-            "fetchai/contract_api:0.6.0": "fetchai/ledger:0.7.0",
-            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
+            "fetchai/ledger_api:0.6.0": "fetchai/ledger:0.8.0",
+            "fetchai/contract_api:0.7.0": "fetchai/ledger:0.8.0",
+            "fetchai/oef_search:0.9.0": "fetchai/soef:0.11.0",
         }
 
         # generate random location
@@ -71,18 +71,18 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
-        self.add_item("connection", "fetchai/ledger:0.7.0")
-        self.add_item("connection", "fetchai/soef:0.10.0")
-        self.remove_item("connection", "fetchai/stub:0.11.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/ledger:0.8.0")
+        self.add_item("connection", "fetchai/soef:0.11.0")
+        self.remove_item("connection", "fetchai/stub:0.12.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_deploy:0.15.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.16.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.15.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.16.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -116,18 +116,18 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add packages for agent two
         self.set_agent_context(client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
-        self.add_item("connection", "fetchai/ledger:0.7.0")
-        self.add_item("connection", "fetchai/soef:0.10.0")
-        self.remove_item("connection", "fetchai/stub:0.11.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/ledger:0.8.0")
+        self.add_item("connection", "fetchai/soef:0.11.0")
+        self.remove_item("connection", "fetchai/stub:0.12.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.14.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.15.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.15.0", client_aea_name
+            "fetchai/erc1155_client:0.16.0", client_aea_name
         )
         assert (
             diff == []
