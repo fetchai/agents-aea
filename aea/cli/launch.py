@@ -82,4 +82,4 @@ def _launch_agents(
         logger.info(f"Agent {agent} terminated with exit code 0")
 
     logger.debug(f"Exit cli. code: {launcher.num_failed}")
-    sys.exit(launcher.num_failed)
+    sys.exit(1 if launcher.num_failed > 0 else 0)
