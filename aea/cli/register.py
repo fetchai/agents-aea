@@ -34,7 +34,7 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.option(
     "--confirm_password", type=str, required=True, prompt=True, hide_input=True
 )
-@click.option("--no_subscribe", is_flag=True, help="For developers subscription.")
+@click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
 def register(
     username: str, email: str, password: str, confirm_password: str, no_subscribe: bool
 ):

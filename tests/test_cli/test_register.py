@@ -50,7 +50,7 @@ class RegisterTestCase(TestCase):
                 "--email={}".format(email),
                 "--password={}".format(fake_pwd),
                 "--confirm_password={}".format(fake_pwd),
-                "--no_subscribe",
+                "--no-subscribe",
             ],
             standalone_mode=False,
         )

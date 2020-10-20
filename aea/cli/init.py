@@ -37,7 +37,7 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.option("--author", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--local", is_flag=True, help="For init AEA locally.")
-@click.option("--no_subscribe", is_flag=True, help="For developers subscription.")
+@click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
 @pass_ctx
 def init(  # pylint: disable=unused-argument
     ctx: Context, author: str, reset: bool, local: bool, no_subscribe: bool
