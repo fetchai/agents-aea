@@ -110,3 +110,11 @@ func EnableRelayService() Option {
 	}
 
 }
+
+// EnablePrometheusMonitoring for dhtpeer.New
+func EnablePrometheusMonitoring(port uint16) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.monitoringPort = port
+		return nil
+	}
+}

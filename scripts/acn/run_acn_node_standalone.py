@@ -37,6 +37,7 @@ class AcnNodeConfig:
     URI = "AEA_P2P_URI"
     EXTERNAL_URI = "AEA_P2P_URI_PUBLIC"
     DELEGATE_URI = "AEA_P2P_DELEGATE_URI"
+    MONITORING_URI = "AEA_P2P_URI_MONITORING"
     ENTRY_PEERS_MADDRS = "AEA_P2P_ENTRY_URIS"
     IPC_IN = "AEA_TO_NODE"
     IPC_OUT = "NODE_TO_AEA"
@@ -49,6 +50,7 @@ class AcnNodeConfig:
         uri: str,
         external_uri: Optional[str] = None,
         delegate_uri: Optional[str] = None,
+        monitoring_uri: Optional[str] = None,
         entry_peers_maddrs: Optional[List[str]] = None,
         enable_checks: bool = True,
     ):
@@ -59,6 +61,7 @@ class AcnNodeConfig:
         :param uri: node local uri to bind to
         :param external_uri: node external uri, needed to be reached by others
         :param delegate_uri: node local uri for delegate service
+        :param monitoring_uri: node monitoring uri
         :param entry_peers_maddrs: multiaddresses of peers to join their network
         :param enable_checks: to check if provided configuration is valid
         """
@@ -71,6 +74,9 @@ class AcnNodeConfig:
         )
         self.config[AcnNodeConfig.DELEGATE_URI] = (
             delegate_uri if delegate_uri is not None else ""
+        )
+        self.config[AcnNodeConfig.MONITORING_URI] = (
+            monitoring_uri if monitoring_uri is not None else ""
         )
 
         entry_peers_maddrs_list = (
@@ -119,10 +125,17 @@ class AcnNodeConfig:
         uri = config[AcnNodeConfig.URI]
         external_uri = config.get(AcnNodeConfig.EXTERNAL_URI, None)
         delegate_uri = config.get(AcnNodeConfig.DELEGATE_URI, None)
+        monitoring_uri = config.get(AcnNodeConfig.MONITORING_URI, None)
         entry_peers = config.get(AcnNodeConfig.ENTRY_PEERS_MADDRS, "")
 
         return cls(
-            key, uri, external_uri, delegate_uri, entry_peers.split(","), enable_checks
+            key,
+            uri,
+            external_uri,
+            delegate_uri,
+            monitoring_uri,
+            entry_peers.split(","),
+            enable_checks,
         )
 
     @staticmethod
@@ -142,6 +155,8 @@ class AcnNodeConfig:
             AcnNodeConfig._check_uri(config[AcnNodeConfig.EXTERNAL_URI])
         if config[AcnNodeConfig.DELEGATE_URI] != "":
             AcnNodeConfig._check_uri(config[AcnNodeConfig.DELEGATE_URI])
+        if config[AcnNodeConfig.MONITORING_URI] != "":
+            AcnNodeConfig._check_uri(config[AcnNodeConfig.MONITORING_URI])
 
         maddrs = config[AcnNodeConfig.ENTRY_PEERS_MADDRS].split(
             AcnNodeConfig.LIST_SEPARATOR
@@ -257,6 +272,14 @@ def parse_commandline():
         help="node's delegate service uri in format {ip_address:port}",
     )
     parser.add_argument(
+        "--uri-monitoring",
+        action="store",
+        type=str,
+        dest="monitoring_uri",
+        required=False,
+        help="node's monitoring service uri in format {ip_address:port}",
+    )
+    parser.add_argument(
         "--entry-peers-maddrs",
         action="store",
         nargs="*",
@@ -289,10 +312,11 @@ if __name__ == "__main__":
         uri = os.environ[AcnNodeConfig.URI]
         external_uri = os.environ.get(AcnNodeConfig.EXTERNAL_URI)
         delegate_uri = os.environ.get(AcnNodeConfig.DELEGATE_URI)
+        monitoring_uri = os.environ.get(AcnNodeConfig.MONITORING_URI)
         entry_peers = os.environ.get(AcnNodeConfig.ENTRY_PEERS_MADDRS)
         entry_peers_list = entry_peers.split(",") if entry_peers is not None else []
         node_config = AcnNodeConfig(
-            key, uri, external_uri, delegate_uri, entry_peers_list
+            key, uri, external_uri, delegate_uri, monitoring_uri, entry_peers_list
         )
 
     elif args.config_from_file is not None:
@@ -302,7 +326,12 @@ if __name__ == "__main__":
         with open(args.key, "r") as f:
             key = f.read().strip()
         node_config = AcnNodeConfig(
-            key, args.uri, args.external_uri, args.delegate_uri, args.entry_peers_maddrs
+            key,
+            args.uri,
+            args.external_uri,
+            args.delegate_uri,
+            args.monitoring_uri,
+            args.entry_peers_maddrs,
         )
 
     node = AcnNodeStandalone(node_config, args.libp2p_node)
