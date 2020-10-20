@@ -31,10 +31,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type PrometheusGauge struct {
-	gauge prometheus.Gauge
-}
-
 type PrometheusMonitoring struct {
 	Namespace string
 	Port      uint16
@@ -123,7 +119,7 @@ func (pmts *PrometheusMonitoring) Start() {
 	http.Handle("/metrics", promhttp.Handler())
 
 	pmts.running = true
-	pmts.httpServer.ListenAndServe()
+	ignore(pmts.httpServer.ListenAndServe())
 }
 
 func (pmts *PrometheusMonitoring) Stop() {

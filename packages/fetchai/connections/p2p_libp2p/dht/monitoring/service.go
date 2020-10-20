@@ -22,6 +22,7 @@ package monitoring
 
 import (
 	"errors"
+	"log"
 	"sync"
 	"time"
 )
@@ -95,4 +96,10 @@ type MonitoringService interface {
 	Stop()
 	Info() string
 	Timer() *Timer
+}
+
+func ignore(err error) {
+	if err != nil {
+		log.Println("IGNORED", err)
+	}
 }

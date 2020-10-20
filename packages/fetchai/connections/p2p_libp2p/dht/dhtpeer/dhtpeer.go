@@ -76,7 +76,7 @@ const (
 )
 
 var (
-	latencyBucketsMilliSeconds = []float64{1., 10., 20., 50., 100., 200., 500., 1000.}
+	//latencyBucketsMilliSeconds = []float64{1., 10., 20., 50., 100., 200., 500., 1000.}
 	latencyBucketsMicroSeconds = []float64{100., 500., 1e3, 1e4, 1e5, 5e5, 1e6}
 )
 
@@ -303,33 +303,45 @@ func (dhtPeer *DHTPeer) startMonitoring() {
 
 func (dhtPeer *DHTPeer) addMonitoringMetrics() {
 	buckets := latencyBucketsMicroSeconds
+	var err error
 	// acn primitives
-	dhtPeer.monitor.NewHistogram("dht_op_latency_store",
+	_, err = dhtPeer.monitor.NewHistogram("dht_op_latency_store",
 		"Histogram for time to store a key in the DHT", buckets)
-	dhtPeer.monitor.NewHistogram("dht_op_latency_lookup",
+	ignore(err)
+	_, err = dhtPeer.monitor.NewHistogram("dht_op_latency_lookup",
 		"Histogram for time to find a key in the DHT", buckets)
+	ignore(err)
 	// acn main service
-	dhtPeer.monitor.NewHistogram("op_latency_register",
+	_, err = dhtPeer.monitor.NewHistogram("op_latency_register",
 		"Histogram for end-to-end time to register an agent in the acn", buckets)
-	dhtPeer.monitor.NewHistogram("op_latency_route",
+	ignore(err)
+	_, err = dhtPeer.monitor.NewHistogram("op_latency_route",
 		"Histogram for end-to-end time to route an envelope to its destination, excluding time to send envelope itself",
 		buckets)
-	dhtPeer.monitor.NewGauge("op_route_count",
+	ignore(err)
+	_, err = dhtPeer.monitor.NewGauge("op_route_count",
 		"Number of ongoing envelope routing requests")
-	dhtPeer.monitor.NewCounter("op_route_count_all",
+	ignore(err)
+	_, err = dhtPeer.monitor.NewCounter("op_route_count_all",
 		"Total number envelope routing requests, successful or not")
-	dhtPeer.monitor.NewCounter("op_route_count_success",
+	ignore(err)
+	_, err = dhtPeer.monitor.NewCounter("op_route_count_success",
 		"Total number envelope routed successfully")
+	ignore(err)
 	// acn delegate service
-	dhtPeer.monitor.NewGauge("service_delegate_clients_count",
+	_, err = dhtPeer.monitor.NewGauge("service_delegate_clients_count",
 		"Number of active delagate connections")
-	dhtPeer.monitor.NewCounter("service_delegate_clients_count_all",
+	ignore(err)
+	_, err = dhtPeer.monitor.NewCounter("service_delegate_clients_count_all",
 		"Number of all delagate clients, connected or disconnected")
+	ignore(err)
 	// acn relay service
-	dhtPeer.monitor.NewGauge("service_relay_clients_count",
+	_, err = dhtPeer.monitor.NewGauge("service_relay_clients_count",
 		"Number of active relay clients")
-	dhtPeer.monitor.NewCounter("service_relay_clients_count_all",
+	ignore(err)
+	_, err = dhtPeer.monitor.NewCounter("service_relay_clients_count_all",
 		"Total number of all relayed clients, connected or disconnected")
+	ignore(err)
 }
 
 func (dhtPeer *DHTPeer) setupLogger() {

@@ -173,9 +173,11 @@ func (fm *FileMonitoring) Start() {
 			file.Close()
 			break
 		default:
-			file.Truncate(0)
-			file.Seek(0, 0)
-			file.WriteString(fm.getStats())
+			ignore(file.Truncate(0))
+			_, err := file.Seek(0, 0)
+			ignore(err)
+			_, err = file.WriteString(fm.getStats())
+			ignore(err)
 			time.Sleep(5 * time.Second)
 		}
 	}
