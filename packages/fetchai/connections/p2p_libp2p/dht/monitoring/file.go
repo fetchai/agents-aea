@@ -78,12 +78,13 @@ type FileHistogram struct {
 
 func (fh *FileHistogram) Observe(value float64) {
 	var i int = 0
-	for value > fh.buckets[i] {
+	for i < len(fh.buckets) {
+		if value <= fh.buckets[i] {
+			fh.counts[i] += 1
+		}
 		i++
 	}
-	for j := i; j < len(fh.counts); j++ {
-		fh.counts[j] += 1
-	}
+	fh.counts[i] += 1
 }
 
 type FileMonitoring struct {
@@ -197,6 +198,7 @@ func (fm FileMonitoring) getStats() string {
 		strValue := fmt.Sprintf("%e", value.Get())
 		stats += fm.Namespace + "_" + name + " " + strValue + "\n"
 	}
+	// TODO: report histograms
 	return stats
 }
 
