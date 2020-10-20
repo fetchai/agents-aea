@@ -373,7 +373,10 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
             )
 
             self.runner.invoke(  # pylint: disable=no-member
-                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+                cli,
+                ["--skip-consistency-check", "upgrade"],
+                standalone_mode=False,
+                catch_exceptions=False,
             )
             agent_items = set(
                 ItemRemoveHelper(self.load_config())
