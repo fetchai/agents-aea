@@ -24,9 +24,9 @@ from typing import Optional, cast
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.tac_control.handlers import (
     OefSearchHandler as BaseOefSearchHandler,
 )

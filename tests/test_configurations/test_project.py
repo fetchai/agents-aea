@@ -22,13 +22,15 @@ import shutil
 import tempfile
 from unittest.mock import Mock
 
+import pytest
+
 from aea.cli import cli
 from aea.configurations.base import PublicId
 from aea.configurations.project import AgentAlias, Project
 from aea.helpers.base import cd
 from aea.test_tools.click_testing import CliRunner
 
-from tests.conftest import ROOT_DIR
+from tests.conftest import MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 class TestProjectAndAgentAlias:
@@ -45,11 +47,14 @@ class TestProjectAndAgentAlias:
             self.t, self.project_public_id.author, self.project_public_id.name
         )
 
-    def test_project(self):
-        """Test project laoded and removed."""
+    def _test_project(self, is_local: bool):
+        """Test method to handle both local and remote registry."""
         registry_path = os.path.join(ROOT_DIR, "packages")
         project = Project.load(
-            self.t, self.project_public_id, is_local=True, registry_path=registry_path
+            self.t,
+            self.project_public_id,
+            is_local=is_local,
+            registry_path=registry_path,
         )
         assert os.path.exists(self.project_path)
 
@@ -63,6 +68,16 @@ class TestProjectAndAgentAlias:
         assert self.project_public_id.name in result.output
         project.remove()
         assert not os.path.exists(self.project_path)
+
+    def test_project_local(self):
+        """Test project loaded and removed, from local registry."""
+        self._test_project(True)
+
+    @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    def test_project_remote(self):
+        """Test project loaded and removed, from remove registry."""
+        self._test_project(False)
 
     def test_agents(self):
         """Test agent added to project and rmeoved."""

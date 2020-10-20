@@ -18,12 +18,26 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for transaction."""
+from typing import Type
 from unittest.mock import patch
 
 import pytest
 
-import aea
-from aea.protocols.state_update.message import StateUpdateMessage
+from aea.common import Address
+from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel
+
+from packages.fetchai.protocols.state_update.dialogues import (
+    StateUpdateDialogue as BaseStateUpdateDialogue,
+)
+from packages.fetchai.protocols.state_update.dialogues import (
+    StateUpdateDialogues as BaseStateUpdateDialogues,
+)
+from packages.fetchai.protocols.state_update.message import (
+    StateUpdateMessage,
+    _default_logger,
+)
 
 
 class TestStateUpdateMessage:
@@ -138,9 +152,7 @@ def test_performative_str():
 
 def test_light_protocol_rule_3_target_less_than_message_id():
     """Test that if message_id is not 1, target must be > message_id"""
-    with patch.object(
-        aea.protocols.state_update.message._default_logger, "error"
-    ) as mock_logger:
+    with patch.object(_default_logger, "error") as mock_logger:
         currency_endowment = {"FET": 100}
         good_endowment = {"a_good": 2}
         exchange_params = {"FET": 10.0}
@@ -159,4 +171,75 @@ def test_light_protocol_rule_3_target_less_than_message_id():
 
         mock_logger.assert_any_call(
             f"Invalid 'target'. Expected an integer between 1 and {message_id - 1} inclusive. Found {target}."
+        )
+
+
+def test_dialogues():
+    """Test intiaontiation of dialogues."""
+    state_update_dialogues = StateUpdateDialogues("agent_addr")
+    msg, dialogue = state_update_dialogues.create(
+        counterparty="abc",
+        performative=StateUpdateMessage.Performative.INITIALIZE,
+        amount_by_currency_id={},
+        quantities_by_good_id={},
+        exchange_params_by_currency_id={},
+        utility_params_by_good_id={},
+    )
+    assert dialogue is not None
+
+
+class StateUpdateDialogue(BaseStateUpdateDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[StateUpdateMessage],
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseStateUpdateDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+
+
+class StateUpdateDialogues(BaseStateUpdateDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, self_address: Address) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return StateUpdateDialogue.Role.SKILL
+
+        BaseStateUpdateDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=StateUpdateDialogue,
         )

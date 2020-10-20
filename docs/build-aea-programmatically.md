@@ -1,6 +1,14 @@
 
 These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface.
 
+## Preperation
+
+Get the packages directory from the AEA repository:
+
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+
 ## Imports
 
 First, import the necessary common Python libraries and classes.
@@ -16,9 +24,9 @@ Then, import the application specific libraries.
 ``` python
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.connections.stub.connection import write_with_lock
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
 ```
 
@@ -72,8 +80,9 @@ Also, we can add a component that was instantiated programmatically. :
 ``` python
     # create skill and handler manually
     from aea.protocols.base import Message
-    from aea.protocols.default.message import DefaultMessage
     from aea.skills.base import Handler
+
+    from packages.fetchai.protocols.default.message import DefaultMessage
 
     class DummyHandler(Handler):
         """Dummy handler to handle messages."""
@@ -164,9 +173,9 @@ from threading import Thread
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.connections.stub.connection import write_with_lock
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
 
 
@@ -201,8 +210,9 @@ def run():
 
     # create skill and handler manually
     from aea.protocols.base import Message
-    from aea.protocols.default.message import DefaultMessage
     from aea.skills.base import Handler
+
+    from packages.fetchai.protocols.default.message import DefaultMessage
 
     class DummyHandler(Handler):
         """Dummy handler to handle messages."""

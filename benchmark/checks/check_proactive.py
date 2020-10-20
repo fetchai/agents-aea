@@ -23,7 +23,6 @@ from threading import Thread
 
 import click
 
-from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Behaviour
 from benchmark.checks.utils import SyncedGeneratorConnection  # noqa: I100
 from benchmark.checks.utils import (
@@ -34,6 +33,8 @@ from benchmark.checks.utils import (
     print_results,
     wait_for_condition,
 )
+
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 class TestBehaviour(Behaviour):

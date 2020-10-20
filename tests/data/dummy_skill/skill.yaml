@@ -11,7 +11,7 @@ fingerprint:
   dummy.py: QmeV6FBPAkmQC49gATSmU1aq8S1SKPv7cm2zSH8cnuqoLT
   dummy_subpackage/__init__.py: QmfDrbsUewXFcF3afdhCnzsZYrzDTUbQH69MHPnEpzp5qP
   dummy_subpackage/foo.py: QmYJvc2VGES86RDhgd4Rp6vKgL9QvvozKRDpBYLx7bzXQS
-  handlers.py: QmQ84i8LKkf7zzB8YMPJ8yJBEEpqzJBKK7EYWTDGmC71oV
+  handlers.py: QmYchfGvDXD5CxDHt6kChNsNbRxTcqViQTn65R7p8VJ4fu
   tasks.py: Qmegg4QsYSqSZN3q2zuRiBAToQ2LEiWrAPtUo7rCMrxjGJ
 fingerprint_ignore_patterns: []
 contracts: []

@@ -24,8 +24,9 @@ from typing import Any, Dict, cast
 from aea.mail.base_pb2 import DialogueMessage
 from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
-from aea.protocols.signing import signing_pb2
-from aea.protocols.signing.custom_types import (
+
+from packages.fetchai.protocols.signing import signing_pb2
+from packages.fetchai.protocols.signing.custom_types import (
     ErrorCode,
     RawMessage,
     RawTransaction,
@@ -33,7 +34,7 @@ from aea.protocols.signing.custom_types import (
     SignedTransaction,
     Terms,
 )
-from aea.protocols.signing.message import SigningMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 
 class SigningSerializer(Serializer):

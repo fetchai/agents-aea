@@ -42,14 +42,17 @@ from aea.helpers.transaction.base import (
 from aea.identity.base import Identity
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.signing.dialogues import SigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
-from aea.protocols.signing.message import SigningMessage
-from aea.protocols.state_update.dialogues import StateUpdateDialogue
-from aea.protocols.state_update.dialogues import (
+
+from packages.fetchai.protocols.signing.dialogues import SigningDialogue
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogues as BaseSigningDialogues,
+)
+from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.protocols.state_update.dialogues import StateUpdateDialogue
+from packages.fetchai.protocols.state_update.dialogues import (
     StateUpdateDialogues as BaseStateUpdateDialogues,
 )
-from aea.protocols.state_update.message import StateUpdateMessage
+from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
 from tests.conftest import (
     COSMOS,

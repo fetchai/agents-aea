@@ -24,10 +24,11 @@ import pytest
 
 from aea.configurations.base import PublicId, SkillConfig
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
-from aea.protocols.signing import SigningMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
+
+from packages.fetchai.protocols.signing import SigningMessage
 
 from tests.data.dummy_skill.behaviours import DummyBehaviour
 from tests.data.dummy_skill.handlers import DummyHandler

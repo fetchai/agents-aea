@@ -56,8 +56,6 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
-    SIGNING_PROTOCOL,
-    STATE_UPDATE_PROTOCOL,
 )
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
@@ -450,16 +448,12 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("author/package:latest"), False),
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
-        (DEFAULT_CONNECTION, True),
-        (DEFAULT_SKILL, True),
-        (DEFAULT_PROTOCOL, True),
-        (SIGNING_PROTOCOL, True),
-        (STATE_UPDATE_PROTOCOL, True),
-        (DEFAULT_CONNECTION.to_latest(), True),
-        (DEFAULT_SKILL.to_latest(), True),
-        (DEFAULT_PROTOCOL.to_latest(), True),
-        (SIGNING_PROTOCOL.to_latest(), True),
-        (STATE_UPDATE_PROTOCOL.to_latest(), True),
+        (DEFAULT_CONNECTION, False),
+        (DEFAULT_SKILL, False),
+        (DEFAULT_PROTOCOL, False),
+        (DEFAULT_CONNECTION.to_latest(), False),
+        (DEFAULT_SKILL.to_latest(), False),
+        (DEFAULT_PROTOCOL.to_latest(), False),
     ],
 )
 def test_is_distributed_item(public_id, expected_outcome):

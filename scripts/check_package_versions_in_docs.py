@@ -29,7 +29,7 @@ import re
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Callable, Dict, Set
+from typing import Callable, Dict, List, Set
 
 import yaml
 
@@ -77,13 +77,7 @@ class PackageIdNotFound(Exception):
         self.match_obj = match_obj
 
 
-DEFAULT_CONFIG_FILE_PATHS = [
-    Path("aea", "connections", "stub", "connection.yaml"),
-    Path("aea", "protocols", "default", "protocol.yaml"),
-    Path("aea", "protocols", "signing", "protocol.yaml"),
-    Path("aea", "protocols", "state_update", "protocol.yaml"),
-    Path("aea", "skills", "error", "skill.yaml"),
-]
+DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
 
 
 def default_config_file_paths():

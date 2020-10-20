@@ -329,7 +329,7 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
             "Cannot find {} with author and version specified.".format(item_type)
         )
 
-    return package_path
+    return package_path  # pragma: no cover
 
 
 def validate_author_name(author: Optional[str] = None) -> str:

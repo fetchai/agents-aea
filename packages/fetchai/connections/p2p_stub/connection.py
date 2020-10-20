@@ -24,9 +24,10 @@ from pathlib import Path
 from typing import Union, cast
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.stub.connection import StubConnection, write_envelope
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+
+from packages.fetchai.connections.stub.connection import StubConnection, write_envelope
 
 
 PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.8.0")

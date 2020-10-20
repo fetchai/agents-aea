@@ -30,20 +30,14 @@ import sys
 from functools import partial
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, List, Set
 
 import yaml
 
 from aea.configurations.base import PackageId, PackageType, PublicId
 
 
-DEFAULT_CONFIG_FILE_PATHS = [
-    Path("aea", "connections", "stub", "connection.yaml"),
-    Path("aea", "protocols", "default", "protocol.yaml"),
-    Path("aea", "protocols", "signing", "protocol.yaml"),
-    Path("aea", "protocols", "state_update", "protocol.yaml"),
-    Path("aea", "skills", "error", "skill.yaml"),
-]
+DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
 
 
 class DependencyNotFound(Exception):

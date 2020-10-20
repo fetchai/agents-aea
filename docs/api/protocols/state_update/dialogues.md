@@ -1,12 +1,12 @@
-<a name="aea.protocols.state_update.dialogues"></a>
-# aea.protocols.state`_`update.dialogues
+<a name="packages.fetchai.protocols.state_update.dialogues"></a>
+# packages.fetchai.protocols.state`_`update.dialogues
 
 This module contains the classes required for state_update dialogue management.
 
 - StateUpdateDialogue: The dialogue class maintains state of a dialogue and manages it.
 - StateUpdateDialogues: The dialogues class keeps track of all dialogues.
 
-<a name="aea.protocols.state_update.dialogues.StateUpdateDialogue"></a>
+<a name="packages.fetchai.protocols.state_update.dialogues.StateUpdateDialogue"></a>
 ## StateUpdateDialogue Objects
 
 ```python
@@ -15,7 +15,7 @@ class StateUpdateDialogue(Dialogue)
 
 The state_update dialogue class maintains state of a dialogue and manages it.
 
-<a name="aea.protocols.state_update.dialogues.StateUpdateDialogue.Role"></a>
+<a name="packages.fetchai.protocols.state_update.dialogues.StateUpdateDialogue.Role"></a>
 ## Role Objects
 
 ```python
@@ -24,7 +24,7 @@ class Role(Dialogue.Role)
 
 This class defines the agent's role in a state_update dialogue.
 
-<a name="aea.protocols.state_update.dialogues.StateUpdateDialogue.EndState"></a>
+<a name="packages.fetchai.protocols.state_update.dialogues.StateUpdateDialogue.EndState"></a>
 ## EndState Objects
 
 ```python
@@ -33,7 +33,7 @@ class EndState(Dialogue.EndState)
 
 This class defines the end states of a state_update dialogue.
 
-<a name="aea.protocols.state_update.dialogues.StateUpdateDialogue.__init__"></a>
+<a name="packages.fetchai.protocols.state_update.dialogues.StateUpdateDialogue.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -52,7 +52,7 @@ Initialize a dialogue.
 
 None
 
-<a name="aea.protocols.state_update.dialogues.StateUpdateDialogues"></a>
+<a name="packages.fetchai.protocols.state_update.dialogues.StateUpdateDialogues"></a>
 ## StateUpdateDialogues Objects
 
 ```python
@@ -61,7 +61,7 @@ class StateUpdateDialogues(Dialogues,  ABC)
 
 This class keeps track of all state_update dialogues.
 
-<a name="aea.protocols.state_update.dialogues.StateUpdateDialogues.__init__"></a>
+<a name="packages.fetchai.protocols.state_update.dialogues.StateUpdateDialogues.__init__"></a>
 #### `__`init`__`
 
 ```python

@@ -204,7 +204,7 @@ my_aea_2 = builder.builder()
 #### `__`init`__`
 
 ```python
- | __init__(with_default_packages: bool = True)
+ | __init__(with_default_packages: bool = True, registry_dir: str = "packages")
 ```
 
 Initialize the builder.

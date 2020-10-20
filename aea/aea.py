@@ -30,6 +30,7 @@ from typing import (
     List,
     Optional,
     Sequence,
+    TYPE_CHECKING,
     Tuple,
     Type,
     cast,
@@ -38,26 +39,31 @@ from typing import (
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_SEARCH_SERVICE_ADDRESS, DEFAULT_SKILL
+from aea.configurations.constants import (
+    DEFAULT_PROTOCOL,
+    DEFAULT_SEARCH_SERVICE_ADDRESS,
+    DEFAULT_SKILL,
+)
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
-from aea.decision_maker.default import (
-    DecisionMakerHandler as DefaultDecisionMakerHandler,
-)
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
+from aea.protocols.base import Message, Protocol
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
 from aea.runtime import _StopRuntime
 from aea.skills.base import Behaviour, Handler
-from aea.skills.error.handlers import ErrorHandler
+
+
+if TYPE_CHECKING:
+    from packages.fetchai.skills.error.handlers import (  # noqa: F401 # pragma: nocover
+        ErrorHandler,
+    )
 
 
 class AEA(Agent):
@@ -78,9 +84,7 @@ class AEA(Agent):
         period: float = 0.05,
         execution_timeout: float = 0,
         max_reactions: int = 20,
-        decision_maker_handler_class: Type[
-            DecisionMakerHandler
-        ] = DefaultDecisionMakerHandler,
+        decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
@@ -132,6 +136,13 @@ class AEA(Agent):
         )
 
         self.max_reactions = max_reactions
+
+        if decision_maker_handler_class is None:
+            from aea.decision_maker.default import (  # isort:skip  # pylint: disable=import-outside-toplevel
+                DecisionMakerHandler as DefaultDecisionMakerHandler,
+            )
+
+            decision_maker_handler_class = DefaultDecisionMakerHandler
         decision_maker_handler = decision_maker_handler_class(
             identity=identity, wallet=wallet
         )
@@ -229,38 +240,37 @@ class AEA(Agent):
             default_connection=self.context.default_connection,
         )
 
-    def _get_error_handler(self) -> Optional[Handler]:
+    def _get_error_handler(self) -> Handler:
         """Get error handler."""
-        return self.resources.get_handler(DefaultMessage.protocol_id, DEFAULT_SKILL)
+        handler = self.resources.get_handler(DEFAULT_PROTOCOL, DEFAULT_SKILL)
+        if handler is None:
+            self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
+            raise _StopRuntime()
+        return handler
 
     def _get_msg_and_handlers_for_envelope(
         self, envelope: Envelope
     ) -> Tuple[Optional[Message], List[Handler]]:
         protocol = self.resources.get_protocol(envelope.protocol_id)
 
+        msg, handlers = self._handle_decoding(envelope, protocol)
+
+        return msg, handlers
+
+    def _handle_decoding(
+        self, envelope: Envelope, protocol: Optional[Protocol]
+    ) -> Tuple[Optional[Message], List[Handler]]:
         error_handler = self._get_error_handler()
 
-        if error_handler is None:
-            self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
-            raise _StopRuntime()
+        from packages.fetchai.skills.error.handlers import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+            ErrorHandler,
+        )
 
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
             error_handler.send_unsupported_protocol(envelope)
-            return None, []
-
-        if isinstance(envelope.message, Message):
-            msg = envelope.message
-        else:
-            try:
-                msg = protocol.serializer.decode(envelope.message)
-                msg.sender = envelope.sender
-                msg.to = envelope.to
-            except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
-                self.logger.warning("Decoding error. Exception: {}".format(str(e)))
-                error_handler.send_decoding_error(envelope)
-                return None, []
+            return None, []  # Tuple[Optional[Message], List[Handler]]
 
         handlers = self.filter.get_active_handlers(
             protocol.public_id, envelope.skill_id
@@ -270,7 +280,18 @@ class AEA(Agent):
             error_handler.send_unsupported_skill(envelope)
             return None, []
 
-        return msg, handlers
+        if isinstance(envelope.message, Message):
+            msg = envelope.message
+            return msg, handlers
+        try:
+            msg = protocol.serializer.decode(envelope.message)
+            msg.sender = envelope.sender
+            msg.to = envelope.to
+            return msg, handlers
+        except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
+            self.logger.warning("Decoding error. Exception: {}".format(str(e)))
+            error_handler.send_decoding_error(envelope)
+            return None, []
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """

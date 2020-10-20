@@ -30,7 +30,8 @@ from typing import Callable, FrozenSet, Type, cast
 from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
-from aea.protocols.state_update.message import StateUpdateMessage
+
+from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
 
 class StateUpdateDialogue(Dialogue):

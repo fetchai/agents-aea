@@ -23,11 +23,14 @@ import time
 from aea.common import Address
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.protocols.default.dialogues import DefaultDialogue
-from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from packages.fetchai.protocols.default.dialogues import DefaultDialogue
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogues as BaseDefaultDialogues,
+)
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 class DefaultDialogues(BaseDefaultDialogues):

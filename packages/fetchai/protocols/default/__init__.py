@@ -17,10 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the signing protocol."""
+"""This module contains the support resources for the default protocol."""
 
-from aea.protocols.signing.message import SigningMessage
-from aea.protocols.signing.serialization import SigningSerializer
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
 
-SigningMessage.serializer = SigningSerializer
+DefaultMessage.serializer = DefaultSerializer

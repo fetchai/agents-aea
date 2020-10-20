@@ -1,9 +1,9 @@
-<a name="aea.protocols.default.serialization"></a>
-# aea.protocols.default.serialization
+<a name="packages.fetchai.protocols.default.serialization"></a>
+# packages.fetchai.protocols.default.serialization
 
 Serialization module for default protocol.
 
-<a name="aea.protocols.default.serialization.DefaultSerializer"></a>
+<a name="packages.fetchai.protocols.default.serialization.DefaultSerializer"></a>
 ## DefaultSerializer Objects
 
 ```python
@@ -12,7 +12,7 @@ class DefaultSerializer(Serializer)
 
 Serialization for the 'default' protocol.
 
-<a name="aea.protocols.default.serialization.DefaultSerializer.encode"></a>
+<a name="packages.fetchai.protocols.default.serialization.DefaultSerializer.encode"></a>
 #### encode
 
 ```python
@@ -30,7 +30,7 @@ Encode a 'Default' message into bytes.
 
 the bytes.
 
-<a name="aea.protocols.default.serialization.DefaultSerializer.decode"></a>
+<a name="packages.fetchai.protocols.default.serialization.DefaultSerializer.decode"></a>
 #### decode
 
 ```python

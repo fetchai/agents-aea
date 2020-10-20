@@ -32,10 +32,10 @@ from aea.exceptions import enforce
 from aea.helpers.search.models import Description
 from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )

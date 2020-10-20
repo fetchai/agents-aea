@@ -125,7 +125,7 @@ Multi agents manager.
 #### `__`init`__`
 
 ```python
- | __init__(working_dir: str, mode: str = "async") -> None
+ | __init__(working_dir: str, mode: str = "async", registry_path: str = "packages") -> None
 ```
 
 Initialize manager.
@@ -181,10 +181,15 @@ None
 #### add`_`project
 
 ```python
- | add_project(public_id: PublicId) -> "MultiAgentManager"
+ | add_project(public_id: PublicId, local: bool = True) -> "MultiAgentManager"
 ```
 
 Fetch agent project and all dependencies to working_dir.
+
+**Arguments**:
+
+- `public_id`: the public if of the agent project.
+- `local`: whether or not to fetch from local registry.
 
 <a name="aea.manager.MultiAgentManager.remove_project"></a>
 #### remove`_`project
