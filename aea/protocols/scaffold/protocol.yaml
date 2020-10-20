@@ -4,7 +4,7 @@ version: 0.1.0
 type: protocol
 description: The scaffold protocol scaffolds a protocol to be implemented by the developer.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: Qmc9Ln8THrWmwou4nr3Acag7vcZ1fv8v5oRSkCWtv1aH6t
   message.py: QmWPrVTSHeKANCaVA4VaQyMGLix7yiMALbytsKZppAG2VU

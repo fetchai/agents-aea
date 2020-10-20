@@ -49,7 +49,7 @@ class TestRemoveSkillWithPublicId:
         tmp_dir = cls.t / dir_path
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
-        cls.skill_id = "fetchai/gym:0.9.0"
+        cls.skill_id = "fetchai/gym:0.10.0"
         cls.skill_name = "gym"
 
         os.chdir(cls.t)
@@ -122,7 +122,7 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         tmp_dir = cls.t / dir_path
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
-        cls.skill_id = "fetchai/gym:0.9.0"
+        cls.skill_id = "fetchai/gym:0.10.0"
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -180,7 +180,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         tmp_dir = cls.t / dir_path
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
-        cls.skill_id = "fetchai/gym:0.9.0"
+        cls.skill_id = "fetchai/gym:0.10.0"
         cls.skill_name = "gym"
 
         os.chdir(cls.t)

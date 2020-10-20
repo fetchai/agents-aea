@@ -260,7 +260,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match="The custom configuration for skill fetchai/error:0.7.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+            match="The custom configuration for skill fetchai/error:0.8.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
         ):
             skill_config.update(new_configurations)
 
@@ -284,7 +284,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.7.0' are not allowed to change: {'class_name'}.",
+            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.8.0' are not allowed to change: {'class_name'}.",
         ):
             skill_config.update(new_configurations)
 

@@ -10,10 +10,10 @@ This is a protocol for two agents exchanging any bytes messages.
 ---
 name: default
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 speech_acts:
   bytes:
     content: pt:bytes

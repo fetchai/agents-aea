@@ -36,7 +36,7 @@ from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 
 
 DEFAULT_SERVICES_INTERVAL = 30.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class ServiceRegistrationBehaviour(TickerBehaviour):

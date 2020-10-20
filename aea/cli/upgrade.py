@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea upgrade' subcommand."""
 from contextlib import suppress
+from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
@@ -99,19 +100,21 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     items_to_upgrade_dependencies = set()
 
     for package_id, deps in agent_items.items():
+        item_upgrader = ItemUpgrader(
+            ctx, str(package_id.package_type), package_id.public_id.to_latest()
+        )
+
         if deps:
             continue
 
         with suppress(UpgraderException):
-            item_upgrader = ItemUpgrader(
-                ctx, str(package_id.package_type), package_id.public_id.to_latest()
-            )
             new_version = item_upgrader.check_upgrade_is_required()
             items_to_upgrade.add((package_id, new_version))
             upgraders.append(item_upgrader)
-            shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
-            items_to_upgrade_dependencies.update(item_upgrader.dependencies)
-            items_to_upgrade_dependencies.add(package_id)
+
+        items_to_upgrade_dependencies.add(package_id)
+        items_to_upgrade_dependencies.update(item_upgrader.dependencies)
+        shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
 
     if not items_to_upgrade:
         click.echo("Everything is already up to date!")
@@ -130,6 +133,11 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
                 f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
             )
             for dep in shared_deps_to_remove:
+                if ItemUpgrader(
+                    ctx, str(dep.package_type), dep.public_id
+                ).is_non_vendor:
+                    # non vendor package, do not remove!
+                    continue
                 RemoveItem(
                     ctx,
                     str(dep.package_type),
@@ -144,6 +152,9 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
             upgrader.add_item()
 
     click.echo("Finished project upgrade. Everything is up to date now!")
+    click.echo(
+        'Please manually update package versions in your non-vendor packages as well as in "default_connection" and "default_routing"'
+    )
 
 
 class UpgraderException(Exception):
@@ -212,7 +223,11 @@ class ItemUpgrader:
 
     def check_item_present(self) -> None:
         """Check item going to be upgraded already registered in agent."""
-        if not is_item_present(self.ctx, self.item_type, self.item_public_id):
+        if not is_item_present(
+            self.ctx, self.item_type, self.item_public_id
+        ) and not is_item_present(
+            self.ctx, self.item_type, self.item_public_id, is_vendor=False
+        ):
             raise NotAddedException()
 
     def get_dependencies(
@@ -227,6 +242,14 @@ class ItemUpgrader:
             self.item_type, self.current_item_public_id
         )
 
+    @property
+    def is_non_vendor(self) -> bool:
+        """Check is package specified is non vendor."""
+        path = ItemRemoveHelper.get_component_directory(
+            PackageId(self.item_type, self.item_public_id)
+        )
+        return "vendor" not in Path(path).parts[:2]
+
     def check_upgrade_is_required(self) -> str:
         """
         Check upgrade is required otherwise raise UpgraderException.
@@ -237,6 +260,9 @@ class ItemUpgrader:
             # check if we trying to upgrade some component dependency
             raise IsRequiredException(self.in_requirements)
 
+        if self.is_non_vendor:
+            raise AlreadyActualVersionException(self.current_item_public_id.version)
+
         if self.item_public_id.version != "latest":
             new_item = self.item_public_id
         else:
@@ -246,6 +272,7 @@ class ItemUpgrader:
 
         if self.current_item_public_id.version == new_item.version:
             raise AlreadyActualVersionException(new_item.version)
+
         return new_item.version
 
     def remove_item(self) -> None:
