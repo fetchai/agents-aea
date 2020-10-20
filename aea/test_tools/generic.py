@@ -32,8 +32,8 @@ from aea.configurations.base import (
     SkillConfig,
     dependencies_from_json,
 )
-from aea.connections.stub.connection import write_envelope
 from aea.exceptions import enforce
+from aea.helpers.file_io import write_envelope
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 from aea.mail.base import Envelope
 from aea.test_tools.constants import DEFAULT_AUTHOR

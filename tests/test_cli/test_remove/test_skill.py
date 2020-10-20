@@ -45,6 +45,10 @@ class TestRemoveSkillWithPublicId:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         cls.skill_id = "fetchai/gym:0.9.0"
         cls.skill_name = "gym"
 
@@ -114,6 +118,10 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         cls.skill_id = "fetchai/gym:0.9.0"
 
         os.chdir(cls.t)
@@ -168,6 +176,10 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         cls.skill_id = "fetchai/gym:0.9.0"
         cls.skill_name = "gym"
 

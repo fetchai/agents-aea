@@ -108,7 +108,7 @@ def _save_agent_locally(ctx: Context) -> None:
         dependencies = getattr(ctx.agent_config, item_type_plural)
         for public_id in dependencies:
             if public_id in DISTRIBUTED_PACKAGES:
-                continue
+                continue  # pragma: nocover
             _check_is_item_in_local_registry(
                 PublicId.from_str(str(public_id)),
                 item_type_plural,

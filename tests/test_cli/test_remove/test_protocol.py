@@ -109,6 +109,7 @@ class TestRemoveProtocolFailsWhenProtocolDoesNotExist:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.protocol_id = "fetchai/gym:0.7.0"
 
         os.chdir(cls.t)
@@ -162,6 +163,7 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.protocol_id = "fetchai/gym:0.7.0"

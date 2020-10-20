@@ -20,14 +20,14 @@
 """Implementation of the 'aea add_key' subcommand."""
 
 import os
-from typing import cast
+from typing import Optional, cast
 
 import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.helpers import try_validate_private_key_path
+from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, try_validate_private_key_path
 from aea.crypto.registries import crypto_registry
 
 
@@ -42,7 +42,7 @@ from aea.crypto.registries import crypto_registry
     "file",
     metavar="FILE",
     type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
-    required=True,
+    required=False,
 )
 @click.option(
     "--connection", is_flag=True, help="For adding a private key for connections."
@@ -55,7 +55,10 @@ def add_key(click_context, type_, file, connection):
 
 
 def _add_private_key(
-    click_context: click.core.Context, type_: str, file: str, connection: bool = False
+    click_context: click.core.Context,
+    type_: str,
+    file: Optional[str] = None,
+    connection: bool = False,
 ) -> None:
     """
     Add private key to the wallet.
@@ -68,6 +71,8 @@ def _add_private_key(
     :return: None
     """
     ctx = cast(Context, click_context.obj)
+    if file is None:
+        file = PRIVATE_KEY_PATH_SCHEMA.format(type_)
     try_validate_private_key_path(type_, file)
     _try_add_key(ctx, type_, file, connection)
 

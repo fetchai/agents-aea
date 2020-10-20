@@ -30,12 +30,7 @@ from aea.exceptions import enforce
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
-from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
-from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel
-from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.contract_api.dialogues import (
@@ -45,6 +40,12 @@ from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue as BaseDefaultDialogue,
+)
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogues as BaseDefaultDialogues,
+)
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -62,6 +63,13 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogue as BaseSigningDialogue,
+)
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogues as BaseSigningDialogues,
+)
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.tac_negotiation.helpers import (
     DEMAND_DATAMODEL_NAME,
     SUPPLY_DATAMODEL_NAME,

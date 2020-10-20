@@ -27,9 +27,9 @@ from urllib.parse import urlparse
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_alice.dialogues import (

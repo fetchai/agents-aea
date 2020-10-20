@@ -18,10 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for transaction."""
+from typing import Type
 from unittest.mock import patch
 
 import pytest
 
+from aea.common import Address
 from aea.helpers.transaction.base import (
     RawMessage,
     RawTransaction,
@@ -29,7 +31,17 @@ from aea.helpers.transaction.base import (
     SignedTransaction,
     Terms,
 )
-from aea.protocols.signing.message import SigningMessage
+from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel
+
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogue as BaseSigningDialogue,
+)
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogues as BaseSigningDialogues,
+)
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 from tests.conftest import COSMOS
 
@@ -144,3 +156,80 @@ def test_serialization_negative():
             ValueError, match=f"Performative not valid: {tx_msg.performative}"
         ):
             tx_msg.serializer.decode(encoded_tx_bytes)
+
+
+def test_dialogues():
+    """Test intiaontiation of dialogues."""
+    signing_dialogues = SigningDialogues("agent_addr")
+    msg, dialogue = signing_dialogues.create(
+        counterparty="abc",
+        performative=SigningMessage.Performative.SIGN_TRANSACTION,
+        terms=Terms(
+            ledger_id="ledger_id",
+            sender_address="address1",
+            counterparty_address="address2",
+            amount_by_currency_id={"FET": -2},
+            quantities_by_good_id={"good_id": 10},
+            is_sender_payable_tx_fee=True,
+            nonce="transaction nonce",
+        ),
+        raw_transaction=RawTransaction("ledger_id", "transaction"),
+    )
+    assert dialogue is not None
+
+
+class SigningDialogue(BaseSigningDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[SigningMessage],
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseSigningDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+
+
+class SigningDialogues(BaseSigningDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, self_address: Address) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return SigningDialogue.Role.SKILL
+
+        BaseSigningDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=SigningDialogue,
+        )

@@ -155,7 +155,7 @@ def _cast_ctx(context: Union[Context, click.core.Context]) -> Context:
     """
     if isinstance(context, Context):
         return context
-    if isinstance(context, click.core.Context):
+    if isinstance(context, click.core.Context):  # pragma: no cover
         return cast(Context, context.obj)
     raise AEAException(  # pragma: no cover
         "clean_after decorator should be used only on methods with Context "

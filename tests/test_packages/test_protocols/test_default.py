@@ -19,13 +19,24 @@
 
 """This module contains the tests of the messages module."""
 
+from typing import Type
 from unittest import mock
 from unittest.mock import patch
 
 import pytest
 
-import aea
-from aea.protocols.default.message import DefaultMessage
+from aea.common import Address
+from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel
+
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue as BaseDefaultDialogue,
+)
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogues as BaseDefaultDialogues,
+)
+from packages.fetchai.protocols.default.message import DefaultMessage, _default_logger
 
 
 def test_default_bytes_serialization():
@@ -40,13 +51,6 @@ def test_default_bytes_serialization():
     msg_bytes = DefaultMessage.serializer.encode(expected_msg)
     actual_msg = DefaultMessage.serializer.decode(msg_bytes)
     assert expected_msg == actual_msg
-
-    with pytest.raises(ValueError):
-        with mock.patch(
-            "aea.protocols.default.message.DefaultMessage.Performative"
-        ) as mock_type_enum:
-            mock_type_enum.BYTES.value = "unknown"
-            assert DefaultMessage.serializer.encode(expected_msg), ""
 
 
 def test_default_error_serialization():
@@ -76,6 +80,19 @@ def test_default_message_str_values():
     ), "DefaultMessage.Performative.ERROR must be error"
 
 
+def test_encoding_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during encoding."""
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES, content=b"hello"
+    )
+
+    with pytest.raises(ValueError, match="Performative not valid:"):
+        with mock.patch.object(
+            DefaultMessage.Performative, "__eq__", return_value=False
+        ):
+            DefaultMessage.serializer.encode(msg)
+
+
 def test_check_consistency_raises_exception_when_type_not_recognized():
     """Test that we raise exception when the type of the message is not recognized."""
     message = DefaultMessage(
@@ -100,9 +117,7 @@ def test_default_valid_performatives():
 
 def test_light_protocol_rule_3_target_0():
     """Test that if message_id is not 1, target must be > 0"""
-    with patch.object(
-        aea.protocols.default.message._default_logger, "error"
-    ) as mock_logger:
+    with patch.object(_default_logger, "error") as mock_logger:
         message_id = 2
         target = 0
         DefaultMessage(
@@ -118,9 +133,7 @@ def test_light_protocol_rule_3_target_0():
 
 def test_light_protocol_rule_3_target_less_than_message_id():
     """Test that if message_id is not 1, target must be > message_id"""
-    with patch.object(
-        aea.protocols.default.message._default_logger, "error"
-    ) as mock_logger:
+    with patch.object(_default_logger, "error") as mock_logger:
         message_id = 2
         target = 2
         DefaultMessage(
@@ -146,3 +159,71 @@ def test_serializer_performative_not_found():
     with patch.object(DefaultMessage.Performative, "__eq__", return_value=False):
         with pytest.raises(ValueError, match="Performative not valid: .*"):
             message.serializer.decode(message_bytes)
+
+
+def test_dialogues():
+    """Test intiaontiation of dialogues."""
+    default_dialogues = DefaultDialogues("agent_addr")
+    msg, dialogue = default_dialogues.create(
+        counterparty="abc",
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"hello",
+    )
+    assert dialogue is not None
+
+
+class DefaultDialogue(BaseDefaultDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[DefaultMessage],
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseDefaultDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+
+
+class DefaultDialogues(BaseDefaultDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, self_address: Address) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return DefaultDialogue.Role.AGENT
+
+        BaseDefaultDialogues.__init__(
+            self,
+            self_address=self_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=DefaultDialogue,
+        )

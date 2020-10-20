@@ -116,7 +116,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     ctx.clean_paths.append(dest_path)
 
     is_distributed = is_distributed_item(item_public_id)
-    if is_local and is_distributed:
+    if is_local and is_distributed:  # pragma: nocover
         source_path = find_item_in_distribution(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
     elif is_local and not is_distributed:

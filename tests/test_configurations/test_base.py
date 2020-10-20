@@ -67,6 +67,7 @@ from tests.conftest import (
     connection_config_files,
     contract_config_files,
     protocol_config_files,
+    random_string,
     skill_config_files,
 )
 
@@ -242,7 +243,12 @@ class TestSkillConfig:
     def test_update_method_raises_error_if_skill_component_not_allowed(self):
         """Test that we raise error if the custom configuration contain unexpected skill components."""
         skill_config_path = Path(
-            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+            ROOT_DIR,
+            "packages",
+            "fetchai",
+            "skills",
+            "error",
+            DEFAULT_SKILL_CONFIG_FILE,
         )
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
         skill_config = loader.load(skill_config_path.open())
@@ -263,7 +269,12 @@ class TestSkillConfig:
     ):
         """Test that we raise error if we try to change the 'class_name' field of a skill component configuration."""
         skill_config_path = Path(
-            ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE
+            ROOT_DIR,
+            "packages",
+            "fetchai",
+            "skills",
+            "error",
+            DEFAULT_SKILL_CONFIG_FILE,
         )
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
         skill_config = loader.load(skill_config_path.open())
@@ -969,3 +980,11 @@ def test_dependency_to_string():
         str(dependency)
         == "Dependency(name='package_1', version='==0.1.0', index='https://index.com', git='https://some-repo.git', ref='branch')"
     )
+
+
+def test_check_public_id_consistency_negative():
+    """Test ComponentId.check_public_id_consistency raises error when directory does not exists."""
+    random_dir_name = random_string()
+    with pytest.raises(ValueError, match=f"Directory {random_dir_name} is not valid."):
+        component_configuration = ProtocolConfig("name", "author")
+        component_configuration.check_public_id_consistency(Path(random_dir_name))

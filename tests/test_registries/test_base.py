@@ -44,8 +44,6 @@ from aea.crypto.wallet import Wallet
 from aea.helpers.transaction.base import SignedTransaction
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.registries.base import (
     AgentComponentRegistry,
     ComponentRegistry,
@@ -54,6 +52,9 @@ from aea.registries.base import (
 )
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
+
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
@@ -145,7 +146,9 @@ class TestProtocolRegistry:
         cls.patch = unittest.mock.patch.object(cls.registry.logger, "exception")
         cls.mocked_logger = cls.patch.start()
 
-        protocol_1 = Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
+        protocol_1 = Protocol.from_dir(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        )
         protocol_2 = Protocol.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"),
         )
@@ -228,7 +231,9 @@ class TestResources:
         cls.resources = Resources()
 
         cls.resources.add_component(
-            Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
+            Protocol.from_dir(
+                Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+            )
         )
         cls.resources.add_component(
             Skill.from_dir(
@@ -238,7 +243,7 @@ class TestResources:
         )
         cls.resources.add_component(
             Skill.from_dir(
-                Path(aea.AEA_DIR, "skills", "error"),
+                Path(ROOT_DIR, "packages", "fetchai", "skills", "error"),
                 agent_context=MagicMock(agent_name="name"),
             )
         )

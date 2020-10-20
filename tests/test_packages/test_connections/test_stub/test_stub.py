@@ -28,20 +28,20 @@ from unittest import mock
 
 import pytest
 
-import aea
 from aea.configurations.base import PublicId
-from aea.connections.stub.connection import (
-    StubConnection,
-    _process_line,
-    lock_file,
-    write_envelope,
-    write_with_lock,
-)
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
-from aea.protocols.default.message import DefaultMessage
+
+from packages.fetchai.connections.stub.connection import (
+    StubConnection,
+    envelope_from_bytes,
+    lock_file,
+    write_envelope,
+)
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import ROOT_DIR, _make_stub_connection
 
@@ -153,23 +153,6 @@ class TestStubConnectionReception:
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope == actual_envelope
 
-    def test_reception_fails(self):
-        """Test the case when an error occurs during the processing of a line."""
-        patch = mock.patch.object(
-            aea.connections.stub.connection._default_logger, "error"
-        )
-        mocked_logger_error = patch.start()
-        with mock.patch(
-            "aea.connections.stub.connection._decode",
-            side_effect=Exception("an error."),
-        ):
-            _process_line(b"")
-            mocked_logger_error.assert_called_with(
-                "Error when processing a line. Message: an error.", exc_info=True
-            )
-
-        patch.stop()
-
     def teardown(self):
         """Tear down the test."""
         os.chdir(self.cwd)
@@ -221,7 +204,7 @@ class TestStubConnectionSending:
             SEPARATOR,
         )
         encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
-        envelope = _process_line(encoded_envelope)
+        envelope = envelope_from_bytes(encoded_envelope)
         if envelope is not None:
             self.connection._put_envelopes([envelope])
 
@@ -390,7 +373,9 @@ async def test_bad_envelope():
 async def test_load_from_dir():
     """Test stub connection can be loaded from dir."""
     StubConnection.from_dir(
-        ROOT_DIR + "/aea/connections/stub", Identity("name", "address"), CryptoStore(),
+        ROOT_DIR + "/packages/fetchai/connections/stub",
+        Identity("name", "address"),
+        CryptoStore(),
     )
 
 

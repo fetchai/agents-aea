@@ -25,7 +25,7 @@ import shutil
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, List, Set
 
 import yaml
 from click.testing import CliRunner
@@ -36,13 +36,7 @@ from aea.configurations.base import PackageId, PackageType, PublicId
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 
-DEFAULT_CONFIG_FILE_PATHS = [
-    Path("aea", "connections", "stub", "connection.yaml"),
-    Path("aea", "protocols", "default", "protocol.yaml"),
-    Path("aea", "protocols", "signing", "protocol.yaml"),
-    Path("aea", "protocols", "state_update", "protocol.yaml"),
-    Path("aea", "skills", "error", "skill.yaml"),
-]
+DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
 
 
 def default_config_file_paths():

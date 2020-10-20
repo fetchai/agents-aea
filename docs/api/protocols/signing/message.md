@@ -1,9 +1,9 @@
-<a name="aea.protocols.signing.message"></a>
-# aea.protocols.signing.message
+<a name="packages.fetchai.protocols.signing.message"></a>
+# packages.fetchai.protocols.signing.message
 
 This module contains signing's message definition.
 
-<a name="aea.protocols.signing.message.SigningMessage"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage"></a>
 ## SigningMessage Objects
 
 ```python
@@ -12,7 +12,7 @@ class SigningMessage(Message)
 
 A protocol for communication between skills and decision maker.
 
-<a name="aea.protocols.signing.message.SigningMessage.Performative"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.Performative"></a>
 ## Performative Objects
 
 ```python
@@ -21,7 +21,7 @@ class Performative(Message.Performative)
 
 Performatives for the signing protocol.
 
-<a name="aea.protocols.signing.message.SigningMessage.Performative.__str__"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.Performative.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -30,7 +30,7 @@ Performatives for the signing protocol.
 
 Get the string representation.
 
-<a name="aea.protocols.signing.message.SigningMessage.__init__"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -46,7 +46,7 @@ Initialise an instance of SigningMessage.
 - `target`: the message target.
 - `performative`: the message performative.
 
-<a name="aea.protocols.signing.message.SigningMessage.valid_performatives"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.valid_performatives"></a>
 #### valid`_`performatives
 
 ```python
@@ -56,7 +56,7 @@ Initialise an instance of SigningMessage.
 
 Get valid performatives.
 
-<a name="aea.protocols.signing.message.SigningMessage.dialogue_reference"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.dialogue_reference"></a>
 #### dialogue`_`reference
 
 ```python
@@ -66,7 +66,7 @@ Get valid performatives.
 
 Get the dialogue_reference of the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.message_id"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.message_id"></a>
 #### message`_`id
 
 ```python
@@ -76,7 +76,7 @@ Get the dialogue_reference of the message.
 
 Get the message_id of the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.performative"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.performative"></a>
 #### performative
 
 ```python
@@ -86,7 +86,7 @@ Get the message_id of the message.
 
 Get the performative of the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.target"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.target"></a>
 #### target
 
 ```python
@@ -96,7 +96,7 @@ Get the performative of the message.
 
 Get the target of the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.error_code"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.error_code"></a>
 #### error`_`code
 
 ```python
@@ -106,7 +106,7 @@ Get the target of the message.
 
 Get the 'error_code' content from the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.raw_message"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.raw_message"></a>
 #### raw`_`message
 
 ```python
@@ -116,7 +116,7 @@ Get the 'error_code' content from the message.
 
 Get the 'raw_message' content from the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.raw_transaction"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.raw_transaction"></a>
 #### raw`_`transaction
 
 ```python
@@ -126,7 +126,7 @@ Get the 'raw_message' content from the message.
 
 Get the 'raw_transaction' content from the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.signed_message"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.signed_message"></a>
 #### signed`_`message
 
 ```python
@@ -136,7 +136,7 @@ Get the 'raw_transaction' content from the message.
 
 Get the 'signed_message' content from the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.signed_transaction"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.signed_transaction"></a>
 #### signed`_`transaction
 
 ```python
@@ -146,7 +146,7 @@ Get the 'signed_message' content from the message.
 
 Get the 'signed_transaction' content from the message.
 
-<a name="aea.protocols.signing.message.SigningMessage.terms"></a>
+<a name="packages.fetchai.protocols.signing.message.SigningMessage.terms"></a>
 #### terms
 
 ```python

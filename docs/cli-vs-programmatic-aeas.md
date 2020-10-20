@@ -70,7 +70,6 @@ import os
 import sys
 from typing import cast
 
-from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.fetchai import FetchAICrypto
@@ -139,11 +138,15 @@ def run():
     )
 
     # Add the default protocol (which is part of the AEA distribution)
-    default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
+    default_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "default")
+    )
     resources.add_protocol(default_protocol)
 
     # Add the signing protocol (which is part of the AEA distribution)
-    signing_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "signing"))
+    signing_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "signing")
+    )
     resources.add_protocol(signing_protocol)
 
     # Add the ledger_api protocol
@@ -200,7 +203,8 @@ def run():
 
     # Add the error and weather_client skills
     error_skill = Skill.from_dir(
-        os.path.join(AEA_DIR, "skills", "error"), agent_context=my_aea.context
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "error"),
+        agent_context=my_aea.context,
     )
     weather_skill = Skill.from_dir(
         os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client"),

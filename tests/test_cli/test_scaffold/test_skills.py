@@ -41,6 +41,7 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CliRunner,
+    ROOT_DIR,
     SKILL_CONFIGURATION_SCHEMA,
 )
 
@@ -56,6 +57,10 @@ class TestScaffoldSkill:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
@@ -138,6 +143,10 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -201,6 +210,10 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -270,6 +283,10 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -337,6 +354,10 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(

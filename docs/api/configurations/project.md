@@ -26,10 +26,16 @@ Init project with public_id and project's path.
 
 ```python
  | @classmethod
- | load(cls, working_dir: str, public_id: PublicId) -> "Project"
+ | load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, registry_path: str = "packages") -> "Project"
 ```
 
 Load project with given public_id to working_dir.
+
+**Arguments**:
+
+- `working_dir`: the working directory
+- `public_id`: the public id
+- `is_local`: whether to fetch from local or remote
 
 <a name="aea.configurations.project.Project.remove"></a>
 #### remove

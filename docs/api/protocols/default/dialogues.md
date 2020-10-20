@@ -1,12 +1,12 @@
-<a name="aea.protocols.default.dialogues"></a>
-# aea.protocols.default.dialogues
+<a name="packages.fetchai.protocols.default.dialogues"></a>
+# packages.fetchai.protocols.default.dialogues
 
 This module contains the classes required for default dialogue management.
 
 - DefaultDialogue: The dialogue class maintains state of a dialogue and manages it.
 - DefaultDialogues: The dialogues class keeps track of all dialogues.
 
-<a name="aea.protocols.default.dialogues.DefaultDialogue"></a>
+<a name="packages.fetchai.protocols.default.dialogues.DefaultDialogue"></a>
 ## DefaultDialogue Objects
 
 ```python
@@ -15,7 +15,7 @@ class DefaultDialogue(Dialogue)
 
 The default dialogue class maintains state of a dialogue and manages it.
 
-<a name="aea.protocols.default.dialogues.DefaultDialogue.Role"></a>
+<a name="packages.fetchai.protocols.default.dialogues.DefaultDialogue.Role"></a>
 ## Role Objects
 
 ```python
@@ -24,7 +24,7 @@ class Role(Dialogue.Role)
 
 This class defines the agent's role in a default dialogue.
 
-<a name="aea.protocols.default.dialogues.DefaultDialogue.EndState"></a>
+<a name="packages.fetchai.protocols.default.dialogues.DefaultDialogue.EndState"></a>
 ## EndState Objects
 
 ```python
@@ -33,7 +33,7 @@ class EndState(Dialogue.EndState)
 
 This class defines the end states of a default dialogue.
 
-<a name="aea.protocols.default.dialogues.DefaultDialogue.__init__"></a>
+<a name="packages.fetchai.protocols.default.dialogues.DefaultDialogue.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -52,7 +52,7 @@ Initialize a dialogue.
 
 None
 
-<a name="aea.protocols.default.dialogues.DefaultDialogues"></a>
+<a name="packages.fetchai.protocols.default.dialogues.DefaultDialogues"></a>
 ## DefaultDialogues Objects
 
 ```python
@@ -61,7 +61,7 @@ class DefaultDialogues(Dialogues,  ABC)
 
 This class keeps track of all default dialogues.
 
-<a name="aea.protocols.default.dialogues.DefaultDialogues.__init__"></a>
+<a name="packages.fetchai.protocols.default.dialogues.DefaultDialogues.__init__"></a>
 #### `__`init`__`
 
 ```python

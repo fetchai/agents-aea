@@ -19,6 +19,8 @@
 
 """Module to declare constants."""
 
+from typing import List
+
 from aea.configurations.base import DEFAULT_LICENSE as DL
 from aea.configurations.base import DEFAULT_REGISTRY_PATH as DRP
 from aea.configurations.base import PublicId
@@ -28,17 +30,14 @@ from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 
 DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.11.0")
 DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.7.0")
+SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.5.0")
+STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:0.5.0")
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.7.0")
 DEFAULT_LEDGER = FetchAICrypto.identifier
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
 DEFAULT_REGISTRY_PATH = DRP
 DEFAULT_LICENSE = DL
-SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:0.5.0")
-STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:0.5.0")
-DISTRIBUTED_PROTOCOLS = [DEFAULT_PROTOCOL, SIGNING_PROTOCOL, STATE_UPDATE_PROTOCOL]
-DISTRIBUTED_PACKAGES = [
-    DEFAULT_CONNECTION,
-    *DISTRIBUTED_PROTOCOLS,
-    DEFAULT_SKILL,
-]
+DISTRIBUTED_PACKAGES = []  # type: List[PublicId]
 DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
+DEFAULT_INPUT_FILE_NAME = "./input_file"
+DEFAULT_OUTPUT_FILE_NAME = "./output_file"

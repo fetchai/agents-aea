@@ -105,7 +105,7 @@ def fetch_agent_locally(
             'Item "{}" already exists in target folder.'.format(public_id.name)
         )
     if target_dir is not None:
-        os.makedirs(target_path)
+        os.makedirs(target_path)  # pragma: nocover
 
     ctx.clean_paths.append(target_path)
     copy_tree(source_path, target_path)

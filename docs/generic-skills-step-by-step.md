@@ -296,9 +296,9 @@ from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -1054,12 +1054,16 @@ from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
-from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
-from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue as BaseDefaultDialogue,
+)
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogues as BaseDefaultDialogues,
+)
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -1496,13 +1500,13 @@ from typing import Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -2425,15 +2429,16 @@ from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
-from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
-from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue as BaseDefaultDialogue,
+)
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogues as BaseDefaultDialogues,
+)
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -2450,6 +2455,13 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogue as BaseSigningDialogue,
+)
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogues as BaseSigningDialogues,
+)
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 
 DefaultDialogue = BaseDefaultDialogue

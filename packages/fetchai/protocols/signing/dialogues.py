@@ -30,7 +30,8 @@ from typing import Callable, FrozenSet, Type, cast
 from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
-from aea.protocols.signing.message import SigningMessage
+
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 
 class SigningDialogue(Dialogue):

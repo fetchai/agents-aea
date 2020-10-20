@@ -34,10 +34,13 @@ from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue
-from aea.protocols.signing.dialogues import SigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler, Model, Skill, SkillContext
+
+from packages.fetchai.protocols.signing.dialogues import SigningDialogue
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogues as BaseSigningDialogues,
+)
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 
 logger = logging.getLogger("aea")

@@ -320,6 +320,27 @@ Run from agent's directory.
 
 Result
 
+<a name="aea.test_tools.test_cases.BaseAEATestCase.remove_item"></a>
+#### remove`_`item
+
+```python
+ | @classmethod
+ | remove_item(cls, item_type: str, public_id: str) -> Result
+```
+
+Remove an item from the agent.
+
+Run from agent's directory.
+
+**Arguments**:
+
+- `item_type`: str item type.
+- `public_id`: public id of the item.
+
+**Returns**:
+
+Result
+
 <a name="aea.test_tools.test_cases.BaseAEATestCase.scaffold_item"></a>
 #### scaffold`_`item
 

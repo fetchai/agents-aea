@@ -28,7 +28,6 @@ import click
 
 from aea.configurations.base import ConnectionConfig
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.runner import AEARunner
 from aea.skills.base import Handler
 from benchmark.checks.utils import get_mem_usage_in_mb  # noqa: I100
@@ -45,6 +44,7 @@ from packages.fetchai.connections.local.connection import (  # noqa: E402 # pyli
     LocalNode,
     OEFLocalConnection,
 )
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")
