@@ -37,23 +37,23 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.option("--author", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--local", is_flag=True, help="For init AEA locally.")
-@click.option("--subscribe", is_flag=True, help="For developers subscription.")
+@click.option("--no_subscribe", is_flag=True, help="For developers subscription.")
 @pass_ctx
 def init(  # pylint: disable=unused-argument
-    ctx: Context, author: str, reset: bool, local: bool, subscribe: bool
+    ctx: Context, author: str, reset: bool, local: bool, no_subscribe: bool
 ):
     """Initialize your AEA configurations."""
-    do_init(author, reset, not local, subscribe)
+    do_init(author, reset, not local, no_subscribe)
 
 
-def do_init(author: str, reset: bool, registry: bool, subscribe: bool) -> None:
+def do_init(author: str, reset: bool, registry: bool, no_subscribe: bool) -> None:
     """
     Initialize your AEA configurations.
 
     :param author: str author username.
     :param reset: True, if resetting the author name
     :param registry: True, if registry is used
-    :param subscribe: bool flag for developers subscription on register.
+    :param no_subscribe: bool flag for developers subscription skip on register.
 
     :return: None.
     """
@@ -61,7 +61,7 @@ def do_init(author: str, reset: bool, registry: bool, subscribe: bool) -> None:
     if reset or config.get(AUTHOR_KEY, None) is None:
         author = validate_author_name(author)
         if registry:
-            _registry_init(username=author, subscribe=subscribe)
+            _registry_init(username=author, no_subscribe=no_subscribe)
 
         update_cli_config({AUTHOR_KEY: author})
         config = get_or_create_cli_config()
@@ -76,12 +76,12 @@ def do_init(author: str, reset: bool, registry: bool, subscribe: bool) -> None:
     click.echo(success_msg)
 
 
-def _registry_init(username: str, subscribe: bool) -> None:
+def _registry_init(username: str, no_subscribe: bool) -> None:
     """
     Create an author name on the registry.
 
     :param author: the author name
-    :param subscribe: bool flag for developers subscription on register.
+    :param no_subscribe: bool flag for developers subscription skip on register.
 
     :return: None.
     """
@@ -104,4 +104,4 @@ def _registry_init(username: str, subscribe: bool) -> None:
                     "Confirm password", type=str, hide_input=True
                 )
 
-            do_register(username, email, password, password_confirmation, subscribe)
+            do_register(username, email, password, password_confirmation, no_subscribe)
