@@ -98,6 +98,6 @@ In the above, we mock the logger before running `my_behaviour`'s `act()` method 
 
 ## Next steps
 
-You can consult the `fetchai/generic_buyer` and `fetchai/generic_seller` skills and their associated tests <a href="https://github.com/fetchai/agents-aea/blob/master/tests/test_packages" target="_blank">here</a> to study how `BaseSkillTestCase` can help you in testing your skills.
+You can consult the `fetchai/generic_buyer` and `fetchai/generic_seller` skills and their associated tests <a href="https://github.com/fetchai/agents-aea/tree/master/tests/test_packages/test_skills" target="_blank">here</a> to study how `BaseSkillTestCase` can help you in testing your skills.
 
 You can also refer to the API to study the different methods `BaseSkillTestCase` makes available to make testing your skills easier. 

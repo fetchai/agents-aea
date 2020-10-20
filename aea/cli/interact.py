@@ -51,7 +51,7 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: nocover
     from packages.fetchai.connections.stub.connection import (  # noqa: F401
         DEFAULT_INPUT_FILE_NAME,
         DEFAULT_OUTPUT_FILE_NAME,
