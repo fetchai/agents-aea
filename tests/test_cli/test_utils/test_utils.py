@@ -54,12 +54,15 @@ from aea.cli.utils.package_utils import (
     validate_author_name,
     validate_package_name,
 )
-from aea.configurations.base import PublicId
+from aea.configurations.base import ComponentId, ComponentType, PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
+    DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
+    LEDGER_CONNECTION,
 )
+from aea.crypto.fetchai import DEFAULT_CHAIN_ID
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
@@ -483,3 +486,30 @@ def test_override_ledger_configurations_negative():
     _override_ledger_configurations(agent_config)
     actual_configurations = LedgerApis.ledger_api_configs
     assert expected_configurations == actual_configurations
+
+
+def test_override_ledger_configurations_positive():
+    """Test override ledger configurations function util with fields to override."""
+    new_chain_id = "some_chain"
+    agent_config = MagicMock()
+    agent_config.component_configurations = {
+        ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION): {
+            "config": {"ledger_apis": {DEFAULT_LEDGER: {"chain_id": new_chain_id}}}
+        }
+    }
+    old_configurations = deepcopy(LedgerApis.ledger_api_configs)
+
+    expected_configurations = deepcopy(old_configurations[DEFAULT_LEDGER])
+    expected_configurations["chain_id"] = new_chain_id
+    try:
+        _override_ledger_configurations(agent_config)
+        actual_configurations = LedgerApis.ledger_api_configs.get("fetchai")
+        assert expected_configurations == actual_configurations
+    finally:
+        # this is important - _ovveride_ledger_configurations does
+        # side-effect to LedgerApis.ledger_api_configs
+        LedgerApis.ledger_api_configs = old_configurations
+        assert (
+            LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
+            == DEFAULT_CHAIN_ID
+        )
