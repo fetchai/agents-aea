@@ -34,6 +34,8 @@ from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     AgentConfig,
     ComponentConfiguration,
+    ComponentId,
+    ComponentType,
     DEFAULT_AEA_CONFIG_FILE,
     PACKAGE_PUBLIC_ID_VAR_NAME,
     PackageType,
@@ -41,12 +43,13 @@ from aea.configurations.base import (
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import DISTRIBUTED_PACKAGES
+from aea.configurations.constants import DISTRIBUTED_PACKAGES, LEDGER_CONNECTION
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
+from aea.helpers.base import recursive_update
 
 
 ROOT = Path(".")
@@ -520,6 +523,17 @@ def is_distributed_item(item_public_id: PublicId) -> bool:
     return item_public_id in DISTRIBUTED_PACKAGES
 
 
+def _override_ledger_configurations(agent_config: AgentConfig) -> None:
+    """Override LedgerApis configurations with agent override configurations."""
+    ledger_component_id = ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION)
+    if ledger_component_id not in agent_config.component_configurations:
+        return
+    ledger_apis_config = agent_config.component_configurations[ledger_component_id].get(
+        "ledger_apis", {}
+    )
+    recursive_update(LedgerApis.ledger_api_configs, ledger_apis_config)
+
+
 def try_get_balance(  # pylint: disable=unused-argument
     agent_config: AgentConfig, wallet: Wallet, type_: str
 ) -> int:
@@ -538,6 +552,7 @@ def try_get_balance(  # pylint: disable=unused-argument
         address = wallet.addresses.get(type_)
         if address is None:  # pragma: no cover
             raise ValueError("No key '{}' in wallet.".format(type_))
+        _override_ledger_configurations(agent_config)
         balance = LedgerApis.get_balance(type_, address)
         if balance is None:  # pragma: no cover
             raise ValueError("No balance returned!")
