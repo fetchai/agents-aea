@@ -255,7 +255,7 @@ class OwnershipState(BaseOwnershipState):
         if self.is_initialized:
             is_affordable = self.is_affordable_transaction(terms)
         else:
-            _default_logger.warning(
+            _default_logger.debug(
                 "Cannot verify whether transaction is affordable as ownership state is not initialized. Assuming it is!"
             )
             is_affordable = True
@@ -486,7 +486,7 @@ class Preferences(BasePreferences):
                 self.utility_diff_from_transaction(ownership_state, terms) >= 0.0
             )
         else:
-            _default_logger.warning(
+            _default_logger.debug(
                 "Cannot verify whether transaction improves utility as preferences are not initialized. Assuming it does!"
             )
             is_utility_enhancing = True
@@ -787,7 +787,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
         if state_update_msg.performative == StateUpdateMessage.Performative.INITIALIZE:
-            self.logger.warning(
+            self.logger.info(
                 "[{}]: Applying ownership_state and preferences initialization!".format(
                     self.agent_name
                 )

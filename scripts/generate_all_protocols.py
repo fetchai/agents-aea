@@ -67,6 +67,7 @@ PROTOCOL_PATHS = list(
             Path("packages", "fetchai", "protocols", "ml_trade"),
             Path("packages", "fetchai", "protocols", "oef_search"),
             Path("packages", "fetchai", "protocols", "tac"),
+            Path("packages", "fetchai", "protocols", "register"),
         ],
     )
 )

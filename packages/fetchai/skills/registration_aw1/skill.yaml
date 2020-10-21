@@ -1,0 +1,51 @@
+name: registration_aw1
+author: fetchai
+version: 0.1.0
+type: skill
+description: The registration_aw1 skill is a skill for registration in Agent World
+  1.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmUVY3sShwwnypNPRCYhAcuYH2nXu6S21ChQmEsCVpfg2y
+  behaviours.py: QmeHdwnNPzhGfCD8wZGNqaqyhkfozLByTqd8CzqRYXumgU
+  dialogues.py: QmP6k3UcXDHoSMH6DZGeDUbR5EyVe2yevXLYCj9EAPo45j
+  handlers.py: QmZJDxpZaCFf5c1jpM1owK66AjsA2oajb2JtC9rqgWkh5n
+  strategy.py: QmZZPpCQqo9ZVqqUhFUf6CPv9x5eoogA4gXc6YEkjaxL99
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/register:0.1.0
+- fetchai/signing:0.6.0
+skills:
+- fetchai/simple_service_search:0.1.0
+behaviours:
+  registration:
+    args:
+      tick_interval: 10
+    class_name: AW1RegistrationBehaviour
+handlers:
+  registration:
+    args: {}
+    class_name: AW1RegistrationHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  register_dialogues:
+    args: {}
+    class_name: RegisterDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      developer_handle: PUT_YOUR_DEVELOPER_HANDLE_HERE
+      ethereum_address: PUT_YOUR_ETHEREUM_ADDRESS_HERE
+      shared_storage_key: agents_found
+      signature_of_fetchai_address: PUT_YOUR_SIGNATURE_HERE
+      tweet: PUT_THE_LINK_TO_YOUR_TWEET_HERE
+      whitelist: []
+    class_name: Strategy
+dependencies: {}
+is_abstract: false

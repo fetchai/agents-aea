@@ -64,8 +64,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: weather_data

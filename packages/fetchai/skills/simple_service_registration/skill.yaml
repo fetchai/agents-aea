@@ -8,10 +8,10 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmPuD9EtLKV143FbAaGUht5ZVtemVWXnm1jYmQxyUNnZ9T
   __init__.py: QmVezA4XpumWr459AP98UsBLdbHRWTJ9AciSzjnSTfThyQ
-  behaviours.py: QmbAQq8xchbxFu7QT3RofR1VX1ExQGUBemCQuNjc5bUnVA
+  behaviours.py: QmdekyPrLrR5WiGw7PLgvhgPpLB7zUBS4T9J5yT4w4U4pW
   dialogues.py: QmX8L6qMd4X6LHLyPmiXaQL2LA5Ca9Q6B77qYdfvfJ3aen
   handlers.py: QmW4yvvuLMeGng6V5k3dXxzRZDFAymNRLnQ6pPjXfFs6G5
-  strategy.py: QmdiJNDkTvhEC2yxEt4P8WYniLbjPGSSQFWjmjvhgxMtx5
+  strategy.py: QmdDBeyK7Es8DE537Y8txLvY8TAMpEus5xWnXeNJ4tKn5p
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -33,8 +33,8 @@ models:
   strategy:
     args:
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: generic_service
