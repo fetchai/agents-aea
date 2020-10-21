@@ -25,6 +25,8 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
+from packages.fetchai.contracts.staking_erc20.contract import PUBLIC_ID
+
 
 REQUIRED_KEYS = [
     "ethereum_address",
@@ -68,7 +70,13 @@ class Strategy(Model):
         self._ledger_id = "fetchai"
         self._max_tx_fee = 100
         self._contract_ledger_id = "ethereum"
-        self._contract_callable = "getStakeForUser"
+        self._contract_callable = "get_stake"
+        self._contract_id = str(PUBLIC_ID)
+
+    @property
+    def contract_id(self) -> str:
+        """Get the ledger on which the contract is deployed."""
+        return self._contract_id
 
     @property
     def contract_address(self) -> str:
@@ -153,7 +161,7 @@ class Strategy(Model):
             sender_address=self.context.agent_address,
             counterparty_address=counterparty,
             amount_by_currency_id={
-                self._token_denomination: self._token_dispense_amount
+                self._token_denomination: -self._token_dispense_amount
             },
             quantities_by_good_id={},
             is_sender_payable_tx_fee=True,
@@ -163,12 +171,13 @@ class Strategy(Model):
         return terms
 
     @staticmethod
-    def get_kwargs(counterparty: str) -> Dict[str, str]:
+    def get_kwargs(info: Dict[str, str]) -> Dict[str, str]:
         """
         Get the kwargs for the contract state call.
 
         :param counterparty:
         """
+        counterparty = info["ethereum_address"]
         return {"address": counterparty}
 
     def has_staked(self, state: Dict[str, str]) -> bool:
@@ -177,8 +186,7 @@ class Strategy(Model):
 
         :return: bool, indicating outcome
         """
-        print(state)
         if self._override_staking_check:
             return True
-        result = int(state.get("principal", "0")) > 0
+        result = int(state.get("stake", "0")) > 0
         return result

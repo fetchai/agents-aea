@@ -20,9 +20,13 @@
 """This module contains the erc1155 contract definition."""
 
 import logging
+from typing import Dict
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
+from aea.crypto.base import LedgerApi
+from aea.crypto.ethereum import EthereumApi
 
 
 _default_logger = logging.getLogger(
@@ -36,3 +40,21 @@ class StakingERC20(Contract):
     """The ERC1155 contract class which acts as a bridge between AEA framework and ERC1155 ABI."""
 
     contract_id = PUBLIC_ID
+
+    @classmethod
+    def get_stake(
+        cls, ledger_api: LedgerApi, contract_address: Address, address: Address,
+    ) -> Dict[str, int]:
+        """
+        Get the balance for a specific token id.
+
+        :param ledger_api: the ledger API
+        :param contract_address: the address of the contract
+        :param address: the address
+        :return: the balance in a dictionary - {"balance": {token_id: int, balance: int}}
+        """
+        if ledger_api.identifier == EthereumApi.identifier:
+            instance = cls.get_instance(ledger_api, contract_address)
+            result = instance.functions.getStakeForUser(address).call()
+            return {"stake": result[0]}
+        raise NotImplementedError

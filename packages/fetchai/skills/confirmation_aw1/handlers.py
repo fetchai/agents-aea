@@ -124,12 +124,13 @@ class AW1RegistrationHandler(Handler):
             contract_api_dialogues = cast(
                 ContractApiDialogues, self.context.contract_api_dialogues
             )
-            kwargs = strategy.get_kwargs(register_msg.sender)
+            kwargs = strategy.get_kwargs(register_msg.info)
             terms = strategy.get_terms(register_msg.sender)
             contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
                 counterparty=LEDGER_API_ADDRESS,
                 performative=ContractApiMessage.Performative.GET_STATE,
                 ledger_id=strategy.contract_ledger_id,
+                contract_id=strategy.contract_id,
                 contract_address=strategy.contract_address,
                 callable=strategy.contract_callable,
                 kwargs=ContractApiMessage.Kwargs(kwargs),

@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmWzYodbomKRhKchtYUW9yzRzEPiv2M68rB4FAS7M1WzYj
-  contract.py: QmYzr8p6y9WoLJ1PY8EqmBhajy7F86ou5vU3vczz8MVxe9
+  contract.py: QmWUJv2ce3Fgeof932WQAygZ4b5eDnGfJ4fULAD8Bmsecv
 fingerprint_ignore_patterns:
 - build/*
 class_name: StakingERC20
