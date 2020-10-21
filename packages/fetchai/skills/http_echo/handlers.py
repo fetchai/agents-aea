@@ -23,9 +23,9 @@ import json
 from typing import cast
 
 from aea.protocols.base import Message
-from aea.protocols.default import DefaultMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.http_echo.dialogues import (
     DefaultDialogues,
@@ -100,7 +100,7 @@ class HttpHandler(Handler):
         """
         self.context.logger.info(
             "received http request with method={}, url={} and body={!r}".format(
-                http_msg.method, http_msg.url, http_msg.bodyy,
+                http_msg.method, http_msg.url, http_msg.body,
             )
         )
         if http_msg.method == "get":
@@ -123,7 +123,7 @@ class HttpHandler(Handler):
             status_code=200,
             status_text="Success",
             headers=http_msg.headers,
-            bodyy=json.dumps({"tom": {"type": "cat", "age": 10}}).encode("utf-8"),
+            body=json.dumps({"tom": {"type": "cat", "age": 10}}).encode("utf-8"),
         )
         self.context.logger.info("responding with: {}".format(http_response))
         self.context.outbox.put_message(message=http_response)
@@ -143,7 +143,7 @@ class HttpHandler(Handler):
             status_code=200,
             status_text="Success",
             headers=http_msg.headers,
-            bodyy=b"",
+            body=b"",
         )
         self.context.logger.info("responding with: {}".format(http_response))
         self.context.outbox.put_message(message=http_response)

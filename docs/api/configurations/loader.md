@@ -141,7 +141,7 @@ the configuration object.
  | validate(json_data: Dict) -> None
 ```
 
-Validate a JSON object.
+Validate a JSON object against the right JSON schema.
 
 **Arguments**:
 
@@ -212,6 +212,31 @@ Load agent configuration from configuration json data.
 **Returns**:
 
 AgentConfig instance
+
+<a name="aea.configurations.loader.ConfigLoader.validate_component_configuration"></a>
+#### validate`_`component`_`configuration
+
+```python
+ | @staticmethod
+ | validate_component_configuration(component_id: ComponentId, configuration: Dict) -> None
+```
+
+Validate the component configuration of an agent configuration file.
+
+This check is to detect inconsistencies in the specified fields.
+
+**Arguments**:
+
+- `component_id`: the component id.
+- `configuration`: the configuration dictionary.
+
+**Returns**:
+
+None
+
+**Raises**:
+
+- `ValueError`: if the configuration is not valid.
 
 <a name="aea.configurations.loader.ConfigLoaders"></a>
 ## ConfigLoaders Objects

@@ -395,6 +395,20 @@ Get the dialogue rules.
 
 the rules
 
+<a name="aea.protocols.dialogue.base.Dialogue.message_class"></a>
+#### message`_`class
+
+```python
+ | @property
+ | message_class() -> Type[Message]
+```
+
+Get the message class.
+
+**Returns**:
+
+the message class
+
 <a name="aea.protocols.dialogue.base.Dialogue.is_self_initiated"></a>
 #### is`_`self`_`initiated
 
@@ -469,7 +483,7 @@ True if empty, False otherwise
 #### reply
 
 ```python
- | reply(performative: Message.Performative, target_message: Optional[Message] = None, **kwargs, ,) -> Message
+ | reply(performative: Message.Performative, target_message: Optional[Message] = None, target: Optional[int] = None, **kwargs, ,) -> Message
 ```
 
 Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
@@ -479,6 +493,7 @@ Note if no target_message is provided, the last message in the dialogue will be 
 **Arguments**:
 
 - `target_message`: the message to reply to.
+- `target`: the id of the message to reply to.
 - `performative`: the performative of the reply message.
 - `kwargs`: the content of the reply message.
 
@@ -620,6 +635,34 @@ Get the dialogue statistics.
 
 dialogue stats object
 
+<a name="aea.protocols.dialogue.base.Dialogues.message_class"></a>
+#### message`_`class
+
+```python
+ | @property
+ | message_class() -> Type[Message]
+```
+
+Get the message class.
+
+**Returns**:
+
+the message class
+
+<a name="aea.protocols.dialogue.base.Dialogues.dialogue_class"></a>
+#### dialogue`_`class
+
+```python
+ | @property
+ | dialogue_class() -> Type[Dialogue]
+```
+
+Get the dialogue class.
+
+**Returns**:
+
+the dialogue class
+
 <a name="aea.protocols.dialogue.base.Dialogues.get_dialogues_with_counterparty"></a>
 #### get`_`dialogues`_`with`_`counterparty
 
@@ -641,7 +684,8 @@ The dialogues with the counterparty.
 #### new`_`self`_`initiated`_`dialogue`_`reference
 
 ```python
- | new_self_initiated_dialogue_reference() -> Tuple[str, str]
+ | @classmethod
+ | new_self_initiated_dialogue_reference(cls) -> Tuple[str, str]
 ```
 
 Return a dialogue label for a new self initiated dialogue.

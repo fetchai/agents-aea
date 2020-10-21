@@ -58,11 +58,14 @@ class AddContractCommandTestCase(TestCase):
 class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
     """Test case for add contract from Registry command."""
 
+    IS_LOCAL = False
+    IS_EMPTY = True
+
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_contract_from_remote_registry_positive(self):
         """Test add contract from Registry positive result."""
-        self.add_item("contract", "fetchai/erc1155:0.6.0", local=False)
+        self.add_item("contract", "fetchai/erc1155:0.10.0", local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         items_folders = os.listdir(items_path)

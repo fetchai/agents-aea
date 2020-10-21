@@ -63,7 +63,7 @@ class Connection(Component, ABC):
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize the connection.
@@ -105,6 +105,22 @@ class Connection(Component, ABC):
         """Raise exception if connection is not connected."""
         if not self.is_connected:
             raise ConnectionError("Connection is not connected! Connect first!")
+
+    @staticmethod
+    def _ensure_valid_envelope_for_external_comms(envelope: "Envelope") -> None:
+        """
+        Ensure the envelope sender and to are valid addresses for agent-to-agent communication.
+
+        :param envelope: the envelope
+        """
+        enforce(
+            not envelope.is_sender_public_id,
+            f"Sender field of envelope is public id, needs to be address. Found={envelope.sender}",
+        )
+        enforce(
+            not envelope.is_to_public_id,
+            f"To field of envelope is public id, needs to be address. Found={envelope.to}",
+        )
 
     @contextmanager
     def _connect_context(self) -> Generator:
@@ -218,7 +234,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
-        **kwargs
+        **kwargs,
     ) -> "Connection":
         """
         Load a connection from a configuration.
@@ -256,7 +272,7 @@ class Connection(Component, ABC):
             configuration=configuration,
             identity=identity,
             crypto_store=crypto_store,
-            **kwargs
+            **kwargs,
         )
 
     @property

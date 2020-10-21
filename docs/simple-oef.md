@@ -59,7 +59,7 @@ A genus is a coarse agent class. It is the roughest description of what an agent
 | `buyer`     | Indicates the agent is a buyer _only_ and does not have value to deliver |
 | `viewer` |The agent is a view in the world, acting as a "camera" to view content |
 
-The best way to use genus is to pick the *best fit* choice. If there isn't one for you, then do not specify it. If you feel that a high-level genus is missing, please make the suggestion in our Developer Slack (see <a href="https://community.fetch.ai" target="_blank">here</a> for the instructions on joining, or the "Further Information" section below). 
+The best way to use genus is to pick the *best fit* choice. If there isn't one for you, then do not specify it. If you feel that a high-level genus is missing, please make the suggestion in our Developer Slack (see <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY" target="_blank">here</a> for the instructions on joining, or the "Further Information" section below). 
 
 #### Architectures
 

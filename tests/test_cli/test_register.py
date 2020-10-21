@@ -50,24 +50,46 @@ class RegisterTestCase(TestCase):
                 "--email={}".format(email),
                 "--password={}".format(fake_pwd),
                 "--confirm_password={}".format(fake_pwd),
+                "--no-subscribe",
             ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
-        do_register_mock.assert_called_once_with(username, email, fake_pwd, fake_pwd)
+        do_register_mock.assert_called_once_with(
+            username, email, fake_pwd, fake_pwd, True
+        )
 
 
 @mock.patch("aea.cli.register.validate_author_name", lambda x: x)
 @mock.patch("aea.cli.register.register_new_account", return_value="token")
+@mock.patch("aea.cli.register.click.echo")
+@mock.patch("aea.cli.register.click.confirm", return_value=True)
 @mock.patch("aea.cli.register.update_cli_config")
 class DoRegisterTestCase(TestCase):
     """Test case for do_register method."""
 
-    def test_do_register_positive(self, update_cli_config_mock, *mocks):
+    def test_do_register_positive(
+        self, update_cli_config_mock, confirm_mock, echo_mock, *mocks
+    ):
         """Test for do_register method positive result."""
         username = "username"
         email = "email@example.com"
         fake_pwd = "fake_pwd"  # nosec
+        no_subscribe = False
 
-        do_register(username, email, fake_pwd, fake_pwd)
+        do_register(username, email, fake_pwd, fake_pwd, no_subscribe)
         update_cli_config_mock.assert_called_once_with({AUTH_TOKEN_KEY: "token"})
+        confirm_mock.assert_called_once()
+
+    def test_do_register_no_subscribe_true_positive(
+        self, update_cli_config_mock, confirm_mock, echo_mock, *mocks
+    ):
+        """Test for do_register method no_subscribe flag = True positive result."""
+        username = "username"
+        email = "email@example.com"
+        fake_pwd = "fake_pwd"  # nosec
+        no_subscribe = True
+
+        do_register(username, email, fake_pwd, fake_pwd, no_subscribe)
+        update_cli_config_mock.assert_called_once_with({AUTH_TOKEN_KEY: "token"})
+        confirm_mock.assert_not_called()

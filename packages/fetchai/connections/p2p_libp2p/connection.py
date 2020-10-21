@@ -26,8 +26,10 @@ import shutil
 import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
+from ipaddress import ip_address
 from pathlib import Path
 from random import randint
+from socket import gethostbyname
 from typing import IO, List, Optional, Sequence, cast
 
 from aea.common import Address
@@ -38,6 +40,7 @@ from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import AwaitableProc
+from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
 
@@ -61,11 +64,26 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.10.0")
-
-MultiAddr = str
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.12.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
+
+LIBP2P_SUCCESS_MESSAGE = "Peer running in "
+
+
+def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
+    if len(addrs) == 0:
+        return True
+
+    is_private = ip_address(gethostbyname(addrs[0])).is_private
+    is_loopback = ip_address(gethostbyname(addrs[0])).is_loopback
+
+    for addr in addrs:
+        if ip_address(gethostbyname(addr)).is_private != is_private:
+            return False  # pragma: nocover
+        if ip_address(gethostbyname(addr)).is_loopback != is_loopback:
+            return False
+    return True
 
 
 async def _golang_module_build_async(
@@ -197,6 +215,7 @@ class Libp2pNode:
         uri: Optional[Uri] = None,
         public_uri: Optional[Uri] = None,
         delegate_uri: Optional[Uri] = None,
+        monitoring_uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
@@ -212,6 +231,7 @@ class Libp2pNode:
         :param uri: libp2p node ip address and port number in format ipaddress:port.
         :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
         :param delegate_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
+        :param monitoring_uri: libp2 node monitoring ip address and port in fromat ipaddress:port
         :param entry_peers: libp2p entry peers multiaddresses.
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
@@ -232,6 +252,9 @@ class Libp2pNode:
 
         # node delegate uri, optional
         self.delegate_uri = delegate_uri
+
+        # node monitoring uri, optional
+        self.monitoring_uri = monitoring_uri
 
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
@@ -318,6 +341,9 @@ class Libp2pNode:
             self._config += "AEA_P2P_DELEGATE_URI={}\n".format(
                 str(self.delegate_uri) if self.delegate_uri is not None else ""
             )
+            self._config += "AEA_P2P_URI_MONITORING={}\n".format(
+                str(self.monitoring_uri) if self.monitoring_uri is not None else ""
+            )
             env_file.write(self._config)
 
         # run node
@@ -355,7 +381,7 @@ class Libp2pNode:
 
         self.logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
-        self.logger.info("My libp2p addresses: {}".format(self.multiaddrs))
+        self.describe_configuration()
 
     async def write(self, data: bytes) -> None:
         """
@@ -377,7 +403,25 @@ class Libp2pNode:
             raise ValueError("pipe is not set.")  # pragma: nocover
         return await self.pipe.read()
 
-    # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
+    def describe_configuration(self) -> None:
+        """Print a message discribing the libp2p node configuration"""
+        msg = LIBP2P_SUCCESS_MESSAGE
+
+        if self.public_uri is not None:
+            msg += "full DHT mode with "
+            if self.delegate_uri is not None:
+                msg += "delegate service reachable at '{}:{}' and relay service enabled. ".format(
+                    self.public_uri.host, self.delegate_uri.port
+                )
+            else:
+                msg += "relay service enabled. "
+
+            msg += "To join its network use multiaddr '{}'.".format(self.multiaddrs[0])
+        else:
+            msg += "relayed mode and cannot be used as entry peer."
+
+        self.logger.info(msg)
+
     def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
         """
         Get the node's multiaddresses.
@@ -401,8 +445,8 @@ class Libp2pNode:
                 continue
             if found:
                 elem = line.strip()
-                if elem != LIST_END:
-                    multiaddrs.append(MultiAddr(elem))
+                if elem != LIST_END and len(elem) != 0:
+                    multiaddrs.append(MultiAddr.from_string(elem))
                 else:
                     found = False
         return multiaddrs
@@ -483,6 +527,9 @@ class P2PLibp2pConnection(Connection):
         libp2p_delegate_uri = self.configuration.config.get(
             "delegate_uri"
         )  # Optional[str]
+        libp2p_monitoring_uri = self.configuration.config.get(
+            "monitoring_uri"
+        )  # Optional[str]
         libp2p_entry_peers = self.configuration.config.get("entry_peers")
         if libp2p_entry_peers is None:
             libp2p_entry_peers = []
@@ -512,22 +559,24 @@ class P2PLibp2pConnection(Connection):
         if libp2p_delegate_uri is not None:
             delegate_uri = Uri(libp2p_delegate_uri)
 
-        entry_peers = [MultiAddr(maddr) for maddr in libp2p_entry_peers]
-        # TOFIX(LR) Make sure that this node is reachable in the case where
-        #   fetchai's public dht nodes are used as entry peer and public
-        #   uri is provided.
-        #   Otherwise, it may impact the proper functioning of the dht
+        monitoring_uri = None
+        if libp2p_monitoring_uri is not None:
+            monitoring_uri = Uri(libp2p_monitoring_uri)
+
+        entry_peers = [
+            MultiAddr.from_string(str(maddr)) for maddr in libp2p_entry_peers
+        ]
 
         if public_uri is None:
             # node will be run as a ClientDHT
             # requires entry peers to use as relay
             if entry_peers is None or len(entry_peers) == 0:
                 raise ValueError(
-                    "At least one Entry Peer should be provided when node can not be publically reachable"
+                    "At least one Entry Peer should be provided when node is run in relayed mode"
                 )
             if delegate_uri is not None:  # pragma: no cover
                 self.logger.warning(
-                    "Ignoring Delegate Uri configuration as node can not be publically reachable"
+                    "Ignoring Delegate Uri configuration as node is run in relayed mode"
                 )
         else:
             # node will be run as a full NodeDHT
@@ -535,6 +584,14 @@ class P2PLibp2pConnection(Connection):
                 raise ValueError(
                     "Local Uri must be set when Public Uri is provided. "
                     "Hint: they are the same for local host/network deployment"
+                )
+            # check if node's public host and entry peers hosts are either
+            #  both private or both public
+            if not _ip_all_private_or_all_public(
+                [public_uri.host] + [maddr.host for maddr in entry_peers]
+            ):
+                raise ValueError(  # pragma: nocover
+                    "Node's public ip and entry peers ip addresses are not in the same ip address space (private/public)"
                 )
 
         # libp2p local node
@@ -551,6 +608,7 @@ class P2PLibp2pConnection(Connection):
             uri,
             public_uri,
             delegate_uri,
+            monitoring_uri,
             entry_peers,
             log_file,
             env_file,
@@ -648,6 +706,7 @@ class P2PLibp2pConnection(Connection):
 
         :return: None
         """
+        self._ensure_valid_envelope_for_external_comms(envelope)
         await self.node.write(envelope.encode())
 
     async def _receive_from_node(self) -> None:

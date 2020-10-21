@@ -26,7 +26,8 @@ from asyncio import CancelledError
 import pytest
 
 from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
+
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
     _make_tcp_client_connection,
@@ -65,7 +66,7 @@ async def test_connect_raises_exception():
 
 
 @pytest.mark.asyncio
-async def test_disconnect_when_already_disconnected(caplog):
+async def test_disconnect_when_already_disconnected():
     """Test that disconnecting a connection already disconnected works correctly."""
     port = get_unused_tcp_port()
     tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)

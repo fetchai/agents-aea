@@ -31,7 +31,7 @@ from aea.mail.base import Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
-PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.8.0")
+PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.10.0")
 
 
 class TCPConnection(Connection, ABC):
@@ -134,6 +134,7 @@ class TCPConnection(Connection, ABC):
         :param envelope: the envelope to send.
         :return: None.
         """
+        self._ensure_valid_envelope_for_external_comms(envelope)
         writer = self.select_writer_from_envelope(envelope)
         if writer is not None:
             data = envelope.encode()

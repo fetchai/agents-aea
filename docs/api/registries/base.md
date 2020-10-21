@@ -16,10 +16,14 @@ This class implements an abstract registry.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__(agent_name: str = "standalone")
 ```
 
 Initialize the registry.
+
+**Arguments**:
+
+- `agent_name`: the name of the agent
 
 <a name="aea.registries.base.Registry.register"></a>
 #### register
@@ -240,10 +244,14 @@ This class implements a simple dictionary-based registry for agent components.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 
@@ -359,7 +367,7 @@ None
 
 ```python
 class ComponentRegistry(
-    Registry[Tuple[SkillId, str], SkillComponentType],  Generic[SkillComponentType])
+    Registry[Tuple[PublicId, str], SkillComponentType],  Generic[SkillComponentType])
 ```
 
 This class implements a generic registry for skill components.
@@ -368,10 +376,14 @@ This class implements a generic registry for skill components.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 
@@ -381,7 +393,7 @@ None
 #### register
 
 ```python
- | register(item_id: Tuple[SkillId, str], item: SkillComponentType, is_dynamically_added: bool = False) -> None
+ | register(item_id: Tuple[PublicId, str], item: SkillComponentType, is_dynamically_added: bool = False) -> None
 ```
 
 Register a item.
@@ -401,7 +413,7 @@ None
 #### unregister
 
 ```python
- | unregister(item_id: Tuple[SkillId, str]) -> None
+ | unregister(item_id: Tuple[PublicId, str]) -> None
 ```
 
 Unregister a item.
@@ -419,7 +431,7 @@ None
 #### fetch
 
 ```python
- | fetch(item_id: Tuple[SkillId, str]) -> Optional[SkillComponentType]
+ | fetch(item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]
 ```
 
 Fetch an item.
@@ -436,7 +448,7 @@ the Item
 #### fetch`_`by`_`skill
 
 ```python
- | fetch_by_skill(skill_id: SkillId) -> List[SkillComponentType]
+ | fetch_by_skill(skill_id: PublicId) -> List[SkillComponentType]
 ```
 
 Fetch all the items of a given skill.
@@ -454,7 +466,7 @@ Fetch all the items.
 #### unregister`_`by`_`skill
 
 ```python
- | unregister_by_skill(skill_id: SkillId) -> None
+ | unregister_by_skill(skill_id: PublicId) -> None
 ```
 
 Unregister all the components by skill.
@@ -463,7 +475,7 @@ Unregister all the components by skill.
 #### ids
 
 ```python
- | ids() -> Set[Tuple[SkillId, str]]
+ | ids() -> Set[Tuple[PublicId, str]]
 ```
 
 Get the item ids.
@@ -507,10 +519,14 @@ This class implements the handlers registry.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(**kwargs) -> None
 ```
 
 Instantiate the registry.
+
+**Arguments**:
+
+- `kwargs`: kwargs
 
 **Returns**:
 
@@ -520,7 +536,7 @@ None
 #### register
 
 ```python
- | register(item_id: Tuple[SkillId, str], item: Handler, is_dynamically_added: bool = False) -> None
+ | register(item_id: Tuple[PublicId, str], item: Handler, is_dynamically_added: bool = False) -> None
 ```
 
 Register a handler.
@@ -543,7 +559,7 @@ None
 #### unregister
 
 ```python
- | unregister(item_id: Tuple[SkillId, str]) -> None
+ | unregister(item_id: Tuple[PublicId, str]) -> None
 ```
 
 Unregister a item.
@@ -561,7 +577,7 @@ None
 #### unregister`_`by`_`skill
 
 ```python
- | unregister_by_skill(skill_id: SkillId) -> None
+ | unregister_by_skill(skill_id: PublicId) -> None
 ```
 
 Unregister all the components by skill.
@@ -570,7 +586,7 @@ Unregister all the components by skill.
 #### fetch`_`by`_`protocol
 
 ```python
- | fetch_by_protocol(protocol_id: ProtocolId) -> List[Handler]
+ | fetch_by_protocol(protocol_id: PublicId) -> List[Handler]
 ```
 
 Fetch the handler by the pair protocol id and skill id.
@@ -587,7 +603,7 @@ the handlers registered for the protocol_id and skill_id
 #### fetch`_`by`_`protocol`_`and`_`skill
 
 ```python
- | fetch_by_protocol_and_skill(protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]
+ | fetch_by_protocol_and_skill(protocol_id: PublicId, skill_id: PublicId) -> Optional[Handler]
 ```
 
 Fetch the handler by the pair protocol id and skill id.

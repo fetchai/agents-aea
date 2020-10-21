@@ -24,7 +24,6 @@ import os
 import sys
 from typing import cast
 
-from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.fetchai import FetchAICrypto
@@ -78,8 +77,8 @@ def run():
 
     # specify the default routing for some protocols
     default_routing = {
-        PublicId.from_str("fetchai/ledger_api:0.4.0"): LedgerConnection.connection_id,
-        PublicId.from_str("fetchai/oef_search:0.7.0"): SOEFConnection.connection_id,
+        PublicId.from_str("fetchai/ledger_api:0.6.0"): LedgerConnection.connection_id,
+        PublicId.from_str("fetchai/oef_search:0.9.0"): SOEFConnection.connection_id,
     }
     default_connection = P2PLibp2pConnection.connection_id
 
@@ -93,11 +92,15 @@ def run():
     )
 
     # Add the default protocol (which is part of the AEA distribution)
-    default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
+    default_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "default")
+    )
     resources.add_protocol(default_protocol)
 
     # Add the signing protocol (which is part of the AEA distribution)
-    signing_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "signing"))
+    signing_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "signing")
+    )
     resources.add_protocol(signing_protocol)
 
     # Add the ledger_api protocol
@@ -146,7 +149,7 @@ def run():
         api_key=API_KEY,
         soef_addr=SOEF_ADDR,
         soef_port=SOEF_PORT,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.7.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.9.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity)
@@ -154,7 +157,8 @@ def run():
 
     # Add the error and weather_client skills
     error_skill = Skill.from_dir(
-        os.path.join(AEA_DIR, "skills", "error"), agent_context=my_aea.context
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "error"),
+        agent_context=my_aea.context,
     )
     weather_skill = Skill.from_dir(
         os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client"),

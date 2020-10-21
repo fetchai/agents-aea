@@ -22,6 +22,7 @@ package dhtpeer
 
 import (
 	"bufio"
+	"flag"
 	"net"
 	"os"
 	"testing"
@@ -36,13 +37,18 @@ import (
 * How to run
 * ***********
 
-	$ go test -p 1 -count 20 libp2p_node/dht/dhtpeer/ -run=XXX  -bench .  -benchtime=20x
+	$ go test -p 1 -count 20 libp2p_node/dht/dhtpeer/ -run=XXX  -bench .  -benchtime=20x -keys-file=/path/to/file/benchmark_keys.txt -addrs-file=/path/to/file/benchmark_addrs.txt
 
 */
 
-var keysFilePath = "/home/lokman/dev/aea/agents-aea/benchmark_keys.txt"
-var addrsFilePath = "/home/lokman/dev/aea/agents-aea/benchmark_addrs.txt"
+var keysFilePath string
+var addrsFilePath string
 var tcpUri = "localhost:12345"
+
+func init() {
+	flag.StringVar(&keysFilePath, "keys-file", "", "File with list of EC private keys")
+	flag.StringVar(&addrsFilePath, "addrs-file", "", "File with list of agents addresses")
+}
 
 /* **********************************
  * baseline TCP connection benchmark

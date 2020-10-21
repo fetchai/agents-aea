@@ -54,6 +54,11 @@ logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
 
+def isort_is_not_installed_side_effect(*args, **kwargs):
+    """Isort not installed."""
+    return not args[0] == "isort"
+
+
 def black_is_not_installed_side_effect(*args, **kwargs):
     """Black not installed."""
     return not args[0] == "black"
@@ -363,6 +368,17 @@ class TestCommon(TestCase):
 
     @mock.patch(
         "aea.protocols.generator.common.is_installed",
+        side_effect=isort_is_not_installed_side_effect,
+    )
+    def test_check_prerequisites_negative_isort_is_not_installed(
+        self, mocked_is_installed
+    ):
+        """Negative test for the 'check_prerequisites' method: isort isn't installed"""
+        with self.assertRaises(FileNotFoundError):
+            check_prerequisites()
+
+    @mock.patch(
+        "aea.protocols.generator.common.is_installed",
         side_effect=protoc_is_not_installed_side_effect,
     )
     def test_check_prerequisites_negative_protoc_is_not_installed(
@@ -379,7 +395,7 @@ class TestCommon(TestCase):
         assert spec.version == "0.1.0"
         assert spec.author == "fetchai"
         assert spec.license == "Apache-2.0"
-        assert spec.aea_version == ">=0.6.0, <0.7.0"
+        assert spec.aea_version == ">=0.7.0, <0.8.0"
         assert spec.description == "A protocol for testing purposes."
         assert spec.speech_acts is not None
         assert spec.protobuf_snippets is not None and spec.protobuf_snippets != ""

@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.10.0
+aea fetch fetchai/generic_seller:0.12.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.13.0
+aea eject skill fetchai/generic_seller:0.15.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.10.0
+aea fetch fetchai/generic_buyer:0.12.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.12.0
+aea eject skill fetchai/generic_buyer:0.14.0
 cd ..
 ```
 
@@ -105,7 +105,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
@@ -292,13 +292,13 @@ Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a
 ``` python
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -314,13 +314,13 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class GenericFipaHandler(Handler):
     """This class implements a FIPA handler."""
 
-    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -590,7 +590,7 @@ The remaining handlers are as follows:
 class GenericLedgerApiHandler(Handler):
     """Implement the ledger handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -744,7 +744,7 @@ class GenericLedgerApiHandler(Handler):
 class GenericOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -892,7 +892,7 @@ class GenericStrategy(Model):
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
             "location": Location(
-                longitude=location["longitude"], latitude=location["latitude"]
+                latitude=location["latitude"], longitude=location["longitude"]
             )
         }
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
@@ -920,7 +920,7 @@ class GenericStrategy(Model):
         )
 
         if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()
+            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
         else:
             self._data_for_sale = data_for_sale
         self._sale_quantity = len(data_for_sale)
@@ -1013,7 +1013,7 @@ The following properties and methods deal with different aspects of the strategy
                 client=counterparty_address,
             )
         else:
-            tx_nonce = uuid.uuid4().hex
+            tx_nonce = uuid.uuid4().hex  # pragma: nocover
         proposal = Description(
             {
                 "ledger_id": self.ledger_id,
@@ -1054,12 +1054,16 @@ from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
-from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
-from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue as BaseDefaultDialogue,
+)
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogues as BaseDefaultDialogues,
+)
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -1304,7 +1308,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmcFahpL4DZ1rsTNEK1BT3e5T8TEJJg2hP4ytkzdqKuJnZ
@@ -1314,10 +1318,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/ledger_api:0.4.0
-- fetchai/oef_search:0.7.0
+- fetchai/default:0.8.0
+- fetchai/fipa:0.9.0
+- fetchai/ledger_api:0.6.0
+- fetchai/oef_search:0.9.0
 skills: []
 behaviours:
   service_registration:
@@ -1424,7 +1428,7 @@ from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
 DEFAULT_SEARCH_INTERVAL = 5.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class GenericSearchBehaviour(TickerBehaviour):
@@ -1494,15 +1498,15 @@ Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a
 import pprint
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -1517,13 +1521,13 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.6.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class GenericFipaHandler(Handler):
     """This class implements a FIPA handler."""
 
-    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """
@@ -1686,7 +1690,9 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
         if strategy.is_ledger_tx:
             transfer_address = fipa_msg.info.get("address", None)
             if transfer_address is not None and isinstance(transfer_address, str):
-                fipa_dialogue.terms.counterparty_address = transfer_address
+                fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
+                    transfer_address
+                )
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
@@ -1774,7 +1780,7 @@ To handle the messages in the `oef_search` protocol used by the <a href="../simp
 class GenericOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -1905,7 +1911,7 @@ The last handlers we need are the `GenericSigningHandler` and the `GenericLedger
 class GenericSigningHandler(Handler):
     """Implement the signing handler."""
 
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -2017,7 +2023,7 @@ class GenericSigningHandler(Handler):
 class GenericLedgerApiHandler(Handler):
     """Implement the ledger handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -2247,7 +2253,7 @@ class GenericStrategy(Model):
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = Location(
-            longitude=location["longitude"], latitude=location["latitude"]
+            latitude=location["latitude"], longitude=location["longitude"]
         )
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
@@ -2423,15 +2429,16 @@ from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
-from aea.protocols.default.dialogues import DefaultDialogue as BaseDefaultDialogue
-from aea.protocols.default.dialogues import DefaultDialogues as BaseDefaultDialogues
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
-from aea.protocols.signing.dialogues import SigningDialogue as BaseSigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue as BaseDefaultDialogue,
+)
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogues as BaseDefaultDialogues,
+)
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -2448,6 +2455,13 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogue as BaseSigningDialogue,
+)
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogues as BaseSigningDialogues,
+)
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 
 DefaultDialogue = BaseDefaultDialogue
@@ -2766,7 +2780,7 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmUBQvZkoCcik71vqRZGP4JJBgFP2kj8o7C24dfkAphitP
@@ -2776,11 +2790,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.6.0
-- fetchai/fipa:0.7.0
-- fetchai/ledger_api:0.4.0
-- fetchai/oef_search:0.7.0
-- fetchai/signing:0.4.0
+- fetchai/default:0.8.0
+- fetchai/fipa:0.9.0
+- fetchai/ledger_api:0.6.0
+- fetchai/oef_search:0.9.0
+- fetchai/signing:0.6.0
 skills: []
 behaviours:
   search:
@@ -2881,8 +2895,8 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.4.0: fetchai/ledger:0.6.0
-  fetchai/oef_search:0.7.0: fetchai/soef:0.9.0
+  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 
 ### Fund the buyer AEA
@@ -2898,12 +2912,12 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/ledger:0.6.0
-aea add protocol fetchai/fipa:0.7.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add protocol fetchai/fipa:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea run
 ```
 
@@ -2914,13 +2928,13 @@ Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take 
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.10.0
-aea add connection fetchai/soef:0.9.0
-aea add connection fetchai/ledger:0.6.0
-aea add protocol fetchai/fipa:0.7.0
-aea add protocol fetchai/signing:0.4.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add protocol fetchai/fipa:0.9.0
+aea add protocol fetchai/signing:0.6.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.10.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 
 Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:

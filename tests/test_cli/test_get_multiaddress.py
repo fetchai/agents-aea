@@ -69,17 +69,17 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
-            "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
+        self.nested_set_config(
+            "vendor.fetchai.connections.stub.config",
+            {"host": "127.0.0.1", "port": 10000},
         )
-        self.force_set_config("vendor.fetchai.connections.stub.config.port", 10000)
 
         result = self.run_cli_command(
             "get-multiaddress",
             FETCHAI,
             "--connection",
             "--connection-id",
-            "fetchai/stub:0.10.0",
+            "fetchai/stub:0.12.0",
             "--host-field",
             "host",
             "--port-field",
@@ -103,8 +103,8 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
-            "vendor.fetchai.connections.stub.config.public_uri", "127.0.0.1:10000"
+        self.nested_set_config(
+            "vendor.fetchai.connections.stub.config", {"public_uri": "127.0.0.1:10000"}
         )
 
         result = self.run_cli_command(
@@ -112,7 +112,7 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
             FETCHAI,
             "--connection",
             "--connection-id",
-            "fetchai/stub:0.10.0",
+            "fetchai/stub:0.12.0",
             "--uri-field",
             "public_uri",
             cwd=self.current_agent_context,
@@ -188,14 +188,14 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
         # this will cause exception because no host configuration is in stub connection by default.
         with pytest.raises(
             Exception,
-            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.10.0",
+            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.12.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.10.0",
+                "fetchai/stub:0.12.0",
                 "--host-field",
                 "some_host",
                 "--port-field",
@@ -212,21 +212,21 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
-            "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
+        self.nested_set_config(
+            "vendor.fetchai.connections.stub.config", {"host": "127.0.0.1"}
         )
 
         # this will cause exception because no port configuration is in stub connection by default.
         with pytest.raises(
             Exception,
-            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.10.0",
+            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.12.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.10.0",
+                "fetchai/stub:0.12.0",
                 "--host-field",
                 "host",
                 "--port-field",
@@ -271,10 +271,10 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
-            "vendor.fetchai.connections.stub.config.host", "127.0.0.1"
+        self.nested_set_config(
+            "vendor.fetchai.connections.stub.config",
+            {"host": "127.0.0.1", "port": 10000},
         )
-        self.force_set_config("vendor.fetchai.connections.stub.config.port", 10000)
 
         # this will cause exception due to the mocking.
         with pytest.raises(
@@ -286,7 +286,7 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.10.0",
+                "fetchai/stub:0.12.0",
                 "--host-field",
                 "host",
                 "--port-field",
@@ -313,7 +313,7 @@ class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.10.0",
+                "fetchai/stub:0.12.0",
                 "--host-field",
                 "some_host",
                 cwd=self.current_agent_context,
@@ -331,14 +331,14 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
         # this will cause exception because only the host, and not the port, are specified.
         with pytest.raises(
             Exception,
-            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.10.0",
+            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.12.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.10.0",
+                "fetchai/stub:0.12.0",
                 "--uri-field",
                 "some_uri",
                 cwd=self.current_agent_context,
@@ -353,8 +353,9 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
-        self.force_set_config(
-            "vendor.fetchai.connections.stub.config.some_uri", "some-unparsable_URI"
+        self.nested_set_config(
+            "vendor.fetchai.connections.stub.config",
+            {"some_uri": "some-unparsable_URI"},
         )
 
         # this will cause exception because only the host, and not the port, are specified.
@@ -367,7 +368,7 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.10.0",
+                "fetchai/stub:0.12.0",
                 "--uri-field",
                 "some_uri",
                 cwd=self.current_agent_context,

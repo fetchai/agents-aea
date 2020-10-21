@@ -1,5 +1,9 @@
 This page provides some tipps of how to upgrade between versions.
 
+## v0.6.2 to v0.6.3
+
+A new `upgrade` command is introduced to upgrade agent projects and components to their latest versions on the registry. To use the command first upgrade the AEA PyPI package to the latest version, then enter your project and run `aea upgrade`. The project's vendor dependencies will be updated where possible.
+
 ## v0.6.1 to v0.6.2
 
 No public APIs have been changed.

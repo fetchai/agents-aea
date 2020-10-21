@@ -29,12 +29,13 @@ import aea
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel, DialogueMessage, DialogueStats
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 from aea.protocols.dialogue.base import InvalidDialogueMessage
-from aea.protocols.state_update.message import StateUpdateMessage
+
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
 
 class Dialogue(BaseDialogue):
@@ -1312,7 +1313,10 @@ class TestDialoguesBase:
 
         with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(invalid_message_1_by_other)
-        assert str(cm.value) == "Message to and dialogue self address do not match."
+        assert (
+            str(cm.value)
+            == "Message to and dialogue self address do not match. Got 'to=agent 1wrong_stuff' expected 'to=agent 1'."
+        )
 
         assert len(self.own_dialogues.dialogues) == 0
 

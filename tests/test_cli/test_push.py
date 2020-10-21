@@ -17,13 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 """Test module for Registry push methods."""
-
+import filecmp
 from unittest import TestCase, mock
 
+import pytest
 from click import ClickException
 
 from aea.cli import cli
 from aea.cli.push import _check_package_public_id, _save_item_locally
+from aea.cli.utils.constants import ITEM_TYPES
+from aea.configurations.base import PublicId
+from aea.test_tools.constants import DEFAULT_AUTHOR
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
@@ -73,18 +78,14 @@ class CheckPackagePublicIdTestCase(TestCase):
     def test__check_package_public_id_positive(self, *mocks):
         """Test for _check_package_public_id positive result."""
         _check_package_public_id(
-            "source-path",
-            "item-type",
-            PublicIdMock.from_str("{}/name:0.1.0".format(AUTHOR)),
+            "source-path", "item-type", PublicId.from_str(f"{AUTHOR}/name:0.1.0"),
         )
 
     def test__check_package_public_id_negative(self, *mocks):
         """Test for _check_package_public_id negative result."""
         with self.assertRaises(ClickException):
             _check_package_public_id(
-                "source-path",
-                "item-type",
-                PublicIdMock.from_str("{}/name:0.1.1".format(AUTHOR)),
+                "source-path", "item-type", PublicId.from_str(f"{AUTHOR}/name:0.1.1"),
             )
 
 
@@ -207,3 +208,32 @@ class PushContractCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+
+class TestPushLocallyWithLatest(AEATestCaseEmpty):
+    """Test push locally with 'latest' as version."""
+
+    @pytest.mark.parametrize("component_type", ITEM_TYPES)
+    def test_command(self, component_type):
+        """Run the test."""
+        item_name = f"my_{component_type}"
+        version = ":latest"
+        self.scaffold_item(component_type, item_name)
+        self.run_cli_command(
+            "push",
+            "--local",
+            component_type,
+            f"{self.author}/{item_name}{version}",
+            cwd=self._get_cwd(),
+        )
+
+        component_type_plural = component_type + "s"
+        path_to_pushed_package = (
+            self.packages_dir_path / DEFAULT_AUTHOR / component_type_plural / item_name
+        )
+        path_to_current_package = (
+            self.t / self.agent_name / component_type_plural / item_name
+        )
+        assert path_to_pushed_package.exists()
+        comparison = filecmp.dircmp(path_to_pushed_package, path_to_current_package)
+        assert comparison.diff_files == []

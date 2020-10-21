@@ -27,10 +27,12 @@ from typing import List
 from aea.agent import Agent
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.connections.stub.connection import StubConnection, write_with_lock
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
+
+from packages.fetchai.connections.stub.connection import StubConnection
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 INPUT_FILE = "input_file"
@@ -112,9 +114,8 @@ def run():
         time.sleep(3)
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = (
-            b"my_agent,other_agent,fetchai/default:0.6.0,\x08\x01*\x07\n\x05hello,"
-        )
+        message_text = b"my_agent,other_agent,fetchai/default:0.8.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
 

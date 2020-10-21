@@ -19,25 +19,17 @@
 
 """This module contains a class to manage transactions."""
 
-import copy
 import datetime
 from collections import defaultdict, deque
 from typing import Deque, Dict, List, Tuple, cast
 
-from aea.common import Address
 from aea.decision_maker.default import OwnershipState
 from aea.exceptions import enforce
-from aea.helpers.search.models import Description
-from aea.helpers.transaction.base import RawMessage, Terms
+from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueLabel
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Model
 
-from packages.fetchai.skills.tac_negotiation.dialogues import (
-    FipaDialogue,
-    SigningDialogue,
-    SigningDialogues,
-)
+from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 
 
 MessageId = int
@@ -54,14 +46,14 @@ class Transactions(Model):
         super().__init__(**kwargs)
         self._pending_proposals = defaultdict(
             lambda: {}
-        )  # type: Dict[DialogueLabel, Dict[MessageId, SigningMessage]]
+        )  # type: Dict[DialogueLabel, Dict[MessageId, Terms]]
         self._pending_initial_acceptances = defaultdict(
             lambda: {}
-        )  # type: Dict[DialogueLabel, Dict[MessageId, SigningMessage]]
+        )  # type: Dict[DialogueLabel, Dict[MessageId, Terms]]
 
-        self._locked_txs = {}  # type: Dict[str, SigningMessage]
-        self._locked_txs_as_buyer = {}  # type: Dict[str, SigningMessage]
-        self._locked_txs_as_seller = {}  # type: Dict[str, SigningMessage]
+        self._locked_txs = {}  # type: Dict[str, Terms]
+        self._locked_txs_as_buyer = {}  # type: Dict[str, Terms]
+        self._locked_txs_as_seller = {}  # type: Dict[str, Terms]
 
         self._last_update_for_transactions = (
             deque()
@@ -69,16 +61,14 @@ class Transactions(Model):
         self._nonce = 0
 
     @property
-    def pending_proposals(
-        self,
-    ) -> Dict[DialogueLabel, Dict[MessageId, SigningMessage]]:
+    def pending_proposals(self,) -> Dict[DialogueLabel, Dict[MessageId, Terms]]:
         """Get the pending proposals."""
         return self._pending_proposals
 
     @property
     def pending_initial_acceptances(
         self,
-    ) -> Dict[DialogueLabel, Dict[MessageId, SigningMessage]]:
+    ) -> Dict[DialogueLabel, Dict[MessageId, Terms]]:
         """Get the pending initial acceptances."""
         return self._pending_initial_acceptances
 
@@ -86,68 +76,6 @@ class Transactions(Model):
         """Get the next nonce."""
         self._nonce += 1
         return str(self._nonce)
-
-    def generate_signing_message(
-        self,
-        performative: SigningMessage.Performative,
-        proposal_description: Description,
-        fipa_dialogue: FipaDialogue,
-        role: FipaDialogue.Role,
-        agent_addr: Address,
-    ) -> SigningMessage:
-        """
-        Generate the transaction message from the description and the dialogue.
-
-        :param proposal_description: the description of the proposal
-        :param fipa_dialogue: the fipa dialogue
-        :param role: the role of the agent (seller or buyer)
-        :param agent_addr: the address of the agent
-        :return: a transaction message
-        """
-        is_seller = role == FipaDialogue.Role.SELLER
-
-        goods_component = copy.copy(proposal_description.values)
-        [  # pylint: disable=expression-not-assigned
-            goods_component.pop(key)
-            for key in ["fee", "price", "currency_id", "nonce", "ledger_id"]
-        ]
-        # switch signs based on whether seller or buyer role
-        amount = (
-            proposal_description.values["price"]
-            if is_seller
-            else -proposal_description.values["price"]
-        )
-        fee = proposal_description.values["fee"]
-        if is_seller:
-            for good_id in goods_component.keys():
-                goods_component[good_id] = goods_component[good_id] * (-1)
-        amount_by_currency_id = {proposal_description.values["currency_id"]: amount}
-        fee_by_currency_id = {proposal_description.values["currency_id"]: fee}
-        nonce = proposal_description.values["nonce"]
-        ledger_id = proposal_description.values["ledger_id"]
-        terms = Terms(
-            ledger_id=ledger_id,
-            sender_address=agent_addr,
-            counterparty_address=fipa_dialogue.dialogue_label.dialogue_opponent_addr,
-            amount_by_currency_id=amount_by_currency_id,
-            is_sender_payable_tx_fee=not is_seller,
-            quantities_by_good_id=goods_component,
-            nonce=nonce,
-            fee_by_currency_id=fee_by_currency_id,
-        )
-        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        raw_message = RawMessage(
-            ledger_id=ledger_id, body=terms.sender_hash.encode("utf-8")
-        )
-        signing_msg, signing_dialogue = signing_dialogues.create(
-            counterparty=self.context.decision_maker_address,
-            performative=performative,
-            terms=terms,
-            raw_message=raw_message,
-        )
-        signing_dialogue = cast(SigningDialogue, signing_dialogue)
-        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
-        return cast(SigningMessage, signing_msg)
 
     def update_confirmed_transactions(self) -> None:
         """
@@ -200,17 +128,14 @@ class Transactions(Model):
             next_date, next_item = queue[0]
 
     def add_pending_proposal(
-        self,
-        dialogue_label: DialogueLabel,
-        proposal_id: int,
-        signing_msg: SigningMessage,
+        self, dialogue_label: DialogueLabel, proposal_id: int, terms: Terms,
     ) -> None:
         """
         Add a proposal (in the form of a transaction) to the pending list.
 
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
-        :param signing_msg: the transaction message
+        :param terms: the terms
         :raise AEAEnforceError: if the pending proposal is already present.
 
         :return: None
@@ -220,11 +145,11 @@ class Transactions(Model):
             and proposal_id not in self._pending_proposals[dialogue_label],
             "Proposal is already in the list of pending proposals.",
         )
-        self._pending_proposals[dialogue_label][proposal_id] = signing_msg
+        self._pending_proposals[dialogue_label][proposal_id] = terms
 
     def pop_pending_proposal(
         self, dialogue_label: DialogueLabel, proposal_id: int
-    ) -> SigningMessage:
+    ) -> Terms:
         """
         Remove a proposal (in the form of a transaction) from the pending list.
 
@@ -239,21 +164,18 @@ class Transactions(Model):
             and proposal_id in self._pending_proposals[dialogue_label],
             "Cannot find the proposal in the list of pending proposals.",
         )
-        signing_msg = self._pending_proposals[dialogue_label].pop(proposal_id)
-        return signing_msg
+        terms = self._pending_proposals[dialogue_label].pop(proposal_id)
+        return terms
 
     def add_pending_initial_acceptance(
-        self,
-        dialogue_label: DialogueLabel,
-        proposal_id: int,
-        signing_msg: SigningMessage,
+        self, dialogue_label: DialogueLabel, proposal_id: int, terms: Terms,
     ) -> None:
         """
         Add an acceptance (in the form of a transaction) to the pending list.
 
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
-        :param signing_msg: the transaction message
+        :param terms: the terms
         :raise AEAEnforceError: if the pending acceptance is already present.
 
         :return: None
@@ -263,11 +185,11 @@ class Transactions(Model):
             and proposal_id not in self._pending_initial_acceptances[dialogue_label],
             "Initial acceptance is already in the list of pending initial acceptances.",
         )
-        self._pending_initial_acceptances[dialogue_label][proposal_id] = signing_msg
+        self._pending_initial_acceptances[dialogue_label][proposal_id] = terms
 
     def pop_pending_initial_acceptance(
         self, dialogue_label: DialogueLabel, proposal_id: int
-    ) -> SigningMessage:
+    ) -> Terms:
         """
         Remove an acceptance (in the form of a transaction) from the pending list.
 
@@ -282,8 +204,8 @@ class Transactions(Model):
             and proposal_id in self._pending_initial_acceptances[dialogue_label],
             "Cannot find the initial acceptance in the list of pending initial acceptances.",
         )
-        signing_msg = self._pending_initial_acceptances[dialogue_label].pop(proposal_id)
-        return signing_msg
+        terms = self._pending_initial_acceptances[dialogue_label].pop(proposal_id)
+        return terms
 
     def _register_transaction_with_time(self, transaction_id: str) -> None:
         """
@@ -296,13 +218,11 @@ class Transactions(Model):
         now = datetime.datetime.now()
         self._last_update_for_transactions.append((now, transaction_id))
 
-    def add_locked_tx(
-        self, signing_msg: SigningMessage, role: FipaDialogue.Role
-    ) -> None:
+    def add_locked_tx(self, terms: Terms, role: FipaDialogue.Role) -> None:
         """
         Add a lock (in the form of a transaction).
 
-        :param signing_msg: the transaction message
+        :param terms: the terms
         :param role: the role of the agent (seller or buyer)
         :raise AEAEnforceError: if the transaction is already present.
 
@@ -310,36 +230,36 @@ class Transactions(Model):
         """
         as_seller = role == FipaDialogue.Role.SELLER
 
-        transaction_id = signing_msg.terms.id
+        transaction_id = terms.id
         enforce(
             transaction_id not in self._locked_txs,
             "This transaction is already a locked transaction.",
         )
         self._register_transaction_with_time(transaction_id)
-        self._locked_txs[transaction_id] = signing_msg
+        self._locked_txs[transaction_id] = terms
         if as_seller:
-            self._locked_txs_as_seller[transaction_id] = signing_msg
+            self._locked_txs_as_seller[transaction_id] = terms
         else:
-            self._locked_txs_as_buyer[transaction_id] = signing_msg
+            self._locked_txs_as_buyer[transaction_id] = terms
 
-    def pop_locked_tx(self, signing_msg: SigningMessage) -> SigningMessage:
+    def pop_locked_tx(self, terms: Terms) -> Terms:
         """
         Remove a lock (in the form of a transaction).
 
-        :param signing_msg: the transaction message
+        :param terms: the terms
         :raise AEAEnforceError: if the transaction with the given transaction id has not been found.
 
         :return: the transaction
         """
-        transaction_id = signing_msg.terms.id
+        transaction_id = terms.id
         enforce(
             transaction_id in self._locked_txs,
             "Cannot find this transaction in the list of locked transactions.",
         )
-        signing_msg = self._locked_txs.pop(transaction_id)
+        terms = self._locked_txs.pop(transaction_id)
         self._locked_txs_as_buyer.pop(transaction_id, None)
         self._locked_txs_as_seller.pop(transaction_id, None)
-        return signing_msg
+        return terms
 
     def ownership_state_after_locks(self, is_seller: bool) -> OwnershipState:
         """
@@ -351,14 +271,13 @@ class Transactions(Model):
 
         :return: the agent state with the locks applied to current state
         """
-        signing_msgs = (
+        all_terms = (
             list(self._locked_txs_as_seller.values())
             if is_seller
             else list(self._locked_txs_as_buyer.values())
         )
-        terms = [signing_msg.terms for signing_msg in signing_msgs]
         ownership_state = cast(
             OwnershipState, self.context.decision_maker_handler_context.ownership_state
         )
-        ownership_state_after_locks = ownership_state.apply_transactions(terms)
+        ownership_state_after_locks = ownership_state.apply_transactions(all_terms)
         return ownership_state_after_locks

@@ -21,6 +21,7 @@
 import asyncio
 import copy
 import logging
+import re
 import urllib
 from asyncio import CancelledError
 from concurrent.futures._base import CancelledError as ConcurrentCancelledError
@@ -65,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.9.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.11.0")
 
 NOT_SPECIFIED = object()
 
@@ -202,12 +203,11 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 class SOEFChannel:
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    DEFAULT_CHAIN_IDENTIFIER = "fetchai_cosmos"
+    DEFAULT_CHAIN_IDENTIFIER = "fetchai_v2_testnet_stable"
 
     SUPPORTED_CHAIN_IDENTIFIERS = [
-        "fetchai",
-        "fetchai_cosmos",
-        "ethereum",
+        re.compile("ethereum"),
+        re.compile("^fetchai(_[a-z0-9_]*)?$"),
     ]
 
     DEFAULT_PERSONALITY_PIECES = ["architecture,agentframework"]
@@ -237,12 +237,11 @@ class SOEFChannel:
         :param restricted_to_protocols: the protocol ids restricted to
         :param chain_identifier: supported chain id
         """
-        if (
-            chain_identifier is not None
-            and chain_identifier not in self.SUPPORTED_CHAIN_IDENTIFIERS
+        if chain_identifier is not None and not any(
+            regex.match(chain_identifier) for regex in self.SUPPORTED_CHAIN_IDENTIFIERS
         ):
             raise ValueError(
-                f"Unsupported chain_identifier. Valida are {', '.join(self.SUPPORTED_CHAIN_IDENTIFIERS)}"
+                f"Unsupported chain_identifier. Valid identifier regular expressions are {', '.join([reg.pattern for reg in self.SUPPORTED_CHAIN_IDENTIFIERS])}"
             )
 
         self.address = address
@@ -1115,7 +1114,7 @@ class SOEFConnection(Connection):
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
             kwargs["restricted_to_protocols"] = kwargs.get("excluded_protocols") or [
-                PublicId.from_str("fetchai/oef_search:0.7.0")
+                OefSearchMessage.protocol_id
             ]
 
         super().__init__(**kwargs)

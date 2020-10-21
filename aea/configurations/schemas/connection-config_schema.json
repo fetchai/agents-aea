@@ -7,6 +7,7 @@
     "name",
     "author",
     "version",
+    "type",
     "license",
     "aea_version",
     "class_name",
@@ -24,7 +25,7 @@
       "$ref": "definitions.json#/definitions/package_version"
     },
     "type": {
-      "$ref": "definitions.json#/definitions/component_type"
+      "enum": ["connection"]
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"
@@ -42,6 +43,14 @@
       "type": "string"
     },
     "protocols": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
+    },
+    "connections": {
       "type": "array",
       "additionalProperties": false,
       "uniqueItems": true,
@@ -71,6 +80,9 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "is_abstract": {
+      "$ref": "skill-config_schema.json#/properties/is_abstract"
     }
   }
 }

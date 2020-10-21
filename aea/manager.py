@@ -132,13 +132,16 @@ class MultiAgentManager:
     MODES = ["async", "threaded"]
     DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
 
-    def __init__(self, working_dir: str, mode: str = "async") -> None:
+    def __init__(
+        self, working_dir: str, mode: str = "async", registry_path: str = "packages"
+    ) -> None:
         """
         Initialize manager.
 
         :param working_dir: directory to store base agents.
         """
         self.working_dir = working_dir
+        self.registry_path = registry_path
         self._was_working_dir_created = False
         self._is_running = False
         self._projects: Dict[PublicId, Project] = {}
@@ -263,11 +266,20 @@ class MultiAgentManager:
         if self._was_working_dir_created and os.path.exists(self.working_dir):
             rmtree(self.working_dir)
 
-    def add_project(self, public_id: PublicId) -> "MultiAgentManager":
-        """Fetch agent project and all dependencies to working_dir."""
+    def add_project(
+        self, public_id: PublicId, local: bool = True
+    ) -> "MultiAgentManager":
+        """
+        Fetch agent project and all dependencies to working_dir.
+
+        :param public_id: the public if of the agent project.
+        :param local: whether or not to fetch from local registry.
+        """
         if public_id in self._projects:
             raise ValueError(f"Project {public_id} was already added!")
-        self._projects[public_id] = Project.load(self.working_dir, public_id)
+        self._projects[public_id] = Project.load(
+            self.working_dir, public_id, local, registry_path=self.registry_path
+        )
         return self
 
     def remove_project(self, public_id: PublicId) -> "MultiAgentManager":
@@ -528,7 +540,22 @@ class MultiAgentManager:
                 default_ledger, self._create_private_key(agent_name, default_ledger)
             )
         agent = builder.build()
-        return AgentAlias(project, agent_name, json_config, agent)
+        return AgentAlias(project, agent_name, json_config, agent, builder)
+
+    def install_pypi_dependencies(self) -> None:
+        """Install dependencies for every project has at least one agent alias."""
+        for project in self._projects.values():
+            self._install_pypi_dependencies_for_project(project)
+
+    def _install_pypi_dependencies_for_project(self, project: Project) -> None:
+        """Install dependencies for project specified if has at least one agent alias."""
+        if not project.agents:
+            return
+        self._install_pypi_dependencies_for_agent(list(project.agents)[0])
+
+    def _install_pypi_dependencies_for_agent(self, agent_name: str) -> None:
+        """Install dependencies for the agent registered."""
+        self._agents[agent_name].builder.install_pypi_dependencies()
 
     def _make_config(
         self,

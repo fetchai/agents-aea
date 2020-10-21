@@ -116,8 +116,14 @@ func EnableRelayService() Option {
 func LoggingLevel(lvl zerolog.Level) Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.logger = dhtPeer.logger.Level(lvl)
-		zerolog.SetGlobalLevel(lvl)
 		return nil
 	}
+}
 
+// EnablePrometheusMonitoring for dhtpeer.New
+func EnablePrometheusMonitoring(port uint16) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.monitoringPort = port
+		return nil
+	}
 }

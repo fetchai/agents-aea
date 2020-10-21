@@ -35,7 +35,7 @@ from aea.launcher import AEALauncher, _run_agent
 from aea.test_tools.test_cases import CLI_LOG_OPTION
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import AUTHOR, CUR_PATH, CliRunner
+from tests.conftest import AUTHOR, CUR_PATH, CliRunner, ROOT_DIR
 
 
 class TestThreadLauncherMode:
@@ -53,6 +53,10 @@ class TestThreadLauncherMode:
         cls.runner = CliRunner()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         result = cls.runner.invoke(

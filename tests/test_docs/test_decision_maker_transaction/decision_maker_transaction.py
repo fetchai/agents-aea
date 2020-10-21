@@ -25,7 +25,7 @@ from threading import Thread
 from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ProtocolId, SkillConfig
+from aea.configurations.base import PublicId, SkillConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
@@ -34,10 +34,13 @@ from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue
-from aea.protocols.signing.dialogues import SigningDialogue
-from aea.protocols.signing.dialogues import SigningDialogues as BaseSigningDialogues
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler, Model, Skill, SkillContext
+
+from packages.fetchai.protocols.signing.dialogues import SigningDialogue
+from packages.fetchai.protocols.signing.dialogues import (
+    SigningDialogues as BaseSigningDialogues,
+)
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 
 logger = logging.getLogger("aea")
@@ -178,7 +181,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 class SigningHandler(Handler):
     """Implement the signing handler."""
 
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""

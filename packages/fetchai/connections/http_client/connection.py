@@ -26,7 +26,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Tuple, Union, cast
+from typing import Any, Optional, Set, Tuple, Type, Union, cast
 
 import aiohttp
 from aiohttp.client_reqrep import ClientResponse
@@ -37,8 +37,9 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.mail.base import Envelope, EnvelopeContext, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
-from packages.fetchai.protocols.http.dialogues import HttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
@@ -47,17 +48,57 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.9.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.11.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
 
 
+class HttpDialogue(BaseHttpDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[HttpMessage] = HttpMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseHttpDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+        self._envelope_context = None  # type: Optional[EnvelopeContext]
+
+    @property
+    def envelope_context(self) -> Optional[EnvelopeContext]:
+        """Get envelope_context."""
+        return self._envelope_context
+
+    @envelope_context.setter
+    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
+        """Set envelope_context."""
+        enforce(self._envelope_context is None, "envelope_context already set!")
+        self._envelope_context = envelope_context
+
+
 class HttpDialogues(BaseHttpDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self) -> None:
         """
         Initialize dialogues.
 
@@ -80,7 +121,7 @@ class HttpDialogues(BaseHttpDialogues):
             self,
             self_address=str(HTTPClientConnection.connection_id),
             role_from_first_message=role_from_first_message,
-            **kwargs,
+            dialogue_class=HttpDialogue,
         )
 
 
@@ -151,7 +192,9 @@ class HTTPClientAsyncChannel:
         :return: Tuple[MEssage, Optional[Dialogue]]
         """
         message = cast(HttpMessage, envelope.message)
-        dialogue = cast(HttpDialogue, self._dialogues.update(message))
+        dialogue = cast(Optional[HttpDialogue], self._dialogues.update(message))
+        if dialogue is not None:
+            dialogue.envelope_context = envelope.context
         return message, dialogue
 
     async def _http_request_task(self, request_envelope: Envelope) -> None:
@@ -181,24 +224,22 @@ class HTTPClientAsyncChannel:
                 timeout=self.DEFAULT_TIMEOUT,
             )
             envelope = self.to_envelope(
-                self.connection_id,
                 request_http_message,
                 status_code=resp.status,
                 headers=resp.headers,
                 status_text=resp.reason,
-                bodyy=resp._body  # pylint: disable=protected-access
+                body=resp._body  # pylint: disable=protected-access
                 if resp._body is not None  # pylint: disable=protected-access
                 else b"",
                 dialogue=dialogue,
             )
         except Exception:  # pragma: nocover # pylint: disable=broad-except
             envelope = self.to_envelope(
-                self.connection_id,
                 request_http_message,
                 status_code=self.DEFAULT_EXCEPTION_CODE,
                 headers={},
                 status_text="HTTPConnection request error.",
-                bodyy=format_exc().encode("utf-8"),
+                body=format_exc().encode("utf-8"),
                 dialogue=dialogue,
             )
 
@@ -221,7 +262,7 @@ class HTTPClientAsyncChannel:
                     method=request_http_message.method,
                     url=request_http_message.url,
                     headers=request_http_message.headers,
-                    data=request_http_message.bodyy,
+                    data=request_http_message.body,
                 ) as resp:
                     await resp.read()
                 return resp
@@ -307,41 +348,38 @@ class HTTPClientAsyncChannel:
 
     @staticmethod
     def to_envelope(
-        connection_id: PublicId,
         http_request_message: HttpMessage,
         status_code: int,
         headers: dict,
         status_text: Optional[Any],
-        bodyy: bytes,
+        body: bytes,
         dialogue: HttpDialogue,
     ) -> Envelope:
         """
         Convert an HTTP response object (from the 'requests' library) into an Envelope containing an HttpMessage (from the 'http' Protocol).
 
-        :param connection_id: the connection id
         :param http_request_message: the message of the http request envelop
         :param status_code: the http status code, int
         :param headers: dict of http response headers
         :param status_text: the http status_text, str
-        :param bodyy: bytes of http response content
+        :param body: bytes of http response content
 
         :return: Envelope with http response data.
         """
-        context = EnvelopeContext(connection_id=connection_id)
         http_message = dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
             target_message=http_request_message,
             status_code=status_code,
             headers=json.dumps(dict(headers.items())),
             status_text=status_text,
-            bodyy=bodyy,
+            body=body,
             version="",
         )
         envelope = Envelope(
             to=http_message.to,
             sender=http_message.sender,
             protocol_id=http_message.protocol_id,
-            context=context,
+            context=dialogue.envelope_context,
             message=http_message,
         )
         return envelope

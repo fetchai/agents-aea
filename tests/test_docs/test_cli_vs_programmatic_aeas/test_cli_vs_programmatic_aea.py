@@ -28,6 +28,8 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
+
 from tests.conftest import (
     CUR_PATH,
     FETCHAI,
@@ -63,7 +65,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.13.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.15.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -90,7 +92,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         setting_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.location"
         )
-        self.force_set_config(setting_path, location)
+        self.nested_set_config(setting_path, location)
 
         weather_station_process = self.run_agent()
 
@@ -100,7 +102,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             weather_station_process, check_strings, timeout=240, is_terminating=False
@@ -121,7 +123,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
-            "My libp2p addresses:",
+            LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
             weather_client_process, check_strings, timeout=240, is_terminating=False,
@@ -173,13 +175,13 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 165  # line below: `strategy._is_ledger_tx = False`
+        line_insertion_position = 170  # line below: `strategy._is_ledger_tx = False`
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",
         )
         lines.insert(
             line_insertion_position + 1,
-            f"    strategy._agent_location = Location(longitude={location['longitude']}, latitude={location['latitude']})",
+            f"    strategy._agent_location = Location(latitude={location['latitude']}, longitude={location['longitude']})",
         )
         file.write_text("\n".join(lines))

@@ -40,9 +40,10 @@ from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
-from aea.protocols.default.message import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
+
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore

@@ -43,13 +43,13 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
-from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.click_testing import CliRunner
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_PUBLIC_ID,
 )
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from .conftest import (
     AUTHOR,
@@ -500,6 +500,48 @@ async def test_inbox_outbox():
 
     finally:
         await multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_threaded_mode():
+    """Test InBox OutBox objects in threaded mode."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = AsyncMultiplexer(connections, threaded=True)
+    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg.to = "to"
+    msg.sender = "sender"
+    context = EnvelopeContext(connection_id=connection_1.connection_id)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        protocol_id=msg.protocol_id,
+        message=msg,
+        context=context,
+    )
+    try:
+        multiplexer.start()
+        await asyncio.sleep(0.5)
+        inbox = InBox(multiplexer)
+        outbox = OutBox(multiplexer)
+
+        assert inbox.empty()
+        assert outbox.empty()
+
+        outbox.put(envelope)
+        received = await inbox.async_get()
+        assert received == envelope
+
+        assert inbox.empty()
+        assert outbox.empty()
+
+        outbox.put_message(msg, context=context)
+        await inbox.async_wait()
+        received = inbox.get_nowait()
+        assert received == envelope
+
+    finally:
+        multiplexer.stop()
 
 
 @pytest.mark.asyncio

@@ -506,6 +506,15 @@ class EthereumApi(LedgerApi, EthereumHelper):
             _default_logger.debug("Error when trying to estimate gas: {}".format(e))
         return tx
 
+    @classmethod
+    def is_valid_address(cls, address: Address) -> bool:
+        """
+        Check if the address is valid.
+
+        :param address: the address to validate
+        """
+        return Web3.isAddress(address)
+
 
 class EthereumFaucetApi(FaucetApi):
     """Ethereum testnet faucet API."""

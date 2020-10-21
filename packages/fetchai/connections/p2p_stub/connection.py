@@ -24,12 +24,13 @@ from pathlib import Path
 from typing import Union, cast
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.stub.connection import StubConnection, write_envelope
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
+from packages.fetchai.connections.stub.connection import StubConnection, write_envelope
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.7.0")
+
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.9.0")
 
 
 class P2PStubConnection(StubConnection):
@@ -74,6 +75,7 @@ class P2PStubConnection(StubConnection):
         """
         if self.loop is None:
             raise ValueError("Loop not initialized.")  # pragma: nocover
+        self._ensure_valid_envelope_for_external_comms(envelope)
         target_file = Path(os.path.join(self.namespace, "{}.in".format(envelope.to)))
 
         with open(target_file, "ab") as file:

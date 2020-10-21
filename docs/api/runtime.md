@@ -45,7 +45,7 @@ Runtime states.
 ## BaseRuntime Objects
 
 ```python
-class BaseRuntime(Runnable)
+class BaseRuntime(Runnable,  WithLogger)
 ```
 
 Abstract runtime class to create implementations.
@@ -54,7 +54,7 @@ Abstract runtime class to create implementations.
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded=False) -> None
+ | __init__(agent: AbstractAgent, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded: bool = False) -> None
 ```
 
 Init runtime.

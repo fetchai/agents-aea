@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of runtime for economic agent (AEA)."""
 
 import asyncio
@@ -315,6 +313,7 @@ class AsyncRuntime(BaseRuntime):
         self.logger.debug("[{}]: Runtime started".format(self._agent.name))
 
         await self.multiplexer.connection_status.wait(ConnectionStates.connected)
+        self.logger.debug("[{}]: Multiplexer connected.".format(self._agent.name))
 
         self.task_manager.start()
         if self._decision_maker is not None:  # pragma: nocover

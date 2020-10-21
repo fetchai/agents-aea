@@ -44,7 +44,6 @@ from tests.test_cli.tools_for_testing import (
 @mock.patch("aea.cli.publish.os.path.exists", return_value=False)
 @mock.patch("aea.cli.publish.try_get_item_target_path", return_value="target-dir")
 @mock.patch("aea.cli.publish.os.path.join", return_value="joined-path")
-@mock.patch("aea.cli.publish.DEFAULT_CONNECTION", "author/default_connection:version")
 class SaveAgentLocallyTestCase(TestCase):
     """Test case for _save_agent_locally method."""
 

@@ -50,6 +50,7 @@ def test_location():
     assert Location(1.1, 2.2) is not None
     assert isinstance(loc.tuple, Tuple)
     assert loc.tuple == (loc.latitude, loc.longitude)
+    assert str(loc) == "Location(latitude=1.1,longitude=2.2)"
 
 
 def test_attribute():
@@ -59,6 +60,10 @@ def test_attribute():
     assert Attribute(**params) == Attribute(**params)
     assert Attribute(**params) is not None
     assert Attribute(**params) != Attribute(name="another", type_=int, is_required=True)
+    assert (
+        str(Attribute(**params))
+        == "Attribute(name=test,type=<class 'str'>,is_required=True)"
+    )
 
 
 def test_data_model():
@@ -68,6 +73,10 @@ def test_data_model():
     data_model = DataModel("test", [Attribute(**params)])
     data_model._check_validity()
 
+    assert (
+        str(data_model)
+        == "DataModel(name=test,attributes={'test': \"Attribute(name=test,type=<class 'str'>,is_required=True)\"},description=)"
+    )
     with pytest.raises(ValueError):
         data_model = DataModel("test", [Attribute(**params), Attribute(**params)])
         data_model._check_validity()
@@ -93,7 +102,11 @@ def test_description():
     """Test model description."""
     values = {"test": "test"}
     Description(values=values, data_model=generate_data_model("test", values))
-    Description(values=values)
+    desc = Description(values=values)
+    assert (
+        str(desc)
+        == "Description(values={'test': 'test'},data_model=DataModel(name=,attributes={'test': \"Attribute(name=test,type=<class 'str'>,is_required=True)\"},description=))"
+    )
 
     assert Description(values=values) == Description(values=values)
     assert list(Description(values=values)) == list(values.values())
@@ -147,6 +160,7 @@ def test_constraint_type():
     constrant_type = ConstraintType(ConstraintTypes.WITHIN, [1, 2])
     constrant_type.is_valid(Attribute("test", int, True))
     constrant_type.check(13)
+    assert str(constrant_type) == "ConstraintType(value=[1, 2],type=within)"
 
     constrant_type = ConstraintType(ConstraintTypes.IN, [1, 2])
     constrant_type.is_valid(Attribute("test", int, True))
@@ -239,6 +253,10 @@ def test_query():
     """Test Query."""
     c1 = Constraint("author", ConstraintType("==", "Stephen King"))
     query = Query([c1])
+    assert (
+        str(query)
+        == "Query(constraints=['Constraint(attribute_name=author,constraint_type=ConstraintType(value=Stephen King,type===))'],model=None)"
+    )
     query.check_validity()
     assert query.check(
         Description({"author": "Stephen King", "year": 1991, "genre": "horror"})

@@ -32,10 +32,11 @@ from aea.cli.utils.package_utils import (
     copy_package_directory,
     find_item_in_distribution,
     find_item_locally,
+    get_item_id_present,
     get_package_path,
+    is_distributed_item,
     is_fingerprint_correct,
     is_item_present,
-    is_local_item,
     register_item,
 )
 from aea.configurations.base import PublicId
@@ -102,9 +103,10 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
         )
     )
     if is_item_present(ctx, item_type, item_public_id):
+        present_item_id = get_item_id_present(ctx, item_type, item_public_id)
         raise click.ClickException(
-            "A {} with id '{}/{}' already exists. Aborting...".format(
-                item_type, item_public_id.author, item_public_id.name
+            "A {} with id '{}' already exists. Aborting...".format(
+                item_type, present_item_id
             )
         )
 
@@ -113,10 +115,11 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
 
     ctx.clean_paths.append(dest_path)
 
-    if is_local_item(item_public_id):
+    is_distributed = is_distributed_item(item_public_id)
+    if is_local and is_distributed:  # pragma: nocover
         source_path = find_item_in_distribution(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
-    elif is_local:
+    elif is_local and not is_distributed:
         source_path, _ = find_item_locally(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
     else:
@@ -130,6 +133,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
 
     _add_item_deps(ctx, item_type, item_config)
     register_item(ctx, item_type, item_config.public_id)
+    click.echo(f"Successfully added {item_type} '{item_config.public_id}'.")
 
 
 def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:

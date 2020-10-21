@@ -55,6 +55,7 @@ nav:
         - Use multiplexer stand-alone: 'multiplexer-standalone.md'
         - Create stand-alone transaction: 'standalone-transaction.md'
         - Create decision-maker transaction: 'decision-maker-transaction.md'
+        - Testing Skills: 'skill-testing.md'
         - Deployment: 'deployment.md'
         - Known limitations: 'known-limits.md'
         - Build an AEA programmatically: 'build-aea-programmatically.md'
@@ -63,6 +64,7 @@ nav:
         - Upgrading versions: 'upgrading.md'
         - Modes of running an AEA: 'modes.md'
         - Multi agent manager: 'multi-agent-manager.md'
+        - Debugging: 'debug.md'
       - Use case components:
         - Generic skills: 'generic-skills.md'
         - Front-end intergration: 'connect-a-frontend.md'
@@ -160,10 +162,10 @@ nav:
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
-          - Test Cases: 'api/helpers/test_cases.md'
           - Transaction:
             - Base: 'api/helpers/transaction/base.md'
           - Win32: 'api/helpers/win32.md'
+          - YamlUtils: 'api/helpers/yaml_utils.md'
         - Identity: 'api/identity/base.md'
         - Mail: 'api/mail/base.md'
         - Protocols:
@@ -196,7 +198,10 @@ nav:
           - Error Skill: 'api/skills/error/handlers.md'
           - Behaviors: 'api/skills/behaviours.md'
           - Task: 'api/skills/tasks.md'
-        - Test Tools: 'api/test_tools/generic.md'
+        - Test Tools:
+          - Generic: 'api/test_tools/generic.md'
+          - Test Cases: 'api/test_tools/test_cases.md'
+          - Test Skill: 'api/test_tools/test_skill.md'
     - Glossary: 'glossary.md'
     - Q&A: 'questions-and-answers.md'
 

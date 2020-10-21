@@ -50,12 +50,17 @@ import (
 	"libp2p_node/aea"
 )
 
+const (
+	maxMessageSizeDelegateConnection = 1024 * 1024 * 3 // 3Mb
+)
+
 var loggerGlobalLevel zerolog.Level = zerolog.DebugLevel
+
 var logger zerolog.Logger = NewDefaultLogger()
 
 // SetLoggerLevel set utils logger level
 func SetLoggerLevel(lvl zerolog.Level) {
-	//logger.Level(lvl)
+	logger.Level(lvl)
 }
 
 /*
@@ -75,7 +80,7 @@ func newConsoleLogger() zerolog.Logger {
 func NewDefaultLogger() zerolog.Logger {
 	return newConsoleLogger().
 		With().Timestamp().
-		Logger() //.Level(loggerGlobalLevel)
+		Logger().Level(loggerGlobalLevel)
 }
 
 // NewDefaultLoggerWithFields zerolog console writer
@@ -85,7 +90,7 @@ func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
 	for key, val := range fields {
 		logger = logger.Str(key, val)
 	}
-	return logger.Logger().Level(zerolog.Disabled) //.Level(loggerGlobalLevel)
+	return logger.Logger().Level(loggerGlobalLevel)
 
 }
 
@@ -254,7 +259,11 @@ func ReadBytesConn(conn net.Conn) ([]byte, error) {
 	if err != nil {
 		return buf, err
 	}
+
 	size := binary.BigEndian.Uint32(buf)
+	if size > maxMessageSizeDelegateConnection {
+		return nil, errors.New("Expected message size larger than maximum allowed")
+	}
 
 	buf = make([]byte, size)
 	_, err = conn.Read(buf)

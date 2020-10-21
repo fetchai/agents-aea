@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fetch.aea.Tac;
+package aea.fetchai.tac;
 
 message TacMessage{
 
@@ -71,11 +71,6 @@ message TacMessage{
     }
 
 
-    // Standard TacMessage fields
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
     oneof performative{
         Cancelled_Performative cancelled = 5;
         Game_Data_Performative game_data = 6;

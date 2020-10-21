@@ -7,6 +7,7 @@
     "name",
     "author",
     "version",
+    "type",
     "license",
     "aea_version",
     "class_name"
@@ -22,7 +23,7 @@
       "$ref": "definitions.json#/definitions/package_version"
     },
     "type": {
-      "$ref": "definitions.json#/definitions/component_type"
+      "enum": ["contract"]
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"
@@ -50,9 +51,6 @@
           "$ref": "definitions.json#/definitions/contract_interface_path"
         }
       }
-    },
-    "path_to_contract_interface": {
-      "type": "string"
     },
     "class_name": {
       "type": "string"

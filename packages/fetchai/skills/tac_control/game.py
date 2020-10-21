@@ -169,6 +169,10 @@ class Configuration:
         enforce(len(self.agent_addr_to_name) >= 2, "Must have at least two agents.")
         enforce(len(self.good_id_to_name) >= 2, "Must have at least two goods.")
         enforce(len(self.currency_id_to_name) == 1, "Must have exactly one currency.")
+        enforce(
+            next(iter(self.currency_id_to_name)) not in self.good_id_to_name,
+            "Currency id and good ids cannot overlap.",
+        )
 
 
 class Initialization:

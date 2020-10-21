@@ -22,9 +22,9 @@
 from typing import Optional, cast
 
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.dialogues import (
@@ -297,7 +297,9 @@ class TacHandler(Handler):
     ) -> None:
         """Handle an invalid transaction."""
         self.context.logger.info(
-            "handling invalid transaction: {}".format(tac_msg.transaction_id)
+            "handling invalid transaction: {}, tac_msg={}".format(
+                tac_msg.transaction_id, tac_msg
+            )
         )
         error_msg = tac_dialogue.reply(
             performative=TacMessage.Performative.TAC_ERROR,

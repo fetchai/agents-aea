@@ -3,7 +3,7 @@ author: fetchai
 version: 0.2.0
 description: An example of agent configuration file for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
@@ -30,9 +30,7 @@ connection_private_key_paths:
    ethereum: ethereum_private_key.txt
 registry_path: ../../packages
 ---
-name: dummy
-author: dummy_author
-version: 0.1.0
+public_id: dummy_author/dummy:0.1.0
 type: skill
 behaviours:
   dummy:

@@ -21,7 +21,7 @@
 import logging
 from pathlib import Path
 from typing import cast
-from unittest import mock
+from unittest.mock import patch
 
 import pytest
 
@@ -32,14 +32,14 @@ from aea.helpers.transaction.base import (
     Terms,
     TransactionDigest,
 )
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_NAME
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
     FipaDialogue,
     FipaDialogues,
@@ -93,7 +93,12 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             ),
         )
 
-    def test_fipa_handler_handle_unidentified_dialogue(self, caplog):
+    def test_setup(self):
+        """Test the setup method of the fipa handler."""
+        assert self.fipa_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the fipa handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -104,18 +109,16 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
+        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
-        assert (
-            f"received invalid fipa message={incoming_message}, unidentified dialogue."
-            in caplog.text
-        )
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid fipa message={incoming_message}, unidentified dialogue.",
+        )
+
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=DefaultMessage,
@@ -128,7 +131,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_propose(self, caplog):
+    def test_handle_propose_is_affordable_and_is_acceptable(self):
         """Test the _handle_propose method of the fipa handler."""
         # setup
         proposal = Description(
@@ -151,28 +154,28 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with mock.patch.object(
+        with patch.object(
             self.strategy, "is_acceptable_proposal", return_value=True,
         ):
-            with mock.patch.object(
+            with patch.object(
                 self.strategy, "is_affordable_proposal", return_value=True,
             ):
-                with caplog.at_level(logging.INFO):
+                with patch.object(
+                    self.fipa_handler.context.logger, "log"
+                ) as mock_logger:
                     self.fipa_handler.handle(incoming_message)
-        assert (
-            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}"
-            in caplog.text
-        )
-        assert (
-            f"accepting the proposal from sender={COUNTERPARTY_NAME[-5:]}"
-            in caplog.text
-        )
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        incoming_message = cast(FipaMessage, incoming_message)
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO, f"accepting the proposal from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
@@ -183,7 +186,62 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_decline_decline_cfp(self, caplog):
+    def test_handle_propose_not_is_affordable_or_not_is_acceptable(self):
+        """Test the _handle_propose method of the fipa handler."""
+        # setup
+        proposal = Description(
+            {
+                "ledger_id": self.strategy.ledger_id,
+                "price": 100,
+                "currency_id": "FET",
+                "service_id": "some_service_id",
+                "quantity": 1,
+                "tx_nonce": "some_tx_nonce",
+            }
+        )
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=proposal,
+        )
+
+        # operation
+        with patch.object(
+            self.strategy, "is_acceptable_proposal", return_value=False,
+        ):
+            with patch.object(
+                self.strategy, "is_affordable_proposal", return_value=False,
+            ):
+                with patch.object(
+                    self.fipa_handler.context.logger, "log"
+                ) as mock_logger:
+                    self.fipa_handler.handle(incoming_message)
+
+        # after
+        incoming_message = cast(FipaMessage, incoming_message)
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_NAME[-5:]}",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO, f"declining the proposal from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+
+        self.assert_quantity_in_outbox(1)
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.DECLINE,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+        )
+        assert has_attributes, error_str
+
+    def test_handle_decline_decline_cfp(self):
         """Test the _handle_decline method of the fipa handler where the end state is decline_cfp."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
@@ -204,11 +262,14 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             assert end_state_numbers == 0
 
         # operation
-        with caplog.at_level(logging.INFO):
+        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
-        assert f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
         # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+
         for (
             end_state_numbers
         ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -222,7 +283,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             else:
                 assert end_state_numbers == 0
 
-    def test_fipa_handler_handle_decline_decline_accept(self, caplog):
+    def test_handle_decline_decline_accept(self):
         """Test the _handle_decline method of the fipa handler where the end state is decline_accept."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
@@ -233,21 +294,20 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # before
-        for (
-            end_state_numbers
-        ) in self.fipa_dialogues.dialogue_stats.self_initiated.values():
-            assert end_state_numbers == 0
-        for (
-            end_state_numbers
-        ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
+        for end_state_numbers in list(
+            self.fipa_dialogues.dialogue_stats.self_initiated.values()
+        ) + list(self.fipa_dialogues.dialogue_stats.other_initiated.values()):
             assert end_state_numbers == 0
 
         # operation
-        with caplog.at_level(logging.INFO):
+        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
-        assert f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
         # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"received DECLINE from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+
         for (
             end_state_numbers
         ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -261,7 +321,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             else:
                 assert end_state_numbers == 0
 
-    def test_fipa_handler_handle_match_accept_is_ledger_tx(self, caplog):
+    def test_handle_match_accept_is_ledger_tx(self):
         """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is True."""
         # setup
         self.strategy._is_ledger_tx = True
@@ -284,19 +344,16 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
+        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
-        assert (
-            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}"
-            in caplog.text
-        )
-        assert "requesting transfer transaction from ledger api..." in caplog.text
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}",
+        )
+
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=LedgerApiMessage,
@@ -307,7 +364,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_match_accept_not_is_ledger_tx(self, caplog):
+        mock_logger.assert_any_call(
+            logging.INFO, "requesting transfer transaction from ledger api..."
+        )
+
+    def test_handle_match_accept_not_is_ledger_tx(self):
         """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is False."""
         # setup
         self.strategy._is_ledger_tx = False
@@ -322,22 +383,16 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
+        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
-        assert (
-            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}"
-            in caplog.text
-        )
-        assert (
-            f"informing counterparty={COUNTERPARTY_NAME[-5:]} of payment."
-            in caplog.text
-        )
 
         # after
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected 1. Found {quantity}."
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_NAME[-5:]} with info={incoming_message.info}",
+        )
+
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
@@ -349,7 +404,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_fipa_handler_handle_inform_with_data(self, caplog):
+        mock_logger.assert_any_call(
+            logging.INFO, f"informing counterparty={COUNTERPARTY_NAME[-5:]} of payment."
+        )
+
+    def test_handle_inform_with_data(self):
         """Test the _handle_inform method of the fipa handler where info has data."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
@@ -362,21 +421,23 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # before
-        for (
-            end_state_numbers
-        ) in self.fipa_dialogues.dialogue_stats.self_initiated.values():
-            assert end_state_numbers == 0
-        for (
-            end_state_numbers
-        ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
+        for end_state_numbers in list(
+            self.fipa_dialogues.dialogue_stats.self_initiated.values()
+        ) + list(self.fipa_dialogues.dialogue_stats.other_initiated.values()):
             assert end_state_numbers == 0
 
         # operation
-        with caplog.at_level(logging.INFO):
+        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
-        assert "received the following data={'data_name': 'data'}" in caplog.text
 
         # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"received INFORM from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+        mock_logger.assert_any_call(
+            logging.INFO, "received the following data={'data_name': 'data'}"
+        )
+
         for (
             end_state_numbers
         ) in self.fipa_dialogues.dialogue_stats.other_initiated.values():
@@ -390,7 +451,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             else:
                 assert end_state_numbers == 0
 
-    def test_fipa_handler_handle_inform_without_data(self, caplog):
+    def test_handle_inform_without_data(self):
         """Test the _handle_inform method of the fipa handler where info has NO data."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
@@ -403,11 +464,19 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
+        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
-        assert f"received no data from sender={COUNTERPARTY_NAME[-5:]}" in caplog.text
 
-    def test_fipa_handler_handle_invalid(self, caplog):
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"received INFORM from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+
+        mock_logger.assert_any_call(
+            logging.INFO, f"received no data from sender={COUNTERPARTY_NAME[-5:]}"
+        )
+
+    def test_handle_invalid(self):
         """Test the _handle_invalid method of the fipa handler."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
@@ -418,12 +487,19 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with caplog.at_level(logging.INFO):
+        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
             self.fipa_handler.handle(incoming_message)
-        assert (
-            f"cannot handle fipa message of performative={incoming_message.performative} in dialogue={fipa_dialogue}."
-            in caplog.text
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle fipa message of performative={incoming_message.performative} in dialogue={fipa_dialogue}.",
         )
+
+    def test_teardown(self):
+        """Test the teardown method of the fipa handler."""
+        assert self.fipa_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
 
 
 class TestGenericOefSearchHandler(BaseSkillTestCase):
@@ -448,7 +524,12 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             ),
         )
 
-    def test_oef_search_handler_handle_unidentified_dialogue(self, caplog):
+    def test_setup(self):
+        """Test the setup method of the oef_search handler."""
+        assert self.oef_search_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the oef_search handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -457,18 +538,18 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             dialogue_reference=incorrect_dialogue_reference,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.oef_search_handler.handle(incoming_message)
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"received invalid oef_search message={incoming_message}, unidentified dialogue."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid oef_search message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_oef_search_handler_handle_error(self, caplog):
+    def test_handle_error(self):
         """Test the _handle_error method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
@@ -479,18 +560,18 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             performative=OefSearchMessage.Performative.OEF_ERROR,
             oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.oef_search_handler.handle(incoming_message)
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"received oef_search error message={incoming_message} in dialogue={oef_dialogue}."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received oef_search error message={incoming_message} in dialogue={oef_dialogue}.",
         )
 
-    def test_oef_search_handler_handle_search_zero_agents(self, caplog):
+    def test_handle_search_zero_agents(self):
         """Test the _handle_search method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
@@ -502,18 +583,18 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             agents=tuple(),
             agents_info=OefSearchMessage.AgentsInfo({}),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.oef_search_handler.handle(incoming_message)
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"found no agents in dialogue={oef_dialogue}, continue searching."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"found no agents in dialogue={oef_dialogue}, continue searching.",
         )
 
-    def test_oef_search_handler_handle_search(self, caplog):
+    def test_handle_search(self):
         """Test the _handle_search method of the oef_search handler."""
         # setup
         self.strategy._max_negotiations = 3
@@ -529,18 +610,19 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
                 {"agent_1": {"key_1": "value_1"}, "agent_2": {"key_2": "value_2"}}
             ),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.oef_search_handler.handle(incoming_message)
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
 
         # after
-        assert f"found agents={list(agents)}, stopping search." in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO, f"found agents={list(agents)}, stopping search."
+        )
+
         assert not self.strategy.is_searching
-        quantity = self.get_quantity_in_outbox()
-        assert quantity == len(
-            agents
-        ), f"Invalid number of messages in outbox. Expected {len(agents)}. Found {quantity}."
+
+        self.assert_quantity_in_outbox(len(agents))
         for agent in agents:
             has_attributes, error_str = self.message_has_attributes(
                 actual_message=self.get_message_from_outbox(),
@@ -552,9 +634,53 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
                 query=self.strategy.get_service_query(),
             )
             assert has_attributes, error_str
-            assert f"sending CFP to agent={agent}" in caplog.text
+            mock_logger.assert_any_call(logging.INFO, f"sending CFP to agent={agent}")
 
-    def test_oef_search_handler_handle_invalid(self, caplog):
+    def test_handle_search_more_than_max_negotiation(self):
+        """Test the _handle_search method of the oef_search handler where number of agents is more than max_negotiation."""
+        # setup
+        self.strategy._max_negotiations = 1
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+        )
+        agents = ("agnt1", "agnt2")
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=oef_dialogue,
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
+            agents=agents,
+            agents_info=OefSearchMessage.AgentsInfo(
+                {"agent_1": {"key_1": "value_1"}, "agent_2": {"key_2": "value_2"}}
+            ),
+        )
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"found agents={list(agents)}, stopping search."
+        )
+
+        assert not self.strategy.is_searching
+
+        self.assert_quantity_in_outbox(self.strategy._max_negotiations)
+        for idx in range(0, self.strategy._max_negotiations):
+            has_attributes, error_str = self.message_has_attributes(
+                actual_message=self.get_message_from_outbox(),
+                message_type=FipaMessage,
+                performative=FipaMessage.Performative.CFP,
+                to=agents[idx],
+                sender=self.skill.skill_context.agent_address,
+                target=0,
+                query=self.strategy.get_service_query(),
+            )
+            assert has_attributes, error_str
+            mock_logger.assert_any_call(
+                logging.INFO, f"sending CFP to agent={agents[idx]}"
+            )
+
+    def test_handle_invalid(self):
         """Test the _handle_invalid method of the oef_search handler."""
         # setup
         invalid_performative = OefSearchMessage.Performative.UNREGISTER_SERVICE
@@ -564,16 +690,21 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             performative=invalid_performative,
             service_description="some_service_description",
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.oef_search_handler.handle(incoming_message)
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"cannot handle oef_search message of performative={invalid_performative} in dialogue={self.oef_dialogues.get_dialogue(incoming_message)}."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle oef_search message of performative={invalid_performative} in dialogue={self.oef_dialogues.get_dialogue(incoming_message)}.",
         )
+
+    def test_teardown(self):
+        """Test the teardown method of the oef_search handler."""
+        assert self.oef_search_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
 
 
 class TestGenericSigningHandler(BaseSkillTestCase):
@@ -639,7 +770,12 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             DialogueMessage(LedgerApiMessage.Performative.TRANSACTION_DIGEST, {}),
         )
 
-    def test_signing_handler_handle_unidentified_dialogue(self, caplog):
+    def test_setup(self):
+        """Test the setup method of the signing handler."""
+        assert self.signing_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the signing handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -650,20 +786,18 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
             to=str(self.skill.skill_context.skill_id),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.signing_handler.handle(incoming_message)
+        with patch.object(self.signing_handler.context.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"received invalid signing message={incoming_message}, unidentified dialogue."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_signing_handler_handle_signed_transaction_last_ledger_api_message_is_none(
-        self, caplog
-    ):
+    def test_handle_signed_transaction_last_ledger_api_message_is_none(self,):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         signing_dialogue = cast(
@@ -703,14 +837,15 @@ class TestGenericSigningHandler(BaseSkillTestCase):
         with pytest.raises(
             ValueError, match="Could not retrieve last message in ledger api dialogue"
         ):
-            self.signing_handler.handle(incoming_message)
+            with patch.object(
+                self.signing_handler.context.logger, "log"
+            ) as mock_logger:
+                self.signing_handler.handle(incoming_message)
 
         # after
-        assert "transaction signing was successful." in caplog.text
+        mock_logger.assert_any_call(logging.INFO, "transaction signing was successful.")
 
-    def test_signing_handler_handle_signed_transaction_last_ledger_api_message_is_not_none(
-        self, caplog
-    ):
+    def test_handle_signed_transaction_last_ledger_api_message_is_not_none(self,):
         """Test the _handle_signed_transaction method of the signing handler where the last ledger_api message is not None."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address
@@ -748,17 +883,14 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 ),
             ),
         )
-        caplog.set_level(logging.INFO)
-
         # operation
-        self.signing_handler.handle(incoming_message)
+        with patch.object(self.signing_handler.context.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
 
         # after
-        assert "transaction signing was successful." in caplog.text
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected {1}. Found {quantity}."
+        mock_logger.assert_any_call(logging.INFO, "transaction signing was successful.")
+
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=LedgerApiMessage,
@@ -768,9 +900,10 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str
-        assert "sending transaction to ledger." in caplog.text
 
-    def test_signing_handler_handle_error(self, caplog):
+        mock_logger.assert_any_call(logging.INFO, "sending transaction to ledger.")
+
+    def test_handle_error(self):
         """Test the _handle_error method of the signing handler."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address
@@ -787,18 +920,18 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
             ),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.signing_handler.handle(incoming_message)
+        with patch.object(self.signing_handler.context.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"transaction signing was not successful. Error_code={incoming_message.error_code} in dialogue={signing_dialogue}"
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction signing was not successful. Error_code={incoming_message.error_code} in dialogue={signing_dialogue}",
         )
 
-    def test_signing_handler_handle_invalid(self, caplog):
+    def test_handle_invalid(self):
         """Test the _handle_invalid method of the signing handler."""
         # setup
         invalid_performative = SigningMessage.Performative.SIGN_TRANSACTION
@@ -812,16 +945,21 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             ),
             to=str(self.skill.skill_context.skill_id),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.signing_handler.handle(incoming_message)
+        with patch.object(self.signing_handler.context.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"cannot handle signing message of performative={invalid_performative} in dialogue={self.signing_dialogues.get_dialogue(incoming_message)}."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle signing message of performative={invalid_performative} in dialogue={self.signing_dialogues.get_dialogue(incoming_message)}.",
         )
+
+    def test_teardown(self):
+        """Test the teardown method of the signing handler."""
+        assert self.signing_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
 
 
 class TestGenericLedgerApiHandler(BaseSkillTestCase):
@@ -887,7 +1025,12 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             ),
         )
 
-    def test_ledger_api_handler_handle_unidentified_dialogue(self, caplog):
+    def test_setup(self):
+        """Test the setup method of the ledger_api handler."""
+        assert self.ledger_api_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_ledger_api_handler_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the ledger_api handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -898,18 +1041,18 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             ledger_id="some_ledger_id",
             address="some_address",
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.ledger_api_handler.handle(incoming_message)
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"received invalid ledger_api message={incoming_message}, unidentified dialogue."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid ledger_api message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_ledger_api_handler_handle_balance_positive_balance(self, caplog):
+    def test_ledger_api_handler_handle_balance_positive_balance(self):
         """Test the _handle_balance method of the ledger_api handler where balance is positive."""
         # setup
         balance = 10
@@ -935,20 +1078,20 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 balance=balance,
             ),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.ledger_api_handler.handle(incoming_message)
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"starting balance on {self.strategy.ledger_id} ledger={incoming_message.balance}."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"starting balance on {self.strategy.ledger_id} ledger={incoming_message.balance}.",
         )
         assert self.strategy.balance == balance
         assert self.strategy.is_searching
 
-    def test_ledger_api_handler_handle_balance_zero_balance(self, caplog):
+    def test_ledger_api_handler_handle_balance_zero_balance(self):
         """Test the _handle_balance method of the ledger_api handler where balance is zero."""
         # setup
         balance = 0
@@ -974,19 +1117,19 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 balance=balance,
             ),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.ledger_api_handler.handle(incoming_message)
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"you have no starting balance on {self.strategy.ledger_id} ledger!"
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"you have no starting balance on {self.strategy.ledger_id} ledger!",
         )
         assert not self.skill.skill_context.is_active
 
-    def test_ledger_api_handler_handle_raw_transaction(self, caplog):
+    def test_ledger_api_handler_handle_raw_transaction(self):
         """Test the _handle_raw_transaction method of the ledger_api handler."""
         # setup
         ledger_api_dialogue = cast(
@@ -1013,21 +1156,37 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 raw_transaction=self.raw_transaction,
             ),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.ledger_api_handler.handle(incoming_message)
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert f"received raw transaction={incoming_message}" in caplog.text
-        assert self.get_quantity_in_decision_maker_inbox() == 1
+        mock_logger.assert_any_call(
+            logging.INFO, f"received raw transaction={incoming_message}"
+        )
+
+        message_quantity = self.get_quantity_in_decision_maker_inbox()
         assert (
-            "proposing the transaction to the decision maker. Waiting for confirmation ..."
-            in caplog.text
+            message_quantity == 1
+        ), f"Invalid number of messages in decision maker queue. Expected {1}. Found {message_quantity}."
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_decision_maker_inbox(),
+            message_type=SigningMessage,
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
+            to=self.skill.skill_context.decision_maker_address,
+            sender=str(self.skill.skill_context.skill_id),
+            terms=self.terms,
+        )
+        assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
         )
 
     def test_ledger_api_handler_handle_transaction_digest_last_fipa_message_is_none(
-        self, caplog
+        self,
     ):
         """Test the _handle_transaction_digest method of the ledger_api handler where the last incoming fipa message os None."""
         # setup
@@ -1055,19 +1214,21 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 transaction_digest=self.transaction_digest,
             ),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
         with pytest.raises(ValueError, match="Could not retrieve fipa message"):
-            self.ledger_api_handler.handle(incoming_message)
+            with patch.object(
+                self.ledger_api_handler.context.logger, "log"
+            ) as mock_logger:
+                self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"transaction was successfully submitted. Transaction digest={incoming_message.transaction_digest}"
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction was successfully submitted. Transaction digest={incoming_message.transaction_digest}",
         )
 
-    def test_ledger_api_handler_handle_transaction_digest(self, caplog):
+    def test_ledger_api_handler_handle_transaction_digest(self):
         """Test the _handle_transaction_digest method of the ledger_api handler."""
         # setup
         ledger_api_dialogue = cast(
@@ -1094,20 +1255,18 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 transaction_digest=self.transaction_digest,
             ),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.ledger_api_handler.handle(incoming_message)
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"transaction was successfully submitted. Transaction digest={incoming_message.transaction_digest}"
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction was successfully submitted. Transaction digest={incoming_message.transaction_digest}",
         )
-        quantity = self.get_quantity_in_outbox()
-        assert (
-            quantity == 1
-        ), f"Invalid number of messages in outbox. Expected {1}. Found {quantity}."
+
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
@@ -1117,12 +1276,13 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             info={"transaction_digest": incoming_message.transaction_digest.body},
         )
         assert has_attributes, error_str
-        assert (
-            f"informing counterparty={COUNTERPARTY_NAME[-5:]} of transaction digest."
-            in caplog.text
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"informing counterparty={COUNTERPARTY_NAME[-5:]} of transaction digest.",
         )
 
-    def test_ledger_api_handler_handle_error(self, caplog):
+    def test_ledger_api_handler_handle_error(self):
         """Test the _handle_error method of the ledger_api handler."""
         # setup
         ledger_api_dialogue = self.prepare_skill_dialogue(
@@ -1137,18 +1297,18 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 code=1,
             ),
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.ledger_api_handler.handle(incoming_message)
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"received ledger_api error message={incoming_message} in dialogue={ledger_api_dialogue}"
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received ledger_api error message={incoming_message} in dialogue={ledger_api_dialogue}.",
         )
 
-    def test_ledger_api_handler_handle_invalid(self, caplog):
+    def test_ledger_api_handler_handle_invalid(self):
         """Test the _handle_invalid method of the ledger_api handler."""
         # setup
         invalid_performative = LedgerApiMessage.Performative.GET_BALANCE
@@ -1160,13 +1320,18 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             address="some_address",
             to=self.skill.skill_context.agent_address,
         )
-        caplog.set_level(logging.INFO)
 
         # operation
-        self.ledger_api_handler.handle(incoming_message)
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert (
-            f"cannot handle ledger_api message of performative={invalid_performative} in dialogue={self.ledger_api_dialogues.get_dialogue(incoming_message)}."
-            in caplog.text
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle ledger_api message of performative={invalid_performative} in dialogue={self.ledger_api_dialogues.get_dialogue(incoming_message)}.",
         )
+
+    def test_teardown(self):
+        """Test the teardown method of the ledger_api handler."""
+        assert self.ledger_api_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)

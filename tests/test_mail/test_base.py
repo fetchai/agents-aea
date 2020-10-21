@@ -28,9 +28,9 @@ from aea.configurations.base import PublicId
 from aea.mail.base import Envelope, EnvelopeContext, ProtobufEnvelopeSerializer, URI
 from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 
 from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
@@ -95,6 +95,8 @@ def test_envelope_initialisation():
     ), "Cannot set protocol_id on Envelope "
     assert envelope.message == b"HelloWorld", "Cannot set message on Envelope"
     assert envelope.context.uri_raw is not None
+    assert not envelope.is_sender_public_id
+    assert not envelope.is_to_public_id
 
 
 def test_inbox_empty():

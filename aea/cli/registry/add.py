@@ -21,8 +21,6 @@
 import os
 from pathlib import Path
 
-import click
-
 from aea.cli.registry.utils import download_file, extract, get_package_meta
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import PublicId
@@ -62,8 +60,8 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Pa
         )
     )
     extract(filepath, dest)
-    click.echo(
-        "Successfully fetched {obj_type}: {public_id}.".format(
+    logger.debug(
+        "Successfully fetched {obj_type} '{public_id}'.".format(
             public_id=public_id, obj_type=obj_type
         )
     )

@@ -24,15 +24,11 @@ from typing import List, cast
 
 import click
 
-from aea.aea import AEA
-from aea.aea_builder import AEABuilder
 from aea.cli.utils.click_utils import AgentDirectory
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
-from aea.helpers.base import cd
 from aea.helpers.multiple_executor import ExecutorExceptionPolicies
 from aea.launcher import AEALauncher
-from aea.runner import AEARunner
 
 
 @click.command()
@@ -57,38 +53,23 @@ def _launch_agents(
     :return: None.
     """
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
-    try:
-        if multithreaded:
-            failed = _launch_threads(agents_directories)
-        else:
-            failed = _launch_subprocesses(click_context, agents_directories)
-    except BaseException:  # pragma: no cover # pylint: disable=broad-except
-        logger.exception("Exception in launch agents.")
-        failed = -1
-    finally:
-        logger.debug(f"Exit cli. code: {failed}")
-        sys.exit(failed)
-
-
-def _launch_subprocesses(click_context: click.Context, agents: List[Path]) -> int:
-    """
-    Launch many agents using subprocesses.
-
-    :param click_context: the click context.
-    :param agents: list of paths to agent projects.
-    :return: execution status
-    """
+    mode = "threaded" if multithreaded else "multiprocess"
     ctx = cast(Context, click_context.obj)
 
     launcher = AEALauncher(
-        agents,
-        mode="multiprocess",
+        agent_dirs=agents_directories,
+        mode=mode,
         fail_policy=ExecutorExceptionPolicies.log_only,
         log_level=ctx.verbosity,
     )
 
     try:
-        launcher.start()
+        """
+        run in threaded mode and wait for thread finished cause issue with python 3.6/3.7 on windows
+        probably keyboard interrupt exception gets lost in executor pool or in asyncio module
+        """
+        launcher.start(threaded=True)
+        launcher.join_thread()
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected.")
     finally:
@@ -100,29 +81,5 @@ def _launch_subprocesses(click_context: click.Context, agents: List[Path]) -> in
     for agent in launcher.not_failed:
         logger.info(f"Agent {agent} terminated with exit code 0")
 
-    return launcher.num_failed
-
-
-def _launch_threads(agents: List[Path]) -> int:
-    """
-    Launch many agents, multithreaded.
-
-    :param click_context: the click context.
-    :param agents: list of paths to agent projects.
-    :return: exit status
-    """
-    aeas = []  # type: List[AEA]
-    for agent_directory in agents:
-        with cd(agent_directory):
-            aeas.append(AEABuilder.from_aea_project(".").build())
-    runner = AEARunner(
-        agents=aeas, mode="threaded", fail_policy=ExecutorExceptionPolicies.log_only
-    )
-    try:
-        runner.start(threaded=True)
-        runner.join_thread()  # for some reason on windows and python 3.7/3.7 keyboard interuption exception gets lost so run in threaded mode to catch keyboard interruped
-    except KeyboardInterrupt:
-        logger.info("Keyboard interrupt detected.")
-    finally:
-        runner.stop()
-    return runner.num_failed
+    logger.debug(f"Exit cli. code: {launcher.num_failed}")
+    sys.exit(1 if launcher.num_failed > 0 else 0)

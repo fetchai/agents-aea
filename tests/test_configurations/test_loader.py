@@ -71,20 +71,6 @@ def test_config_loader_dump_agent_config():
         config_loader.dump(configuration, open("foo"))
 
 
-@mock.patch.object(
-    aea.configurations.loader, "yaml_load", return_value=dict(type="connection")
-)
-def test_load_wrong_type(_):
-    """Test the case when the loaded configuration file has the wrong 'type' field value."""
-    loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
-    with mock.patch.object(loader.validator, "validate", side_effect=None):
-        with pytest.raises(
-            ValueError,
-            match="The field type is not correct: expected protocol, found connection.",
-        ):
-            loader.load(MagicMock())
-
-
 @pytest.mark.parametrize("spec_file_path", protocol_specification_files)
 def test_load_protocol_specification(spec_file_path):
     """Test for the utility function 'load_protocol_specification'"""
