@@ -25,7 +25,11 @@ import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import get_wallet_from_context, try_get_balance
+from aea.cli.utils.package_utils import (
+    _override_ledger_configurations,
+    get_wallet_from_context,
+    try_get_balance,
+)
 from aea.crypto.registries import ledger_apis_registry
 
 
@@ -47,4 +51,5 @@ def get_wealth(click_context, type_):
 
 def _try_get_wealth(ctx: Context, type_: str):
     wallet = get_wallet_from_context(ctx)
+    _override_ledger_configurations(ctx.agent_config)
     return try_get_balance(ctx.agent_config, wallet, type_)

@@ -28,7 +28,8 @@ from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.ethereum import DEFAULT_CHAIN_ID, EthereumApi
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
-from aea.crypto.fetchai import FetchAIApi
+from aea.crypto.fetchai import DEFAULT_CHAIN_ID as FETCHAI_DEFAULT_CHAIN_ID
+from aea.crypto.fetchai import DEFAULT_CURRENCY_DENOM, FetchAIApi
 from aea.crypto.registries import (
     ledger_apis_registry,
     make_ledger_api,
@@ -43,7 +44,11 @@ DEFAULT_LEDGER_CONFIGS = {
         "address": ETHEREUM_DEFAULT_ADDRESS,
         "chain_id": DEFAULT_CHAIN_ID,
     },
-    FetchAIApi.identifier: {"address": FETCHAI_DEFAULT_ADDRESS},
+    FetchAIApi.identifier: {
+        "address": FETCHAI_DEFAULT_ADDRESS,
+        "chain_id": FETCHAI_DEFAULT_CHAIN_ID,
+        "denom": DEFAULT_CURRENCY_DENOM,
+    },
 }  # type: Dict[str, Dict[str, Union[str, int]]]
 
 
