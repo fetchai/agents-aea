@@ -178,9 +178,13 @@ class Strategy(Model):
         :param ledger_id: the ledger id
         :return: bool indiciating validity
         """
-        result = expected_signer in LedgerApis.recover_message(
-            ledger_id, message_str.encode("utf-8"), signature
-        )
+        try:
+            result = expected_signer in LedgerApis.recover_message(
+                ledger_id, message_str.encode("utf-8"), signature
+            )
+        except Exceptions as e:
+            self.context.logger.warning(f"Signing exception: {e}")
+            result = False
         return result
 
     def get_terms(self, counterparty: str) -> Terms:
