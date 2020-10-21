@@ -552,7 +552,6 @@ def try_get_balance(  # pylint: disable=unused-argument
         address = wallet.addresses.get(type_)
         if address is None:  # pragma: no cover
             raise ValueError("No key '{}' in wallet.".format(type_))
-        _override_ledger_configurations(agent_config)
         balance = LedgerApis.get_balance(type_, address)
         if balance is None:  # pragma: no cover
             raise ValueError("No balance returned!")
