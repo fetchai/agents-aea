@@ -49,7 +49,7 @@ function install_aea (){
 		echo 'Failed to install aea'
 		exit 1
 	fi
-	
+	source ~/.profile  # sometimes ~/.local/bin is not in PATH
 	output=`aea --help 2>&1`
 	if [[  $? -ne 0 ]];
 	then
@@ -111,7 +111,7 @@ function mac_install_python(){
 		echo "Python supported version already installed!"
 		return 0
 	fi
-		
+
 	ensure_brew
 	echo "Install python3.8. It takes long time."
 	output=$(brew install python@3.8 2>&1)
@@ -135,7 +135,7 @@ function install_on_mac(){
 function main(){
 	echo "Welcome to AEA installer!"
 	case "$OSTYPE" in
-	  darwin*)  install_on_mac ;; 
+	  darwin*)  install_on_mac ;;
 	  linux*)   check_linux ;;
 	  *)        bad_os_type ;;
 	esac
