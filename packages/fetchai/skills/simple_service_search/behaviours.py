@@ -21,6 +21,7 @@
 
 from typing import cast
 
+from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -55,7 +56,8 @@ class ServiceSearchBehaviour(TickerBehaviour):
             query=strategy.get_query(),
         )
         self.context.logger.info("sending search request to OEF search node")
-        self.context.outbox.put_message(message=search_request)
+        context = EnvelopeContext(skill_id=self.context.skill_id)
+        self.context.outbox.put_message(message=search_request, context=context)
 
     def teardown(self) -> None:
         """

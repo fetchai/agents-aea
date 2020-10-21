@@ -13,7 +13,9 @@ fingerprint:
   strategy.py: QmWUh63RsTcphMgwy9Pxe5iN4gosnfiRoKD1NNufnsA35L
 fingerprint_ignore_patterns: []
 contracts: []
-protocols: []
+protocols:
+- fetchai/register:0.1.0
+- fetchai/signing:0.6.0
 skills: []
 behaviours:
   registration:

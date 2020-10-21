@@ -1,4 +1,4 @@
-agent_name: my_registration_aea
+agent_name: registration_aea_aw1
 author: fetchai
 version: 0.1.0
 description: This is an agent to register for Agent World 1.
@@ -7,6 +7,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
+- fetchai/ledger:0.8.0
 - fetchai/p2p_libp2p:0.12.0
 - fetchai/soef:0.11.0
 contracts: []
@@ -54,3 +55,11 @@ public_id: fetchai/soef:0.11.0
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
+---
+public_id: fetchai/ledger:0.8.0
+type: connection
+config:
+  ledger_apis:
+    fetchai:
+      address: https://rest-agentworld.prod.fetch-ai.com:443
+      chain_id: agentworld-1

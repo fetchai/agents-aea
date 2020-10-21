@@ -21,6 +21,7 @@
 
 from typing import cast
 
+from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -85,7 +86,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=description,
         )
-        self.context.outbox.put_message(message=oef_search_msg)
+        context = EnvelopeContext(skill_id=self.context.skill_id)
+        self.context.outbox.put_message(message=oef_search_msg, context=context)
         self.context.logger.info("registering agent on SOEF.")
 
     def _register_service(self) -> None:
