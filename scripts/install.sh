@@ -1,6 +1,6 @@
 #!/bin/bash
 ### usage
-# mac/linux: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/fetchai/agents-aea/feature/install_scripts/scripts/install.sh)"
+# mac/linux: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.sh)"
 
 function bad_os_type() {
 	echo "OS $OSTYPE is not supported!"
