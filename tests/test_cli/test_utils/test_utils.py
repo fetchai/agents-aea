@@ -19,8 +19,10 @@
 """This test module contains the tests for aea.cli.utils module."""
 
 from builtins import FileNotFoundError
+from copy import deepcopy
 from typing import cast
 from unittest import TestCase, mock
+from unittest.mock import MagicMock
 
 import pytest
 from click import BadParameter, ClickException
@@ -38,6 +40,7 @@ from aea.cli.utils.decorators import _validate_config_consistency, clean_after
 from aea.cli.utils.formatting import format_items
 from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.package_utils import (
+    _override_ledger_configurations,
     find_item_in_distribution,
     find_item_locally,
     get_package_path_unified,
@@ -57,6 +60,7 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
@@ -469,3 +473,13 @@ class TestGetWalletFromtx(AEATestCaseEmpty):
         ctx = mock.Mock()
         with cd(self._get_cwd()):
             assert isinstance(get_wallet_from_context(ctx), Wallet)
+
+
+def test_override_ledger_configurations_negative():
+    """Test override ledger configurations function util when nothing to override."""
+    agent_config = MagicMock()
+    agent_config.component_configurations = {}
+    expected_configurations = deepcopy(LedgerApis.ledger_api_configs)
+    _override_ledger_configurations(agent_config)
+    actual_configurations = LedgerApis.ledger_api_configs
+    assert expected_configurations == actual_configurations
