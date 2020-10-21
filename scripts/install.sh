@@ -58,6 +58,7 @@ function install_aea (){
 		exit 1
 	fi
 	echo "AEA successfully installed!"
+	echo "It's recommended to open a new shell to work with AEA."
 }
 
 function install_ubuntu_deps(){
