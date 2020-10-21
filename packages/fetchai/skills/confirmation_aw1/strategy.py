@@ -35,6 +35,8 @@ REQUIRED_KEYS = [
 ]
 DEFAULT_TOKEN_DISPENSE_AMOUNT = 100000
 DEFAULT_TOKEN_DENOMINATION = "atestfet"
+DEFAULT_CONTRACT_ADDRESS = "0x351bac612b50e87b46e4b10a282f632d41397de2"
+DEFAULT_OVERRIDE = False
 
 
 class Strategy(Model):
@@ -52,6 +54,12 @@ class Strategy(Model):
         self._token_dispense_amount = kwargs.pop(
             "token_dispense_amount", DEFAULT_TOKEN_DISPENSE_AMOUNT
         )
+        self._fetchai_staking_contract_address = kwargs.pop(
+            "fetchai_staking_contract_address", DEFAULT_CONTRACT_ADDRESS
+        )
+        self._override_staking_check = kwargs.pop(
+            "override_staking_check", DEFAULT_OVERRIDE
+        )
         super().__init__(**kwargs)
         self._is_ready_to_register = False
         self._is_registered = False
@@ -59,6 +67,23 @@ class Strategy(Model):
         self.signature_of_ethereum_address: Optional[str] = None
         self._ledger_id = "fetchai"
         self._max_tx_fee = 100
+        self._contract_ledger_id = "ethereum"
+        self._contract_callable = "getStakeForUser"
+
+    @property
+    def contract_address(self) -> str:
+        """Get contract address."""
+        return self._fetchai_staking_contract_address
+
+    @property
+    def contract_ledger_id(self) -> str:
+        """Get the ledger on which the contract is deployed."""
+        return self._contract_ledger_id
+
+    @property
+    def contract_callable(self) -> str:
+        """Get the ledger on which the contract is deployed."""
+        return self._contract_callable
 
     def valid_registration(
         self, registration_info: Dict[str, str], sender: str
@@ -136,3 +161,24 @@ class Strategy(Model):
             fee_by_currency_id={self._token_denomination: self._max_tx_fee},
         )
         return terms
+
+    @staticmethod
+    def get_kwargs(counterparty: str) -> Dict[str, str]:
+        """
+        Get the kwargs for the contract state call.
+
+        :param counterparty:
+        """
+        return {"address": counterparty}
+
+    def has_staked(self, state: Dict[str, str]) -> bool:
+        """
+        Check if the agent has staked.
+
+        :return: bool, indicating outcome
+        """
+        print(state)
+        if self._override_staking_check:
+            return True
+        result = int(state.get("principal", "0")) > 0
+        return result

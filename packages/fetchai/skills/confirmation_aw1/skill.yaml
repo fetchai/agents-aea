@@ -12,7 +12,8 @@ fingerprint:
   handlers.py: QmaR9AgwankLMjsBGmtUkHNKymujkfoG7TkcDG45v9ut12
   strategy.py: Qmc1UGa8abWhkmVFmJr9rBmWDD3D82eMiWiAoMsmHhUcYb
 fingerprint_ignore_patterns: []
-contracts: []
+contracts:
+- fetchai/staking_erc20:0.1.0
 protocols:
 - fetchai/ledger_api:0.6.0
 - fetchai/register:0.1.0
@@ -43,6 +44,8 @@ models:
     args:
       token_denomination: atestfet
       token_dispense_amount: 100000
+      fetchai_staking_contract_address: '0x351bac612b50e87b46e4b10a282f632d41397de2'
+      override_staking_check: false
     class_name: Strategy
 dependencies: {}
 is_abstract: false

@@ -33,6 +33,13 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Address, Model
 
+from packages.fetchai.protocols.contract_api.dialogues import (
+    ContractApiDialogue as BaseContractApiDialogue,
+)
+from packages.fetchai.protocols.contract_api.dialogues import (
+    ContractApiDialogues as BaseContractApiDialogues,
+)
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue as BaseLedgerApiDialogue,
 )
@@ -85,6 +92,97 @@ class RegisterDialogues(Model, BaseRegisterDialogues):
             self,
             self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
+        )
+
+
+class ContractApiDialogue(BaseContractApiDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[ContractApiMessage] = ContractApiMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseContractApiDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+        self._terms = None  # type: Optional[Terms]
+        self._associated_register_dialogue = None  # type: Optional[RegisterDialogue]
+
+    @property
+    def terms(self) -> Terms:
+        """Get the terms."""
+        if self._terms is None:
+            raise ValueError("Terms not set!")
+        return self._terms
+
+    @terms.setter
+    def terms(self, terms: Terms) -> None:
+        """Set the terms."""
+        enforce(self._terms is None, "Terms already set!")
+        self._terms = terms
+
+    @property
+    def associated_register_dialogue(self) -> RegisterDialogue:
+        """Get the associated register dialogue."""
+        if self._associated_register_dialogue is None:
+            raise ValueError("Associated register dialogue not set!")
+        return self._associated_register_dialogue
+
+    @associated_register_dialogue.setter
+    def associated_register_dialogue(
+        self, associated_register_dialogue: RegisterDialogue
+    ) -> None:
+        """Set the associated register dialogue."""
+        enforce(
+            self._associated_register_dialogue is None,
+            "Associated register dialogue already set!",
+        )
+        self._associated_register_dialogue = associated_register_dialogue
+
+
+class ContractApiDialogues(Model, BaseContractApiDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return ContractApiDialogue.Role.AGENT
+
+        BaseContractApiDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=ContractApiDialogue,
         )
 
 

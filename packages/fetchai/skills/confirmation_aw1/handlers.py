@@ -25,10 +25,13 @@ from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.confirmation_aw1.dialogues import (
+    ContractApiDialogue,
+    ContractApiDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
     RegisterDialogue,
@@ -116,21 +119,25 @@ class AW1RegistrationHandler(Handler):
         )
         if is_valid:
             self.context.logger.info(
-                f"valid registration={register_msg.info}. Requesting funds release."
+                f"valid registration={register_msg.info}. Verifying if tokens staked."
             )
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
+            contract_api_dialogues = cast(
+                ContractApiDialogues, self.context.contract_api_dialogues
             )
+            kwargs = strategy.get_kwargs(register_msg.sender)
             terms = strategy.get_terms(register_msg.sender)
-            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
                 counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=terms,
+                performative=ContractApiMessage.Performative.GET_STATE,
+                ledger_id=strategy.contract_ledger_id,
+                contract_address=strategy.contract_address,
+                callable=strategy.contract_callable,
+                kwargs=ContractApiMessage.Kwargs(kwargs),
             )
-            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-            ledger_api_dialogue.terms = terms
-            ledger_api_dialogue.associated_register_dialogue = register_dialogue
-            self.context.outbox.put_message(ledger_api_msg)
+            contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+            contract_api_dialogue.terms = terms
+            contract_api_dialogue.associated_register_dialogue = register_dialogue
+            self.context.outbox.put_message(contract_api_msg)
         else:
             self.context.logger.info(
                 f"invalid registration={register_msg.info}. Rejecting."
@@ -155,6 +162,146 @@ class AW1RegistrationHandler(Handler):
         """
         self.context.logger.warning(
             f"cannot handle register_msg message of performative={register_msg.performative} in dialogue={register_dialogue}."
+        )
+
+
+class ContractApiHandler(Handler):
+    """Implement the contract api handler."""
+
+    SUPPORTED_PROTOCOL = ContractApiMessage.protocol_id  # type: Optional[PublicId]
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        contract_api_msg = cast(ContractApiMessage, message)
+
+        # recover dialogue
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        contract_api_dialogue = cast(
+            Optional[ContractApiDialogue],
+            contract_api_dialogues.update(contract_api_msg),
+        )
+        if contract_api_dialogue is None:
+            self._handle_unidentified_dialogue(contract_api_msg)
+            return
+
+        # handle message
+        if contract_api_msg.performative is ContractApiMessage.Performative.STATE:
+            self._handle_state(contract_api_msg, contract_api_dialogue)
+        elif contract_api_msg.performative == ContractApiMessage.Performative.ERROR:
+            self._handle_error(contract_api_msg, contract_api_dialogue)
+        else:
+            self._handle_invalid(contract_api_msg, contract_api_dialogue)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+    def _handle_unidentified_dialogue(
+        self, contract_api_msg: ContractApiMessage
+    ) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the message
+        """
+        self.context.logger.info(
+            "received invalid contract_api message={}, unidentified dialogue.".format(
+                contract_api_msg
+            )
+        )
+
+    def _handle_state(
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
+    ) -> None:
+        """
+        Handle a message of raw_message performative.
+
+        :param contract_api_message: the ledger api message
+        :param contract_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.info("received state message={}".format(contract_api_msg))
+        register_dialogue = contract_api_dialogue.associated_register_dialogue
+        register_msg = cast(
+            Optional[RegisterMessage], register_dialogue.last_incoming_message
+        )
+        if register_msg is None:
+            raise ValueError("Could not retrieve fipa message")
+        strategy = cast(Strategy, self.context.strategy)
+        if strategy.has_staked(contract_api_msg.state.body):
+            self.context.logger.info("Has staked! Requesting funds release.")
+            ledger_api_dialogues = cast(
+                LedgerApiDialogues, self.context.ledger_api_dialogues
+            )
+            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
+                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+                terms=contract_api_dialogue.terms,
+            )
+            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
+            ledger_api_dialogue.terms = contract_api_dialogue.terms
+            ledger_api_dialogue.associated_register_dialogue = register_dialogue
+            self.context.outbox.put_message(ledger_api_msg)
+        else:
+            self.context.logger.info(
+                f"invalid registration={register_msg.info}. Rejecting."
+            )
+            reply = register_dialogue.reply(
+                performative=RegisterMessage.Performative.ERROR,
+                error_code=1,
+                error_msg="No funds staked!",
+                info={},
+            )
+            self.context.outbox.put_message(reply)
+
+    def _handle_error(
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
+    ) -> None:
+        """
+        Handle a message of error performative.
+
+        :param contract_api_message: the ledger api message
+        :param contract_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.info(
+            "received ledger_api error message={} in dialogue={}.".format(
+                contract_api_msg, contract_api_dialogue
+            )
+        )
+
+    def _handle_invalid(
+        self,
+        contract_api_msg: ContractApiMessage,
+        contract_api_dialogue: ContractApiDialogue,
+    ) -> None:
+        """
+        Handle a message of invalid performative.
+
+        :param contract_api_message: the ledger api message
+        :param contract_api_dialogue: the ledger api dialogue
+        """
+        self.context.logger.warning(
+            "cannot handle contract_api message of performative={} in dialogue={}.".format(
+                contract_api_msg.performative, contract_api_dialogue,
+            )
         )
 
 
