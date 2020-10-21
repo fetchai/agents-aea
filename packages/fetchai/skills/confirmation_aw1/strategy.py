@@ -17,15 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a model."""
+"""This package contains the strategy model."""
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, cast
 
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
 from packages.fetchai.contracts.staking_erc20.contract import PUBLIC_ID
+from packages.fetchai.skills.confirmation_aw1.registration_db import RegistrationDB
 
 
 REQUIRED_KEYS = [
@@ -72,6 +73,7 @@ class Strategy(Model):
         self._contract_ledger_id = "ethereum"
         self._contract_callable = "get_stake"
         self._contract_id = str(PUBLIC_ID)
+        self._in_process_registrations: Dict[str, Dict[str, str]] = {}
 
     @property
     def contract_id(self) -> str:
@@ -92,6 +94,33 @@ class Strategy(Model):
     def contract_callable(self) -> str:
         """Get the ledger on which the contract is deployed."""
         return self._contract_callable
+
+    def lock_registration_temporarily(self, address: str, info: Dict[str, str]) -> None:
+        """Lock this address for registration."""
+        self._in_process_registrations.update({address: info})
+
+    def finalize_registration(self, address: str) -> None:
+        """Lock this address for registration."""
+        info = self._in_process_registrations.pop(address)
+        self.context.logger.info(
+            f"finalizing registration for address={address}, info={info}"
+        )
+        registration_db = cast(RegistrationDB, self.context.registration_db)
+        registration_db.set_registered(
+            address=address,
+            ethereum_address=info["ethereum_address"],
+            ethereum_signature=info["signature_of_ethereum_address"],
+            fetchai_signature=info["signature_of_fetchai_address"],
+            developer_handle=info["developer_handle"],
+            tweet=info.get("tweet", ""),
+        )
+
+    def unlock_registration(self, address: str) -> None:
+        """Unlock this address for registration."""
+        info = self._in_process_registrations.pop(address, {})
+        self.context.logger.info(
+            f"registration info did not pass staking checks = {info}"
+        )
 
     def valid_registration(
         self, registration_info: Dict[str, str], sender: str
@@ -129,6 +158,11 @@ class Strategy(Model):
             "fetchai",
         ):
             return (False, 1, "ethereum address and signature do not match!")
+        if sender in self._in_process_registrations:
+            return (False, 1, "registration in process for this address!")
+        registration_db = cast(RegistrationDB, self.context.registration_db)
+        if registration_db.is_registered(sender):
+            return (False, 1, "already registered!")
         return (True, 0, "all good!")
 
     @staticmethod

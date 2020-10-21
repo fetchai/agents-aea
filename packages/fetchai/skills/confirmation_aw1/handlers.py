@@ -118,6 +118,9 @@ class AW1RegistrationHandler(Handler):
             register_msg.info, register_msg.sender
         )
         if is_valid:
+            strategy.lock_registration_temporarily(
+                register_msg.sender, register_msg.info
+            )
             self.context.logger.info(
                 f"valid registration={register_msg.info}. Verifying if tokens staked."
             )
@@ -221,9 +224,7 @@ class ContractApiHandler(Handler):
         :param msg: the message
         """
         self.context.logger.info(
-            "received invalid contract_api message={}, unidentified dialogue.".format(
-                contract_api_msg
-            )
+            f"received invalid contract_api message={contract_api_msg}, unidentified dialogue."
         )
 
     def _handle_state(
@@ -237,7 +238,7 @@ class ContractApiHandler(Handler):
         :param contract_api_message: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
-        self.context.logger.info("received state message={}".format(contract_api_msg))
+        self.context.logger.info(f"received state message={contract_api_msg}")
         register_dialogue = contract_api_dialogue.associated_register_dialogue
         register_msg = cast(
             Optional[RegisterMessage], register_dialogue.last_incoming_message
@@ -247,6 +248,7 @@ class ContractApiHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         if strategy.has_staked(contract_api_msg.state.body):
             self.context.logger.info("Has staked! Requesting funds release.")
+            strategy.finalize_registration(register_msg.sender)
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
@@ -260,6 +262,7 @@ class ContractApiHandler(Handler):
             ledger_api_dialogue.associated_register_dialogue = register_dialogue
             self.context.outbox.put_message(ledger_api_msg)
         else:
+            strategy.unlock_registration(register_msg.sender)
             self.context.logger.info(
                 f"invalid registration={register_msg.info}. Rejecting."
             )
@@ -283,9 +286,7 @@ class ContractApiHandler(Handler):
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "received ledger_api error message={} in dialogue={}.".format(
-                contract_api_msg, contract_api_dialogue
-            )
+            f"received ledger_api error message={contract_api_msg} in dialogue={contract_api_dialogue}."
         )
 
     def _handle_invalid(
@@ -300,9 +301,7 @@ class ContractApiHandler(Handler):
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
-            "cannot handle contract_api message of performative={} in dialogue={}.".format(
-                contract_api_msg.performative, contract_api_dialogue,
-            )
+            f"cannot handle contract_api message of performative={contract_api_msg.performative} in dialogue={contract_api_dialogue}."
         )
 
 

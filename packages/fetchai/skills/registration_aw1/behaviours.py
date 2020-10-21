@@ -59,7 +59,7 @@ class AW1RegistrationBehaviour(TickerBehaviour):
                 nonce="",
             ),
         )
-        self.context.logger.info("sending signing_msg to decision maker")
+        self.context.logger.info("sending signing_msg to decision maker...")
         self.context.decision_maker_message_queue.put_nowait(msg)
 
     def act(self) -> None:

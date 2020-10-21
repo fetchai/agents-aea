@@ -102,12 +102,16 @@ class AW1RegistrationHandler(Handler):
         :param register_dialogue: the dialogue
         :return: None
         """
-        self.context.logger.info(
+        self.context.logger.debug(
             f"received register_msg success message={register_msg} in dialogue={register_dialogue}."
+        )
+        self.context.logger.info(
+            f"received register message success, info={register_msg.info}. Stop me now!"
         )
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_registered = True
         strategy.is_registration_pending = False
+        self.context.is_active = False
 
     def _handle_error(
         self, register_msg: RegisterMessage, register_dialogue: RegisterDialogue
@@ -119,11 +123,15 @@ class AW1RegistrationHandler(Handler):
         :param register_dialogue: the dialogue
         :return: None
         """
-        self.context.logger.info(
+        self.context.logger.debug(
             f"received register_msg error message={register_msg} in dialogue={register_dialogue}."
+        )
+        self.context.logger.info(
+            f"received register message error, error_msg={register_msg.error_msg}. Stop me now!"
         )
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_registration_pending = False
+        self.context.is_active = False
 
     def _handle_invalid(
         self, register_msg: RegisterMessage, register_dialogue: RegisterDialogue
@@ -203,8 +211,11 @@ class SigningHandler(Handler):
         :param signing_dialogue: the dialogue
         :return: None
         """
+        self.context.logger.debug(
+            f"received signing message from decision maker, message={signing_msg} in dialogue={signing_dialogue}"
+        )
         self.context.logger.info(
-            f"received signing message from decision maker message={signing_msg} in dialogue={signing_dialogue}"
+            f"received signing message from decision maker, signature={signing_msg.signed_message.body} stored!"
         )
         strategy = cast(Strategy, self.context.strategy)
         strategy.signature_of_ethereum_address = signing_msg.signed_message.body
