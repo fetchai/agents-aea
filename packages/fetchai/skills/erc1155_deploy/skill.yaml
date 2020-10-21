@@ -69,8 +69,8 @@ models:
       from_supply: 10
       ledger_id: ethereum
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       mint_quantities:
       - 100
       - 100

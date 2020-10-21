@@ -57,7 +57,8 @@ class Strategy(Model):
         self._is_registered = False
         self.is_registration_pending = False
         self.signature_of_ethereum_address: Optional[str] = None
-        self._ledger_id = "ethereum"
+        self._ledger_id = "fetchai"
+        self._max_tx_fee = 100
 
     def valid_registration(
         self, registration_info: Dict[str, str], sender: str
@@ -123,13 +124,15 @@ class Strategy(Model):
         :return: the terms
         """
         terms = Terms(
-            ledger_id="fetchai",
+            ledger_id=self._ledger_id,
             sender_address=self.context.agent_address,
             counterparty_address=counterparty,
             amount_by_currency_id={
                 self._token_denomination: self._token_dispense_amount
             },
             quantities_by_good_id={},
-            nonce="",
+            is_sender_payable_tx_fee=True,
+            nonce="some",
+            fee_by_currency_id={self._token_denomination: self._max_tx_fee},
         )
         return terms

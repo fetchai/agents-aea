@@ -274,3 +274,19 @@ class LedgerApis:
         api_class = make_ledger_api_cls(identifier)
         digest = api_class.get_hash(message=message)
         return digest
+
+    @staticmethod
+    def is_valid_address(identifier: str, address: Address) -> bool:
+        """
+        Check if the address is valid.
+
+        :param address: the address to validate
+        """
+        identifier = (
+            identifier
+            if identifier in ledger_apis_registry.supported_ids
+            else DEFAULT_LEDGER
+        )
+        api_class = make_ledger_api_cls(identifier)
+        result = api_class.is_valid_address(address=address)
+        return result

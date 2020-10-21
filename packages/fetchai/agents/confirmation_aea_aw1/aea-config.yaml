@@ -22,6 +22,7 @@ protocols:
 skills:
 - fetchai/confirmation_aw1:0.1.0
 - fetchai/error:0.8.0
+- fetchai/simple_service_registration:0.12.0
 default_connection: fetchai/p2p_libp2p:0.12.0
 default_ledger: fetchai
 default_routing:
@@ -54,3 +55,15 @@ config:
     fetchai:
       address: https://rest-agentworld.prod.fetch-ai.com:443
       chain_id: agentworld-1
+---
+public_id: fetchai/simple_service_registration:0.12.0
+type: skill
+models:
+  strategy:
+    args:
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      service_data:
+        key: registration_service
+        value: aw1-registration

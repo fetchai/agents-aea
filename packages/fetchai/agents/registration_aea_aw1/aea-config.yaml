@@ -38,10 +38,12 @@ type: skill
 models:
   strategy:
     args:
-      ethereum_address: PUT_YOUR_ETHEREUM_ADDRESS_HERE!
-      developer_handle: PUT_YOUR_DEVELOPER_HANDLE_HERE!
-      signature_of_fetchai_address: PUT_YOUR_SIGNATURE_HERE!
-      tweet: PUT_THE_LINK_TO_YOUR_TWEET_HERE!
+      ethereum_address: PUT_YOUR_ETHEREUM_ADDRESS_HERE
+      developer_handle: PUT_YOUR_DEVELOPER_HANDLE_HERE
+      signature_of_fetchai_address: PUT_YOUR_SIGNATURE_HERE
+      tweet: PUT_THE_LINK_TO_YOUR_TWEET_HERE
+      whitelist:
+      - PUT_WHITELIST_ADDRESSES_HERE
 ---
 public_id: fetchai/p2p_libp2p:0.12.0
 type: connection
@@ -63,3 +65,28 @@ config:
     fetchai:
       address: https://rest-agentworld.prod.fetch-ai.com:443
       chain_id: agentworld-1
+---
+public_id: fetchai/simple_service_registration:0.12.0
+type: skill
+models:
+  strategy:
+    args:
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      service_data:
+        key: agentworld-1
+        value: PUT_YOUR_DEVELOPER_HANDLE_HERE
+---
+public_id: fetchai/simple_service_search:0.1.0
+type: skill
+models:
+  strategy:
+    args:
+      search_location:
+        latitude: 51.5194
+        longitude: 0.127
+      search_query:
+        constraint_type: ==
+        search_key: registration_service
+        search_value: aw1-registration

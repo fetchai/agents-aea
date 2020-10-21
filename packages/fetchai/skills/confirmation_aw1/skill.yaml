@@ -2,14 +2,15 @@ name: confirmation_aw1
 author: fetchai
 version: 0.1.0
 type: skill
-description: The scaffold skill is a scaffold for your own skill implementation.
+description: The confirmation_aw1 skill is a skill to confirm registration for Agent
+  World 1.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmSRjWPGDeLsKZYQoBKLRG59WS7b7RYMrPNcNxDSaBFxCW
-  dialogues.py: QmR9YQvt8bMwHGeAVr2JPWMXs8Gp5NoDD8UTHcyNmS8GrC
+  dialogues.py: QmPo9vc8Msp8Bi5aFgg5BZas1tZqn7K1FgeiwMu1Sqai2Z
   handlers.py: QmaR9AgwankLMjsBGmtUkHNKymujkfoG7TkcDG45v9ut12
-  strategy.py: QmXyEPn4cptMgjQigh9XkP466wGH3Y36pnBXjgh12KEqmt
+  strategy.py: Qmc1UGa8abWhkmVFmJr9rBmWDD3D82eMiWiAoMsmHhUcYb
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:

@@ -54,8 +54,8 @@ models:
       item_setup_timeout: 0
       ledger_id: ethereum
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000

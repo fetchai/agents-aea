@@ -21,6 +21,7 @@
 
 from typing import Dict, List, Optional
 
+from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.skills.base import Model
 
@@ -44,7 +45,8 @@ class Strategy(Model):
         """
         ethereum_address = kwargs.pop("ethereum_address", DEFAULT_ETHEREUM_ADDRESS)
         enforce(
-            ethereum_address != DEFAULT_ETHEREUM_ADDRESS,
+            ethereum_address != DEFAULT_ETHEREUM_ADDRESS
+            and LedgerApis.is_valid_address("ethereum", ethereum_address),
             f"Not a valid ethereum_address: {ethereum_address}",
         )
         self._ethereum_address = ethereum_address
@@ -52,17 +54,20 @@ class Strategy(Model):
             "signature_of_fetchai_address", DEFAULT_SIGNATURE_OF_FETCHAI_ADDRESS
         )
         enforce(
-            signature_of_fetchai_address != DEFAULT_SIGNATURE_OF_FETCHAI_ADDRESS,
+            signature_of_fetchai_address != DEFAULT_SIGNATURE_OF_FETCHAI_ADDRESS
+            and isinstance(signature_of_fetchai_address, str),
             f"Not a valid signature_of_fetchai_address: {signature_of_fetchai_address}",
         )
         self._signature_of_fetchai_address = signature_of_fetchai_address
         developer_handle = kwargs.pop("developer_handle", DEFAULT_DEVELOPER_HANDLE)
         enforce(
-            developer_handle != DEFAULT_DEVELOPER_HANDLE,
+            developer_handle != DEFAULT_DEVELOPER_HANDLE
+            and isinstance(developer_handle, str),
             f"Not a valid developer_handle: {developer_handle}",
         )
         self._developer_handle = developer_handle
         tweet = kwargs.pop("tweet", DEFAULT_TWEET)
+        enforce(isinstance(tweet, str), "Not a valid tweet link")
         self._tweet = tweet
         self._shared_storage_key = kwargs.pop(
             "shared_storage_key", DEFAULT_SHARED_STORAGE_KEY
@@ -73,7 +78,7 @@ class Strategy(Model):
         self._is_registered = False
         self.is_registration_pending = False
         self.signature_of_ethereum_address: Optional[str] = None
-        self._ledger_id = "ethereum"
+        self._ledger_id = "fetchai"
 
     @property
     def shared_storage_key(self) -> str:

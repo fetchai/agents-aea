@@ -31,7 +31,7 @@ reply:
   success: []
   error: []
 termination: [success, error]
-roles: {agent, agent}
+roles: {agent}
 end_states: [successful, failed]
 ...
 ```

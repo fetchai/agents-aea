@@ -2,24 +2,27 @@ name: registration_aw1
 author: fetchai
 version: 0.1.0
 type: skill
-description: The scaffold skill is a scaffold for your own skill implementation.
+description: The registration_aw1 skill is a skill for registration in Agent World
+  1.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmUVY3sShwwnypNPRCYhAcuYH2nXu6S21ChQmEsCVpfg2y
-  behaviours.py: QmV8pJLkdN6cK4fi3W2hTBqrkSVAc2L6zLGn9grAoZVoAe
-  dialogues.py: QmYswuH1ts6gFSVXyY8m7YLtts8fATYKQ2pcP7dEXMfp9v
+  behaviours.py: QmVfrEBaFxjwhmSyCKQBVyqC6BMPuafKAjzwvDW6u4GwUs
+  dialogues.py: QmP6k3UcXDHoSMH6DZGeDUbR5EyVe2yevXLYCj9EAPo45j
   handlers.py: QmX6nMK4uuDEDfvUUApgcAg5bdqYM2jGFuA9pbXiHHtxcz
-  strategy.py: QmWUh63RsTcphMgwy9Pxe5iN4gosnfiRoKD1NNufnsA35L
+  strategy.py: QmP3EDgFgQpzkBqaWYdPJqkfoZv8e6pCB74GvZrF7rKNwk
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/register:0.1.0
 - fetchai/signing:0.6.0
-skills: []
+skills:
+- fetchai/simple_service_search:0.1.0
 behaviours:
   registration:
-    args: {}
+    args:
+      tick_interval: 10
     class_name: AW1RegistrationBehaviour
 handlers:
   registration:

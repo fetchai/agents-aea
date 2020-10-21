@@ -60,7 +60,7 @@ class AW1RegistrationBehaviour(TickerBehaviour):
             ),
         )
         self.context.logger.info("sending signing_msg to decision maker")
-        self.context.outbox.put_message(msg)
+        self.context.decision_maker_message_queue.put_nowait(msg)
 
     def act(self) -> None:
         """
