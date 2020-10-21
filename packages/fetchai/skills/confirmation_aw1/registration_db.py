@@ -75,9 +75,9 @@ class RegistrationDB(Model):
 
     def is_registered(self, address: str) -> bool:
         """Check if an address is registered."""
-        result = self._execute_single_sql(
-            f"SELECT * FROM registered_table WHERE address='{address}'"
-        )
+        command = "SELECT * FROM registered_table WHERE address=?"
+        variables = (address,)
+        result = self._execute_single_sql(command, variables)
         return len(result) != 0
 
     def _execute_single_sql(

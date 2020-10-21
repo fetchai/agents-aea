@@ -111,6 +111,7 @@ class AW1RegistrationBehaviour(TickerBehaviour):
         register_dialogues = cast(RegisterDialogues, self.context.register_dialogues)
         for agent in aw1_registration_aeas:
             if agent not in whitelist:
+                self.context.logger.info(f"agent={agent} not in whitelist={whitelist}")
                 return
             msg, _ = register_dialogues.create(
                 counterparty=agent,

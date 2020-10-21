@@ -108,7 +108,6 @@ class Strategy(Model):
     @is_ready_to_register.setter
     def is_ready_to_register(self, is_ready_to_register: bool) -> None:
         """Set readiness for registration."""
-        enforce(not self._is_ready_to_register, "Can only switch to true.")
         self._is_ready_to_register = is_ready_to_register
 
     @property

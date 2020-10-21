@@ -31,6 +31,28 @@ private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
+  formatters:
+    standard:
+      format: '[%(levelname)s]: %(message)s'
+    extra:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    logfile:
+      class: logging.FileHandler
+      formatter: extra
+      level: DEBUG
+      filename: all.log
+    console:
+      class: logging.StreamHandler
+      formatter: standard
+      level: INFO
+  loggers:
+    aea:
+      handlers:
+      - logfile
+      - console
+      level: DEBUG
+      propagate: false
 registry_path: ../packages
 ---
 public_id: fetchai/registration_aw1:0.1.0

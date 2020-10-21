@@ -111,7 +111,7 @@ class AW1RegistrationHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_registered = True
         strategy.is_registration_pending = False
-        self.context.is_active = False
+        strategy.is_ready_to_register = False
 
     def _handle_error(
         self, register_msg: RegisterMessage, register_dialogue: RegisterDialogue
@@ -131,7 +131,7 @@ class AW1RegistrationHandler(Handler):
         )
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_registration_pending = False
-        self.context.is_active = False
+        strategy.is_ready_to_register = False
 
     def _handle_invalid(
         self, register_msg: RegisterMessage, register_dialogue: RegisterDialogue

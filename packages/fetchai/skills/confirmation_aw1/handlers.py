@@ -288,6 +288,14 @@ class ContractApiHandler(Handler):
         self.context.logger.info(
             f"received ledger_api error message={contract_api_msg} in dialogue={contract_api_dialogue}."
         )
+        register_dialogue = contract_api_dialogue.associated_register_dialogue
+        register_msg = cast(
+            Optional[RegisterMessage], register_dialogue.last_incoming_message
+        )
+        if register_msg is None:
+            raise ValueError("Could not retrieve fipa message")
+        strategy = cast(Strategy, self.context.strategy)
+        strategy.unlock_registration(register_msg.sender)
 
     def _handle_invalid(
         self,
