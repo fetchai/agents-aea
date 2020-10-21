@@ -31,7 +31,7 @@ import subprocess  # nosec
 import sys
 import time
 import types
-from collections import UserString, defaultdict, deque
+from collections import OrderedDict, UserString, defaultdict, deque
 from copy import copy
 from functools import wraps
 from pathlib import Path
@@ -311,6 +311,16 @@ def exception_log_and_reraise(log_method: Callable, message: str):
         raise
 
 
+def _is_dict_like(obj: Any) -> bool:
+    """
+    Check whether an object is dict-like (i.e. either dict or OrderedDict).
+
+    :param obj: the object to test.
+    :return: True if the object is dict-like, False otherwise.
+    """
+    return type(obj) in {dict, OrderedDict}
+
+
 def recursive_update(to_update: Dict, new_values: Dict) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.
@@ -336,12 +346,17 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
         value_to_update = to_update[key]
         value_type = type(value)
         value_to_update_type = type(value_to_update)
-        if value_type != value_to_update_type and value is not None:
+        both_are_dict = _is_dict_like(value) and _is_dict_like(value_to_update)
+        if (
+            not both_are_dict
+            and value_type != value_to_update_type
+            and value is not None
+        ):
             raise ValueError(
                 f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."
             )
 
-        if value_type == value_to_update_type == dict:
+        if both_are_dict:
             recursive_update(value_to_update, value)
         else:
             to_update[key] = value
