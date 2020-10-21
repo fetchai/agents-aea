@@ -385,6 +385,11 @@ func (dhtPeer *DHTPeer) getLoggers() (func(error) *zerolog.Event, func() *zerolo
 	return lerror, lwarn, linfo, ldebug
 }
 
+// SetLogLevel set utils logger level
+func (dhtPeer *DHTPeer) SetLogLevel(lvl zerolog.Level) {
+	dhtPeer.logger = dhtPeer.logger.Level(lvl)
+}
+
 // Close stops the DHTPeer
 func (dhtPeer *DHTPeer) Close() []error {
 	var err error
