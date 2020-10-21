@@ -34,7 +34,7 @@ REQUIRED_KEYS = [
     "developer_handle",
 ]
 DEFAULT_TOKEN_DISPENSE_AMOUNT = 100000
-DEFAULT_TOKEN_DENOMINATION = "atestfet"
+DEFAULT_TOKEN_DENOMINATION = "atestfet"  # nosec
 
 
 class Strategy(Model):
