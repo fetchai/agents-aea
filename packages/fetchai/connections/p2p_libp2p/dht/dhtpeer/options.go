@@ -24,6 +24,7 @@ import (
 	"fmt"
 
 	"github.com/multiformats/go-multiaddr"
+	"github.com/rs/zerolog"
 
 	utils "libp2p_node/utils"
 )
@@ -109,4 +110,20 @@ func EnableRelayService() Option {
 		return nil
 	}
 
+}
+
+// LoggingLevel for dhtpeer.New
+func LoggingLevel(lvl zerolog.Level) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.logger = dhtPeer.logger.Level(lvl)
+		return nil
+	}
+}
+
+// EnablePrometheusMonitoring for dhtpeer.New
+func EnablePrometheusMonitoring(port uint16) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.monitoringPort = port
+		return nil
+	}
 }

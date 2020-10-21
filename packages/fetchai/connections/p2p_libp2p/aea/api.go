@@ -58,23 +58,25 @@ type Pipe interface {
 */
 
 type AeaApi struct {
-	msgin_path    string
-	msgout_path   string
-	agent_addr    string
-	id            string
-	entry_peers   []string
-	host          string
-	port          uint16
-	host_public   string
-	port_public   uint16
-	host_delegate string
-	port_delegate uint16
-	pipe          Pipe
-	out_queue     chan *Envelope
-	closing       bool
-	connected     bool
-	sandbox       bool
-	standalone    bool
+	msgin_path      string
+	msgout_path     string
+	agent_addr      string
+	id              string
+	entry_peers     []string
+	host            string
+	port            uint16
+	host_public     string
+	port_public     uint16
+	host_delegate   string
+	port_delegate   uint16
+	host_monitoring string
+	port_monitoring uint16
+	pipe            Pipe
+	out_queue       chan *Envelope
+	closing         bool
+	connected       bool
+	sandbox         bool
+	standalone      bool
 }
 
 func (aea AeaApi) AeaAddress() string {
@@ -95,6 +97,10 @@ func (aea AeaApi) PublicAddress() (string, uint16) {
 
 func (aea AeaApi) DelegateAddress() (string, uint16) {
 	return aea.host_delegate, aea.port_delegate
+}
+
+func (aea AeaApi) MonitoringAddress() (string, uint16) {
+	return aea.host_monitoring, aea.port_monitoring
 }
 
 func (aea AeaApi) EntryPeers() []string {
@@ -161,6 +167,7 @@ func (aea *AeaApi) Init() error {
 	uri := os.Getenv("AEA_P2P_URI")
 	uri_public := os.Getenv("AEA_P2P_URI_PUBLIC")
 	uri_delegate := os.Getenv("AEA_P2P_DELEGATE_URI")
+	uri_monitoring := os.Getenv("AEA_P2P_URI_MONITORING")
 	logger.Debug().Msgf("msgin_path: %s", aea.msgin_path)
 	logger.Debug().Msgf("msgout_path: %s", aea.msgout_path)
 	logger.Debug().Msgf("id: %s", aea.id)
@@ -235,6 +242,22 @@ func (aea *AeaApi) Init() error {
 	} else {
 		aea.host_delegate = ""
 		aea.port_delegate = 0
+	}
+
+	// parse monitoring uri
+	if uri_monitoring != "" {
+		parts = strings.SplitN(uri_monitoring, ":", -1)
+		if len(parts) < 2 {
+			err := errors.New("malformed Uri " + uri_monitoring)
+			logger.Error().Str("err", err.Error()).Msg("")
+			return err
+		}
+		aea.host_monitoring = parts[0]
+		port, _ = strconv.ParseUint(parts[1], 10, 16)
+		aea.port_monitoring = uint16(port)
+	} else {
+		aea.host_monitoring = ""
+		aea.port_monitoring = 0
 	}
 
 	// parse entry peers multiaddrs
