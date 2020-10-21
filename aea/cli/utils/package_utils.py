@@ -528,9 +528,9 @@ def _override_ledger_configurations(agent_config: AgentConfig) -> None:
     ledger_component_id = ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION)
     if ledger_component_id not in agent_config.component_configurations:
         return
-    ledger_apis_config = agent_config.component_configurations[ledger_component_id].get(
-        "ledger_apis", {}
-    )
+    ledger_apis_config = agent_config.component_configurations[ledger_component_id][
+        "config"
+    ].get("ledger_apis", {})
     recursive_update(LedgerApis.ledger_api_configs, ledger_apis_config)
 
 
