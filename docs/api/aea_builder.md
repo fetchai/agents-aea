@@ -757,6 +757,16 @@ the AEA object.
 
 - `ValueError`: if we cannot
 
+<a name="aea.aea_builder.AEABuilder.find_component_directory_from_component_id"></a>
+#### find`_`component`_`directory`_`from`_`component`_`id
+
+```python
+ | @staticmethod
+ | find_component_directory_from_component_id(aea_project_directory: Path, component_id: ComponentId) -> Path
+```
+
+Find a component directory from component id.
+
 <a name="aea.aea_builder.AEABuilder.set_from_configuration"></a>
 #### set`_`from`_`configuration
 
