@@ -21,9 +21,9 @@
 from pathlib import Path
 from typing import cast
 
-from aea.protocols.default.message import DefaultMessage
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.dialogues import (

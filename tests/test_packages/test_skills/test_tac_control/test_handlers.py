@@ -21,12 +21,14 @@
 import logging
 from pathlib import Path
 from typing import cast
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 
-from aea.protocols.default.message import DefaultMessage
+import pytest
+
 from aea.protocols.dialogue.base import DialogueMessage, Dialogues
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.dialogues import (
@@ -388,18 +390,26 @@ class TestGenericTacHandler(BaseSkillTestCase):
         """Test the _on_transaction method of the tac handler where the transaction is valid."""
         # setup
         self.game._phase = Phase.GAME
-        dialogue = self.prepare_skill_dialogue(
-            self.tac_dialogues, self.list_of_messages[:2]
+
+        tac_participant_sender = COUNTERPARTY_ADDRESS
+        tac_participant_counterparty = "counterparties_counterparty"
+
+        counterparty_dialogue = self.prepare_skill_dialogue(
+            self.tac_dialogues, self.list_of_messages[:2], tac_participant_counterparty
         )
+        self_dialogue = self.prepare_skill_dialogue(
+            self.tac_dialogues, self.list_of_messages[:2],
+        )
+
         ledger_id = "some_ledger"
-        sender_address = COUNTERPARTY_ADDRESS
-        counterparty_address = self.skill.skill_context.agent_address
         good_ids = ["G1"]
         nonce = "some_nonce"
+        amount_by_currency_id = {"FET": 1}
+        quantities_by_good_id = {"G1": 1}
         tx_id = Transaction.get_hash(
             ledger_id=ledger_id,
-            sender_address=sender_address,
-            counterparty_address=counterparty_address,
+            sender_address=tac_participant_sender,
+            counterparty_address=tac_participant_counterparty,
             good_ids=good_ids,
             sender_supplied_quantities=[1],
             counterparty_supplied_quantities=[0],
@@ -407,29 +417,341 @@ class TestGenericTacHandler(BaseSkillTestCase):
             counterparty_payable_amount=1,
             nonce=nonce,
         )
-        incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=dialogue,
-            performative=TacMessage.Performative.TRANSACTION,
+        incoming_message = cast(
+            TacMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=self_dialogue,
+                performative=TacMessage.Performative.TRANSACTION,
+                transaction_id=tx_id,
+                ledger_id=ledger_id,
+                sender_address=tac_participant_sender,
+                counterparty_address=tac_participant_counterparty,
+                amount_by_currency_id=amount_by_currency_id,
+                fee_by_currency_id={"FET": 2},
+                quantities_by_good_id=quantities_by_good_id,
+                nonce=nonce,
+                sender_signature="some_signature",
+                counterparty_signature="some_other_signature",
+            ),
+        )
+        tx = Transaction.from_message(incoming_message)
+
+        mocked_holdings_summary = "some_holdings_summary"
+
+        # operation
+        with patch.object(
+            type(self.game),
+            "holdings_summary",
+            new_callable=PropertyMock,
+            return_value=mocked_holdings_summary,
+        ):
+            with patch.object(self.game, "is_transaction_valid", return_value=True):
+                with patch.object(self.game, "settle_transaction"):
+                    with patch.object(
+                        self.tac_handler.context.logger, "log"
+                    ) as mock_logger:
+                        self.tac_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(2)
+
+        # _on_transaction
+        mock_logger.assert_any_call(logging.DEBUG, f"handling transaction: {tx}")
+
+        # _handle_valid_transaction
+        mock_logger.assert_any_call(
+            logging.INFO, f"handling valid transaction: {tx_id[-10:]}"
+        )
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=TacMessage,
+            performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
+            to=tac_participant_sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
             transaction_id=tx_id,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+        )
+        assert has_attributes, error_str
+
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=TacMessage,
+            performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
+            to=tac_participant_counterparty,
+            sender=self.skill.skill_context.agent_address,
+            target=counterparty_dialogue.last_message.message_id - 1,
+            transaction_id=tx.counterparty_hash,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+        )
+        assert has_attributes, error_str
+        mock_logger.assert_any_call(
+            logging.INFO, f"transaction '{tx_id[-10:]}' settled successfully."
+        )
+        mock_logger.assert_any_call(
+            logging.INFO, f"current state:\n{mocked_holdings_summary}"
+        )
+
+    def test_handle_valid_transaction_recovered_tac_dialogue_not_1(self):
+        """Test the _handle_valid_transaction method of the tac handler where the number of recivered tac dialogues is 0."""
+        # setup
+        self.game._phase = Phase.GAME
+
+        tac_participant_sender = COUNTERPARTY_ADDRESS
+        tac_participant_counterparty = "counterparties_counterparty"
+
+        self_dialogue = self.prepare_skill_dialogue(
+            self.tac_dialogues, self.list_of_messages[:2],
+        )
+
+        ledger_id = "some_ledger"
+        good_ids = ["G1"]
+        nonce = "some_nonce"
+        amount_by_currency_id = {"FET": 1}
+        quantities_by_good_id = {"G1": 1}
+        tx_id = Transaction.get_hash(
             ledger_id=ledger_id,
-            sender_address=sender_address,
-            counterparty_address=counterparty_address,
-            amount_by_currency_id={"FET": 1},
-            fee_by_currency_id={"FET": 2},
-            quantities_by_good_id={"G1": 1},
+            sender_address=tac_participant_sender,
+            counterparty_address=tac_participant_counterparty,
+            good_ids=good_ids,
+            sender_supplied_quantities=[1],
+            counterparty_supplied_quantities=[0],
+            sender_payable_amount=0,
+            counterparty_payable_amount=1,
             nonce=nonce,
-            sender_signature="some_signature",
-            counterparty_signature="some_other_signature",
+        )
+        incoming_message = cast(
+            TacMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=self_dialogue,
+                performative=TacMessage.Performative.TRANSACTION,
+                transaction_id=tx_id,
+                ledger_id=ledger_id,
+                sender_address=tac_participant_sender,
+                counterparty_address=tac_participant_counterparty,
+                amount_by_currency_id=amount_by_currency_id,
+                fee_by_currency_id={"FET": 2},
+                quantities_by_good_id=quantities_by_good_id,
+                nonce=nonce,
+                sender_signature="some_signature",
+                counterparty_signature="some_other_signature",
+            ),
+        )
+        tx = Transaction.from_message(incoming_message)
+
+        mocked_holdings_summary = "some_holdings_summary"
+
+        # operation
+        with patch.object(
+            type(self.game),
+            "holdings_summary",
+            new_callable=PropertyMock,
+            return_value=mocked_holdings_summary,
+        ):
+            with patch.object(self.game, "is_transaction_valid", return_value=True):
+                with patch.object(self.game, "settle_transaction"):
+                    with patch.object(
+                        self.tac_handler.context.logger, "log"
+                    ) as mock_logger:
+                        with pytest.raises(
+                            ValueError, match="Error when retrieving dialogue."
+                        ):
+                            self.tac_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        # _on_transaction
+        mock_logger.assert_any_call(logging.DEBUG, f"handling transaction: {tx}")
+
+        # _handle_valid_transaction
+        mock_logger.assert_any_call(
+            logging.INFO, f"handling valid transaction: {tx_id[-10:]}"
+        )
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=TacMessage,
+            performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
+            to=tac_participant_sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+            transaction_id=tx_id,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+        )
+        assert has_attributes, error_str
+
+    def test_handle_valid_transaction_no_last_message(self):
+        """Test the _handle_valid_transaction method of the tac handler where the recovered dialogue is empty."""
+        # setup
+        self.game._phase = Phase.GAME
+
+        tac_participant_sender = COUNTERPARTY_ADDRESS
+        tac_participant_counterparty = "counterparties_counterparty"
+
+        counterparty_dialogue = self.prepare_skill_dialogue(
+            self.tac_dialogues, self.list_of_messages[:2], tac_participant_counterparty
+        )
+        self_dialogue = self.prepare_skill_dialogue(
+            self.tac_dialogues, self.list_of_messages[:2],
+        )
+        counterparty_dialogue._incoming_messages = []
+        counterparty_dialogue._outgoing_messages = []
+
+        ledger_id = "some_ledger"
+        good_ids = ["G1"]
+        nonce = "some_nonce"
+        amount_by_currency_id = {"FET": 1}
+        quantities_by_good_id = {"G1": 1}
+        tx_id = Transaction.get_hash(
+            ledger_id=ledger_id,
+            sender_address=tac_participant_sender,
+            counterparty_address=tac_participant_counterparty,
+            good_ids=good_ids,
+            sender_supplied_quantities=[1],
+            counterparty_supplied_quantities=[0],
+            sender_payable_amount=0,
+            counterparty_payable_amount=1,
+            nonce=nonce,
+        )
+        incoming_message = cast(
+            TacMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=self_dialogue,
+                performative=TacMessage.Performative.TRANSACTION,
+                transaction_id=tx_id,
+                ledger_id=ledger_id,
+                sender_address=tac_participant_sender,
+                counterparty_address=tac_participant_counterparty,
+                amount_by_currency_id=amount_by_currency_id,
+                fee_by_currency_id={"FET": 2},
+                quantities_by_good_id=quantities_by_good_id,
+                nonce=nonce,
+                sender_signature="some_signature",
+                counterparty_signature="some_other_signature",
+            ),
+        )
+        tx = Transaction.from_message(incoming_message)
+
+        mocked_holdings_summary = "some_holdings_summary"
+
+        # operation
+        with patch.object(
+            type(self.game),
+            "holdings_summary",
+            new_callable=PropertyMock,
+            return_value=mocked_holdings_summary,
+        ):
+            with patch.object(self.game, "is_transaction_valid", return_value=True):
+                with patch.object(self.game, "settle_transaction"):
+                    with patch.object(
+                        self.tac_handler.context.logger, "log"
+                    ) as mock_logger:
+                        with pytest.raises(
+                            ValueError, match="Error when retrieving last message."
+                        ):
+                            self.tac_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        # _on_transaction
+        mock_logger.assert_any_call(logging.DEBUG, f"handling transaction: {tx}")
+
+        # _handle_valid_transaction
+        mock_logger.assert_any_call(
+            logging.INFO, f"handling valid transaction: {tx_id[-10:]}"
+        )
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=TacMessage,
+            performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
+            to=tac_participant_sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+            transaction_id=tx_id,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+        )
+        assert has_attributes, error_str
+
+    def test_on_transaction_invalid(self):
+        """Test the _on_transaction method of the tac handler where the transaction is invalid."""
+        # setup
+        self.game._phase = Phase.GAME
+
+        tac_participant_sender = COUNTERPARTY_ADDRESS
+        tac_participant_counterparty = "counterparties_counterparty"
+
+        self_dialogue = self.prepare_skill_dialogue(
+            self.tac_dialogues, self.list_of_messages[:2],
+        )
+
+        ledger_id = "some_ledger"
+        good_ids = ["G1"]
+        nonce = "some_nonce"
+        amount_by_currency_id = {"FET": 1}
+        quantities_by_good_id = {"G1": 1}
+        tx_id = Transaction.get_hash(
+            ledger_id=ledger_id,
+            sender_address=tac_participant_sender,
+            counterparty_address=tac_participant_counterparty,
+            good_ids=good_ids,
+            sender_supplied_quantities=[1],
+            counterparty_supplied_quantities=[0],
+            sender_payable_amount=0,
+            counterparty_payable_amount=1,
+            nonce=nonce,
+        )
+        incoming_message = cast(
+            TacMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=self_dialogue,
+                performative=TacMessage.Performative.TRANSACTION,
+                transaction_id=tx_id,
+                ledger_id=ledger_id,
+                sender_address=tac_participant_sender,
+                counterparty_address=tac_participant_counterparty,
+                amount_by_currency_id=amount_by_currency_id,
+                fee_by_currency_id={"FET": 2},
+                quantities_by_good_id=quantities_by_good_id,
+                nonce=nonce,
+                sender_signature="some_signature",
+                counterparty_signature="some_other_signature",
+            ),
         )
         tx = Transaction.from_message(incoming_message)
 
         # operation
-        with patch.object(self.tac_handler.context.logger, "log") as mock_logger:
-            with patch.object(self.game, "is_transaction_valid", return_value=True):
+        with patch.object(self.game, "is_transaction_valid", return_value=False):
+            with patch.object(self.tac_handler.context.logger, "log") as mock_logger:
                 self.tac_handler.handle(incoming_message)
 
         # after
-        mock_logger.assert_any_call(logging.WARNING, f"handling transaction: '{tx}'")
+        self.assert_quantity_in_outbox(1)
+
+        # _on_transaction
+        mock_logger.assert_any_call(logging.DEBUG, f"handling transaction: {tx}")
+
+        # _handle_invalid_transaction
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"handling invalid transaction: {tx_id}, tac_msg={incoming_message}",
+        )
+
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=TacMessage,
+            performative=TacMessage.Performative.TAC_ERROR,
+            to=tac_participant_sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+            error_code=TacMessage.ErrorCode.TRANSACTION_NOT_VALID,
+            info={"transaction_id": tx_id},
+        )
+        assert has_attributes, error_str
 
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the fipa handler."""
