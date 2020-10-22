@@ -162,7 +162,7 @@ First, run the weather station AEA:
 aea run
 ```
 
-Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
 
 Then, update the configuration of the weather client AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
 
