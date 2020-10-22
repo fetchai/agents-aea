@@ -24,13 +24,19 @@ from unittest import mock
 
 import pytest
 
-from aea.crypto.cosmos import CosmosApi
-from aea.crypto.ethereum import EthereumApi
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.cosmos import CosmosApi, CosmosCrypto
+from aea.crypto.ethereum import EthereumApi, EthereumCrypto
 from aea.crypto.fetchai import FetchAIApi
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import AEAEnforceError
 
-from tests.conftest import COSMOS, COSMOS_ADDRESS_ONE, ETHEREUM_ADDRESS_ONE
+from tests.conftest import (
+    COSMOS,
+    COSMOS_ADDRESS_ONE,
+    ETHEREUM_ADDRESS_ONE,
+    FETCHAI_ADDRESS_ONE,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -167,3 +173,10 @@ class TestLedgerApis:
         """Test generate_tx_nonce positive result."""
         result = LedgerApis.generate_tx_nonce(CosmosApi.identifier, "seller", "client")
         assert int(result, 16)
+
+
+def test_is_valid_address():
+    """Test LedgerApis.is_valid_address."""
+    assert LedgerApis.is_valid_address(DEFAULT_LEDGER, FETCHAI_ADDRESS_ONE)
+    assert LedgerApis.is_valid_address(EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE)
+    assert LedgerApis.is_valid_address(CosmosCrypto.identifier, COSMOS_ADDRESS_ONE)

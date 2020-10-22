@@ -26,7 +26,11 @@ import click
 from aea.cli.get_address import _try_get_address
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import get_wallet_from_context, try_get_balance
+from aea.cli.utils.package_utils import (
+    _override_ledger_configurations,
+    get_wallet_from_context,
+    try_get_balance,
+)
 from aea.common import Address
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import ledger_apis_registry
@@ -126,6 +130,7 @@ def do_transfer(
     wallet = get_wallet_from_context(ctx)
     source_address = wallet.addresses[identifier]
 
+    _override_ledger_configurations(ctx.agent_config)
     balance = int(try_get_balance(ctx.agent_config, wallet, identifier))
     total_payable = amount + tx_fee
     if total_payable > balance:

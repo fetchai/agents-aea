@@ -44,8 +44,6 @@ from aea.crypto.wallet import Wallet
 from aea.helpers.transaction.base import SignedTransaction
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.registries.base import (
     AgentComponentRegistry,
     ComponentRegistry,
@@ -54,6 +52,9 @@ from aea.registries.base import (
 )
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
+
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
@@ -81,7 +82,7 @@ class TestContractRegistry:
         cls.mocked_logger = cls.patch.start()
         cls.registry.register(contract.component_id, cast(Contract, contract))
         cls.expected_contract_ids = {
-            PublicId.from_str("fetchai/erc1155:0.11.0"),
+            PublicId.from_str("fetchai/erc1155:0.12.0"),
         }
 
     def test_fetch_all(self):
@@ -92,14 +93,14 @@ class TestContractRegistry:
 
     def test_fetch(self):
         """Test that the `fetch` method works as expected."""
-        contract_id = PublicId.from_str("fetchai/erc1155:0.11.0")
+        contract_id = PublicId.from_str("fetchai/erc1155:0.12.0")
         contract = self.registry.fetch(ComponentId(ComponentType.CONTRACT, contract_id))
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.11.0")
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.12.0")
         component_id = ComponentId(ComponentType.CONTRACT, contract_id_removed)
         contract_removed = self.registry.fetch(component_id)
         self.registry.unregister(contract_removed.component_id)
@@ -145,7 +146,9 @@ class TestProtocolRegistry:
         cls.patch = unittest.mock.patch.object(cls.registry.logger, "exception")
         cls.mocked_logger = cls.patch.start()
 
-        protocol_1 = Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
+        protocol_1 = Protocol.from_dir(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        )
         protocol_2 = Protocol.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"),
         )
@@ -154,7 +157,7 @@ class TestProtocolRegistry:
 
         cls.expected_protocol_ids = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/fipa:0.8.0"),
+            PublicId.from_str("fetchai/fipa:0.9.0"),
         }
 
     def test_fetch_all(self):
@@ -228,7 +231,9 @@ class TestResources:
         cls.resources = Resources()
 
         cls.resources.add_component(
-            Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
+            Protocol.from_dir(
+                Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+            )
         )
         cls.resources.add_component(
             Skill.from_dir(
@@ -238,7 +243,7 @@ class TestResources:
         )
         cls.resources.add_component(
             Skill.from_dir(
-                Path(aea.AEA_DIR, "skills", "error"),
+                Path(ROOT_DIR, "packages", "fetchai", "skills", "error"),
                 agent_context=MagicMock(agent_name="name"),
             )
         )
@@ -246,7 +251,7 @@ class TestResources:
         cls.error_skill_public_id = DEFAULT_SKILL
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
-        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.11.0")
+        cls.contract_public_id = PublicId.from_str("fetchai/erc1155:0.12.0")
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""

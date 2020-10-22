@@ -4,13 +4,13 @@ version: 0.1.0
 type: skill
 description: a skill for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmejjdhqVfgR3ABQbUFT5xwjAwTt9MvPTpGd9oC2xHKzY4
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.7.0
+- fetchai/default:0.8.0
 skills: []
 behaviours: {}
 handlers: {}

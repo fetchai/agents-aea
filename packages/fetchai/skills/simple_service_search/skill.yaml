@@ -1,0 +1,45 @@
+name: simple_service_search
+author: fetchai
+version: 0.1.0
+type: skill
+description: A simple search skill utilising the SOEF search node.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmS951sLBAf5CjdBidavwDqxbK4gBBF6Xcb6q1nEdNiomo
+  behaviours.py: QmYrWTnVoMa3npvV4HSYphyRBdcV1kzY42v8MMmy6Yhzm3
+  dialogues.py: QmeCMkqzA7ZQNUdTc3x4WqeF3Uz2DjeSYuLufy6fKXaiqR
+  handlers.py: QmWWTnuD5FYBxDPwBJpR4TwrXLDwpryYC8AXW9mbfkEoPp
+  strategy.py: QmTQpcmsLiGBVb1QDeh5W7HS38pPH1VuxXUpT9c1L5cUrv
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/oef_search:0.9.0
+skills: []
+behaviours:
+  my_search_behaviour:
+    args:
+      tick_interval: 30
+    class_name: ServiceSearchBehaviour
+handlers:
+  my_search_handler:
+    args: {}
+    class_name: OefSearchHandler
+models:
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  strategy:
+    args:
+      search_location:
+        latitude: 51.5194
+        longitude: 0.127
+      search_query:
+        constraint_type: ==
+        search_key: seller_service
+        search_value: generic_service
+      search_radius: 5.0
+      shared_storage_key: agents_found
+    class_name: Strategy
+dependencies: {}
+is_abstract: false

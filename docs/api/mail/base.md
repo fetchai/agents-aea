@@ -319,6 +319,8 @@ the encoded envelope
 
 Decode the envelope.
 
+The default serializer doesn't decode the message field.
+
 **Arguments**:
 
 - `envelope_bytes`: the encoded envelope

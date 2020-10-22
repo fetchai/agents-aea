@@ -1224,9 +1224,14 @@ class ConnectionConfig(ComponentConfiguration):
     @property
     def package_dependencies(self) -> Set[ComponentId]:
         """Get the connection dependencies."""
-        return set(
+        return {
             ComponentId(ComponentType.PROTOCOL, protocol_id)
             for protocol_id in self.protocols
+        }.union(
+            {
+                ComponentId(ComponentType.CONNECTION, connection_id)
+                for connection_id in self.connections
+            }
         )
 
     @property
@@ -1817,9 +1822,7 @@ class AgentConfig(PackageConfiguration):
         for component_id, config in self.component_configurations.items():
             result.append(
                 OrderedDict(
-                    name=component_id.name,
-                    author=component_id.author,
-                    version=component_id.version,
+                    public_id=str(component_id.public_id),
                     type=str(component_id.component_type),
                     **config,
                 )
@@ -1845,18 +1848,18 @@ class AgentConfig(PackageConfiguration):
                 "skills": sorted(map(str, self.skills)),
                 "default_connection": self.default_connection,
                 "default_ledger": self.default_ledger,
-                "logging_config": self.logging_config,
+                "default_routing": {
+                    str(key): str(value) for key, value in self.default_routing.items()
+                },
+                "connection_private_key_paths": self.connection_private_key_paths_dict,
                 "private_key_paths": self.private_key_paths_dict,
+                "logging_config": self.logging_config,
                 "registry_path": self.registry_path,
                 "component_configurations": self.component_configurations_json(),
             }
         )  # type: Dict[str, Any]
 
-        if len(self.connection_private_key_paths_dict) > 0:
-            config[
-                "connection_private_key_paths"
-            ] = self.connection_private_key_paths_dict
-
+        # framework optional configs are only printed if defined.
         if self.period is not None:
             config["period"] = self.period
         if self.execution_timeout is not None:
@@ -1869,13 +1872,8 @@ class AgentConfig(PackageConfiguration):
             config["skill_exception_policy"] = self.skill_exception_policy
         if self.connection_exception_policy is not None:
             config["connection_exception_policy"] = self.connection_exception_policy
-        if self.default_routing != {}:
-            config["default_routing"] = {
-                str(key): str(value) for key, value in self.default_routing.items()
-            }
         if self.loop_mode is not None:
             config["loop_mode"] = self.loop_mode
-
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
 
@@ -1934,13 +1932,9 @@ class AgentConfig(PackageConfiguration):
         component_configurations = {}
         for config in obj.get("component_configurations", []):
             tmp = deepcopy(config)
-            name = tmp.pop("name")
-            author = tmp.pop("author")
-            version = tmp.pop("version")
+            public_id = PublicId.from_str(tmp.pop("public_id"))
             type_ = tmp.pop("type")
-            component_id = ComponentId(
-                ComponentType(type_), PublicId(author, name, version)
-            )
+            component_id = ComponentId(ComponentType(type_), public_id)
             component_configurations[component_id] = tmp
         agent_config.component_configurations = component_configurations
 

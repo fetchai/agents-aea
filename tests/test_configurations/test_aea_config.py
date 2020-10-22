@@ -61,7 +61,7 @@ connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.11.0
+default_connection: fetchai/stub:0.12.0
 default_ledger: cosmos
 private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
@@ -374,9 +374,7 @@ def test_agent_configuration_loading_multipage_positive_case(component_type):
     yaml.safe_dump(json_data, modified_file)
     modified_file.flush()
     modified_file.write("---\n")
-    modified_file.write(f"author: {public_id.author}\n")
-    modified_file.write(f"name: {public_id.name}\n")
-    modified_file.write(f"version: {public_id.version}\n")
+    modified_file.write(f"public_id: {public_id}\n")
     modified_file.write(f"type: {component_type.value}\n")
     modified_file.seek(0)
     expected_component_id = ComponentId(
@@ -408,7 +406,8 @@ def test_agent_configuration_dump_multipage():
     fp.seek(0)
     agent_config = yaml_load_all(fp)
     assert agent_config[0]["agent_name"] == "myagent"
-    assert agent_config[1]["name"] == "dummy"
+    assert agent_config[1]["public_id"] == "dummy_author/dummy:0.1.0"
+    assert agent_config[1]["type"] == "skill"
 
 
 def test_agent_configuration_dump_multipage_fails_bad_component_configuration():

@@ -284,10 +284,18 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.agent_name = "generic_buyer_0.9.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.9.0", "--alias", cls.agent_name
+            "--skip-consistency-check",
+            "fetch",
+            "fetchai/generic_buyer:0.10.0",
+            "--alias",
+            cls.agent_name,
         )
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:latest", "--alias", cls.latest_agent_name
+            "--skip-consistency-check",
+            "fetch",
+            "fetchai/generic_buyer:latest",
+            "--alias",
+            cls.latest_agent_name,
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -303,7 +311,10 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
 
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
-                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+                cli,
+                ["--skip-consistency-check", "upgrade"],
+                standalone_mode=False,
+                catch_exceptions=False,
             )
             agent_items = set(
                 ItemRemoveHelper(self.load_config())
@@ -315,7 +326,10 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         # upgrade again to check it workd with upgraded version
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
-                cli, ["upgrade"], standalone_mode=False, catch_exceptions=False
+                cli,
+                ["--skip-consistency-check", "upgrade"],
+                standalone_mode=False,
+                catch_exceptions=False,
             )
             agent_items = set(
                 ItemRemoveHelper(self.load_config())
@@ -323,6 +337,53 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
                 .keys()
             )
             assert latest_agent_items == agent_items
+
+
+class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
+    """Test that the command 'aea upgrade' works."""
+
+    capture_log = True
+
+    @classmethod
+    def setup(cls):
+        """Set up test case."""
+        super(TestNonVendorProject, cls).setup()
+        cls.agent_name = "generic_buyer_0.9.0"
+        cls.run_cli_command(
+            "fetch", "fetchai/generic_buyer:0.9.0", "--alias", cls.agent_name
+        )
+        cls.agents.add(cls.agent_name)
+        cls.set_agent_context(cls.agent_name)
+
+    @patch("aea.cli.upgrade.ItemUpgrader.is_non_vendor", True)
+    @patch(
+        "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value="0.99.0"
+    )
+    @patch("aea.cli.upgrade.ItemUpgrader.remove_item")
+    @patch("aea.cli.upgrade.ItemUpgrader.add_item")
+    def test_non_vendor_nothing_to_upgrade(
+        self, *mocks
+    ):  # pylint: disable=unused-argument
+        """Test upgrade project dependencies not removed cause non vendor."""
+        with cd(self.agent_name):
+            base_agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+
+            self.runner.invoke(  # pylint: disable=no-member
+                cli,
+                ["--skip-consistency-check", "upgrade"],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
+            agent_items = set(
+                ItemRemoveHelper(self.load_config())
+                .get_agent_dependencies_with_reverse_dependencies()
+                .keys()
+            )
+            assert base_agent_items == agent_items
 
 
 class TestUpgradeConnectionLocally(BaseTestCase):
@@ -353,6 +414,25 @@ class TestUpgradeConnectionLocally(BaseTestCase):
             self.runner.invoke(
                 cli,
                 ["upgrade", *self.LOCAL, self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
+
+    @patch("aea.cli.upgrade.ItemUpgrader.is_non_vendor", True)
+    def test_upgrade_non_vendor(self):
+        """Test do not upgrade non vendor package."""
+        with pytest.raises(
+            ClickException,
+            match=r"The .* with id '.*' already has version .*. Nothing to upgrade.",
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    "upgrade",
+                    *self.LOCAL,
+                    self.ITEM_TYPE,
+                    f"{self.ITEM_PUBLIC_ID.author}/{self.ITEM_PUBLIC_ID.name}:100.0.0",
+                ],
                 standalone_mode=False,
                 catch_exceptions=False,
             )
@@ -507,7 +587,7 @@ class TestUpgradeProtocolLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade protocol --local' works."""
 
     ITEM_TYPE = "protocol"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.7.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.8.0")
 
 
 class TestUpgradeProtocolRemoteRegistry(TestUpgradeProtocolLocally):
@@ -524,7 +604,7 @@ class TestUpgradeSkillLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade skill --local' works."""
 
     ITEM_TYPE = "skill"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.9.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.10.0")
 
 
 class TestUpgradeSkillRemoteRegistry(TestUpgradeSkillLocally):
@@ -549,7 +629,7 @@ class TestUpgradeContractLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade contract' works."""
 
     ITEM_TYPE = "contract"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.11.0")
+    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.12.0")
 
 
 class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):

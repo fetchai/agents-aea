@@ -1,9 +1,9 @@
-<a name="aea.protocols.signing.serialization"></a>
-# aea.protocols.signing.serialization
+<a name="packages.fetchai.protocols.signing.serialization"></a>
+# packages.fetchai.protocols.signing.serialization
 
 Serialization module for signing protocol.
 
-<a name="aea.protocols.signing.serialization.SigningSerializer"></a>
+<a name="packages.fetchai.protocols.signing.serialization.SigningSerializer"></a>
 ## SigningSerializer Objects
 
 ```python
@@ -12,7 +12,7 @@ class SigningSerializer(Serializer)
 
 Serialization for the 'signing' protocol.
 
-<a name="aea.protocols.signing.serialization.SigningSerializer.encode"></a>
+<a name="packages.fetchai.protocols.signing.serialization.SigningSerializer.encode"></a>
 #### encode
 
 ```python
@@ -30,7 +30,7 @@ Encode a 'Signing' message into bytes.
 
 the bytes.
 
-<a name="aea.protocols.signing.serialization.SigningSerializer.decode"></a>
+<a name="packages.fetchai.protocols.signing.serialization.SigningSerializer.decode"></a>
 #### decode
 
 ```python

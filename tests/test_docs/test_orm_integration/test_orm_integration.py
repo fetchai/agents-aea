@@ -64,8 +64,8 @@ seller_strategy_replacement = """models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: thermometer_data
@@ -97,8 +97,8 @@ buyer_strategy_replacement = """models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
@@ -128,8 +128,8 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.5.0": "fetchai/ledger:0.7.0",
-            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
+            "fetchai/ledger_api:0.6.0": "fetchai/ledger:0.8.0",
+            "fetchai/oef_search:0.9.0": "fetchai/soef:0.11.0",
         }
 
         # generate random location
@@ -140,15 +140,15 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
-        self.add_item("connection", "fetchai/soef:0.10.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
-        self.add_item("connection", "fetchai/ledger:0.7.0")
-        self.add_item("skill", "fetchai/thermometer:0.13.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/ledger:0.8.0")
+        self.add_item("skill", "fetchai/thermometer:0.14.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.13.0")
+        self.eject_item("skill", "fetchai/thermometer:0.14.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.nested_set_config(
             "skills.thermometer.models.strategy.args",
@@ -187,11 +187,11 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
-        self.add_item("connection", "fetchai/soef:0.10.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
-        self.add_item("connection", "fetchai/ledger:0.7.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.12.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/ledger:0.8.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.13.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)

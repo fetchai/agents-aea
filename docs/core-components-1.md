@@ -32,7 +32,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 * `Dialogues`, which define rules over `Message` sequences.
 
-The framework provides one default `Protocol`, called `default` (current version `fetchai/default:0.7.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#aea.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#aea.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#aea.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework provides one default `Protocol`, called `default` (current version `fetchai/default:0.8.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
 Additional `Protocols` - i.e. a new type of interaction - can be added as packages and generated with the <a href="../protocol-generator">protocol generator</a>. For more details on `Protocols` also read the `Protocol` guide <a href="../protocol">here</a>.
 
@@ -42,7 +42,7 @@ Protocol specific `Messages`, wrapped in `Envelopes`, are sent and received to o
 
 A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an SDK or API and provides an interface to network, ledgers and other services. Where necessary, a `Connection` is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service or third-party protocol (e.g. `HTTP`).
 
-The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.11.0`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
+The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.12.0`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
 
 Additional `Connections` can be added as packages. For more details on `Connections` also read the `Connection` guide <a href="../connection">here</a>.
 

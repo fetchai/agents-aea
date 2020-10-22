@@ -23,7 +23,9 @@ import inspect
 import logging
 import os
 import platform
+import random
 import socket
+import string
 import sys
 import threading
 import time
@@ -54,7 +56,6 @@ from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
-from aea.connections.stub.connection import StubConnection
 from aea.contracts.base import Contract, contract_registry
 from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import _COSMOS
@@ -78,6 +79,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
+from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
@@ -215,10 +217,10 @@ contract_config_files = [
 ]
 
 protocol_config_files = [
-    os.path.join(ROOT_DIR, "aea", "protocols", "default", PROTOCOL_YAML),
+    os.path.join(FETCHAI_PREF, "protocols", "default", PROTOCOL_YAML),
     os.path.join(ROOT_DIR, "aea", "protocols", "scaffold", PROTOCOL_YAML),
-    os.path.join(ROOT_DIR, "aea", "protocols", "signing", PROTOCOL_YAML),
-    os.path.join(ROOT_DIR, "aea", "protocols", "state_update", PROTOCOL_YAML),
+    os.path.join(FETCHAI_PREF, "protocols", "signing", PROTOCOL_YAML),
+    os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "contract_api", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "fipa", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "gym", PROTOCOL_YAML),
@@ -231,7 +233,7 @@ protocol_config_files = [
 
 connection_config_files = [
     os.path.join(ROOT_DIR, "aea", "connections", "scaffold", CONNECTION_YAML),
-    os.path.join(ROOT_DIR, "aea", "connections", "stub", CONNECTION_YAML),
+    os.path.join(FETCHAI_PREF, "connections", "stub", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "gym", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "http_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "http_server", CONNECTION_YAML),
@@ -250,7 +252,7 @@ connection_config_files = [
 
 
 skill_config_files = [
-    os.path.join(ROOT_DIR, "aea", "skills", "error", SKILL_YAML),
+    os.path.join(FETCHAI_PREF, "skills", "error", SKILL_YAML),
     os.path.join(ROOT_DIR, "aea", "skills", "scaffold", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "aries_alice", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "aries_faber", SKILL_YAML),
@@ -1026,3 +1028,15 @@ def env_path_separator() -> str:
         return ";"
     else:
         return ":"
+
+
+def random_string(length: int = 8) -> str:
+    """Generate a random string.
+
+    :param length: how long random string should be
+
+    :return: random chars str
+    """
+    return "".join(
+        random.choice(string.ascii_lowercase) for _ in range(length)  # nosec
+    )

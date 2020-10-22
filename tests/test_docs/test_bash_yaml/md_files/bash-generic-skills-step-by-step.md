@@ -5,15 +5,15 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.11.0
+aea fetch fetchai/generic_seller:0.12.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.14.0
+aea eject skill fetchai/generic_seller:0.15.0
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.11.0
+aea fetch fetchai/generic_buyer:0.12.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.13.0
+aea eject skill fetchai/generic_buyer:0.14.0
 cd ..
 ```
 ``` bash
@@ -48,22 +48,22 @@ aea add-key fetchai fetchai_private_key.txt --connection
 aea generate-wealth fetchai --sync
 ```
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add protocol fetchai/fipa:0.8.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add protocol fetchai/fipa:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea run
 ```
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add protocol fetchai/fipa:0.8.0
-aea add protocol fetchai/signing:0.5.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add protocol fetchai/fipa:0.9.0
+aea add protocol fetchai/signing:0.6.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 ``` bash
 aea run
@@ -81,7 +81,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmcFahpL4DZ1rsTNEK1BT3e5T8TEJJg2hP4ytkzdqKuJnZ
@@ -91,10 +91,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.7.0
-- fetchai/fipa:0.8.0
-- fetchai/ledger_api:0.5.0
-- fetchai/oef_search:0.8.0
+- fetchai/default:0.8.0
+- fetchai/fipa:0.9.0
+- fetchai/ledger_api:0.6.0
+- fetchai/oef_search:0.9.0
 skills: []
 behaviours:
   service_registration:
@@ -133,8 +133,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: generic_service
@@ -150,7 +150,7 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmUBQvZkoCcik71vqRZGP4JJBgFP2kj8o7C24dfkAphitP
@@ -160,11 +160,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.7.0
-- fetchai/fipa:0.8.0
-- fetchai/ledger_api:0.5.0
-- fetchai/oef_search:0.8.0
-- fetchai/signing:0.5.0
+- fetchai/default:0.8.0
+- fetchai/fipa:0.9.0
+- fetchai/ledger_api:0.6.0
+- fetchai/oef_search:0.9.0
+- fetchai/signing:0.6.0
 skills: []
 behaviours:
   search:
@@ -206,8 +206,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
@@ -225,8 +225,8 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.5.0: fetchai/ledger:0.7.0
-  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 ``` yaml
 config:

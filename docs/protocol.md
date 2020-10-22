@@ -6,7 +6,7 @@
 
 * dialogues, which define rules over message sequences.
 
-The framework provides one default protocol, called `default` and introduced below. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#aea.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#aea.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#aea.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework provides one default protocol, called `default` and introduced below. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
 Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>.
 
@@ -66,9 +66,9 @@ The developer can generate custom protocols with the <a href="../protocol-genera
 
 We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
 
-## `fetchai/default:0.7.0` protocol
+## `fetchai/default:0.8.0` protocol
 
-The `fetchai/default:0.7.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
+The `fetchai/default:0.8.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
 
 ``` python
 from enum import Enum
@@ -86,7 +86,7 @@ class Performative(Enum):
 
 * The `DefaultMessage` of performative `DefaultMessage.Performative.BYTES` is used to send payloads of byte strings to other AEAs. An example is:
 ``` python
-from aea.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 msg = DefaultMessage(
     performative=DefaultMessage.Performative.BYTES,
@@ -115,13 +115,13 @@ msg = DefaultMessage(
 )
 ```
 
-Each AEA's `fetchai/error:0.7.0` skill utilises the `fetchai/default:0.7.0` protocol for error handling.
+Each AEA's `fetchai/error:0.8.0` skill utilises the `fetchai/default:0.8.0` protocol for error handling.
 
-## `fetchai/oef_search:0.8.0` protocol
+## `fetchai/oef_search:0.9.0` protocol
 
-The `fetchai/oef_search:0.8.0` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:0.9.0` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
 
-The `fetchai/oef_search:0.8.0` protocol definition includes an `OefSearchMessage` with the following message types:
+The `fetchai/oef_search:0.9.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ``` python
 class Performative(Enum):
@@ -231,7 +231,7 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The <a href="../simple-oef">SOEF search node</a> will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.8.0`.
+* The <a href="../simple-oef">SOEF search node</a> will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.9.0`.
 
 * If the <a href="../simple-oef">SOEF search node</a> encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 ``` python
@@ -246,11 +246,11 @@ class OefErrorOperation(Enum):
     OTHER = 10000
 ```
 
-## `fetchai/fipa:0.8.0` protocol
+## `fetchai/fipa:0.9.0` protocol
 
 This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="http://www.fipa.org/repository/aclspecs.html" target="_blank">FIPA</a> Agent Communication Language.
 
-The `fetchai/fipa:0.8.0` protocol definition includes a `FipaMessage` with the following performatives:
+The `fetchai/fipa:0.9.0` protocol definition includes a `FipaMessage` with the following performatives:
 
 ``` python
 class Performative(Enum):
@@ -283,9 +283,9 @@ def __init__(
 )
 ```
 
-The `fetchai/fipa:0.8.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
+The `fetchai/fipa:0.9.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:0.8.0` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:0.9.0` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
 
 
 ### Fipa dialogue

@@ -3,20 +3,12 @@
   "description": "Base schema for a custom component configuration in the agent configuration file.",
   "additionalProperties": false,
   "required": [
-    "name",
-    "author",
-    "version",
+    "public_id",
     "type"
   ],
   "properties": {
-    "name": {
-      "$ref": "definitions.json#/definitions/resource_name"
-    },
-    "author": {
-      "$ref": "definitions.json#/definitions/author"
-    },
-    "version": {
-      "$ref": "definitions.json#/definitions/package_version"
+    "public_id": {
+      "$ref": "definitions.json#/definitions/public_id"
     },
     "type": {
       "$ref": "definitions.json#/definitions/component_type"

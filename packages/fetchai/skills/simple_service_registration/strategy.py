@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a model."""
+"""This package contains a strategy model."""
 
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (

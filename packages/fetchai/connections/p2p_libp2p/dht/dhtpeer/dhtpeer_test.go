@@ -1322,10 +1322,16 @@ func SetupLocalDHTPeer(key string, addr string, dhtPort uint16, delegatePort uin
 		LocalURI(DefaultLocalHost, dhtPort),
 		PublicURI(DefaultLocalHost, dhtPort),
 		IdentityFromFetchAIKey(key),
-		RegisterAgentAddress(addr, func() bool { return true }),
 		EnableRelayService(),
-		EnableDelegateService(delegatePort),
 		BootstrapFrom(entry),
+	}
+
+	if addr != "" {
+		opts = append(opts, RegisterAgentAddress(addr, func() bool { return true }))
+	}
+
+	if delegatePort != 0 {
+		opts = append(opts, EnableDelegateService(delegatePort))
 	}
 
 	dhtPeer, err := New(opts...)

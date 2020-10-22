@@ -30,12 +30,6 @@ This module contains the classes required for dialogue management.
 
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.state_update.dialogues import (
-    StateUpdateDialogue as BaseStateUpdateDialogue,
-)
-from aea.protocols.state_update.dialogues import (
-    StateUpdateDialogues as BaseStateUpdateDialogues,
-)
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -43,6 +37,12 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
+)
+from packages.fetchai.protocols.state_update.dialogues import (
+    StateUpdateDialogue as BaseStateUpdateDialogue,
+)
+from packages.fetchai.protocols.state_update.dialogues import (
+    StateUpdateDialogues as BaseStateUpdateDialogues,
 )
 from packages.fetchai.protocols.tac.dialogues import TacDialogue as BaseTacDialogue
 from packages.fetchai.protocols.tac.dialogues import TacDialogues as BaseTacDialogues

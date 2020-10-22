@@ -58,7 +58,26 @@ class RemoveItemTestCase(TestCase):
     ):  # pylint: disable=unused-argument
         """Test for save_agent_locally item folder not exists."""
         public_id = PublicIdMock.from_str("author/name:0.1.0")
-        with self.assertRaises(ClickException):
+        with pytest.raises(ClickException, match="Can not find folder for the package"):
+            remove_item(ContextMock(protocols=[public_id]), "protocol", public_id)
+
+
+@mock.patch("aea.cli.remove.shutil.rmtree")
+@mock.patch("aea.cli.remove.Path.exists", return_value=True)
+@mock.patch("aea.cli.remove.ItemRemoveHelper.get_component_directory")
+@mock.patch("aea.cli.remove.load_item_config")
+class RemoveItemBadConfigurationTestCase(TestCase):
+    """Test case for remove_item method."""
+
+    def test_remove_item_item_folder_not_exists(
+        self, *mocks
+    ):  # pylint: disable=unused-argument
+        """Test for component bad configuration load."""
+        public_id = PublicIdMock.from_str("author/name:0.1.0")
+        with pytest.raises(
+            ClickException,
+            match="Error loading .* configuration, author/name do not match: .*",
+        ):
             remove_item(ContextMock(protocols=[public_id]), "protocol", public_id)
 
 
@@ -126,6 +145,8 @@ class TestRemoveConfig(
             self.run_cli_command(
                 "add", "--local", self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)
             )
+            self.run_cli_command("add", "--local", "connection", "fetchai/http_server")
+
             self.runner.invoke(
                 cli,
                 [
@@ -137,8 +158,19 @@ class TestRemoveConfig(
                 standalone_mode=False,
                 catch_exceptions=False,
             )
+            self.runner.invoke(
+                cli,
+                [
+                    "config",
+                    "set",
+                    "vendor.fetchai.connections.http_server.config.port",
+                    "9000",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
             config = self.load_config()
-
+            assert config.component_configurations
             assert (
                 PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
                 in config.component_configurations
@@ -147,8 +179,8 @@ class TestRemoveConfig(
             self.run_cli_command("remove", self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID))
 
             config = self.load_config()
-
             assert (
                 PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
                 not in config.component_configurations
             )
+            assert config.component_configurations
