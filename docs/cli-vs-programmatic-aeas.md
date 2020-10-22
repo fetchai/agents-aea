@@ -54,7 +54,7 @@ aea add-key fetchai fetchai_private_key.txt --connection
 aea run
 ```
 
-Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
 
 ### Create the weather client AEA
 
