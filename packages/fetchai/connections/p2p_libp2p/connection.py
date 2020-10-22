@@ -561,7 +561,7 @@ class P2PLibp2pConnection(Connection):
 
         monitoring_uri = None
         if libp2p_monitoring_uri is not None:
-            monitoring_uri = Uri(libp2p_monitoring_uri)
+            monitoring_uri = Uri(libp2p_monitoring_uri)  # pragma: nocover
 
         entry_peers = [
             MultiAddr.from_string(str(maddr)) for maddr in libp2p_entry_peers
