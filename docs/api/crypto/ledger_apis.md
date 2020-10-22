@@ -233,3 +233,17 @@ Get the hash of a message.
 
 the hash of the message.
 
+<a name="aea.crypto.ledger_apis.LedgerApis.is_valid_address"></a>
+#### is`_`valid`_`address
+
+```python
+ | @staticmethod
+ | is_valid_address(identifier: str, address: Address) -> bool
+```
+
+Check if the address is valid.
+
+**Arguments**:
+
+- `address`: the address to validate
+

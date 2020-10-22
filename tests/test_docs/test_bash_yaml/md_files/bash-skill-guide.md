@@ -6,16 +6,16 @@ aea scaffold skill my_search
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
 ``` bash
-aea add protocol fetchai/oef_search:0.8.0
+aea add protocol fetchai/oef_search:0.9.0
 ```
 ``` bash
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/p2p_libp2p:0.11.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/p2p_libp2p:0.12.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.14.0 && cd simple_service_registration && aea install
+aea fetch fetchai/simple_service_registration:0.15.0 && cd simple_service_registration && aea install
 ```
 ``` bash
 aea generate-key fetchai
@@ -40,19 +40,19 @@ version: 0.1.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.8.0
+- fetchai/oef_search:0.9.0
 skills: []
 behaviours:
   my_search_behaviour:
     args:
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       search_query:
         constraint_type: ==
         search_key: seller_service
@@ -72,7 +72,7 @@ dependencies: {}
 ```
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 ``` yaml
 name: simple_service_registration
@@ -81,7 +81,7 @@ version: 0.4.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD
@@ -91,7 +91,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.8.0
+- fetchai/oef_search:0.9.0
 skills: []
 behaviours:
   service:
@@ -109,8 +109,8 @@ models:
   strategy:
     args:
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: generic_service

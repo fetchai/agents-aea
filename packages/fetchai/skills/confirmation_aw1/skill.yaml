@@ -1,0 +1,61 @@
+name: confirmation_aw1
+author: fetchai
+version: 0.1.0
+type: skill
+description: The confirmation_aw1 skill is a skill to confirm registration for Agent
+  World 1.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmSRjWPGDeLsKZYQoBKLRG59WS7b7RYMrPNcNxDSaBFxCW
+  dialogues.py: QmdMjuAT8h7ZUSfqMVkF88Hnz1kc6advg8oVg8QB7xGPw1
+  handlers.py: QmWoEyJnVURKtvFYrx9ykVao5y7iA8eKRGEsndeMREkVDY
+  registration_db.py: QmZUL4XxvDZn7EGvYBBtwcVyncL5ffTjE25cCaurG5ysUM
+  strategy.py: QmS5kx3LcmgYWLxaAMsrF8VEeXjg1cJD2XoirC9KK8WqAe
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/staking_erc20:0.1.0
+protocols:
+- fetchai/ledger_api:0.6.0
+- fetchai/register:0.1.0
+- fetchai/signing:0.6.0
+skills: []
+behaviours: {}
+handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  registration:
+    args: {}
+    class_name: AW1RegistrationHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  register_dialogues:
+    args: {}
+    class_name: RegisterDialogues
+  registration_db:
+    args: {}
+    class_name: RegistrationDB
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      fetchai_staking_contract_address: '0x351bac612b50e87b46e4b10a282f632d41397de2'
+      override_staking_check: false
+      token_denomination: atestfet
+      token_dispense_amount: 100000
+    class_name: Strategy
+dependencies: {}
+is_abstract: false

@@ -40,7 +40,6 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     Dependency,
     ProtocolConfig,
-    PublicId,
     SkillConfig,
 )
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
@@ -52,14 +51,17 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import run_install_subprocess
 from aea.helpers.yaml_utils import yaml_load_all
 from aea.protocols.base import Protocol
-from aea.protocols.default import DefaultMessage
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 
+from packages.fetchai.connections.stub.connection import StubConnection
+from packages.fetchai.protocols.default import DefaultMessage
+
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,
+    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     _make_dummy_connection,
 )
@@ -100,7 +102,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.8.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.9.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -110,12 +112,12 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.11.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/oef_search:0.8.0)']"
+        "Package 'fetchai/oef:0.12.0' of type 'connection' cannot be added. "
+        "Missing dependencies: ['(protocol, fetchai/oef_search:0.9.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef:0.11.0" requires
-        # "fetchai/oef_search:0.8.0" and "fetchai/fipa:0.8.0" protocols.
+        # connection "fetchai/oef:0.12.0" requires
+        # "fetchai/oef_search:0.9.0" and "fetchai/fipa:0.9.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
@@ -464,7 +466,7 @@ def test_find_component_failed():
         ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
     )
     with pytest.raises(ValueError, match=r"Package .* not found"):
-        builder._find_component_directory_from_component_id(
+        builder.find_component_directory_from_component_id(
             Path("/some_dir"), a_protocol.component_id
         )
 
@@ -525,11 +527,7 @@ def test_find_import_order():
             AEAException, match=r"Cannot load skills, there is a cyclic dependency."
         ):
             builder._find_import_order(
-                [
-                    ComponentId(
-                        ComponentType.SKILL, PublicId("dummy_author", "dummy", "0.1.0")
-                    ),
-                ],
+                [ComponentId(ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID)],
                 Path(os.path.join(CUR_PATH, "data", "dummy_aea")),
                 True,
             )
@@ -572,12 +570,12 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         cwd = self._get_cwd()
         aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
         configuration = aea_config_file.read_text()
+        connection_name = StubConnection.connection_id.name
+        connection_version = StubConnection.connection_id.version
         configuration += dedent(
             f"""
         ---
-        name: stub
-        author: fetchai
-        version: 0.11.0
+        public_id: fetchai/{connection_name}:{connection_version}
         type: connection
         config:
             input_file: "{self.expected_input_file}"
@@ -596,9 +594,8 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
         with cd(self._get_cwd()):
             aea = builder.build()
         assert aea.name == self.agent_name
-        stub_connection = aea.resources.get_connection(
-            PublicId.from_str("fetchai/stub:0.11.0")
-        )
+        stub_connection_id = StubConnection.connection_id
+        stub_connection = aea.resources.get_connection(stub_connection_id)
         assert stub_connection.configuration.config == dict(
             input_file=self.expected_input_file, output_file=self.expected_output_file
         )
@@ -618,9 +615,7 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         configuration += dedent(
             f"""
         ---
-        name: dummy
-        author: dummy_author
-        version: 0.1.0
+        public_id: dummy_author/dummy:0.1.0
         type: skill
         behaviours:
           dummy:
@@ -649,9 +644,7 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         with cd(self._get_cwd()):
             aea = builder.build()
 
-        dummy_skill = aea.resources.get_skill(
-            PublicId("dummy_author", "dummy", "0.1.0")
-        )
+        dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
         dummy_behaviour = dummy_skill.behaviours["dummy"]
         assert dummy_behaviour.config == {"behaviour_arg_1": 42, "behaviour_arg_2": "2"}
         dummy_handler = dummy_skill.handlers["dummy"]
@@ -681,9 +674,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
         configuration += dedent(
             """
         ---
-        name: dummy
-        author: dummy_author
-        version: 0.1.0
+        public_id: dummy_author/dummy:0.1.0
         type: skill
         is_abstract: true
         ...
@@ -698,9 +689,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
         with cd(self._get_cwd()):
             aea = builder.build()
 
-        dummy_skill = aea.resources.get_skill(
-            PublicId("dummy_author", "dummy", "0.1.0")
-        )
+        dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
         assert dummy_skill is None, "Shouldn't have found the skill in Resources."
 
 
@@ -715,9 +704,7 @@ class TestFromAEAProjectCustomConfigFailsWhenComponentNotDeclared(AEATestCaseEmp
         configuration += dedent(
             """
         ---
-        name: non_existing_package
-        author: some_author
-        version: 0.1.0
+        public_id: some_author/non_existing_package:0.1.0
         type: protocol
         ...
         """

@@ -1,24 +1,24 @@
 name: aries_alice
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 type: skill
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmfS1ezD77No8WQkvrkPs4oSXHFbULRxatGzRhMbSMntSx
-  __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
-  behaviours.py: QmTdJbrP1N3W1M6CLDyPFc6erfcrhnbRJtDNN6ZuY9eRUt
-  dialogues.py: QmbCkYZ9mQK6az3qWVMuYmpy5bapq2szYigUbVzE2GgiJi
-  handlers.py: QmTtqM5oWBEAZcHdTuwuPtbiZZGWontMNEtmDxcccS2u2Y
+  __init__.py: QmYQBjVZnv84FUtmT8WYoY7G1yKWAeprCdhb1WqtmbKmqo
+  behaviours.py: QmWdgTikAdSzc9NPM3kKMWRQjBEGpW3kcuAGgh62rpH3Em
+  dialogues.py: QmbNu2XAdis9ot16egeoUYLkuu8FibKtUd125BVMZFodxB
+  handlers.py: QmP19LbZoZMNkysXS4nypniQ3vp1U3TPDxgvMmv9hnZuY2
   strategy.py: QmPUPJvc9idv1KeJE67PKze4E6TpSzjkvFjPG1FRMPAhaL
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.7.0
-- fetchai/http:0.7.0
-- fetchai/oef_search:0.8.0
+- fetchai/default:0.8.0
+- fetchai/http:0.8.0
+- fetchai/oef_search:0.9.0
 skills: []
 behaviours:
   alice:
@@ -50,8 +50,8 @@ models:
       admin_host: 127.0.0.1
       admin_port: 8031
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: intro_service
         value: intro_alice

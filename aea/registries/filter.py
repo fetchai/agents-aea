@@ -20,7 +20,7 @@
 
 from typing import List, Optional
 
-from aea.configurations.base import PublicId, SkillId
+from aea.configurations.base import PublicId
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.logging import WithLogger, get_logger
 from aea.protocols.base import Message
@@ -56,7 +56,7 @@ class Filter(WithLogger):
         return self._decision_maker_out_queue
 
     def get_active_handlers(
-        self, protocol_id: PublicId, skill_id: Optional[SkillId] = None
+        self, protocol_id: PublicId, skill_id: Optional[PublicId] = None
     ) -> List[Handler]:
         """
         Get active handlers based on protocol id and optional skill id.

@@ -21,19 +21,19 @@
 
 from typing import Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.helpers.transaction.base import RawMessage
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
@@ -51,13 +51,13 @@ from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class FipaNegotiationHandler(Handler):
     """This class implements the fipa negotiation handler."""
 
-    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """
@@ -408,7 +408,7 @@ class FipaNegotiationHandler(Handler):
 class SigningHandler(Handler):
     """This class implements the transaction handler."""
 
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """
@@ -614,7 +614,7 @@ class SigningHandler(Handler):
 class LedgerApiHandler(Handler):
     """Implement the ledger api handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -769,7 +769,7 @@ class LedgerApiHandler(Handler):
 class OefSearchHandler(Handler):
     """This class implements the oef search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """
@@ -923,7 +923,7 @@ class OefSearchHandler(Handler):
 class ContractApiHandler(Handler):
     """Implement the contract api handler."""
 
-    SUPPORTED_PROTOCOL = ContractApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = ContractApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""

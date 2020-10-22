@@ -80,6 +80,9 @@ func main() {
 	// node delegate service address, if set
 	_, nodePortDelegate := agent.DelegateAddress()
 
+	// node monitoring service address, if set
+	_, nodePortMonitoring := agent.MonitoringAddress()
+
 	// node private key
 	key := agent.PrivateKey()
 
@@ -111,6 +114,9 @@ func main() {
 		}
 		if aeaAddr != "" {
 			opts = append(opts, dhtpeer.RegisterAgentAddress(aeaAddr, agent.Connected))
+		}
+		if nodePortMonitoring != 0 {
+			opts = append(opts, dhtpeer.EnablePrometheusMonitoring(nodePortMonitoring))
 		}
 		node, err = dhtpeer.New(opts...)
 	}

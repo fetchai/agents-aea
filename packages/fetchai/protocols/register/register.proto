@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package aea.fetchai.register;
+
+message RegisterMessage{
+
+    // Performatives and contents
+    message Register_Performative{
+        map<string, string> info = 1;
+    }
+
+    message Success_Performative{
+        map<string, string> info = 1;
+    }
+
+    message Error_Performative{
+        int32 error_code = 1;
+        string error_msg = 2;
+        map<string, string> info = 3;
+    }
+
+
+    oneof performative{
+        Error_Performative error = 5;
+        Register_Performative register = 6;
+        Success_Performative success = 7;
+    }
+}

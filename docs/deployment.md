@@ -28,7 +28,7 @@ Finally, we run it:
 docker run -it aea-deploy:latest
 ```
 
-This will run the `fetchai/my_first_aea:0.13.0` demo project. You can edit `entrypoint.sh` to run whatever project you would like.
+This will run the `fetchai/my_first_aea:0.14.0` demo project. You can edit `entrypoint.sh` to run whatever project you would like.
 
 ## Deployment
 

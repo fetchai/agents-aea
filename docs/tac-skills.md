@@ -100,7 +100,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 In the root directory, fetch the controller AEA:
 ``` bash
-aea fetch fetchai/tac_controller:0.11.0
+aea fetch fetchai/tac_controller:0.12.0
 cd tac_controller
 aea install
 ```
@@ -112,19 +112,19 @@ The following steps create the controller from scratch:
 ``` bash
 aea create tac_controller
 cd tac_controller
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add skill fetchai/tac_control:0.9.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/tac_control:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
 ```
 
 In `tac_controller/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 
 </p>
@@ -134,8 +134,8 @@ default_routing:
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.12.0 --alias tac_participant_one
-aea fetch fetchai/tac_participant:0.12.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.13.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.13.0 --alias tac_participant_two
 cd tac_participant_two
 aea install
 ```
@@ -152,41 +152,41 @@ aea create tac_participant_two
 Build participant one:
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add skill fetchai/tac_participation:0.10.0
-aea add skill fetchai/tac_negotiation:0.11.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/tac_participation:0.11.0
+aea add skill fetchai/tac_negotiation:0.12.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
 ```
 
 In `tac_participant_one/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.5.0: fetchai/ledger:0.7.0
-  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 
 Then, build participant two:
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add skill fetchai/tac_participation:0.10.0
-aea add skill fetchai/tac_negotiation:0.11.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/tac_participation:0.11.0
+aea add skill fetchai/tac_negotiation:0.12.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
 ```
 
 In `tac_participant_two/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.5.0: fetchai/ledger:0.7.0
-  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 
 </p>
@@ -218,7 +218,7 @@ Briefly run the controller AEA:
 aea run
 ```
 
-Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
 
 Then, update the configuration of the weather client AEA's p2p connection (in `aea-config.yaml`) add the following:
 
@@ -226,7 +226,7 @@ Then, update the configuration of the weather client AEA's p2p connection (in `a
 ---
 name: p2p_libp2p
 author: fetchai
-version: 0.11.0
+version: 0.12.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001
@@ -240,7 +240,7 @@ config:
 ---
 name: p2p_libp2p
 author: fetchai
-version: 0.11.0
+version: 0.12.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11002

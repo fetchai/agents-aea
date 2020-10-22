@@ -75,6 +75,7 @@ class ContextMock:
         self.agent_loader = ConfigLoaderMock()
         self.clean_paths: List = []
         self.obj = self
+        self.registry_path = ""
 
     def set_config(self, key, value):
         """Set config."""

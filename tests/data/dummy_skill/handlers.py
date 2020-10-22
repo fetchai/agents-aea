@@ -20,9 +20,10 @@
 """This module contains the handler for the 'dummy' skill."""
 
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
+
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 
 
 class DummyHandler(Handler):

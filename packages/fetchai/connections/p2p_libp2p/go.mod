@@ -13,6 +13,7 @@ require (
 	github.com/libp2p/go-libp2p-kad-dht v0.7.11
 	github.com/multiformats/go-multiaddr v0.2.1
 	github.com/multiformats/go-multihash v0.0.13
+	github.com/prometheus/client_golang v1.7.1
 	github.com/rs/zerolog v1.19.0
 	google.golang.org/protobuf v1.25.0
 )

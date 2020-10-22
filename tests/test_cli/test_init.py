@@ -19,9 +19,7 @@
 
 """This test module contains the tests for the `aea init` sub-command."""
 import os
-import random
 import shutil
-import string
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -30,23 +28,11 @@ import yaml
 
 from aea.cli import cli
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner
+from tests.conftest import CLI_LOG_OPTION, CliRunner, random_string
 
 
 class TestDoInit:
     """Test that the command 'aea init'."""
-
-    @staticmethod
-    def random_string(length: int = 8) -> str:
-        """Generate random string.
-
-        :param length: how long random string should be
-
-        :return: random chars str
-        """
-        return "".join(
-            random.choice(string.ascii_lowercase) for i in range(length)  # nosec
-        )
 
     def setup(self):
         """Set the test up."""
@@ -96,9 +82,9 @@ class TestDoInit:
     @patch("aea.cli.register.register_new_account", return_value="TOKEN")
     def test_non_local(self, mock):
         """Test registration online."""
-        email = f"{self.random_string()}@{self.random_string()}.com"
-        pwd = self.random_string()
-        author = "test_author" + self.random_string()
+        email = f"{random_string()}@{random_string()}.com"
+        pwd = random_string()
+        author = "test_author" + random_string()
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "init", "--author", author],
@@ -114,7 +100,7 @@ class TestDoInit:
     @patch("aea.cli.init.do_login", return_value=None)
     def test_registered(self, *mocks):
         """Test author already registered."""
-        author = "test_author" + self.random_string()
+        author = "test_author" + random_string()
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "init", "--author", author],

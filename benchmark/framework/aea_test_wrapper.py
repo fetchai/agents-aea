@@ -29,10 +29,11 @@ from aea.configurations.base import SkillConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler, Skill, SkillContext
 from benchmark.framework.fake_connection import FakeConnection
+
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
 
 class AEATestWrapper:

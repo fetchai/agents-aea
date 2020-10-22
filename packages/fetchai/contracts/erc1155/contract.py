@@ -38,11 +38,13 @@ from aea.crypto.fetchai import FetchAIApi
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
-PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.11.0")
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.12.0")
 
 
 class ERC1155Contract(Contract):
     """The ERC1155 contract class which acts as a bridge between AEA framework and ERC1155 ABI."""
+
+    contract_id = PUBLIC_ID
 
     @classmethod
     def generate_token_ids(

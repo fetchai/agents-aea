@@ -24,6 +24,8 @@ from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
 from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.skills.base import Model
 
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as CONTRACT_ID
+
 
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SEARCH_QUERY = {
@@ -55,11 +57,17 @@ class Strategy(Model):
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         super().__init__(**kwargs)
         self.is_searching = True
+        self._contract_id = str(CONTRACT_ID)
 
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
+
+    @property
+    def contract_id(self) -> str:
+        """Get the contract id."""
+        return self._contract_id
 
     def get_location_and_service_query(self) -> Query:
         """

@@ -21,6 +21,8 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.contract_api import contract_api_pb2
@@ -45,12 +47,15 @@ class ContractApiSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(ContractApiMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         contract_api_msg = contract_api_pb2.ContractApiMessage()
-        contract_api_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        contract_api_msg.dialogue_starter_reference = dialogue_reference[0]
-        contract_api_msg.dialogue_responder_reference = dialogue_reference[1]
-        contract_api_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION:
@@ -134,8 +139,11 @@ class ContractApiSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        contract_api_bytes = contract_api_msg.SerializeToString()
-        return contract_api_bytes
+        dialogue_message_pb.content = contract_api_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -145,15 +153,17 @@ class ContractApiSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'ContractApi' message.
         """
+        message_pb = ProtobufMessage()
         contract_api_pb = contract_api_pb2.ContractApiMessage()
-        contract_api_pb.ParseFromString(obj)
-        message_id = contract_api_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            contract_api_pb.dialogue_starter_reference,
-            contract_api_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = contract_api_pb.target
+        target = message_pb.dialogue_message.target
 
+        contract_api_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = contract_api_pb.WhichOneof("performative")
         performative_id = ContractApiMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

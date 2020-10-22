@@ -40,12 +40,13 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
-from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
-from aea.configurations.loader import ConfigLoader
-from aea.connections.stub.connection import (
+from aea.configurations.constants import (
     DEFAULT_INPUT_FILE_NAME,
+    DEFAULT_LEDGER,
     DEFAULT_OUTPUT_FILE_NAME,
+    DEFAULT_PRIVATE_KEY_FILE,
 )
+from aea.configurations.loader import ConfigLoader
 from aea.exceptions import enforce
 from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope
@@ -447,6 +448,21 @@ class BaseAEATestCase(ABC):
         cli_args = ["add", "--local", item_type, public_id]
         if not local:  # pragma: nocover
             cli_args.remove("--local")
+        return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
+
+    @classmethod
+    def remove_item(cls, item_type: str, public_id: str) -> Result:
+        """
+        Remove an item from the agent.
+
+        Run from agent's directory.
+
+        :param item_type: str item type.
+        :param public_id: public id of the item.
+
+        :return: Result
+        """
+        cli_args = ["remove", item_type, public_id]
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod

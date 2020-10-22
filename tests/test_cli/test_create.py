@@ -41,6 +41,8 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
+    SIGNING_PROTOCOL,
+    STATE_UPDATE_PROTOCOL,
 )
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
@@ -71,6 +73,10 @@ class TestCreate:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         cls.cli_config_file = f"{cls.t}/cli_config.yaml"
         cls.cli_config_patch = patch(
@@ -152,7 +158,11 @@ class TestCreate:
 
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
-        assert self.agent_config["protocols"] == [str(DEFAULT_PROTOCOL)]
+        assert self.agent_config["protocols"] == [
+            str(DEFAULT_PROTOCOL),
+            str(SIGNING_PROTOCOL),
+            str(STATE_UPDATE_PROTOCOL),
+        ]
 
     def test_skills_field_is_not_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
@@ -195,7 +205,7 @@ class TestCreate:
         )
         comparison = filecmp.dircmp(
             str(stub_connection_dirpath),
-            str(Path(ROOT_DIR, "aea", "connections", "stub")),
+            str(Path(ROOT_DIR, "packages", "fetchai", "connections", "stub")),
         )
         assert comparison.diff_files == []
 
@@ -208,13 +218,13 @@ class TestCreate:
         assert stub_connection_dirpath.is_dir()
 
     def test_default_protocol_is_equal_to_library_default_protocol(self):
-        """Check that the stub connection directory is equal to the package's one (aea.protocols.default)."""
+        """Check that the stub connection directory is equal to the package's one (packages.fetchai.protocols.default)."""
         default_protocol_dirpath = Path(
             self.agent_name, "vendor", "fetchai", "protocols", "default"
         )
         comparison = filecmp.dircmp(
             str(default_protocol_dirpath),
-            str(Path(ROOT_DIR, "aea", "protocols", "default")),
+            str(Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")),
         )
         assert comparison.diff_files == []
 
@@ -232,7 +242,8 @@ class TestCreate:
             self.agent_name, "vendor", "fetchai", "skills", "error"
         )
         comparison = filecmp.dircmp(
-            str(default_protocol_dirpath), str(Path(ROOT_DIR, "aea", "skills", "error"))
+            str(default_protocol_dirpath),
+            str(Path(ROOT_DIR, "packages", "fetchai", "skills", "error")),
         )
         assert comparison.diff_files == []
 
@@ -279,6 +290,10 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         # create a directory with the agent name -> make 'aea create fail.
@@ -380,6 +395,10 @@ class TestCreateFailsWhenExceptionOccurs:
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
@@ -419,6 +438,10 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         """Set the test up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         cls.runner = CliRunner()

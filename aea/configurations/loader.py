@@ -372,20 +372,16 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         :raises ValueError: if the component id cannot be extracted.
         """
         # author, name, version, type are mandatory fields
-        missing_fields = {"author", "name", "version", "type"}.difference(
+        missing_fields = {"public_id", "type"}.difference(
             component_configuration_json.keys()
         )
         if len(missing_fields) > 0:
             raise ValueError(
                 f"There are missing fields in component id {component_index + 1}: {missing_fields}."
             )
-        component_name = component_configuration_json.pop("name")
-        component_author = component_configuration_json.pop("author")
-        component_version = component_configuration_json.pop("version")
+        public_id_str = component_configuration_json.pop("public_id")
         component_type = ComponentType(component_configuration_json.pop("type"))
-        component_public_id = PublicId(
-            component_author, component_name, component_version
-        )
+        component_public_id = PublicId.from_str(public_id_str)
         component_id = ComponentId(component_type, component_public_id)
         return component_id
 
@@ -408,7 +404,11 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         )
         try:
             BaseConfigLoader(schema_file).validate(
-                dict(**component_id.json, **configuration)
+                dict(
+                    type=str(component_id.component_type),
+                    public_id=str(component_id.public_id),
+                    **configuration,
+                )
             )
         except jsonschema.ValidationError as e:
             raise ValueError(

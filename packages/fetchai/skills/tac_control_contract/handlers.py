@@ -21,12 +21,12 @@
 
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.tac_control.handlers import (
     OefSearchHandler as BaseOefSearchHandler,
 )
@@ -45,7 +45,7 @@ from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 TacHandler = BaseTacHandler
@@ -57,7 +57,7 @@ OefSearchHandler = BaseOefSearchHandler
 class ContractApiHandler(Handler):
     """Implement the contract api handler."""
 
-    SUPPORTED_PROTOCOL = ContractApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = ContractApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -181,7 +181,7 @@ class ContractApiHandler(Handler):
 class SigningHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -293,7 +293,7 @@ class SigningHandler(Handler):
 class LedgerApiHandler(Handler):
     """Implement the ledger api handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""

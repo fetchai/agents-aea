@@ -33,13 +33,13 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
 
     MODE = "async"
 
-    echo_skill_id = PublicId("fetchai", "echo", "0.7.0")
+    echo_skill_id = PublicId.from_str("fetchai/echo:0.10.0")
 
     def setup(self):
         """Set test case."""
         self.agent_name = "test_what_ever12"
         self.working_dir = "MultiAgentManager_dir"
-        self.project_public_id = PublicId("fetchai", "my_first_aea", "0.11.0")
+        self.project_public_id = PublicId.from_str("fetchai/my_first_aea:0.14.0")
         self.project_path = os.path.join(
             self.working_dir, self.project_public_id.author, self.project_public_id.name
         )
@@ -70,13 +70,13 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         """Test add and remove project."""
         self.manager.start_manager()
 
-        self.manager.add_project(self.project_public_id)
+        self.manager.add_project(self.project_public_id, local=True)
 
         assert self.project_public_id in self.manager.list_projects()
         assert os.path.exists(self.project_path)
 
         with pytest.raises(ValueError, match=r".*was already added.*"):
-            self.manager.add_project(self.project_public_id)
+            self.manager.add_project(self.project_public_id, local=True)
 
         self.manager.remove_project(self.project_public_id)
         assert self.project_public_id not in self.manager.list_projects()
@@ -84,7 +84,7 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         with pytest.raises(ValueError, match=r"is not present"):
             self.manager.remove_project(self.project_public_id)
 
-        self.manager.add_project(self.project_public_id)
+        self.manager.add_project(self.project_public_id, local=True)
         assert self.project_public_id in self.manager.list_projects()
         assert os.path.exists(self.project_path)
 
@@ -92,7 +92,7 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         """Test add agent alias."""
         self.manager.start_manager()
 
-        self.manager.add_project(self.project_public_id)
+        self.manager.add_project(self.project_public_id, local=True)
 
         new_tick_interval = 0.2111
 
@@ -232,7 +232,7 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         """Do not allo to override some values in agent config."""
         self.manager.start_manager()
 
-        self.manager.add_project(self.project_public_id)
+        self.manager.add_project(self.project_public_id, local=True)
 
         BAD_OVERRIDES = ["skills", "connections", "contracts", "protocols"]
 
@@ -292,7 +292,7 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         """Test add agent alias."""
         self.manager.start_manager()
 
-        self.manager.add_project(self.project_public_id)
+        self.manager.add_project(self.project_public_id, local=True)
 
         # check empty project, nothing should be installed
         with patch(

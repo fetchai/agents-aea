@@ -19,8 +19,10 @@
 """This test module contains the tests for aea.cli.utils module."""
 
 from builtins import FileNotFoundError
+from copy import deepcopy
 from typing import cast
 from unittest import TestCase, mock
+from unittest.mock import MagicMock
 
 import pytest
 from click import BadParameter, ClickException
@@ -38,27 +40,30 @@ from aea.cli.utils.decorators import _validate_config_consistency, clean_after
 from aea.cli.utils.formatting import format_items
 from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.package_utils import (
+    _override_ledger_configurations,
     find_item_in_distribution,
     find_item_locally,
     get_package_path_unified,
     get_wallet_from_context,
+    is_distributed_item,
     is_fingerprint_correct,
     is_item_present_unified,
-    is_local_item,
     try_get_balance,
     try_get_item_source_path,
     try_get_item_target_path,
     validate_author_name,
     validate_package_name,
 )
-from aea.configurations.base import PublicId
+from aea.configurations.base import ComponentId, ComponentType, PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
+    DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
-    SIGNING_PROTOCOL,
-    STATE_UPDATE_PROTOCOL,
+    LEDGER_CONNECTION,
 )
+from aea.crypto.fetchai import DEFAULT_CHAIN_ID
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
@@ -292,7 +297,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -306,7 +311,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -325,7 +330,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -334,7 +339,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -348,7 +353,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.9.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -450,21 +455,17 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("author/package:latest"), False),
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
-        (DEFAULT_CONNECTION, True),
-        (DEFAULT_SKILL, True),
-        (DEFAULT_PROTOCOL, True),
-        (SIGNING_PROTOCOL, True),
-        (STATE_UPDATE_PROTOCOL, True),
-        (DEFAULT_CONNECTION.to_latest(), True),
-        (DEFAULT_SKILL.to_latest(), True),
-        (DEFAULT_PROTOCOL.to_latest(), True),
-        (SIGNING_PROTOCOL.to_latest(), True),
-        (STATE_UPDATE_PROTOCOL.to_latest(), True),
+        (DEFAULT_CONNECTION, False),
+        (DEFAULT_SKILL, False),
+        (DEFAULT_PROTOCOL, False),
+        (DEFAULT_CONNECTION.to_latest(), False),
+        (DEFAULT_SKILL.to_latest(), False),
+        (DEFAULT_PROTOCOL.to_latest(), False),
     ],
 )
-def test_is_local_item(public_id, expected_outcome):
-    """Test the 'is_local_item' CLI utility function."""
-    assert is_local_item(public_id) is expected_outcome
+def test_is_distributed_item(public_id, expected_outcome):
+    """Test the 'is_distributed_item' CLI utility function."""
+    assert is_distributed_item(public_id) is expected_outcome
 
 
 class TestGetWalletFromtx(AEATestCaseEmpty):
@@ -475,3 +476,40 @@ class TestGetWalletFromtx(AEATestCaseEmpty):
         ctx = mock.Mock()
         with cd(self._get_cwd()):
             assert isinstance(get_wallet_from_context(ctx), Wallet)
+
+
+def test_override_ledger_configurations_negative():
+    """Test override ledger configurations function util when nothing to override."""
+    agent_config = MagicMock()
+    agent_config.component_configurations = {}
+    expected_configurations = deepcopy(LedgerApis.ledger_api_configs)
+    _override_ledger_configurations(agent_config)
+    actual_configurations = LedgerApis.ledger_api_configs
+    assert expected_configurations == actual_configurations
+
+
+def test_override_ledger_configurations_positive():
+    """Test override ledger configurations function util with fields to override."""
+    new_chain_id = "some_chain"
+    agent_config = MagicMock()
+    agent_config.component_configurations = {
+        ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION): {
+            "config": {"ledger_apis": {DEFAULT_LEDGER: {"chain_id": new_chain_id}}}
+        }
+    }
+    old_configurations = deepcopy(LedgerApis.ledger_api_configs)
+
+    expected_configurations = deepcopy(old_configurations[DEFAULT_LEDGER])
+    expected_configurations["chain_id"] = new_chain_id
+    try:
+        _override_ledger_configurations(agent_config)
+        actual_configurations = LedgerApis.ledger_api_configs.get("fetchai")
+        assert expected_configurations == actual_configurations
+    finally:
+        # this is important - _ovveride_ledger_configurations does
+        # side-effect to LedgerApis.ledger_api_configs
+        LedgerApis.ledger_api_configs = old_configurations
+        assert (
+            LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
+            == DEFAULT_CHAIN_ID
+        )

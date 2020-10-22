@@ -1,5 +1,25 @@
 # Release History
 
+## 0.7.0 (2020-10-22)
+
+- Adds two AEAs for Agent World 1
+- Adds support to apply config overrides to CLI calls transfer and get-wealth
+- Adds install scripts to install AEA and dependencies on all major OS (Windows, MacOs, Ubuntu)
+- Adds developer mailing list opt-in step to CLI init
+- Modifies custom configs in aea-config to use public id
+- Adds all non-optional fields in aea-config by default
+- Fixes upgrade command to properly handle dependencies of non-vendor packages
+- Remove all distributed packages and add them to registry
+- Adds public ids to all skill init files and makes it a requirement
+- Adds primitive benchmarks for libp2p node
+- Adds Prometheus monitoring to libp2p node
+- Makes body a private attribute in message base class
+- Renames bodyy to body in http protocol
+- Adds support for abstract connections
+- Refactors protobuf schemas for protocols to avoid code duplication
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.6.3 (2020-10-16)
 
 - Adds skill testing tools and documentation

@@ -1,9 +1,9 @@
-<a name="aea.protocols.state_update.message"></a>
-# aea.protocols.state`_`update.message
+<a name="packages.fetchai.protocols.state_update.message"></a>
+# packages.fetchai.protocols.state`_`update.message
 
 This module contains state_update's message definition.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage"></a>
 ## StateUpdateMessage Objects
 
 ```python
@@ -12,7 +12,7 @@ class StateUpdateMessage(Message)
 
 A protocol for state updates to the decision maker state.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.Performative"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.Performative"></a>
 ## Performative Objects
 
 ```python
@@ -21,7 +21,7 @@ class Performative(Message.Performative)
 
 Performatives for the state_update protocol.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.Performative.__str__"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.Performative.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -30,7 +30,7 @@ Performatives for the state_update protocol.
 
 Get the string representation.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.__init__"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -46,7 +46,7 @@ Initialise an instance of StateUpdateMessage.
 - `target`: the message target.
 - `performative`: the message performative.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.valid_performatives"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.valid_performatives"></a>
 #### valid`_`performatives
 
 ```python
@@ -56,7 +56,7 @@ Initialise an instance of StateUpdateMessage.
 
 Get valid performatives.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.dialogue_reference"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.dialogue_reference"></a>
 #### dialogue`_`reference
 
 ```python
@@ -66,7 +66,7 @@ Get valid performatives.
 
 Get the dialogue_reference of the message.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.message_id"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.message_id"></a>
 #### message`_`id
 
 ```python
@@ -76,7 +76,7 @@ Get the dialogue_reference of the message.
 
 Get the message_id of the message.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.performative"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.performative"></a>
 #### performative
 
 ```python
@@ -86,7 +86,7 @@ Get the message_id of the message.
 
 Get the performative of the message.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.target"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.target"></a>
 #### target
 
 ```python
@@ -96,7 +96,7 @@ Get the performative of the message.
 
 Get the target of the message.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.amount_by_currency_id"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.amount_by_currency_id"></a>
 #### amount`_`by`_`currency`_`id
 
 ```python
@@ -106,7 +106,7 @@ Get the target of the message.
 
 Get the 'amount_by_currency_id' content from the message.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.exchange_params_by_currency_id"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.exchange_params_by_currency_id"></a>
 #### exchange`_`params`_`by`_`currency`_`id
 
 ```python
@@ -116,7 +116,7 @@ Get the 'amount_by_currency_id' content from the message.
 
 Get the 'exchange_params_by_currency_id' content from the message.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.quantities_by_good_id"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.quantities_by_good_id"></a>
 #### quantities`_`by`_`good`_`id
 
 ```python
@@ -126,7 +126,7 @@ Get the 'exchange_params_by_currency_id' content from the message.
 
 Get the 'quantities_by_good_id' content from the message.
 
-<a name="aea.protocols.state_update.message.StateUpdateMessage.utility_params_by_good_id"></a>
+<a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.utility_params_by_good_id"></a>
 #### utility`_`params`_`by`_`good`_`id
 
 ```python

@@ -141,7 +141,7 @@ class TestWebhookConnection:
         dialogue = self.dialogues.update(message)
         assert dialogue is not None
         assert message.method.upper() == "POST"
-        assert message.bodyy.decode("utf-8") == json.dumps(payload)
+        assert message.body.decode("utf-8") == json.dumps(payload)
         await call_task
 
     @pytest.mark.asyncio
@@ -158,13 +158,13 @@ class TestWebhookConnection:
             method="get",
             url="/",
             headers="",
-            bodyy="",
+            body="",
             version="",
         )
         envelope = Envelope(
             to="addr",
             sender="my_id",
-            protocol_id=PublicId.from_str("fetchai/http:0.7.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.8.0"),
             message=http_message,
         )
         with patch.object(self.webhook_connection.logger, "warning") as mock_logger:

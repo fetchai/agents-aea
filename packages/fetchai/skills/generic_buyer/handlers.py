@@ -22,15 +22,15 @@
 import pprint
 from typing import Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.signing.message import SigningMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -45,13 +45,13 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class GenericFipaHandler(Handler):
     """This class implements a FIPA handler."""
 
-    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """
@@ -277,7 +277,7 @@ class GenericFipaHandler(Handler):
 class GenericOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -404,7 +404,7 @@ class GenericOefSearchHandler(Handler):
 class GenericSigningHandler(Handler):
     """Implement the signing handler."""
 
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -516,7 +516,7 @@ class GenericSigningHandler(Handler):
 class GenericLedgerApiHandler(Handler):
     """Implement the ledger handler."""
 
-    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""

@@ -78,7 +78,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.14.0",
+            "fetchai/simple_service_registration:0.15.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -96,7 +96,7 @@ class TestBuildSkill(AEATestCaseMany):
         self.set_config(setting_path, COSMOS)
 
         default_routing = {
-            "fetchai/oef_search:0.8.0": "fetchai/soef:0.10.0",
+            "fetchai/oef_search:0.9.0": "fetchai/soef:0.11.0",
         }
 
         # replace location
@@ -109,9 +109,9 @@ class TestBuildSkill(AEATestCaseMany):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.11.0")
-        self.add_item("connection", "fetchai/soef:0.10.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.11.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.11.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
@@ -141,6 +141,12 @@ class TestBuildSkill(AEATestCaseMany):
         yaml_code_block = extract_code_blocks(self.doc_path, filter="yaml")
         with open(path, "w") as file:
             file.write(yaml_code_block[0])  # block one is yaml
+
+        path = Path(self.t, search_aea, "skills", skill_name, "__init__.py")
+        original = Path(AEA_DIR, "skills", "scaffold", "__init__.py")
+        assert filecmp.cmp(path, original)
+        with open(path, "w") as file:
+            file.write(self.code_blocks[3])  # block four is init
 
         # update fingerprint
         self.fingerprint_item("skill", skill_id)

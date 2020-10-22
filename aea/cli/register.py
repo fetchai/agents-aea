@@ -34,13 +34,20 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.option(
     "--confirm_password", type=str, required=True, prompt=True, hide_input=True
 )
-def register(username, email, password, confirm_password):
+@click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
+def register(
+    username: str, email: str, password: str, confirm_password: str, no_subscribe: bool
+):
     """Register a new Registry account CLI command."""
-    do_register(username, email, password, confirm_password)
+    do_register(username, email, password, confirm_password, no_subscribe)
 
 
 def do_register(
-    username: str, email: str, password: str, password_confirmation: str
+    username: str,
+    email: str,
+    password: str,
+    password_confirmation: str,
+    no_subscribe: bool,
 ) -> None:
     """
     Register a new Registry account and save auth token.
@@ -49,10 +56,18 @@ def do_register(
     :param email: str email.
     :param password: str password.
     :param password_confirmation: str password confirmation.
+    :param no_subscribe: bool flag for developers subscription skip on register.
 
     :return: None
     """
     username = validate_author_name(username)
     token = register_new_account(username, email, password, password_confirmation)
     update_cli_config({AUTH_TOKEN_KEY: token})
+    if not no_subscribe and click.confirm(
+        "Do you want to subscribe for developer news?"
+    ):
+        click.echo(
+            "Please visit `https://aea-registry.fetch.ai/mailing-list` "
+            "to subscribe for developer news"
+        )
     click.echo("Successfully registered and logged in: {}".format(username))

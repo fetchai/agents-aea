@@ -34,7 +34,7 @@ from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.7.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
 
 
 class TacBehaviour(BaseTacBehaviour):
@@ -67,7 +67,7 @@ class TacBehaviour(BaseTacBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ledger_id=parameters.ledger_id,
-            contract_id="fetchai/erc1155:0.11.0",
+            contract_id=parameters.contract_id,
             callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(
                 {"deployer_address": self.context.agent_address}
@@ -162,7 +162,7 @@ class TacBehaviour(BaseTacBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=parameters.ledger_id,
-            contract_id="fetchai/erc1155:0.11.0",
+            contract_id=parameters.contract_id,
             contract_address=parameters.contract_address,
             callable=ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(
@@ -209,7 +209,7 @@ class TacBehaviour(BaseTacBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=parameters.ledger_id,
-            contract_id="fetchai/erc1155:0.11.0",
+            contract_id=parameters.contract_id,
             contract_address=parameters.contract_address,
             callable=ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(

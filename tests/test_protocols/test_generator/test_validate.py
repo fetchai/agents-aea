@@ -61,7 +61,7 @@ class TestValidate(TestCase):
 
     def test_is_reserved_name(self):
         """Test for the '_is_reserved_name' method."""
-        invalid_content_name_1 = "body"
+        invalid_content_name_1 = "_body"
         assert _is_reserved_name(invalid_content_name_1) is True
 
         invalid_content_name_2 = "message_id"
@@ -664,7 +664,7 @@ class TestValidate(TestCase):
             )
         )
 
-        invalid_content_type_6 = "body"
+        invalid_content_type_6 = "_body"
         invalid_result_6, invalid_msg_6 = _validate_performatives(
             invalid_content_type_6
         )

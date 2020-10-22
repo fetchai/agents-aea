@@ -26,16 +26,16 @@ from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, cast
 
 from aea.common import Address
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.search.models import Description
 from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -52,7 +52,7 @@ MESSAGE_ID = 1
 RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.10.0")
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.11.0")
 
 
 class OefSearchDialogue(BaseOefSearchDialogue):
@@ -222,7 +222,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.8.0"):
+        if envelope.protocol_id == OefSearchMessage.protocol_id:
             await self._handle_oef_message(envelope)
         else:
             OEFLocalConnection._ensure_valid_envelope_for_external_comms(  # pylint: disable=protected-access

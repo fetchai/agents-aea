@@ -546,7 +546,7 @@ class EthereumFaucetApi(FaucetApi):
         response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
         if response.status_code // 100 == 5:
             _default_logger.error("Response: {}".format(response.status_code))
-        elif response.status_code // 100 in [3, 4]:
+        elif response.status_code // 100 in [3, 4]:  # pragma: nocover
             response_dict = json.loads(response.text)
             _default_logger.warning(
                 "Response: {}\nMessage: {}".format(

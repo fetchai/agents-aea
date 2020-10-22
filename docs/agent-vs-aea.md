@@ -6,7 +6,7 @@ In this guide we show some of the differences in terms of code.
 
 The <a href="../build-aea-programmatically">Build an AEA programmatically</a> guide shows how to programmatically build an AEA. We can build an agent of the <a href="../api/agent#agent-objects">`Agent`</a> class programmatically as well.
 
-First, import the python and application specific libraries.
+First, import the python and application specific libraries. (Get the packages directory from the AEA repository `svn export https://github.com/fetchai/agents-aea.git/trunk/packages`.)
 ``` python
 import os
 import time
@@ -16,10 +16,12 @@ from typing import List
 from aea.agent import Agent
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.connections.stub.connection import StubConnection, write_with_lock
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
+
+from packages.fetchai.connections.stub.connection import StubConnection
+from packages.fetchai.protocols.default.message import DefaultMessage
 ```
 
 Unlike an `AEA`, an `Agent` does not require a `Wallet`, `LedgerApis` or `Resources` module.
@@ -126,9 +128,8 @@ We run the agent from a different thread so that we can still use the main threa
 We use the input and output text files to send an envelope to our agent and receive a response
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = (
-            b"my_agent,other_agent,fetchai/default:0.7.0,\x08\x01*\x07\n\x05hello,"
-        )
+        message_text = b"my_agent,other_agent,fetchai/default:0.8.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
 
@@ -168,10 +169,12 @@ from typing import List
 from aea.agent import Agent
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.connections.stub.connection import StubConnection, write_with_lock
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
+
+from packages.fetchai.connections.stub.connection import StubConnection
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 INPUT_FILE = "input_file"
@@ -253,9 +256,8 @@ def run():
         time.sleep(3)
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = (
-            b"my_agent,other_agent,fetchai/default:0.7.0,\x08\x01*\x07\n\x05hello,"
-        )
+        message_text = b"my_agent,other_agent,fetchai/default:0.8.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
 

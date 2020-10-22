@@ -33,29 +33,29 @@ class TestEjectCommands(AEATestCaseMany):
 
         self.set_agent_context(agent_name)
         cwd = os.path.join(self.t, agent_name)
-        self.add_item("connection", "fetchai/gym:0.9.0")
-        self.add_item("skill", "fetchai/gym:0.9.0")
-        self.add_item("contract", "fetchai/erc1155:0.11.0")
+        self.add_item("connection", "fetchai/gym:0.10.0")
+        self.add_item("skill", "fetchai/gym:0.10.0")
+        self.add_item("contract", "fetchai/erc1155:0.12.0")
 
-        self.run_cli_command("eject", "connection", "fetchai/gym:0.9.0", cwd=cwd)
+        self.eject_item("connection", "fetchai/gym:0.10.0")
         assert "gym" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "connections"))
         )
         assert "gym" in os.listdir((os.path.join(cwd, "connections")))
 
-        self.run_cli_command("eject", "protocol", "fetchai/gym:0.7.0", cwd=cwd)
+        self.eject_item("protocol", "fetchai/gym:0.8.0")
         assert "gym" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "protocols"))
         )
         assert "gym" in os.listdir((os.path.join(cwd, "protocols")))
 
-        self.run_cli_command("eject", "skill", "fetchai/gym:0.9.0", cwd=cwd)
+        self.eject_item("skill", "fetchai/gym:0.10.0")
         assert "gym" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "skills"))
         )
         assert "gym" in os.listdir((os.path.join(cwd, "skills")))
 
-        self.run_cli_command("eject", "contract", "fetchai/erc1155:0.11.0", cwd=cwd)
+        self.eject_item("contract", "fetchai/erc1155:0.12.0")
         assert "erc1155" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "contracts"))
         )

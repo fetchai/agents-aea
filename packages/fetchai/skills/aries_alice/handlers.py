@@ -25,11 +25,11 @@ import json
 from typing import Dict, Optional, cast
 from urllib.parse import urlparse
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_alice.dialogues import (
@@ -49,7 +49,7 @@ from packages.fetchai.skills.aries_alice.strategy import (
 class AliceDefaultHandler(Handler):
     """This class represents alice's handler for default messages."""
 
-    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -151,7 +151,7 @@ class AliceDefaultHandler(Handler):
 class AliceHttpHandler(Handler):
     """This class represents alice's handler for HTTP messages."""
 
-    SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -188,7 +188,7 @@ class AliceHttpHandler(Handler):
                     "alice -> http_handler -> handle() -> REQUEST: something went wrong when adding the incoming HTTP webhook request message to the dialogue."
                 )
                 return
-            content_bytes = message.bodyy
+            content_bytes = message.body
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
             if "connection_id" in content:
@@ -205,7 +205,7 @@ class AliceHttpHandler(Handler):
                     "alice -> http_handler -> handle() -> RESPONSE: something went wrong when adding the incoming HTTP response message to the dialogue."
                 )
                 return
-            content_bytes = message.bodyy
+            content_bytes = message.body
             content = content_bytes.decode("utf-8")
             if "Error" in content:
                 self.context.logger.error(
@@ -235,7 +235,7 @@ class AliceHttpHandler(Handler):
 class AliceOefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
-    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Call to setup the handler."""

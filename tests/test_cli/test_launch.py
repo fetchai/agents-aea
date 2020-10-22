@@ -36,7 +36,14 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner, MAX_FLAKY_RERUNS
+from tests.conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CUR_PATH,
+    CliRunner,
+    MAX_FLAKY_RERUNS,
+    ROOT_DIR,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -89,6 +96,10 @@ class BaseLaunchTestCase:
         cls.agent_name_2 = "myagent_2"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]

@@ -22,7 +22,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Optional, Set, Tuple
 
 import click
 from jsonschema import ValidationError
@@ -34,22 +34,22 @@ from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     AgentConfig,
     ComponentConfiguration,
+    ComponentId,
+    ComponentType,
     DEFAULT_AEA_CONFIG_FILE,
+    PACKAGE_PUBLIC_ID_VAR_NAME,
     PackageType,
     PublicId,
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
-    DEFAULT_SKILL,
-    LOCAL_PROTOCOLS,
-)
+from aea.configurations.constants import DISTRIBUTED_PACKAGES, LEDGER_CONNECTION
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
+from aea.helpers.base import recursive_update
 
 
 ROOT = Path(".")
@@ -224,7 +224,7 @@ def copy_package_directory(src: Path, dst: str) -> Path:
 
 
 def find_item_locally(
-    ctx, item_type, item_public_id
+    ctx: Context, item_type: str, item_public_id: PublicId
 ) -> Tuple[Path, ComponentConfiguration]:
     """
     Find an item in the local registry.
@@ -241,7 +241,11 @@ def find_item_locally(
     item_name = item_public_id.name
 
     # check in registry
-    registry_path = os.path.join(ctx.cwd, ctx.agent_config.registry_path)
+    registry_path = (
+        os.path.join(ctx.cwd, ctx.agent_config.registry_path)
+        if ctx.registry_path is None
+        else ctx.registry_path
+    )
     package_path = Path(
         registry_path, item_public_id.author, item_type_plural, item_name
     )
@@ -328,7 +332,7 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
             "Cannot find {} with author and version specified.".format(item_type)
         )
 
-    return package_path
+    return package_path  # pragma: no cover
 
 
 def validate_author_name(author: Optional[str] = None) -> str:
@@ -507,21 +511,27 @@ def get_items(agent_config: AgentConfig, item_type: str) -> Set[PublicId]:
     return getattr(agent_config, item_type_plural)
 
 
-def is_local_item(item_public_id: PublicId) -> bool:
+def is_distributed_item(item_public_id: PublicId) -> bool:
     """
-    Check whether the item public id correspond to a local package.
+    Check whether the item public id correspond to a package in the distribution.
 
     If the provided item has version 'latest', only the prefixes are compared.
-    Otherwise, the function will try to match the exact version occurrence among the local packages.
+    Otherwise, the function will try to match the exact version occurrence among the distributed packages.
     """
-    local_packages: List[PublicId] = [
-        DEFAULT_CONNECTION,
-        *LOCAL_PROTOCOLS,
-        DEFAULT_SKILL,
-    ]
     if item_public_id.package_version.is_latest:
-        return any(item_public_id.same_prefix(other) for other in local_packages)
-    return item_public_id in local_packages
+        return any(item_public_id.same_prefix(other) for other in DISTRIBUTED_PACKAGES)
+    return item_public_id in DISTRIBUTED_PACKAGES
+
+
+def _override_ledger_configurations(agent_config: AgentConfig) -> None:
+    """Override LedgerApis configurations with agent override configurations."""
+    ledger_component_id = ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION)
+    if ledger_component_id not in agent_config.component_configurations:
+        return
+    ledger_apis_config = agent_config.component_configurations[ledger_component_id][
+        "config"
+    ].get("ledger_apis", {})
+    recursive_update(LedgerApis.ledger_api_configs, ledger_apis_config)
 
 
 def try_get_balance(  # pylint: disable=unused-argument
@@ -571,3 +581,30 @@ def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
     }
     wallet = Wallet(private_key_paths)
     return wallet
+
+
+def update_item_public_id_in_init(
+    item_type: str, package_path: Path, item_id: PublicId
+) -> None:
+    """
+    Update item config and item config file.
+
+    :param item_type: type of item.
+    :param package_path: path to a package folder.
+    :param item_id: public_id
+
+    :return: None
+    """
+    if item_type != "skill":
+        return
+    init_filepath = os.path.join(package_path, "__init__.py")
+    with open(init_filepath, "r") as f:
+        file_content = f.readlines()
+    with open(init_filepath, "w") as f:
+        for line in file_content:
+            if PACKAGE_PUBLIC_ID_VAR_NAME in line:
+                f.write(
+                    f'{PACKAGE_PUBLIC_ID_VAR_NAME} = PublicId.from_str("{str(item_id)}")'
+                )
+            else:
+                f.write(line)

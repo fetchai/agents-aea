@@ -1,0 +1,23 @@
+name: error
+author: fetchai
+version: 0.8.0
+type: skill
+description: The error skill implements basic error handling required by all AEAs.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmZN1T31FVeFwC5TfUaxfX489Td1cr9xZaqDKsH2vzFBYY
+  handlers.py: QmZiic7ryUmmpoczUc77pPuBapdDREubU8rYUCPY1eJwfm
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/default:0.8.0
+skills: []
+behaviours: {}
+handlers:
+  error_handler:
+    args: {}
+    class_name: ErrorHandler
+models: {}
+dependencies: {}
+is_abstract: false

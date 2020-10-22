@@ -29,7 +29,6 @@ from unittest import TestCase, mock
 import jsonschema
 from jsonschema import Draft4Validator
 
-from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import PublicId
 
@@ -56,7 +55,6 @@ class TestSearchProtocolsLocal:
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
-        os.chdir(AEA_DIR)
         self.result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "search", "--local", "protocols"],
@@ -124,7 +122,6 @@ class TestSearchConnectionsLocal:
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
-        os.chdir(AEA_DIR)
         self.result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "search", "--local", "connections"],
@@ -154,7 +151,6 @@ class TestSearchSkillsLocal:
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
-        os.chdir(AEA_DIR)
         self.result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "search", "--local", "skills"], standalone_mode=False
         )
@@ -186,6 +182,10 @@ class TestSearchAgentsLocal:
         cls.runner = CliRunner()
 
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         cls.cli_config_file = f"{cls.t}/cli_config.yaml"
         cls.cli_config_patch = mock.patch(
@@ -227,17 +227,19 @@ class TestSearchAgentsLocal:
 
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
-        assert (
-            self.result.output == 'Searching for ""...\n'
-            "Agents found:\n\n"
-            "------------------------------\n"
-            "Public ID: default_author/myagent:0.1.0\n"
-            "Name: myagent\n"
-            "Description: Some description.\n"
-            "Author: default_author\n"
-            "Version: 0.1.0\n"
-            "------------------------------\n\n"
-        )
+        expected = [
+            ('Searching for ""...\n' "Agents found:\n\n"),
+            (
+                "------------------------------\n"
+                "Public ID: default_author/myagent:0.1.0\n"
+                "Name: myagent\n"
+                "Description: Some description.\n"
+                "Author: default_author\n"
+                "Version: 0.1.0\n"
+                "------------------------------\n\n"
+            ),
+        ]
+        assert [strings in self.result.output for strings in expected]
 
     @classmethod
     def teardown_class(cls):
@@ -349,9 +351,9 @@ class TestSearchWithRegistryInSubfolderLocal:
         # copy the packages directory in the temporary test directory.
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
-        # remove all the skills except the echo skill (to make testing easier).
+        # remove all the skills except the echo and error skill (to make testing easier).
         for p in Path(cls.t, "packages", "fetchai", "skills").iterdir():
-            if p.name != "echo" and p.is_dir():
+            if p.name not in ["echo", "error"] and p.is_dir():
                 shutil.rmtree(p)
 
         cls.result = cls.runner.invoke(
@@ -364,32 +366,30 @@ class TestSearchWithRegistryInSubfolderLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.9.0")
-        public_id_error = PublicId.from_str("fetchai/error:0.7.0")
-        expected = (
-            'Searching for ""...\n'
-            "Skills found:\n\n"
-            "------------------------------\n"
-            "Public ID: {}\n"
-            "Name: echo\n"
-            "Description: The echo skill implements simple echo functionality.\n"
-            "Author: fetchai\n"
-            "Version: {}\n"
-            "------------------------------\n"
-            "------------------------------\n"
-            "Public ID: {}\n"
-            "Name: error\n"
-            "Description: The error skill implements basic error handling required by all AEAs.\n"
-            "Author: fetchai\n"
-            "Version: {}\n"
-            "------------------------------\n\n"
-        ).format(
-            str(public_id_echo),
-            str(public_id_echo.version),
-            str(public_id_error),
-            str(public_id_error.version),
-        )
-        assert self.result.output == expected
+        public_id_echo = PublicId.from_str("fetchai/echo:0.10.0")
+        public_id_error = PublicId.from_str("fetchai/error:0.8.0")
+        expected = [
+            ('Searching for ""...\n' "Skills found:\n\n"),
+            (
+                "------------------------------\n"
+                "Public ID: {}\n"
+                "Name: echo\n"
+                "Description: The echo skill implements simple echo functionality.\n"
+                "Author: fetchai\n"
+                "Version: {}\n"
+                "------------------------------\n"
+            ).format(str(public_id_echo), str(public_id_echo.version)),
+            (
+                "------------------------------\n"
+                "Public ID: {}\n"
+                "Name: error\n"
+                "Description: The error skill implements basic error handling required by all AEAs.\n"
+                "Author: fetchai\n"
+                "Version: {}\n"
+                "------------------------------\n\n"
+            ).format(str(public_id_error), str(public_id_error.version),),
+        ]
+        assert [strings in self.result.output for strings in expected]
 
     @classmethod
     def teardown_class(cls):
@@ -415,12 +415,10 @@ class TestSearchInAgentDirectoryLocal:
         # copy the packages directory in the temporary test directory.
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
-        # remove all the skills except the echo skill (to make testing easier).
-        [
-            shutil.rmtree(p)
-            for p in Path(cls.t, "packages", "fetchai", "skills").iterdir()
-            if p.name != "echo" and p.is_dir()
-        ]
+        # remove all the skills except the echo and error skill (to make testing easier).
+        for p in Path(cls.t, "packages", "fetchai", "skills").iterdir():
+            if p.name not in ["echo", "error"] and p.is_dir():
+                shutil.rmtree(p)
 
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
@@ -446,32 +444,30 @@ class TestSearchInAgentDirectoryLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.9.0")
-        public_id_error = PublicId.from_str("fetchai/error:0.7.0")
-        expected = (
-            'Searching for ""...\n'
-            "Skills found:\n\n"
-            "------------------------------\n"
-            "Public ID: {}\n"
-            "Name: echo\n"
-            "Description: The echo skill implements simple echo functionality.\n"
-            "Author: fetchai\n"
-            "Version: {}\n"
-            "------------------------------\n"
-            "------------------------------\n"
-            "Public ID: {}\n"
-            "Name: error\n"
-            "Description: The error skill implements basic error handling required by all AEAs.\n"
-            "Author: fetchai\n"
-            "Version: {}\n"
-            "------------------------------\n\n"
-        ).format(
-            str(public_id_echo),
-            str(public_id_echo.version),
-            str(public_id_error),
-            str(public_id_error.version),
-        )
-        assert self.result.output == expected
+        public_id_echo = PublicId.from_str("fetchai/echo:0.10.0")
+        public_id_error = PublicId.from_str("fetchai/error:0.8.0")
+        expected = [
+            ('Searching for ""...\n' "Skills found:\n\n"),
+            (
+                "------------------------------\n"
+                "Public ID: {}\n"
+                "Name: echo\n"
+                "Description: The echo skill implements simple echo functionality.\n"
+                "Author: fetchai\n"
+                "Version: {}\n"
+                "------------------------------\n"
+            ).format(str(public_id_echo), str(public_id_echo.version)),
+            (
+                "------------------------------\n"
+                "Public ID: {}\n"
+                "Name: error\n"
+                "Description: The error skill implements basic error handling required by all AEAs.\n"
+                "Author: fetchai\n"
+                "Version: {}\n"
+                "------------------------------\n\n"
+            ).format(str(public_id_error), str(public_id_error.version),),
+        ]
+        assert [strings in self.result.output for strings in expected]
 
     @classmethod
     def teardown_class(cls):

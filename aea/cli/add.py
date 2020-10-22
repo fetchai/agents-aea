@@ -34,9 +34,9 @@ from aea.cli.utils.package_utils import (
     find_item_locally,
     get_item_id_present,
     get_package_path,
+    is_distributed_item,
     is_fingerprint_correct,
     is_item_present,
-    is_local_item,
     register_item,
 )
 from aea.configurations.base import PublicId
@@ -115,11 +115,11 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
 
     ctx.clean_paths.append(dest_path)
 
-    is_distributed_item = is_local_item(item_public_id)
-    if is_local and is_distributed_item:
+    is_distributed = is_distributed_item(item_public_id)
+    if is_local and is_distributed:  # pragma: nocover
         source_path = find_item_in_distribution(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
-    elif is_local and not is_distributed_item:
+    elif is_local and not is_distributed:
         source_path, _ = find_item_locally(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
     else:

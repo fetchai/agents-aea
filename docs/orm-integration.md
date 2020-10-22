@@ -59,7 +59,7 @@ A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` ne
 
 First, fetch the seller AEA, which will provide data:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.12.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.13.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 ```
@@ -71,19 +71,19 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add skill fetchai/thermometer:0.13.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/thermometer:0.14.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 
 In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.5.0: fetchai/ledger:0.7.0
-  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 
 </p>
@@ -94,7 +94,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the seller AEA.
 ``` bash
-aea fetch fetchai/thermometer_client:0.12.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.13.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -106,19 +106,19 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.11.0
-aea add connection fetchai/soef:0.10.0
-aea add connection fetchai/ledger:0.7.0
-aea add skill fetchai/thermometer_client:0.12.0
+aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.11.0
+aea add connection fetchai/ledger:0.8.0
+aea add skill fetchai/thermometer_client:0.13.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.11.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 
 In `my_buyer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.5.0: fetchai/ledger:0.7.0
-  fetchai/oef_search:0.8.0: fetchai/soef:0.10.0
+  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
+  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
 ```
 
 </p>
@@ -166,8 +166,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: thermometer_data
@@ -190,8 +190,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
@@ -214,7 +214,7 @@ aea install
 Before being able to modify a package we need to eject it from vendor:
 
 ``` bash
-aea eject skill fetchai/thermometer:0.13.0
+aea eject skill fetchai/thermometer:0.14.0
 ```
 
 This will move the package to your `skills` directory and reset the version to `0.1.0` and the author to your author handle.
@@ -297,7 +297,7 @@ First, run the thermometer AEA:
 aea run
 ```
 
-Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
 
 Then, update the configuration of the thermometer client AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
 

@@ -34,7 +34,7 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
- | __init__(body: Optional[Dict] = None, **kwargs)
+ | __init__(_body: Optional[Dict] = None, **kwargs)
 ```
 
 Initialize a Message object.
@@ -105,38 +105,6 @@ Get address of receiver.
 ```
 
 Set address of receiver.
-
-<a name="aea.protocols.base.Message.body"></a>
-#### body
-
-```python
- | @property
- | body() -> Dict
-```
-
-Get the body of the message (in dictionary form).
-
-**Returns**:
-
-the body
-
-<a name="aea.protocols.base.Message.body"></a>
-#### body
-
-```python
- | @body.setter
- | body(body: Dict) -> None
-```
-
-Set the body of hte message.
-
-**Arguments**:
-
-- `body`: the body.
-
-**Returns**:
-
-None
 
 <a name="aea.protocols.base.Message.dialogue_reference"></a>
 #### dialogue`_`reference
@@ -241,6 +209,23 @@ Get the string representation of the message.
 
 Encode the message.
 
+<a name="aea.protocols.base.Message.has_dialogue_info"></a>
+#### has`_`dialogue`_`info
+
+```python
+ | @property
+ | has_dialogue_info() -> bool
+```
+
+Check whether a message has the dialogue fields populated.
+
+More precisely, it checks whether the fields 'message_id',
+'target' and 'dialogue_reference' are set.
+
+**Returns**:
+
+True if the message has the dialogue fields set, False otherwise.
+
 <a name="aea.protocols.base.Encoder"></a>
 ## Encoder Objects
 
@@ -327,6 +312,11 @@ It assumes that the Message contains a JSON-serializable body.
 
 Encode a message into bytes using Protobuf.
 
+- if one of message_id, target and dialogue_reference are not defined,
+  serialize only the message body/
+- otherwise, extract those fields from the body and instantiate
+  a Message struct.
+
 <a name="aea.protocols.base.ProtobufSerializer.decode"></a>
 #### decode
 
@@ -336,6 +326,9 @@ Encode a message into bytes using Protobuf.
 ```
 
 Decode bytes into a message using Protobuf.
+
+First, try to parse the input as a Protobuf 'Message';
+if it fails, parse the bytes as struct.
 
 <a name="aea.protocols.base.Protocol"></a>
 ## Protocol Objects

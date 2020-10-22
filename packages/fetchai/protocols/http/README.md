@@ -10,23 +10,23 @@ This is a protocol for interacting with a client/server via HTTP requests and re
 ---
 name: http
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
-aea_version: '>=0.6.0, <0.7.0'
+aea_version: '>=0.7.0, <0.8.0'
 speech_acts:
   request:
     method: pt:str
     url: pt:str
     version: pt:str
     headers: pt:str
-    bodyy: pt:bytes
+    body: pt:bytes
   response:
     version: pt:str
     status_code: pt:int
     status_text: pt:str
     headers: pt:str
-    bodyy: pt:bytes
+    body: pt:bytes
 ...
 ---
 initiation: [request]

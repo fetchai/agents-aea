@@ -1260,6 +1260,19 @@ Check that the AEA version matches the specifier set.
 
 :raises ValueError if the version of the aea framework falls within a specifier.
 
+<a name="aea.configurations.base.ComponentConfiguration.check_public_id_consistency"></a>
+#### check`_`public`_`id`_`consistency
+
+```python
+ | check_public_id_consistency(directory: Path) -> None
+```
+
+Check that the public ids in the init file match the config.
+
+:raises ValueError if:
+- the argument is not a valid package directory
+- the public ids do not match.
+
 <a name="aea.configurations.base.ConnectionConfig"></a>
 ## ConnectionConfig Objects
 
@@ -1273,7 +1286,7 @@ Handle connection configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str = "", author: str = "", version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", connection_id: Optional[PublicId] = None, **config, ,)
+ | __init__(name: str = "", author: str = "", version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, connections: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", connection_id: Optional[PublicId] = None, is_abstract: bool = False, **config, ,)
 ```
 
 Initialize a connection configuration object.
@@ -1287,6 +1300,16 @@ Initialize a connection configuration object.
 ```
 
 Get the connection dependencies.
+
+<a name="aea.configurations.base.ConnectionConfig.is_abstract_component"></a>
+#### is`_`abstract`_`component
+
+```python
+ | @property
+ | is_abstract_component() -> bool
+```
+
+Check whether the component is abstract.
 
 <a name="aea.configurations.base.ConnectionConfig.json"></a>
 #### json
@@ -1422,7 +1445,7 @@ Class to represent a skill configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, protocols: List[PublicId] = None, contracts: List[PublicId] = None, skills: List[PublicId] = None, dependencies: Optional[Dependencies] = None, description: str = "", is_abstract: bool = False)
+ | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, protocols: Optional[Set[PublicId]] = None, contracts: Optional[Set[PublicId]] = None, skills: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", is_abstract: bool = False)
 ```
 
 Initialize a skill configuration.

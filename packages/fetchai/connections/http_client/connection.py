@@ -48,7 +48,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.10.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.11.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -228,7 +228,7 @@ class HTTPClientAsyncChannel:
                 status_code=resp.status,
                 headers=resp.headers,
                 status_text=resp.reason,
-                bodyy=resp._body  # pylint: disable=protected-access
+                body=resp._body  # pylint: disable=protected-access
                 if resp._body is not None  # pylint: disable=protected-access
                 else b"",
                 dialogue=dialogue,
@@ -239,7 +239,7 @@ class HTTPClientAsyncChannel:
                 status_code=self.DEFAULT_EXCEPTION_CODE,
                 headers={},
                 status_text="HTTPConnection request error.",
-                bodyy=format_exc().encode("utf-8"),
+                body=format_exc().encode("utf-8"),
                 dialogue=dialogue,
             )
 
@@ -262,7 +262,7 @@ class HTTPClientAsyncChannel:
                     method=request_http_message.method,
                     url=request_http_message.url,
                     headers=request_http_message.headers,
-                    data=request_http_message.bodyy,
+                    data=request_http_message.body,
                 ) as resp:
                     await resp.read()
                 return resp
@@ -352,7 +352,7 @@ class HTTPClientAsyncChannel:
         status_code: int,
         headers: dict,
         status_text: Optional[Any],
-        bodyy: bytes,
+        body: bytes,
         dialogue: HttpDialogue,
     ) -> Envelope:
         """
@@ -362,7 +362,7 @@ class HTTPClientAsyncChannel:
         :param status_code: the http status code, int
         :param headers: dict of http response headers
         :param status_text: the http status_text, str
-        :param bodyy: bytes of http response content
+        :param body: bytes of http response content
 
         :return: Envelope with http response data.
         """
@@ -372,7 +372,7 @@ class HTTPClientAsyncChannel:
             status_code=status_code,
             headers=json.dumps(dict(headers.items())),
             status_text=status_text,
-            bodyy=bodyy,
+            body=body,
             version="",
         )
         envelope = Envelope(

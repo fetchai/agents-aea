@@ -21,6 +21,8 @@
 
 from typing import Any, Dict, cast
 
+from aea.mail.base_pb2 import DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.ml_trade import ml_trade_pb2
@@ -40,12 +42,15 @@ class MlTradeSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(MlTradeMessage, msg)
+        message_pb = ProtobufMessage()
+        dialogue_message_pb = DialogueMessage()
         ml_trade_msg = ml_trade_pb2.MlTradeMessage()
-        ml_trade_msg.message_id = msg.message_id
+
+        dialogue_message_pb.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
-        ml_trade_msg.dialogue_starter_reference = dialogue_reference[0]
-        ml_trade_msg.dialogue_responder_reference = dialogue_reference[1]
-        ml_trade_msg.target = msg.target
+        dialogue_message_pb.dialogue_starter_reference = dialogue_reference[0]
+        dialogue_message_pb.dialogue_responder_reference = dialogue_reference[1]
+        dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
         if performative_id == MlTradeMessage.Performative.CFP:
@@ -75,8 +80,11 @@ class MlTradeSerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
-        ml_trade_bytes = ml_trade_msg.SerializeToString()
-        return ml_trade_bytes
+        dialogue_message_pb.content = ml_trade_msg.SerializeToString()
+
+        message_pb.dialogue_message.CopyFrom(dialogue_message_pb)
+        message_bytes = message_pb.SerializeToString()
+        return message_bytes
 
     @staticmethod
     def decode(obj: bytes) -> Message:
@@ -86,15 +94,17 @@ class MlTradeSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'MlTrade' message.
         """
+        message_pb = ProtobufMessage()
         ml_trade_pb = ml_trade_pb2.MlTradeMessage()
-        ml_trade_pb.ParseFromString(obj)
-        message_id = ml_trade_pb.message_id
+        message_pb.ParseFromString(obj)
+        message_id = message_pb.dialogue_message.message_id
         dialogue_reference = (
-            ml_trade_pb.dialogue_starter_reference,
-            ml_trade_pb.dialogue_responder_reference,
+            message_pb.dialogue_message.dialogue_starter_reference,
+            message_pb.dialogue_message.dialogue_responder_reference,
         )
-        target = ml_trade_pb.target
+        target = message_pb.dialogue_message.target
 
+        ml_trade_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = ml_trade_pb.WhichOneof("performative")
         performative_id = MlTradeMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]

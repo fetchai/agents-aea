@@ -26,10 +26,12 @@ from threading import Thread
 from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.stub.connection import StubConnection, write_with_lock
+from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
+
+from packages.fetchai.connections.stub.connection import StubConnection
 
 
 INPUT_FILE = "input.txt"
@@ -65,7 +67,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
-            "multiplexer,some_agent,fetchai/default:0.7.0,\x08\x01*\x07\n\x05hello,"
+            "multiplexer,some_agent,fetchai/default:0.8.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             write_with_lock(f, message_text)

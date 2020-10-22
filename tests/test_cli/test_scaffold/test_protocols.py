@@ -42,6 +42,7 @@ from tests.conftest import (
     CONFIGURATION_SCHEMA_DIR,
     CliRunner,
     PROTOCOL_CONFIGURATION_SCHEMA,
+    ROOT_DIR,
 )
 
 
@@ -56,7 +57,10 @@ class TestScaffoldProtocol:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
             make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
@@ -134,6 +138,10 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -197,6 +205,10 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -266,6 +278,10 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -335,6 +351,10 @@ class TestScaffoldProtocolFailsWhenExceptionOccurs:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(

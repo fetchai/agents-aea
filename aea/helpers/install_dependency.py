@@ -17,19 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 """Helper to install python dependecies."""
-import pprint
 import subprocess  # nosec
 import sys
+from logging import Logger
 from typing import List
 
-import click
-
-from aea.cli.utils.loggers import logger
 from aea.configurations.base import Dependency
 from aea.exceptions import AEAException, enforce
 
 
-def install_dependency(dependency_name: str, dependency: Dependency) -> None:
+def install_dependency(
+    dependency_name: str, dependency: Dependency, logger: Logger
+) -> None:
     """
     Install python dependency to the current python environment.
 
@@ -38,7 +37,6 @@ def install_dependency(dependency_name: str, dependency: Dependency) -> None:
 
     :return: None
     """
-    click.echo("Installing {}...".format(pprint.pformat(dependency_name)))
     try:
         pip_args = dependency.get_pip_install_args()
         command = [sys.executable, "-m", "pip", "install", *pip_args]

@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
 from aea.components.base import Component, load_aea_package
-from aea.configurations.base import ComponentType, ContractConfig, ContractId
+from aea.configurations.base import ComponentType, ContractConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
@@ -40,6 +40,7 @@ _default_logger = logging.getLogger(__name__)
 class Contract(Component):
     """Abstract definition of a contract."""
 
+    contract_id = None  # type: PublicId
     contract_interface: Any = None
 
     def __init__(self, contract_config: ContractConfig, **kwargs):
@@ -51,7 +52,7 @@ class Contract(Component):
         super().__init__(contract_config, **kwargs)
 
     @property
-    def id(self) -> ContractId:
+    def id(self) -> PublicId:
         """Get the name."""
         return self.public_id
 

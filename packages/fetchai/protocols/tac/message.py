@@ -22,7 +22,7 @@
 import logging
 from typing import Dict, Optional, Set, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
-    protocol_id = ProtocolId.from_str("fetchai/tac:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/tac:0.9.0")
 
     ErrorCode = CustomErrorCode
 
@@ -304,7 +304,7 @@ class TacMessage(Message):
             )
 
             # Check correct contents
-            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == TacMessage.Performative.REGISTER:
                 expected_nb_of_contents = 1

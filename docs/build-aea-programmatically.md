@@ -1,6 +1,14 @@
 
 These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface.
 
+## Preperation
+
+Get the packages directory from the AEA repository:
+
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+
 ## Imports
 
 First, import the necessary common Python libraries and classes.
@@ -16,9 +24,9 @@ Then, import the application specific libraries.
 ``` python
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.connections.stub.connection import write_with_lock
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
 ```
 
@@ -48,7 +56,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.7.0` protocol, the `fetchai/stub:0.11.0` connection and the `fetchai/error:0.7.0` skill.
+We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.8.0` protocol, the `fetchai/stub:0.12.0` connection and the `fetchai/error:0.8.0` skill.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -72,8 +80,9 @@ Also, we can add a component that was instantiated programmatically. :
 ``` python
     # create skill and handler manually
     from aea.protocols.base import Message
-    from aea.protocols.default.message import DefaultMessage
     from aea.skills.base import Handler
+
+    from packages.fetchai.protocols.default.message import DefaultMessage
 
     class DummyHandler(Handler):
         """Dummy handler to handle messages."""
@@ -121,7 +130,7 @@ We run the AEA from a different thread so that we can still use the main thread 
 We use the input and output text files to send an envelope to our AEA and receive a response (from the echo skill)
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = b"my_aea,other_agent,fetchai/default:0.7.0,\x08\x01\x12\x011*\x07\n\x05hello,"
+        message_text = b"my_aea,other_agent,fetchai/default:0.8.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
             print(b"input message: " + message_text)
@@ -147,8 +156,8 @@ Finally stop our AEA and wait for it to finish
 ## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_aea,other_agent,fetchai/default:0.7.0,\x08\x01*\x07\n\x05hello
-    output message: other_agent,my_aea,fetchai/default:0.7.0,...\x05hello
+    input message: my_aea,other_agent,fetchai/default:0.8.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
+    output message: other_agent,my_aea,fetchai/default:0.8.0,...\x05hello
 
 
 ## Entire code listing
@@ -164,9 +173,9 @@ from threading import Thread
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.connections.stub.connection import write_with_lock
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
 
 
@@ -201,8 +210,9 @@ def run():
 
     # create skill and handler manually
     from aea.protocols.base import Message
-    from aea.protocols.default.message import DefaultMessage
     from aea.skills.base import Handler
+
+    from packages.fetchai.protocols.default.message import DefaultMessage
 
     class DummyHandler(Handler):
         """Dummy handler to handle messages."""
@@ -239,7 +249,7 @@ def run():
         time.sleep(4)
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = b"my_aea,other_agent,fetchai/default:0.7.0,\x08\x01\x12\x011*\x07\n\x05hello,"
+        message_text = b"my_aea,other_agent,fetchai/default:0.8.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
             print(b"input message: " + message_text)

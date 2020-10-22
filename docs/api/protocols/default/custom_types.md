@@ -1,9 +1,9 @@
-<a name="aea.protocols.default.custom_types"></a>
-# aea.protocols.default.custom`_`types
+<a name="packages.fetchai.protocols.default.custom_types"></a>
+# packages.fetchai.protocols.default.custom`_`types
 
 This module contains class representations corresponding to every custom type in the protocol specification.
 
-<a name="aea.protocols.default.custom_types.ErrorCode"></a>
+<a name="packages.fetchai.protocols.default.custom_types.ErrorCode"></a>
 ## ErrorCode Objects
 
 ```python
@@ -12,7 +12,7 @@ class ErrorCode(Enum)
 
 This class represents an instance of ErrorCode.
 
-<a name="aea.protocols.default.custom_types.ErrorCode.encode"></a>
+<a name="packages.fetchai.protocols.default.custom_types.ErrorCode.encode"></a>
 #### encode
 
 ```python
@@ -33,7 +33,7 @@ The protocol buffer object in the error_code_protobuf_object argument is matched
 
 None
 
-<a name="aea.protocols.default.custom_types.ErrorCode.decode"></a>
+<a name="packages.fetchai.protocols.default.custom_types.ErrorCode.decode"></a>
 #### decode
 
 ```python
