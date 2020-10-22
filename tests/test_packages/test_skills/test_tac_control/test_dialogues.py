@@ -80,7 +80,8 @@ class TestDialogues(BaseSkillTestCase):
         """Test the TacDialogues class."""
         _, dialogue = self.tac_dialogues.create(
             counterparty=COUNTERPARTY_ADDRESS,
-            performative=TacMessage.Performative.CANCELLED,
+            performative=TacMessage.Performative.REGISTER,
+            agent_name="some_agent_name"
         )
         assert dialogue.role == TacDialogue.Role.CONTROLLER
         assert dialogue.self_address == self.skill.skill_context.agent_address
