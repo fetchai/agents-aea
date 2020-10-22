@@ -11,6 +11,8 @@
 - Fixes upgrade command to properly handle dependencies of non-vendor packages
 - Remove all distributed packages and add them to registry
 - Adds public ids to all skill init files and makes it a requirement
+- Adds primitive benchmarks for libp2p node
+- Adds Prometheus monitoring to libp2p node
 - Makes body a private attribute in message base class
 - Renames bodyy to body in http protocol
 - Adds support for abstract connections
