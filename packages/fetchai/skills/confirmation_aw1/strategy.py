@@ -165,9 +165,8 @@ class Strategy(Model):
             return (False, 1, "already registered!")
         return (True, 0, "all good!")
 
-    @staticmethod
     def _valid_signature(
-        expected_signer: str, signature: str, message_str: str, ledger_id: str
+        self, expected_signer: str, signature: str, message_str: str, ledger_id: str
     ) -> bool:
         """
         Check if the signature and message match the expected signer.
@@ -178,9 +177,13 @@ class Strategy(Model):
         :param ledger_id: the ledger id
         :return: bool indiciating validity
         """
-        result = expected_signer in LedgerApis.recover_message(
-            ledger_id, message_str.encode("utf-8"), signature
-        )
+        try:
+            result = expected_signer in LedgerApis.recover_message(
+                ledger_id, message_str.encode("utf-8"), signature
+            )
+        except Exception as e:  # pylint: disable=broad-except
+            self.context.logger.warning(f"Signing exception: {e}")
+            result = False
         return result
 
     def get_terms(self, counterparty: str) -> Terms:

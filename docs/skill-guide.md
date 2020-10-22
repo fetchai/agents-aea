@@ -447,7 +447,7 @@ Then we run the aea:
 aea run
 ```
 
-Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
 
 <details><summary>Click here to see full code</summary>
 <p>

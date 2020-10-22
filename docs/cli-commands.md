@@ -27,11 +27,11 @@
 | `login USERNAME [--password password]`      | Login to a registry account with credentials.                                |
 | `logout`                                    | Logout from registry account.                                                |
 | `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.`publish --local` to publish to local `packages` directory. |
-| `push [protocol_type] [public_id]`          | Push connection, protocol, or skill with `public_id` to registry.	`push --local` to push to local `packages` directory. |
-| `remove [protocol_type] [name]`             | Remove connection, protocol, or skill, called `name`, from AEA.            |
+| `push [package_type] [public_id]`          | Push connection, protocol, or skill with `public_id` to registry.	`push --local` to push to local `packages` directory. |
+| `remove [package_type] [name]`             | Remove connection, protocol, or skill, called `name`, from AEA.            |
 | `run {using [connections, ...]}`            | Run the AEA on the Fetch.ai network with default or specified connections.   |
-| `search [protocol_type]`                    | Search for components in the registry. `search --local [protocol_type] [--query searching_query]` to search in local `packages` directory. |
-| `scaffold [protocol_type] [name]`           | Scaffold a new connection, protocol, or skill called `name`.               |
+| `search [package_type]`                    | Search for components in the registry. `search --local [package_type] [--query searching_query]` to search in local `packages` directory. |
+| `scaffold [package_type] [name]`           | Scaffold a new connection, protocol, or skill called `name`.               |
 | `-v DEBUG run`                              | Run with debugging.                                                          |
 
 <!--
