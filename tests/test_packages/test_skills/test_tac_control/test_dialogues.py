@@ -38,7 +38,7 @@ from packages.fetchai.skills.tac_control.dialogues import (
 from tests.conftest import ROOT_DIR
 
 
-class TestDialogues(BaseSkillTestCase):
+class TestTacDialogues(BaseSkillTestCase):
     """Test dialogue classes of tac control."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_control")
@@ -81,7 +81,7 @@ class TestDialogues(BaseSkillTestCase):
         _, dialogue = self.tac_dialogues.create(
             counterparty=COUNTERPARTY_ADDRESS,
             performative=TacMessage.Performative.REGISTER,
-            agent_name="some_agent_name"
+            agent_name="some_agent_name",
         )
         assert dialogue.role == TacDialogue.Role.CONTROLLER
         assert dialogue.self_address == self.skill.skill_context.agent_address
