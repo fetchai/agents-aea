@@ -423,6 +423,8 @@ class BaseSkillTestCase:
             decision_maker_message_queue=Queue(),
             decision_maker_handler_context=SimpleNamespace(),
             task_manager=TaskManager(),
+            default_ledger_id=identity.default_address_key,
+            ledger_id_to_currency_denom={},
             default_connection=None,
             default_routing={},
             search_service_address="dummy_search_service_address",

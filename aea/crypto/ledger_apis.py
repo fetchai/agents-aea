@@ -25,11 +25,18 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
 from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
+from aea.crypto.cosmos import DEFAULT_CHAIN_ID as COSMOS_DEFAULT_CHAIN_ID
+from aea.crypto.cosmos import DEFAULT_CURRENCY_DENOM as COSMOS_DEFAULT_CURRENCY_DENOM
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
-from aea.crypto.ethereum import DEFAULT_CHAIN_ID, EthereumApi
+from aea.crypto.ethereum import DEFAULT_CHAIN_ID as ETHEREUM_DEFAULT_CHAIN_ID
+from aea.crypto.ethereum import (
+    DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM,
+)
+from aea.crypto.ethereum import EthereumApi
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.fetchai import DEFAULT_CHAIN_ID as FETCHAI_DEFAULT_CHAIN_ID
-from aea.crypto.fetchai import DEFAULT_CURRENCY_DENOM, FetchAIApi
+from aea.crypto.fetchai import DEFAULT_CURRENCY_DENOM as FETCHAI_DEFAULT_CURRENCY_DENOM
+from aea.crypto.fetchai import FetchAIApi
 from aea.crypto.registries import (
     ledger_apis_registry,
     make_ledger_api,
@@ -39,17 +46,27 @@ from aea.exceptions import enforce
 
 
 DEFAULT_LEDGER_CONFIGS = {
-    CosmosApi.identifier: {"address": COSMOS_DEFAULT_ADDRESS},
+    CosmosApi.identifier: {
+        "address": COSMOS_DEFAULT_ADDRESS,
+        "chain_id": COSMOS_DEFAULT_CHAIN_ID,
+        "denom": COSMOS_DEFAULT_CURRENCY_DENOM,
+    },
     EthereumApi.identifier: {
         "address": ETHEREUM_DEFAULT_ADDRESS,
-        "chain_id": DEFAULT_CHAIN_ID,
+        "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
+        "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
     },
     FetchAIApi.identifier: {
         "address": FETCHAI_DEFAULT_ADDRESS,
         "chain_id": FETCHAI_DEFAULT_CHAIN_ID,
-        "denom": DEFAULT_CURRENCY_DENOM,
+        "denom": FETCHAI_DEFAULT_CURRENCY_DENOM,
     },
 }  # type: Dict[str, Dict[str, Union[str, int]]]
+DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM = {
+    CosmosApi.identifier: COSMOS_DEFAULT_CURRENCY_DENOM,
+    EthereumApi.identifier: ETHEREUM_DEFAULT_CURRENCY_DENOM,
+    FetchAIApi.identifier: FETCHAI_DEFAULT_CURRENCY_DENOM,
+}
 
 
 class LedgerApis:

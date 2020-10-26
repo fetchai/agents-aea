@@ -33,8 +33,6 @@ from packages.fetchai.skills.tac_participation.dialogues import (
 )
 
 
-DEFAULT_LEDGER_ID = "ethereum"
-
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "tac",
@@ -195,7 +193,7 @@ class Game(Model):
         )
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        ledger_id = kwargs.pop("ledger_id", None)
         self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
@@ -203,6 +201,9 @@ class Game(Model):
         self._contract_address = None  # type: Optional[str]
         self._tac_dialogue = None  # type: Optional[TacDialogue]
         self._state_update_dialogue = None  # type: Optional[StateUpdateDialogue]
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
 
     @property
     def ledger_id(self) -> str:

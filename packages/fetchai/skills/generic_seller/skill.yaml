@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmZTCb8DunetFsFctShNqkRP2YQLNzU21LLofKoj5HfHUK
   dialogues.py: QmdTW8q1xQ7ajFVsWmuV62ypoT5J2b6Hkyz52LFaWuMEtd
   handlers.py: QmPnzqNNTgYV4qNPa8eaftFvaH5z56sdHc7WkTBQ48w83w
-  strategy.py: QmYvr6ph4ZVSXAv837kPF4Pi3u9ExXtHnaUaiZFMtji2cr
+  strategy.py: QmYcsrk7Mq31BH6bQ41AmeHAy7QREaFaAEykmz9P7KsqrF
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -51,12 +51,10 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
-      currency_id: FET
       data_for_sale:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127

@@ -41,6 +41,8 @@ class AgentContext:
         decision_maker_message_queue: Queue,
         decision_maker_handler_context: SimpleNamespace,
         task_manager: TaskManager,
+        default_ledger_id: str,
+        ledger_id_to_currency_denom: Dict[str, str],
         default_connection: Optional[PublicId],
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
@@ -56,6 +58,8 @@ class AgentContext:
         :param decision_maker_message_queue: the (in) queue of the decision maker
         :param decision_maker_handler_context: the decision maker's name space
         :param task_manager: the task manager
+        :param default_ledger_id: the default ledger id
+        :param ledger_it_to_currency_denom: mapping from ledger ids to currency denominations
         :param default_connection: the default connection
         :param default_routing: the default routing
         :param search_service_address: the address of the search service
@@ -71,6 +75,8 @@ class AgentContext:
         self._task_manager = task_manager
         self._search_service_address = search_service_address
         self._decision_maker_address = decision_maker_address
+        self._default_ledger_id = default_ledger_id
+        self._ledger_id_to_currency_denom = ledger_id_to_currency_denom
         self._default_connection = default_connection
         self._default_routing = default_routing
         self._namespace = SimpleNamespace(**kwargs)
@@ -140,6 +146,16 @@ class AgentContext:
     def decision_maker_address(self) -> Address:
         """Get the address of the decision maker."""
         return self._decision_maker_address
+
+    @property
+    def default_ledger_id(self) -> str:
+        """Get the default ledger id."""
+        return self._default_ledger_id
+
+    @property
+    def ledger_id_to_currency_denom(self) -> Dict[str, str]:
+        """Get a dictionary mapping ledger ids to currency denominations."""
+        return self._ledger_id_to_currency_denom
 
     @property
     def default_connection(self) -> Optional[PublicId]:

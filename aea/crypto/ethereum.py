@@ -49,6 +49,7 @@ TESTNET_NAME = "ropsten"
 DEFAULT_ADDRESS = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe"
 DEFAULT_CHAIN_ID = 3
 DEFAULT_GAS_PRICE = "50"
+DEFAULT_CURRENCY_DENOM = "gwei"
 
 
 class EthereumCrypto(Crypto[Account]):

@@ -19,7 +19,6 @@
 
 """This module contains the strategy class."""
 
-from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
 from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.skills.base import Model
@@ -34,8 +33,6 @@ DEFAULT_SEARCH_QUERY = {
     "constraint_type": "==",
 }
 DEFAULT_SEARCH_RADIUS = 5.0
-
-DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
 
 class Strategy(Model):
@@ -54,8 +51,11 @@ class Strategy(Model):
         )
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        ledger_id = kwargs.pop("ledger_id", None)
         super().__init__(**kwargs)
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
         self.is_searching = True
         self._contract_id = str(CONTRACT_ID)
 
