@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add connection` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -48,6 +47,7 @@ from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+from tests.common.utils import are_dirs_equal
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 
@@ -286,7 +286,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.10.0",
+            "fetchai/generic_buyer:0.12.0",
             "--alias",
             cls.agent_name,
         )
@@ -337,6 +337,22 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
                 .keys()
             )
             assert latest_agent_items == agent_items
+
+        # compare both configuration files, except the agent name
+        upgraded_agent_dir = Path(self.agent_name)
+        latest_agent_dir = Path(self.latest_agent_name)
+        lines_upgraded_agent_config = (
+            (upgraded_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+        )
+        lines_latest_agent_config = (
+            (latest_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+        )
+        assert lines_upgraded_agent_config == lines_latest_agent_config
+
+        # compare vendor folders.
+        assert are_dirs_equal(
+            upgraded_agent_dir / "vendor", latest_agent_dir / "vendor"
+        )
 
 
 class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
