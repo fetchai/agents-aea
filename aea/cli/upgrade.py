@@ -132,7 +132,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
             click.echo(
                 f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
             )
-            for dep in shared_deps_to_remove:
+            for dep in shared_deps_to_remove:  # pragma: nocover
                 if ItemUpgrader(
                     ctx, str(dep.package_type), dep.public_id
                 ).is_non_vendor:
