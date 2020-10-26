@@ -184,13 +184,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python_version: [3.6, 3.7, 3.8, 3.9]
     timeout-minutes: 40
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python_version }}
     - uses: actions/setup-go@master
       with:
         go-version: '^1.14.0'
@@ -219,7 +219,7 @@ jobs:
     - if: matrix.os == 'ubuntu-latest' || matrix.python_version != '3.9'
       name: Unit tests
       run: |
-        tox -e py${{ matrix.python-version }} -- -m 'not integration and not unstable'
+        tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
 
   platform_checks_sync_aea_loop:
     continue-on-error: True
