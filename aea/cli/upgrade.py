@@ -307,14 +307,7 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
         with remove_unused_component_configurations(ctx):
             item_upgrader = ItemUpgrader(ctx, item_type, item_public_id)
             click.echo(
-                "Upgrading {} '{}/{}' from version '{}' to '{}' for the agent '{}'...".format(
-                    item_type,
-                    item_public_id.author,
-                    item_public_id.name,
-                    item_upgrader.current_item_public_id.version,
-                    item_public_id.version,
-                    ctx.agent_config.agent_name,
-                )
+                f"Upgrading {item_type} '{item_public_id.author}/{item_public_id.name}' from version '{item_upgrader.current_item_public_id.version}' to '{item_public_id.version}' for the agent '{ctx.agent_config.agent_name}'..."
             )
             version = item_upgrader.check_upgrade_is_required()
 
@@ -322,14 +315,7 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
             item_upgrader.add_item()
 
         click.echo(
-            "The {} '{}/{}' for the agent '{}' has been successfully upgraded from version '{}' to '{}'.".format(
-                item_type,
-                item_public_id.author,
-                item_public_id.name,
-                ctx.agent_config.agent_name,
-                item_upgrader.current_item_public_id.version,
-                version,
-            )
+            f"The {item_type} '{item_public_id.author}/{item_public_id.name}' for the agent '{ctx.agent_config.agent_name}' has been successfully upgraded from version '{item_upgrader.current_item_public_id.version}' to '{version}'."
         )
 
     except NotAddedException:
@@ -346,10 +332,5 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
         )
     except IsRequiredException as e:
         raise click.ClickException(
-            "Can not upgrade {} '{}/{}' because it is required by '{}'".format(
-                item_type,
-                item_public_id.author,
-                item_public_id.name,
-                ", ".join(map(str, e.required_by)),
-            )
+            f"Can not upgrade {item_type} '{item_public_id.author}/{item_public_id.name}' because it is required by '{', '.join(map(str, e.required_by))}'"
         )
