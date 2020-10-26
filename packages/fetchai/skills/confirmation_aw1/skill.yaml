@@ -10,7 +10,7 @@ fingerprint:
   __init__.py: QmSRjWPGDeLsKZYQoBKLRG59WS7b7RYMrPNcNxDSaBFxCW
   dialogues.py: QmdMjuAT8h7ZUSfqMVkF88Hnz1kc6advg8oVg8QB7xGPw1
   handlers.py: QmWoEyJnVURKtvFYrx9ykVao5y7iA8eKRGEsndeMREkVDY
-  registration_db.py: QmZUL4XxvDZn7EGvYBBtwcVyncL5ffTjE25cCaurG5ysUM
+  registration_db.py: QmRbQaZYqFDp1LMsuaEocUz24dhF8bTvHXKcVw9s1AzwTa
   strategy.py: QmS5kx3LcmgYWLxaAMsrF8VEeXjg1cJD2XoirC9KK8WqAe
 fingerprint_ignore_patterns: []
 contracts:
@@ -45,7 +45,8 @@ models:
     args: {}
     class_name: RegisterDialogues
   registration_db:
-    args: {}
+    args:
+      custom_path: path_to_db
     class_name: RegistrationDB
   signing_dialogues:
     args: {}

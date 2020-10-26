@@ -37,9 +37,10 @@ class RegistrationDB(Model):
 
     def __init__(self, **kwargs):
         """Initialise the Detection Database Communication class."""
+        custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
         this_dir = os.getcwd()
-        self.db_path = os.path.join(this_dir, "registration.db")
+        self.db_path = os.path.join(this_dir, "registration.db") if custom_path is None else custom_path
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:
