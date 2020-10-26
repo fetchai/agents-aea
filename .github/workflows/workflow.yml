@@ -216,7 +216,8 @@ jobs:
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
         choco install protoc
         python scripts/update_symlinks_cross_platform.py
-    - name: Unit tests
+    - if: matrix.os == 'ubuntu-latest' || matrix.python_version != '3.9'
+      name: Unit tests
       run: |
         tox -e py${{ matrix.python-version }} -- -m 'not integration and not unstable'
 
