@@ -102,27 +102,21 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
     """
     validate_package_name(item_name)
     author_name = ctx.agent_config.author
-    loader = getattr(ctx, "{}_loader".format(item_type))
-    default_config_filename = globals()[
-        "DEFAULT_{}_CONFIG_FILE".format(item_type.upper())
-    ]
+    loader = getattr(ctx, f"{item_type}_loader")
+    default_config_filename = globals()[f"DEFAULT_{item_type.upper()}_CONFIG_FILE"]
 
     item_type_plural = item_type + "s"
-    existing_ids = getattr(ctx.agent_config, "{}s".format(item_type))
+    existing_ids = getattr(ctx.agent_config, f"{item_type}s")
     existing_ids_only_author_and_name = map(lambda x: (x.author, x.name), existing_ids)
     # check if we already have an item with the same public id
     if (author_name, item_name) in existing_ids_only_author_and_name:
         raise click.ClickException(
-            "A {} with name '{}' already exists. Aborting...".format(
-                item_type, item_name
-            )
+            f"A {item_type} with name '{item_name}' already exists. Aborting..."
         )
 
     agent_name = ctx.agent_config.agent_name
     click.echo(
-        "Adding {} scaffold '{}' to the agent '{}'...".format(
-            item_type, item_name, agent_name
-        )
+        f"Adding {item_type} scaffold '{item_name}' to the agent '{agent_name}'..."
     )
 
     # create the item folder
@@ -130,22 +124,18 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
     dest = os.path.join(item_type_plural, item_name)
     if os.path.exists(dest):
         raise click.ClickException(
-            "A {} with this name already exists. Please choose a different name and try again.".format(
-                item_type
-            )
+            f"A {item_type} with this name already exists. Please choose a different name and try again."
         )
 
     ctx.clean_paths.append(str(dest))
     try:
         # copy the item package into the agent project.
         src = Path(os.path.join(AEA_DIR, item_type_plural, "scaffold"))
-        logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
+        logger.debug(f"Copying {item_type} modules. src={src} dst={dest}")
         shutil.copytree(src, dest)
 
         # add the item to the configurations.
-        logger.debug(
-            "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
-        )
+        logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
         existing_ids.add(PublicId(author_name, item_name, DEFAULT_VERSION))
         with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
             ctx.agent_loader.dump(ctx.agent_config, fp)
@@ -163,7 +153,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
     except ValidationError:
         raise click.ClickException(
-            "Error when validating the {} configuration file.".format(item_type)
+            f"Error when validating the {item_type} configuration file."
         )
     except Exception as e:
         raise click.ClickException(str(e))
