@@ -67,6 +67,8 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
     resources = Resources()
     agent_context = MagicMock()
     agent_context.agent_name = agent_name
+    agent_context.agent_address = agent_name
+
     resources.add_skill(
         Skill.from_dir(
             str(PACKAGES_DIR / "fetchai" / "skills" / DEFAULT_SKILL.name),
