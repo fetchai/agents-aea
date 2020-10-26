@@ -206,7 +206,8 @@ class TestRemoveAndDependencies(BaseTestCase):
         assert component_id in agent_config.component_configurations
 
         with patch(
-            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value=True
+            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required",
+            return_value=self.ITEM_PUBLIC_ID.version,
         ), patch("aea.cli.add._add_item_deps"):
             result = self.runner.invoke(
                 cli,
