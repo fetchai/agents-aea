@@ -391,6 +391,9 @@ class TestAgentConfigUpdate:
             == self.new_dummy_skill_config
         )
 
+        # to json
+        self.aea_config.json
+
 
 class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
     """Test case for _get_default_configuration_file_name_from_type method."""
@@ -737,6 +740,7 @@ def test_component_id_prefix_import_path():
         ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0")
     )
     assert component_id.prefix_import_path == "packages.author.protocols.name"
+    assert component_id.json
 
 
 def test_component_configuration_load_file_not_found():

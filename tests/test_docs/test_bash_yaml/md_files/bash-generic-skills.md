@@ -82,8 +82,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: generic_service
@@ -100,8 +100,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20

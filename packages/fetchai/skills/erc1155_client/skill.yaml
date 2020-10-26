@@ -68,8 +68,8 @@ models:
     args:
       ledger_id: ethereum
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       search_query:
         constraint_type: ==
         search_key: seller_service

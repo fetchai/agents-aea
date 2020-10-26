@@ -48,8 +48,8 @@ models:
       admin_port: 8021
       ledger_url: http://127.0.0.1:9000
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       search_query:
         constraint_type: ==
         search_key: intro_service

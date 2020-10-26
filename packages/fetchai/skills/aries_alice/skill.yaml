@@ -50,8 +50,8 @@ models:
       admin_host: 127.0.0.1
       admin_port: 8031
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: intro_service
         value: intro_alice

@@ -51,8 +51,8 @@ behaviours:
   my_search_behaviour:
     args:
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       search_query:
         constraint_type: ==
         search_key: seller_service
@@ -109,8 +109,8 @@ models:
   strategy:
     args:
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: generic_service

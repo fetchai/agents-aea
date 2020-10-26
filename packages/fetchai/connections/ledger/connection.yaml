@@ -25,6 +25,8 @@ config:
       gas_price: 50
     fetchai:
       address: https://rest-agent-land.fetch.ai:443
+      denom: atestfet
+      chain_id: agent-land
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:0.7.0

@@ -335,8 +335,8 @@ behaviours:
   my_search_behaviour:
     args:
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       search_query:
         constraint_type: ==
         search_key: seller_service
@@ -447,7 +447,7 @@ Then we run the aea:
 aea run
 ```
 
-Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
 
 <details><summary>Click here to see full code</summary>
 <p>
@@ -853,8 +853,8 @@ models:
   strategy:
     args:
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: generic_service

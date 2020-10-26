@@ -1360,8 +1360,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       service_data:
         key: seller_service
         value: generic_service
@@ -2836,8 +2836,8 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
@@ -2921,7 +2921,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea run
 ```
 
-Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
 
 #### Run buyer AEA
 

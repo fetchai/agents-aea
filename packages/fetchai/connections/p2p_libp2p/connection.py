@@ -215,6 +215,7 @@ class Libp2pNode:
         uri: Optional[Uri] = None,
         public_uri: Optional[Uri] = None,
         delegate_uri: Optional[Uri] = None,
+        monitoring_uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
@@ -230,6 +231,7 @@ class Libp2pNode:
         :param uri: libp2p node ip address and port number in format ipaddress:port.
         :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
         :param delegate_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
+        :param monitoring_uri: libp2 node monitoring ip address and port in fromat ipaddress:port
         :param entry_peers: libp2p entry peers multiaddresses.
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
@@ -250,6 +252,9 @@ class Libp2pNode:
 
         # node delegate uri, optional
         self.delegate_uri = delegate_uri
+
+        # node monitoring uri, optional
+        self.monitoring_uri = monitoring_uri
 
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
@@ -335,6 +340,9 @@ class Libp2pNode:
             )
             self._config += "AEA_P2P_DELEGATE_URI={}\n".format(
                 str(self.delegate_uri) if self.delegate_uri is not None else ""
+            )
+            self._config += "AEA_P2P_URI_MONITORING={}\n".format(
+                str(self.monitoring_uri) if self.monitoring_uri is not None else ""
             )
             env_file.write(self._config)
 
@@ -519,6 +527,9 @@ class P2PLibp2pConnection(Connection):
         libp2p_delegate_uri = self.configuration.config.get(
             "delegate_uri"
         )  # Optional[str]
+        libp2p_monitoring_uri = self.configuration.config.get(
+            "monitoring_uri"
+        )  # Optional[str]
         libp2p_entry_peers = self.configuration.config.get("entry_peers")
         if libp2p_entry_peers is None:
             libp2p_entry_peers = []
@@ -547,6 +558,10 @@ class P2PLibp2pConnection(Connection):
         delegate_uri = None
         if libp2p_delegate_uri is not None:
             delegate_uri = Uri(libp2p_delegate_uri)
+
+        monitoring_uri = None
+        if libp2p_monitoring_uri is not None:
+            monitoring_uri = Uri(libp2p_monitoring_uri)  # pragma: nocover
 
         entry_peers = [
             MultiAddr.from_string(str(maddr)) for maddr in libp2p_entry_peers
@@ -593,6 +608,7 @@ class P2PLibp2pConnection(Connection):
             uri,
             public_uri,
             delegate_uri,
+            monitoring_uri,
             entry_peers,
             log_file,
             env_file,

@@ -258,7 +258,7 @@ Finally run **Alice_AEA**:
 aea run
 ```
 
-Once you see a message of the form `My libp2p addresses: ['SOME_ADDRESS']` take note of the address. We will refer to this as **Alice_AEA's p2p address**.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. We will refer to this as **Alice_AEA's p2p address**.
 
 ### Faber_AEA
 

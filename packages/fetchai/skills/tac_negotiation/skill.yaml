@@ -76,8 +76,8 @@ models:
       is_contract_tx: false
       ledger_id: fetchai
       location:
-        latitude: 0.127
-        longitude: 51.5194
+        latitude: 51.5194
+        longitude: 0.127
       register_as: both
       search_for: both
       search_radius: 5.0
