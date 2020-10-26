@@ -84,6 +84,10 @@ class TestHandler(Handler):
 
 def run(duration, runtime_mode, connection_mode):
     """Test memory usage."""
+    # pylint: disable=import-outside-toplevel
+    # import causer tricky import in decision_maker
+    import aea.decision_maker.default  # noqa: F401
+
     agent = make_agent(runtime_mode=runtime_mode)
 
     if connection_mode not in CONNECTION_MODES:

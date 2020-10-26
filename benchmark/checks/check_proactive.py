@@ -61,6 +61,10 @@ class TestBehaviour(Behaviour):
 
 def run(duration, runtime_mode):
     """Test act message generate performance."""
+    # pylint: disable=import-outside-toplevel
+    # import causer tricky import in decision_maker
+    import aea.decision_maker.default  # noqa: F401
+
     agent = make_agent(runtime_mode=runtime_mode)
     connection = SyncedGeneratorConnection.make()
     agent.resources.add_connection(connection)
