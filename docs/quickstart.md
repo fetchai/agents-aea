@@ -62,6 +62,22 @@ sudo apt-get install python3.7-dev
 
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
 
+- To install Go, follow the
+ official guide, depending on your platform: 
+ [https://golang.org/doc/install](https://golang.org/doc/install)
+
+- Python is already included by default on 
+many Linux distributions (e.g. Ubuntu), as well as MacOS.
+To check you have the right version, open a terminal and run: 
+```
+python3 --version
+```
+
+- To install Python on Windows machines, 
+you can download a specific release 
+[here](https://www.python.org/downloads/).
+
+
 ## Setup author name
 
 AEAs are composed from components. The components can be developed by anyone and are available on the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a>. To use the registry we need to register an author name.
