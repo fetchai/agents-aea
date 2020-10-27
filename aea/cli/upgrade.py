@@ -300,6 +300,7 @@ class ItemUpgrader:
         It breaks down in:
         - update default routing mapping
         - update default connection
+        - update component configurations
 
         :param new_version: the new item version.
         """
