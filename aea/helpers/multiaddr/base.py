@@ -23,9 +23,9 @@ from binascii import unhexlify
 from typing import Optional
 
 import base58
-import multihash  # type: ignore
 from ecdsa import VerifyingKey, curves, keys
 
+import aea.helpers.multihash as multihash
 from aea.helpers.multiaddr.crypto_pb2 import KeyType, PublicKey
 
 
@@ -156,7 +156,7 @@ class MultiAddr:
         key_serialized = key_protobuf.SerializeToString()
         algo = multihash.Func.sha2_256
         if ENABLE_INLINING and len(key_serialized) <= MAX_INLINE_KEY_LENGTH:
-            algo = IDENTITY_MULTIHASH_CODE
+            algo = IDENTITY_MULTIHASH_CODE  # type: ignore
         key_mh = multihash.digest(key_serialized, algo)
         return base58.b58encode(key_mh.encode()).decode()
 
