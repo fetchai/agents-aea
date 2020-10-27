@@ -17,6 +17,7 @@ fingerprint:
   strategy.py: QmVDAXUA1YBGa2PSQKDekyf5j1qZfEfLvZpuLJ6MnURvS8
 fingerprint_ignore_patterns:
 - '*.db'
+connections: []
 contracts: []
 protocols:
 - fetchai/default:0.8.0

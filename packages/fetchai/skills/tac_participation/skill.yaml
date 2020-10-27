@@ -14,6 +14,7 @@ fingerprint:
   game.py: QmZ8udzD5B79xGVKcLvaR62c2cvDc1PJDZdoVqcJtUdddJ
   handlers.py: QmcnLo9ZgEuPGBFfnpkk1b1kCZP5d2K3kAbgENQVgqETu9
 fingerprint_ignore_patterns: []
+connections: []
 contracts:
 - fetchai/erc1155:0.12.0
 protocols:

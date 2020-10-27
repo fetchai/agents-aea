@@ -26,6 +26,9 @@ from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -45,7 +48,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class GenericFipaHandler(Handler):

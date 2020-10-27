@@ -479,7 +479,7 @@ class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""
-        self.add_item("connection", "fetchai/local:0.9.0", local=self.IS_LOCAL)
+        self.add_item("connection", "fetchai/local:0.11.0", local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
         items_folders = os.listdir(items_path)

@@ -71,7 +71,7 @@ base_deps = [
     "protobuf",
     "pymultihash==0.8.2",
     "pyyaml>=4.2b1",
-    "requests==2.22.0",
+    "requests>=2.22.0",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

@@ -23,6 +23,9 @@ from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_seller.dialogues import (
@@ -33,7 +36,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class GenericServiceRegistrationBehaviour(TickerBehaviour):

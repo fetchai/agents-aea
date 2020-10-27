@@ -36,3 +36,4 @@ dependencies:
     index: https://test.pypi.org/simple
     ref: master
 is_abstract: false
+connections: []
