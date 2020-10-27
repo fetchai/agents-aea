@@ -286,7 +286,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.10.0",
+            "fetchai/generic_buyer:0.12.0",
             "--alias",
             cls.agent_name,
         )
