@@ -39,7 +39,6 @@ LEDGER_COMMAND_REGISTER_DID = "/register"
 
 # Convenience
 FABER_ACA_IDENTITY = "Faber_ACA"
-HTTP_COUNTERPARTY = "HTTP Server"
 
 # Search
 DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}

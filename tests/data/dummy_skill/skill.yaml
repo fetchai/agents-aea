@@ -43,3 +43,4 @@ models:
     class_name: DummyModel
 dependencies: {}
 is_abstract: false
+connections: []

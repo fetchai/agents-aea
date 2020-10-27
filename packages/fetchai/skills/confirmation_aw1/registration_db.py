@@ -40,7 +40,11 @@ class RegistrationDB(Model):
         custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
         this_dir = os.getcwd()
-        self.db_path = os.path.join(this_dir, "registration.db") if custom_path is None else custom_path
+        self.db_path = (
+            os.path.join(this_dir, "registration.db")
+            if custom_path is None
+            else custom_path
+        )
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:

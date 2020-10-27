@@ -22,11 +22,10 @@
 import json
 from typing import Dict, cast
 
-from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.http_client.connection import (
-    PUBLIC_ID as HTTP_CLIENT_CONNECTION_PUBLIC_ID,
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
 )
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -34,10 +33,7 @@ from packages.fetchai.skills.aries_alice.dialogues import (
     HttpDialogues,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.aries_alice.strategy import (
-    AliceStrategy,
-    HTTP_COUNTERPARTY,
-)
+from packages.fetchai.skills.aries_alice.strategy import AliceStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
@@ -71,7 +67,7 @@ class AliceBehaviour(TickerBehaviour):
 
         # http request message
         request_http_message, _ = http_dialogues.create(
-            counterparty=HTTP_COUNTERPARTY,
+            counterparty=str(HTTP_CLIENT_PUBLIC_ID),
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=url,
@@ -80,10 +76,7 @@ class AliceBehaviour(TickerBehaviour):
             body=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         # send
-        self.context.outbox.put_message(
-            message=request_http_message,
-            context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
-        )
+        self.context.outbox.put_message(message=request_http_message,)
 
     def setup(self) -> None:
         """
