@@ -17,9 +17,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
-"""Envelopes generation speed for Behaviour act test."""
+"""?Memory usage across the time."""
 
 import itertools
 import os
@@ -66,12 +64,13 @@ class HttpPingPongHandler(Handler):
 
     def setup(self) -> None:
         """Noop setup."""
-        self.count: int = 0  # pylint: disable=attribute-defined-outside-init
-        self.rtt_total_time: float = 0.0  # pylint: disable=attribute-defined-outside-init
-        self.rtt_count: int = 0  # pylint: disable=attribute-defined-outside-init
+        # pylint: disable=attribute-defined-outside-init, unused-argument
+        self.count: int = 0
+        self.rtt_total_time: float = 0.0
+        self.rtt_count: int = 0
 
-        self.latency_total_time: float = 0.0  # pylint: disable=attribute-defined-outside-init
-        self.latency_count: int = 0  # pylint: disable=attribute-defined-outside-init
+        self.latency_total_time: float = 0.0
+        self.latency_count: int = 0
 
         def role(m: Message, addr: Address) -> Dialogue.Role:
             return HttpDialogue.Role.CLIENT
@@ -117,7 +116,7 @@ class HttpPingPongHandler(Handler):
 
     def make_request(self, recipient_addr: str) -> None:
         """Make initial http request."""
-        message, dialogue = self.dialogues.create(
+        message, _ = self.dialogues.create(
             recipient_addr,
             performative=HttpMessage.Performative.REQUEST,
             method="get",
@@ -140,7 +139,7 @@ def make_agent(*args, **kwargs) -> AEA:
 
 def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     """Test multiagent message exchange."""
-    # pylint: disable=import-outside-toplevel
+    # pylint: disable=import-outside-toplevel,unused-import
     # import causer tricky import in decision_maker
     import aea.decision_maker.default  # noqa: F401
 
@@ -231,7 +230,7 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     "--start_messages", default=100, help="Amount of messages to prepopulate."
 )
 @click.option("--num_of_agents", default=2, help="Amount of agents to run.")
-@click.option("--number_of_runs", default=10, help="How many times run teste.")
+@click.option("--number_of_runs", default=10, help="How many times run test.")
 def main(
     duration, runtime_mode, runner_mode, start_messages, num_of_agents, number_of_runs
 ):

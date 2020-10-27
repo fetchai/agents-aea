@@ -105,7 +105,7 @@ class TestHandler(Handler):
 
 def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     """Test multiagent message exchange."""
-    # pylint: disable=import-outside-toplevel
+    # pylint: disable=import-outside-toplevel,unused-import
     # import causer tricky import in decision_maker
     import aea.decision_maker.default  # noqa: F401
 
@@ -187,7 +187,7 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     "--start_messages", default=100, help="Amount of messages to prepopulate."
 )
 @click.option("--num_of_agents", default=2, help="Amount of agents to run.")
-@click.option("--number_of_runs", default=10, help="How many times run teste.")
+@click.option("--number_of_runs", default=10, help="How many times run test.")
 def main(
     duration, runtime_mode, runner_mode, start_messages, num_of_agents, number_of_runs
 ):

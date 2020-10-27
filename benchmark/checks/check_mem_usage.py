@@ -57,7 +57,7 @@ class TestHandler(Handler):
 
 def run(duration, runtime_mode):
     """Check memory usage."""
-    # pylint: disable=import-outside-toplevel
+    # pylint: disable=import-outside-toplevel,unused-import
     # import causer tricky import in decision_maker
     import aea.decision_maker.default  # noqa: F401
 
@@ -90,7 +90,7 @@ def run(duration, runtime_mode):
 @click.option(
     "--runtime_mode", default="async", help="Runtime mode: async or threaded."
 )
-@click.option("--number_of_runs", default=10, help="How many times run teste.")
+@click.option("--number_of_runs", default=10, help="How many times run test.")
 def main(duration, runtime_mode, number_of_runs):
     """Run test."""
     click.echo("Start test with options:")
