@@ -55,7 +55,9 @@ If the installation steps fail, it might be a dependency issue.
 
 The following hints can help:
 
-- Ubuntu/Debian systems only: install Python 3.7 headers.
+- Ubuntu/Debian systems only: install Python headers,
+  depending on the Python version you have installed on your machine.
+  E.g. for Python 3.7: 
 ``` bash
 sudo apt-get install python3.7-dev
 ```
