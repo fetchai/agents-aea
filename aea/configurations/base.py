@@ -55,7 +55,14 @@ from urllib3.util import Url, parse_url
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
-from aea.helpers.base import RegexConstrainedString, load_module, recursive_update
+from aea.helpers.base import (
+    RegexConstrainedString,
+    STRING_LENGTH_LIMIT,
+    SimpleId,
+    SimpleIdOrStr,
+    load_module,
+    recursive_update,
+)
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -587,24 +594,26 @@ class PublicId(JSONSerializable):
     True
     """
 
-    AUTHOR_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
-    PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
-    VERSION_REGEX = r"(latest|(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
-    PUBLIC_ID_REGEX = r"^({})/({})(:({}))?$".format(
-        AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
-    )
-    PUBLIC_ID_URI_REGEX = r"^({})/({})/({})$".format(
-        AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
+    AUTHOR_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
+    PACKAGE_NAME_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT  - 1}}}"
+    VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
+    VERSION_REGEX = fr"(latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"
+    PUBLIC_ID_URI_REGEX = (
+        fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
     )
 
     LATEST_VERSION = "latest"
 
     def __init__(
-        self, author: str, name: str, version: Optional[PackageVersionLike] = None
+        self,
+        author: SimpleIdOrStr,
+        name: SimpleIdOrStr,
+        version: Optional[PackageVersionLike] = None,
     ):
         """Initialize the public identifier."""
-        self._author = author
-        self._name = name
+        self._author = SimpleId(author)
+        self._name = SimpleId(name)
         self._package_version = (
             PackageVersion(version)
             if version is not None
@@ -614,12 +623,12 @@ class PublicId(JSONSerializable):
     @property
     def author(self) -> str:
         """Get the author."""
-        return self._author
+        return str(self._author)
 
     @property
     def name(self) -> str:
         """Get the name."""
-        return self._name
+        return str(self._name)
 
     @property
     def version(self) -> str:
@@ -972,8 +981,8 @@ class PackageConfiguration(Configuration, ABC):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -997,8 +1006,8 @@ class PackageConfiguration(Configuration, ABC):
         super().__init__()
         if name is None or author is None:  # pragma: nocover
             raise ValueError("Name and author must be set on the configuration!")
-        self.name = name
-        self.author = author
+        self._name = SimpleId(name)
+        self._author = SimpleId(author)
         self.version = version if version != "" else DEFAULT_VERSION
         self.license = license_ if license_ != "" else DEFAULT_LICENSE
         self.fingerprint = fingerprint if fingerprint is not None else {}
@@ -1011,6 +1020,26 @@ class PackageConfiguration(Configuration, ABC):
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
         self._directory = None  # type: Optional[Path]
+
+    @property
+    def name(self) -> str:
+        """Get the name."""
+        return str(self._name)
+
+    @name.setter
+    def name(self, value: SimpleIdOrStr):
+        """Set the name."""
+        self._name = SimpleId(value)
+
+    @property
+    def author(self) -> str:
+        """Get the author."""
+        return str(self._author)
+
+    @author.setter
+    def author(self, value: SimpleIdOrStr):
+        """Set the author."""
+        self._author = SimpleId(value)
 
     @property
     def directory(self) -> Optional[Path]:
@@ -1064,8 +1093,8 @@ class ComponentConfiguration(PackageConfiguration, ABC):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -1158,8 +1187,8 @@ class ConnectionConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str = "",
-        author: str = "",
+        name: SimpleIdOrStr = "",
+        author: SimpleIdOrStr = "",
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -1323,8 +1352,8 @@ class ProtocolConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
@@ -1426,8 +1455,8 @@ class SkillConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -1636,8 +1665,8 @@ class AgentConfig(PackageConfiguration):
 
     def __init__(
         self,
-        agent_name: str,
-        author: str,
+        agent_name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -1667,7 +1696,7 @@ class AgentConfig(PackageConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
         )
-        self.agent_name = agent_name
+        self.agent_name = self.name
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
@@ -2016,8 +2045,8 @@ class ProtocolSpecification(ProtocolConfig):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -2132,8 +2161,8 @@ class ContractConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",

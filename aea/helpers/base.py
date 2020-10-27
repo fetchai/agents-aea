@@ -40,6 +40,8 @@ from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
 from dotenv import load_dotenv
 
 
+STRING_LENGTH_LIMIT = 128
+
 _default_logger = logging.getLogger(__name__)
 
 
@@ -197,6 +199,38 @@ class RegexConstrainedString(UserString):
                 data=self.data, regex=self.REGEX
             )
         )
+
+
+class SimpleId(RegexConstrainedString):
+    """
+    A simple identifier.
+
+    The allowed strings are all the strings that:
+    - have at least length 1
+    - have at most length 128
+    - the first character must be between a-z,A-Z or underscore
+    - the other characters must be either the above or digits.
+
+    Examples of allowed strings:
+    >>> SimpleId("an_identifier")
+    'an_identifier'
+
+    Examples of not allowed strings:
+    >>> SimpleId("0an_identifier")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
+    >>> SimpleId("")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    """
+
+    REGEX = re.compile(fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}")
+
+
+SimpleIdOrStr = Union[SimpleId, str]
 
 
 @contextlib.contextmanager
