@@ -14,6 +14,7 @@ fingerprint:
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
   strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols:
 - fetchai/default:0.8.0

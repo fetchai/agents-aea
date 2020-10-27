@@ -9,10 +9,12 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmSRjWPGDeLsKZYQoBKLRG59WS7b7RYMrPNcNxDSaBFxCW
   dialogues.py: QmdMjuAT8h7ZUSfqMVkF88Hnz1kc6advg8oVg8QB7xGPw1
-  handlers.py: QmWoEyJnVURKtvFYrx9ykVao5y7iA8eKRGEsndeMREkVDY
-  registration_db.py: QmZUL4XxvDZn7EGvYBBtwcVyncL5ffTjE25cCaurG5ysUM
+  handlers.py: QmVmTJCyEqPn2BR6ucPCe7nV3t8N9cYwoASKSxoJYkr9Wp
+  registration_db.py: QmfUXubG3ZRbTmMDs7AKjC3zKg9mRhxuTi1CtfU1DMcNsL
   strategy.py: QmS5kx3LcmgYWLxaAMsrF8VEeXjg1cJD2XoirC9KK8WqAe
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.8.0
 contracts:
 - fetchai/staking_erc20:0.1.0
 protocols:
@@ -45,7 +47,8 @@ models:
     args: {}
     class_name: RegisterDialogues
   registration_db:
-    args: {}
+    args:
+      custom_path: path_to_db
     class_name: RegistrationDB
   signing_dialogues:
     args: {}

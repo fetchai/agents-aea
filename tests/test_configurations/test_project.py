@@ -78,7 +78,7 @@ class TestProjectAndAgentAlias:
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_project_remote(self):
         """Test project loaded and removed, from remove registry."""
-        self.project_public_id = PublicId.from_str("fetchai/my_first_aea:0.13.0")
+        self.project_public_id = PublicId.from_str("fetchai/my_first_aea:0.14.0")
         self._test_project(False, True)
 
     def test_agents(self):

@@ -35,5 +35,6 @@ class AddItemDepsTestCase(TestCase):
         item_config = mock.Mock()
         item_config.protocols = []
         item_config.contracts = []
+        item_config.connections = []
         item_config.skills = ["skill-1", "skill-2"]
         _add_item_deps(ctx, "skill", item_config)

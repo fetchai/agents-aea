@@ -1462,6 +1462,7 @@ class SkillConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        connections: Optional[Set[PublicId]] = None,
         protocols: Optional[Set[PublicId]] = None,
         contracts: Optional[Set[PublicId]] = None,
         skills: Optional[Set[PublicId]] = None,
@@ -1480,6 +1481,7 @@ class SkillConfig(ComponentConfiguration):
             fingerprint_ignore_patterns,
             dependencies,
         )
+        self.connections = connections if connections is not None else set()
         self.protocols = protocols if protocols is not None else set()
         self.contracts = contracts if contracts is not None else set()
         self.skills = skills if skills is not None else set()
@@ -1508,6 +1510,12 @@ class SkillConfig(ComponentConfiguration):
             .union(
                 {ComponentId(ComponentType.SKILL, skill_id) for skill_id in self.skills}
             )
+            .union(
+                {
+                    ComponentId(ComponentType.CONNECTION, connection_id)
+                    for connection_id in self.connections
+                }
+            )
         )
 
     @property
@@ -1529,6 +1537,7 @@ class SkillConfig(ComponentConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
+                "connections": sorted(map(str, self.connections)),
                 "contracts": sorted(map(str, self.contracts)),
                 "protocols": sorted(map(str, self.protocols)),
                 "skills": sorted(map(str, self.skills)),
@@ -1553,6 +1562,7 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns = cast(
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
+        connections = {PublicId.from_str(id_) for id_ in obj.get("connections", set())}
         protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
         contracts = {PublicId.from_str(id_) for id_ in obj.get("contracts", set())}
         skills = {PublicId.from_str(id_) for id_ in obj.get("skills", set())}
@@ -1566,6 +1576,7 @@ class SkillConfig(ComponentConfiguration):
             aea_version=aea_version_specifiers,
             fingerprint=fingerprint,
             fingerprint_ignore_patterns=fingerprint_ignore_patterns,
+            connections=connections,
             protocols=protocols,
             contracts=contracts,
             skills=skills,

@@ -144,7 +144,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         path = Path(self.t, search_aea, "skills", skill_name, "__init__.py")
         original = Path(AEA_DIR, "skills", "scaffold", "__init__.py")
-        assert filecmp.cmp(path, original)
+        assert not filecmp.cmp(path, original)  # the public id gets updated
         with open(path, "w") as file:
             file.write(self.code_blocks[3])  # block four is init
 
