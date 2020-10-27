@@ -28,11 +28,11 @@ PACKAGE_NAME = "aea"
 
 def get_all_extras() -> Dict:
 
-    cosmos_ledger_deps = ["ecdsa==0.15", "bech32==1.2.0"]
+    cosmos_ledger_deps = ["ecdsa>=0.16<1.0", "bech32==1.2.0"]
 
     fetch_ledger_deps = cosmos_ledger_deps
 
-    ethereum_ledger_deps = ["web3==5.12.0", "ipfshttpclient==0.6.1", "eth-account==0.5.2"]
+    ethereum_ledger_deps = ["web3==5.12.0", "ipfshttpclient>=0.6.1,<0.7.0", "eth-account>=0.5.2,<0.6.0"]
 
     crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps, *cosmos_ledger_deps]
 
