@@ -22,10 +22,10 @@
 from binascii import unhexlify
 from typing import Optional
 
-import base58
 import multihash  # type: ignore
 from ecdsa import VerifyingKey, curves, keys
 
+import aea.helpers.base58 as base58
 from aea.helpers.multiaddr.crypto_pb2 import KeyType, PublicKey
 
 

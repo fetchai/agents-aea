@@ -23,8 +23,7 @@ import codecs
 import hashlib
 import re
 
-import base58
-
+import aea.helpers.base58 as base58
 from aea.helpers.ipfs.pb import merkledag_pb2, unixfs_pb2
 
 
