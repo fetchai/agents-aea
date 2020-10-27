@@ -95,7 +95,7 @@ class Multihash(namedtuple("Multihash", "func digest")):
         >>> hash_ = hashlib.sha1(data)
         >>> digest_ = hash_.digest()
         >>> mh = Multihash.from_hash(hash_)
-        >>> mh == (Func.sha1, digest)
+        >>> mh == (Func.sha1, digest_)
         True
 
         Application-specific hash functions are also supported (see
