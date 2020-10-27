@@ -42,3 +42,4 @@ DISTRIBUTED_PACKAGES = []  # type: List[PublicId]
 DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:*"
 DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
+SCAFFOLD_PUBLIC_ID = "fetchai/scaffold:0.1.0"
