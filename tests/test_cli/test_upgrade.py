@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add connection` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -48,6 +47,7 @@ from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+from tests.common.utils import are_dirs_equal
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 
@@ -206,7 +206,8 @@ class TestRemoveAndDependencies(BaseTestCase):
         assert component_id in agent_config.component_configurations
 
         with patch(
-            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value=True
+            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required",
+            return_value=self.ITEM_PUBLIC_ID.version,
         ), patch("aea.cli.add._add_item_deps"):
             result = self.runner.invoke(
                 cli,
@@ -337,6 +338,22 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
                 .keys()
             )
             assert latest_agent_items == agent_items
+
+        # compare both configuration files, except the agent name
+        upgraded_agent_dir = Path(self.agent_name)
+        latest_agent_dir = Path(self.latest_agent_name)
+        lines_upgraded_agent_config = (
+            (upgraded_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+        )
+        lines_latest_agent_config = (
+            (latest_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+        )
+        assert lines_upgraded_agent_config == lines_latest_agent_config
+
+        # compare vendor folders.
+        assert are_dirs_equal(
+            upgraded_agent_dir / "vendor", latest_agent_dir / "vendor"
+        )
 
 
 class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
