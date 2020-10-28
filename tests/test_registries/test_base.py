@@ -32,12 +32,7 @@ import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import ComponentId, ComponentType, PublicId
-from aea.configurations.constants import (
-    DEFAULT_LEDGER,
-    DEFAULT_PRIVATE_KEY_FILE,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
-)
+from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.crypto.wallet import Wallet
@@ -57,6 +52,7 @@ from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUB
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
@@ -83,9 +79,7 @@ class TestContractRegistry:
         cls.patch = unittest.mock.patch.object(cls.registry.logger, "exception")
         cls.mocked_logger = cls.patch.start()
         cls.registry.register(contract.component_id, cast(Contract, contract))
-        cls.expected_contract_ids = {
-            str(ERC1155_PUBLIC_ID),
-        }
+        cls.expected_contract_ids = {ERC1155_PUBLIC_ID}
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""
@@ -95,14 +89,14 @@ class TestContractRegistry:
 
     def test_fetch(self):
         """Test that the `fetch` method works as expected."""
-        contract_id = str(ERC1155_PUBLIC_ID)
+        contract_id = ERC1155_PUBLIC_ID
         contract = self.registry.fetch(ComponentId(ComponentType.CONTRACT, contract_id))
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = str(ERC1155_PUBLIC_ID)
+        contract_id_removed = ERC1155_PUBLIC_ID
         component_id = ComponentId(ComponentType.CONTRACT, contract_id_removed)
         contract_removed = self.registry.fetch(component_id)
         self.registry.unregister(contract_removed.component_id)
@@ -158,8 +152,8 @@ class TestProtocolRegistry:
         cls.registry.register(protocol_2.component_id, protocol_2)
 
         cls.expected_protocol_ids = {
-            DEFAULT_PROTOCOL,
-            str(FipaMessage.protocol_id),
+            DefaultMessage.protocol_id,
+            FipaMessage.protocol_id,
         }
 
     def test_fetch_all(self):
@@ -170,7 +164,7 @@ class TestProtocolRegistry:
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        protocol_id_removed = DEFAULT_PROTOCOL
+        protocol_id_removed = DefaultMessage.protocol_id
         component_id = ComponentId(ComponentType.PROTOCOL, protocol_id_removed)
         protocol_removed = self.registry.fetch(component_id)
         self.registry.unregister(component_id)
@@ -250,10 +244,10 @@ class TestResources:
             )
         )
 
-        cls.error_skill_public_id = DEFAULT_SKILL
+        cls.error_skill_public_id = ERROR_SKILL_PUBLIC_ID
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
-        cls.contract_public_id = str(ERC1155_PUBLIC_ID)
+        cls.contract_public_id = ERC1155_PUBLIC_ID
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
@@ -315,7 +309,7 @@ class TestResources:
         all_protocols = self.resources.get_all_protocols()
         assert len(all_protocols) == 1
 
-        expected_pids = {DEFAULT_PROTOCOL}
+        expected_pids = {DefaultMessage.protocol_id}
         actual_pids = {p.public_id for p in all_protocols}
         assert expected_pids == actual_pids
 
@@ -378,13 +372,13 @@ class TestResources:
     def test_get_handler(self):
         """Test get handler."""
         handler = self.resources.get_handler(
-            DEFAULT_PROTOCOL, self.dummy_skill_public_id
+            DefaultMessage.protocol_id, self.dummy_skill_public_id
         )
         assert handler is not None
 
     def test_get_handlers(self):
         """Test get handlers."""
-        default_handlers = self.resources.get_handlers(DEFAULT_PROTOCOL)
+        default_handlers = self.resources.get_handlers(DefaultMessage.protocol_id)
         assert len(default_handlers) == 2
 
     def test_get_behaviours(self):

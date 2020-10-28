@@ -37,14 +37,16 @@ from jsonschema import Draft4Validator
 import aea
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
-    SIGNING_PROTOCOL,
-    STATE_UPDATE_PROTOCOL,
-)
+from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
+
+from packages.fetchai.connections.stub.connection import (
+    PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
+)
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.protocols.state_update.message import StateUpdateMessage
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
@@ -144,7 +146,7 @@ class TestCreate:
 
     def test_connections_contains_only_stub(self):
         """Check that the 'connections' list contains only the 'stub' connection."""
-        assert self.agent_config["connections"] == [str(DEFAULT_CONNECTION)]
+        assert self.agent_config["connections"] == [str(STUB_CONNECTION_PUBLIC_ID)]
 
     def test_default_connection_field_is_stub(self):
         """Check that the 'default_connection' is the 'stub' connection."""
@@ -159,18 +161,18 @@ class TestCreate:
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
         assert self.agent_config["protocols"] == [
-            str(DEFAULT_PROTOCOL),
-            str(SIGNING_PROTOCOL),
-            str(STATE_UPDATE_PROTOCOL),
+            str(DefaultMessage.protocol_id),
+            str(SigningMessage.protocol_id),
+            str(StateUpdateMessage.protocol_id),
         ]
 
     def test_skills_field_is_not_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == [str(DEFAULT_SKILL)]
+        assert self.agent_config["skills"] == [str(ERROR_SKILL_PUBLIC_ID)]
 
     def test_connections_field_is_not_empty_list(self):
         """Check that the 'connections' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == [str(DEFAULT_SKILL)]
+        assert self.agent_config["skills"] == [str(ERROR_SKILL_PUBLIC_ID)]
 
     def test_version_field_is_equal_to_0_1_0(self):
         """Check that the 'version' field is equal to the string '0.1.0'."""
