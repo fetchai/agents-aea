@@ -872,10 +872,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             ]
 
         # sort default id to be first
-        if self._default_connection in selected_connections_ids:
-            selected_connections_ids.remove(self._default_connection)
+        default_connection = self._get_default_connection()
+        if default_connection in selected_connections_ids:
+            selected_connections_ids.remove(default_connection)
             sorted_selected_connections_ids = [
-                self._default_connection
+                default_connection
             ] + selected_connections_ids
         else:
             raise ValueError(

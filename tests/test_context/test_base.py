@@ -43,6 +43,8 @@ def test_agent_context():
     decision_maker_address = "decision_maker_address_stub"
     value = "some_value"
     kwargs = {"some_key": value}
+    default_ledger_id = "fetchai"
+    ledger_id_to_currency_denom = {}
     ac = AgentContext(
         identity=identity,
         connection_status=connection_status,
@@ -50,6 +52,8 @@ def test_agent_context():
         decision_maker_message_queue=decision_maker_message_queue,
         decision_maker_handler_context=decision_maker_handler_context,
         task_manager=task_manager,
+        default_ledger_id=default_ledger_id,
+        ledger_id_to_currency_denom=ledger_id_to_currency_denom,
         default_connection=default_connection,
         default_routing=default_routing,
         search_service_address=search_service_address,
@@ -66,6 +70,8 @@ def test_agent_context():
     assert ac.decision_maker_message_queue == decision_maker_message_queue
     assert ac.decision_maker_handler_context == decision_maker_handler_context
     assert ac.task_manager == task_manager
+    assert ac.default_ledger_id == default_ledger_id
+    assert ac.ledger_id_to_currency_denom == ledger_id_to_currency_denom
     assert ac.default_connection == default_connection
     assert ac.default_routing == default_routing
     assert ac.search_service_address == search_service_address

@@ -544,10 +544,10 @@ def test__build_identity_from_wallet():
     with pytest.raises(ValueError):
         builder._build_identity_from_wallet(wallet)
 
-    wallet.addresses = {builder._default_ledger: "addr1"}
+    wallet.addresses = {builder._get_default_ledger(): "addr1"}
     builder._build_identity_from_wallet(wallet)
 
-    wallet.addresses = {builder._default_ledger: "addr1", "fetchai": "addr2"}
+    wallet.addresses = {builder._get_default_ledger(): "addr1", "fetchai": "addr2"}
     builder._build_identity_from_wallet(wallet)
 
 
