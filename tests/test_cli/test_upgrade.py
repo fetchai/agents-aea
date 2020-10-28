@@ -45,7 +45,10 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
+from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.common.utils import are_dirs_equal
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
@@ -604,7 +607,7 @@ class TestUpgradeProtocolLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade protocol --local' works."""
 
     ITEM_TYPE = "protocol"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.8.0")
+    ITEM_PUBLIC_ID = HttpMessage.protocol_id
 
 
 class TestUpgradeProtocolRemoteRegistry(TestUpgradeProtocolLocally):
@@ -621,7 +624,7 @@ class TestUpgradeSkillLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade skill --local' works."""
 
     ITEM_TYPE = "skill"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.10.0")
+    ITEM_PUBLIC_ID = ECHO_SKILL_PUBLIC_ID
 
 
 class TestUpgradeSkillRemoteRegistry(TestUpgradeSkillLocally):
@@ -646,7 +649,7 @@ class TestUpgradeContractLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade contract' works."""
 
     ITEM_TYPE = "contract"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.12.0")
+    ITEM_PUBLIC_ID = ERC1155_PUBLIC_ID
 
 
 class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):

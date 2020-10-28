@@ -35,8 +35,9 @@ from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogues,
 )
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
-from tests.conftest import FETCHAI
+from tests.conftest import FETCHAI, MY_FIRST_AEA_PUBLIC_ID
 from tests.test_cli import test_generate_wealth, test_interact
 
 
@@ -162,7 +163,7 @@ class TestGenericCases(AEATestCaseEmpty):
     def test_fetch_and_delete(self):
         """Fetch and delete agent from repo."""
         agent_name = "some_agent_for_tests"
-        self.fetch_agent("fetchai/my_first_aea:0.14.0", agent_name)
+        self.fetch_agent(str(MY_FIRST_AEA_PUBLIC_ID), agent_name)
         assert os.path.exists(agent_name)
         self.delete_agents(agent_name)
         assert not os.path.exists(agent_name)
@@ -170,7 +171,7 @@ class TestGenericCases(AEATestCaseEmpty):
     def test_diff(self):
         """Test difference_to_fetched_agent."""
         agent_name = "some_agent_for_tests2"
-        self.fetch_agent("fetchai/my_first_aea:0.14.0", agent_name)
+        self.fetch_agent(str(MY_FIRST_AEA_PUBLIC_ID), agent_name)
         self.run_cli_command(
             "config", "set", "agent.default_ledger", "test_ledger", cwd=agent_name
         )
@@ -178,19 +179,15 @@ class TestGenericCases(AEATestCaseEmpty):
             "config", "get", "agent.default_ledger", cwd=agent_name
         )
         assert b"test_ledger" in result.stdout_bytes
-        diff = self.difference_to_fetched_agent(
-            "fetchai/my_first_aea:0.14.0", agent_name
-        )
+        diff = self.difference_to_fetched_agent(str(MY_FIRST_AEA_PUBLIC_ID), agent_name)
         assert diff
         assert "test_ledger" in diff[1]
 
     def test_no_diff(self):
         """Test no difference for two aea configs."""
         agent_name = "some_agent_for_tests3"
-        self.fetch_agent("fetchai/my_first_aea:0.14.0", agent_name)
-        diff = self.difference_to_fetched_agent(
-            "fetchai/my_first_aea:0.14.0", agent_name
-        )
+        self.fetch_agent(str(MY_FIRST_AEA_PUBLIC_ID), agent_name)
+        diff = self.difference_to_fetched_agent(str(MY_FIRST_AEA_PUBLIC_ID), agent_name)
         assert not diff
 
     def test_terminate_subprocesses(self):
@@ -228,10 +225,10 @@ class TestAddAndEjectComponent(AEATestCaseEmpty):
 
     def test_add_and_eject(self):
         """Test add/reject components."""
-        result = self.add_item("skill", "fetchai/echo:0.10.0", local=True)
+        result = self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID), local=True)
         assert result.exit_code == 0
 
-        result = self.eject_item("skill", "fetchai/echo:0.10.0")
+        result = self.eject_item("skill", str(ECHO_SKILL_PUBLIC_ID))
         assert result.exit_code == 0
 
 
@@ -240,10 +237,10 @@ class TestAddAndRemoveComponent(AEATestCaseEmpty):
 
     def test_add_and_eject(self):
         """Test add/reject components."""
-        result = self.add_item("skill", "fetchai/echo:0.10.0", local=True)
+        result = self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID), local=True)
         assert result.exit_code == 0
 
-        result = self.remove_item("skill", "fetchai/echo:0.10.0")
+        result = self.remove_item("skill", str(ECHO_SKILL_PUBLIC_ID))
         assert result.exit_code == 0
 
 
@@ -290,7 +287,7 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
 
     def test_send_receive_envelope(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.10.0")
+        self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
 
         process = self.run_agent()
         is_running = self.is_running(process)

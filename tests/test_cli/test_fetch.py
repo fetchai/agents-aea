@@ -29,7 +29,12 @@ from aea.cli.fetch import _is_version_correct, fetch_agent_locally
 from aea.configurations.base import PublicId
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS
+from tests.conftest import (
+    CLI_LOG_OPTION,
+    CliRunner,
+    MAX_FLAKY_RERUNS,
+    MY_FIRST_AEA_PUBLIC_ID,
+)
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
@@ -150,7 +155,7 @@ class TestFetchFromRemoteRegistry(AEATestCaseMany):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_fetch_agent_from_remote_registry_positive(self):
         """Test fetch agent from Registry for positive result."""
-        self.run_cli_command("fetch", "fetchai/my_first_aea:0.14.0")
+        self.run_cli_command("fetch", str(MY_FIRST_AEA_PUBLIC_ID))
         assert "my_first_aea" in os.listdir(self.t)
 
 
@@ -159,5 +164,5 @@ class TestFetchLatestVersion(AEATestCaseMany):
 
     def test_fetch_agent_latest(self):
         """Test fetch agent, latest version."""
-        self.run_cli_command("fetch", "--local", "fetchai/my_first_aea:latest")
+        self.run_cli_command("fetch", "--local", str(MY_FIRST_AEA_PUBLIC_ID.latest))
         assert "my_first_aea" in os.listdir(self.t)

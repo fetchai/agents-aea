@@ -25,7 +25,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from aea.common import Address
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
 from aea.helpers.search.models import (
@@ -120,7 +120,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.9.0")},
+            restricted_to_protocols={OefSearchMessage.protocol_id},
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
@@ -661,7 +661,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.9.0")},
+            restricted_to_protocols={OefSearchMessage.protocol_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
@@ -679,7 +679,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.9.0")},
+            restricted_to_protocols={OefSearchMessage.protocol_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )

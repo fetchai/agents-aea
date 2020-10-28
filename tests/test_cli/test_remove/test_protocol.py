@@ -32,6 +32,8 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
+from packages.fetchai.protocols.gym.message import GymMessage
+
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 
@@ -47,7 +49,7 @@ class TestRemoveProtocolWithPublicId:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-        cls.protocol_id = "fetchai/gym:0.8.0"
+        cls.protocol_id = str(GymMessage.protocol_id)
         cls.protocol_name = "gym"
 
         os.chdir(cls.t)
@@ -110,7 +112,7 @@ class TestRemoveProtocolFailsWhenProtocolDoesNotExist:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-        cls.protocol_id = "fetchai/gym:0.8.0"
+        cls.protocol_id = str(GymMessage.protocol_id)
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -166,7 +168,7 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-        cls.protocol_id = "fetchai/gym:0.8.0"
+        cls.protocol_id = str(GymMessage.protocol_id)
 
         os.chdir(cls.t)
         result = cls.runner.invoke(

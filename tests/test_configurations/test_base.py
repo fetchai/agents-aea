@@ -61,7 +61,6 @@ from tests.conftest import (
     AUTHOR,
     CUR_PATH,
     DUMMY_SKILL_PATH,
-    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     agent_config_files,
     connection_config_files,
@@ -70,6 +69,7 @@ from tests.conftest import (
     random_string,
     skill_config_files,
 )
+from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
 class TestCRUDCollection:

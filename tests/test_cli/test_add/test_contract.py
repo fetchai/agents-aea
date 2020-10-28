@@ -26,6 +26,8 @@ import pytest
 from aea.cli import cli
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
+
 from tests.conftest import CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS
 
 
@@ -65,7 +67,7 @@ class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_contract_from_remote_registry_positive(self):
         """Test add contract from Registry positive result."""
-        self.add_item("contract", "fetchai/erc1155:0.10.0", local=self.IS_LOCAL)
+        self.add_item("contract", str(ERC1155_PUBLIC_ID.to_latest), local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         items_folders = os.listdir(items_path)
@@ -76,11 +78,13 @@ class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
 class TestAddContractWithLatestVersion(AEATestCaseEmpty):
     """Test case for add contract with latest version."""
 
+    IS_LOCAL = True
+
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_contract_latest_version(self):
         """Test add contract with latest version."""
-        self.add_item("contract", "fetchai/erc1155:latest", local=True)
+        self.add_item("contract", str(ERC1155_PUBLIC_ID.to_latest), local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         items_folders = os.listdir(items_path)

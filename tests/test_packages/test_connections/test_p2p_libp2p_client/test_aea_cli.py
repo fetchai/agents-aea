@@ -21,6 +21,8 @@
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.connections.p2p_libp2p.connection import PUBLIC_ID
+
 from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
@@ -62,7 +64,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
 
     def test_connection(self):
         """Test the connection can be used in an aea."""
-        self.add_item("connection", "fetchai/p2p_libp2p_client:0.9.0")
+        self.add_item("connection", str(PUBLIC_ID))
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.nested_set_config(
             config_path,

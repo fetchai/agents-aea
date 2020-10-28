@@ -34,6 +34,13 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
+)
+from packages.fetchai.connections.local.connection import (
+    PUBLIC_ID as LOCAL_CONNECTION_PUBLIC_ID,
+)
+
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -57,7 +64,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.3.0"
-        cls.connection_id = "fetchai/http_client:0.11.0"
+        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
@@ -146,7 +153,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         cls.connection_name = "http_client"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.3.0"
-        cls.connection_id = "fetchai/http_client:0.11.0"
+        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -341,7 +348,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/http_client:0.11.0"
+        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
         cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -409,7 +416,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/http_client:0.11.0"
+        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
         cls.connection_name = "http_client"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -479,7 +486,7 @@ class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""
-        self.add_item("connection", "fetchai/local:0.11.0", local=self.IS_LOCAL)
+        self.add_item("connection", str(HTTP_CLIENT_PUBLIC_ID), local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
         items_folders = os.listdir(items_path)
@@ -492,7 +499,7 @@ class TestAddConnectionWithLatestVersion(AEATestCaseEmpty):
 
     def test_add_connection_latest_version(self):
         """Test add connection with latest version."""
-        self.add_item("connection", "fetchai/local:latest", local=True)
+        self.add_item("connection", str(LOCAL_CONNECTION_PUBLIC_ID.latest), local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
         items_folders = os.listdir(items_path)

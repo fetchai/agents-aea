@@ -28,7 +28,7 @@ from urllib.parse import urlencode
 import pytest
 from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
@@ -67,7 +67,7 @@ def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, C
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.9.0")},
+        restricted_to_protocols={OefSearchMessage.protocol_id},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)

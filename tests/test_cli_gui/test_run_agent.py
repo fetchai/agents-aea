@@ -33,6 +33,8 @@ from aea.cli.utils.context import Context
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
+from packages.fetchai.connections.local.connection import PUBLIC_ID as LOCAL_PUBLIC_ID
+
 from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS
 from tests.test_cli_gui.test_base import TempCWD, create_app
 
@@ -63,7 +65,7 @@ def test_create_and_run_agent():
             response_add = app.post(
                 "api/agent/" + agent_id + "/connection",
                 content_type="application/json",
-                data=json.dumps("fetchai/local:0.11.0"),
+                data=json.dumps(str(LOCAL_PUBLIC_ID)),
             )
             assert response_add.status_code == 201
 
