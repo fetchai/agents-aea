@@ -58,7 +58,7 @@ class TestHandler(Handler):
 def run(duration, runtime_mode):
     """Check memory usage."""
     # pylint: disable=import-outside-toplevel,unused-import
-    # import causer tricky import in decision_maker
+    # import manually due to some lazy imports in decision_maker
     import aea.decision_maker.default  # noqa: F401
 
     agent = make_agent(runtime_mode=runtime_mode)

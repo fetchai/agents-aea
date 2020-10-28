@@ -140,7 +140,7 @@ def make_agent(*args, **kwargs) -> AEA:
 def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     """Test multiagent message exchange."""
     # pylint: disable=import-outside-toplevel,unused-import
-    # import causer tricky import in decision_maker
+    # import manually due to some lazy imports in decision_maker
     import aea.decision_maker.default  # noqa: F401
 
     local_node = LocalNode()

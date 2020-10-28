@@ -8,7 +8,6 @@ RUN apk add --update --no-cache gfortran freetype-dev libpng-dev openblas-dev g+
 RUN apk add --no-cache go
 
 RUN pip install --upgrade pip pipenv
-RUN pip install protobuf colorlog graphviz
 RUN pip install aea[all] --upgrade --force-reinstall
 
 RUN wget https://raw.githubusercontent.com/fetchai/agents-aea/master/Pipfile
