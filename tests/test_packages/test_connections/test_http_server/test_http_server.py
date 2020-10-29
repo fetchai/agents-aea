@@ -31,7 +31,7 @@ import pytest
 from aiohttp.client_reqrep import ClientResponse
 
 from aea.common import Address
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -118,7 +118,7 @@ class TestHTTPServer:
             ROOT_DIR, "tests", "data", "petstore_sim.yaml"
         )
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.8.0")
+        self.protocol_id = HttpMessage.protocol_id
 
         self.configuration = ConnectionConfig(
             host=self.host,

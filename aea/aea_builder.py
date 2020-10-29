@@ -873,11 +873,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         # sort default id to be first
         default_connection = self._get_default_connection()
-        if default_connection in selected_connections_ids:
-            selected_connections_ids.remove(default_connection)
-            sorted_selected_connections_ids = [
-                default_connection
-            ] + selected_connections_ids
+        full_default_connection_id = [
+            connection_id
+            for connection_id in selected_connections_ids
+            if connection_id.same_prefix(default_connection)
+        ]
+        if len(full_default_connection_id) == 1:
+            selected_connections_ids.remove(full_default_connection_id[0])
+            sorted_selected_connections_ids = (
+                full_default_connection_id + selected_connections_ids
+            )
         else:
             raise ValueError(
                 "Default connection not a dependency. Please add it and retry."

@@ -61,7 +61,6 @@ from tests.conftest import (
     AUTHOR,
     CUR_PATH,
     DUMMY_SKILL_PATH,
-    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     agent_config_files,
     connection_config_files,
@@ -70,6 +69,7 @@ from tests.conftest import (
     random_string,
     skill_config_files,
 )
+from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
 class TestCRUDCollection:
@@ -151,7 +151,7 @@ class TestContractConfig:
         assert config.contract_interfaces != {}
         assert (
             "cosmos" in config.contract_interfaces
-            and "ethereum" in config.contract_interfaces
+            or "ethereum" in config.contract_interfaces
         )
 
 
@@ -421,12 +421,6 @@ class PublicIdTestCase(TestCase):
         obj = {"author": AUTHOR, "name": "name", "version": "0.1.0"}
         PublicId.from_json(obj)
 
-    def test_public_id_latest_positive(self):
-        """Test case for latest property positive result."""
-        name = "name"
-        obj = PublicId(AUTHOR, name, "0.1.0")
-        assert obj.latest == "{}/{}:*".format(AUTHOR, name)
-
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""
         obj = PublicId(AUTHOR, "name", "0.1.0")
@@ -643,6 +637,14 @@ def test_pubic_id_to_latest():
     public_id = PublicId("author", "name", "0.1.0")
     expected_public_id = PublicId("author", "name", "latest")
     actual_public_id = public_id.to_latest()
+    assert expected_public_id == actual_public_id
+
+
+def test_pubic_id_to_any():
+    """Test PublicId.to_any"""
+    public_id = PublicId("author", "name", "0.1.0")
+    expected_public_id = PublicId("author", "name", "any")
+    actual_public_id = public_id.to_any()
     assert expected_public_id == actual_public_id
 
 

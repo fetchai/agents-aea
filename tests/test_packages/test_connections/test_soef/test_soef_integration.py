@@ -28,7 +28,7 @@ from urllib.parse import urlencode
 import pytest
 from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
@@ -67,7 +67,7 @@ def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, C
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.9.0")},
+        restricted_to_protocols={OefSearchMessage.protocol_id},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
@@ -115,7 +115,7 @@ class Instance:
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -141,7 +141,7 @@ class Instance:
             service_instance, data_model=models.AGENT_PERSONALITY_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -161,7 +161,7 @@ class Instance:
             service_instance, data_model=models.SET_SERVICE_KEY_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -177,7 +177,7 @@ class Instance:
     def search(self, query: Query) -> OefSearchMessage:
         """Perform search with query provided."""
         message, sending_dialogue = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=query,
         )
@@ -214,7 +214,7 @@ class Instance:
             service_instance, data_model=models.AGENT_GENERIC_COMMAND_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -340,7 +340,7 @@ class TestRealNetwork:
         try:
             service_description = Description({}, data_model=models.PING_MODEL)
             message, _ = agent.oef_search_dialogues.create(
-                counterparty=SOEFConnection.connection_id.latest,
+                counterparty=str(SOEFConnection.connection_id.to_any()),
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
                 service_description=service_description,
             )
@@ -404,7 +404,7 @@ class TestRealNetwork:
             message, _ = agent1.oef_search_dialogues.create(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
                 service_description=service_description,
-                counterparty=SOEFConnection.connection_id.latest,
+                counterparty=str(SOEFConnection.connection_id.to_any()),
             )
 
             envelope = Envelope(

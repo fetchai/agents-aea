@@ -178,7 +178,7 @@ def _crete_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agent
         registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
         description="",
         default_ledger=DEFAULT_LEDGER,
-        default_connection=str(DEFAULT_CONNECTION),
+        default_connection=str(DEFAULT_CONNECTION.to_any()),
     )
 
     with open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w") as config_file:

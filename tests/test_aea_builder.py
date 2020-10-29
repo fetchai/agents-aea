@@ -55,16 +55,20 @@ from aea.registries.resources import Resources
 from aea.skills.base import Skill
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 
+from packages.fetchai.connections.oef.connection import (
+    PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,
-    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     _make_dummy_connection,
 )
+from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
@@ -112,12 +116,12 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.12.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/oef_search:0.9.0)']"
+        f"Package '{str(OEF_CONNECTION_PUBLIC_ID)}' of type 'connection' cannot be added. "
+        f"Missing dependencies: ['(protocol, {str(OefSearchMessage.protocol_id)})']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef:0.12.0" requires
-        # "fetchai/oef_search:0.9.0" and "fetchai/fipa:0.9.0" protocols.
+        # connection "fetchai/oef" requires
+        # "fetchai/oef_search" and "fetchai/fipa" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",

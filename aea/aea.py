@@ -39,11 +39,7 @@ from typing import (
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
-from aea.configurations.constants import (
-    DEFAULT_PROTOCOL,
-    DEFAULT_SEARCH_SERVICE_ADDRESS,
-    DEFAULT_SKILL,
-)
+from aea.configurations.constants import DEFAULT_SEARCH_SERVICE_ADDRESS
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
@@ -259,7 +255,18 @@ class AEA(Agent):
 
     def _get_error_handler(self) -> Handler:
         """Get error handler."""
-        handler = self.resources.get_handler(DEFAULT_PROTOCOL, DEFAULT_SKILL)
+
+        # temporary hack
+        from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+            DefaultMessage,
+        )
+        from packages.fetchai.skills.error import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+            PUBLIC_ID as ERROR_SKILL_PUBLIC_ID,
+        )
+
+        handler = self.resources.get_handler(
+            DefaultMessage.protocol_id, ERROR_SKILL_PUBLIC_ID
+        )
         if handler is None:
             self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
             raise _StopRuntime()
@@ -279,6 +286,7 @@ class AEA(Agent):
     ) -> Tuple[Optional[Message], List[Handler]]:
         error_handler = self._get_error_handler()
 
+        # temporary hack
         from packages.fetchai.skills.error.handlers import (  # noqa: F811 # pylint: disable=import-outside-toplevel
             ErrorHandler,
         )
