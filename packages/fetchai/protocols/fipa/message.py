@@ -62,6 +62,28 @@ class FipaMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "accept",
+        "accept_w_inform",
+        "cfp",
+        "decline",
+        "inform",
+        "match_accept",
+        "match_accept_w_inform",
+        "propose",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+            "query",
+            "proposal",
+            "info",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -78,16 +100,6 @@ class FipaMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "accept",
-            "accept_w_inform",
-            "cfp",
-            "decline",
-            "inform",
-            "match_accept",
-            "match_accept_w_inform",
-            "propose",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

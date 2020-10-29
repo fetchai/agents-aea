@@ -56,6 +56,43 @@ class TacMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "cancelled",
+        "game_data",
+        "register",
+        "tac_error",
+        "transaction",
+        "transaction_confirmation",
+        "unregister",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+            "agent_name",
+            "transaction_id",
+            "ledger_id",
+            "sender_address",
+            "counterparty_address",
+            "amount_by_currency_id",
+            "fee_by_currency_id",
+            "quantities_by_good_id",
+            "nonce",
+            "sender_signature",
+            "counterparty_signature",
+            "exchange_params_by_currency_id",
+            "utility_params_by_good_id",
+            "agent_addr_to_name",
+            "currency_id_to_name",
+            "good_id_to_name",
+            "version_id",
+            "info",
+            "error_code",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -72,15 +109,6 @@ class TacMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "cancelled",
-            "game_data",
-            "register",
-            "tac_error",
-            "transaction",
-            "transaction_confirmation",
-            "unregister",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

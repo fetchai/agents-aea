@@ -51,6 +51,20 @@ class DefaultMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {"bytes", "error"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+            "content",
+            "error_code",
+            "error_msg",
+            "error_data",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -67,7 +81,6 @@ class DefaultMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"bytes", "error"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

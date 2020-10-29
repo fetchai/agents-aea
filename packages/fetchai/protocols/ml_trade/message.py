@@ -58,6 +58,20 @@ class MlTradeMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {"accept", "cfp", "data", "terms"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+            "query",
+            "terms",
+            "tx_digest",
+            "payload",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -74,7 +88,6 @@ class MlTradeMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"accept", "cfp", "data", "terms"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from copy import copy
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Type, cast
+from typing import Any, Dict, Optional, Tuple, Type, cast, Set
 
 from google.protobuf.struct_pb2 import Struct
 
@@ -56,6 +56,11 @@ class Message:
             """Get the string representation."""
             return str(self.value)
 
+    class _SlotsCls():
+        __slots__: Tuple[str, ...] = ()
+
+    _performatives: Set[str] = set()
+
     def __init__(self, _body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
@@ -63,15 +68,23 @@ class Message:
         :param body: the dictionary of values to hold.
         :param kwargs: any additional value to add to the body. It will overwrite the body values.
         """
+        self._slots = self._SlotsCls()
+
         self._to: Optional[Address] = None
         self._sender: Optional[Address] = None
-        self.__body: Dict[str, Any] = copy(_body) if _body else {}
-        self.__body.update(kwargs)
+
+        self._update_slots_from_dict(copy(_body) if _body else {})
+        self._update_slots_from_dict(kwargs)
 
         try:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
             _default_logger.error(e)
+
+    @property
+    def valid_performatives(self) -> Set[str]:
+        """Get valid performatives."""
+        return self._performatives
 
     @property
     def has_sender(self) -> bool:
@@ -125,17 +138,23 @@ class Message:
 
         :return: the body
         """
-        return self.__body
+        return {
+            key: self.get(key)
+            for key
+            in self._SlotsCls.__slots__
+            if self.is_set(key)
+        }
 
     @_body.setter
     def _body(self, body: Dict) -> None:
         """
-        Set the body of hte message.
+        Set the body of the message.
 
         :param body: the body.
         :return: None
         """
-        self.__body = body
+        self._slots = self._SlotsCls()  # new instsance to clean up all data
+        self._update_slots_from_dict(body)
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
@@ -173,15 +192,23 @@ class Message:
         :param value: the value.
         :return: None
         """
-        self._body[key] = value
+        try:
+            setattr(self._slots, key, value)
+        except AttributeError:
+            raise ValueError(f"Field `{key}` is not supported")
 
     def get(self, key: str) -> Optional[Any]:
         """Get value for key."""
-        return self._body.get(key, None)
+        return getattr(self._slots, key, None)
 
     def is_set(self, key: str) -> bool:
         """Check value is set for key."""
-        return key in self._body
+        return hasattr(self._slots, key)
+
+    def _update_slots_from_dict(self, data: dict) -> None:
+        """Update slots value with data from dict."""
+        for key, value in data.items():
+            self.set(key, value)
 
     def _is_consistent(self) -> bool:  # pylint: disable=no-self-use
         """Check that the data is consistent."""

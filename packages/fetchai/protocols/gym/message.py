@@ -54,6 +54,23 @@ class GymMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {"act", "close", "percept", "reset", "status"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+            "action",
+            "step_id",
+            "observation",
+            "reward",
+            "done",
+            "info",
+            "content",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -70,7 +87,6 @@ class GymMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"act", "close", "percept", "reset", "status"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

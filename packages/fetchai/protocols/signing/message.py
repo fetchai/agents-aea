@@ -77,6 +77,28 @@ class SigningMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "error",
+        "sign_message",
+        "sign_transaction",
+        "signed_message",
+        "signed_transaction",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+            "terms",
+            "raw_transaction",
+            "raw_message",
+            "signed_transaction",
+            "signed_message",
+            "error_code",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -93,13 +115,6 @@ class SigningMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "error",
-            "sign_message",
-            "sign_transaction",
-            "signed_message",
-            "signed_transaction",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

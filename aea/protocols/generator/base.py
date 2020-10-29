@@ -637,6 +637,25 @@ class ProtocolGenerator:
 
         # Performatives Enum
         cls_str += "\n" + self._performatives_enum_str()
+        cls_str += self.indent + "_performatives = {}\n".format(
+            self._performatives_str()
+        )
+
+        # slots
+        cls_str += self.indent + "class _SlotsCls():\n"
+        self._change_indent(1)
+        cls_str += self.indent + "__slots__ = (\n"
+        self._change_indent(1)
+        # default fields
+        cls_str += self.indent + '"performative",'
+        cls_str += self.indent + '"dialogue_reference",'
+        cls_str += self.indent + '"message_id",'
+        cls_str += self.indent + '"target",'
+        for field_name in self.spec.all_unique_contents.keys():
+            cls_str += self.indent + f'"{field_name}",'
+        self._change_indent(-1)
+        cls_str += self.indent + ")\n"
+        self._change_indent(-1)
 
         # __init__
         cls_str += self.indent + "def __init__(\n"
@@ -659,9 +678,7 @@ class ProtocolGenerator:
         cls_str += self.indent + ":param target: the message target.\n"
         cls_str += self.indent + ":param performative: the message performative.\n"
         cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "self._performatives = {}\n".format(
-            self._performatives_str()
-        )
+
         cls_str += self.indent + "super().__init__(\n"
         self._change_indent(1)
         cls_str += self.indent + "dialogue_reference=dialogue_reference,\n"
