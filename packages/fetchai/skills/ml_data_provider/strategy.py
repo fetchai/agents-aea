@@ -80,9 +80,7 @@ class Strategy(Model):
             ledger_id if ledger_id is not None else self.context.default_ledger_id
         )
         if currency_id is None:
-            currency_id = self.context.ledger_id_to_currency_denom.get(
-                self._ledger_id, None
-            )
+            currency_id = self.context.currency_denominations.get(self._ledger_id, None)
             enforce(
                 currency_id is not None,
                 f"Currency denomination for ledger_id={self._ledger_id} not specified.",
