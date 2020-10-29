@@ -150,7 +150,9 @@ class TestCreate:
 
     def test_default_connection_field_is_stub(self):
         """Check that the 'default_connection' is the 'stub' connection."""
-        assert self.agent_config["default_connection"] == str(DEFAULT_CONNECTION.to_any())
+        assert self.agent_config["default_connection"] == str(
+            DEFAULT_CONNECTION.to_any()
+        )
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""

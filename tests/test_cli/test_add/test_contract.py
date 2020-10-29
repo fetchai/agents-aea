@@ -67,7 +67,9 @@ class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_contract_from_remote_registry_positive(self):
         """Test add contract from Registry positive result."""
-        self.add_item("contract", str(ERC1155_PUBLIC_ID.to_latest()), local=self.IS_LOCAL)
+        self.add_item(
+            "contract", str(ERC1155_PUBLIC_ID.to_latest()), local=self.IS_LOCAL
+        )
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         items_folders = os.listdir(items_path)
@@ -84,7 +86,9 @@ class TestAddContractWithLatestVersion(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_contract_latest_version(self):
         """Test add contract with latest version."""
-        self.add_item("contract", str(ERC1155_PUBLIC_ID.to_latest()), local=self.IS_LOCAL)
+        self.add_item(
+            "contract", str(ERC1155_PUBLIC_ID.to_latest()), local=self.IS_LOCAL
+        )
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         items_folders = os.listdir(items_path)
