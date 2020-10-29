@@ -503,7 +503,7 @@ class TestAddSkillWithLatestVersion(AEATestCaseEmpty):
 
     def test_add_skill_latest_version(self):
         """Test add skill with latest version."""
-        self.add_item("skill", str(ECHO_PUBLIC_ID.latest), local=True)
+        self.add_item("skill", str(ECHO_PUBLIC_ID.to_latest()), local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)

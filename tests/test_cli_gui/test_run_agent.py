@@ -30,10 +30,12 @@ import pytest
 import aea
 from aea.cli.create import create_aea
 from aea.cli.utils.context import Context
-from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import PUBLIC_ID as LOCAL_PUBLIC_ID
+from packages.fetchai.connections.stub.connection import (
+    PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
+)
 
 from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS
 from tests.test_cli_gui.test_base import TempCWD, create_app
@@ -109,7 +111,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps(str(DEFAULT_CONNECTION)),
+            data=json.dumps(str(STUB_CONNECTION_PUBLIC_ID)),
         )
         assert response_run.status_code == 201
 
@@ -119,7 +121,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps(str(DEFAULT_CONNECTION)),
+            data=json.dumps(str(STUB_CONNECTION_PUBLIC_ID)),
         )
         assert response_run.status_code == 400
 
@@ -156,7 +158,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps(str(DEFAULT_CONNECTION)),
+            data=json.dumps(str(STUB_CONNECTION_PUBLIC_ID)),
         )
         assert response_run.status_code == 201
 
@@ -219,6 +221,6 @@ def test_create_and_run_agent():
             response_run = app.post(
                 "api/agent/" + agent_id + "/run",
                 content_type="application/json",
-                data=json.dumps(str(DEFAULT_CONNECTION)),
+                data=json.dumps(str(STUB_CONNECTION_PUBLIC_ID)),
             )
         assert response_run.status_code == 400

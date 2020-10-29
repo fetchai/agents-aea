@@ -151,7 +151,7 @@ class TestContractConfig:
         assert config.contract_interfaces != {}
         assert (
             "cosmos" in config.contract_interfaces
-            and "ethereum" in config.contract_interfaces
+            or "ethereum" in config.contract_interfaces
         )
 
 
@@ -420,12 +420,6 @@ class PublicIdTestCase(TestCase):
         """Test case for from_json method positive result."""
         obj = {"author": AUTHOR, "name": "name", "version": "0.1.0"}
         PublicId.from_json(obj)
-
-    def test_public_id_latest_positive(self):
-        """Test case for latest property positive result."""
-        name = "name"
-        obj = PublicId(AUTHOR, name, "0.1.0")
-        assert obj.latest == "{}/{}:*".format(AUTHOR, name)
 
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""

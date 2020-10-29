@@ -164,5 +164,7 @@ class TestFetchLatestVersion(AEATestCaseMany):
 
     def test_fetch_agent_latest(self):
         """Test fetch agent, latest version."""
-        self.run_cli_command("fetch", "--local", str(MY_FIRST_AEA_PUBLIC_ID.latest))
+        self.run_cli_command(
+            "fetch", "--local", str(MY_FIRST_AEA_PUBLIC_ID.to_latest())
+        )
         assert "my_first_aea" in os.listdir(self.t)

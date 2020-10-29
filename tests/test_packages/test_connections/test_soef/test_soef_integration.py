@@ -115,7 +115,7 @@ class Instance:
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -141,7 +141,7 @@ class Instance:
             service_instance, data_model=models.AGENT_PERSONALITY_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -161,7 +161,7 @@ class Instance:
             service_instance, data_model=models.SET_SERVICE_KEY_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -177,7 +177,7 @@ class Instance:
     def search(self, query: Query) -> OefSearchMessage:
         """Perform search with query provided."""
         message, sending_dialogue = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=query,
         )
@@ -214,7 +214,7 @@ class Instance:
             service_instance, data_model=models.AGENT_GENERIC_COMMAND_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -340,7 +340,7 @@ class TestRealNetwork:
         try:
             service_description = Description({}, data_model=models.PING_MODEL)
             message, _ = agent.oef_search_dialogues.create(
-                counterparty=SOEFConnection.connection_id.latest,
+                counterparty=str(SOEFConnection.connection_id.to_any()),
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
                 service_description=service_description,
             )
@@ -404,7 +404,7 @@ class TestRealNetwork:
             message, _ = agent1.oef_search_dialogues.create(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
                 service_description=service_description,
-                counterparty=SOEFConnection.connection_id.latest,
+                counterparty=str(SOEFConnection.connection_id.to_any()),
             )
 
             envelope = Envelope(

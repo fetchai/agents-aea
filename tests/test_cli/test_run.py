@@ -38,11 +38,13 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
 )
-from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
 
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_ClIENT_PUBLIC_ID,
+)
+from packages.fetchai.connections.stub.connection import (
+    PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
@@ -172,9 +174,9 @@ def test_run_with_default_connection():
 @pytest.mark.parametrize(
     argnames=["connection_ids"],
     argvalues=[
-        [f"{str(HTTP_ClIENT_PUBLIC_ID)},{str(DEFAULT_CONNECTION)}"],
-        [f"'{str(HTTP_ClIENT_PUBLIC_ID)}, {str(DEFAULT_CONNECTION)}'"],
-        [f"{str(HTTP_ClIENT_PUBLIC_ID)},,{str(DEFAULT_CONNECTION)},"],
+        [f"{str(HTTP_ClIENT_PUBLIC_ID)},{str(STUB_CONNECTION_PUBLIC_ID)}"],
+        [f"'{str(HTTP_ClIENT_PUBLIC_ID)}, {str(STUB_CONNECTION_PUBLIC_ID)}'"],
+        [f"{str(HTTP_ClIENT_PUBLIC_ID)},,{str(STUB_CONNECTION_PUBLIC_ID)},"],
     ],
 )
 def test_run_multiple_connections(connection_ids):
@@ -205,7 +207,14 @@ def test_run_multiple_connections(connection_ids):
 
     # stub is the default connection, so it should fail
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(DEFAULT_CONNECTION)]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "add",
+            "--local",
+            "connection",
+            str(STUB_CONNECTION_PUBLIC_ID),
+        ],
     )
     assert result.exit_code == 1
     process = PexpectWrapper(  # nosec
@@ -1063,7 +1072,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = HTTP_ClIENT_PUBLIC_ID
+        cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
         cls.connection_name = "http_client"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1151,7 +1160,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = str(DEFAULT_CONNECTION)
+        cls.connection_id = str(STUB_CONNECTION_PUBLIC_ID)
         cls.connection_name = "stub"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()

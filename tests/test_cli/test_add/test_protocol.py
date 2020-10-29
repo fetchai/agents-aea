@@ -464,7 +464,7 @@ class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
     def test_add_protocol_from_remote_registry_positive(self):
         """Test add protocol from Registry positive result."""
         self.add_item(
-            "protocol", str(FipaMessage.protocol_id.latest), local=self.IS_LOCAL
+            "protocol", str(FipaMessage.protocol_id.to_latest()), local=self.IS_LOCAL
         )
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
@@ -478,7 +478,7 @@ class TestAddProtocolWithLatestVersion(AEATestCaseEmpty):
 
     def test_add_protocol_latest_version(self):
         """Test add protocol with latest version."""
-        self.add_item("protocol", str(FipaMessage.protocol_id.latest), local=True)
+        self.add_item("protocol", str(FipaMessage.protocol_id.to_latest()), local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
         items_folders = os.listdir(items_path)

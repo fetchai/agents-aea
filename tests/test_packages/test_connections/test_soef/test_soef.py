@@ -143,7 +143,7 @@ class TestSoef:
             service_instance, data_model=models.SET_SERVICE_KEY_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -173,7 +173,7 @@ class TestSoef:
             service_instance, data_model=models.REMOVE_SERVICE_KEY_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
@@ -219,7 +219,7 @@ class TestSoef:
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -260,7 +260,7 @@ class TestSoef:
             service_instance, data_model=bad_location_model
         )
         message, sending_dialogue = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -291,7 +291,7 @@ class TestSoef:
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
@@ -318,7 +318,7 @@ class TestSoef:
             service_instance, data_model=models.AGENT_PERSONALITY_MODEL
         )
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
@@ -378,7 +378,7 @@ class TestSoef:
             dialogue_reference=self.oef_search_dialogues.new_self_initiated_dialogue_reference(),
             service_description=service_description,
         )
-        message.to = SOEFConnection.connection_id.latest
+        message.to = str(SOEFConnection.connection_id.to_any())
         message.sender = self.crypto.address
         envelope = Envelope(
             to=message.to,
@@ -395,7 +395,7 @@ class TestSoef:
         await self.test_register_service()
         closeness_query = Query([], model=models.AGENT_LOCATION_MODEL)
         message, sending_dialogue = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
@@ -442,7 +442,7 @@ class TestSoef:
             [close_to_my_service] + personality_filters + service_key_filters
         )
         message, sending_dialogue = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
@@ -492,7 +492,7 @@ class TestSoef:
         )
 
         message_1, sending_dialogue = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
@@ -503,7 +503,7 @@ class TestSoef:
         assert internal_dialogue_1 is not None
 
         message_2, sending_dialogue = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
@@ -514,7 +514,7 @@ class TestSoef:
         assert internal_dialogue_2 is not None
 
         message_3, sending_dialogue = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
@@ -692,7 +692,7 @@ class TestSoef:
         """Test set service key."""
         service_description = Description({}, data_model=models.PING_MODEL)
         message, _ = self.oef_search_dialogues.create(
-            counterparty=SOEFConnection.connection_id.latest,
+            counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )

@@ -499,7 +499,9 @@ class TestAddConnectionWithLatestVersion(AEATestCaseEmpty):
 
     def test_add_connection_latest_version(self):
         """Test add connection with latest version."""
-        self.add_item("connection", str(LOCAL_CONNECTION_PUBLIC_ID.latest), local=True)
+        self.add_item(
+            "connection", str(LOCAL_CONNECTION_PUBLIC_ID.to_latest()), local=True
+        )
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
         items_folders = os.listdir(items_path)
