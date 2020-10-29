@@ -46,7 +46,7 @@ from aea.configurations.constants import (
 )
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM
+from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.exceptions import AEAException
@@ -91,7 +91,7 @@ class AEA(Agent):
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         default_ledger: Optional[str] = None,
-        ledger_id_to_currency_denom: Optional[Dict[str, str]] = None,
+        currency_denominations: Optional[Dict[str, str]] = None,
         default_connection: Optional[PublicId] = None,
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
@@ -113,7 +113,7 @@ class AEA(Agent):
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode (async, threaded) to run AEA in.
         :param default_ledger: default ledger id
-        :param ledger_id_to_currency_denom: mapping from ledger id to currency denomination
+        :param currency_denominations: mapping from ledger id to currency denomination
         :param default_connection: public id to the default connection
         :param default_routing: dictionary for default routing.
         :param connection_ids: active connection ids. Default: consider all the ones in the resources.
@@ -158,10 +158,10 @@ class AEA(Agent):
             if default_ledger is not None
             else identity.default_address_key
         )
-        ledger_id_to_currency_denom = (
-            ledger_id_to_currency_denom
-            if ledger_id_to_currency_denom is not None
-            else DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM
+        currency_denominations = (
+            currency_denominations
+            if currency_denominations is not None
+            else DEFAULT_CURRENCY_DENOMINATIONS
         )
         self._context = AgentContext(
             self.identity,
@@ -171,7 +171,7 @@ class AEA(Agent):
             decision_maker_handler.context,
             self.runtime.task_manager,
             default_ledger_id,
-            ledger_id_to_currency_denom,
+            currency_denominations,
             default_connection,
             default_routing if default_routing is not None else {},
             search_service_address,

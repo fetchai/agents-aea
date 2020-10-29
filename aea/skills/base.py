@@ -203,9 +203,9 @@ class SkillContext:
         return self._get_agent_context().default_ledger_id
 
     @property
-    def ledger_id_to_currency_denom(self) -> Dict[str, str]:
+    def currency_denominations(self) -> Dict[str, str]:
         """Get a dictionary mapping ledger ids to currency denominations."""
-        return self._get_agent_context().ledger_id_to_currency_denom
+        return self._get_agent_context().currency_denominations
 
     @property
     def search_service_address(self) -> Address:

@@ -25,7 +25,7 @@ from types import SimpleNamespace
 from typing import Any, Dict, Optional, Tuple, Type, Union, cast
 
 from aea.context.base import AgentContext
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM
+from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import Address
@@ -425,7 +425,7 @@ class BaseSkillTestCase:
             decision_maker_handler_context=SimpleNamespace(),
             task_manager=TaskManager(),
             default_ledger_id=identity.default_address_key,
-            ledger_id_to_currency_denom=DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM,
+            currency_denominations=DEFAULT_CURRENCY_DENOMINATIONS,
             default_connection=None,
             default_routing={},
             search_service_address="dummy_search_service_address",

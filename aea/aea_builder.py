@@ -66,7 +66,7 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM
+from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.exceptions import AEAException
@@ -282,7 +282,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     DEFAULT_LEDGER = DEFAULT_LEDGER
     DEFAULT_CONNECTION = DEFAULT_CONNECTION
-    DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM = DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM
+    DEFAULT_CURRENCY_DENOMINATIONS = DEFAULT_CURRENCY_DENOMINATIONS
     DEFAULT_AGENT_ACT_PERIOD = 0.05  # seconds
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
@@ -350,7 +350,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if not is_full_reset:
             return
         self._default_ledger: Optional[str] = None
-        self._ledger_id_to_currency_denom: Dict[str, str] = {}
+        self._currency_denominations: Dict[str, str] = {}
         self._default_connection: Optional[PublicId] = None
         self._context_namespace: Dict[str, Any] = {}
         self._period: Optional[float] = None
@@ -648,16 +648,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._default_ledger = identifier
         return self
 
-    def set_ledger_id_to_currency_denom(
-        self, ledger_id_to_currency_denom: Dict[str, str]
+    def set_currency_denominations(
+        self, currency_denominations: Dict[str, str]
     ) -> "AEABuilder":  # pragma: nocover
         """
         Set the mapping from ledger ids to currency denomincations.
 
-        :param ledger_id_to_currency_denom: the mapping
+        :param currency_denominations: the mapping
         :return: the AEABuilder
         """
-        self._ledger_id_to_currency_denom = ledger_id_to_currency_denom
+        self._currency_denominations = currency_denominations
         return self
 
     def add_component(
@@ -931,7 +931,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             connection_exception_policy=self._get_connection_exception_policy(),
-            ledger_id_to_currency_denom=self._get_ledger_id_to_currency_denom(),
+            currency_denominations=self._get_currency_denominations(),
             default_routing=self._get_default_routing(),
             default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
@@ -1020,16 +1020,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             else self.DEFAULT_CONNECTION_EXCEPTION_POLICY
         )
 
-    def _get_ledger_id_to_currency_denom(self) -> Dict[str, str]:
+    def _get_currency_denominations(self) -> Dict[str, str]:
         """
         Return the mapping from ledger id to currency denom.
 
         :return: the mapping
         """
         return (
-            self._ledger_id_to_currency_denom
-            if self._ledger_id_to_currency_denom != {}
-            else self.DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM
+            self._currency_denominations
+            if self._currency_denominations != {}
+            else self.DEFAULT_CURRENCY_DENOMINATIONS
         )
 
     def _get_default_routing(self) -> Dict[PublicId, PublicId]:
@@ -1210,9 +1210,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # set name and other configurations
         self.set_name(agent_configuration.name)
         self.set_default_ledger(agent_configuration.default_ledger)
-        self.set_ledger_id_to_currency_denom(
-            agent_configuration.ledger_id_to_currency_denom
-        )
+        self.set_currency_denominations(agent_configuration.currency_denominations)
         self.set_default_connection(agent_configuration.default_connection)
         self.set_period(agent_configuration.period)
         self.set_execution_timeout(agent_configuration.execution_timeout)

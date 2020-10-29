@@ -42,7 +42,7 @@ class AgentContext:
         decision_maker_handler_context: SimpleNamespace,
         task_manager: TaskManager,
         default_ledger_id: str,
-        ledger_id_to_currency_denom: Dict[str, str],
+        currency_denominations: Dict[str, str],
         default_connection: Optional[PublicId],
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
@@ -76,7 +76,7 @@ class AgentContext:
         self._search_service_address = search_service_address
         self._decision_maker_address = decision_maker_address
         self._default_ledger_id = default_ledger_id
-        self._ledger_id_to_currency_denom = ledger_id_to_currency_denom
+        self._currency_denominations = currency_denominations
         self._default_connection = default_connection
         self._default_routing = default_routing
         self._namespace = SimpleNamespace(**kwargs)
@@ -153,9 +153,9 @@ class AgentContext:
         return self._default_ledger_id
 
     @property
-    def ledger_id_to_currency_denom(self) -> Dict[str, str]:
+    def currency_denominations(self) -> Dict[str, str]:
         """Get a dictionary mapping ledger ids to currency denominations."""
-        return self._ledger_id_to_currency_denom
+        return self._currency_denominations
 
     @property
     def default_connection(self) -> Optional[PublicId]:

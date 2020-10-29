@@ -62,7 +62,7 @@ DEFAULT_LEDGER_CONFIGS = {
         "denom": FETCHAI_DEFAULT_CURRENCY_DENOM,
     },
 }  # type: Dict[str, Dict[str, Union[str, int]]]
-DEFAULT_LEDGER_ID_TO_CURRENCY_DENOM = {
+DEFAULT_CURRENCY_DENOMINATIONS = {
     CosmosApi.identifier: COSMOS_DEFAULT_CURRENCY_DENOM,
     EthereumApi.identifier: ETHEREUM_DEFAULT_CURRENCY_DENOM,
     FetchAIApi.identifier: FETCHAI_DEFAULT_CURRENCY_DENOM,

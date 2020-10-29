@@ -1693,7 +1693,7 @@ class AgentConfig(PackageConfiguration):
         skill_exception_policy: Optional[str] = None,
         connection_exception_policy: Optional[str] = None,
         default_ledger: Optional[str] = None,
-        ledger_id_to_currency_denom: Optional[Dict[str, str]] = None,
+        currency_denominations: Optional[Dict[str, str]] = None,
         default_connection: Optional[str] = None,
         default_routing: Optional[Dict[str, str]] = None,
         loop_mode: Optional[str] = None,
@@ -1718,10 +1718,8 @@ class AgentConfig(PackageConfiguration):
 
         self.logging_config = logging_config if logging_config is not None else {}
         self.default_ledger = default_ledger
-        self.ledger_id_to_currency_denom = (
-            ledger_id_to_currency_denom
-            if ledger_id_to_currency_denom is not None
-            else {}
+        self.currency_denominations = (
+            currency_denominations if currency_denominations is not None else {}
         )
         self.default_connection = (
             PublicId.from_str(default_connection)
@@ -1891,8 +1889,8 @@ class AgentConfig(PackageConfiguration):
             config["loop_mode"] = self.loop_mode
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
-        if self.ledger_id_to_currency_denom != {}:
-            config["ledger_id_to_currency_denom"] = self.ledger_id_to_currency_denom
+        if self.currency_denominations != {}:
+            config["currency_denominations"] = self.currency_denominations
 
         return config
 
@@ -1921,9 +1919,7 @@ class AgentConfig(PackageConfiguration):
                 str, obj.get("connection_exception_policy")
             ),
             default_ledger=cast(str, obj.get("default_ledger")),
-            ledger_id_to_currency_denom=cast(
-                Dict, obj.get("ledger_id_to_currency_denom", {})
-            ),
+            currency_denominations=cast(Dict, obj.get("currency_denominations", {})),
             default_connection=cast(str, obj.get("default_connection")),
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),

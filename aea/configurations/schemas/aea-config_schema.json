@@ -63,7 +63,7 @@
     "default_ledger": {
       "$ref": "definitions.json#/definitions/ledger_id"
     },
-    "ledger_id_to_currency_denom": {
+    "currency_denominations": {
       "type": "object"
     },
     "connections": {
