@@ -194,7 +194,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=SOEFConnection.connection_id.latest,
+            self_address=str(SOEFConnection.connection_id.to_any()),
             role_from_first_message=role_from_first_message,
             dialogue_class=OefSearchDialogue,
         )

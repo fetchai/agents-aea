@@ -315,6 +315,8 @@ class PackageVersion:
         """
         if isinstance(version_like, str) and version_like == "latest":
             self._version = version_like
+        elif isinstance(version_like, str) and version_like == "any":
+            self._version = version_like
         elif isinstance(version_like, str):
             self._version = VersionInfoClass.parse(version_like)
         elif isinstance(version_like, VersionInfoClass):
@@ -597,12 +599,13 @@ class PublicId(JSONSerializable):
     AUTHOR_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
     PACKAGE_NAME_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT  - 1}}}"
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
-    VERSION_REGEX = fr"(latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+    VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
     PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"
     PUBLIC_ID_URI_REGEX = (
         fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
     )
 
+    ANY_VERSION = "any"
     LATEST_VERSION = "latest"
 
     def __init__(
@@ -640,10 +643,9 @@ class PublicId(JSONSerializable):
         """Get the package version object."""
         return self._package_version
 
-    @property
-    def latest(self) -> str:
-        """Get the public id in `latest` form."""
-        return "{author}/{name}:*".format(author=self.author, name=self.name)
+    def to_any(self) -> "PublicId":
+        """Return the same public id, but with any version."""
+        return PublicId(self.author, self.name, self.ANY_VERSION)
 
     def same_prefix(self, other: "PublicId") -> bool:
         """Check if the other public id has the same author and name of this."""

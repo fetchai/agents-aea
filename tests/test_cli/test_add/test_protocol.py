@@ -34,6 +34,9 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.gym.message import GymMessage
+
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -54,7 +57,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = PublicId.from_str("fetchai/gym:0.8.0")
+        cls.protocol_id = GymMessage.protocol_id
         cls.protocol_name = cls.protocol_id.name
         cls.protocol_author = cls.protocol_id.author
         cls.protocol_version = cls.protocol_id.version
@@ -120,7 +123,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = PublicId.from_str("fetchai/gym:0.8.0")
+        cls.protocol_id = GymMessage.protocol_id
         cls.protocol_name = cls.protocol_id.name
         cls.protocol_author = cls.protocol_id.author
         cls.protocol_version = cls.protocol_id.version
@@ -330,7 +333,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.8.0"
+        cls.protocol_id = str(GymMessage.protocol_id)
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -396,7 +399,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.8.0"
+        cls.protocol_id = str(GymMessage.protocol_id)
         cls.protocol_name = "gym"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -460,7 +463,9 @@ class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_protocol_from_remote_registry_positive(self):
         """Test add protocol from Registry positive result."""
-        self.add_item("protocol", "fetchai/fipa:0.7.0", local=self.IS_LOCAL)
+        self.add_item(
+            "protocol", str(FipaMessage.protocol_id.to_latest()), local=self.IS_LOCAL
+        )
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
         items_folders = os.listdir(items_path)
@@ -473,7 +478,7 @@ class TestAddProtocolWithLatestVersion(AEATestCaseEmpty):
 
     def test_add_protocol_latest_version(self):
         """Test add protocol with latest version."""
-        self.add_item("protocol", "fetchai/fipa:latest", local=True)
+        self.add_item("protocol", str(FipaMessage.protocol_id.to_latest()), local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "protocols")
         items_folders = os.listdir(items_path)

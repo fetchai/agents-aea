@@ -42,6 +42,7 @@ from packages.fetchai.connections.stub.connection import (
     write_envelope,
 )
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from tests.conftest import ROOT_DIR, _make_stub_connection
 
@@ -144,7 +145,7 @@ class TestStubConnectionReception:
         expected_envelope = Envelope(
             to="0x5E22777dD831A459535AA4306AceC9cb22eC4cB5",
             sender="default_oef",
-            protocol_id=PublicId.from_str("fetchai/oef_search:0.9.0"),
+            protocol_id=OefSearchMessage.protocol_id,
             message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
         )
         with open(self.input_file_path, "ab+") as f:
