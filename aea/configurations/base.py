@@ -315,6 +315,8 @@ class PackageVersion:
         """
         if isinstance(version_like, str) and version_like == "latest":
             self._version = version_like
+        elif isinstance(version_like, str) and version_like == "any":
+            self._version = version_like
         elif isinstance(version_like, str):
             self._version = VersionInfoClass.parse(version_like)
         elif isinstance(version_like, VersionInfoClass):

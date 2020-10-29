@@ -640,6 +640,14 @@ def test_pubic_id_to_latest():
     assert expected_public_id == actual_public_id
 
 
+def test_pubic_id_to_any():
+    """Test PublicId.to_any"""
+    public_id = PublicId("author", "name", "0.1.0")
+    expected_public_id = PublicId("author", "name", "any")
+    actual_public_id = public_id.to_any()
+    assert expected_public_id == actual_public_id
+
+
 def test_pubic_id_same_prefix():
     """Test PublicId.same_prefix"""
     same_1 = PublicId("author", "name", "0.1.0")
