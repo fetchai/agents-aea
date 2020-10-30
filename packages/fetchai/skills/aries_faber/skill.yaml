@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmYLnc1FbdeN94X227kP9GSbS19xBPRWvspy5sx2w5cfJd
   dialogues.py: QmUEjYSjTsN8KDCkidZmeyoWxPbmSxoVJkaNEPbdEcVLgS
   handlers.py: QmQHx7LcPWbQVP1cAKFDVwGbe4Srawh37MN7621tJ3scPA
-  strategy.py: QmfSHyJW8JKio4CpEJNe66DnCEdF8VNpHqogmp1iWLsrTw
+  strategy.py: QmTHHpfXMjD3F2yifFJt8jDJQEmEoVRSzAZHJ4s79PWo5S
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.11.0
