@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea config' subcommand."""
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -61,7 +62,7 @@ def get(ctx: Context, json_path: str):
 @click.option(
     "--type",
     default="str",
-    type=click.Choice(["str", "int", "bool", "float"]),
+    type=click.Choice(["str", "int", "bool", "float", "dict"]),
     help="Specify the type of the value.",
 )
 @click.argument("JSON_PATH", required=True)
@@ -192,7 +193,7 @@ class ConfigGetSet:
 
         if attr_name not in parent_obj:
             raise click.ClickException("Attribute '{}' not found.".format(attr_name))
-        if not isinstance(parent_obj.get(attr_name), (str, int, bool, float)):
+        if not isinstance(parent_obj.get(attr_name), (str, int, bool, float, dict)):
             raise click.ClickException(
                 "Attribute '{}' is not of primitive type.".format(attr_name)
             )
@@ -314,10 +315,12 @@ class ConfigGetSet:
         """
         type_ = FROM_STRING_TO_TYPE[type_str]
         try:
-            if type_ != bool:
-                parent_object[self.attr_name] = type_(value)
-            else:
+            if type_ == bool:
                 parent_object[self.attr_name] = value not in FALSE_EQUIVALENTS
+            elif type_ == dict:
+                parent_object[self.attr_name] = json.loads(value)
+            else:
+                parent_object[self.attr_name] = type_(value)
         except ValueError:  # pragma: no cover
             raise click.ClickException(
                 "Cannot convert {} to type {}".format(value, type_)

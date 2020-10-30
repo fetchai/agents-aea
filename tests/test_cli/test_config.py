@@ -62,6 +62,17 @@ class TestConfigGet:
         assert result.exit_code == 0
         assert result.output == "Agent0\n"
 
+    def test_get_agent_default_routing(self):
+        """Test getting the agent name."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "config", "get", "agent.default_routing"],
+            standalone_mode=False,
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+        assert result.output == "{}\n"
+
     def test_get_skill_name(self):
         """Test getting the 'dummy' skill name."""
         result = self.runner.invoke(
@@ -153,16 +164,18 @@ class TestConfigGet:
         s = "Attribute 'non_existing_attribute' not found."
         assert result.exception.message == s
 
-    def test_get_fails_when_getting_non_primitive_type(self):
-        """Test that getting the 'dummy' skill behaviours fails because not a primitive type."""
+    def test_get_whole_dict(self):
+        """Test that getting the 'dummy' skill behaviours works."""
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "config", "get", "skills.dummy.behaviours"],
             standalone_mode=False,
         )
-        assert result.exit_code == 1
-        s = "Attribute 'behaviours' is not of primitive type."
-        assert result.exception.message == s
+        assert result.exit_code == 0
+        assert (
+            result.output
+            == "{'dummy': {'args': {'behaviour_arg_1': 1, 'behaviour_arg_2': '2'}, 'class_name': 'DummyBehaviour'}}\n"
+        )
 
     def test_get_fails_when_getting_nested_object(self):
         """Test that getting a nested object in 'dummy' skill fails because path is not valid."""
@@ -296,6 +309,22 @@ class TestConfigSet:
                 "agent.logging_config.disable_existing_loggers",
                 "true",
                 "--type=bool",
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+    def test_set_type_dict(self):
+        """Test setting the default routing."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_routing",
+                '{"fetchai/contract_api:any": "fetchai/ledger:any"}',
+                "--type=dict",
             ],
             standalone_mode=False,
         )
