@@ -35,7 +35,7 @@ from packages.fetchai.skills.tac_participation.dialogues import (
 
 DEFAULT_LEDGER_ID = "ethereum"
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "tac",
     "search_value": "v1",

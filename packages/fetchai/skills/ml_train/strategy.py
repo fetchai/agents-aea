@@ -37,7 +37,7 @@ DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_LEDGER_ID = "None"
 DEFAULT_MAX_NEGOTIATIONS = 1
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "dataset_id",
     "search_value": "fmnist",

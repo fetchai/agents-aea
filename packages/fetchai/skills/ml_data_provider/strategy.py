@@ -41,7 +41,7 @@ DEFAULT_BUYER_TX_FEE = 0
 DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "dataset_id", "value": "fmnist"}
 
 

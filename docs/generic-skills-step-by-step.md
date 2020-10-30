@@ -256,7 +256,7 @@ We have to specify the logic to negotiate with another AEA based on the strategy
         activate Search
         activate Seller_AEA
         activate Blockchain
-
+    
         Seller_AEA->>Search: register_service
         Buyer_AEA->>Search: search
         Search-->>Buyer_AEA: list_of_agents
@@ -277,7 +277,7 @@ We have to specify the logic to negotiate with another AEA based on the strategy
         Buyer_AEA->>Seller_AEA: send_transaction_digest
         Seller_AEA->>Blockchain: check_transaction_status
         Seller_AEA->>Buyer_AEA: send_data
-
+    
         deactivate Buyer_AEA
         deactivate Search
         deactivate Seller_AEA
@@ -861,7 +861,7 @@ DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_UNIT_PRICE = 4
 DEFAULT_SERVICE_ID = "generic_service"
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
 
 DEFAULT_HAS_DATA_SOURCE = False
