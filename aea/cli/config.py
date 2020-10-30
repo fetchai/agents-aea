@@ -321,7 +321,7 @@ class ConfigGetSet:
                 parent_object[self.attr_name] = json.loads(value)
             else:
                 parent_object[self.attr_name] = type_(value)
-        except ValueError:  # pragma: no cover
+        except (ValueError, json.decoder.JSONDecodeError):  # pragma: no cover
             raise click.ClickException(
                 "Cannot convert {} to type {}".format(value, type_)
             )
