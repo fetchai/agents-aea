@@ -52,7 +52,7 @@ from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 
 ROUNDING_ADJUSTMENT = 1
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_KEY = "tac_service"
 DEFAULT_SEARCH_QUERY = {
     "search_key": "tac_service",

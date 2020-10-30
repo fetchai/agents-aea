@@ -60,8 +60,8 @@ class TestGenericStrategy(BaseSkillTestCase):
         cls.unit_price = 20
         cls.service_id = "some_service_id"
         cls.location = {
-            "longitude": 51.5194,
-            "latitude": 0.127,
+            "longitude": 0.127,
+            "latitude": 51.5194,
         }
         cls.service_data = {"key": "seller_service", "value": "some_service"}
         cls.has_data_source = False

@@ -29,7 +29,7 @@ from aea.helpers.search.models import Description, Location
 from aea.skills.base import Model
 
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
 
 

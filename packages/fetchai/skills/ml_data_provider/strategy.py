@@ -38,7 +38,7 @@ DEFAULT_BATCH_SIZE = 32
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_BUYER_TX_FEE = 0
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "dataset_id", "value": "fmnist"}
 
 
