@@ -647,11 +647,9 @@ class ProtocolGenerator:
         cls_str += self.indent + "__slots__ = (\n"
         self._change_indent(1)
         # default fields
-        cls_str += self.indent + '"performative",'
-        cls_str += self.indent + '"dialogue_reference",'
-        cls_str += self.indent + '"message_id",'
-        cls_str += self.indent + '"target",'
-        for field_name in self.spec.all_unique_contents.keys():
+        default_slots = ["performative", "dialogue_reference", "message_id", "target"]
+        slots = list(self.spec.all_unique_contents.keys()) + default_slots
+        for field_name in sorted(slots):
             cls_str += self.indent + f'"{field_name}",'
         self._change_indent(-1)
         cls_str += self.indent + ")\n"

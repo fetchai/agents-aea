@@ -79,7 +79,7 @@ class TestStateUpdateMessage:
                 quantities_by_good_id=good_endowment,
                 exchange_params_by_currency_id=exchange_params,
                 utility_params_by_good_id=utility_params,
-                non_exists_field='some value',
+                non_exists_field="some value",
             )
 
 

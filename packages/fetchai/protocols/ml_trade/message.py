@@ -62,14 +62,14 @@ class MlTradeMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
             "dialogue_reference",
             "message_id",
-            "target",
+            "payload",
+            "performative",
             "query",
+            "target",
             "terms",
             "tx_digest",
-            "payload",
         )
 
     def __init__(

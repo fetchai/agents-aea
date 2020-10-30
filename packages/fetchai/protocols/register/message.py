@@ -52,13 +52,13 @@ class RegisterMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
             "dialogue_reference",
-            "message_id",
-            "target",
-            "info",
             "error_code",
             "error_msg",
+            "info",
+            "message_id",
+            "performative",
+            "target",
         )
 
     def __init__(

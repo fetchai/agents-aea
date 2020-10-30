@@ -12,7 +12,7 @@ fingerprint:
   dialogues.py: QmdCzcFfyPF43U2SoxwshG5p4hd6dK49m6GYKduDHbnNPo
   gym.proto: QmbrGMjAwLXxg4vZTTsdNkbsudhJbSbvkG2mag9RP6ejEg
   gym_pb2.py: QmQmbRXAdHQGF4oWk27deqHhMYqmUWviLrAkvnGAVAXpeE
-  message.py: QmTYjnEEud731uMhf2NdcJxpc4F9uRuZAjohzViwFi18c6
+  message.py: QmQtg6bG1mtL9jpH3bDVgo4L2F91wVJq3ZU4gGP6NvGgDQ
   serialization.py: QmT2d4sLcJ96Yf2GEBoKqL3oq4pE518yQvK5WbeHaDXMSQ
 fingerprint_ignore_patterns: []
 dependencies:

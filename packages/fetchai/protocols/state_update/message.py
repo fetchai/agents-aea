@@ -53,14 +53,14 @@ class StateUpdateMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
-            "dialogue_reference",
-            "message_id",
-            "target",
-            "exchange_params_by_currency_id",
-            "utility_params_by_good_id",
             "amount_by_currency_id",
+            "dialogue_reference",
+            "exchange_params_by_currency_id",
+            "message_id",
+            "performative",
             "quantities_by_good_id",
+            "target",
+            "utility_params_by_good_id",
         )
 
     def __init__(

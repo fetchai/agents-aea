@@ -75,13 +75,13 @@ class FipaMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
             "dialogue_reference",
-            "message_id",
-            "target",
-            "query",
-            "proposal",
             "info",
+            "message_id",
+            "performative",
+            "proposal",
+            "query",
+            "target",
         )
 
     def __init__(

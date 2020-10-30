@@ -92,21 +92,21 @@ class LedgerApiMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
-            "dialogue_reference",
-            "message_id",
-            "target",
-            "ledger_id",
             "address",
-            "terms",
-            "signed_transaction",
-            "transaction_digest",
             "balance",
-            "raw_transaction",
-            "transaction_receipt",
             "code",
-            "message",
             "data",
+            "dialogue_reference",
+            "ledger_id",
+            "message",
+            "message_id",
+            "performative",
+            "raw_transaction",
+            "signed_transaction",
+            "target",
+            "terms",
+            "transaction_digest",
+            "transaction_receipt",
         )
 
     def __init__(

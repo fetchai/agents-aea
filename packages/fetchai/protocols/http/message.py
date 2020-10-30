@@ -51,17 +51,17 @@ class HttpMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
-            "dialogue_reference",
-            "message_id",
-            "target",
-            "method",
-            "url",
-            "version",
-            "headers",
             "body",
+            "dialogue_reference",
+            "headers",
+            "message_id",
+            "method",
+            "performative",
             "status_code",
             "status_text",
+            "target",
+            "url",
+            "version",
         )
 
     def __init__(

@@ -10,7 +10,7 @@ fingerprint:
   __init__.py: QmUcmsCfop25uvwR6XQR3GGaJ63pbDsEPQPJeXM7nASuQW
   custom_types.py: Qmc7sAyCQbAaVs5dZf9hFkTrB2BG8VAioWzbyKBAybrQ1J
   dialogues.py: QmeDmrSHy6CHVY7ksGZ6fwdUHgAB4fmG9FJ2WBn9DfVb6s
-  message.py: QmPC5ZsYzHHhipBZeQ8X7Fn6eqXtog1rmmzftSNGo77JdJ
+  message.py: QmbHwGyjGnuYSY71Le3AEGpuJsZGc9zf5z4kxhbWJMm6bM
   serialization.py: QmVMoDnWyDYchf8MMbBQNSh9FPXev2dXqoMCrSXFWjkLYQ
   signing.proto: QmZN9CmcfXCBiMQd9GTG81LadsbVQQ7j5pLFxEiQsQ4Sqk
   signing_pb2.py: QmYQH8PDeC25ysrxeqh4nNv38bUL7jv9gRhta9gaNiXLL2

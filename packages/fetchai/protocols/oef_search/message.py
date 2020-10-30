@@ -81,15 +81,15 @@ class OefSearchMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
-            "dialogue_reference",
-            "message_id",
-            "target",
-            "service_description",
-            "query",
             "agents",
             "agents_info",
+            "dialogue_reference",
+            "message_id",
             "oef_error_operation",
+            "performative",
+            "query",
+            "service_description",
+            "target",
         )
 
     def __init__(

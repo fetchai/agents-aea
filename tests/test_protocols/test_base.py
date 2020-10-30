@@ -93,6 +93,22 @@ DIALOGUE_CLASSES: List[Tuple[Type, Type, Enum, Callable]] = [
 ]
 
 
+class TestMessage(Message):
+    """Message class for tests."""
+
+    class _SlotsCls:
+        __slots__ = (
+            "body_1",
+            "body_2",
+            "kwarg",
+            "content",
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+        )
+
+
 class TestMessageProperties:
     """Test that the base serializations work."""
 
@@ -101,7 +117,7 @@ class TestMessageProperties:
         """Setup test."""
         cls.body = {"body_1": "1", "body_2": "2"}
         cls.kwarg = 1
-        cls.message = Message(cls.body, kwarg=cls.kwarg)
+        cls.message = TestMessage(cls.body, kwarg=cls.kwarg)
 
     def test_message_properties(self):
         """Test message properties."""
@@ -128,9 +144,9 @@ class TestBaseSerializations:
     @classmethod
     def setup_class(cls):
         """Set up the use case."""
-        cls.message = Message(content="hello")
-        cls.message2 = Message(_body={"content": "hello"})
-        cls.message3 = Message(
+        cls.message = TestMessage(content="hello")
+        cls.message2 = TestMessage(_body={"content": "hello"})
+        cls.message3 = TestMessage(
             message_id=1,
             target=0,
             dialogue_reference=("", ""),
@@ -177,16 +193,17 @@ class TestBaseSerializations:
 
     def test_set(self):
         """Test that the set method works."""
-        key, value = "temporary_key", "temporary_value"
+        self.message._body = {}  # clean values
+        key, value = "content", "temporary_value"
         assert self.message.get(key) is None
         self.message.set(key, value)
         assert self.message.get(key) == value
 
     def test_body_setter(self):
         """Test the body setter."""
-        m_dict = {"Hello": "World"}
+        m_dict = {"content": "data"}
         self.message2._body = m_dict
-        assert "Hello" in self.message2._body.keys()
+        assert self.message2._body == m_dict
 
 
 class TestProtocolFromDir:

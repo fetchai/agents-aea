@@ -58,17 +58,17 @@ class GymMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
-            "dialogue_reference",
-            "message_id",
-            "target",
             "action",
-            "step_id",
-            "observation",
-            "reward",
+            "content",
+            "dialogue_reference",
             "done",
             "info",
-            "content",
+            "message_id",
+            "observation",
+            "performative",
+            "reward",
+            "step_id",
+            "target",
         )
 
     def __init__(

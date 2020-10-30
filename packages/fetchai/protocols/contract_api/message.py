@@ -85,21 +85,21 @@ class ContractApiMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
-            "dialogue_reference",
-            "message_id",
-            "target",
-            "ledger_id",
-            "contract_id",
             "callable",
-            "kwargs",
-            "contract_address",
-            "state",
-            "raw_transaction",
-            "raw_message",
             "code",
-            "message",
+            "contract_address",
+            "contract_id",
             "data",
+            "dialogue_reference",
+            "kwargs",
+            "ledger_id",
+            "message",
+            "message_id",
+            "performative",
+            "raw_message",
+            "raw_transaction",
+            "state",
+            "target",
         )
 
     def __init__(

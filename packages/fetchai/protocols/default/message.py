@@ -55,14 +55,14 @@ class DefaultMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
-            "dialogue_reference",
-            "message_id",
-            "target",
             "content",
+            "dialogue_reference",
             "error_code",
-            "error_msg",
             "error_data",
+            "error_msg",
+            "message_id",
+            "performative",
+            "target",
         )
 
     def __init__(

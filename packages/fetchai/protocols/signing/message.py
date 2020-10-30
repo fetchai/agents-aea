@@ -87,16 +87,16 @@ class SigningMessage(Message):
 
     class _SlotsCls:
         __slots__ = (
-            "performative",
             "dialogue_reference",
+            "error_code",
             "message_id",
+            "performative",
+            "raw_message",
+            "raw_transaction",
+            "signed_message",
+            "signed_transaction",
             "target",
             "terms",
-            "raw_transaction",
-            "raw_message",
-            "signed_transaction",
-            "signed_message",
-            "error_code",
         )
 
     def __init__(

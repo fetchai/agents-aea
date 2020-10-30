@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from copy import copy
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Type, cast, Set
+from typing import Any, Dict, Optional, Set, Tuple, Type, cast
 
 from google.protobuf.struct_pb2 import Struct
 
@@ -56,8 +56,14 @@ class Message:
             """Get the string representation."""
             return str(self.value)
 
-    class _SlotsCls():
-        __slots__: Tuple[str, ...] = ()
+    class _SlotsCls:  # pylint: disable=too-few-public-methods
+        __slots__: Tuple[str, ...] = (
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+            "content",
+        )
 
     _performatives: Set[str] = set()
 
@@ -139,10 +145,7 @@ class Message:
         :return: the body
         """
         return {
-            key: self.get(key)
-            for key
-            in self._SlotsCls.__slots__
-            if self.is_set(key)
+            key: self.get(key) for key in self._SlotsCls.__slots__ if self.is_set(key)
         }
 
     @_body.setter
@@ -194,8 +197,8 @@ class Message:
         """
         try:
             setattr(self._slots, key, value)
-        except AttributeError:
-            raise ValueError(f"Field `{key}` is not supported")
+        except AttributeError as e:
+            raise ValueError(f"Field `{key}` is not supported {e}")
 
     def get(self, key: str) -> Optional[Any]:
         """Get value for key."""
