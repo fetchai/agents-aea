@@ -17,23 +17,28 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Envelopes generation speed for Behaviour act test."""
+"""?Memory usage across the time."""
+
 import itertools
 import os
 import struct
 import sys
 import time
+from typing import cast
 
 import click
 
+from aea.aea import AEA
+from aea.common import Address
 from aea.configurations.base import ConnectionConfig
-from aea.protocols.base import Message
+from aea.protocols.base import Message, Protocol
+from aea.protocols.dialogue.base import Dialogue
 from aea.runner import AEARunner
 from aea.skills.base import Handler
 from benchmark.checks.utils import get_mem_usage_in_mb  # noqa: I100
+from benchmark.checks.utils import PACKAGES_DIR
+from benchmark.checks.utils import make_agent as base_make_agent
 from benchmark.checks.utils import (
-    make_agent,
-    make_envelope,
     make_skill,
     multi_run,
     print_results,
@@ -44,26 +49,35 @@ from packages.fetchai.connections.local.connection import (  # noqa: E402 # pyli
     LocalNode,
     OEFLocalConnection,
 )
-from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.protocols.http.message import HttpMessage
 
 
 ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")
 sys.path.append(ROOT_PATH)
 
 
-class TestHandler(Handler):
+class HttpPingPongHandler(Handler):
     """Dummy handler to handle messages."""
 
-    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
+    SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
     def setup(self) -> None:
         """Noop setup."""
-        self.count: int = 0  # pylint: disable=attribute-defined-outside-init
-        self.rtt_total_time: float = 0.0  # pylint: disable=attribute-defined-outside-init
-        self.rtt_count: int = 0  # pylint: disable=attribute-defined-outside-init
+        # pylint: disable=attribute-defined-outside-init, unused-argument
+        self.count: int = 0
+        self.rtt_total_time: float = 0.0
+        self.rtt_count: int = 0
 
-        self.latency_total_time: float = 0.0  # pylint: disable=attribute-defined-outside-init
-        self.latency_count: int = 0  # pylint: disable=attribute-defined-outside-init
+        self.latency_total_time: float = 0.0
+        self.latency_count: int = 0
+
+        def role(m: Message, addr: Address) -> Dialogue.Role:
+            return HttpDialogue.Role.CLIENT
+
+        self.dialogues = HttpDialogues(
+            self.context.agent_address, role_from_first_message=role
+        )
 
     def teardown(self) -> None:
         """Noop teardown."""
@@ -71,36 +85,56 @@ class TestHandler(Handler):
     def handle(self, message: Message) -> None:
         """Handle incoming message."""
         self.count += 1
-
-        if message.dialogue_reference[0] != "":
-            rtt_ts, latency_ts = struct.unpack("dd", message.content)  # type: ignore
-            if message.dialogue_reference[0] == self.context.agent_address:
-                self.rtt_total_time += time.time() - rtt_ts
-                self.rtt_count += 1
-
+        message = cast(HttpMessage, message)
+        dialogue = self.dialogues.update(message)
+        if not dialogue:
+            raise Exception("something goes wrong")
+        rtt_ts, latency_ts = struct.unpack("dd", message.body)  # type: ignore
+        if message.performative == HttpMessage.Performative.REQUEST:
             self.latency_total_time += time.time() - latency_ts
             self.latency_count += 1
+            self.make_response(cast(HttpDialogue, dialogue), message)
+        elif message.performative == HttpMessage.Performative.RESPONSE:
+            self.rtt_total_time += time.time() - rtt_ts
+            self.rtt_count += 1
 
-        if message.dialogue_reference[0] in ["", self.context.agent_address]:
-            # create new
-            response_msg = DefaultMessage(
-                dialogue_reference=(self.context.agent_address, ""),
-                message_id=1,
-                target=0,
-                performative=DefaultMessage.Performative.BYTES,
-                content=struct.pack("dd", time.time(), time.time()),
-            )
-        else:
-            # update ttfb copy rtt
-            response_msg = DefaultMessage(
-                dialogue_reference=message.dialogue_reference,
-                message_id=1,
-                target=0,
-                performative=DefaultMessage.Performative.BYTES,
-                content=struct.pack("dd", rtt_ts, time.time()),  # type: ignore
-            )
+            # got response, make another requet to the same agent
+            self.make_request(message.sender)
 
-        self.context.outbox.put(make_envelope(message.to, message.sender, response_msg))
+    def make_response(self, dialogue: HttpDialogue, message: HttpMessage) -> None:
+        """Construct and send a response for message received."""
+        response_message = dialogue.reply(
+            target_message=message,
+            performative=HttpMessage.Performative.RESPONSE,
+            version=message.version,
+            headers="",
+            status_code=200,
+            status_text="Success",
+            body=message.body,
+        )
+        self.context.outbox.put_message(response_message)
+
+    def make_request(self, recipient_addr: str) -> None:
+        """Make initial http request."""
+        message, _ = self.dialogues.create(
+            recipient_addr,
+            performative=HttpMessage.Performative.REQUEST,
+            method="get",
+            url="some url",
+            headers="",
+            version="",
+            body=struct.pack("dd", time.time(), time.time()),
+        )
+        self.context.outbox.put_message(message)
+
+
+def make_agent(*args, **kwargs) -> AEA:
+    """Make agent with http protocol support."""
+    aea = base_make_agent(*args, **kwargs)
+    aea.resources.add_protocol(
+        Protocol.from_dir(str(PACKAGES_DIR / "fetchai" / "protocols" / "http"))
+    )
+    return aea
 
 
 def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
@@ -113,10 +147,11 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     local_node.start()
 
     agents = []
-    skills = []
-
+    skills = {}
+    handler_name = "httpingpong"
     for i in range(num_of_agents):
-        agent = make_agent(agent_name=f"agent{i}", runtime_mode=runtime_mode)
+        agent_name = f"agent{i}"
+        agent = make_agent(agent_name=agent_name, runtime_mode=runtime_mode)
         connection = OEFLocalConnection(
             local_node,
             configuration=ConnectionConfig(
@@ -125,10 +160,10 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
             identity=agent.identity,
         )
         agent.resources.add_connection(connection)
-        skill = make_skill(agent, handlers={"test": TestHandler})
+        skill = make_skill(agent, handlers={handler_name: HttpPingPongHandler})
         agent.resources.add_skill(skill)
         agents.append(agent)
-        skills.append(skill)
+        skills[agent_name] = skill
 
     runner = AEARunner(agents, runner_mode)
     runner.start(threaded=True)
@@ -139,10 +174,10 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     time.sleep(1)
 
     for agent1, agent2 in itertools.permutations(agents, 2):
-        env = make_envelope(agent1.identity.address, agent2.identity.address)
-
         for _ in range(int(start_messages)):
-            agent1.outbox.put(env)
+            skills[agent1.identity.address].handlers[handler_name].make_request(
+                agent2.identity.address
+            )
 
     time.sleep(duration)
 
@@ -151,19 +186,27 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     local_node.stop()
     runner.stop()
 
-    total_messages = sum([skill.handlers["test"].count for skill in skills])
+    total_messages = sum(
+        [skill.handlers[handler_name].count for skill in skills.values()]
+    )
     rate = total_messages / duration
 
-    rtt_total_time = sum([skill.handlers["test"].rtt_total_time for skill in skills])
-    rtt_count = sum([skill.handlers["test"].rtt_count for skill in skills])
+    rtt_total_time = sum(
+        [skill.handlers[handler_name].rtt_total_time for skill in skills.values()]
+    )
+    rtt_count = sum(
+        [skill.handlers[handler_name].rtt_count for skill in skills.values()]
+    )
 
     if rtt_count == 0:
         rtt_count = -1
 
     latency_total_time = sum(
-        [skill.handlers["test"].latency_total_time for skill in skills]
+        [skill.handlers[handler_name].latency_total_time for skill in skills.values()]
     )
-    latency_count = sum([skill.handlers["test"].latency_count for skill in skills])
+    latency_count = sum(
+        [skill.handlers[handler_name].latency_count for skill in skills.values()]
+    )
 
     if latency_count == 0:
         latency_count = -1

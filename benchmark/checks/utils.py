@@ -47,6 +47,7 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
+PACKAGES_DIR = Path(AEA_DIR, "..", "packages")
 
 
 def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout") -> None:
@@ -64,13 +65,20 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
     wallet = Wallet({DEFAULT_LEDGER: None})
     identity = Identity(agent_name, address=agent_name)
     resources = Resources()
+    agent_context = MagicMock()
+    agent_context.agent_name = agent_name
+    agent_context.agent_address = agent_name
+
     resources.add_skill(
         Skill.from_dir(
-            str(Path(AEA_DIR, "skills", DEFAULT_SKILL.name)), agent_context=MagicMock()
+            str(PACKAGES_DIR / "fetchai" / "skills" / DEFAULT_SKILL.name),
+            agent_context=agent_context,
         )
     )
     resources.add_protocol(
-        Protocol.from_dir(str(Path(AEA_DIR, "protocols", DEFAULT_PROTOCOL.name)))
+        Protocol.from_dir(
+            str(PACKAGES_DIR / "fetchai" / "protocols" / DEFAULT_PROTOCOL.name)
+        )
     )
     return AEA(identity, wallet, resources, runtime_mode=runtime_mode)
 
