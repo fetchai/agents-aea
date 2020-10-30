@@ -55,6 +55,7 @@ class TacDialogue(Dialogue):
                 TacMessage.Performative.TAC_ERROR,
                 TacMessage.Performative.GAME_DATA,
                 TacMessage.Performative.CANCELLED,
+                TacMessage.Performative.UNREGISTER,
             }
         ),
         TacMessage.Performative.TAC_ERROR: frozenset(
