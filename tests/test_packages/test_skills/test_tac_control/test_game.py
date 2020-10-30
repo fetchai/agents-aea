@@ -82,10 +82,11 @@ class TestGame(BaseSkillTestCase):
             name="parameters",
             skill_context=cls._skill.skill_context,
         )
-        cls.game._conf = 2
+        cls.game._conf = "stub"
 
     def test_simple_properties(self):
         """Test the properties of Game class."""
+        self.game._conf = None
         # phase
         assert self.game.phase == Phase.PRE_GAME
 
