@@ -33,7 +33,6 @@ from packages.fetchai.skills.tac_control.helpers import (
 )
 
 
-DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_MIN_NB_AGENTS = 2
 DEFAULT_MONEY_ENDOWMENT = 200
 DEFAULT_NB_GOODS = 9  # ERC1155 vyper contract only accepts 10 tokens per mint/create
@@ -56,7 +55,7 @@ class Parameters(Model):
 
     def __init__(self, **kwargs):
         """Instantiate the parameter class."""
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        ledger_id = kwargs.pop("ledger_id", None)
         self._contract_address = kwargs.pop(
             "contract_address", None
         )  # type: Optional[str]
@@ -124,6 +123,9 @@ class Parameters(Model):
         }
 
         super().__init__(**kwargs)
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
         self._contract_id = str(CONTRACT_ID)
         self._currency_id_to_name = generate_currency_id_to_name(
             self.nb_currencies, self.currency_ids

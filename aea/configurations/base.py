@@ -1694,7 +1694,10 @@ class AgentConfig(PackageConfiguration):
         decision_maker_handler: Optional[Dict] = None,
         skill_exception_policy: Optional[str] = None,
         connection_exception_policy: Optional[str] = None,
-        default_routing: Optional[Dict] = None,
+        default_ledger: Optional[str] = None,
+        currency_denominations: Optional[Dict[str, str]] = None,
+        default_connection: Optional[str] = None,
+        default_routing: Optional[Dict[str, str]] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
@@ -1716,8 +1719,15 @@ class AgentConfig(PackageConfiguration):
         self.connection_private_key_paths = CRUDCollection[str]()
 
         self.logging_config = logging_config if logging_config is not None else {}
-        self._default_ledger = None  # type: Optional[str]
-        self._default_connection = None  # type: Optional[PublicId]
+        self.default_ledger = default_ledger
+        self.currency_denominations = (
+            currency_denominations if currency_denominations is not None else {}
+        )
+        self.default_connection = (
+            PublicId.from_str(default_connection)
+            if default_connection is not None
+            else None
+        )
         self.connections = set()  # type: Set[PublicId]
         self.contracts = set()  # type: Set[PublicId]
         self.protocols = set()  # type: Set[PublicId]
@@ -1819,45 +1829,6 @@ class AgentConfig(PackageConfiguration):
             key: path for key, path in self.connection_private_key_paths.read_all()
         }
 
-    @property
-    def default_connection(self) -> str:
-        """Get the default connection."""
-        if self._default_connection is None:  # pragma: nocover
-            raise ValueError("Default connection not set yet.")
-        return str(self._default_connection)
-
-    @default_connection.setter
-    def default_connection(self, connection_id: Optional[Union[str, PublicId]]):
-        """
-        Set the default connection.
-
-        :param connection_id: the name of the default connection.
-        :return: None
-        """
-        if connection_id is None:
-            self._default_connection = None
-        elif isinstance(connection_id, str):
-            self._default_connection = PublicId.from_str(connection_id)
-        else:
-            self._default_connection = connection_id
-
-    @property
-    def default_ledger(self) -> str:
-        """Get the default ledger."""
-        if self._default_ledger is None:  # pragma: nocover
-            raise ValueError("Default ledger not set yet.")
-        return self._default_ledger
-
-    @default_ledger.setter
-    def default_ledger(self, ledger_id: str):
-        """
-        Set the default ledger.
-
-        :param ledger_id: the id of the default ledger.
-        :return: None
-        """
-        self._default_ledger = ledger_id
-
     def component_configurations_json(self) -> List[OrderedDict]:
         """Get the component configurations in JSON format."""
         result: List[OrderedDict] = []
@@ -1879,8 +1850,8 @@ class AgentConfig(PackageConfiguration):
                 "agent_name": self.agent_name,
                 "author": self.author,
                 "version": self.version,
-                "description": self.description,
                 "license": self.license,
+                "description": self.description,
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
@@ -1888,7 +1859,9 @@ class AgentConfig(PackageConfiguration):
                 "contracts": sorted(map(str, self.contracts)),
                 "protocols": sorted(map(str, self.protocols)),
                 "skills": sorted(map(str, self.skills)),
-                "default_connection": self.default_connection,
+                "default_connection": str(self.default_connection)
+                if self.default_connection is not None
+                else None,
                 "default_ledger": self.default_ledger,
                 "default_routing": {
                     str(key): str(value) for key, value in self.default_routing.items()
@@ -1918,6 +1891,8 @@ class AgentConfig(PackageConfiguration):
             config["loop_mode"] = self.loop_mode
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
+        if self.currency_denominations != {}:
+            config["currency_denominations"] = self.currency_denominations
 
         return config
 
@@ -1945,12 +1920,16 @@ class AgentConfig(PackageConfiguration):
             connection_exception_policy=cast(
                 str, obj.get("connection_exception_policy")
             ),
+            default_ledger=cast(str, obj.get("default_ledger")),
+            currency_denominations=cast(Dict, obj.get("currency_denominations", {})),
+            default_connection=cast(str, obj.get("default_connection")),
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
             component_configurations=None,
         )
 
+        #  parse private keys
         for crypto_id, path in obj.get("private_key_paths", {}).items():
             agent_config.private_key_paths.create(crypto_id, path)
 
@@ -1971,6 +1950,7 @@ class AgentConfig(PackageConfiguration):
         # parse skills public ids
         agent_config.skills = set(map(PublicId.from_str, obj.get("skills", []),))
 
+        # parse component configurations
         component_configurations = {}
         for config in obj.get("component_configurations", []):
             tmp = deepcopy(config)
@@ -1979,12 +1959,6 @@ class AgentConfig(PackageConfiguration):
             component_id = ComponentId(ComponentType(type_), public_id)
             component_configurations[component_id] = tmp
         agent_config.component_configurations = component_configurations
-
-        # set default connection
-        default_connection_name = obj.get("default_connection", None)
-        agent_config.default_connection = default_connection_name
-        default_ledger_id = obj.get("default_ledger", None)
-        agent_config.default_ledger = default_ledger_id
 
         return agent_config
 

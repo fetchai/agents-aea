@@ -66,6 +66,7 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.crypto.helpers import verify_or_create_private_keys
+from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.exceptions import AEAException
@@ -279,6 +280,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     """
 
+    DEFAULT_LEDGER = DEFAULT_LEDGER
+    DEFAULT_CONNECTION = DEFAULT_CONNECTION
+    DEFAULT_CURRENCY_DENOMINATIONS = DEFAULT_CURRENCY_DENOMINATIONS
     DEFAULT_AGENT_ACT_PERIOD = 0.05  # seconds
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
@@ -345,8 +349,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._build_called: bool = False
         if not is_full_reset:
             return
-        self._default_ledger = DEFAULT_LEDGER
-        self._default_connection: PublicId = DEFAULT_CONNECTION
+        self._default_ledger: Optional[str] = None
+        self._currency_denominations: Dict[str, str] = {}
+        self._default_connection: Optional[PublicId] = None
         self._context_namespace: Dict[str, Any] = {}
         self._period: Optional[float] = None
         self._execution_timeout: Optional[float] = None
@@ -567,7 +572,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         return self
 
     def set_default_connection(
-        self, public_id: PublicId
+        self, public_id: Optional[PublicId] = None
     ) -> "AEABuilder":  # pragma: nocover
         """
         Set the default connection.
@@ -631,7 +636,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """Get the connection private key paths."""
         return self._connection_private_key_paths
 
-    def set_default_ledger(self, identifier: str) -> "AEABuilder":  # pragma: nocover
+    def set_default_ledger(
+        self, identifier: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
         """
         Set a default ledger API to use.
 
@@ -639,6 +646,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: the AEABuilder
         """
         self._default_ledger = identifier
+        return self
+
+    def set_currency_denominations(
+        self, currency_denominations: Dict[str, str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the mapping from ledger ids to currency denomincations.
+
+        :param currency_denominations: the mapping
+        :return: the AEABuilder
+        """
+        self._currency_denominations = currency_denominations
         return self
 
     def add_component(
@@ -806,13 +825,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
-                default_address_key=self._default_ledger,
+                default_address_key=self._get_default_ledger(),
             )
         else:
             identity = Identity(
                 self._name,
-                address=wallet.addresses[self._default_ledger],
-                default_address_key=self._default_ledger,
+                address=wallet.addresses[self._get_default_ledger()],
+                default_address_key=self._get_default_ledger(),
             )
         return identity
 
@@ -853,11 +872,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             ]
 
         # sort default id to be first
-
+        default_connection = self._get_default_connection()
         full_default_connection_id = [
             connection_id
             for connection_id in selected_connections_ids
-            if connection_id.same_prefix(self._default_connection)
+            if connection_id.same_prefix(default_connection)
         ]
         if len(full_default_connection_id) == 1:
             selected_connections_ids.remove(full_default_connection_id[0])
@@ -913,11 +932,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             loop=None,
             period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
-            is_debug=False,
             max_reactions=self._get_max_reactions(),
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             connection_exception_policy=self._get_connection_exception_policy(),
+            currency_denominations=self._get_currency_denominations(),
             default_routing=self._get_default_routing(),
             default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
@@ -931,6 +950,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         )
         self._build_called = True
         return aea
+
+    def _get_default_ledger(self) -> str:
+        """
+        Return default ledger.
+
+        :return: the default ledger identifier.
+        """
+        return self._default_ledger or self.DEFAULT_LEDGER
 
     def _get_agent_act_period(self) -> float:
         """
@@ -998,6 +1025,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             else self.DEFAULT_CONNECTION_EXCEPTION_POLICY
         )
 
+    def _get_currency_denominations(self) -> Dict[str, str]:
+        """
+        Return the mapping from ledger id to currency denom.
+
+        :return: the mapping
+        """
+        return (
+            self._currency_denominations
+            if self._currency_denominations != {}
+            else self.DEFAULT_CURRENCY_DENOMINATIONS
+        )
+
     def _get_default_routing(self) -> Dict[PublicId, PublicId]:
         """
         Return the default routing.
@@ -1012,7 +1051,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: the default connection
         """
-        return self._default_connection
+        return self._default_connection or self.DEFAULT_CONNECTION
 
     def _get_loop_mode(self) -> str:
         """
@@ -1176,9 +1215,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # set name and other configurations
         self.set_name(agent_configuration.name)
         self.set_default_ledger(agent_configuration.default_ledger)
-        self.set_default_connection(
-            PublicId.from_str(agent_configuration.default_connection)
-        )
+        self.set_currency_denominations(agent_configuration.currency_denominations)
+        self.set_default_connection(agent_configuration.default_connection)
         self.set_period(agent_configuration.period)
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
@@ -1197,16 +1235,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.set_default_routing(agent_configuration.default_routing)
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
-
-        if (
-            agent_configuration._default_connection  # pylint: disable=protected-access
-            is None
-        ):
-            self.set_default_connection(DEFAULT_CONNECTION)
-        else:
-            self.set_default_connection(
-                PublicId.from_str(agent_configuration.default_connection)
-            )
 
         # load private keys
         for (

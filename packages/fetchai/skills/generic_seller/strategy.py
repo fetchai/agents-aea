@@ -23,7 +23,6 @@ import uuid
 from typing import Any, Dict, Optional, Tuple
 
 from aea.common import Address
-from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
@@ -37,10 +36,8 @@ from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
 
-DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
-DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_UNIT_PRICE = 4
 DEFAULT_SERVICE_ID = "generic_service"
 
@@ -65,10 +62,10 @@ class GenericStrategy(Model):
 
         :return: None
         """
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        ledger_id = kwargs.pop("ledger_id", None)
+        currency_id = kwargs.pop("currency_id", None)
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
 
-        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
         self._unit_price = kwargs.pop("unit_price", DEFAULT_UNIT_PRICE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
@@ -97,6 +94,16 @@ class GenericStrategy(Model):
         }
 
         super().__init__(**kwargs)
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
+        if currency_id is None:
+            currency_id = self.context.currency_denominations.get(self._ledger_id, None)
+            enforce(
+                currency_id is not None,
+                f"Currency denomination for ledger_id={self._ledger_id} not specified.",
+            )
+        self._currency_id = currency_id
         enforce(
             self.context.agent_addresses.get(self._ledger_id, None) is not None,
             "Wallet does not contain cryptos for provided ledger id.",

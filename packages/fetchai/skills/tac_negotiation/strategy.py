@@ -91,7 +91,7 @@ class Strategy(Model):
         self._register_as = Strategy.RegisterAs(kwargs.pop("register_as", "both"))
         self._search_for = Strategy.SearchFor(kwargs.pop("search_for", "both"))
         self._is_contract_tx = kwargs.pop("is_contract_tx", False)
-        self._ledger_id = kwargs.pop("ledger_id", "ethereum")
+        ledger_id = kwargs.pop("ledger_id", None)
 
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
@@ -113,6 +113,9 @@ class Strategy(Model):
         self._contract_id = str(CONTRACT_ID)
 
         super().__init__(**kwargs)
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
 
     @property
     def registering_as(self) -> str:

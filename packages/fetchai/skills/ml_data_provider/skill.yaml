@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmVwLCVudrwmJ33t5npXFDfRp8UYK7QFH4djanZgzziPTw
   handlers.py: QmWCVSnLMSLLPB9koJVc7g12YsfW3eCgkMET8TTpwDDW69
-  strategy.py: QmZd2L6byxxh6HNpRNk4qaCiUhxmodid757JYXnb8NWLDq
+  strategy.py: QmUkAAC5kJsRWChdfepxJ9TUUi86rT5nwiJ4SPMC3mkEdR
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
@@ -55,9 +55,7 @@ models:
     args:
       batch_size: 2
       buyer_tx_fee: 10
-      currency_id: FET
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127
