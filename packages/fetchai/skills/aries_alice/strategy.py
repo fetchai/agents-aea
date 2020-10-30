@@ -41,7 +41,7 @@ ALICE_ACA_IDENTITY = "Alice_ACA"
 HTTP_COUNTERPARTY = "HTTP Server"
 
 # search
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "intro_service", "value": "intro_alice"}
 
 

@@ -23,7 +23,7 @@ from aea.helpers.search.models import Constraint, ConstraintType, Location, Quer
 from aea.skills.base import Model
 
 
-DEFAULT_SEARCH_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_SEARCH_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "seller_service",
     "search_value": "generic_service",
