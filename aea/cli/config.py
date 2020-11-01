@@ -62,7 +62,7 @@ def get(ctx: Context, json_path: str):
 @click.option(
     "--type",
     default="str",
-    type=click.Choice(["str", "int", "bool", "float", "dict"]),
+    type=click.Choice(["str", "int", "bool", "float", "dict", "list"]),
     help="Specify the type of the value.",
 )
 @click.argument("JSON_PATH", required=True)
@@ -193,8 +193,10 @@ class ConfigGetSet:
 
         if attr_name not in parent_obj:
             raise click.ClickException("Attribute '{}' not found.".format(attr_name))
-        if not isinstance(parent_obj.get(attr_name), (str, int, bool, float, dict)):
-            raise click.ClickException(
+        if not isinstance(
+            parent_obj.get(attr_name), (str, int, bool, float, dict, list)
+        ):
+            raise click.ClickException(  # pragma: nocover
                 "Attribute '{}' is not of primitive type.".format(attr_name)
             )
         return parent_obj
@@ -317,7 +319,7 @@ class ConfigGetSet:
         try:
             if type_ == bool:
                 parent_object[self.attr_name] = value not in FALSE_EQUIVALENTS
-            elif type_ == dict:
+            elif type_ in (dict, list):
                 parent_object[self.attr_name] = json.loads(value)
             else:
                 parent_object[self.attr_name] = type_(value)
