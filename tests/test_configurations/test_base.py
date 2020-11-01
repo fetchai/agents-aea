@@ -840,6 +840,7 @@ def test_agent_config_to_json_with_optional_configurations():
         skill_exception_policy="propagate",
         connection_exception_policy="propagate",
         default_routing={"author/name:0.1.0": "author/name:0.1.0"},
+        currency_denominations={"fetchai": "fet"},
         loop_mode="sync",
         runtime_mode="async",
     )

@@ -177,6 +177,21 @@ class TestConfigGet:
             == "{'dummy': {'args': {'behaviour_arg_1': 1, 'behaviour_arg_2': '2'}, 'class_name': 'DummyBehaviour'}}\n"
         )
 
+    def test_get_list(self):
+        """Test that getting the 'dummy' skill behaviours works."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "get",
+                "vendor.fetchai.connections.p2p_libp2p.config.entry_peers",
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        assert result.output == "[]\n"
+
     def test_get_fails_when_getting_nested_object(self):
         """Test that getting a nested object in 'dummy' skill fails because path is not valid."""
         result = self.runner.invoke(
@@ -325,6 +340,22 @@ class TestConfigSet:
                 "agent.default_routing",
                 '{"fetchai/contract_api:any": "fetchai/ledger:any"}',
                 "--type=dict",
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+    def test_set_type_list(self):
+        """Test setting the default routing."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "vendor.fetchai.connections.p2p_libp2p.config.entry_peers",
+                '["peer1", "peer2"]',
+                "--type=list",
             ],
             standalone_mode=False,
         )
