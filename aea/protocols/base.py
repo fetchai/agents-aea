@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the base message and serialization definition."""
 import importlib
 import inspect
@@ -28,14 +27,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Optional, Set, Tuple, Type, cast
 
-from google.protobuf.struct_pb2 import Struct
-
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.exceptions import enforce
-from aea.mail.base_pb2 import DialogueMessage
-from aea.mail.base_pb2 import Message as ProtobufMessage
 
 
 _default_logger = logging.getLogger(__name__)
@@ -62,7 +57,6 @@ class Message:
             "dialogue_reference",
             "message_id",
             "target",
-            "content",
         )
 
     _performatives: Set[str] = set()
@@ -294,90 +288,6 @@ class Decoder(ABC):
 
 class Serializer(Encoder, Decoder, ABC):
     """The implementations of this class defines a serialization layer for a protocol."""
-
-
-class ProtobufSerializer(Serializer):
-    """
-    Default Protobuf serializer.
-
-    It assumes that the Message contains a JSON-serializable body.
-    """
-
-    @staticmethod
-    def encode(msg: Message) -> bytes:
-        """
-        Encode a message into bytes using Protobuf.
-
-        - if one of message_id, target and dialogue_reference are not defined,
-          serialize only the message body/
-        - otherwise, extract those fields from the body and instantiate
-          a Message struct.
-        """
-        message_pb = ProtobufMessage()
-        if msg.has_dialogue_info:
-            dialogue_message_pb = DialogueMessage()
-            dialogue_message_pb.message_id = msg.message_id
-            dialogue_message_pb.dialogue_starter_reference = msg.dialogue_reference[0]
-            dialogue_message_pb.dialogue_responder_reference = msg.dialogue_reference[1]
-            dialogue_message_pb.target = msg.target
-
-            new_body = copy(msg._body)  # pylint: disable=protected-access
-            new_body.pop("message_id")
-            new_body.pop("dialogue_reference")
-            new_body.pop("target")
-
-            body_json = Struct()
-            body_json.update(new_body)  # pylint: disable=no-member
-
-            dialogue_message_pb.content = (  # pylint: disable=no-member
-                body_json.SerializeToString()
-            )
-            message_pb.dialogue_message.CopyFrom(  # pylint: disable=no-member
-                dialogue_message_pb
-            )
-        else:
-            body_json = Struct()
-            body_json.update(msg._body)  # pylint: disable=no-member,protected-access
-            message_pb.body.CopyFrom(body_json)  # pylint: disable=no-member
-
-        return message_pb.SerializeToString()
-
-    @staticmethod
-    def decode(obj: bytes) -> Message:
-        """
-        Decode bytes into a message using Protobuf.
-
-        First, try to parse the input as a Protobuf 'Message';
-        if it fails, parse the bytes as struct.
-        """
-        message_pb = ProtobufMessage()
-        message_pb.ParseFromString(obj)
-        message_type = message_pb.WhichOneof("message")
-        if message_type == "body":
-            body = dict(message_pb.body)  # pylint: disable=no-member
-            msg = Message(_body=body)
-            return msg
-        if message_type == "dialogue_message":
-            dialogue_message_pb = (
-                message_pb.dialogue_message  # pylint: disable=no-member
-            )
-            message_id = dialogue_message_pb.message_id
-            target = dialogue_message_pb.target
-            dialogue_starter_reference = dialogue_message_pb.dialogue_starter_reference
-            dialogue_responder_reference = (
-                dialogue_message_pb.dialogue_responder_reference
-            )
-            body_json = Struct()
-            body_json.ParseFromString(dialogue_message_pb.content)
-            body = dict(body_json)
-            body["message_id"] = message_id
-            body["target"] = target
-            body["dialogue_reference"] = (
-                dialogue_starter_reference,
-                dialogue_responder_reference,
-            )
-            return Message(_body=body)
-        raise ValueError("Message type not recognized.")  # pragma: nocover
 
 
 class Protocol(Component):
