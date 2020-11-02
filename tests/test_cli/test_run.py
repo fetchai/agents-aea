@@ -37,10 +37,16 @@ from aea.cli.run import _build_aea, run_aea
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
-    PublicId,
 )
-from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
+
+from packages.fetchai.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_ClIENT_PUBLIC_ID,
+)
+from packages.fetchai.connections.stub.connection import (
+    PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
+)
+from packages.fetchai.protocols.fipa.message import FipaMessage
 
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import (
@@ -76,7 +82,7 @@ def test_run():
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/http_client:0.11.0"],
+        [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
 
@@ -87,7 +93,7 @@ def test_run():
             "config",
             "set",
             "agent.default_connection",
-            "fetchai/http_client:0.11.0",
+            str(HTTP_ClIENT_PUBLIC_ID),
         ],
     )
     assert result.exit_code == 0
@@ -168,9 +174,9 @@ def test_run_with_default_connection():
 @pytest.mark.parametrize(
     argnames=["connection_ids"],
     argvalues=[
-        ["fetchai/http_client:0.11.0,{}".format(str(DEFAULT_CONNECTION))],
-        ["'fetchai/http_client:0.11.0, {}'".format(str(DEFAULT_CONNECTION))],
-        ["fetchai/http_client:0.11.0,,{},".format(str(DEFAULT_CONNECTION))],
+        [f"{str(HTTP_ClIENT_PUBLIC_ID)},{str(STUB_CONNECTION_PUBLIC_ID)}"],
+        [f"'{str(HTTP_ClIENT_PUBLIC_ID)}, {str(STUB_CONNECTION_PUBLIC_ID)}'"],
+        [f"{str(HTTP_ClIENT_PUBLIC_ID)},,{str(STUB_CONNECTION_PUBLIC_ID)},"],
     ],
 )
 def test_run_multiple_connections(connection_ids):
@@ -195,13 +201,20 @@ def test_run_multiple_connections(connection_ids):
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/http_client:0.11.0"],
+        [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
 
     # stub is the default connection, so it should fail
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(DEFAULT_CONNECTION)]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "add",
+            "--local",
+            "connection",
+            str(STUB_CONNECTION_PUBLIC_ID),
+        ],
     )
     assert result.exit_code == 1
     process = PexpectWrapper(  # nosec
@@ -251,7 +264,7 @@ def test_run_unknown_private_key():
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/http_client:0.11.0"],
+        [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
     result = runner.invoke(
@@ -261,7 +274,7 @@ def test_run_unknown_private_key():
             "config",
             "set",
             "agent.default_connection",
-            "fetchai/http_client:0.11.0",
+            str(HTTP_ClIENT_PUBLIC_ID),
         ],
     )
     assert result.exit_code == 0
@@ -290,7 +303,7 @@ def test_run_unknown_private_key():
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "run", "--connections", "fetchai/http_client:0.11.0"],
+        [*CLI_LOG_OPTION, "run", "--connections", str(HTTP_ClIENT_PUBLIC_ID)],
         standalone_mode=False,
     )
 
@@ -326,7 +339,7 @@ def test_run_fet_private_key_config():
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/http_client:0.11.0"],
+        [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
 
@@ -350,9 +363,7 @@ def test_run_fet_private_key_config():
 
     error_msg = ""
     try:
-        cli.main(
-            [*CLI_LOG_OPTION, "run", "--connections", "fetchai/http_client:0.11.0"]
-        )
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", str(HTTP_ClIENT_PUBLIC_ID)])
     except SystemExit as e:
         error_msg = str(e)
 
@@ -387,7 +398,7 @@ def test_run_ethereum_private_key_config():
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/http_client:0.11.0"],
+        [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
 
@@ -411,9 +422,7 @@ def test_run_ethereum_private_key_config():
 
     error_msg = ""
     try:
-        cli.main(
-            [*CLI_LOG_OPTION, "run", "--connections", "fetchai/http_client:0.11.0"]
-        )
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", str(HTTP_ClIENT_PUBLIC_ID)])
     except SystemExit as e:
         error_msg = str(e)
 
@@ -451,7 +460,7 @@ def test_run_with_install_deps():
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/http_client:0.11.0"],
+        [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
     result = runner.invoke(
@@ -461,7 +470,7 @@ def test_run_with_install_deps():
             "config",
             "set",
             "agent.default_connection",
-            "fetchai/http_client:0.11.0",
+            str(HTTP_ClIENT_PUBLIC_ID),
         ],
     )
     assert result.exit_code == 0
@@ -477,7 +486,7 @@ def test_run_with_install_deps():
                 "run",
                 "--install-deps",
                 "--connections",
-                "fetchai/http_client:0.11.0",
+                str(HTTP_ClIENT_PUBLIC_ID),
             ],
             env=os.environ,
             maxread=10000,
@@ -523,7 +532,7 @@ def test_run_with_install_deps_and_requirement_file():
 
     result = runner.invoke(
         cli,
-        [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/http_client:0.11.0"],
+        [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
     result = runner.invoke(
@@ -533,7 +542,7 @@ def test_run_with_install_deps_and_requirement_file():
             "config",
             "set",
             "agent.default_connection",
-            "fetchai/http_client:0.11.0",
+            str(HTTP_ClIENT_PUBLIC_ID),
         ],
     )
     assert result.exit_code == 0
@@ -553,7 +562,7 @@ def test_run_with_install_deps_and_requirement_file():
                 "run",
                 "--install-deps",
                 "--connections",
-                "fetchai/http_client:0.11.0",
+                str(HTTP_ClIENT_PUBLIC_ID),
             ],
             env=os.environ,
             maxread=10000,
@@ -611,7 +620,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
                 "add",
                 "--local",
                 "connection",
-                "fetchai/http_client:0.11.0",
+                str(HTTP_ClIENT_PUBLIC_ID),
             ],
             standalone_mode=False,
         )
@@ -628,7 +637,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
         try:
             cli.main(
-                [*CLI_LOG_OPTION, "run", "--connections", "fetchai/http_client:0.11.0"]
+                [*CLI_LOG_OPTION, "run", "--connections", str(HTTP_ClIENT_PUBLIC_ID)]
             )
         except SystemExit as e:
             cls.exit_code = e.code
@@ -878,7 +887,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = PublicId.from_str("fetchai/http_client:0.11.0")
+        cls.connection_id = HTTP_ClIENT_PUBLIC_ID
         cls.connection_name = cls.connection_id.name
         cls.connection_author = cls.connection_id.author
         cls.cwd = os.getcwd()
@@ -912,7 +921,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
                 "config",
                 "set",
                 "agent.default_connection",
-                "fetchai/http_client:0.11.0",
+                str(HTTP_ClIENT_PUBLIC_ID),
             ],
         )
         assert result.exit_code == 0
@@ -971,7 +980,7 @@ class TestRunFailsWhenConnectionNotComplete:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = PublicId.from_str("fetchai/http_client:0.11.0")
+        cls.connection_id = HTTP_ClIENT_PUBLIC_ID
         cls.connection_author = cls.connection_id.author
         cls.connection_name = cls.connection_id.name
         cls.cwd = os.getcwd()
@@ -1005,7 +1014,7 @@ class TestRunFailsWhenConnectionNotComplete:
                 "config",
                 "set",
                 "agent.default_connection",
-                "fetchai/http_client:0.11.0",
+                str(HTTP_ClIENT_PUBLIC_ID),
             ],
         )
         assert result.exit_code == 0
@@ -1063,7 +1072,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = "fetchai/http_client:0.11.0"
+        cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
         cls.connection_name = "http_client"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1096,7 +1105,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
                 "config",
                 "set",
                 "agent.default_connection",
-                "fetchai/http_client:0.11.0",
+                str(HTTP_ClIENT_PUBLIC_ID),
             ],
         )
         assert result.exit_code == 0
@@ -1151,7 +1160,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = str(DEFAULT_CONNECTION)
+        cls.connection_id = str(STUB_CONNECTION_PUBLIC_ID)
         cls.connection_name = "stub"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1250,7 +1259,13 @@ class TestRunFailsWhenProtocolNotComplete:
 
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "protocol", "fetchai/fipa:0.9.0"],
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "protocol",
+                str(FipaMessage.protocol_id),
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0

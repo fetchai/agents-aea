@@ -30,7 +30,9 @@ import jsonschema
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
-from aea.configurations.base import PublicId
+
+from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
@@ -366,8 +368,8 @@ class TestSearchWithRegistryInSubfolderLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.10.0")
-        public_id_error = PublicId.from_str("fetchai/error:0.8.0")
+        public_id_echo = ECHO_SKILL_PUBLIC_ID
+        public_id_error = ERROR_SKILL_PUBLIC_ID
         expected = [
             ('Searching for ""...\n' "Skills found:\n\n"),
             (
@@ -444,8 +446,8 @@ class TestSearchInAgentDirectoryLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        public_id_echo = PublicId.from_str("fetchai/echo:0.10.0")
-        public_id_error = PublicId.from_str("fetchai/error:0.8.0")
+        public_id_echo = ECHO_SKILL_PUBLIC_ID
+        public_id_error = ERROR_SKILL_PUBLIC_ID
         expected = [
             ('Searching for ""...\n' "Skills found:\n\n"),
             (

@@ -324,14 +324,10 @@ class ItemUpgrader:
         # update default connection
         if (
             self.item_type == ComponentType.CONNECTION.value
-            and self.ctx.agent_config._default_connection  # pylint: disable=protected-access
-            is not None
+            and self.ctx.agent_config.default_connection is not None
         ):
-            default_connection_public_id = PublicId.from_str(
-                self.ctx.agent_config.default_connection
-            )
-            if default_connection_public_id.same_prefix(public_id):
-                self.ctx.agent_config.default_connection = str(public_id)
+            if self.ctx.agent_config.default_connection.same_prefix(public_id):
+                self.ctx.agent_config.default_connection = public_id
 
         # update component configurations
         current_component_id = ComponentId(ComponentType(self.item_type), public_id)

@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmSXggCpVFzM3J4xGgTpNXQp87Rh3aykPaJKbEJdrdym3f
   dialogues.py: QmVz44ZiXKHfefyBJjCgjs4vcjsequsDLajww4Mvs3kHCv
   handlers.py: Qmb6RnG2KL286cq3WvvcxibUZK2sx5bxVhva5SuvqenteB
-  strategy.py: QmTdapKSrFEZJkpmqrVeVSqF6MyRgNA6NeLhPByoxRF1V9
+  strategy.py: QmTEf6hyvxmdevHDJQq9a93XP9GjGN9aG38U7gUfWcKHMh
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.8.0
@@ -68,7 +68,6 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
-      ledger_id: ethereum
       location:
         latitude: 51.5194
         longitude: 0.127

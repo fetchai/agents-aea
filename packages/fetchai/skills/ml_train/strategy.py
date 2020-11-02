@@ -33,11 +33,9 @@ from aea.skills.base import Model
 
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
-DEFAULT_CURRENCY_ID = "FET"
-DEFAULT_LEDGER_ID = "None"
 DEFAULT_MAX_NEGOTIATIONS = 1
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "dataset_id",
     "search_value": "fmnist",
@@ -53,8 +51,8 @@ class Strategy(Model):
         """Initialize the strategy of the agent."""
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_ROW_PRICE)
         self._max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_TX_FEE)
-        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        currency_id = kwargs.pop("currency_id", None)
+        ledger_id = kwargs.pop("ledger_id", None)
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", False)
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
@@ -68,6 +66,16 @@ class Strategy(Model):
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         super().__init__(**kwargs)
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
+        if currency_id is None:
+            currency_id = self.context.currency_denominations.get(self._ledger_id, None)
+            enforce(
+                currency_id is not None,
+                f"Currency denomination for ledger_id={self._ledger_id} not specified.",
+            )
+        self._currency_id = currency_id
         self._is_searching = False
         self._tx_id = 0
         self._balance = 0

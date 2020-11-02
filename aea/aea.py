@@ -39,13 +39,10 @@ from typing import (
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
-from aea.configurations.constants import (
-    DEFAULT_PROTOCOL,
-    DEFAULT_SEARCH_SERVICE_ADDRESS,
-    DEFAULT_SKILL,
-)
+from aea.configurations.constants import DEFAULT_SEARCH_SERVICE_ADDRESS
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
+from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.exceptions import AEAException
@@ -89,6 +86,8 @@ class AEA(Agent):
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        default_ledger: Optional[str] = None,
+        currency_denominations: Optional[Dict[str, str]] = None,
         default_connection: Optional[PublicId] = None,
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
@@ -109,6 +108,8 @@ class AEA(Agent):
         :param skill_exception_policy: the skill exception policy enum
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode (async, threaded) to run AEA in.
+        :param default_ledger: default ledger id
+        :param currency_denominations: mapping from ledger id to currency denomination
         :param default_connection: public id to the default connection
         :param default_routing: dictionary for default routing.
         :param connection_ids: active connection ids. Default: consider all the ones in the resources.
@@ -148,6 +149,16 @@ class AEA(Agent):
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 
+        default_ledger_id = (
+            default_ledger
+            if default_ledger is not None
+            else identity.default_address_key
+        )
+        currency_denominations = (
+            currency_denominations
+            if currency_denominations is not None
+            else DEFAULT_CURRENCY_DENOMINATIONS
+        )
         self._context = AgentContext(
             self.identity,
             self.runtime.multiplexer.connection_status,
@@ -155,6 +166,8 @@ class AEA(Agent):
             self.runtime.decision_maker.message_in_queue,
             decision_maker_handler.context,
             self.runtime.task_manager,
+            default_ledger_id,
+            currency_denominations,
             default_connection,
             default_routing if default_routing is not None else {},
             search_service_address,
@@ -242,7 +255,18 @@ class AEA(Agent):
 
     def _get_error_handler(self) -> Handler:
         """Get error handler."""
-        handler = self.resources.get_handler(DEFAULT_PROTOCOL, DEFAULT_SKILL)
+
+        # temporary hack
+        from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+            DefaultMessage,
+        )
+        from packages.fetchai.skills.error import (  # noqa: F811 # pylint: disable=import-outside-toplevel
+            PUBLIC_ID as ERROR_SKILL_PUBLIC_ID,
+        )
+
+        handler = self.resources.get_handler(
+            DefaultMessage.protocol_id, ERROR_SKILL_PUBLIC_ID
+        )
         if handler is None:
             self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
             raise _StopRuntime()
@@ -262,6 +286,7 @@ class AEA(Agent):
     ) -> Tuple[Optional[Message], List[Handler]]:
         error_handler = self._get_error_handler()
 
+        # temporary hack
         from packages.fetchai.skills.error.handlers import (  # noqa: F811 # pylint: disable=import-outside-toplevel
             ErrorHandler,
         )
