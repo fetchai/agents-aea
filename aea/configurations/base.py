@@ -55,7 +55,14 @@ from urllib3.util import Url, parse_url
 
 from aea.__version__ import __version__ as __aea_version__
 from aea.exceptions import enforce
-from aea.helpers.base import RegexConstrainedString, load_module, recursive_update
+from aea.helpers.base import (
+    RegexConstrainedString,
+    STRING_LENGTH_LIMIT,
+    SimpleId,
+    SimpleIdOrStr,
+    load_module,
+    recursive_update,
+)
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -307,6 +314,8 @@ class PackageVersion:
         :param version_like: a string, os a semver.VersionInfo object.
         """
         if isinstance(version_like, str) and version_like == "latest":
+            self._version = version_like
+        elif isinstance(version_like, str) and version_like == "any":
             self._version = version_like
         elif isinstance(version_like, str):
             self._version = VersionInfoClass.parse(version_like)
@@ -587,24 +596,27 @@ class PublicId(JSONSerializable):
     True
     """
 
-    AUTHOR_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
-    PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
-    VERSION_REGEX = r"(latest|(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
-    PUBLIC_ID_REGEX = r"^({})/({})(:({}))?$".format(
-        AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
-    )
-    PUBLIC_ID_URI_REGEX = r"^({})/({})/({})$".format(
-        AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
+    AUTHOR_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
+    PACKAGE_NAME_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT  - 1}}}"
+    VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
+    VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"
+    PUBLIC_ID_URI_REGEX = (
+        fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
     )
 
+    ANY_VERSION = "any"
     LATEST_VERSION = "latest"
 
     def __init__(
-        self, author: str, name: str, version: Optional[PackageVersionLike] = None
+        self,
+        author: SimpleIdOrStr,
+        name: SimpleIdOrStr,
+        version: Optional[PackageVersionLike] = None,
     ):
         """Initialize the public identifier."""
-        self._author = author
-        self._name = name
+        self._author = SimpleId(author)
+        self._name = SimpleId(name)
         self._package_version = (
             PackageVersion(version)
             if version is not None
@@ -614,12 +626,12 @@ class PublicId(JSONSerializable):
     @property
     def author(self) -> str:
         """Get the author."""
-        return self._author
+        return str(self._author)
 
     @property
     def name(self) -> str:
         """Get the name."""
-        return self._name
+        return str(self._name)
 
     @property
     def version(self) -> str:
@@ -631,10 +643,9 @@ class PublicId(JSONSerializable):
         """Get the package version object."""
         return self._package_version
 
-    @property
-    def latest(self) -> str:
-        """Get the public id in `latest` form."""
-        return "{author}/{name}:*".format(author=self.author, name=self.name)
+    def to_any(self) -> "PublicId":
+        """Return the same public id, but with any version."""
+        return PublicId(self.author, self.name, self.ANY_VERSION)
 
     def same_prefix(self, other: "PublicId") -> bool:
         """Check if the other public id has the same author and name of this."""
@@ -972,8 +983,8 @@ class PackageConfiguration(Configuration, ABC):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -997,8 +1008,8 @@ class PackageConfiguration(Configuration, ABC):
         super().__init__()
         if name is None or author is None:  # pragma: nocover
             raise ValueError("Name and author must be set on the configuration!")
-        self.name = name
-        self.author = author
+        self._name = SimpleId(name)
+        self._author = SimpleId(author)
         self.version = version if version != "" else DEFAULT_VERSION
         self.license = license_ if license_ != "" else DEFAULT_LICENSE
         self.fingerprint = fingerprint if fingerprint is not None else {}
@@ -1011,6 +1022,26 @@ class PackageConfiguration(Configuration, ABC):
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
         self._directory = None  # type: Optional[Path]
+
+    @property
+    def name(self) -> str:
+        """Get the name."""
+        return str(self._name)
+
+    @name.setter
+    def name(self, value: SimpleIdOrStr):
+        """Set the name."""
+        self._name = SimpleId(value)
+
+    @property
+    def author(self) -> str:
+        """Get the author."""
+        return str(self._author)
+
+    @author.setter
+    def author(self, value: SimpleIdOrStr):
+        """Set the author."""
+        self._author = SimpleId(value)
 
     @property
     def directory(self) -> Optional[Path]:
@@ -1064,8 +1095,8 @@ class ComponentConfiguration(PackageConfiguration, ABC):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -1158,8 +1189,8 @@ class ConnectionConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str = "",
-        author: str = "",
+        name: SimpleIdOrStr = "",
+        author: SimpleIdOrStr = "",
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -1323,8 +1354,8 @@ class ProtocolConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
@@ -1426,13 +1457,14 @@ class SkillConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        connections: Optional[Set[PublicId]] = None,
         protocols: Optional[Set[PublicId]] = None,
         contracts: Optional[Set[PublicId]] = None,
         skills: Optional[Set[PublicId]] = None,
@@ -1451,6 +1483,7 @@ class SkillConfig(ComponentConfiguration):
             fingerprint_ignore_patterns,
             dependencies,
         )
+        self.connections = connections if connections is not None else set()
         self.protocols = protocols if protocols is not None else set()
         self.contracts = contracts if contracts is not None else set()
         self.skills = skills if skills is not None else set()
@@ -1479,6 +1512,12 @@ class SkillConfig(ComponentConfiguration):
             .union(
                 {ComponentId(ComponentType.SKILL, skill_id) for skill_id in self.skills}
             )
+            .union(
+                {
+                    ComponentId(ComponentType.CONNECTION, connection_id)
+                    for connection_id in self.connections
+                }
+            )
         )
 
     @property
@@ -1500,6 +1539,7 @@ class SkillConfig(ComponentConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
+                "connections": sorted(map(str, self.connections)),
                 "contracts": sorted(map(str, self.contracts)),
                 "protocols": sorted(map(str, self.protocols)),
                 "skills": sorted(map(str, self.skills)),
@@ -1524,6 +1564,7 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns = cast(
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
+        connections = {PublicId.from_str(id_) for id_ in obj.get("connections", set())}
         protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
         contracts = {PublicId.from_str(id_) for id_ in obj.get("contracts", set())}
         skills = {PublicId.from_str(id_) for id_ in obj.get("skills", set())}
@@ -1537,6 +1578,7 @@ class SkillConfig(ComponentConfiguration):
             aea_version=aea_version_specifiers,
             fingerprint=fingerprint,
             fingerprint_ignore_patterns=fingerprint_ignore_patterns,
+            connections=connections,
             protocols=protocols,
             contracts=contracts,
             skills=skills,
@@ -1636,8 +1678,8 @@ class AgentConfig(PackageConfiguration):
 
     def __init__(
         self,
-        agent_name: str,
-        author: str,
+        agent_name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -1652,7 +1694,10 @@ class AgentConfig(PackageConfiguration):
         decision_maker_handler: Optional[Dict] = None,
         skill_exception_policy: Optional[str] = None,
         connection_exception_policy: Optional[str] = None,
-        default_routing: Optional[Dict] = None,
+        default_ledger: Optional[str] = None,
+        currency_denominations: Optional[Dict[str, str]] = None,
+        default_connection: Optional[str] = None,
+        default_routing: Optional[Dict[str, str]] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
@@ -1667,15 +1712,22 @@ class AgentConfig(PackageConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
         )
-        self.agent_name = agent_name
+        self.agent_name = self.name
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
         self.connection_private_key_paths = CRUDCollection[str]()
 
         self.logging_config = logging_config if logging_config is not None else {}
-        self._default_ledger = None  # type: Optional[str]
-        self._default_connection = None  # type: Optional[PublicId]
+        self.default_ledger = default_ledger
+        self.currency_denominations = (
+            currency_denominations if currency_denominations is not None else {}
+        )
+        self.default_connection = (
+            PublicId.from_str(default_connection)
+            if default_connection is not None
+            else None
+        )
         self.connections = set()  # type: Set[PublicId]
         self.contracts = set()  # type: Set[PublicId]
         self.protocols = set()  # type: Set[PublicId]
@@ -1777,45 +1829,6 @@ class AgentConfig(PackageConfiguration):
             key: path for key, path in self.connection_private_key_paths.read_all()
         }
 
-    @property
-    def default_connection(self) -> str:
-        """Get the default connection."""
-        if self._default_connection is None:  # pragma: nocover
-            raise ValueError("Default connection not set yet.")
-        return str(self._default_connection)
-
-    @default_connection.setter
-    def default_connection(self, connection_id: Optional[Union[str, PublicId]]):
-        """
-        Set the default connection.
-
-        :param connection_id: the name of the default connection.
-        :return: None
-        """
-        if connection_id is None:
-            self._default_connection = None
-        elif isinstance(connection_id, str):
-            self._default_connection = PublicId.from_str(connection_id)
-        else:
-            self._default_connection = connection_id
-
-    @property
-    def default_ledger(self) -> str:
-        """Get the default ledger."""
-        if self._default_ledger is None:  # pragma: nocover
-            raise ValueError("Default ledger not set yet.")
-        return self._default_ledger
-
-    @default_ledger.setter
-    def default_ledger(self, ledger_id: str):
-        """
-        Set the default ledger.
-
-        :param ledger_id: the id of the default ledger.
-        :return: None
-        """
-        self._default_ledger = ledger_id
-
     def component_configurations_json(self) -> List[OrderedDict]:
         """Get the component configurations in JSON format."""
         result: List[OrderedDict] = []
@@ -1837,8 +1850,8 @@ class AgentConfig(PackageConfiguration):
                 "agent_name": self.agent_name,
                 "author": self.author,
                 "version": self.version,
-                "description": self.description,
                 "license": self.license,
+                "description": self.description,
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
@@ -1846,7 +1859,9 @@ class AgentConfig(PackageConfiguration):
                 "contracts": sorted(map(str, self.contracts)),
                 "protocols": sorted(map(str, self.protocols)),
                 "skills": sorted(map(str, self.skills)),
-                "default_connection": self.default_connection,
+                "default_connection": str(self.default_connection)
+                if self.default_connection is not None
+                else None,
                 "default_ledger": self.default_ledger,
                 "default_routing": {
                     str(key): str(value) for key, value in self.default_routing.items()
@@ -1876,6 +1891,8 @@ class AgentConfig(PackageConfiguration):
             config["loop_mode"] = self.loop_mode
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
+        if self.currency_denominations != {}:
+            config["currency_denominations"] = self.currency_denominations
 
         return config
 
@@ -1903,12 +1920,16 @@ class AgentConfig(PackageConfiguration):
             connection_exception_policy=cast(
                 str, obj.get("connection_exception_policy")
             ),
+            default_ledger=cast(str, obj.get("default_ledger")),
+            currency_denominations=cast(Dict, obj.get("currency_denominations", {})),
+            default_connection=cast(str, obj.get("default_connection")),
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
             component_configurations=None,
         )
 
+        #  parse private keys
         for crypto_id, path in obj.get("private_key_paths", {}).items():
             agent_config.private_key_paths.create(crypto_id, path)
 
@@ -1929,6 +1950,7 @@ class AgentConfig(PackageConfiguration):
         # parse skills public ids
         agent_config.skills = set(map(PublicId.from_str, obj.get("skills", []),))
 
+        # parse component configurations
         component_configurations = {}
         for config in obj.get("component_configurations", []):
             tmp = deepcopy(config)
@@ -1937,12 +1959,6 @@ class AgentConfig(PackageConfiguration):
             component_id = ComponentId(ComponentType(type_), public_id)
             component_configurations[component_id] = tmp
         agent_config.component_configurations = component_configurations
-
-        # set default connection
-        default_connection_name = obj.get("default_connection", None)
-        agent_config.default_connection = default_connection_name
-        default_ledger_id = obj.get("default_ledger", None)
-        agent_config.default_ledger = default_ledger_id
 
         return agent_config
 
@@ -2016,8 +2032,8 @@ class ProtocolSpecification(ProtocolConfig):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -2132,8 +2148,8 @@ class ContractConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: SimpleIdOrStr,
+        author: SimpleIdOrStr,
         version: str = "",
         license_: str = "",
         aea_version: str = "",

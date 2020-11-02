@@ -22,6 +22,9 @@
 import datetime
 from typing import List, cast
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.skills.tac_control.behaviours import (
     TacBehaviour as BaseTacBehaviour,
@@ -34,7 +37,7 @@ from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class TacBehaviour(BaseTacBehaviour):

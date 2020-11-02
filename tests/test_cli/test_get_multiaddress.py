@@ -24,6 +24,10 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.connections.stub.connection import (
+    PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
+)
+
 from tests.conftest import FETCHAI
 
 
@@ -79,7 +83,7 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
             FETCHAI,
             "--connection",
             "--connection-id",
-            "fetchai/stub:0.12.0",
+            str(STUB_CONNECTION_PUBLIC_ID),
             "--host-field",
             "host",
             "--port-field",
@@ -112,7 +116,7 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
             FETCHAI,
             "--connection",
             "--connection-id",
-            "fetchai/stub:0.12.0",
+            str(STUB_CONNECTION_PUBLIC_ID),
             "--uri-field",
             "public_uri",
             cwd=self.current_agent_context,
@@ -195,7 +199,7 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.12.0",
+                str(STUB_CONNECTION_PUBLIC_ID),
                 "--host-field",
                 "some_host",
                 "--port-field",
@@ -226,7 +230,7 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.12.0",
+                str(STUB_CONNECTION_PUBLIC_ID),
                 "--host-field",
                 "host",
                 "--port-field",
@@ -286,7 +290,7 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.12.0",
+                str(STUB_CONNECTION_PUBLIC_ID),
                 "--host-field",
                 "host",
                 "--port-field",
@@ -313,7 +317,7 @@ class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.12.0",
+                str(STUB_CONNECTION_PUBLIC_ID),
                 "--host-field",
                 "some_host",
                 cwd=self.current_agent_context,
@@ -338,7 +342,7 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.12.0",
+                str(STUB_CONNECTION_PUBLIC_ID),
                 "--uri-field",
                 "some_uri",
                 cwd=self.current_agent_context,
@@ -368,7 +372,7 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
                 FETCHAI,
                 "--connection",
                 "--connection-id",
-                "fetchai/stub:0.12.0",
+                str(STUB_CONNECTION_PUBLIC_ID),
                 "--uri-field",
                 "some_uri",
                 cwd=self.current_agent_context,

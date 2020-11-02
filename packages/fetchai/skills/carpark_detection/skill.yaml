@@ -16,6 +16,7 @@ fingerprint:
   strategy.py: QmUCmsvvKqRsM4nFuhsUUTfCnZ6zPffXytD3PjMjFdqHdU
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
+connections: []
 contracts: []
 protocols:
 - fetchai/default:0.8.0
@@ -54,12 +55,10 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
-      currency_id: FET
       data_for_sale:
         free_spaces: 0
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127

@@ -32,9 +32,6 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
 )
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
-
-
 class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 

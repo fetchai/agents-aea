@@ -458,9 +458,6 @@ def test_is_item_present_unified(mock_, vendor):
         (DEFAULT_CONNECTION, False),
         (DEFAULT_SKILL, False),
         (DEFAULT_PROTOCOL, False),
-        (DEFAULT_CONNECTION.to_latest(), False),
-        (DEFAULT_SKILL.to_latest(), False),
-        (DEFAULT_PROTOCOL.to_latest(), False),
     ],
 )
 def test_is_distributed_item(public_id, expected_outcome):

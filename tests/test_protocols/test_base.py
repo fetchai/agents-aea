@@ -28,7 +28,6 @@ from typing import Callable, List, Tuple, Type
 
 import pytest
 
-from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, ProtobufSerializer, Protocol
@@ -38,6 +37,7 @@ from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue,
     DefaultDialogues,
 )
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.signing.dialogues import (
     SigningDialogue,
     SigningDialogues,
@@ -206,7 +206,7 @@ class TestProtocolFromDir:
             Path("packages", "fetchai", "protocols", "default")
         )
         assert str(default_protocol.public_id) == str(
-            DEFAULT_PROTOCOL
+            DefaultMessage.protocol_id
         ), "Protocol not loaded correctly."
         assert default_protocol.serializer is not None
 

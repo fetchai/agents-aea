@@ -64,6 +64,10 @@ SYMLINKS = [
         FETCHAI_PACKAGES / "connections" / "local",
     ),
     (
+        TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "connections" / "p2p_libp2p",
+        FETCHAI_PACKAGES / "connections" / "p2p_libp2p",
+    ),
+    (
         TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "contracts" / "erc1155",
         FETCHAI_PACKAGES / "contracts" / "erc1155",
     ),

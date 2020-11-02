@@ -37,7 +37,8 @@ from aea.runtime import (
 )
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import CUR_PATH, DUMMY_SKILL_PUBLIC_ID
+from tests.conftest import CUR_PATH
+from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
 class TestAsyncRuntime:

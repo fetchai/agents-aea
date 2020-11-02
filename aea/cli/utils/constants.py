@@ -49,7 +49,9 @@ NOT_PERMITTED_AUTHORS = [
 ]
 
 
-FROM_STRING_TO_TYPE = dict(str=str, int=int, bool=bool, float=float)
+FROM_STRING_TO_TYPE = dict(
+    str=str, int=int, bool=bool, float=float, dict=dict, list=list
+)
 
 ALLOWED_PATH_ROOTS = [
     "agent",

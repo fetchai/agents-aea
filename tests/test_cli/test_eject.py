@@ -22,6 +22,13 @@ import os
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
+from packages.fetchai.connections.gym.connection import (
+    PUBLIC_ID as GYM_CONNECTION_PUBLIC_ID,
+)
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
+from packages.fetchai.protocols.gym.message import GymMessage
+from packages.fetchai.skills.gym import PUBLIC_ID as GYM_SKILL_PUBLIC_ID
+
 
 class TestEjectCommands(AEATestCaseMany):
     """End-to-end test case for CLI eject commands."""
@@ -33,29 +40,29 @@ class TestEjectCommands(AEATestCaseMany):
 
         self.set_agent_context(agent_name)
         cwd = os.path.join(self.t, agent_name)
-        self.add_item("connection", "fetchai/gym:0.10.0")
-        self.add_item("skill", "fetchai/gym:0.10.0")
-        self.add_item("contract", "fetchai/erc1155:0.12.0")
+        self.add_item("connection", str(GYM_CONNECTION_PUBLIC_ID))
+        self.add_item("skill", str(GYM_SKILL_PUBLIC_ID))
+        self.add_item("contract", str(ERC1155_PUBLIC_ID))
 
-        self.eject_item("connection", "fetchai/gym:0.10.0")
+        self.eject_item("connection", str(GYM_CONNECTION_PUBLIC_ID))
         assert "gym" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "connections"))
         )
         assert "gym" in os.listdir((os.path.join(cwd, "connections")))
 
-        self.eject_item("protocol", "fetchai/gym:0.8.0")
+        self.eject_item("protocol", str(GymMessage.protocol_id))
         assert "gym" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "protocols"))
         )
         assert "gym" in os.listdir((os.path.join(cwd, "protocols")))
 
-        self.eject_item("skill", "fetchai/gym:0.10.0")
+        self.eject_item("skill", str(GYM_SKILL_PUBLIC_ID))
         assert "gym" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "skills"))
         )
         assert "gym" in os.listdir((os.path.join(cwd, "skills")))
 
-        self.eject_item("contract", "fetchai/erc1155:0.12.0")
+        self.eject_item("contract", str(ERC1155_PUBLIC_ID))
         assert "erc1155" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "contracts"))
         )

@@ -28,6 +28,9 @@ from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
@@ -48,7 +51,7 @@ from packages.fetchai.skills.ml_train.strategy import Strategy
 
 
 DUMMY_DIGEST = "dummy_digest"
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class MlTradeHandler(Handler):

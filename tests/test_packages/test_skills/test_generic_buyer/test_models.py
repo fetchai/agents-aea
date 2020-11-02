@@ -54,8 +54,8 @@ class TestGenericStrategy(BaseSkillTestCase):
             "search_value": "some_search_value",
         }
         cls.location = {
-            "longitude": 51.5194,
-            "latitude": 0.127,
+            "longitude": 0.127,
+            "latitude": 51.5194,
         }
         cls.search_radius = 5.0
         cls.max_negotiations = 2

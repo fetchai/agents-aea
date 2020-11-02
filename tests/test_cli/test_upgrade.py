@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add connection` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -46,8 +45,12 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
+from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
+from tests.common.utils import are_dirs_equal
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 
@@ -206,7 +209,8 @@ class TestRemoveAndDependencies(BaseTestCase):
         assert component_id in agent_config.component_configurations
 
         with patch(
-            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required", return_value=True
+            "aea.cli.upgrade.ItemUpgrader.check_upgrade_is_required",
+            return_value=self.ITEM_PUBLIC_ID.version,
         ), patch("aea.cli.add._add_item_deps"):
             result = self.runner.invoke(
                 cli,
@@ -281,12 +285,12 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
     def setup(cls):
         """Set up test case."""
         super(TestUpgradeProject, cls).setup()
-        cls.agent_name = "generic_buyer_0.9.0"
+        cls.agent_name = "generic_buyer_0.12.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.10.0",
+            "fetchai/generic_buyer:0.12.0",
             "--alias",
             cls.agent_name,
         )
@@ -338,6 +342,22 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
             )
             assert latest_agent_items == agent_items
 
+        # compare both configuration files, except the agent name
+        upgraded_agent_dir = Path(self.agent_name)
+        latest_agent_dir = Path(self.latest_agent_name)
+        lines_upgraded_agent_config = (
+            (upgraded_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+        )
+        lines_latest_agent_config = (
+            (latest_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+        )
+        assert lines_upgraded_agent_config == lines_latest_agent_config
+
+        # compare vendor folders.
+        assert are_dirs_equal(
+            upgraded_agent_dir / "vendor", latest_agent_dir / "vendor"
+        )
+
 
 class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
     """Test that the command 'aea upgrade' works."""
@@ -350,7 +370,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         super(TestNonVendorProject, cls).setup()
         cls.agent_name = "generic_buyer_0.9.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.9.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.12.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -587,7 +607,7 @@ class TestUpgradeProtocolLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade protocol --local' works."""
 
     ITEM_TYPE = "protocol"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/http:0.8.0")
+    ITEM_PUBLIC_ID = HttpMessage.protocol_id
 
 
 class TestUpgradeProtocolRemoteRegistry(TestUpgradeProtocolLocally):
@@ -604,7 +624,7 @@ class TestUpgradeSkillLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade skill --local' works."""
 
     ITEM_TYPE = "skill"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/echo:0.10.0")
+    ITEM_PUBLIC_ID = ECHO_SKILL_PUBLIC_ID
 
 
 class TestUpgradeSkillRemoteRegistry(TestUpgradeSkillLocally):
@@ -629,7 +649,7 @@ class TestUpgradeContractLocally(TestUpgradeConnectionLocally):
     """Test that the command 'aea upgrade contract' works."""
 
     ITEM_TYPE = "contract"
-    ITEM_PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.12.0")
+    ITEM_PUBLIC_ID = ERC1155_PUBLIC_ID
 
 
 class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):

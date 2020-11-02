@@ -25,7 +25,7 @@ from typing import cast
 import pytest
 
 from aea.common import Address
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -53,7 +53,7 @@ class TestClientServer:
         self.host = get_host()
         self.port = get_unused_tcp_port()
         self.connection_id = HTTPServerConnection.connection_id
-        self.protocol_id = PublicId.from_str("fetchai/http:0.8.0")
+        self.protocol_id = HttpMessage.protocol_id
 
         self.configuration = ConnectionConfig(
             host=self.host,

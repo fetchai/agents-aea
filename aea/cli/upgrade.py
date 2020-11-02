@@ -37,7 +37,7 @@ from aea.cli.utils.package_utils import (
     get_item_public_id_by_author_name,
     is_item_present,
 )
-from aea.configurations.base import PackageId, PublicId
+from aea.configurations.base import ComponentId, ComponentType, PackageId, PublicId
 
 
 @click.group(invoke_without_command=True)
@@ -94,7 +94,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     item_remover = ItemRemoveHelper(ctx.agent_config)
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
     items_to_upgrade = set()
-    upgraders: List[ItemUpgrader] = []
+    upgraders: List[Tuple[ItemUpgrader, str]] = []
     shared_deps: Set[PackageId] = set()
     shared_deps_to_remove = set()
     items_to_upgrade_dependencies = set()
@@ -110,7 +110,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         with suppress(UpgraderException):
             new_version = item_upgrader.check_upgrade_is_required()
             items_to_upgrade.add((package_id, new_version))
-            upgraders.append(item_upgrader)
+            upgraders.append((item_upgrader, new_version))
 
         items_to_upgrade_dependencies.add(package_id)
         items_to_upgrade_dependencies.update(item_upgrader.dependencies)
@@ -132,7 +132,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
             click.echo(
                 f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
             )
-            for dep in shared_deps_to_remove:
+            for dep in shared_deps_to_remove:  # pragma: nocover
                 if ItemUpgrader(
                     ctx, str(dep.package_type), dep.public_id
                 ).is_non_vendor:
@@ -147,9 +147,10 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
                 ).remove_item()
             click.echo("Shared dependencies removed.")
 
-        for upgrader in upgraders:
+        for upgrader, new_item_version in upgraders:
             upgrader.remove_item()
             upgrader.add_item()
+            upgrader.update_references(new_item_version)
 
     click.echo("Finished project upgrade. Everything is up to date now!")
     click.echo(
@@ -292,6 +293,54 @@ class ItemUpgrader:
         click.echo(f"Adding item {self.item_type} {self.item_public_id}.")
         add_item(self.ctx, str(self.item_type), self.item_public_id)
 
+    def update_references(self, new_version: str) -> None:
+        """
+        Update references across the AEA project.
+
+        It breaks down in:
+        - update default routing mapping
+        - update default connection
+        - update component configurations
+
+        :param new_version: the new item version.
+        """
+        # update default routing
+        public_id = PublicId(
+            self.item_public_id.author, self.item_public_id.name, new_version
+        )
+        for key, value in list(self.ctx.agent_config.default_routing.items()):
+            if self.item_type == ComponentType.PROTOCOL.value and key.same_prefix(
+                public_id
+            ):
+                old_value = self.ctx.agent_config.default_routing.pop(key)
+                self.ctx.agent_config.default_routing[public_id] = old_value
+                # in case needs to be used below
+                key = public_id
+            if self.item_type == ComponentType.CONNECTION.value and value.same_prefix(
+                public_id
+            ):
+                self.ctx.agent_config.default_routing[key] = public_id
+
+        # update default connection
+        if (
+            self.item_type == ComponentType.CONNECTION.value
+            and self.ctx.agent_config.default_connection is not None
+        ):
+            if self.ctx.agent_config.default_connection.same_prefix(public_id):
+                self.ctx.agent_config.default_connection = public_id
+
+        # update component configurations
+        current_component_id = ComponentId(ComponentType(self.item_type), public_id)
+        current_component_prefix = current_component_id.component_prefix
+        for component_id, config in list(
+            self.ctx.agent_config.component_configurations.items()
+        ):
+            if component_id.component_prefix == current_component_prefix:
+                self.ctx.agent_config.component_configurations.pop(component_id)
+                self.ctx.agent_config.component_configurations[
+                    current_component_id
+                ] = config
+
 
 @clean_after
 def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
@@ -307,49 +356,27 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
         with remove_unused_component_configurations(ctx):
             item_upgrader = ItemUpgrader(ctx, item_type, item_public_id)
             click.echo(
-                "Upgrading {} '{}/{}' from version '{}' to '{}' for the agent '{}'...".format(
-                    item_type,
-                    item_public_id.author,
-                    item_public_id.name,
-                    item_upgrader.current_item_public_id.version,
-                    item_public_id.version,
-                    ctx.agent_config.agent_name,
-                )
+                f"Upgrading {item_type} '{item_public_id.author}/{item_public_id.name}' from version '{item_upgrader.current_item_public_id.version}' to '{item_public_id.version}' for the agent '{ctx.agent_config.agent_name}'..."
             )
             version = item_upgrader.check_upgrade_is_required()
 
             item_upgrader.remove_item()
             item_upgrader.add_item()
+            item_upgrader.update_references(version)
 
         click.echo(
-            "The {} '{}/{}' for the agent '{}' has been successfully upgraded from version '{}' to '{}'.".format(
-                item_type,
-                item_public_id.author,
-                item_public_id.name,
-                ctx.agent_config.agent_name,
-                item_upgrader.current_item_public_id.version,
-                version,
-            )
+            f"The {item_type} '{item_public_id.author}/{item_public_id.name}' for the agent '{ctx.agent_config.agent_name}' has been successfully upgraded from version '{item_upgrader.current_item_public_id.version}' to '{version}'."
         )
 
     except NotAddedException:
         raise click.ClickException(
-            "A {} with id '{}/{}' is not registered. Please use the `add` command. Aborting...".format(
-                item_type, item_public_id.author, item_public_id.name
-            ),
+            f"A {item_type} with id '{item_public_id.author}/{item_public_id.name}' is not registered. Please use the `add` command. Aborting..."
         )
     except AlreadyActualVersionException as e:
         raise click.ClickException(
-            "The {} with id '{}/{}' already has version '{}'. Nothing to upgrade.".format(
-                item_type, item_public_id.author, item_public_id.name, e.version,
-            )
+            f"The {item_type} with id '{item_public_id.author}/{item_public_id.name}' already has version '{e.version}'. Nothing to upgrade."
         )
     except IsRequiredException as e:
         raise click.ClickException(
-            "Can not upgrade {} '{}/{}' because it is required by '{}'".format(
-                item_type,
-                item_public_id.author,
-                item_public_id.name,
-                ", ".join(map(str, e.required_by)),
-            )
+            f"Can not upgrade {item_type} '{item_public_id.author}/{item_public_id.name}' because it is required by '{', '.join(map(str, e.required_by))}'"
         )

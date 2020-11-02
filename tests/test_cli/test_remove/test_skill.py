@@ -32,6 +32,8 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 
+from packages.fetchai.skills.gym import PUBLIC_ID as GYM_SKILL_PUBLIC_ID
+
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner, ROOT_DIR
 
 
@@ -49,7 +51,7 @@ class TestRemoveSkillWithPublicId:
         tmp_dir = cls.t / dir_path
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
-        cls.skill_id = "fetchai/gym:0.10.0"
+        cls.skill_id = str(GYM_SKILL_PUBLIC_ID)
         cls.skill_name = "gym"
 
         os.chdir(cls.t)
@@ -122,7 +124,7 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         tmp_dir = cls.t / dir_path
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
-        cls.skill_id = "fetchai/gym:0.10.0"
+        cls.skill_id = str(GYM_SKILL_PUBLIC_ID)
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -180,7 +182,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         tmp_dir = cls.t / dir_path
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
-        cls.skill_id = "fetchai/gym:0.10.0"
+        cls.skill_id = str(GYM_SKILL_PUBLIC_ID)
         cls.skill_name = "gym"
 
         os.chdir(cls.t)

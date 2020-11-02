@@ -23,13 +23,14 @@ import importlib
 import re
 from typing import Any, Dict, Generic, Optional, Set, Type, TypeVar, Union
 
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAException
 from aea.helpers.base import RegexConstrainedString
 
 
 """A regex to match a Python identifier (i.e. a module/class name)."""
 PY_ID_REGEX = r"[^\d\W]\w*"
-ITEM_ID_REGEX = r"[:/._A-Za-z0-9]+"
+ITEM_ID_REGEX = fr"([_A-Za-z][_A-Za-z0-9]*)|{PublicId.PUBLIC_ID_REGEX}"
 ItemType = TypeVar("ItemType")
 
 
@@ -64,7 +65,7 @@ class EntryPoint(Generic[ItemType], RegexConstrainedString):
         path.to.module:className
     """
 
-    REGEX = re.compile(r"^({}(?:\.{})*):({})$".format(*[PY_ID_REGEX] * 3))
+    REGEX = re.compile(r"^({pyid}(?:\.{pyid})*):({pyid})$".format(pyid=PY_ID_REGEX))
 
     def __init__(self, seq):
         """Initialize the entrypoint."""

@@ -61,6 +61,10 @@ class TestBehaviour(Behaviour):
 
 def run(duration, runtime_mode):
     """Test act message generate performance."""
+    # pylint: disable=import-outside-toplevel,unused-import
+    # import manually due to some lazy imports in decision_maker
+    import aea.decision_maker.default  # noqa: F401
+
     agent = make_agent(runtime_mode=runtime_mode)
     connection = SyncedGeneratorConnection.make()
     agent.resources.add_connection(connection)
@@ -87,7 +91,7 @@ def run(duration, runtime_mode):
 @click.option(
     "--runtime_mode", default="async", help="Runtime mode: async or threaded."
 )
-@click.option("--number_of_runs", default=10, help="How many times run teste.")
+@click.option("--number_of_runs", default=10, help="How many times run test.")
 def main(duration, runtime_mode, number_of_runs):
     """Run test."""
     click.echo("Start test with options:")
