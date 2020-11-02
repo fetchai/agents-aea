@@ -28,7 +28,6 @@ This module contains the classes required for dialogue management.
 import itertools
 import secrets
 import sys
-from abc import ABC
 from collections import namedtuple
 from enum import Enum
 from inspect import signature
@@ -63,6 +62,12 @@ class InvalidDialogueMessage(Exception):
 
 class DialogueLabel:
     """The dialogue label class acts as an identifier for dialogues."""
+
+    __slots__ = (
+        "_dialogue_reference",
+        "_dialogue_opponent_addr",
+        "_dialogue_starter_addr",
+    )
 
     NONCE_BYTES_NB = 32
 
@@ -113,11 +118,7 @@ class DialogueLabel:
     def __eq__(self, other) -> bool:
         """Check for equality between two DialogueLabel objects."""
         if isinstance(other, DialogueLabel):
-            return (
-                self.dialogue_reference == other.dialogue_reference
-                and self.dialogue_starter_addr == other.dialogue_starter_addr
-                and self.dialogue_opponent_addr == other.dialogue_opponent_addr
-            )
+            return hash(self) == hash(other)
         return False
 
     def __hash__(self) -> int:
@@ -188,7 +189,31 @@ class DialogueLabel:
         return dialogue_label
 
 
-class Dialogue(ABC):
+class _DialogueMeta(type):
+    """
+    Metaclass for Dialogue.
+
+    Adds slot support forevery subclass
+    Creates classlevvel Rules instance
+    """
+
+    def __new__(cls, name: str, bases: Tuple[Type], dct: Dict):
+        """Construct a new type."""
+        # apply empty slots if no slots defined.
+        dct["__slots__"] = dct.get("__slots__", tuple())
+
+        # set class level `_rules`
+        dialogue_cls: Type[Dialogue] = super().__new__(cls, name, bases, dct)
+        dialogue_cls._rules = dialogue_cls.Rules(
+            dialogue_cls.INITIAL_PERFORMATIVES,
+            dialogue_cls.TERMINAL_PERFORMATIVES,
+            dialogue_cls.VALID_REPLIES,
+        )
+
+        return dialogue_cls
+
+
+class Dialogue(metaclass=_DialogueMeta):
     """The dialogue class maintains state of a dialogue and manages it."""
 
     STARTING_MESSAGE_ID = 1
@@ -200,6 +225,17 @@ class Dialogue(ABC):
     VALID_REPLIES = (
         dict()
     )  # type: Dict[Message.Performative, FrozenSet[Message.Performative]]
+
+    __slots__ = (
+        "_self_address",
+        "_incomplete_dialogue_label",
+        "_dialogue_label",
+        "_role",
+        "_is_self_initiated",
+        "_message_class",
+        "_outgoing_messages",
+        "_incoming_messages",
+    )
 
     class Rules:
         """This class defines the rules for the dialogue."""
@@ -281,6 +317,8 @@ class Dialogue(ABC):
             """Get the string representation."""
             return str(self.value)
 
+    _rules: Optional[Rules] = None
+
     def __init__(
         self,
         dialogue_label: DialogueLabel,
@@ -301,9 +339,6 @@ class Dialogue(ABC):
         self._incomplete_dialogue_label = dialogue_label.get_incomplete_version()
         self._dialogue_label = dialogue_label
         self._role = role
-        self._rules = self.Rules(
-            self.INITIAL_PERFORMATIVES, self.TERMINAL_PERFORMATIVES, self.VALID_REPLIES
-        )
 
         self._is_self_initiated = (
             dialogue_label.dialogue_opponent_addr
@@ -340,11 +375,11 @@ class Dialogue(ABC):
     @property
     def dialogue_labels(self) -> Set[DialogueLabel]:
         """
-        Get the dialogue labels (incomplete and complete, if it exists)
+        Get the dialogue labels (incomplete and complete, if it exists).
 
         :return: the dialogue labels
         """
-        return {self._dialogue_label, self._incomplete_dialogue_label}
+        return {self.dialogue_label, self.incomplete_dialogue_label}
 
     @property
     def self_address(self) -> Address:
@@ -895,7 +930,7 @@ class Dialogue(ABC):
         return representation
 
 
-class DialogueStats(ABC):
+class DialogueStats:
     """Class to handle statistics on default dialogues."""
 
     def __init__(self, end_states: FrozenSet[Dialogue.EndState]) -> None:
@@ -940,7 +975,7 @@ class DialogueStats(ABC):
             self._other_initiated[end_state] += 1
 
 
-class Dialogues(ABC):
+class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
     def __init__(
