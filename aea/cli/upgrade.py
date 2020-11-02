@@ -166,7 +166,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
             upgrader.add_item()
             upgrader.update_references(new_item_version)
 
-        _update_non_vendor_packages(ctx, upgraders)
+        _update_non_vendor_packages(ctx)
 
     click.echo("Finished project upgrade. Everything is up to date now!")
     click.echo(
@@ -381,7 +381,7 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
             item_upgrader.add_item()
             item_upgrader.update_references(version)
 
-            _update_non_vendor_packages(ctx, [(item_upgrader, version)])
+            _update_non_vendor_packages(ctx)
 
         click.echo(
             f"The {item_type} '{item_public_id.author}/{item_public_id.name}' for the agent '{ctx.agent_config.agent_name}' has been successfully upgraded from version '{item_upgrader.current_item_public_id.version}' to '{version}'."
@@ -401,28 +401,20 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
         )
 
 
-def _update_non_vendor_packages(
-    ctx: Context, upgraders: List[Tuple[ItemUpgrader, str]]
-) -> None:
+def _update_non_vendor_packages(ctx: Context) -> None:
     """
     Update non-vendor packages.
 
-    :param upgraders: the list of upgraders.
+    :param ctx: the CLI context
     :return: None
     """
     # index from component type to replacements
-    replacements: Dict[ComponentType, Dict[ComponentId, ComponentId]] = {}
-    for upgrader, new_version in upgraders:
-        replacements.setdefault(upgrader.component_id.component_type, {})[
-            upgrader.component_id
-        ] = ComponentId(
-            upgrader.item_type,
-            PublicId(
-                upgrader.item_public_id.author,
-                upgrader.item_public_id.name,
-                new_version,
-            ),
-        )
+    # a replacement is a map from (package_author, package_name) to public id with the new version
+    replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]] = {}
+    for dependency_id in ctx.agent_config.package_dependencies:
+        replacements.setdefault(dependency_id.component_type, {})[
+            (dependency_id.author, dependency_id.name)
+        ] = dependency_id.public_id
 
     non_vendor_packages_paths = get_non_vendor_package_path(Path(ctx.cwd))
     for non_vendor_path in non_vendor_packages_paths:
@@ -431,7 +423,7 @@ def _update_non_vendor_packages(
 
 def _update_non_vendor_package(
     package_path: Path,
-    replacements: Dict[ComponentType, Dict[ComponentId, ComponentId]],
+    replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
 ) -> None:
     """Update a single non-vendor package."""
     # a path to a non-vendor package in an AEA project is of the form:
@@ -450,11 +442,9 @@ def _update_non_vendor_package(
 
 
 @singledispatch
-def update_dependencies(  # pylint: disable=unused-argument
-    arg: ComponentConfiguration,  # pylint: disable=unused-argument
-    replacements: Dict[  # pylint: disable=unused-argument
-        ComponentType, Dict[ComponentId, ComponentId]
-    ],
+def update_dependencies(
+    _arg: ComponentConfiguration,
+    _replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
 ):
     """Update dependencies in a component configuration."""
 
@@ -462,15 +452,16 @@ def update_dependencies(  # pylint: disable=unused-argument
 def _replace_component_id(
     config: ComponentConfiguration,
     types_to_update: Set[ComponentType],
-    replacements: Dict[ComponentType, Dict[ComponentId, ComponentId]],
+    replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
 ):
     """Replace a component id."""
     for component_type in types_to_update:
         public_id_set = getattr(config, component_type.to_plural(), set())
-        replacements_of_type = replacements.get(component_type, {})
+        replacements_given_type = replacements.get(component_type, {})
         for old_public_id in list(public_id_set):
-            if old_public_id in replacements_of_type:
-                new_public_id = replacements_of_type[old_public_id]
+            old_prefix = (old_public_id.author, old_public_id.name)
+            if old_prefix in replacements_given_type:
+                new_public_id = replacements_given_type[old_prefix]
                 public_id_set.discard(old_public_id)
                 public_id_set.add(new_public_id)
 
@@ -478,7 +469,7 @@ def _replace_component_id(
 @update_dependencies.register(ProtocolConfig)  # type: ignore
 def _(
     _arg: ProtocolConfig,
-    _replacements: Dict[ComponentType, Dict[ComponentId, ComponentId]],
+    _replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
 ):
     pass
 
@@ -486,7 +477,7 @@ def _(
 @update_dependencies.register(ConnectionConfig)  # type: ignore
 def _(
     arg: ConnectionConfig,
-    replacements: Dict[ComponentType, Dict[ComponentId, ComponentId]],
+    replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
 ):
     _replace_component_id(
         arg, {ComponentType.PROTOCOL, ComponentType.CONNECTION}, replacements
@@ -496,14 +487,14 @@ def _(
 @update_dependencies.register(ContractConfig)  # type: ignore
 def _(  # type: ignore
     _arg: ContractConfig,
-    _replacements: Dict[ComponentType, Dict[ComponentId, ComponentId]],
+    _replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
 ):
     """Update contract config with new dependencies."""
 
 
 @update_dependencies.register(SkillConfig)  # type: ignore
 def _(
-    arg: SkillConfig, replacements: Dict[ComponentType, Dict[ComponentId, ComponentId]]
+    arg: SkillConfig, replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]]
 ):
     _replace_component_id(
         arg,
