@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-""" Deploy an ACN libp2p node to a kubernetes cluster """
+"""Deploy an ACN libp2p node to a kubernetes cluster"""
 
 import argparse
 import base64
@@ -25,16 +25,21 @@ import subprocess  # nosec
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
+
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
 sys.path.append(SCRIPT_DIR)
-from run_acn_node_standalone import AcnNodeConfig
+from run_acn_node_standalone import (  # noqa # pylint: disable=wrong-import-position # isort:skip
+    AcnNodeConfig,
+)
 
 # docker defaults
 DOCKER_FETCHAI_DEFAULT_FILE = os.path.join(SCRIPT_DIR, "Dockerfile")
+DOCKER_FETCHAI_DEFAULT_FILE_DEV = os.path.join(SCRIPT_DIR, "Dockerfile.dev")
 DOCKER_FETCHAI_DEFAULT_CTX = SCRIPT_DIR
+DOCKER_FETCHAI_DEFAULT_CTX_DEV = os.path.join(SCRIPT_DIR, "../../")
 DOCKER_FETCHAI_DEFAULT_IMG = "acn_node"
 DOCKER_FETCHAI_DEFAULT_REGISTRY = "gcr.io/fetch-ai-sandbox"
 
@@ -59,7 +64,10 @@ def _execute_cmd(cmd: List[str]) -> Tuple[str, bool]:
     try:
         if proc.wait() == 0:
             success = True
-    except Exception as e:
+    except (
+        subprocess.CalledProcessError,  # pylint: disable=broad-except
+        Exception,
+    ) as e:
         print("_excute_cmd caught exception: {}".format(str(e)))
     print("-| Output :\n{}".format(out.decode("ascii")))
     return out.decode("ascii"), success
@@ -120,7 +128,7 @@ class DockerDeployment:
         )
 
         for cmd in cmds:
-            out, ok = _execute_cmd(cmd)
+            _, ok = _execute_cmd(cmd)
             if not ok:
                 return False
 
@@ -159,8 +167,7 @@ class K8sPodDeployment:
                 return ok
         for yaml in self.deployment_files:
             cmd = ["kubectl", "apply", "-f", str(yaml)]
-            out, ok = _execute_cmd(cmd)
-            print(out)
+            _, ok = _execute_cmd(cmd)
             if not ok:
                 break
         return ok
@@ -174,17 +181,14 @@ class K8sPodDeployment:
         ok = True
         for yaml in self.deployment_files:
             cmd = ["kubectl", "delete", "-f", str(yaml)]
-            out, ok = _execute_cmd(cmd)
-            print(out)
+            _, ok = _execute_cmd(cmd)
             if not ok:
                 break
         return ok
 
 
 class AcnK8sPodConfig:
-    """
-    Store, parse, and generate kubernetes deployment for an ACN node
-    """
+    """Store, parse, and generate kubernetes deployment for an ACN node"""
 
     K8S_DEPLOYMENT_NAME = "ph-deployment-name-here"
     K8S_NAMESPACE = "ph-deployment-namespace-here"
@@ -194,7 +198,7 @@ class AcnK8sPodConfig:
 
     NODE_PORT = "ph-node-port-number-here"
     NODE_PORT_DELEGATE = "ph-node-delegate-port-number-here"
-    NODE_PORT_MONITORING = "ph-node-monitoring-port-number-here"  # TODO
+    NODE_PORT_MONITORING = "ph-node-monitoring-port-number-here"
     NODE_URI_EXTERNAL = "ph-node-external-uri-here"
     NODE_URI = "ph-node-local-uri-here"
     NODE_URI_DELEGATE = "ph-node-delegate-uri-here"
@@ -249,9 +253,9 @@ class AcnK8sPodConfig:
 
         # acn node configuration
         config[cls.NODE_KEY_NAME] = "node-priv-key-{}".format(acn_port)
-        config[cls.NODE_PORT] = acn_port
-        config[cls.NODE_PORT_DELEGATE] = acn_delegate_port
-        config[cls.NODE_PORT_MONITORING] = acn_monitoring_port
+        config[cls.NODE_PORT] = str(acn_port)
+        config[cls.NODE_PORT_DELEGATE] = str(acn_delegate_port)
+        config[cls.NODE_PORT_MONITORING] = str(acn_monitoring_port)
         config[cls.NODE_ENTRY_PEERS] = (
             ",".join(acn_entry_peers) if acn_entry_peers is not None else ""
         )
@@ -323,6 +327,11 @@ class AcnK8sPodConfig:
 
     @staticmethod
     def check_config(config: Dict[str, str]) -> None:
+        """
+        Check an AcnK8sPodConfig deployment for correct configuration
+
+        :param config: dictionary of configuration to check
+        """
         AcnNodeConfig(
             base64.b64decode(
                 config[AcnK8sPodConfig.NODE_KEY_ENCODED].encode("ascii")
@@ -331,7 +340,8 @@ class AcnK8sPodConfig:
             config[AcnK8sPodConfig.NODE_URI_EXTERNAL],
             config[AcnK8sPodConfig.NODE_URI_DELEGATE],
             config[AcnK8sPodConfig.NODE_URI_MONITORING],
-            config[AcnK8sPodConfig.NODE_ENTRY_PEERS].strip('"').split(','),
+            config[AcnK8sPodConfig.NODE_ENTRY_PEERS].strip('"').split(","),
+            "",
             True,
         )
 
@@ -361,7 +371,7 @@ class AcnK8sPodConfig:
 
 
 def parse_commandline():
-    """ Parse script cl arguments """
+    """Parse script cl arguments"""
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -390,7 +400,7 @@ def parse_commandline():
     parser.add_argument(
         "--acn-port",
         action="store",
-        type=str,
+        type=int,
         dest="port",
         required=False,
         help="acn node's port number (both local and external)",
@@ -398,7 +408,7 @@ def parse_commandline():
     parser.add_argument(
         "--acn-port-delegate",
         action="store",
-        type=str,
+        type=int,
         dest="delegate_port",
         required=False,
         help="acn node's delegate service port number (both local and external)",
@@ -406,7 +416,7 @@ def parse_commandline():
     parser.add_argument(
         "--acn-port-monitoring",
         action="store",
-        type=str,
+        type=int,
         dest="monitoring_port",
         required=False,
         help="acn node's monitoring service port number (local only)",
@@ -456,6 +466,13 @@ def parse_commandline():
         dest="docker_fetchai_defaults",
         required=False,
         help="Use FetchAI defaults for docker configuration",
+    )
+    parser.add_argument(
+        "--docker-fetchai-defaults-dev",
+        action="store_true",
+        dest="docker_fetchai_defaults_dev",
+        required=False,
+        help="Use FetchAI Dev defaults for docker configuration",
     )
     parser.add_argument(
         "--docker-file",
@@ -519,6 +536,7 @@ def parse_commandline():
     if (
         not args.from_file
         and not args.docker_fetchai_defaults
+        and not args.docker_fetchai_defaults_dev
         and (
             args.docker_file is None
             or args.docker_ctx is None
@@ -527,7 +545,7 @@ def parse_commandline():
         )
     ):
         parser.error(
-            "--docker-file, --docker-ctx, --docker-image, --docker-registry are required when --docker-fetchai-defaults is not set"
+            "--docker-file, --docker-ctx, --docker-image, --docker-registry are required when --docker-fetchai-defaults[-dev] is not set"
         )
 
     return args
@@ -542,40 +560,50 @@ if __name__ == "__main__":
     if args.from_file:
         pod_deployment = K8sPodDeployment([Path(args.from_file)], None)
     else:
-        deployment_args: List[str] = [
+        dargs: List[Any] = [
             args.key,
             args.port,
             args.delegate_port,
             args.monitoring_port,
-            args.entry_peers_maddrs,
         ]
 
-        docker_config : List[str] = []
-        if args.docker_fetchai_defaults:
+        dargs.append(
+            args.entry_peers_maddrs if args.entry_peers_maddrs is not None else ""
+        )
+
+        docker_config: List[str] = []
+        if args.docker_fetchai_defaults_dev:
             docker_config = [
-                    DOCKER_FETCHAI_DEFAULT_FILE,
-                    DOCKER_FETCHAI_DEFAULT_CTX,
-                    DOCKER_FETCHAI_DEFAULT_IMG,
-                    DOCKER_FETCHAI_DEFAULT_REGISTRY,
+                DOCKER_FETCHAI_DEFAULT_FILE_DEV,
+                DOCKER_FETCHAI_DEFAULT_CTX_DEV,
+                DOCKER_FETCHAI_DEFAULT_IMG,
+                DOCKER_FETCHAI_DEFAULT_REGISTRY,
+            ]
+        elif args.docker_fetchai_defaults:
+            docker_config = [
+                DOCKER_FETCHAI_DEFAULT_FILE,
+                DOCKER_FETCHAI_DEFAULT_CTX,
+                DOCKER_FETCHAI_DEFAULT_IMG,
+                DOCKER_FETCHAI_DEFAULT_REGISTRY,
             ]
         if args.docker_file is not None:
             docker_config[0] = args.docker_file
         if args.docker_ctx is not None:
-            docker_config[1] = args.docker_file
+            docker_config[1] = args.docker_ctx
         if args.docker_image is not None:
             docker_config[2] = args.docker_image
         if args.docker_registry is not None:
             docker_config[3] = args.docker_registry
 
-        deployment_args.extend(docker_config)
+        dargs.extend(docker_config)
 
-        k8s_config : List[str] = []
+        k8s_config: List[str] = []
         if args.k8s_fetchai_defaults:
             k8s_config = [
-                    K8S_FETCHAI_DEFAULT_PUBLIC_HOST,
-                    K8S_FETCHAI_DEFAULT_NAMESPACE,
-                    K8S_FETCHAI_DEFAULT_PUBLIC_TEMPLATE_DIR,
-                ]
+                K8S_FETCHAI_DEFAULT_PUBLIC_HOST,
+                K8S_FETCHAI_DEFAULT_NAMESPACE,
+                K8S_FETCHAI_DEFAULT_PUBLIC_TEMPLATE_DIR,
+            ]
         if args.k8s_public_hostname is not None:
             k8s_config[0] = args.k8s_public_hostname
         if args.k8s_namespace is not None:
@@ -583,10 +611,22 @@ if __name__ == "__main__":
         if args.k8s_template_files_dir is not None:
             k8s_config[2] = args.k8s_template_files_dir
 
-        deployment_args.extend(k8s_config)
-        print(deployment_args)
+        dargs.extend(k8s_config)
 
-        pod_deployment = AcnK8sPodConfig(*deployment_args).generate_deployment()
+        pod_deployment = AcnK8sPodConfig(
+            dargs[0],
+            dargs[1],
+            dargs[2],
+            dargs[3],
+            dargs[4],
+            dargs[5],
+            dargs[6],
+            dargs[7],
+            dargs[8],
+            dargs[9],
+            dargs[10],
+            dargs[11],
+        ).generate_deployment()
 
     try:
         if args.delete_deployment:
