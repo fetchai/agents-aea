@@ -23,25 +23,28 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List
+from typing import List, Set
 from unittest.mock import patch
 
 import pytest
 from click.exceptions import ClickException
+from click.testing import Result
 
 from aea.cli import cli
+from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.configurations.base import (
     AgentConfig,
     ComponentId,
+    ComponentType,
     DEFAULT_AEA_CONFIG_FILE,
     PackageId,
     PackageType,
     PublicId,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.helpers.base import cd
-from aea.test_tools.test_cases import BaseAEATestCase
+from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
@@ -660,3 +663,105 @@ class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):
     def test_upgrade_to_latest_but_same_version(self):
         """Skip."""
         pass
+
+
+class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
+    """
+    Test that the command 'aea upgrade' correctly updates non-vendor package data.
+
+    In particular, check that 'aea upgrade' updates the public ids of
+    the package dependencies and the 'aea_version' field.
+
+    The test works as follows:
+    - scaffold a package, one for each possible package type;
+    - add a dependency to each of them (that will be updated)
+    - this dependency will be one to upgrade (thanks to mocking)
+    - check that the command actually updated the reference to the mocked package
+      in every configuration file.
+    """
+
+    capture_log = True
+    IS_EMPTY = True
+
+    _expected_version = "0.99.0"
+    _package_name = "dummy_package"
+
+    @classmethod
+    def scaffold_item(cls, item_type: str, name: str) -> Result:
+        """Override default behaviour by adding a custom dependency to the scaffolded item."""
+        result = super(TestUpgradeNonVendorDependencies, cls).scaffold_item(
+            item_type, name
+        )
+        # add custom dependency (a protocol) to each package
+        # that supports dependencies (only connections and skills)
+        if item_type in {ComponentType.CONNECTION.value, ComponentType.SKILL.value}:
+            cls.nested_set_config(
+                f"{ComponentType(item_type).to_plural()}.{name}.protocols",
+                [str(cls._custom_dependency_public_id)],  # type: ignore
+            )
+        return result
+
+    @classmethod
+    def setup_class(cls):
+        """Set up test case."""
+        super(TestUpgradeNonVendorDependencies, cls).setup_class()
+        cls._custom_dependency_public_id = PublicId(
+            cls.author, cls._package_name, "0.1.0"
+        )
+        cls._new_custom_dependency_public_id = PublicId(
+            cls.author, cls._package_name, cls._expected_version
+        )
+        cls.scaffold_item("protocol", "my_protocol")
+        cls.scaffold_item("connection", "my_connection")
+        cls.scaffold_item("contract", "my_contract")
+        cls.scaffold_item("skill", "my_skill")
+        cls.scaffold_item("protocol", "dummy_package")
+        shutil.move(
+            Path(cls._get_cwd(), "protocols", "dummy_package"),
+            Path(cls._get_cwd(), "vendor", cls.author, "protocols", "dummy_package"),
+        )
+
+    @classmethod
+    def _change_latest_version_in_registry(cls, *args, **kwargs):
+        """
+        Emulate the behaviour of 'get_latest_version_available_in_registry'.
+
+        Do something only if certain conditions are met
+        """
+        old_public_id = PublicId(cls.author, cls._package_name, "0.1.0")
+        new_public_id = PublicId(cls.author, cls._package_name, cls._expected_version)
+        if old_public_id in args:
+            return new_public_id
+        else:
+            return get_latest_version_available_in_registry(*args, **kwargs)
+
+    @patch("aea.cli.upgrade.ItemUpgrader.check_item_present")
+    @patch("aea.cli.upgrade.ItemUpgrader.remove_item")
+    @patch("aea.cli.upgrade.ItemUpgrader.add_item")
+    @patch("aea.cli.upgrade.ItemUpgrader.update_references")
+    @patch(
+        "aea.cli.registry.utils.get_latest_version_available_in_registry",
+        side_effect=_change_latest_version_in_registry,
+    )
+    def test_non_vendor_nothing_to_upgrade(
+        self, mock_latest_version, *mocks
+    ):  # pylint: disable=unused-argument
+        """Test upgrade project dependencies not removed cause non vendor."""
+        mock_latest_version.side_effect = self._change_latest_version_in_registry
+        self.run_cli_command("upgrade", cwd=self._get_cwd())
+        self.assert_dependency_updated(
+            ComponentType.CONNECTION,
+            "my_connection",
+            {self._new_custom_dependency_public_id},
+        )
+        self.assert_dependency_updated(
+            ComponentType.SKILL, "my_skill", {self._new_custom_dependency_public_id}
+        )
+
+    def assert_dependency_updated(
+        self, item_type: ComponentType, package_name: str, expected: Set[PublicId]
+    ):
+        """Assert dependency is updated."""
+        package_path = Path(self._get_cwd(), item_type.to_plural(), package_name)
+        component_config = load_component_configuration(item_type, package_path)
+        assert component_config.protocols == expected  # type: ignore

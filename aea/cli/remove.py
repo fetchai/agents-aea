@@ -120,7 +120,7 @@ class ItemRemoveHelper:
         self,
     ) -> Dict[PackageId, Set[PackageId]]:
         """
-        Get all reverse dependencices in agent.
+        Get all reverse dependencies in agent.
 
         :return: dict with PackageId: and set of PackageIds that uses this package
 
