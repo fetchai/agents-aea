@@ -21,7 +21,6 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
@@ -134,9 +133,8 @@ class TestParameters(BaseSkillTestCase):
         self.parameters._contract_address = None
         assert self.parameters.is_contract_deployed is False
 
-        assert (
-            self.parameters.registration_end_time
-            == datetime.datetime.strptime("01 01 2020  00:02", "%d %m %Y %H:%M")
+        assert self.parameters.registration_end_time == datetime.datetime.strptime(
+            "01 01 2020  00:02", "%d %m %Y %H:%M"
         )
 
         assert self.parameters.inactivity_timeout == 30

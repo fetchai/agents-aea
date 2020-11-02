@@ -19,6 +19,7 @@
 """This module contains the tests of the helpers module of the tac control skill."""
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -26,8 +27,17 @@ from aea.exceptions import AEAEnforceError
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.skills.tac_control.helpers import (
+    ERC1155Contract,
+    _sample_good_instances,
+    determine_scaling_factor,
+    generate_currency_endowments,
     generate_currency_id_to_name,
+    generate_currency_ids,
+    generate_exchange_params,
+    generate_good_endowments,
     generate_good_id_to_name,
+    generate_good_ids,
+    generate_utility_params,
 )
 
 from tests.conftest import ROOT_DIR
@@ -43,8 +53,38 @@ class TestHelpers(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
 
+    def test_generate_good_ids(self):
+        """Test the generate_good_ids of Helpers module."""
+        expected_list = [1, 2, 3, 4, 5]
+        with patch.object(
+            ERC1155Contract, "generate_token_ids", return_value=expected_list
+        ):
+            good_ids = generate_good_ids(5, 2)
+        assert good_ids == expected_list
+
+    def test_generate_currency_ids(self):
+        """Test the generate_good_ids of Helpers module."""
+        expected_list = [1, 2, 3, 4, 5]
+        with patch.object(
+            ERC1155Contract, "generate_token_ids", return_value=expected_list
+        ):
+            currency_ids = generate_currency_ids(5, 2)
+        assert currency_ids == expected_list
+
     def test_generate_currency_id_to_name(self):
         """Test the generate_currency_id_to_name of Helpers module."""
+        expected_currency_id_to_name = {
+            "1": "FT_1",
+            "3": "FT_3",
+            "5": "FT_5",
+            "7": "FT_7",
+            "9": "FT_9",
+        }
+        currency_id_to_name = generate_currency_id_to_name(5, [1, 3, 5, 7, 9])
+        assert currency_id_to_name == expected_currency_id_to_name
+
+    def test_generate_currency_id_to_name_invalid_lengths(self):
+        """Test the generate_currency_id_to_name of Helpers module where the lengths do not match."""
         # phase
         with pytest.raises(
             AEAEnforceError,
@@ -54,8 +94,76 @@ class TestHelpers(BaseSkillTestCase):
 
     def test_generate_good_id_to_name(self):
         """Test the generate_good_id_to_name of Helpers module."""
+        expected_good_id_to_name = {
+            "1": "FT_1",
+            "3": "FT_3",
+            "5": "FT_5",
+            "7": "FT_7",
+            "9": "FT_9",
+        }
+        good_id_to_name = generate_good_id_to_name(5, [1, 3, 5, 7, 9])
+        assert good_id_to_name == expected_good_id_to_name
+
+    def test_generate_good_id_to_name_invalid_lengths(self):
+        """Test the generate_good_id_to_name of Helpers module."""
         # phase
         with pytest.raises(
             AEAEnforceError, match="Length of good_ids does not match nb_goods."
         ):
             assert generate_good_id_to_name(nb_goods=1, good_ids=[1, 2])
+
+    def test_determine_scaling_factor(self):
+        """Test the determine_scaling_factor of Helpers module."""
+        money_endowment = 53730411
+        scaling_factor = determine_scaling_factor(money_endowment)
+        assert scaling_factor == 10000000.0
+
+    def test_generate_good_endowments(self):
+        """Test the generate_good_endowments of Helpers module."""
+        endowments = generate_good_endowments(
+            ["ag_1_add", "ag_2_add"], ["good_id_1", "good_id_2"], 2, 1, 1
+        )
+        assert "ag_1_add" in endowments
+        assert "ag_2_add" in endowments
+
+    def test_generate_utility_params(self):
+        """Test the generate_utility_params of Helpers module."""
+        utility_function_params = generate_utility_params(
+            ["ag_1_add", "ag_2_add"], ["good_id_1", "good_id_2"], 1000.0
+        )
+        assert "good_id_1" in utility_function_params["ag_1_add"].keys()
+        assert "good_id_2" in utility_function_params["ag_1_add"].keys()
+        assert "good_id_1" in utility_function_params["ag_2_add"].keys()
+        assert "good_id_2" in utility_function_params["ag_2_add"].keys()
+
+    def test_sample_good_instances(self):
+        """Test the _sample_good_instances of Helpers module."""
+        nb_instances = _sample_good_instances(2, ["good_id_1", "good_id_2"], 2, 1, 1)
+        assert type(nb_instances["good_id_1"]) == int
+        assert type(nb_instances["good_id_2"]) == int
+
+    def test_generate_currency_endowments(self):
+        """Test the generate_currency_endowments of Helpers module."""
+        currency_endowments = generate_currency_endowments(
+            ["ag_1_add", "ag_2_add"], ["currency_id_1", "currency_id_2"], 10
+        )
+        assert "currency_id_1" in currency_endowments["ag_1_add"].keys()
+        assert "currency_id_2" in currency_endowments["ag_2_add"].keys()
+        assert currency_endowments["ag_1_add"]["currency_id_1"] == 10
+        assert currency_endowments["ag_1_add"]["currency_id_2"] == 10
+
+        assert currency_endowments["ag_2_add"]["currency_id_1"] == 10
+        assert currency_endowments["ag_2_add"]["currency_id_2"] == 10
+
+    def test_generate_exchange_params(self):
+        """Test the generate_exchange_params of Helpers module."""
+        currency_endowments = generate_exchange_params(
+            ["ag_1_add", "ag_2_add"], ["currency_id_1", "currency_id_2"]
+        )
+        assert "currency_id_1" in currency_endowments["ag_1_add"].keys()
+        assert "currency_id_2" in currency_endowments["ag_2_add"].keys()
+        assert currency_endowments["ag_1_add"]["currency_id_1"] == 1.0
+        assert currency_endowments["ag_1_add"]["currency_id_2"] == 1.0
+
+        assert currency_endowments["ag_2_add"]["currency_id_1"] == 1.0
+        assert currency_endowments["ag_2_add"]["currency_id_2"] == 1.0

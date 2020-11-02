@@ -55,18 +55,30 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.parameters = cast(Parameters, cls._skill.skill_context.parameters)
         cls.tac_dialogues = cast(TacDialogues, cls._skill.skill_context.tac_dialogues)
 
+        cls.mocked_reg_time = cls._time("00:02")
+        cls.mocked_start_time = cls._time("00:04")
+        cls.mocked_end_time = cls._time("00:06")
+
+        cls.parameters._registration_start_time = cls.mocked_reg_time
+        cls.parameters._start_time = cls.mocked_start_time
+        cls.parameters._end_time = cls.mocked_end_time
+
+        cls.mocked_description = Description({"foo1": 1, "bar1": 2})
+
+        cls.agent_1_address = "agent_address_1"
+        cls.agent_1_name = "agent_name_1"
+        cls.agent_2_address = "agent_address_2"
+        cls.agent_2_name = "agent_name_2"
+
     def test_init(self):
         """Test the __init__ method of the tac behaviour."""
         assert self.tac_behaviour._registered_description is None
 
     def test_setup(self):
         """Test the setup method of the tac behaviour."""
-        # setup
-        mocked_description = Description({"foo1": 1, "bar1": 2})
-
         # operation
         with patch.object(
-            self.game, "get_location_description", return_value=mocked_description
+            self.game, "get_location_description", return_value=self.mocked_description
         ):
             with patch.object(self.tac_behaviour.context.logger, "log") as mock_logger:
                 self.tac_behaviour.setup()
@@ -74,47 +86,39 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # after
         self.assert_quantity_in_outbox(1)
 
+        # _register_agent
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
             sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description,
+            service_description=self.mocked_description,
         )
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
+
+    @staticmethod
+    def _time(time: str):
+        date_time = "01 01 2020  " + time
+        return datetime.datetime.strptime(date_time, "%d %m %Y %H:%M")
 
     def test_act_i(self):
         """Test the act method of the tac behaviour where phase is pre_game and reg_start_time < now < start_time."""
         # setup
         self.game._phase = Phase.PRE_GAME
 
-        mocked_reg_time = datetime.datetime.strptime(
-            "01 01 2020  00:01", "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
-        mocked_start_time = datetime.datetime.strptime(
-            "01 01 2020  00:03", "%d %m %Y %H:%M"
-        )
-
-        self.parameters._registration_start_time = mocked_reg_time
-        self.parameters._start_time = mocked_start_time
-
+        mocked_now_time = self._time("00:03")
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
-
-        mocked_description = Description({"foo1": 1, "bar1": 2})
 
         # operation
         with patch("datetime.datetime", new=datetime_mock):
             with patch.object(
                 self.game,
                 "get_register_tac_description",
-                return_value=mocked_description,
+                return_value=self.mocked_description,
             ):
                 with patch.object(
                     self.tac_behaviour.context.logger, "log"
@@ -122,8 +126,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     self.tac_behaviour.act()
 
         # after
+        # act
         assert self.game.phase == Phase.GAME_REGISTRATION
 
+        # _register_tac
         self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
@@ -131,39 +137,27 @@ class TestSkillBehaviour(BaseSkillTestCase):
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
             sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description,
+            service_description=self.mocked_description,
         )
         assert has_attributes, error_str
-
         mock_logger.assert_any_call(logging.INFO, "registering TAC data model on SOEF.")
+
+        # act
         mock_logger.assert_any_call(
-            logging.INFO, f"TAC open for registration until: {mocked_start_time}"
+            logging.INFO, f"TAC open for registration until: {self.mocked_start_time}"
         )
 
     def test_act_ii(self):
-        """Test the act method of the tac behaviour where phase is game_registration and start_time < now < end_time and nb_agent < min_nb_agents"""
+        """Test the act method of the tac behaviour where phase is game_registration and start_time < now < end_time and nb_agent < min_nb_agents."""
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
-        mocked_start_time = datetime.datetime.strptime(
-            "01 01 2020  00:01", "%d %m %Y %H:%M"
-        )
-        mocked_end_time = datetime.datetime.strptime(
-            "01 01 2020  00:03", "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
-
-        self.parameters._start_time = mocked_start_time
-        self.parameters._end_time = mocked_end_time
-
+        mocked_now_time = self._time("00:05")
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, "agent_name_1")
-        mocked_description = Description({"foo1": 1, "bar1": 2})
+        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_1_name)
 
         self.prepare_skill_dialogue(
             self.tac_dialogues,
@@ -181,7 +175,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             with patch.object(
                 self.game,
                 "get_unregister_tac_description",
-                return_value=mocked_description,
+                return_value=self.mocked_description,
             ):
                 with patch.object(
                     self.tac_behaviour.context.logger, "log"
@@ -214,7 +208,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
             sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description,
+            service_description=self.mocked_description,
         )
         assert has_attributes, error_str
         mock_logger.assert_any_call(
@@ -226,32 +220,19 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
-        mocked_start_time = datetime.datetime.strptime(
-            "01 01 2020  00:01", "%d %m %Y %H:%M"
-        )
-        mocked_end_time = datetime.datetime.strptime(
-            "01 01 2020  00:03", "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
-
-        self.parameters._start_time = mocked_start_time
-        self.parameters._end_time = mocked_end_time
-
+        mocked_now_time = self._time("00:05")
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, "agent_name_1")
-        mocked_description = Description({"foo1": 1, "bar1": 2})
+        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_1_name)
 
         # operation
         with patch("datetime.datetime", new=datetime_mock):
             with patch.object(
                 self.game,
                 "get_unregister_tac_description",
-                return_value=mocked_description,
+                return_value=self.mocked_description,
             ):
                 with patch.object(self.tac_behaviour.context.logger, "log"):
                     with pytest.raises(
@@ -264,25 +245,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
-        mocked_start_time = datetime.datetime.strptime(
-            "01 01 2020  00:01", "%d %m %Y %H:%M"
-        )
-        mocked_end_time = datetime.datetime.strptime(
-            "01 01 2020  00:03", "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
-
-        self.parameters._start_time = mocked_start_time
-        self.parameters._end_time = mocked_end_time
-
+        mocked_now_time = self._time("00:05")
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, "agent_name_1")
-        mocked_description = Description({"foo1": 1, "bar1": 2})
+        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_1_name)
 
         dialogue = self.prepare_skill_dialogue(
             self.tac_dialogues,
@@ -301,7 +269,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             with patch.object(
                 self.game,
                 "get_unregister_tac_description",
-                return_value=mocked_description,
+                return_value=self.mocked_description,
             ):
                 with patch.object(self.tac_behaviour.context.logger, "log"):
                     with pytest.raises(
@@ -326,35 +294,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
 
     def test_act_iii(self):
-        """Test the act method of the tac behaviour where phase is game_registration and start_time < now < end_time and nb_agent < min_nb_agents"""
+        """Test the act method of the tac behaviour where phase is game_registration and start_time < now < end_time and nb_agent >= min_nb_agents"""
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
-        mocked_start_time = datetime.datetime.strptime(
-            "01 01 2020  00:01", "%d %m %Y %H:%M"
-        )
-        mocked_end_time = datetime.datetime.strptime(
-            "01 01 2020  00:03", "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
-
-        self.parameters._start_time = mocked_start_time
-        self.parameters._end_time = mocked_end_time
-
+        mocked_now_time = self._time("00:05")
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        agent_1_address = "agent_address_1"
-        agent_1_name = "agent_name_1"
-        agent_2_address = "agent_address_2"
-        agent_2_name = "agent_name_2"
 
-        self.game._registration.register_agent(agent_1_address, agent_1_name)
-        self.game._registration.register_agent(agent_2_address, agent_2_name)
-        mocked_description = Description({"foo1": 1, "bar1": 2})
+        self.game._registration.register_agent(self.agent_1_address, self.agent_1_name)
+        self.game._registration.register_agent(self.agent_2_address, self.agent_2_name)
         mocked_holdings_summary = "some_holdings_summary"
         mocked_equilibrium_summary = "some_equilibrium_summary"
 
@@ -362,19 +313,23 @@ class TestSkillBehaviour(BaseSkillTestCase):
             self.tac_dialogues,
             (
                 DialogueMessage(
-                    TacMessage.Performative.REGISTER, {"agent_name": agent_1_name}, True
+                    TacMessage.Performative.REGISTER,
+                    {"agent_name": self.agent_1_name},
+                    True,
                 ),
             ),
-            agent_1_address,
+            self.agent_1_address,
         )
         self.prepare_skill_dialogue(
             self.tac_dialogues,
             (
                 DialogueMessage(
-                    TacMessage.Performative.REGISTER, {"agent_name": agent_2_name}, True
+                    TacMessage.Performative.REGISTER,
+                    {"agent_name": self.agent_2_name},
+                    True,
                 ),
             ),
-            agent_2_address,
+            self.agent_2_address,
         )
 
         # operation
@@ -382,7 +337,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             with patch.object(
                 self.game,
                 "get_unregister_tac_description",
-                return_value=mocked_description,
+                return_value=self.mocked_description,
             ):
                 with patch.object(
                     type(self.game),
@@ -414,12 +369,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         tac_message_1_in_outbox = cast(TacMessage, self.get_message_from_outbox())
         self._assert_tac_message_and_logging_output(
-            tac_message_1_in_outbox, agent_1_address, mock_logger
+            tac_message_1_in_outbox, self.agent_1_address, mock_logger
         )
 
         tac_message_2_in_outbox = cast(TacMessage, self.get_message_from_outbox())
         self._assert_tac_message_and_logging_output(
-            tac_message_2_in_outbox, agent_2_address, mock_logger
+            tac_message_2_in_outbox, self.agent_2_address, mock_logger
         )
 
         # phase is POST_GAME
@@ -432,7 +387,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
             sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description,
+            service_description=self.mocked_description,
         )
         assert has_attributes, error_str
 
@@ -447,38 +402,20 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
-        mocked_start_time = datetime.datetime.strptime(
-            "01 01 2020  00:01", "%d %m %Y %H:%M"
-        )
-        mocked_end_time = datetime.datetime.strptime(
-            "01 01 2020  00:03", "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
-
-        self.parameters._start_time = mocked_start_time
-        self.parameters._end_time = mocked_end_time
-
+        mocked_now_time = self._time("00:05")
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        agent_1_address = "agent_address_1"
-        agent_1_name = "agent_name_1"
-        agent_2_address = "agent_address_2"
-        agent_2_name = "agent_name_2"
-
-        self.game._registration.register_agent(agent_1_address, agent_1_name)
-        self.game._registration.register_agent(agent_2_address, agent_2_name)
-        mocked_description = Description({"foo1": 1, "bar1": 2})
+        self.game._registration.register_agent(self.agent_1_address, self.agent_1_name)
+        self.game._registration.register_agent(self.agent_2_address, self.agent_2_name)
 
         # operation
         with patch("datetime.datetime", new=datetime_mock):
             with patch.object(
                 self.game,
                 "get_unregister_tac_description",
-                return_value=mocked_description,
+                return_value=self.mocked_description,
             ):
                 with patch.object(self.tac_behaviour.context.logger, "log"):
                     with pytest.raises(
@@ -487,44 +424,28 @@ class TestSkillBehaviour(BaseSkillTestCase):
                         self.tac_behaviour.act()
 
     def test_start_tac_empty_dialogue(self):
-        """Test the _start_tac method of the tac behaviour where a dialogue is empty.."""
+        """Test the _start_tac method of the tac behaviour where a dialogue is empty."""
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
-        mocked_start_time = datetime.datetime.strptime(
-            "01 01 2020  00:01", "%d %m %Y %H:%M"
-        )
-        mocked_end_time = datetime.datetime.strptime(
-            "01 01 2020  00:03", "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
-
-        self.parameters._start_time = mocked_start_time
-        self.parameters._end_time = mocked_end_time
-
+        mocked_now_time = self._time("00:05")
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        agent_1_address = "agent_address_1"
-        agent_1_name = "agent_name_1"
-        agent_2_address = "agent_address_2"
-        agent_2_name = "agent_name_2"
-
-        self.game._registration.register_agent(agent_1_address, agent_1_name)
-        self.game._registration.register_agent(agent_2_address, agent_2_name)
-        mocked_description = Description({"foo1": 1, "bar1": 2})
+        self.game._registration.register_agent(self.agent_1_address, self.agent_1_name)
+        self.game._registration.register_agent(self.agent_2_address, self.agent_2_name)
 
         dialogue_1 = self.prepare_skill_dialogue(
             self.tac_dialogues,
             (
                 DialogueMessage(
-                    TacMessage.Performative.REGISTER, {"agent_name": agent_1_name}, True
+                    TacMessage.Performative.REGISTER,
+                    {"agent_name": self.agent_1_name},
+                    True,
                 ),
             ),
-            agent_1_address,
+            self.agent_1_address,
         )
 
         dialogue_1._incoming_messages = []
@@ -534,7 +455,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             with patch.object(
                 self.game,
                 "get_unregister_tac_description",
-                return_value=mocked_description,
+                return_value=self.mocked_description,
             ):
                 with patch.object(self.tac_behaviour.context.logger, "log"):
                     with pytest.raises(
@@ -543,31 +464,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
                         self.tac_behaviour.act()
 
     def test_act_iv(self):
-        """Test the act method of the tac behaviour where phase is game_registration and start_time < now < end_time and nb_agent < min_nb_agents"""
+        """Test the act method of the tac behaviour where phase is GAME and end_time < now."""
         # setup
         self.game._phase = Phase.GAME
 
-        mocked_end_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:03", "%d %m %Y %H:%M"
-        )
-
-        self.parameters._end_time = mocked_end_time
-
+        mocked_now_time = self._time("00:07")
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        agent_1_address = "agent_address_1"
-        agent_1_name = "agent_name_1"
-        agent_2_address = "agent_address_2"
-        agent_2_name = "agent_name_2"
+        self.game._registration.register_agent(self.agent_1_address, self.agent_1_name)
+        self.game._registration.register_agent(self.agent_2_address, self.agent_2_name)
 
-        self.game._registration.register_agent(agent_1_address, agent_1_name)
-        self.game._registration.register_agent(agent_2_address, agent_2_name)
-        mocked_description = Description({"foo1": 1, "bar1": 2})
         mocked_holdings_summary = "some_holdings_summary"
         mocked_equilibrium_summary = "some_equilibrium_summary"
 
@@ -575,19 +483,23 @@ class TestSkillBehaviour(BaseSkillTestCase):
             self.tac_dialogues,
             (
                 DialogueMessage(
-                    TacMessage.Performative.REGISTER, {"agent_name": agent_1_name}, True
+                    TacMessage.Performative.REGISTER,
+                    {"agent_name": self.agent_1_name},
+                    True,
                 ),
             ),
-            agent_1_address,
+            self.agent_1_address,
         )
         self.prepare_skill_dialogue(
             self.tac_dialogues,
             (
                 DialogueMessage(
-                    TacMessage.Performative.REGISTER, {"agent_name": agent_2_name}, True
+                    TacMessage.Performative.REGISTER,
+                    {"agent_name": self.agent_2_name},
+                    True,
                 ),
             ),
-            agent_2_address,
+            self.agent_2_address,
         )
 
         # operation
@@ -595,7 +507,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             with patch.object(
                 self.game,
                 "get_unregister_tac_description",
-                return_value=mocked_description,
+                return_value=self.mocked_description,
             ):
                 with patch.object(
                     type(self.game),
@@ -625,7 +537,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=TacMessage,
             performative=TacMessage.Performative.CANCELLED,
-            to=agent_1_address,
+            to=self.agent_1_address,
             sender=self.skill.skill_context.agent_address,
         )
         assert has_attributes, error_str
@@ -634,7 +546,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=TacMessage,
             performative=TacMessage.Performative.CANCELLED,
-            to=agent_2_address,
+            to=self.agent_2_address,
             sender=self.skill.skill_context.agent_address,
         )
         assert has_attributes, error_str
@@ -653,12 +565,13 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test_teardown(self):
         """Test the teardown method of the service_registration behaviour."""
         # setup
-        mocked_description = Description({"foo1": 1, "bar1": 2})
         mocked_location_description = Description({"foo1": 1, "bar1": 2})
 
         # operation
         with patch.object(
-            self.game, "get_unregister_tac_description", return_value=mocked_description
+            self.game,
+            "get_unregister_tac_description",
+            return_value=self.mocked_description,
         ):
             with patch.object(
                 self.game,
@@ -680,7 +593,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
             sender=self.skill.skill_context.agent_address,
-            service_description=mocked_description,
+            service_description=self.mocked_description,
         )
         assert has_attributes, error_str
         mock_logger.assert_any_call(
