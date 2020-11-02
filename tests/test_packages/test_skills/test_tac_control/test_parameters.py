@@ -44,70 +44,47 @@ class TestParameters(BaseSkillTestCase):
     def setup(cls):
         """Setup the test class."""
         super().setup()
-        cls.parameters = cast(Parameters, cls._skill.skill_context.parameters)
-        cls.parameters_manual = Parameters(
-            ledger_id="some_ledger_id",
-            contract_address=None,
-            good_ids=[],
-            currency_ids=[],
-            min_nb_agents=2,
-            money_endowment=200,
-            nb_goods=9,
-            nb_currencies=1,
-            tx_fee=1,
-            base_good_endowment=2,
-            lower_bound_factor=1,
-            upper_bound_factor=1,
-            registration_start_time="01 01 2020  00:01",
-            registration_timeout=60,
-            item_setup_timeout=60,
-            competition_timeout=300,
-            inactivity_timeout=30,
-            whitelist=[],
-            location={"longitude": 51.5194, "latitude": 0.1270},
-            service_data={"key": "tac", "value": "v1"},
-            name="parameters",
-            skill_context=cls._skill.skill_context,
-        )
+        cls.kwargs = {
+            "ledger_id": "some_ledger_id",
+            "contract_address": None,
+            "good_ids": [],
+            "currency_ids": [],
+            "min_nb_agents": 2,
+            "money_endowment": 200,
+            "nb_goods": 9,
+            "nb_currencies": 1,
+            "tx_fee": 1,
+            "base_good_endowment": 2,
+            "lower_bound_factor": 1,
+            "upper_bound_factor": 1,
+            "registration_start_time": "01 01 2020  00:01",
+            "registration_timeout": 60,
+            "item_setup_timeout": 60,
+            "competition_timeout": 300,
+            "inactivity_timeout": 30,
+            "whitelist": [],
+            "location": {"longitude": 51.5194, "latitude": 0.1270},
+            "service_data": {"key": "tac", "value": "v1"},
+            "name": "parameters",
+            "skill_context": cls._skill.skill_context,
+        }
+        cls.parameters = Parameters(**cls.kwargs)
+
+    @staticmethod
+    def _time(date_time: str):
+        return datetime.datetime.strptime(date_time, "%d %m %Y %H:%M")
 
     def test_init_now_after_start(self):
         """Test the init of Parameters where now is after the registration_start_time."""
-        mocked_start_time_str = "01 01 2020  00:01"
-        mocked_start_time = datetime.datetime.strptime(
-            mocked_start_time_str, "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
+        mocked_start_time = self._time("01 01 2020 00:01")
+        mocked_now_time = self._time("01 01 2020 00:02")
+
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
         with patch("datetime.datetime", new=datetime_mock):
             with patch.object(self.parameters.context.logger, "log") as mocked_logger:
-                Parameters(
-                    ledger_id="",
-                    contract_address=None,
-                    good_ids=[],
-                    currency_ids=[],
-                    min_nb_agents=2,
-                    money_endowment=200,
-                    nb_goods=9,
-                    nb_currencies=1,
-                    tx_fee=1,
-                    base_good_endowment=2,
-                    lower_bound_factor=1,
-                    upper_bound_factor=1,
-                    registration_start_time=mocked_start_time_str,
-                    registration_timeout=60,
-                    item_setup_timeout=60,
-                    competition_timeout=300,
-                    inactivity_timeout=30,
-                    whitelist=[],
-                    location={"longitude": 51.5194, "latitude": 0.1270},
-                    service_data={"key": "tac", "value": "v1"},
-                    name="parameters",
-                    skill_context=self.skill.skill_context,
-                )
+                Parameters(**self.kwargs)
         mocked_logger.assert_any_call(
             logging.WARNING,
             f"TAC registration start time {mocked_start_time} is in the past! Deregistering skill.",
@@ -117,41 +94,18 @@ class TestParameters(BaseSkillTestCase):
     def test_init_now_before_start(self):
         """Test the init of Parameters where now is before the registration_start_time."""
         mocked_start_time_str = "01 01 2020  00:03"
-        mocked_start_time = datetime.datetime.strptime(
-            mocked_start_time_str, "%d %m %Y %H:%M"
-        )
-        mocked_now_time = datetime.datetime.strptime(
-            "01 01 2020  00:02", "%d %m %Y %H:%M"
-        )
+
+        mocked_start_time = self._time(mocked_start_time_str)
+        mocked_now_time = self._time("01 01 2020  00:02")
+
         datetime_mock = Mock(wraps=datetime.datetime)
         datetime_mock.now.return_value = mocked_now_time
 
+        self.kwargs["registration_start_time"] = mocked_start_time_str
+
         with patch("datetime.datetime", new=datetime_mock):
             with patch.object(self.parameters.context.logger, "log") as mocked_logger:
-                par = Parameters(
-                    ledger_id="",
-                    contract_address=None,
-                    good_ids=[],
-                    currency_ids=[],
-                    min_nb_agents=2,
-                    money_endowment=200,
-                    nb_goods=9,
-                    nb_currencies=1,
-                    tx_fee=1,
-                    base_good_endowment=2,
-                    lower_bound_factor=1,
-                    upper_bound_factor=1,
-                    registration_start_time=mocked_start_time_str,
-                    registration_timeout=60,
-                    item_setup_timeout=60,
-                    competition_timeout=300,
-                    inactivity_timeout=30,
-                    whitelist=[],
-                    location={"longitude": 51.5194, "latitude": 0.1270},
-                    service_data={"key": "tac", "value": "v1"},
-                    name="parameters",
-                    skill_context=self.skill.skill_context,
-                )
+                par = Parameters(**self.kwargs)
         mocked_logger.assert_any_call(
             logging.INFO,
             f"TAC registation start time: {mocked_start_time}, and registration end time: {par.registration_end_time}, and start time: "
@@ -162,65 +116,42 @@ class TestParameters(BaseSkillTestCase):
     def test_simple_properties(self):
         """Test the properties of Parameters class."""
         # phase
-        assert self.parameters_manual.ledger_id == "some_ledger_id"
+        assert self.parameters.ledger_id == "some_ledger_id"
 
-        self.parameters_manual._contract_address = None
+        self.parameters._contract_address = None
         with pytest.raises(AEAEnforceError, match="No contract address provided."):
-            assert self.parameters_manual.contract_address
+            assert self.parameters.contract_address
 
-        self.parameters_manual.contract_address = "some_contract_address"
-        assert self.parameters_manual.contract_address == "some_contract_address"
+        self.parameters.contract_address = "some_contract_address"
+        assert self.parameters.contract_address == "some_contract_address"
 
         with pytest.raises(AEAEnforceError, match="Contract address already provided."):
-            self.parameters_manual.contract_address = "some_contract_address"
+            self.parameters.contract_address = "some_contract_address"
 
-        assert self.parameters_manual.contract_id == self.parameters_manual._contract_id
+        assert self.parameters.contract_id == self.parameters._contract_id
 
-        assert self.parameters_manual.is_contract_deployed is True
-        self.parameters_manual._contract_address = None
-        assert self.parameters_manual.is_contract_deployed is False
+        assert self.parameters.is_contract_deployed is True
+        self.parameters._contract_address = None
+        assert self.parameters.is_contract_deployed is False
 
         assert (
-            self.parameters_manual.registration_end_time
+            self.parameters.registration_end_time
             == datetime.datetime.strptime("01 01 2020  00:02", "%d %m %Y %H:%M")
         )
 
-        assert self.parameters_manual.inactivity_timeout == 30
+        assert self.parameters.inactivity_timeout == 30
 
-        assert self.parameters_manual.agent_location == {
+        assert self.parameters.agent_location == {
             "location": Location(latitude=0.1270, longitude=51.5194)
         }
-        assert self.parameters_manual.set_service_data == {"key": "tac", "value": "v1"}
-        assert self.parameters_manual.remove_service_data == {"key": "tac"}
-        assert self.parameters_manual.simple_service_data == {"tac": "v1"}
+        assert self.parameters.set_service_data == {"key": "tac", "value": "v1"}
+        assert self.parameters.remove_service_data == {"key": "tac"}
+        assert self.parameters.simple_service_data == {"tac": "v1"}
 
     def test_init_inconsistent(self):
         """Test the __init__ of the Parameters class where _check_consistency raises an exception."""
-        with pytest.raises(
-            ValueError,
-            match="If the contract address is set, then good ids and currency id must be provided and consistent.",
-        ):
-            assert Parameters(
-                ledger_id="",
-                contract_address="some_contract_address",
-                good_ids=[],
-                currency_ids=[],
-                min_nb_agents=2,
-                money_endowment=200,
-                nb_goods=9,
-                nb_currencies=1,
-                tx_fee=1,
-                base_good_endowment=2,
-                lower_bound_factor=1,
-                upper_bound_factor=1,
-                registration_start_time="01 01 2020  00:03",
-                registration_timeout=60,
-                item_setup_timeout=60,
-                competition_timeout=300,
-                inactivity_timeout=30,
-                whitelist=[],
-                location={"longitude": 51.5194, "latitude": 0.1270},
-                service_data={"key": "tac", "value": "v1"},
-                name="parameters",
-                skill_context=self.skill.skill_context,
-            )
+        self.kwargs["contract_address"] = "some_contract_address"
+        error_message = "If the contract address is set, then good ids and currency id must be provided and consistent."
+
+        with pytest.raises(ValueError, match=error_message):
+            assert Parameters(**self.kwargs,)
