@@ -380,15 +380,6 @@ class TestDialogueBase:
             == self.valid_message_2_by_other
         )
 
-    def test_has_message(self):
-        """Test the 'has_message' method."""
-        assert self.dialogue._has_message(self.valid_message_1_by_self) is False
-
-        self.dialogue._update(self.valid_message_1_by_self)
-        assert self.dialogue._has_message(self.valid_message_1_by_self) is True
-
-        assert self.dialogue._has_message(self.valid_message_2_by_other) is False
-
     def test_has_message_id(self):
         """Test the 'has_message_id' method."""
         assert self.dialogue._has_message_id(1) is False

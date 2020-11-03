@@ -538,22 +538,6 @@ class Dialogue(metaclass=_DialogueMeta):
             raise ValueError("Message not present.")
         return message
 
-    def _has_message(self, message: Message) -> bool:
-        """
-        Check whether a message exists in this dialogue.
-
-        :param message: the message
-        :return: True if message exists in this dialogue, False otherwise
-        """
-        if self.is_empty:
-            return False
-
-        if not self._has_message_id(message.message_id):
-            return False
-
-        retrieved_message = self._get_message(message.message_id)
-        return message == retrieved_message
-
     def _has_message_id(self, message_id: int) -> bool:
         """
         Check whether a message with the supplied message id exists in this dialogue.
