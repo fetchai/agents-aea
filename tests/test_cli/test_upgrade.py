@@ -723,8 +723,10 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
             cwd=cls._get_cwd(),
         )
 
-    def test_non_vendor_nothing_to_upgrade(self):  # pylint: disable=unused-argument
-        """Test upgrade project dependencies not removed cause non vendor."""
+    def test_non_vendor_update_references_to_upgraded_packages(
+        self,
+    ):  # pylint: disable=unused-argument
+        """Test that dependencies in non-vendor packages are updated correctly after upgrade."""
         self.run_cli_command("--skip-consistency-check", "upgrade", cwd=self._get_cwd())
         self.assert_dependency_updated(
             ComponentType.CONNECTION, "my_connection", {DefaultMessage.protocol_id},
@@ -740,3 +742,12 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
         package_path = Path(self._get_cwd(), item_type.to_plural(), package_name)
         component_config = load_component_configuration(item_type, package_path)
         assert component_config.protocols == expected  # type: ignore
+
+
+class TestNothingToUpgrade(AEATestCaseEmpty):
+    """Test the upgrade command when there's nothing t upgrade."""
+
+    def test_nothing_to_upgrade(self):
+        """Test nothing to upgrade."""
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert result.stdout == "Starting project upgrade...\n"

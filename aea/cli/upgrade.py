@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea upgrade' subcommand."""
+
 from contextlib import suppress
 from functools import singledispatch
 from pathlib import Path
@@ -132,6 +133,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
 
     if not items_to_upgrade:
         click.echo("Everything is already up to date!")
+        click.echo("\n")
         return
 
     for dep in shared_deps:
