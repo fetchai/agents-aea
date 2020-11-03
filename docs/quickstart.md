@@ -11,6 +11,19 @@ The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
+
+### Optional: using the Docker image.
+
+We also provide a Docker image with all the needed dependencies.
+
+To pull:
+```bash
+docker pull marcofavorito/aea-deploy:latest
+```
+
+See at the bottom of the guide how to run the quickstart using the Docker image. 
+
+
 ## Preliminaries
 
 Create and enter into a new working directory.
@@ -361,6 +374,15 @@ Delete the AEA from the parent directory (`cd ..` to go to the parent directory)
 ``` bash
 aea delete my_first_aea
 ```
+
+## Using the Docker image
+
+You can reproduce the quick-start guide by:
+```bash
+docker run -it marcofavorito/aea-deploy 
+``` 
+
+To stop, use CTRL+C.
 
 ## Next steps
 
