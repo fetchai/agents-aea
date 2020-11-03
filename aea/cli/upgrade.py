@@ -133,7 +133,6 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
 
     if not items_to_upgrade:
         click.echo("Everything is already up to date!")
-        click.echo("\n")
         return
 
     for dep in shared_deps:
@@ -428,9 +427,13 @@ def _update_non_vendor_package(
     replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
 ) -> None:
     """Update a single non-vendor package."""
-    # a path to a non-vendor package in an AEA project is of the form:
-    #    .../aea-project-path/package-type/package-name/
-    # so we need to get the second-to-last part of the path to infer the type.
+    """
+    A path to a non-vendor package in an AEA project is of the form:
+
+        .../aea-project-path/package-type/package-name/
+
+    so we need to get the second-to-last part of the path to infer the type.
+    """
     type_plural = package_path.parts[-2]
     loader = ConfigLoaders.from_package_type(PackageType(type_plural[:-1]))
     path_to_config = (
