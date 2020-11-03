@@ -16,12 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the dialogue/base.py module."""
 
 import sys
 from typing import FrozenSet, Tuple, Type, cast
 from unittest import mock
+from unittest.mock import patch
 
 import pytest
 
@@ -586,12 +586,16 @@ class TestDialogueBase:
     def test_is_valid_next_message_negative_is_valid_fails(self):
         """Negative test for the 'validate_next_message' method: is_valid method fails"""
 
-        def failing_custom_validation(message: Message) -> Tuple[bool, str]:
+        def failing_custom_validation(self, message: Message) -> Tuple[bool, str]:
             return False, "some reason"
 
-        self.dialogue._custom_validation = failing_custom_validation
+        with patch.object(
+            self.dialogue.__class__, "_custom_validation", failing_custom_validation
+        ):
+            result, msg = self.dialogue._validate_next_message(
+                self.valid_message_1_by_self
+            )
 
-        result, msg = self.dialogue._validate_next_message(self.valid_message_1_by_self)
         assert result is False
         assert msg == "some reason"
 
