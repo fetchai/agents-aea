@@ -137,30 +137,43 @@ def _fetch_agent_deps(ctx: Context, is_mixed: bool = False) -> None:
     :param is_mixed: flag to enable mixed mode (try first local, then remote).
 
     :return: None
-    :raises: ClickException re-raises if occures in add_item call.
+    :raises: ClickException re-raises if occurs in add_item call.
     """
     ctx.set_config("is_local", True)
-
-    def _raise(item_type: str, item_id: str, exception):
-        """Temporary function to raise exception (used below twice)."""
-        raise click.ClickException(
-            "Failed to add {} dependency {}: {}".format(
-                item_type, item_id, str(exception)
-            )
-        )
-
+    ctx.set_config("is_mixed", is_mixed)
     for item_type in ("protocol", "contract", "connection", "skill"):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:
-            try:
-                add_item(ctx, item_type, item_id)
-            except click.ClickException as e:
-                if not is_mixed:
-                    _raise(item_type, item_id, e)
-                ctx.set_config("is_local", False)
-                try:
-                    add_item(ctx, item_type, item_id)
-                except click.ClickException as e:
-                    _raise(item_type, item_id, e)
-                ctx.set_config("is_local", True)
+            fetch_local_or_mixed(ctx, item_type, item_id)
+
+
+def fetch_local_or_mixed(ctx: Context, item_type: str, item_id: PublicId) -> None:
+    """
+    Fetch item, either local or mixed, depending on the parameters/context configuration.
+
+    Context expects 'is_local' and 'is_mixed' to be set.
+
+    :param ctx: the CLI context.
+    :param item_type: the type of the package.
+    :param item_id: the public id of the item.
+    :return: None
+    """
+
+    def _raise(item_type_: str, item_id_: PublicId, exception):
+        """Temporary function to raise exception (used below twice)."""
+        raise click.ClickException(
+            f"Failed to add {item_type_} dependency {item_id_}: {str(exception)}"
+        )
+
+    try:
+        add_item(ctx, item_type, item_id)
+    except click.ClickException as e:
+        if not ctx.config.get("is_mixed", False):
+            _raise(item_type, item_id, e)
+        ctx.set_config("is_local", False)
+        try:
+            add_item(ctx, item_type, item_id)
+        except click.ClickException as e:
+            _raise(item_type, item_id, e)
+        ctx.set_config("is_local", True)
