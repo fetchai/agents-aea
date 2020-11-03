@@ -21,10 +21,10 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import click
-from click import Option, UsageError, option
+from click import Context, Option, UsageError, option
 
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
@@ -152,18 +152,29 @@ def registry_flag():
 
 
 class MutuallyExclusiveOption(Option):
+    """Represent a mutually exclusive option."""
+
     def __init__(self, *args, **kwargs):
+        """Initialize the option."""
         self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
-        help = kwargs.get("help", "")
+        help_ = kwargs.get("help", "")
         if self.mutually_exclusive:
             ex_str = ", ".join(self.mutually_exclusive)
-            kwargs["help"] = help + (
+            kwargs["help"] = help_ + (
                 " NOTE: This argument is mutually exclusive with "
                 " arguments: [" + ex_str + "]."
             )
-        super(MutuallyExclusiveOption, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-    def handle_parse_result(self, ctx, opts, args):
+    def handle_parse_result(self, ctx: Context, opts: Dict[str, Any], args: List[Any]):
+        """
+        Handle parse result.
+
+        :param ctx: the click context.
+        :param opts: the options.
+        :param args: the list of arguments (to be forwarded to the parent class).
+        :return:
+        """
         if self.mutually_exclusive.intersection(opts) and self.name in opts:
             raise UsageError(
                 f"Illegal usage: `{self.name}` is mutually exclusive with "

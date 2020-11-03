@@ -27,7 +27,7 @@ import click
 
 from aea.cli.add import add_item
 from aea.cli.registry.fetch import fetch_agent
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
@@ -37,19 +37,22 @@ from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 
 
 @click.command(name="fetch")
-@click.option("--local", is_flag=True, help="For fetching agent from local folder.")
+@registry_flag()
 @click.option(
     "--alias", type=str, required=False, help="Provide a local alias for the agent.",
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
-def fetch(click_context, public_id, alias, local):
+def fetch(click_context, public_id, alias, local, remote, mixed):
     """Fetch Agent from Registry."""
     ctx = cast(Context, click_context.obj)
-    if local:
-        fetch_agent_locally(ctx, public_id, alias)
-    else:
+    enable_default = not (local or remote or mixed)
+    if remote or enable_default:
         fetch_agent(ctx, public_id, alias)
+    elif local or mixed:
+        fetch_agent_locally(ctx, public_id, alias, is_mixed=mixed)
+    else:  # pragma: nocover
+        pass  # we are never here
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
@@ -73,6 +76,7 @@ def fetch_agent_locally(
     public_id: PublicId,
     alias: Optional[str] = None,
     target_dir: Optional[str] = None,
+    is_mixed: bool = False,
 ) -> None:
     """
     Fetch Agent from local packages.
@@ -81,6 +85,7 @@ def fetch_agent_locally(
     :param public_id: public ID of agent to be fetched.
     :param alias: an optional alias.
     :param target_dir: the target directory to which the agent is fetched.
+    :param is_mixed: flag to enable mixed mode (try first local, then remote).
     :return: None
     """
     packages_path = (
@@ -120,20 +125,29 @@ def fetch_agent_locally(
         )
 
     # add dependencies
-    _fetch_agent_deps(ctx)
+    _fetch_agent_deps(ctx, is_mixed)
     click.echo("Agent {} successfully fetched.".format(public_id.name))
 
 
-def _fetch_agent_deps(ctx: Context) -> None:
+def _fetch_agent_deps(ctx: Context, is_mixed: bool = False) -> None:
     """
     Fetch agent dependencies.
 
     :param ctx: context object.
+    :param is_mixed: flag to enable mixed mode (try first local, then remote).
 
     :return: None
     :raises: ClickException re-raises if occures in add_item call.
     """
     ctx.set_config("is_local", True)
+
+    def _raise(item_type: str, item_id: str, exception):
+        """Temporary function to raise exception (used below twice)."""
+        raise click.ClickException(
+            "Failed to add {} dependency {}: {}".format(
+                item_type, item_id, str(exception)
+            )
+        )
 
     for item_type in ("protocol", "contract", "connection", "skill"):
         item_type_plural = "{}s".format(item_type)
@@ -142,8 +156,11 @@ def _fetch_agent_deps(ctx: Context) -> None:
             try:
                 add_item(ctx, item_type, item_id)
             except click.ClickException as e:
-                raise click.ClickException(
-                    "Failed to add {} dependency {}: {}".format(
-                        item_type, item_id, str(e)
-                    )
-                )
+                if not is_mixed:
+                    _raise(item_type, item_id, e)
+                ctx.set_config("is_local", False)
+                try:
+                    add_item(ctx, item_type, item_id)
+                except click.ClickException as e:
+                    _raise(item_type, item_id, e)
+                ctx.set_config("is_local", True)
