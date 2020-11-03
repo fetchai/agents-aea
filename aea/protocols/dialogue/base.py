@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """
 This module contains the classes required for dialogue management.
 
@@ -228,10 +227,8 @@ class Dialogue(metaclass=_DialogueMeta):
 
     __slots__ = (
         "_self_address",
-        "_incomplete_dialogue_label",
         "_dialogue_label",
         "_role",
-        "_is_self_initiated",
         "_message_class",
         "_outgoing_messages",
         "_incoming_messages",
@@ -336,14 +333,8 @@ class Dialogue(metaclass=_DialogueMeta):
         :return: None
         """
         self._self_address = self_address
-        self._incomplete_dialogue_label = dialogue_label.get_incomplete_version()
         self._dialogue_label = dialogue_label
         self._role = role
-
-        self._is_self_initiated = (
-            dialogue_label.dialogue_opponent_addr
-            is not dialogue_label.dialogue_starter_addr
-        )
 
         self._outgoing_messages = []  # type: List[Message]
         self._incoming_messages = []  # type: List[Message]
@@ -370,7 +361,7 @@ class Dialogue(metaclass=_DialogueMeta):
 
         :return: The incomplete dialogue label
         """
-        return self._incomplete_dialogue_label
+        return self.dialogue_label.get_incomplete_version()
 
     @property
     def dialogue_labels(self) -> Set[DialogueLabel]:
@@ -430,7 +421,10 @@ class Dialogue(metaclass=_DialogueMeta):
 
         :return: True if the agent initiated the dialogue, False otherwise
         """
-        return self._is_self_initiated
+        return (
+            self.dialogue_label.dialogue_opponent_addr
+            is not self.dialogue_label.dialogue_starter_addr
+        )
 
     @property
     def last_incoming_message(self) -> Optional[Message]:
@@ -522,7 +516,9 @@ class Dialogue(metaclass=_DialogueMeta):
         :return: the message if it exists, None otherwise
         """
         result = None  # type: Optional[Message]
-        list_of_all_messages = self._outgoing_messages + self._incoming_messages
+        list_of_all_messages = itertools.chain(
+            self._outgoing_messages, self._incoming_messages
+        )
         for message in list_of_all_messages:
             if message.message_id == message_id:
                 result = message
@@ -601,9 +597,9 @@ class Dialogue(metaclass=_DialogueMeta):
             )
 
         if self._is_message_by_self(message):
-            self._outgoing_messages.extend([message])
+            self._outgoing_messages.append(message)
         else:
-            self._incoming_messages.extend([message])
+            self._incoming_messages.append(message)
 
     def _is_belonging_to_dialogue(self, message: Message) -> bool:
         """
