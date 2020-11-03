@@ -181,4 +181,4 @@ class MutuallyExclusiveOption(Option):
                 f"arguments `{', '.join(self.mutually_exclusive)}`."
             )
 
-        return super(MutuallyExclusiveOption, self).handle_parse_result(ctx, opts, args)
+        return super().handle_parse_result(ctx, opts, args)
