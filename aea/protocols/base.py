@@ -16,13 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the base message and serialization definition."""
 import importlib
 import inspect
 import logging
 import re
 from abc import ABC, abstractmethod
+from collections import namedtuple
 from copy import copy
 from enum import Enum
 from pathlib import Path
@@ -41,6 +41,26 @@ from aea.mail.base_pb2 import Message as ProtobufMessage
 _default_logger = logging.getLogger(__name__)
 
 Address = str
+
+
+class MessageHeader(
+    namedtuple("MessageHeader", ("message_id", "performative", "sender", "target"))
+):
+    """
+    Basic message fields.
+
+    message_id
+    performative
+    sender
+    target
+    """
+
+    __slots__ = ()
+
+    @classmethod
+    def from_message(cls, msg) -> "MessageHeader":
+        """Construct message info from message."""
+        return cls(**{attr: getattr(msg, attr) for attr in cls._fields})
 
 
 class Message:
@@ -72,6 +92,11 @@ class Message:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
             _default_logger.error(e)
+
+    @property
+    def msg_header(self) -> MessageHeader:
+        """Construct message header."""
+        return MessageHeader.from_message(self)
 
     @property
     def has_sender(self) -> bool:

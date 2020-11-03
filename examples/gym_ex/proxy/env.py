@@ -171,7 +171,7 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        last_msg = self.active_dialogue.last_message
+        last_msg = self.active_dialogue.last_message_header
         if last_msg is None:
             raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_dialogue.reply(
@@ -212,7 +212,7 @@ class ProxyEnv(gym.Env):
         :param step_id: the step id
         :return: an envelope
         """
-        last_msg = self.active_dialogue.last_message
+        last_msg = self.active_dialogue.last_message_header
         if last_msg is None:
             raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_dialogue.reply(

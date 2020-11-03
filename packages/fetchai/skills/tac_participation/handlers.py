@@ -403,7 +403,7 @@ class TacHandler(Handler):
             )
         )
         state_update_dialogue = game.state_update_dialogue
-        last_msg = state_update_dialogue.last_message
+        last_msg = state_update_dialogue.last_message_header
         if last_msg is None:
             raise ValueError("Could not retrieve last message.")
         state_update_msg = state_update_dialogue.reply(

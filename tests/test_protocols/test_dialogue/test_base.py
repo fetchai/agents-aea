@@ -309,9 +309,9 @@ class TestDialogueBase:
 
         assert self.dialogue.is_self_initiated
 
-        assert self.dialogue.last_incoming_message is None
-        assert self.dialogue.last_outgoing_message is None
-        assert self.dialogue.last_message is None
+        assert self.dialogue.last_incoming_message_header is None
+        assert self.dialogue.last_outgoing_message_header is None
+        assert self.dialogue.last_message_header is None
 
         assert self.dialogue.is_empty
 
@@ -339,45 +339,53 @@ class TestDialogueBase:
     def test_try_get_message(self):
         """Test the 'try_get_message' method."""
         assert (
-            self.dialogue._try_get_message(self.valid_message_1_by_self.message_id)
+            self.dialogue._try_get_message_header(
+                self.valid_message_1_by_self.message_id
+            )
             is None
         )
         self.dialogue._update(self.valid_message_1_by_self)
         assert (
-            self.dialogue._try_get_message(self.valid_message_1_by_self.message_id)
-            == self.valid_message_1_by_self
+            self.dialogue._try_get_message_header(
+                self.valid_message_1_by_self.message_id
+            )
+            == self.valid_message_1_by_self.msg_header
         )
 
         assert (
-            self.dialogue._try_get_message(self.valid_message_2_by_other.message_id)
+            self.dialogue._try_get_message_header(
+                self.valid_message_2_by_other.message_id
+            )
             is None
         )
         self.dialogue._update(self.valid_message_2_by_other)
         assert (
-            self.dialogue._try_get_message(self.valid_message_2_by_other.message_id)
-            == self.valid_message_2_by_other
+            self.dialogue._try_get_message_header(
+                self.valid_message_2_by_other.message_id
+            )
+            == self.valid_message_2_by_other.msg_header
         )
 
     def test_get_message(self):
         """Test the 'get_message' method."""
         with pytest.raises(ValueError) as cm:
-            self.dialogue._get_message(self.valid_message_1_by_self.message_id)
+            self.dialogue._get_message_header(self.valid_message_1_by_self.message_id)
         assert str(cm.value) == "Message not present."
 
         self.dialogue._update(self.valid_message_1_by_self)
         assert (
-            self.dialogue._get_message(self.valid_message_1_by_self.message_id)
-            == self.valid_message_1_by_self
+            self.dialogue._get_message_header(self.valid_message_1_by_self.message_id)
+            == self.valid_message_1_by_self.msg_header
         )
 
         with pytest.raises(ValueError) as cm:
-            self.dialogue._get_message(self.valid_message_2_by_other.message_id)
+            self.dialogue._get_message_header(self.valid_message_2_by_other.message_id)
         assert str(cm.value) == "Message not present."
 
         self.dialogue._update(self.valid_message_2_by_other)
         assert (
-            self.dialogue._get_message(self.valid_message_2_by_other.message_id)
-            == self.valid_message_2_by_other
+            self.dialogue._get_message_header(self.valid_message_2_by_other.message_id)
+            == self.valid_message_2_by_other.msg_header
         )
 
     def test_has_message_id(self):
@@ -392,7 +400,10 @@ class TestDialogueBase:
     def test_update_positive(self):
         """Positive test for the 'update' method."""
         self.dialogue._update(self.valid_message_1_by_self)
-        assert self.dialogue.last_outgoing_message == self.valid_message_1_by_self
+        assert (
+            self.dialogue.last_outgoing_message_header
+            == self.valid_message_1_by_self.msg_header
+        )
 
     def test_update_positive_multiple_messages_by_self(self):
         """Positive test for the 'update' method: multiple messages by self is sent to the dialogue."""
@@ -410,7 +421,7 @@ class TestDialogueBase:
 
         self.dialogue._update(valid_message_2_by_self)
 
-        assert self.dialogue.last_message.message_id == 2
+        assert self.dialogue.last_message_header.message_id == 2
 
     def test_update_negative_is_valid_next_message_fails(self):
         """Negative test for the 'update' method: input message is invalid with respect to the dialogue."""
@@ -432,7 +443,7 @@ class TestDialogueBase:
             + "Invalid message_id. Expected 1. Found 2."
         )
 
-        assert self.dialogue.last_outgoing_message is None
+        assert self.dialogue.last_outgoing_message_header is None
 
     def test_update_dialogue_negative_message_does_not_belong_to_dialogue(self):
         """Negative test for the 'update' method in dialogue with wrong message not belonging to dialogue."""
@@ -478,7 +489,7 @@ class TestDialogueBase:
             content=b"Hello Back",
         )
 
-        assert self.dialogue.last_message.message_id == 2
+        assert self.dialogue.last_message_header.message_id == 2
 
     def test_reply_negative_empty_dialogue(self):
         """Negative test for the 'reply' method: target message is not in the dialogue."""
@@ -494,7 +505,7 @@ class TestDialogueBase:
     def test_reply_negative_target_message_target_mismatch(self):
         """Negative test for the 'reply' method: target message and target provided but do not match."""
         self.dialogue._update(self.valid_message_1_by_self)
-        assert self.dialogue.last_message.message_id == 1
+        assert self.dialogue.last_message_header.message_id == 1
 
         with pytest.raises(AEAEnforceError) as cm:
             self.dialogue.reply(
@@ -504,12 +515,12 @@ class TestDialogueBase:
                 content=b"Hello Back",
             )
         assert str(cm.value) == "The provided target and target_message do not match."
-        assert self.dialogue.last_message.message_id == 1
+        assert self.dialogue.last_message_header.message_id == 1
 
     def test_reply_negative_invalid_target(self):
         """Negative test for the 'reply' method: target message is not in the dialogue."""
         self.dialogue._update(self.valid_message_1_by_self)
-        assert self.dialogue.last_message.message_id == 1
+        assert self.dialogue.last_message_header.message_id == 1
 
         invalid_message_1_by_self = DefaultMessage(
             dialogue_reference=(str(1), ""),
@@ -528,7 +539,7 @@ class TestDialogueBase:
                 content=b"Hello Back",
             )
         assert str(cm.value) == "The target message does not exist in this dialogue."
-        assert self.dialogue.last_message.message_id == 1
+        assert self.dialogue.last_message_header.message_id == 1
 
     def test_is_valid_next_message_positive(self):
         """Positive test for the 'validate_next_message' method"""
@@ -1174,11 +1185,12 @@ class TestDialoguesBase:
 
         assert len(self.own_dialogues.dialogues) == 1
         assert dialogue is not None
-        assert dialogue.last_message.dialogue_reference == (str(1), "")
-        assert dialogue.last_message.message_id == 1
-        assert dialogue.last_message.target == 0
-        assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
-        assert dialogue.last_message.content == b"Hello"
+        assert dialogue.last_message_header.message_id == 1
+        assert dialogue.last_message_header.target == 0
+        assert (
+            dialogue.last_message_header.performative
+            == DefaultMessage.Performative.BYTES
+        )
 
     def test_update_positive_existing_dialogue(self):
         """Positive test for the 'update' method: the input message is for an existing dialogue."""
@@ -1206,11 +1218,15 @@ class TestDialoguesBase:
 
         assert len(self.own_dialogues.dialogues) == 1
         assert dialogue is not None
-        assert dialogue.last_message.dialogue_reference == dialogue_reference
-        assert dialogue.last_message.message_id == valid_message_2_by_other.message_id
-        assert dialogue.last_message.target == valid_message_2_by_other.target
-        assert dialogue.last_message.performative == DefaultMessage.Performative.BYTES
-        assert dialogue.last_message.content == b"Hello back"
+        assert (
+            dialogue.last_message_header.message_id
+            == valid_message_2_by_other.message_id
+        )
+        assert dialogue.last_message_header.target == valid_message_2_by_other.target
+        assert (
+            dialogue.last_message_header.performative
+            == DefaultMessage.Performative.BYTES
+        )
 
     def test_update_positive_existing_dialogue_2(self):
         """Positive test for the 'update' method: the input message is for an existing dialogue from the original sender."""
@@ -1354,32 +1370,23 @@ class TestDialoguesBase:
         updated_dialogue = self.own_dialogues.update(invalid_message_2_by_other)
 
         assert updated_dialogue is None
-        last_message = self.own_dialogues.dialogues[
-            dialogue.dialogue_label
-        ].last_message
         assert (
-            last_message.dialogue_reference[0] != ""
-            and last_message.dialogue_reference[1] == ""
+            self.own_dialogues.dialogues[
+                dialogue.dialogue_label
+            ].last_message_header.message_id
+            == 1
         )
         assert (
             self.own_dialogues.dialogues[
                 dialogue.dialogue_label
-            ].last_message.message_id
-            == 1
-        )
-        assert (
-            self.own_dialogues.dialogues[dialogue.dialogue_label].last_message.target
+            ].last_message_header.target
             == 0
         )
         assert (
             self.own_dialogues.dialogues[
                 dialogue.dialogue_label
-            ].last_message.performative
+            ].last_message_header.performative
             == DefaultMessage.Performative.BYTES
-        )
-        assert (
-            self.own_dialogues.dialogues[dialogue.dialogue_label].last_message.content
-            == b"Hello"
         )
 
     def test_complete_dialogue_reference_positive(self,):

@@ -419,8 +419,8 @@ class TestDialogues:
         seller_dialogue = self.seller_dialogues.update(cfp_msg)
 
         # Check that both fields in the dialogue_reference are set.
-        last_msg = seller_dialogue.last_incoming_message
-        assert last_msg == cfp_msg, "The messages must be equal"
+        last_msg = seller_dialogue.last_incoming_message_header
+        assert last_msg == cfp_msg.msg_header, "The messages must be equal"
 
         # Generate a proposal message to send to the buyer.
         proposal = Description({"foo1": 1, "bar1": 2})
@@ -436,8 +436,8 @@ class TestDialogues:
         buyer_dialogue = self.buyer_dialogues.update(proposal_msg)
 
         # Check that both fields in the dialogue_reference are set.
-        last_msg = buyer_dialogue.last_incoming_message
-        assert last_msg == proposal_msg, "The two messages must be equal."
+        last_msg = buyer_dialogue.last_incoming_message_header
+        assert last_msg == proposal_msg.msg_header, "The two messages must be equal."
 
         # Retrieve the dialogue based on the received message.
         retrieved_dialogue = self.buyer_dialogues.get_dialogue(proposal_msg)
@@ -465,10 +465,14 @@ class TestDialogues:
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
 
-        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing message."
-        assert len(buyer_dialogue._incoming_messages) == 0, "Some incoming messages."
         assert (
-            buyer_dialogue.last_outgoing_message == cfp_msg
+            len(buyer_dialogue._outgoing_messages_headers) == 1
+        ), "No outgoing message."
+        assert (
+            len(buyer_dialogue._incoming_messages_headers) == 0
+        ), "Some incoming messages."
+        assert (
+            buyer_dialogue.last_outgoing_message_header == cfp_msg.msg_header
         ), "Wrong outgoing message."
         assert (
             buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
@@ -483,10 +487,14 @@ class TestDialogues:
         # message arrives at counterparty
         seller_dialogue = self.seller_dialogues.update(cfp_msg)
 
-        assert len(seller_dialogue._outgoing_messages) == 0, "Some outgoing message."
-        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
         assert (
-            seller_dialogue.last_incoming_message == cfp_msg
+            len(seller_dialogue._outgoing_messages_headers) == 0
+        ), "Some outgoing message."
+        assert (
+            len(seller_dialogue._incoming_messages_headers) == 1
+        ), "No incoming messages."
+        assert (
+            seller_dialogue.last_incoming_message_header == cfp_msg.msg_header
         ), "Wrong incoming message."
         assert (
             seller_dialogue.dialogue_label.dialogue_reference[0] != ""
@@ -502,22 +510,30 @@ class TestDialogues:
             proposal=Description({"foo1": 1, "bar1": 2}),
         )
 
-        assert len(seller_dialogue._outgoing_messages) == 1, "No outgoing messages."
-        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
         assert (
-            seller_dialogue.last_outgoing_message == proposal_msg
+            len(seller_dialogue._outgoing_messages_headers) == 1
+        ), "No outgoing messages."
+        assert (
+            len(seller_dialogue._incoming_messages_headers) == 1
+        ), "No incoming messages."
+        assert (
+            seller_dialogue.last_outgoing_message_header == proposal_msg.msg_header
         ), "Wrong outgoing message."
 
         # message arrives at counterparty
         self.buyer_dialogues.update(proposal_msg)
 
-        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing messages."
-        assert len(buyer_dialogue._incoming_messages) == 1, "No incoming messages."
         assert (
-            buyer_dialogue.last_outgoing_message == cfp_msg
+            len(buyer_dialogue._outgoing_messages_headers) == 1
+        ), "No outgoing messages."
+        assert (
+            len(buyer_dialogue._incoming_messages_headers) == 1
+        ), "No incoming messages."
+        assert (
+            buyer_dialogue.last_outgoing_message_header == cfp_msg.msg_header
         ), "Wrong outgoing message."
         assert (
-            buyer_dialogue.last_incoming_message == proposal_msg
+            buyer_dialogue.last_incoming_message_header == proposal_msg.msg_header
         ), "Wrong incoming message."
         assert (
             buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
@@ -538,10 +554,14 @@ class TestDialogues:
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
 
-        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing message."
-        assert len(buyer_dialogue._incoming_messages) == 0, "Some incoming messages."
         assert (
-            buyer_dialogue.last_outgoing_message == cfp_msg
+            len(buyer_dialogue._outgoing_messages_headers) == 1
+        ), "No outgoing message."
+        assert (
+            len(buyer_dialogue._incoming_messages_headers) == 0
+        ), "Some incoming messages."
+        assert (
+            buyer_dialogue.last_outgoing_message_header == cfp_msg.msg_header
         ), "wrong outgoing message in buyer dialogue after sending cfp."
         assert (
             buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
@@ -557,10 +577,14 @@ class TestDialogues:
 
         seller_dialogue = self.seller_dialogues.update(cfp_msg)
 
-        assert len(seller_dialogue._outgoing_messages) == 0, "Some outgoing message."
-        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
         assert (
-            seller_dialogue.last_incoming_message == cfp_msg
+            len(seller_dialogue._outgoing_messages_headers) == 0
+        ), "Some outgoing message."
+        assert (
+            len(seller_dialogue._incoming_messages_headers) == 1
+        ), "No incoming messages."
+        assert (
+            seller_dialogue.last_incoming_message_header == cfp_msg.msg_header
         ), "wrong incoming message in seller dialogue after receiving cfp."
         assert (
             seller_dialogue.dialogue_label.dialogue_reference[0] != ""
@@ -576,23 +600,31 @@ class TestDialogues:
             proposal=Description({"foo1": 1, "bar1": 2}),
         )
 
-        assert len(seller_dialogue._outgoing_messages) == 1, "No outgoing messages."
-        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
         assert (
-            seller_dialogue.last_outgoing_message == proposal_msg
+            len(seller_dialogue._outgoing_messages_headers) == 1
+        ), "No outgoing messages."
+        assert (
+            len(seller_dialogue._incoming_messages_headers) == 1
+        ), "No incoming messages."
+        assert (
+            seller_dialogue.last_outgoing_message_header == proposal_msg.msg_header
         ), "wrong outgoing message in seller dialogue after sending proposal."
 
         # proposal arrives at buyer
 
         buyer_dialogue = self.buyer_dialogues.update(proposal_msg)
 
-        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing messages."
-        assert len(buyer_dialogue._incoming_messages) == 1, "No incoming messages."
         assert (
-            buyer_dialogue.last_incoming_message == proposal_msg
+            len(buyer_dialogue._outgoing_messages_headers) == 1
+        ), "No outgoing messages."
+        assert (
+            len(buyer_dialogue._incoming_messages_headers) == 1
+        ), "No incoming messages."
+        assert (
+            buyer_dialogue.last_incoming_message_header == proposal_msg.msg_header
         ), "wrong incoming message in buyer dialogue after receiving proposal."
         assert (
-            buyer_dialogue.last_incoming_message == proposal_msg
+            buyer_dialogue.last_incoming_message_header == proposal_msg.msg_header
         ), "Wrong incoming message."
         assert (
             buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
@@ -613,13 +645,14 @@ class TestDialogues:
         )
 
         assert (
-            len(buyer_dialogue._outgoing_messages) == 2
+            len(buyer_dialogue._outgoing_messages_headers) == 2
         ), "incorrect number of outgoing_messages in buyer dialogue after sending counter-proposal 1."
         assert (
-            len(buyer_dialogue._incoming_messages) == 1
+            len(buyer_dialogue._incoming_messages_headers) == 1
         ), "incorrect number of incoming_messages in buyer dialogue after sending counter-proposal 1."
         assert (
-            buyer_dialogue.last_outgoing_message == counter_proposal_msg_1
+            buyer_dialogue.last_outgoing_message_header
+            == counter_proposal_msg_1.msg_header
         ), "wrong outgoing message in buyer dialogue after sending counter-proposal 1."
 
         # counter-proposal 1 arrives at seller
@@ -627,13 +660,14 @@ class TestDialogues:
         seller_dialogue = self.seller_dialogues.update(counter_proposal_msg_1)
 
         assert (
-            len(seller_dialogue._outgoing_messages) == 1
+            len(seller_dialogue._outgoing_messages_headers) == 1
         ), "incorrect number of outgoing_messages in seller dialogue after receiving counter-proposal 1."
         assert (
-            len(seller_dialogue._incoming_messages) == 2
+            len(seller_dialogue._incoming_messages_headers) == 2
         ), "incorrect number of incoming_messages in seller dialogue after receiving counter-proposal 1."
         assert (
-            seller_dialogue.last_incoming_message == counter_proposal_msg_1
+            seller_dialogue.last_incoming_message_header
+            == counter_proposal_msg_1.msg_header
         ), "wrong incoming message in seller dialogue after receiving counter-proposal 1."
 
         # seller creates counter-proposal 2
@@ -644,13 +678,14 @@ class TestDialogues:
         )
 
         assert (
-            len(seller_dialogue._outgoing_messages) == 2
+            len(seller_dialogue._outgoing_messages_headers) == 2
         ), "incorrect number of outgoing_messages in seller dialogue after sending counter-proposal 2."
         assert (
-            len(seller_dialogue._incoming_messages) == 2
+            len(seller_dialogue._incoming_messages_headers) == 2
         ), "incorrect number of incoming_messages in seller dialogue after sending counter-proposal 2."
         assert (
-            seller_dialogue.last_outgoing_message == counter_proposal_msg_2
+            seller_dialogue.last_outgoing_message_header
+            == counter_proposal_msg_2.msg_header
         ), "wrong outgoing message in seller dialogue after sending counter-proposal 2."
 
         # counter-proposal 2 arrives at buyer
@@ -658,13 +693,14 @@ class TestDialogues:
         buyer_dialogue = self.buyer_dialogues.update(counter_proposal_msg_2)
 
         assert (
-            len(buyer_dialogue._outgoing_messages) == 2
+            len(buyer_dialogue._outgoing_messages_headers) == 2
         ), "incorrect number of outgoing_messages in buyer dialogue after receiving counter-proposal 2."
         assert (
-            len(buyer_dialogue._incoming_messages) == 2
+            len(buyer_dialogue._incoming_messages_headers) == 2
         ), "incorrect number of incoming_messages in buyer dialogue after receiving counter-proposal 2."
         assert (
-            buyer_dialogue.last_incoming_message == counter_proposal_msg_2
+            buyer_dialogue.last_incoming_message_header
+            == counter_proposal_msg_2.msg_header
         ), "wrong incoming message in buyer dialogue after receiving counter-proposal 2."
 
 

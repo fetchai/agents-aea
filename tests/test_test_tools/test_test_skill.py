@@ -445,10 +445,8 @@ class TestSkillTestCase(BaseSkillTestCase):
 
         assert type(dialogue) == FipaDialogue
         assert dialogue.is_self_initiated
-        assert len(dialogue._outgoing_messages) == 4
-        assert len(dialogue._incoming_messages) == 4
-        assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
-        assert dialogue._get_message(8).info == "some_info"
+        assert len(dialogue._outgoing_messages_headers) == 4
+        assert len(dialogue._incoming_messages_headers) == 4
 
     def test_prepare_skill_dialogue_valid_opponent_initiated(self):
         """Positive test for prepare_skill_dialogue method with a valid dialogue initiated by the opponent."""
@@ -489,10 +487,8 @@ class TestSkillTestCase(BaseSkillTestCase):
 
         assert type(dialogue) == FipaDialogue
         assert not dialogue.is_self_initiated
-        assert len(dialogue._outgoing_messages) == 4
-        assert len(dialogue._incoming_messages) == 4
-        assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
-        assert dialogue._get_message(8).info == "some_info"
+        assert len(dialogue._outgoing_messages_headers) == 4
+        assert len(dialogue._incoming_messages_headers) == 4
 
     def test_negative_prepare_skill_dialogue_invalid_opponent_initiated(self):
         """Negative test for prepare_skill_dialogue method with an invalid dialogue initiated by the opponent."""

@@ -213,7 +213,7 @@ class BaseSkillTestCase:
         if dialogue is None:
             raise AEAEnforceError("dialogue cannot be None.")
 
-        if dialogue.last_message is None:
+        if dialogue.last_message_header is None:
             raise AEAEnforceError("dialogue cannot be empty.")
 
         message_type = (
@@ -227,9 +227,11 @@ class BaseSkillTestCase:
         message_id = (
             message_id
             if message_id is not None
-            else dialogue.last_message.message_id + 1
+            else dialogue.last_message_header.message_id + 1
         )
-        target = target if target is not None else dialogue.last_message.message_id
+        target = (
+            target if target is not None else dialogue.last_message_header.message_id
+        )
         to = to if to is not None else dialogue.self_address
         sender = (
             sender

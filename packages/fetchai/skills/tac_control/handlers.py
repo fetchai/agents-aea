@@ -274,7 +274,7 @@ class TacHandler(Handler):
         if len(recovered_tac_dialogues) != 1:
             raise ValueError("Error when retrieving dialogue.")
         recovered_tac_dialogue = recovered_tac_dialogues[0]
-        last_msg = recovered_tac_dialogue.last_message
+        last_msg = recovered_tac_dialogue.last_message_header
         if last_msg is None:
             raise ValueError("Error when retrieving last message.")
         counterparty_tac_msg = recovered_tac_dialogue.reply(

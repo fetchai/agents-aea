@@ -485,7 +485,9 @@ class SigningHandler(Handler):
         :return: None
         """
         fipa_dialogue = signing_dialogue.associated_fipa_dialogue
-        last_fipa_message = cast(FipaMessage, fipa_dialogue.last_incoming_message)
+        last_fipa_message = cast(
+            FipaMessage, fipa_dialogue.last_incoming_message_header
+        )
         enforce(last_fipa_message is not None, "last message not recovered.")
         if last_fipa_message.performative == FipaMessage.Performative.ACCEPT:
             fipa_msg = fipa_dialogue.reply(
@@ -539,7 +541,9 @@ class SigningHandler(Handler):
             )
             return
         fipa_dialogue = signing_dialogue.associated_fipa_dialogue
-        last_fipa_message = cast(FipaMessage, fipa_dialogue.last_incoming_message)
+        last_fipa_message = cast(
+            FipaMessage, fipa_dialogue.last_incoming_message_header
+        )
         enforce(last_fipa_message is not None, "last message not recovered.")
         if last_fipa_message.performative == FipaMessage.Performative.ACCEPT:
             fipa_msg = fipa_dialogue.reply(

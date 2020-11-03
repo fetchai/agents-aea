@@ -30,11 +30,22 @@ import sys
 from collections import namedtuple
 from enum import Enum
 from inspect import signature
-from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
+from typing import (
+    Callable,
+    Dict,
+    FrozenSet,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
-from aea.protocols.base import Message
+from aea.protocols.base import Message, MessageHeader
 
 
 if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
@@ -230,8 +241,8 @@ class Dialogue(metaclass=_DialogueMeta):
         "_dialogue_label",
         "_role",
         "_message_class",
-        "_outgoing_messages",
-        "_incoming_messages",
+        "_outgoing_messages_headers",
+        "_incoming_messages_headers",
     )
 
     class Rules:
@@ -335,9 +346,8 @@ class Dialogue(metaclass=_DialogueMeta):
         self._self_address = self_address
         self._dialogue_label = dialogue_label
         self._role = role
-
-        self._outgoing_messages = []  # type: List[Message]
-        self._incoming_messages = []  # type: List[Message]
+        self._outgoing_messages_headers = []  # type: List[MessageHeader]
+        self._incoming_messages_headers = []  # type: List[MessageHeader]
 
         enforce(
             issubclass(message_class, Message),
@@ -427,47 +437,55 @@ class Dialogue(metaclass=_DialogueMeta):
         )
 
     @property
-    def last_incoming_message(self) -> Optional[Message]:
+    def last_incoming_message_header(self) -> Optional[MessageHeader]:
         """
         Get the last incoming message.
 
         :return: the last incoming message if it exists, None otherwise
         """
-        return self._incoming_messages[-1] if len(self._incoming_messages) > 0 else None
+        return (
+            self._incoming_messages_headers[-1]
+            if len(self._incoming_messages_headers) > 0
+            else None
+        )
 
     @property
-    def last_outgoing_message(self) -> Optional[Message]:
+    def last_outgoing_message_header(self) -> Optional[MessageHeader]:
         """
         Get the last outgoing message.
 
         :return: the last outgoing message if it exists, None otherwise
         """
-        return self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None
+        return (
+            self._outgoing_messages_headers[-1]
+            if len(self._outgoing_messages_headers) > 0
+            else None
+        )
 
     @property
-    def last_message(self) -> Optional[Message]:
+    def last_message_header(self) -> Optional[MessageHeader]:
         """
-        Get the last message.
+        Get the last message header.
 
         :return: the last message if it exists, None otherwise
         """
-        last_message = None  # type: Optional[Message]
+        last_message_header = None  # type: Optional[MessageHeader]
         if (
-            self.last_incoming_message is not None
-            and self.last_outgoing_message is not None
+            self.last_incoming_message_header is not None
+            and self.last_outgoing_message_header is not None
         ):
-            last_message = (
-                self.last_outgoing_message
-                if self.last_outgoing_message.message_id
-                > self.last_incoming_message.message_id
-                else self.last_incoming_message
+            last_message_header = (
+                self.last_outgoing_message_header
+                if self.last_outgoing_message_header.message_id
+                > self.last_incoming_message_header.message_id
+                else self.last_incoming_message_header
             )
-        elif self.last_incoming_message is not None:
-            last_message = self.last_incoming_message
-        elif self.last_outgoing_message is not None:
-            last_message = self.last_outgoing_message
+        elif self.last_incoming_message_header is not None:
+            last_message_header = self.last_incoming_message_header
+        elif self.last_outgoing_message_header is not None:
+            last_message_header = self.last_outgoing_message_header
 
-        return last_message
+        return last_message_header
 
     @property
     def is_empty(self) -> bool:
@@ -476,7 +494,10 @@ class Dialogue(metaclass=_DialogueMeta):
 
         :return: True if empty, False otherwise
         """
-        return len(self._outgoing_messages) == 0 and len(self._incoming_messages) == 0
+        return (
+            len(self._outgoing_messages_headers) == 0
+            and len(self._incoming_messages_headers) == 0
+        )
 
     def _counterparty_from_message(self, message: Message) -> Address:
         """
@@ -508,16 +529,16 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         return not self._is_message_by_self(message)
 
-    def _try_get_message(self, message_id: int) -> Optional[Message]:
+    def _try_get_message_header(self, message_id: int) -> Optional[MessageHeader]:
         """
         Try to get the message whose id is 'message_id'.
 
         :param message_id: the id of the message
         :return: the message if it exists, None otherwise
         """
-        result = None  # type: Optional[Message]
+        result = None  # type: Optional[MessageHeader]
         list_of_all_messages = itertools.chain(
-            self._outgoing_messages, self._incoming_messages
+            self._outgoing_messages_headers, self._incoming_messages_headers
         )
         for message in list_of_all_messages:
             if message.message_id == message_id:
@@ -525,7 +546,7 @@ class Dialogue(metaclass=_DialogueMeta):
                 break
         return result
 
-    def _get_message(self, message_id: int) -> Message:
+    def _get_message_header(self, message_id: int) -> MessageHeader:
         """
         Get the message whose id is 'message_id'.
 
@@ -533,7 +554,7 @@ class Dialogue(metaclass=_DialogueMeta):
         :return: the message
         :raises: AssertionError if message is not present
         """
-        message = self._try_get_message(message_id)
+        message = self._try_get_message_header(message_id)
         if message is None:
             raise ValueError("Message not present.")
         return message
@@ -548,7 +569,7 @@ class Dialogue(metaclass=_DialogueMeta):
         if self.is_empty:
             return False
 
-        return self.STARTING_MESSAGE_ID <= message_id <= self.last_message.message_id  # type: ignore
+        return self.STARTING_MESSAGE_ID <= message_id <= self.last_message_header.message_id  # type: ignore
 
     def _update(self, message: Message) -> None:
         """
@@ -580,10 +601,14 @@ class Dialogue(metaclass=_DialogueMeta):
                 )
             )
 
+        self._store_message_header(message)
+
+    def _store_message_header(self, message: Message) -> None:
+        """Store message as incoming or outgoing."""
         if self._is_message_by_self(message):
-            self._outgoing_messages.append(message)
+            self._outgoing_messages_headers.append(message.msg_header)
         else:
-            self._incoming_messages.append(message)
+            self._incoming_messages_headers.append(message.msg_header)
 
     def _is_belonging_to_dialogue(self, message: Message) -> bool:
         """
@@ -613,7 +638,7 @@ class Dialogue(metaclass=_DialogueMeta):
     def reply(
         self,
         performative: Message.Performative,
-        target_message: Optional[Message] = None,
+        target_message: Optional[Union[Message, MessageHeader]] = None,
         target: Optional[int] = None,
         **kwargs,
     ) -> Message:
@@ -629,7 +654,7 @@ class Dialogue(metaclass=_DialogueMeta):
 
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
-        last_message = self.last_message
+        last_message = self.last_message_header
         if last_message is None:
             raise ValueError("Cannot reply in an empty dialogue!")
 
@@ -787,7 +812,7 @@ class Dialogue(metaclass=_DialogueMeta):
                 ),
             )
 
-        last_message_id = self.last_message.message_id  # type: ignore
+        last_message_id = self.last_message_header.message_id  # type: ignore
         if message_id != last_message_id + 1:
             return (
                 False,
@@ -810,7 +835,7 @@ class Dialogue(metaclass=_DialogueMeta):
                 ),
             )
 
-        target_message = self._get_message(target)
+        target_message = self._get_message_header(target)
         target_performative = target_message.performative
         if performative not in self.rules.get_valid_replies(target_performative):
             return (
@@ -837,7 +862,7 @@ class Dialogue(metaclass=_DialogueMeta):
         if self.is_empty:
             return True, "The message passes additional validation."
 
-        last_target = self.last_message.target  # type: ignore
+        last_target = self.last_message_header.target  # type: ignore
         if message.target == last_target + 1:
             return True, "The message passes additional validation."
 
@@ -896,11 +921,11 @@ class Dialogue(metaclass=_DialogueMeta):
 
         if self.is_self_initiated:
             all_messages = self._interleave(
-                self._outgoing_messages, self._incoming_messages
+                self._outgoing_messages_headers, self._incoming_messages_headers
             )
         else:
             all_messages = self._interleave(
-                self._incoming_messages, self._outgoing_messages
+                self._incoming_messages_headers, self._outgoing_messages_headers
             )
 
         for msg in all_messages:

@@ -189,7 +189,7 @@ class TacBehaviour(Behaviour):
             if len(_tac_dialogues) != 1:
                 raise ValueError("Error when retrieving dialogue.")
             tac_dialogue = _tac_dialogues[0]
-            last_msg = tac_dialogue.last_message
+            last_msg = tac_dialogue.last_message_header
             if last_msg is None:
                 raise ValueError("Error when retrieving last message.")
             agent_state = game.current_agent_states[agent_address]
@@ -228,7 +228,7 @@ class TacBehaviour(Behaviour):
             if len(_tac_dialogues) != 1:
                 raise ValueError("Error when retrieving dialogue.")
             tac_dialogue = _tac_dialogues[0]
-            last_msg = tac_dialogue.last_message
+            last_msg = tac_dialogue.last_message_header
             if last_msg is None:
                 raise ValueError("Error when retrieving last message.")
             tac_msg = tac_dialogue.reply(

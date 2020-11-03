@@ -537,7 +537,7 @@ class SigningHandler(Handler):
         fipa_dialogue = (
             signing_dialogue.associated_contract_api_dialogue.associated_fipa_dialogue
         )
-        last_fipa_msg = fipa_dialogue.last_incoming_message
+        last_fipa_msg = fipa_dialogue.last_incoming_message_header
         if last_fipa_msg is None:
             raise ValueError("Could not retrieve last fipa message.")
         inform_msg = fipa_dialogue.reply(

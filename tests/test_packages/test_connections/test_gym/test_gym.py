@@ -129,7 +129,7 @@ class TestGymConnection:
     async def test_send_act(self):
         """Test send act message."""
         sending_dialogue = await self.send_reset()
-        assert sending_dialogue.last_message is not None
+        assert sending_dialogue.last_message_header is not None
         msg = sending_dialogue.reply(
             performative=GymMessage.Performative.ACT,
             action=GymMessage.AnyObject("any_action"),
@@ -171,7 +171,7 @@ class TestGymConnection:
     async def test_send_close(self):
         """Test send close message."""
         sending_dialogue = await self.send_reset()
-        assert sending_dialogue.last_message is not None
+        assert sending_dialogue.last_message_header is not None
         msg = sending_dialogue.reply(performative=GymMessage.Performative.CLOSE,)
         envelope = Envelope(
             to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,

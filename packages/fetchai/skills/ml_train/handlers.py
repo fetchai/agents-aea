@@ -458,7 +458,9 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        last_msg = cast(LedgerApiMessage, ledger_api_dialogue.last_outgoing_message)
+        last_msg = cast(
+            LedgerApiMessage, ledger_api_dialogue.last_outgoing_message_header
+        )
         if last_msg is None:
             raise ValueError("Could not retrive last outgoing ledger_api_msg.")
         signing_msg, signing_dialogue = signing_dialogues.create(
@@ -490,7 +492,7 @@ class LedgerApiHandler(Handler):
             )
         )
         ml_trade_msg = cast(
-            Optional[MlTradeMessage], ml_trade_dialogue.last_incoming_message
+            Optional[MlTradeMessage], ml_trade_dialogue.last_incoming_message_header
         )
         if ml_trade_msg is None:
             raise ValueError("Could not retrieve ml_trade message")
@@ -606,7 +608,7 @@ class SigningHandler(Handler):
         self.context.logger.info("transaction signing was successful.")
         ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
         last_ledger_api_msg = cast(
-            Optional[LedgerApiMessage], ledger_api_dialogue.last_incoming_message
+            Optional[LedgerApiMessage], ledger_api_dialogue.last_incoming_message_header
         )
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")

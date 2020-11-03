@@ -382,14 +382,14 @@ class GenericLedgerApiHandler(Handler):
             fipa_dialogue.terms.counterparty_payable_amount,
         )
         if is_settled and is_valid:
-            last_message = cast(
-                Optional[FipaMessage], fipa_dialogue.last_incoming_message
+            last_message_header = cast(
+                Optional[FipaMessage], fipa_dialogue.last_incoming_message_header
             )
-            if last_message is None:
+            if last_message_header is None:
                 raise ValueError("Cannot retrieve last fipa message.")
             inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
-                target_message=last_message,
+                target_message=last_message_header,
                 info=fipa_dialogue.data_for_sale,
             )
             self.context.outbox.put_message(message=inform_msg)
@@ -399,7 +399,7 @@ class GenericLedgerApiHandler(Handler):
             )
             self.context.logger.info(
                 "transaction confirmed, sending data={} to buyer={}.".format(
-                    fipa_dialogue.data_for_sale, last_message.sender[-5:],
+                    fipa_dialogue.data_for_sale, last_message_header.sender[-5:],
                 )
             )
         else:

@@ -666,7 +666,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
         fipa_dialogue.terms = self.terms
         fipa_dialogue.data_for_sale = {"data_type_1": "data_1"}
-        fipa_dialogue._incoming_messages = []
+        fipa_dialogue._incoming_messages_headers = []
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -753,7 +753,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             performative=FipaMessage.Performative.INFORM,
             to=COUNTERPARTY_NAME,
             sender=self.skill.skill_context.agent_address,
-            target=fipa_dialogue.last_incoming_message.message_id,
+            target=fipa_dialogue.last_incoming_message_header.message_id,
             info=fipa_dialogue.data_for_sale,
         )
         assert has_attributes, error_str

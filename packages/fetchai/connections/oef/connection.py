@@ -313,7 +313,7 @@ class OEFChannel(OEFAgent):
                 "Could not find dialogue for search_id={}".format(search_id)
             )  # pragma: nocover
             return  # pragma: nocover
-        last_msg = oef_search_dialogue.last_incoming_message
+        last_msg = oef_search_dialogue.last_incoming_message_header
         if last_msg is None:
             self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover
@@ -352,7 +352,7 @@ class OEFChannel(OEFAgent):
                 "Could not find dialogue for answer_id={}".format(answer_id)
             )  # pragma: nocover
             return  # pragma: nocover
-        last_msg = oef_search_dialogue.last_incoming_message
+        last_msg = oef_search_dialogue.last_incoming_message_header
         if last_msg is None:
             self.aea_logger.warning("Could not find last message.")  # pragma: nocover
             return  # pragma: nocover

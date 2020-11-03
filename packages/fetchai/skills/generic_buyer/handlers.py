@@ -472,7 +472,7 @@ class GenericSigningHandler(Handler):
         self.context.logger.info("transaction signing was successful.")
         fipa_dialogue = signing_dialogue.associated_fipa_dialogue
         ledger_api_dialogue = fipa_dialogue.associated_ledger_api_dialogue
-        last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
+        last_ledger_api_msg = ledger_api_dialogue.last_incoming_message_header
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")
         ledger_api_msg = ledger_api_dialogue.reply(
@@ -644,7 +644,9 @@ class GenericLedgerApiHandler(Handler):
                 ledger_api_msg.transaction_digest
             )
         )
-        fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
+        fipa_msg = cast(
+            Optional[FipaMessage], fipa_dialogue.last_incoming_message_header
+        )
         if fipa_msg is None:
             raise ValueError("Could not retrieve fipa message")
         inform_msg = fipa_dialogue.reply(

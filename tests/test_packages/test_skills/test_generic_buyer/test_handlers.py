@@ -822,7 +822,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
         )
         signing_dialogue.associated_fipa_dialogue = fipa_dialogue
         fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-        signing_dialogue.associated_fipa_dialogue.associated_ledger_api_dialogue._incoming_messages = (
+        signing_dialogue.associated_fipa_dialogue.associated_ledger_api_dialogue._incoming_messages_headers = (
             []
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -1205,7 +1205,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        ledger_api_dialogue.associated_fipa_dialogue._incoming_messages = []
+        ledger_api_dialogue.associated_fipa_dialogue._incoming_messages_headers = []
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(

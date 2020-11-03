@@ -132,7 +132,7 @@ class TransactionProcessBehaviour(TickerBehaviour):
             self.context.logger.info(
                 "sending transaction {} to controller.".format(tx_id)
             )
-            last_msg = tac_dialogue.last_message
+            last_msg = tac_dialogue.last_message_header
             if last_msg is None:
                 raise ValueError("No last message available.")
             tx_content = transactions.pop(tx_id, None)

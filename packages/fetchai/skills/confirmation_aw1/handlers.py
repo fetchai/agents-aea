@@ -244,7 +244,7 @@ class ContractApiHandler(Handler):
         self.context.logger.info(f"received state message={contract_api_msg}")
         register_dialogue = contract_api_dialogue.associated_register_dialogue
         register_msg = cast(
-            Optional[RegisterMessage], register_dialogue.last_incoming_message
+            Optional[RegisterMessage], register_dialogue.last_incoming_message_header
         )
         if register_msg is None:
             raise ValueError("Could not retrieve fipa message")
@@ -293,7 +293,7 @@ class ContractApiHandler(Handler):
         )
         register_dialogue = contract_api_dialogue.associated_register_dialogue
         register_msg = cast(
-            Optional[RegisterMessage], register_dialogue.last_incoming_message
+            Optional[RegisterMessage], register_dialogue.last_incoming_message_header
         )
         if register_msg is None:
             raise ValueError("Could not retrieve fipa message")
@@ -414,7 +414,7 @@ class LedgerApiHandler(Handler):
             f"transaction was successfully submitted. Transaction digest={ledger_api_msg.transaction_digest}"
         )
         register_msg = cast(
-            Optional[RegisterMessage], register_dialogue.last_incoming_message
+            Optional[RegisterMessage], register_dialogue.last_incoming_message_header
         )
         if register_msg is None:
             raise ValueError("Could not retrieve fipa message")
@@ -520,7 +520,7 @@ class SigningHandler(Handler):
         """
         self.context.logger.info("transaction signing was successful.")
         ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
-        last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
+        last_ledger_api_msg = ledger_api_dialogue.last_incoming_message_header
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")
         ledger_api_msg = ledger_api_dialogue.reply(
