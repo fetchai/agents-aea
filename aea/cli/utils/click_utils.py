@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
+from click import Option, UsageError, option
 
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
@@ -117,3 +118,56 @@ class AgentDirectory(click.Path):
             )
         finally:
             os.chdir(cwd)
+
+
+def registry_flag():
+    """Choice of one flag between: '--local/--remote/--mixed'."""
+
+    def wrapper(f):
+        f = option(
+            "--local",
+            is_flag=True,
+            cls=MutuallyExclusiveOption,
+            help="Use only local registry.",
+            mutually_exclusive=["remote", "mixed"],
+        )(f)
+        f = option(
+            "--remote",
+            is_flag=True,
+            cls=MutuallyExclusiveOption,
+            help="Use ony remote registry.",
+            mutually_exclusive=["local", "mixed"],
+        )(f)
+        f = option(
+            "--mixed",
+            is_flag=True,
+            cls=MutuallyExclusiveOption,
+            help="Use both remote and local registry.",
+            mutually_exclusive=["local", "remote"],
+        )(f)
+
+        return f
+
+    return wrapper
+
+
+class MutuallyExclusiveOption(Option):
+    def __init__(self, *args, **kwargs):
+        self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
+        help = kwargs.get("help", "")
+        if self.mutually_exclusive:
+            ex_str = ", ".join(self.mutually_exclusive)
+            kwargs["help"] = help + (
+                " NOTE: This argument is mutually exclusive with "
+                " arguments: [" + ex_str + "]."
+            )
+        super(MutuallyExclusiveOption, self).__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx, opts, args):
+        if self.mutually_exclusive.intersection(opts) and self.name in opts:
+            raise UsageError(
+                f"Illegal usage: `{self.name}` is mutually exclusive with "
+                f"arguments `{', '.join(self.mutually_exclusive)}`."
+            )
+
+        return super(MutuallyExclusiveOption, self).handle_parse_result(ctx, opts, args)
