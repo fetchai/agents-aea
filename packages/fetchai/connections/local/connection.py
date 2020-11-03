@@ -58,6 +58,8 @@ PUBLIC_ID = PublicId.from_str("fetchai/local:0.11.0")
 class OefSearchDialogue(BaseOefSearchDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_envelope_context",)
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,

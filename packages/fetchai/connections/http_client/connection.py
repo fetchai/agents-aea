@@ -58,6 +58,8 @@ RequestId = str
 class HttpDialogue(BaseHttpDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_envelope_context",)
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
