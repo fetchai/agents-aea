@@ -1,0 +1,37 @@
+name: simple_data_request
+author: fetchai
+version: 0.1.0
+type: skill
+description: The scaffold skill is a scaffold for your own skill implementation.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmWpga5inSHsCrj3GfCq7SmdAUVTRdaAe8spVRAVdjeM3i
+  behaviours.py: QmbLjtA6UeQW7C6SYn7vM3L8RSiEEqeHowYRCX11imTVzC
+  dialogues.py: QmQQmr4X7yWFihTrv8yXWxbHMcoREsz74gSQPzDNPfj5HE
+  handlers.py: QmRJiT8Cqk123nBQMsSj39e4ijCW4wBayhTeuyqdryr4tH
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/http_client:0.11.0
+contracts: []
+protocols:
+- fetchai/http:0.8.0
+skills: []
+behaviours:
+  http_request:
+    args:
+      body: ''
+      method: null
+      url: null
+    class_name: HttpRequestBehaviour
+handlers:
+  http:
+    args:
+      shared_state_key: null
+    class_name: HttpHandler
+models:
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+dependencies: {}
+is_abstract: false
