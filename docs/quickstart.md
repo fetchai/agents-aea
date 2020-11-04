@@ -18,7 +18,7 @@ We also provide a Docker image with all the needed dependencies.
 
 To pull:
 ```bash
-docker pull marcofavorito/aea-deploy:latest
+docker pull fetchai/aea-deploy:latest
 ```
 
 See at the bottom of the guide how to run the quickstart using the Docker image. 
@@ -379,7 +379,7 @@ aea delete my_first_aea
 
 You can reproduce the quick-start guide by:
 ```bash
-docker run -it marcofavorito/aea-deploy 
+docker run -it fetchai/aea-deploy 
 ``` 
 
 To stop, use CTRL+C.
