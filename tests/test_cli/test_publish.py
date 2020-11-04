@@ -148,11 +148,13 @@ class ValidatePkpTestCase(TestCase):
 
 @mock.patch("aea.cli.publish._check_is_item_in_registry_mixed")
 @mock.patch("aea.cli.publish._check_is_item_in_local_registry")
+@mock.patch("aea.cli.publish._validate_config")
 class TestPublishMixedMode(AEATestCaseEmpty):
     """Test the execution branch with the '--mixed' flag."""
 
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
+        self.set_config("agent.description", "some-description")
         self.run_cli_command("publish", "--mixed", cwd=self._get_cwd())
 
 
