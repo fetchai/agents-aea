@@ -198,6 +198,16 @@ class SkillContext:
         return self._get_agent_context().task_manager
 
     @property
+    def default_ledger_id(self) -> str:
+        """Get the default ledger id."""
+        return self._get_agent_context().default_ledger_id
+
+    @property
+    def currency_denominations(self) -> Dict[str, str]:
+        """Get a dictionary mapping ledger ids to currency denominations."""
+        return self._get_agent_context().currency_denominations
+
+    @property
     def search_service_address(self) -> Address:
         """Get the address of the search service."""
         return self._get_agent_context().search_service_address

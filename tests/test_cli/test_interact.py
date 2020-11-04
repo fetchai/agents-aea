@@ -31,6 +31,7 @@ from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
 
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.conftest import MAX_FLAKY_RERUNS
 
@@ -208,7 +209,7 @@ class TestInteractEcho(AEATestCaseEmpty):
     @pytest.mark.integration
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
-        self.add_item("skill", "fetchai/echo:0.10.0")
+        self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
         self.run_agent()
         process = self.run_interaction()
 

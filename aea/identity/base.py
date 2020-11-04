@@ -70,6 +70,12 @@ class Identity:
         if addresses is None:
             addresses = {default_address_key: address}
         self._addresses = addresses
+        self._default_address_key = default_address_key
+
+    @property
+    def default_address_key(self) -> str:
+        """Get the default address key."""
+        return self._default_address_key
 
     @property
     def name(self) -> str:

@@ -25,12 +25,11 @@ from unittest.mock import Mock
 import pytest
 
 from aea.cli import cli
-from aea.configurations.base import PublicId
 from aea.configurations.project import AgentAlias, Project
 from aea.helpers.base import cd
 from aea.test_tools.click_testing import CliRunner
 
-from tests.conftest import MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import MAX_FLAKY_RERUNS, MY_FIRST_AEA_PUBLIC_ID, ROOT_DIR
 
 
 class TestProjectAndAgentAlias:
@@ -42,7 +41,7 @@ class TestProjectAndAgentAlias:
         self.t = tempfile.mkdtemp()
         os.chdir(self.t)
         self.runner = CliRunner()
-        self.project_public_id = PublicId.from_str("fetchai/my_first_aea:0.14.0")
+        self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
         self.project_path = os.path.join(
             self.t, self.project_public_id.author, self.project_public_id.name
         )
@@ -78,7 +77,7 @@ class TestProjectAndAgentAlias:
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_project_remote(self):
         """Test project loaded and removed, from remove registry."""
-        self.project_public_id = PublicId.from_str("fetchai/my_first_aea:0.13.0")
+        self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
         self._test_project(False, True)
 
     def test_agents(self):

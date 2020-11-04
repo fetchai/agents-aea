@@ -22,7 +22,6 @@
 import random  # nosec
 from typing import List
 
-from aea.configurations.constants import DEFAULT_LEDGER
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
@@ -46,9 +45,8 @@ DEFAULT_MINT_QUANTITIES = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
 DEFAULT_FROM_SUPPLY = 10
 DEFAULT_TO_SUPPLY = 0
 DEFAULT_VALUE = 0
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "erc1155_contract"}
-DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 
 
 class Strategy(Model):
@@ -56,7 +54,7 @@ class Strategy(Model):
 
     def __init__(self, **kwargs) -> None:
         """Initialize the strategy of the agent."""
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        ledger_id = kwargs.pop("ledger_id", None)
         self._token_type = kwargs.pop("token_type", DEFAULT_TOKEN_TYPE)
         enforce(self._token_type in [1, 2], "Token type must be 1 (NFT) or 2 (FT)")
         self._nb_tokens = kwargs.pop("nb_tokens", DEFAULT_NB_TOKENS)
@@ -101,6 +99,9 @@ class Strategy(Model):
         }
 
         super().__init__(**kwargs)
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
         self._contract_id = str(ERC1155Contract.contract_id)
         self.is_behaviour_active = True
         self._is_contract_deployed = self._contract_address is not None

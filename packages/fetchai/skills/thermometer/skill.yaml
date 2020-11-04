@@ -13,6 +13,7 @@ fingerprint:
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
   strategy.py: Qmd3Ugpid9WTMnJUMLdK89PQrcivae264vWk7UrEntb9z9
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols:
 - fetchai/default:0.8.0
@@ -51,12 +52,10 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
-      currency_id: FET
       data_for_sale:
         temperature: 26
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127

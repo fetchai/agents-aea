@@ -9,11 +9,13 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmZYqboojbibXnPAXqDifnHkVrmGjLJV3HBCJWeRzRpKMh
   __init__.py: QmemWT4Trdfq4JAEwVdp5G2nQWykVsGeALnYmehRDF8YNR
-  behaviours.py: QmRpGH2F2rugPVTekwreRrFkWFMyCqELTQZqvWo5WL3Cny
+  behaviours.py: QmeahurDCqpzpYjsZXHkpQxH2RnfYoWVgrWEXy9trCDB9d
   dialogues.py: QmQ9ybVCcavoUFTn8pzT531X3WBb9cDawi7iMkru7vCUVA
-  handlers.py: QmT5zDrSC3tnNT65hwNZvpxr4FYaDG6tiEuYsDkFnPW3gg
-  strategy.py: QmTqQAAMUUBmXUY5YWvgLrDLFBFQ781vbxVi9WXsPo9Vr2
+  handlers.py: QmUH2HDbvkxmco3G5Zidn1N2wmWu8hANbjaGSaryMc8KCx
+  strategy.py: QmeVEbHECXWmrnpSzuLETjtQDhAUExwqnJDBkQ7wRXESZs
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.8.0
 contracts:
 - fetchai/erc1155:0.12.0
 protocols:
@@ -67,7 +69,6 @@ models:
   strategy:
     args:
       from_supply: 10
-      ledger_id: ethereum
       location:
         latitude: 51.5194
         longitude: 0.127

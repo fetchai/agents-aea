@@ -40,6 +40,10 @@ from aea.configurations.base import (
 )
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_PUBLIC_ID
+from packages.fetchai.skills.erc1155_client import PUBLIC_ID as ERC1155_CLIENT_PUBLIC_ID
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_PUBLIC_ID
+
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -61,7 +65,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/error:0.8.0")
+        cls.skill_id = ERROR_PUBLIC_ID
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -141,7 +145,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = PublicId.from_str("fetchai/echo:0.10.0")
+        cls.skill_id = ECHO_PUBLIC_ID
         cls.skill_name = cls.skill_id.name
         cls.skill_author = cls.skill_id.author
         cls.skill_version = cls.skill_id.version
@@ -334,7 +338,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.10.0"
+        cls.skill_id = str(ECHO_PUBLIC_ID)
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -406,7 +410,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/echo:0.10.0"
+        cls.skill_id = str(ECHO_PUBLIC_ID)
         cls.skill_name = "echo"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -468,7 +472,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.15.0")
+        self.add_item("skill", str(ERC1155_CLIENT_PUBLIC_ID))
 
         contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)
@@ -486,7 +490,7 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""
-        self.add_item("skill", "fetchai/echo:0.8.0", local=self.IS_LOCAL)
+        self.add_item("skill", str(ECHO_PUBLIC_ID), local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)
@@ -499,7 +503,7 @@ class TestAddSkillWithLatestVersion(AEATestCaseEmpty):
 
     def test_add_skill_latest_version(self):
         """Test add skill with latest version."""
-        self.add_item("skill", "fetchai/echo:latest", local=True)
+        self.add_item("skill", str(ECHO_PUBLIC_ID.to_latest()), local=True)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)

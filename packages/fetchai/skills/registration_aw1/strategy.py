@@ -78,7 +78,7 @@ class Strategy(Model):
         self._is_registered = False
         self.is_registration_pending = False
         self.signature_of_ethereum_address: Optional[str] = None
-        self._ledger_id = "fetchai"
+        self._ledger_id = self.context.default_ledger_id
 
     @property
     def shared_storage_key(self) -> str:

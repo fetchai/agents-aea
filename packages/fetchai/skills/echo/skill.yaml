@@ -12,6 +12,7 @@ fingerprint:
   dialogues.py: QmUh5RWjBPudfUavLtcUvJFf7Sab2Vb7vcpETCs9ByAe2F
   handlers.py: QmNMjjChNLe49PAAXGFWXjrxESHAUn4HTC5zGhcnVhYEyK
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols:
 - fetchai/default:0.8.0

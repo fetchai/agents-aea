@@ -58,13 +58,13 @@ from tests.common.utils import (
 )
 from tests.conftest import (
     CUR_PATH,
-    DUMMY_SKILL_PUBLIC_ID,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_local_connection,
 )
 from tests.data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
+from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 from tests.data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 

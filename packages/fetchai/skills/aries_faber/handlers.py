@@ -24,13 +24,9 @@ import random
 from typing import Dict, Optional, cast
 
 from aea.configurations.base import PublicId
-from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
-    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
-)
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -99,8 +95,7 @@ class FaberHTTPHandler(Handler):
             content=json.dumps(content).encode("utf-8"),
         )
         # send
-        context = EnvelopeContext(connection_id=P2P_CONNECTION_PUBLIC_ID)
-        self.context.outbox.put_message(message=message, context=context)
+        self.context.outbox.put_message(message=message)
 
     def _register_did(self) -> None:
         """

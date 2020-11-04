@@ -55,12 +55,30 @@ If the installation steps fail, it might be a dependency issue.
 
 The following hints can help:
 
-- Ubuntu/Debian systems only: install Python 3.7 headers.
+- Ubuntu/Debian systems only: install Python headers,
+  depending on the Python version you have installed on your machine.
+  E.g. for Python 3.7: 
 ``` bash
 sudo apt-get install python3.7-dev
 ```
 
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
+
+- To install Go, follow the
+ official guide, depending on your platform: 
+ [https://golang.org/doc/install](https://golang.org/doc/install)
+
+- Python is already included by default on 
+many Linux distributions (e.g. Ubuntu), as well as MacOS.
+To check you have the right version, open a terminal and run: 
+```
+python3 --version
+```
+
+- To install Python on Windows machines, 
+you can download a specific release 
+[here](https://www.python.org/downloads/).
+
 
 ## Setup author name
 
