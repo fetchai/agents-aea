@@ -749,7 +749,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
     """
     Test that references are updated correctly after 'aea upgrade'.
 
-    In particular, 'default_routing' and custom component configurations in AEA configuration.
+    In particular, 'default_routing', 'default_connection' and custom component configurations in AEA configuration.
 
     How the test works:
     - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
@@ -788,6 +788,9 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_routing",
             {cls.OLD_DEFAULT_PROTOCOL_PUBLIC_ID: cls.OLD_STUB_CONNECTION_PUBLIC_ID},
         )
+        cls.nested_set_config(
+            "agent.default_connection", cls.OLD_STUB_CONNECTION_PUBLIC_ID,
+        )
         cls.run_cli_command(
             "--skip-consistency-check",
             "config",
@@ -814,6 +817,17 @@ class TestUpdateReferences(AEATestCaseEmpty):
             result.stdout
             == f"{{'{DefaultMessage.protocol_id}': '{StubConnection.connection_id}'}}\n"
         )
+
+    def test_default_connection_updated_correctly(self):
+        """Test default routing has been updated correctly."""
+        result = self.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "get",
+            "agent.default_connection",
+            cwd=self._get_cwd(),
+        )
+        assert result.stdout == "fetchai/stub:0.12.0\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""
