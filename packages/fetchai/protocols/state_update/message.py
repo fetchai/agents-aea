@@ -49,6 +49,20 @@ class StateUpdateMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {"apply", "initialize"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "amount_by_currency_id",
+            "dialogue_reference",
+            "exchange_params_by_currency_id",
+            "message_id",
+            "performative",
+            "quantities_by_good_id",
+            "target",
+            "utility_params_by_good_id",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -65,7 +79,6 @@ class StateUpdateMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"apply", "initialize"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
