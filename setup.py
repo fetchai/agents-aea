@@ -32,7 +32,11 @@ def get_all_extras() -> Dict:
 
     fetch_ledger_deps = cosmos_ledger_deps
 
-    ethereum_ledger_deps = ["web3==5.12.0", "ipfshttpclient==0.6.1", "eth-account==0.5.2"]
+    ethereum_ledger_deps = [
+        "web3==5.12.0",
+        "ipfshttpclient==0.6.1",
+        "eth-account==0.5.2",
+    ]
 
     crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps, *cosmos_ledger_deps]
 
@@ -68,7 +72,7 @@ base_deps = [
     "jsonschema>=3.0.0",
     "packaging>=20.3",
     "semver>=2.9.1",
-    "protobuf",
+    "protobuf==3.13.0",
     "pymultihash==0.8.2",
     "pyyaml>=4.2b1",
     "requests>=2.22.0",

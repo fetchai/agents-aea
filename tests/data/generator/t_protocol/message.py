@@ -56,6 +56,62 @@ class TProtocolMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "performative_ct",
+        "performative_empty_contents",
+        "performative_mt",
+        "performative_o",
+        "performative_pct",
+        "performative_pmt",
+        "performative_pt",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "content_bool",
+            "content_bytes",
+            "content_ct",
+            "content_dict_bool_bool",
+            "content_dict_bool_bytes",
+            "content_dict_bool_float",
+            "content_dict_bool_int",
+            "content_dict_bool_str",
+            "content_dict_int_bool",
+            "content_dict_int_bytes",
+            "content_dict_int_float",
+            "content_dict_int_int",
+            "content_dict_int_str",
+            "content_dict_str_bool",
+            "content_dict_str_bytes",
+            "content_dict_str_float",
+            "content_dict_str_int",
+            "content_dict_str_str",
+            "content_float",
+            "content_int",
+            "content_list_bool",
+            "content_list_bytes",
+            "content_list_float",
+            "content_list_int",
+            "content_list_str",
+            "content_o_bool",
+            "content_o_ct",
+            "content_o_dict_str_int",
+            "content_o_list_bytes",
+            "content_o_set_int",
+            "content_set_bool",
+            "content_set_bytes",
+            "content_set_float",
+            "content_set_int",
+            "content_set_str",
+            "content_str",
+            "content_union_1",
+            "content_union_2",
+            "dialogue_reference",
+            "message_id",
+            "performative",
+            "target",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -72,15 +128,6 @@ class TProtocolMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "performative_ct",
-            "performative_empty_contents",
-            "performative_mt",
-            "performative_o",
-            "performative_pct",
-            "performative_pmt",
-            "performative_pt",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

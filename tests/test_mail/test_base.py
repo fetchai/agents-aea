@@ -27,7 +27,6 @@ import aea
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope, EnvelopeContext, ProtobufEnvelopeSerializer, URI
 from aea.multiplexer import InBox, Multiplexer, OutBox
-from aea.protocols.base import Message
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -67,7 +66,9 @@ def test_envelope_initialisation():
     """Testing the envelope initialisation."""
     agent_address = "Agent0"
     receiver_address = "Agent1"
-    msg = Message(content="hello")
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES, content="hello"
+    )
     msg.to = receiver_address
     assert Envelope(
         to=receiver_address,
@@ -110,7 +111,9 @@ def test_inbox_nowait():
     """Tests the inbox without waiting."""
     agent_address = "Agent0"
     receiver_address = "Agent1"
-    msg = Message(content="hello")
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES, content="hello"
+    )
     msg.to = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
     envelope = Envelope(
@@ -130,7 +133,9 @@ def test_inbox_get():
     """Tests for a envelope on the in queue."""
     agent_address = "Agent0"
     receiver_address = "Agent1"
-    msg = Message(content="hello")
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES, content="hello"
+    )
     msg.to = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
     envelope = Envelope(
