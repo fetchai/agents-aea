@@ -47,6 +47,23 @@ class HttpMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {"request", "response"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "body",
+            "dialogue_reference",
+            "headers",
+            "message_id",
+            "method",
+            "performative",
+            "status_code",
+            "status_text",
+            "target",
+            "url",
+            "version",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -63,7 +80,6 @@ class HttpMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"request", "response"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

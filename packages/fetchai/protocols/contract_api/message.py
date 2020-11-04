@@ -72,6 +72,36 @@ class ContractApiMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "error",
+        "get_deploy_transaction",
+        "get_raw_message",
+        "get_raw_transaction",
+        "get_state",
+        "raw_message",
+        "raw_transaction",
+        "state",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "callable",
+            "code",
+            "contract_address",
+            "contract_id",
+            "data",
+            "dialogue_reference",
+            "kwargs",
+            "ledger_id",
+            "message",
+            "message_id",
+            "performative",
+            "raw_message",
+            "raw_transaction",
+            "state",
+            "target",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -88,16 +118,6 @@ class ContractApiMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "error",
-            "get_deploy_transaction",
-            "get_raw_message",
-            "get_raw_transaction",
-            "get_state",
-            "raw_message",
-            "raw_transaction",
-            "state",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

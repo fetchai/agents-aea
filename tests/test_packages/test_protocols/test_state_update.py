@@ -72,16 +72,15 @@ class TestStateUpdateMessage:
         good_endowment = {"a_good": 2}
         exchange_params = {"UNKNOWN": 10.0}
         utility_params = {"a_good": 20.0}
-        tx_fee = 10
-        stum = StateUpdateMessage(
-            performative=StateUpdateMessage.Performative.INITIALIZE,
-            amount_by_currency_id=currency_endowment,
-            quantities_by_good_id=good_endowment,
-            exchange_params_by_currency_id=exchange_params,
-            utility_params_by_good_id=utility_params,
-            tx_fee=tx_fee,
-        )
-        assert not stum._is_consistent()
+        with pytest.raises(ValueError, match="Field .* is not supported"):
+            StateUpdateMessage(
+                performative=StateUpdateMessage.Performative.INITIALIZE,
+                amount_by_currency_id=currency_endowment,
+                quantities_by_good_id=good_endowment,
+                exchange_params_by_currency_id=exchange_params,
+                utility_params_by_good_id=utility_params,
+                non_exists_field="some value",
+            )
 
 
 class TestSerialization:
