@@ -23,32 +23,36 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List
+from typing import List, Set
 from unittest.mock import patch
 
 import pytest
 from click.exceptions import ClickException
+from click.testing import Result
 
 from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.configurations.base import (
     AgentConfig,
     ComponentId,
+    ComponentType,
     DEFAULT_AEA_CONFIG_FILE,
     PackageId,
     PackageType,
     PublicId,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.helpers.base import cd
-from aea.test_tools.test_cases import BaseAEATestCase
+from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
+from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.common.utils import are_dirs_equal
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
@@ -660,3 +664,90 @@ class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):
     def test_upgrade_to_latest_but_same_version(self):
         """Skip."""
         pass
+
+
+@pytest.mark.integration
+class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
+    """
+    Test that the command 'aea upgrade' correctly updates non-vendor package data.
+
+    In particular, check that 'aea upgrade' updates the public ids of
+    the package dependencies and the 'aea_version' field.
+
+    The test works as follows:
+    - scaffold a package, one for each possible package type;
+    - add the protocol "fetchai/default:0.7.0" as dependency to each of them.
+    - add the skill "fetchai/error:0.7.0"; this will also add the default protocol.
+    - run 'aea upgrade'
+    - check that the reference to "fetchai/default" in each scaffolded package
+      has the new version.
+    """
+
+    capture_log = True
+    IS_EMPTY = True
+    old_default_protocol_id = PublicId(
+        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.7.0"
+    )
+    old_error_skill_id = PublicId(
+        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.7.0"
+    )
+
+    @classmethod
+    def scaffold_item(cls, item_type: str, name: str) -> Result:
+        """Override default behaviour by adding a custom dependency to the scaffolded item."""
+        result = super(TestUpgradeNonVendorDependencies, cls).scaffold_item(
+            item_type, name
+        )
+        # add custom dependency (a protocol) to each package
+        # that supports dependencies (only connections and skills)
+        if item_type in {ComponentType.CONNECTION.value, ComponentType.SKILL.value}:
+            cls.nested_set_config(
+                f"{ComponentType(item_type).to_plural()}.{name}.protocols",
+                [str(cls.old_default_protocol_id)],
+            )
+        return result
+
+    @classmethod
+    def setup_class(cls):
+        """Set up test case."""
+        super(TestUpgradeNonVendorDependencies, cls).setup_class()
+        cls.scaffold_item("protocol", "my_protocol")
+        cls.scaffold_item("connection", "my_connection")
+        cls.scaffold_item("contract", "my_contract")
+        cls.scaffold_item("skill", "my_skill")
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "add",
+            "skill",
+            str(cls.old_error_skill_id),
+            cwd=cls._get_cwd(),
+        )
+
+    def test_non_vendor_update_references_to_upgraded_packages(
+        self,
+    ):  # pylint: disable=unused-argument
+        """Test that dependencies in non-vendor packages are updated correctly after upgrade."""
+        self.run_cli_command("--skip-consistency-check", "upgrade", cwd=self._get_cwd())
+        self.assert_dependency_updated(
+            ComponentType.CONNECTION, "my_connection", {DefaultMessage.protocol_id},
+        )
+        self.assert_dependency_updated(
+            ComponentType.SKILL, "my_skill", {DefaultMessage.protocol_id}
+        )
+
+    def assert_dependency_updated(
+        self, item_type: ComponentType, package_name: str, expected: Set[PublicId]
+    ):
+        """Assert dependency is updated."""
+        package_path = Path(self._get_cwd(), item_type.to_plural(), package_name)
+        component_config = load_component_configuration(item_type, package_path)
+        assert component_config.protocols == expected  # type: ignore
+
+
+class TestNothingToUpgrade(AEATestCaseEmpty):
+    """Test the upgrade command when there's nothing t upgrade."""
+
+    def test_nothing_to_upgrade(self):
+        """Test nothing to upgrade."""
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert result.stdout == "Starting project upgrade...\n"
