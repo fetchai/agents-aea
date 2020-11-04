@@ -83,7 +83,7 @@ spec:
           - name: AEA_P2P_ENTRY_URIS
             value: ph-node-entry-peers-list-here
           - name: ACN_LOG_FILE
-            value: "/acn_data/libp2p_node.log"
+            value: ph-node-log-file-path-here
 
       restartPolicy: Always
 

@@ -208,10 +208,11 @@ class AcnK8sPodConfig:
     NODE_KEY_ENCODED = "ph-base64-encoded-private-key-here"
     NODE_LAST_ENTRY_PEER_HOST = "ph-latest-entry-peer-host-here"
     NODE_LAST_ENTRY_PEER_PORT = "ph-latest-entry-peer-port-here"
-
+    NODE_LOG_FILE = "ph-node-log-file-path-here"
     # class defaults
     Defaults: Dict[str, str] = {
         K8S_DEPLOYMENT_NAME: "acn-node",
+        NODE_LOG_FILE: "/acn_data/libp2p_node",
     }
 
     def __init__(
@@ -272,6 +273,9 @@ class AcnK8sPodConfig:
         config[cls.NODE_URI_DELEGATE] = "0.0.0.0:{}".format(acn_delegate_port)
         config[cls.NODE_URI_MONITORING] = "0.0.0.0:{}".format(acn_monitoring_port)
         config[cls.NODE_URI_EXTERNAL] = "{}:{}".format(k8s_public_hostname, acn_port)
+        config[cls.NODE_LOG_FILE] = '"{}_{}.log"'.format(
+            cls.Defaults[cls.NODE_LOG_FILE], str(acn_port)
+        )
 
         with open(acn_key_file, "r") as f:
             key = f.read().strip()
@@ -388,6 +392,13 @@ def parse_commandline():
         dest="delete_deployment",
         required=False,
         help="Delete an already deployed node with the same configuration",
+    )
+    parser.add_argument(
+        "--generate-only",
+        action="store_true",
+        dest="generate_only",
+        required=False,
+        help="Don't deploy the generated yaml file",
     )
     parser.add_argument(
         "--acn-key-file",
@@ -548,10 +559,19 @@ def parse_commandline():
             "--docker-file, --docker-ctx, --docker-image, --docker-registry are required when --docker-fetchai-defaults[-dev] is not set"
         )
 
+    if args.docker_fetchai_defaults and args.docker_fetchai_defaults_dev:
+        parser.error(
+            "--docker-fetchai-defaults and --docker-fetchai-defaults-dev are mutually exclusive"
+        )
+
+    if args.generate_only and (args.delete_deployment or args.from_file):
+        parser.error("--generate-only can not be used with --delete or --from-file")
+
     return args
 
 
-if __name__ == "__main__":
+def main():
+    """K8s deploy acn node"""
 
     args = parse_commandline()
 
@@ -628,6 +648,9 @@ if __name__ == "__main__":
             dargs[11],
         ).generate_deployment()
 
+    if args.generate_only:
+        return
+
     try:
         if args.delete_deployment:
             pod_deployment.delete()
@@ -635,3 +658,7 @@ if __name__ == "__main__":
             pod_deployment.deploy()
     except Exception as e:
         raise e
+
+
+if __name__ == "__main__":
+    main()
