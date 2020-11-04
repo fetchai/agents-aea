@@ -28,7 +28,6 @@ This module contains the classes required for dialogue management.
 import itertools
 import secrets
 import sys
-from abc import ABC
 from collections import namedtuple
 from enum import Enum
 from inspect import signature
@@ -63,6 +62,12 @@ class InvalidDialogueMessage(Exception):
 
 class DialogueLabel:
     """The dialogue label class acts as an identifier for dialogues."""
+
+    __slots__ = (
+        "_dialogue_reference",
+        "_dialogue_opponent_addr",
+        "_dialogue_starter_addr",
+    )
 
     NONCE_BYTES_NB = 32
 
@@ -188,7 +193,28 @@ class DialogueLabel:
         return dialogue_label
 
 
-class Dialogue(ABC):
+class _DialogueMeta(type):
+    """
+    Metaclass for Dialogue.
+
+    Adds slot support forevery subclass
+    Creates classlevvel Rules instance
+    """
+
+    def __new__(cls, name: str, bases: Tuple[Type], dct: Dict):
+        """Construct a new type."""
+        # set class level `_rules`
+        dialogue_cls: Type[Dialogue] = super().__new__(cls, name, bases, dct)
+        dialogue_cls._rules = dialogue_cls.Rules(
+            dialogue_cls.INITIAL_PERFORMATIVES,
+            dialogue_cls.TERMINAL_PERFORMATIVES,
+            dialogue_cls.VALID_REPLIES,
+        )
+
+        return dialogue_cls
+
+
+class Dialogue(metaclass=_DialogueMeta):
     """The dialogue class maintains state of a dialogue and manages it."""
 
     STARTING_MESSAGE_ID = 1
@@ -281,6 +307,8 @@ class Dialogue(ABC):
             """Get the string representation."""
             return str(self.value)
 
+    _rules: Optional[Rules] = None
+
     def __init__(
         self,
         dialogue_label: DialogueLabel,
@@ -298,17 +326,8 @@ class Dialogue(ABC):
         :return: None
         """
         self._self_address = self_address
-        self._incomplete_dialogue_label = dialogue_label.get_incomplete_version()
         self._dialogue_label = dialogue_label
         self._role = role
-        self._rules = self.Rules(
-            self.INITIAL_PERFORMATIVES, self.TERMINAL_PERFORMATIVES, self.VALID_REPLIES
-        )
-
-        self._is_self_initiated = (
-            dialogue_label.dialogue_opponent_addr
-            is not dialogue_label.dialogue_starter_addr
-        )
 
         self._outgoing_messages = []  # type: List[Message]
         self._incoming_messages = []  # type: List[Message]
@@ -335,7 +354,7 @@ class Dialogue(ABC):
 
         :return: The incomplete dialogue label
         """
-        return self._incomplete_dialogue_label
+        return self.dialogue_label.get_incomplete_version()
 
     @property
     def dialogue_labels(self) -> Set[DialogueLabel]:
@@ -344,7 +363,7 @@ class Dialogue(ABC):
 
         :return: the dialogue labels
         """
-        return {self._dialogue_label, self._incomplete_dialogue_label}
+        return {self._dialogue_label, self.incomplete_dialogue_label}
 
     @property
     def self_address(self) -> Address:
@@ -395,7 +414,10 @@ class Dialogue(ABC):
 
         :return: True if the agent initiated the dialogue, False otherwise
         """
-        return self._is_self_initiated
+        return (
+            self.dialogue_label.dialogue_opponent_addr
+            is not self.dialogue_label.dialogue_starter_addr
+        )
 
     @property
     def last_incoming_message(self) -> Optional[Message]:
@@ -487,7 +509,9 @@ class Dialogue(ABC):
         :return: the message if it exists, None otherwise
         """
         result = None  # type: Optional[Message]
-        list_of_all_messages = self._outgoing_messages + self._incoming_messages
+        list_of_all_messages = itertools.chain(
+            self._outgoing_messages, self._incoming_messages
+        )
         for message in list_of_all_messages:
             if message.message_id == message_id:
                 result = message
@@ -506,22 +530,6 @@ class Dialogue(ABC):
         if message is None:
             raise ValueError("Message not present.")
         return message
-
-    def _has_message(self, message: Message) -> bool:
-        """
-        Check whether a message exists in this dialogue.
-
-        :param message: the message
-        :return: True if message exists in this dialogue, False otherwise
-        """
-        if self.is_empty:
-            return False
-
-        if not self._has_message_id(message.message_id):
-            return False
-
-        retrieved_message = self._get_message(message.message_id)
-        return message == retrieved_message
 
     def _has_message_id(self, message_id: int) -> bool:
         """
@@ -566,9 +574,9 @@ class Dialogue(ABC):
             )
 
         if self._is_message_by_self(message):
-            self._outgoing_messages.extend([message])
+            self._outgoing_messages.append(message)
         else:
-            self._incoming_messages.extend([message])
+            self._incoming_messages.append(message)
 
     def _is_belonging_to_dialogue(self, message: Message) -> bool:
         """
@@ -895,7 +903,7 @@ class Dialogue(ABC):
         return representation
 
 
-class DialogueStats(ABC):
+class DialogueStats:
     """Class to handle statistics on default dialogues."""
 
     def __init__(self, end_states: FrozenSet[Dialogue.EndState]) -> None:
@@ -940,7 +948,7 @@ class DialogueStats(ABC):
             self._other_initiated[end_state] += 1
 
 
-class Dialogues(ABC):
+class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
     def __init__(
