@@ -21,6 +21,7 @@
 import argparse
 import os
 import subprocess  # nosec
+import sys
 from binascii import unhexlify
 from typing import Dict, List, Optional
 
@@ -42,6 +43,7 @@ class AcnNodeConfig:
     IPC_IN = "AEA_TO_NODE"
     IPC_OUT = "NODE_TO_AEA"
     AEA_ADDRESS = "AEA_AGENT_ADDR"
+    ACN_LOG_FILE = "ACN_LOG_FILE"
     LIST_SEPARATOR = ","
 
     def __init__(
@@ -52,6 +54,7 @@ class AcnNodeConfig:
         delegate_uri: Optional[str] = None,
         monitoring_uri: Optional[str] = None,
         entry_peers_maddrs: Optional[List[str]] = None,
+        log_file: Optional[str] = None,
         enable_checks: bool = True,
     ):
         """
@@ -63,6 +66,7 @@ class AcnNodeConfig:
         :param delegate_uri: node local uri for delegate service
         :param monitoring_uri: node monitoring uri
         :param entry_peers_maddrs: multiaddresses of peers to join their network
+        :param log_file: path to log file, opened in append mode
         :param enable_checks: to check if provided configuration is valid
         """
         self.config: Dict[str, str] = dict()
@@ -86,6 +90,9 @@ class AcnNodeConfig:
         )
         self.config[AcnNodeConfig.ENTRY_PEERS_MADDRS] = entry_peers_maddrs_list
 
+        self.config[AcnNodeConfig.ACN_LOG_FILE] = (
+            log_file if log_file is not None else ""
+        )
         self.config[AcnNodeConfig.AEA_ADDRESS] = ""
         self.config[AcnNodeConfig.IPC_IN] = ""
         self.config[AcnNodeConfig.IPC_OUT] = ""
@@ -127,6 +134,7 @@ class AcnNodeConfig:
         delegate_uri = config.get(AcnNodeConfig.DELEGATE_URI, None)
         monitoring_uri = config.get(AcnNodeConfig.MONITORING_URI, None)
         entry_peers = config.get(AcnNodeConfig.ENTRY_PEERS_MADDRS, "")
+        log_file = config.get(AcnNodeConfig.ACN_LOG_FILE, "")
 
         return cls(
             key,
@@ -135,6 +143,7 @@ class AcnNodeConfig:
             delegate_uri,
             monitoring_uri,
             entry_peers.split(","),
+            log_file,
             enable_checks,
         )
 
@@ -207,7 +216,23 @@ class AcnNodeStandalone:
 
         cmd = [self.binary, config_file]
 
-        self._proc = subprocess.Popen(cmd, shell=False,)  # nosec
+        if self.config.config[AcnNodeConfig.ACN_LOG_FILE] != "":
+            self._proc = subprocess.Popen(  # nosec
+                cmd,
+                shell=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=1,
+            )
+            with open(
+                self.config.config[AcnNodeConfig.ACN_LOG_FILE], "ab", 1
+            ) as log_file:
+                for line in self._proc.stdout:
+                    sys.stdout.buffer.write(line)
+                    log_file.write(line)
+                    log_file.flush()
+        else:
+            self._proc = subprocess.Popen(cmd, shell=False,)  # nosec
 
         try:
             self._proc.wait()
@@ -286,6 +311,14 @@ def parse_commandline():
         dest="entry_peers_maddrs",
         help="node's entry peer uri in libp2p multiaddress fromat",
     )
+    parser.add_argument(
+        "--log-file",
+        action="store",
+        type=str,
+        dest="log_file",
+        required=False,
+        help="path to node logging file",
+    )
 
     args = parser.parse_args()
 
@@ -315,8 +348,15 @@ if __name__ == "__main__":
         monitoring_uri = os.environ.get(AcnNodeConfig.MONITORING_URI)
         entry_peers = os.environ.get(AcnNodeConfig.ENTRY_PEERS_MADDRS)
         entry_peers_list = entry_peers.split(",") if entry_peers is not None else []
+        log_file = os.environ.get(AcnNodeConfig.ACN_LOG_FILE, "")
         node_config = AcnNodeConfig(
-            key, uri, external_uri, delegate_uri, monitoring_uri, entry_peers_list
+            key,
+            uri,
+            external_uri,
+            delegate_uri,
+            monitoring_uri,
+            entry_peers_list,
+            log_file,
         )
 
     elif args.config_from_file is not None:
@@ -332,6 +372,7 @@ if __name__ == "__main__":
             args.delegate_uri,
             args.monitoring_uri,
             args.entry_peers_maddrs,
+            args.log_file,
         )
 
     node = AcnNodeStandalone(node_config, args.libp2p_node)

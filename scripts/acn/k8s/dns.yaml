@@ -1,0 +1,13 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: ph-deployment-name-here 
+  namespace: ph-deployment-namespace-here
+spec:
+  endpoints:
+  - dnsName:  ph-deployment-dns-here
+    recordTTL: 180
+    recordType: CNAME
+    targets:
+    - fetchpub.sandbox.fetch-ai.com
