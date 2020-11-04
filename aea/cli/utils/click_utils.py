@@ -120,7 +120,11 @@ class AgentDirectory(click.Path):
             os.chdir(cwd)
 
 
-def registry_flag():
+def registry_flag(
+    help_local: str = "Use only local registry.",
+    help_remote: str = "Use ony remote registry.",
+    help_mixed: str = "Use both remote and local registry.",
+):
     """Choice of one flag between: '--local/--remote/--mixed'."""
 
     def wrapper(f):
@@ -128,21 +132,21 @@ def registry_flag():
             "--local",
             is_flag=True,
             cls=MutuallyExclusiveOption,
-            help="Use only local registry.",
+            help=help_local,
             mutually_exclusive=["remote", "mixed"],
         )(f)
         f = option(
             "--remote",
             is_flag=True,
             cls=MutuallyExclusiveOption,
-            help="Use ony remote registry.",
+            help=help_remote,
             mutually_exclusive=["local", "mixed"],
         )(f)
         f = option(
             "--mixed",
             is_flag=True,
             cls=MutuallyExclusiveOption,
-            help="Use both remote and local registry.",
+            help=help_mixed,
             mutually_exclusive=["local", "remote"],
         )(f)
 

@@ -41,7 +41,11 @@ from aea.configurations.base import ComponentId, ComponentType, PackageId, Publi
 
 
 @click.group(invoke_without_command=True)
-@registry_flag()
+@registry_flag(
+    help_local="For fetching packages only from local folder.",
+    help_remote="For fetching packages only from remote registry.",
+    help_mixed="For fetching agent locally first and in case of failure from remote registry.",
+)
 @click.pass_context
 @check_aea_project
 def upgrade(click_context, local, remote, mixed):  # pylint: disable=unused-argument

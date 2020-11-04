@@ -37,7 +37,11 @@ from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 
 
 @click.command(name="fetch")
-@registry_flag()
+@registry_flag(
+    help_local="For fetching agent from local folder.",
+    help_remote="For fetching agent from remote registry.",
+    help_mixed="For fetching agent locally first and in case of failure from remote registry.",
+)
 @click.option(
     "--alias", type=str, required=False, help="Provide a local alias for the agent.",
 )
@@ -52,7 +56,8 @@ def fetch(click_context, public_id, alias, local, remote, mixed):
     elif local or mixed:
         fetch_agent_locally(ctx, public_id, alias, is_mixed=mixed)
     else:  # pragma: nocover
-        pass  # we are never here
+        # we are never here (mutual exclusivity of registry flags and default flag)
+        pass
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
@@ -151,6 +156,9 @@ def _fetch_agent_deps(ctx: Context, is_mixed: bool = False) -> None:
 def fetch_local_or_mixed(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     Fetch item, either local or mixed, depending on the parameters/context configuration.
+
+    It will first try to fetch from local registry; in case of failure,
+    if the 'is_mixed' flag is set, it will try to fetch from remote registry.
 
     Context expects 'is_local' and 'is_mixed' to be set.
 
