@@ -113,7 +113,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     item_remover = ItemRemoveHelper(ctx.agent_config)
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
     items_to_upgrade = set()
-    upgraders: List[Tuple[ItemUpgrader, str]] = []
+    upgraders: List[ItemUpgrader] = []
     shared_deps: Set[PackageId] = set()
     shared_deps_to_remove = set()
     items_to_upgrade_dependencies = set()
@@ -129,7 +129,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         with suppress(UpgraderException):
             new_version = item_upgrader.check_upgrade_is_required()
             items_to_upgrade.add((package_id, new_version))
-            upgraders.append((item_upgrader, new_version))
+            upgraders.append(item_upgrader)
 
         items_to_upgrade_dependencies.add(package_id)
         items_to_upgrade_dependencies.update(item_upgrader.dependencies)
@@ -166,12 +166,11 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
                 ).remove_item()
             click.echo("Shared dependencies removed.")
 
-        for upgrader, new_item_version in upgraders:
+        for upgrader in upgraders:
             upgrader.remove_item()
             upgrader.add_item()
-            upgrader.update_references(new_item_version)
 
-        _update_non_vendor_packages(ctx)
+        _update_references(ctx)
 
     click.echo("Finished project upgrade. Everything is up to date now!")
     click.echo(
@@ -315,54 +314,6 @@ class ItemUpgrader:
         click.echo(f"Adding item {self.item_type} {self.item_public_id}.")
         fetch_local_or_mixed(self.ctx, str(self.item_type), self.item_public_id)
 
-    def update_references(self, new_version: str) -> None:
-        """
-        Update references across the AEA project.
-
-        It breaks down in:
-        - update default routing mapping
-        - update default connection
-        - update component configurations
-
-        :param new_version: the new item version.
-        """
-        # update default routing
-        public_id = PublicId(
-            self.item_public_id.author, self.item_public_id.name, new_version
-        )
-        for key, value in list(self.ctx.agent_config.default_routing.items()):
-            if self.item_type == ComponentType.PROTOCOL.value and key.same_prefix(
-                public_id
-            ):
-                old_value = self.ctx.agent_config.default_routing.pop(key)
-                self.ctx.agent_config.default_routing[public_id] = old_value
-                # in case needs to be used below
-                key = public_id
-            if self.item_type == ComponentType.CONNECTION.value and value.same_prefix(
-                public_id
-            ):
-                self.ctx.agent_config.default_routing[key] = public_id
-
-        # update default connection
-        if (
-            self.item_type == ComponentType.CONNECTION.value
-            and self.ctx.agent_config.default_connection is not None
-        ):
-            if self.ctx.agent_config.default_connection.same_prefix(public_id):
-                self.ctx.agent_config.default_connection = public_id
-
-        # update component configurations
-        current_component_id = ComponentId(ComponentType(self.item_type), public_id)
-        current_component_prefix = current_component_id.component_prefix
-        for component_id, config in list(
-            self.ctx.agent_config.component_configurations.items()
-        ):
-            if component_id.component_prefix == current_component_prefix:
-                self.ctx.agent_config.component_configurations.pop(component_id)
-                self.ctx.agent_config.component_configurations[
-                    current_component_id
-                ] = config
-
 
 @clean_after
 def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
@@ -384,9 +335,8 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
 
             item_upgrader.remove_item()
             item_upgrader.add_item()
-            item_upgrader.update_references(version)
 
-            _update_non_vendor_packages(ctx)
+            _update_references(ctx)
 
         click.echo(
             f"The {item_type} '{item_public_id.author}/{item_public_id.name}' for the agent '{ctx.agent_config.agent_name}' has been successfully upgraded from version '{item_upgrader.current_item_public_id.version}' to '{version}'."
@@ -406,12 +356,13 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
         )
 
 
-def _update_non_vendor_packages(ctx: Context) -> None:
+def _update_references(ctx: Context):
     """
-    Update non-vendor packages.
+    Update references after upgrade.
 
-    :param ctx: the CLI context
-    :return: None
+    First, compute the replacements; then,
+    both in agent configuration and in non-vendor package configurations,
+    replace the old public ids.
     """
     # index from component type to replacements
     # a replacement is a map from (package_author, package_name) to public id with the new version
@@ -421,6 +372,56 @@ def _update_non_vendor_packages(ctx: Context) -> None:
             (dependency_id.author, dependency_id.name)
         ] = dependency_id.public_id
 
+    _update_agent_configuration(ctx, replacements)
+    _update_non_vendor_packages(ctx, replacements)
+
+
+def _update_agent_configuration(
+    ctx: Context, replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]]
+):
+    """Update agent configuration."""
+    protocol_replacements = replacements.get(ComponentType.PROTOCOL, {})
+    connection_replacements = replacements.get(ComponentType.CONNECTION, {})
+    # update default routing
+    for protocol_id, connection_id in list(ctx.agent_config.default_routing.items()):
+        protocol_prefix = protocol_id.author, protocol_id.name
+        connection_prefix = connection_id.author, connection_id.name
+
+        # update protocol (if replacements provides it)
+        new_protocol_id = protocol_replacements.get(protocol_prefix, protocol_id)
+        old_value = ctx.agent_config.default_routing.pop(protocol_id)
+        ctx.agent_config.default_routing[new_protocol_id] = old_value
+        # in case needs to be used below
+        protocol_id = new_protocol_id
+
+        # update connection (if replacements provides it)
+        new_connection_id = connection_replacements.get(
+            connection_prefix, connection_id
+        )
+        ctx.agent_config.default_routing[protocol_id] = new_connection_id
+
+    # update default connection
+    if ctx.agent_config.default_connection is not None:
+        default_connection_public_id = ctx.agent_config.default_connection
+        default_connection_prefix = (
+            default_connection_public_id.author,
+            default_connection_public_id.name,
+        )
+        new_default_connection_public_id = replacements.get(
+            ComponentType.CONNECTION, {}
+        ).get(default_connection_prefix, default_connection_public_id)
+        ctx.agent_config.default_connection = new_default_connection_public_id
+
+
+def _update_non_vendor_packages(
+    ctx: Context, replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]]
+) -> None:
+    """
+    Update non-vendor packages.
+
+    :param ctx: the CLI context
+    :return: None
+    """
     non_vendor_packages_paths = get_non_vendor_package_path(Path(ctx.cwd))
     for non_vendor_path in non_vendor_packages_paths:
         _update_non_vendor_package(non_vendor_path, replacements)
