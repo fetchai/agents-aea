@@ -44,19 +44,18 @@ from aea.configurations.base import CRUDCollection, DEFAULT_AEA_CONFIG_FILE, Pub
 @registry_flag(
     help_local="For publishing agent to local folder.",
     help_remote="For publishing agent to remote registry.",
-    help_mixed="For publishing agent to local folder, but checking packages also on remote registry",
 )
 @click.pass_context
 @check_aea_project
-def publish(click_context, local, remote, mixed):  # pylint: disable=unused-argument
+def publish(click_context, local, remote):  # pylint: disable=unused-argument
     """Publish Agent to Registry."""
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
     _validate_config(ctx)
-    if local or mixed:
-        _save_agent_locally(ctx, is_mixed=mixed)
-    else:
+    if remote:
         publish_agent(ctx)
+    else:
+        _save_agent_locally(ctx, is_mixed=not local)
 
 
 def _validate_config(ctx: Context) -> None:

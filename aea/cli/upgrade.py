@@ -59,15 +59,14 @@ from aea.configurations.loader import ConfigLoaders
 @registry_flag(
     help_local="For fetching packages only from local folder.",
     help_remote="For fetching packages only from remote registry.",
-    help_mixed="For fetching agent locally first and in case of failure from remote registry.",
 )
 @click.pass_context
 @check_aea_project
-def upgrade(click_context, local, remote, mixed):  # pylint: disable=unused-argument
+def upgrade(click_context, local, remote):  # pylint: disable=unused-argument
     """Upgrade agent's component."""
     ctx = cast(Context, click_context.obj)
-    ctx.set_config("is_local", local)
-    ctx.set_config("is_mixed", mixed)
+    ctx.set_config("is_local", local and not remote)
+    ctx.set_config("is_mixed", not (local or remote))
 
     if click_context.invoked_subcommand is None:
         upgrade_project(ctx)

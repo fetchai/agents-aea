@@ -123,7 +123,6 @@ class AgentDirectory(click.Path):
 def registry_flag(
     help_local: str = "Use only local registry.",
     help_remote: str = "Use ony remote registry.",
-    help_mixed: str = "Use both remote and local registry.",
 ):
     """Choice of one flag between: '--local/--remote/--mixed'."""
 
@@ -133,21 +132,14 @@ def registry_flag(
             is_flag=True,
             cls=MutuallyExclusiveOption,
             help=help_local,
-            mutually_exclusive=["remote", "mixed"],
+            mutually_exclusive=["remote"],
         )(f)
         f = option(
             "--remote",
             is_flag=True,
             cls=MutuallyExclusiveOption,
             help=help_remote,
-            mutually_exclusive=["local", "mixed"],
-        )(f)
-        f = option(
-            "--mixed",
-            is_flag=True,
-            cls=MutuallyExclusiveOption,
-            help=help_mixed,
-            mutually_exclusive=["local", "remote"],
+            mutually_exclusive=["local"],
         )(f)
 
         return f

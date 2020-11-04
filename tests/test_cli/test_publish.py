@@ -114,15 +114,15 @@ class PublishCommandTestCase(TestCase):
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
-        )
-        self.assertEqual(result.exit_code, 0)
-        result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish", "--mixed"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish", "--remote"], standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
@@ -148,14 +148,13 @@ class ValidatePkpTestCase(TestCase):
 
 @mock.patch("aea.cli.publish._check_is_item_in_registry_mixed")
 @mock.patch("aea.cli.publish._check_is_item_in_local_registry")
-@mock.patch("aea.cli.publish._validate_config")
 class TestPublishMixedMode(AEATestCaseEmpty):
-    """Test the execution branch with the '--mixed' flag."""
+    """Test the execution branch with in mixed mode."""
 
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
         self.set_config("agent.description", "some-description")
-        self.run_cli_command("publish", "--mixed", cwd=self._get_cwd())
+        self.run_cli_command("publish", cwd=self._get_cwd())
 
 
 def test_negative_check_is_item_in_remote_registry():

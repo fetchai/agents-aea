@@ -290,6 +290,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
     def setup(cls):
         """Set up test case."""
         super(TestUpgradeProject, cls).setup()
+        cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
@@ -373,6 +374,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
     def setup(cls):
         """Set up test case."""
         super(TestNonVendorProject, cls).setup()
+        cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
             "fetch", "fetchai/generic_buyer:0.12.0", "--alias", cls.agent_name

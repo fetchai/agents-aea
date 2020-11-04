@@ -144,7 +144,7 @@ class TestFetchAgent(TestCase):
 
 
 class TestFetchAgentMixed(BaseAEATestCase):
-    """Test 'aea fetch' in --mixed mode."""
+    """Test 'aea fetch' in mixed mode."""
 
     @staticmethod
     def _mock_add_item(ctx: Context, *args, **kwargs):
@@ -163,44 +163,62 @@ class TestFetchAgentMixed(BaseAEATestCase):
     def test_fetch_mixed(self, mock_fetch_package, mock_add_item) -> None:
         """Test fetch in mixed mode."""
         mock_add_item.side_effect = self._mock_add_item
-        self.run_cli_command("-v", "DEBUG", "fetch", "fetchai/my_first_aea", "--mixed")
+        self.run_cli_command("-v", "DEBUG", "fetch", "fetchai/my_first_aea")
         mock_fetch_package.assert_called()
 
 
 class BaseTestFetchAgentError(BaseAEATestCase, ABC):
-    """Test 'aea fetch' in --local or --mixed mode when it fails."""
+    """Test 'aea fetch' in local, remote or mixed mode when it fails."""
 
-    EXPECTED_ERROR_MESSAGE = "some error."
+    ERROR_MESSAGE = "some error."
+    EXPECTED_ERROR_MESSAGE = ""
     MODE = ""
 
     @staticmethod
     def _mock_add_item(ctx: Context, *args, **kwargs):
         """Mock 'add_item' so to always fail."""
-        raise click.ClickException(BaseTestFetchAgentError.EXPECTED_ERROR_MESSAGE)
+        raise click.ClickException(BaseTestFetchAgentError.ERROR_MESSAGE)
 
     @pytest.mark.integration
     @mock.patch("aea.cli.fetch.add_item")
-    def test_fetch_mixed(self, mock_add_item) -> None:
+    @mock.patch("aea.cli.registry.fetch.add_item")
+    def test_fetch_negative(self, mock_add_item_1, mock_add_item_2) -> None:
         """Test fetch in mixed mode."""
-        if not self.MODE:
+        if type(self) == BaseTestFetchAgentError:
             pytest.skip("Base test class.")
-        mock_add_item.side_effect = self._mock_add_item
+        mock_add_item_1.side_effect = self._mock_add_item
+        mock_add_item_2.side_effect = self._mock_add_item
         with pytest.raises(
-            Exception,
-            match=f"Failed to add .* dependency.*: {self.EXPECTED_ERROR_MESSAGE}",
+            Exception, match=self.EXPECTED_ERROR_MESSAGE,
         ):
             self.run_cli_command(
-                "-v", "DEBUG", "fetch", "fetchai/my_first_aea", self.MODE
+                *(
+                    ["-v", "DEBUG", "fetch", "fetchai/my_first_aea"]
+                    + ([self.MODE] if self.MODE else [])
+                )
             )
 
 
 class TestFetchAgentNonMixedErrorLocal(BaseTestFetchAgentError):
-    """Test 'aea fetch' in --local or --mixed mode when it fails."""
+    """Test 'aea fetch' in local mode when it fails."""
 
+    EXPECTED_ERROR_MESSAGE = (
+        f"Failed to add .* dependency.*: {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    )
     MODE = "--local"
 
 
-class TestFetchAgentNonMixedErrorMixed(BaseTestFetchAgentError):
-    """Test 'aea fetch' in --local or --mixed mode when it fails."""
+class TestFetchAgentMixedModeError(BaseTestFetchAgentError):
+    """Test 'aea fetch' in mixed mode when it fails."""
 
-    MODE = "--mixed"
+    EXPECTED_ERROR_MESSAGE = (
+        f"Failed to add .* dependency.*: {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    )
+    MODE = ""
+
+
+class TestFetchAgentRemoteModeError(BaseTestFetchAgentError):
+    """Test 'aea fetch' in remote mode when it fails."""
+
+    EXPECTED_ERROR_MESSAGE = rf"Unable to fetch dependency for agent .*, aborting\. {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    MODE = "--remote"

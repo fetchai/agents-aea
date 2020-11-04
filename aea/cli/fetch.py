@@ -40,24 +40,19 @@ from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 @registry_flag(
     help_local="For fetching agent from local folder.",
     help_remote="For fetching agent from remote registry.",
-    help_mixed="For fetching agent locally first and in case of failure from remote registry.",
 )
 @click.option(
     "--alias", type=str, required=False, help="Provide a local alias for the agent.",
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
-def fetch(click_context, public_id, alias, local, remote, mixed):
+def fetch(click_context, public_id, alias, local, remote):
     """Fetch Agent from Registry."""
     ctx = cast(Context, click_context.obj)
-    enable_default = not (local or remote or mixed)
-    if remote or enable_default:
+    if remote:
         fetch_agent(ctx, public_id, alias)
-    elif local or mixed:
-        fetch_agent_locally(ctx, public_id, alias, is_mixed=mixed)
-    else:  # pragma: nocover
-        # we are never here (mutual exclusivity of registry flags and default flag)
-        pass
+    else:
+        fetch_agent_locally(ctx, public_id, alias, is_mixed=not local)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
@@ -81,7 +76,7 @@ def fetch_agent_locally(
     public_id: PublicId,
     alias: Optional[str] = None,
     target_dir: Optional[str] = None,
-    is_mixed: bool = False,
+    is_mixed: bool = True,
 ) -> None:
     """
     Fetch Agent from local packages.
@@ -134,7 +129,7 @@ def fetch_agent_locally(
     click.echo("Agent {} successfully fetched.".format(public_id.name))
 
 
-def _fetch_agent_deps(ctx: Context, is_mixed: bool = False) -> None:
+def _fetch_agent_deps(ctx: Context, is_mixed: bool = True) -> None:
     """
     Fetch agent dependencies.
 
