@@ -29,15 +29,15 @@ As before, to pass params to the `docker run` command:
 
 First, be sure you tagged the image with the `latest` tag: 
 
-    docker tag aea-develop:<latest-version-number> aea-develop:latest
+    docker tag fetchai/aea-develop:<latest-version-number> fetchai/aea-develop:latest
 
-Then, publish the images. First, the `aea-develop:<latest-version-number>`
+Then, publish the images. First, the `fetchai/aea-develop:<latest-version-number>`
 
     ./develop-image/scripts/docker-publish-img.sh
 
-And then, the `aea-develop:latest` image:
+And then, the `fetchai/aea-develop:latest` image:
 
-- In `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=aea-develop:latest`  
+- In `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=fetchai/aea-develop:latest`  
 
 - Run the publish command again: 
 
