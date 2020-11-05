@@ -32,7 +32,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 * `Dialogues`, which define rules over `Message` sequences.
 
-The framework provides one default `Protocol`, called `default` (current version `fetchai/default:0.8.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework provides one default `Protocol`, called `default` (current version `fetchai/default:0.9.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
 Additional `Protocols` - i.e. a new type of interaction - can be added as packages and generated with the <a href="../protocol-generator">protocol generator</a>. For more details on `Protocols` also read the `Protocol` guide <a href="../protocol">here</a>.
 

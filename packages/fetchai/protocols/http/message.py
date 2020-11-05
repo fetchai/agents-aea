@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/http:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/http:0.9.0")
 
     class Performative(Message.Performative):
         """Performatives for the http protocol."""
