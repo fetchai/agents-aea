@@ -1,0 +1,14 @@
+
+# Release Process from develop to master
+
+1. Make sure all tests pass, coverage is at 100% and the local branch is in a clean state (nothing to commit).
+
+2. Determine the next AEA version and run `python scripts/bump_aea_version.py --new-version NEW_VERSION_HERE`. Commit if satisfied.
+
+3. Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
+
+4. Check the package upgrades are correct by running `python scripts/check_package_dependencies.py` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
+
+5. Check the protocols are up-to-date by running `python scripts/generate_all_protocols.py`.
+
+6. Check the docs are up-to-date by running `python scripts/generate_api_docs.py` and `python scripts/check_doc_links.py`. Commit if satisfied.
