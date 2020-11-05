@@ -65,8 +65,7 @@ sudo apt-get install python3.7-dev
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
 
 - To install Go, follow the
- official guide, depending on your platform: 
- [https://golang.org/doc/install](https://golang.org/doc/install)
+ official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a>
 
 - Python is already included by default on 
 many Linux distributions (e.g. Ubuntu), as well as MacOS.
@@ -76,8 +75,7 @@ python3 --version
 ```
 
 - To install Python on Windows machines, 
-you can download a specific release 
-[here](https://www.python.org/downloads/).
+you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
 
 
 ## Setup author name
