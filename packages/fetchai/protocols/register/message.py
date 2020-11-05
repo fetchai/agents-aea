@@ -48,6 +48,19 @@ class RegisterMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {"error", "register", "success"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "dialogue_reference",
+            "error_code",
+            "error_msg",
+            "info",
+            "message_id",
+            "performative",
+            "target",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -64,7 +77,6 @@ class RegisterMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"error", "register", "success"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

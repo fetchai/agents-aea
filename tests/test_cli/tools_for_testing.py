@@ -53,7 +53,7 @@ class AgentConfigMock:
         self.connection_private_key_paths.read_all = Mock(
             return_value=connection_private_key_paths
         )
-        self.get = lambda x: getattr(self, x, None)
+        self.get = lambda x, default=None: getattr(self, x, default)
         self.component_configurations = {}
         self.package_dependencies = set()
 

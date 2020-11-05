@@ -1,0 +1,49 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ph-deployment-name-here
+  namespace: ph-deployment-namespace-here
+spec:
+  selector:
+    app: istio-fetchpubig
+    istio: ingressgateway
+  servers:
+  - port:
+      name: libp2p
+      number: ph-node-port-number-here
+      protocol: TCP
+    hosts:
+    - ph-deployment-dns-here
+  - port:
+      name: tcp
+      number: ph-node-delegate-port-number-here
+      protocol: TCP
+    hosts:
+    - ph-deployment-dns-here
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ph-deployment-name-here
+  namespace: ph-deployment-namespace-here
+spec:
+  gateways:
+  - ph-deployment-name-here
+  hosts:
+  - ph-deployment-dns-here
+  tcp:
+  - match:
+    - port: ph-node-port-number-here
+    route:
+    - destination:
+        host: ph-deployment-name-here
+        port:
+          number: ph-node-port-number-here
+  - match:
+    - port: ph-node-delegate-port-number-here
+    route:
+    - destination:
+        host: ph-deployment-name-here
+        port:
+          number: ph-node-delegate-port-number-here

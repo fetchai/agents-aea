@@ -120,7 +120,7 @@ class ItemRemoveHelper:
         self,
     ) -> Dict[PackageId, Set[PackageId]]:
         """
-        Get all reverse dependencices in agent.
+        Get all reverse dependencies in agent.
 
         :return: dict with PackageId: and set of PackageIds that uses this package
 
@@ -265,11 +265,16 @@ def remove_unused_component_configurations(ctx: Context):
     try:
         yield
     finally:
+        saved_configuration_by_component_prefix = {
+            key.component_prefix: value for key, value in saved_configuration.items()
+        }
         for component_id in ctx.agent_config.package_dependencies:
-            if component_id in saved_configuration:
+            if component_id.component_prefix in saved_configuration_by_component_prefix:
                 ctx.agent_config.component_configurations[
                     component_id
-                ] = saved_configuration[component_id]
+                ] = saved_configuration_by_component_prefix[
+                    component_id.component_prefix
+                ]
 
     with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
         ctx.agent_loader.dump(ctx.agent_config, f)
@@ -292,7 +297,7 @@ class RemoveItem:
         :param ctx: click context.
         :param item_type: str, package type
         :param item_id: PublicId of the item to remove.
-        :oaram force: bool. if True remove even required by another package.
+        :param force: bool. if True remove even required by another package.
 
         :return: None
         """

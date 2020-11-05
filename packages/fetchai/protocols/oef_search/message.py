@@ -70,6 +70,28 @@ class OefSearchMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "oef_error",
+        "register_service",
+        "search_result",
+        "search_services",
+        "success",
+        "unregister_service",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "agents",
+            "agents_info",
+            "dialogue_reference",
+            "message_id",
+            "oef_error_operation",
+            "performative",
+            "query",
+            "service_description",
+            "target",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -86,14 +108,6 @@ class OefSearchMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "oef_error",
-            "register_service",
-            "search_result",
-            "search_services",
-            "success",
-            "unregister_service",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

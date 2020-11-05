@@ -20,14 +20,22 @@
 
 from unittest import TestCase, mock
 
+import click
+import pytest
 from click import ClickException
 
 from aea.cli import cli
 from aea.cli.publish import (
     _check_is_item_in_local_registry,
+    _check_is_item_in_registry_mixed,
+    _check_is_item_in_remote_registry,
     _save_agent_locally,
     _validate_pkp,
 )
+from aea.configurations.base import PublicId
+from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from packages.fetchai.protocols.default import DefaultMessage
 
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import (
@@ -106,11 +114,15 @@ class PublishCommandTestCase(TestCase):
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish", "--remote"], standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
@@ -132,3 +144,43 @@ class ValidatePkpTestCase(TestCase):
         with self.assertRaises(ClickException):
             _validate_pkp(private_key_paths)
         private_key_paths.read_all.assert_called_once()
+
+
+@mock.patch("aea.cli.publish._check_is_item_in_registry_mixed")
+@mock.patch("aea.cli.publish._check_is_item_in_local_registry")
+class TestPublishMixedMode(AEATestCaseEmpty):
+    """Test the execution branch with in mixed mode."""
+
+    def test_publish_positive(self, *mocks):
+        """Test for CLI publish positive result."""
+        self.set_config("agent.description", "some-description")
+        self.run_cli_command("publish", cwd=self._get_cwd())
+
+
+def test_negative_check_is_item_in_remote_registry():
+    """Test the utility function (negative) to check if an item is in the remote registry"""
+    with pytest.raises(click.ClickException, match="Not found in Registry."):
+        _check_is_item_in_remote_registry(
+            PublicId("nonexisting_package_author", "nonexisting_package_name", "0.0.0"),
+            "protocol",
+        )
+
+
+def test_negative_check_is_item_in_registry_mixed():
+    """Check if item in registry, mixed mode."""
+    with pytest.raises(
+        click.ClickException,
+        match="Package not found neither in local nor in remote registry: Not found in Registry.",
+    ):
+        _check_is_item_in_registry_mixed(
+            PublicId("nonexisting_package_author", "nonexisting_package_name", "0.0.0"),
+            "protocol",
+            "nonexisting_packages_path",
+        )
+
+
+def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely():
+    """Check if item in registry, mixed mode, when not in local registry but only in remote."""
+    _check_is_item_in_registry_mixed(
+        DefaultMessage.protocol_id, "protocols", "nonexisting_packages_path"
+    )
