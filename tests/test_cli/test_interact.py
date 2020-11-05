@@ -236,7 +236,6 @@ class TestInteractEcho(AEATestCaseEmpty):
                 f"protocol_id: {str(DefaultMessage.protocol_id)}",
                 "message_id=1,target=0,performative=bytes,content=b'hello')",
                 f"Provide message of protocol '{str(DefaultMessage.protocol_id)}' for performative bytes:",
-
             ],
             timeout=10,
             is_terminating=False,

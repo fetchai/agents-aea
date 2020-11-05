@@ -35,8 +35,6 @@ from aea.cli.publish import (
 from aea.configurations.base import PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.fetchai.protocols.default import DefaultMessage
-
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import (
     ContextMock,
@@ -182,5 +180,7 @@ def test_negative_check_is_item_in_registry_mixed():
 def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely():
     """Check if item in registry, mixed mode, when not in local registry but only in remote."""
     _check_is_item_in_registry_mixed(
-        PublicId.from_str("fetchai/default:0.8.0"), "protocols", "nonexisting_packages_path"
+        PublicId.from_str("fetchai/default:0.8.0"),
+        "protocols",
+        "nonexisting_packages_path",
     )
