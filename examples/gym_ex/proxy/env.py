@@ -41,6 +41,9 @@ sys.modules["packages.fetchai.protocols.gym"] = locate(  # isort:skip
 )
 
 
+from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylint: disable=wrong-import-position
+    PUBLIC_ID as GYM_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.gym.dialogues import (  # noqa: E402  # pylint: disable=wrong-import-position
     GymDialogue as BaseGymDialogue,
 )
@@ -60,8 +63,6 @@ Reward = float
 Done = bool
 Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
-
-DEFAULT_GYM = "gym"
 
 GymDialogue = BaseGymDialogue
 
@@ -93,7 +94,7 @@ class ProxyEnv(gym.Env):
         super().__init__()
         self._queue: Queue = Queue()
         self._action_counter: int = 0
-        self.gym_address = "fetchai/gym:0.11.0"
+        self.gym_address = str(GYM_CONNECTION_PUBLIC_ID)
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
