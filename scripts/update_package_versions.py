@@ -372,8 +372,8 @@ def process_packages(
     conflicts = {p.public_id for p in all_package_ids_to_update}.intersection(
         ambiguous_public_ids
     )
-    print(f"Ambiguous public ids: {pprint.pformat(ambiguous_public_ids)}")
-    print(f"Conflicts with public ids to update: {pprint.pformat(conflicts)}",)
+    print(f"Ambiguous public ids: {ambiguous_public_ids}")
+    print(f"Conflicts with public ids to update: {conflicts}",)
 
     print("*" * 100)
     print("Start processing.")
