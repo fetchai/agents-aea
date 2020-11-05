@@ -322,7 +322,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
                 cli,
-                ["--skip-consistency-check", "upgrade"],
+                ["--skip-consistency-check", "upgrade", "--local"],
                 standalone_mode=False,
                 catch_exceptions=False,
             )
@@ -337,7 +337,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
                 cli,
-                ["--skip-consistency-check", "upgrade"],
+                ["--skip-consistency-check", "upgrade", "--local"],
                 standalone_mode=False,
                 catch_exceptions=False,
             )

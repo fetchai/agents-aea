@@ -182,5 +182,5 @@ def test_negative_check_is_item_in_registry_mixed():
 def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely():
     """Check if item in registry, mixed mode, when not in local registry but only in remote."""
     _check_is_item_in_registry_mixed(
-        DefaultMessage.protocol_id, "protocols", "nonexisting_packages_path"
+        PublicId.from_str("fetchai/default:0.8.0"), "protocols", "nonexisting_packages_path"
     )
