@@ -730,7 +730,9 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
         self,
     ):  # pylint: disable=unused-argument
         """Test that dependencies in non-vendor packages are updated correctly after upgrade."""
-        self.run_cli_command("--skip-consistency-check", "upgrade", cwd=self._get_cwd())
+        self.run_cli_command(
+            "--skip-consistency-check", "upgrade", "--local", cwd=self._get_cwd()
+        )
         self.assert_dependency_updated(
             ComponentType.CONNECTION, "my_connection", {DefaultMessage.protocol_id},
         )

@@ -34,6 +34,7 @@ from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.test_tools.test_cases import BaseAEATestCase
 
+from tests.conftest import MY_FIRST_AEA_PUBLIC_ID
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
@@ -163,7 +164,9 @@ class TestFetchAgentMixed(BaseAEATestCase):
     def test_fetch_mixed(self, mock_fetch_package, mock_add_item) -> None:
         """Test fetch in mixed mode."""
         mock_add_item.side_effect = self._mock_add_item
-        self.run_cli_command("-v", "DEBUG", "fetch", "fetchai/my_first_aea")
+        self.run_cli_command(
+            "-v", "DEBUG", "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest())
+        )
         mock_fetch_package.assert_called()
 
 
@@ -193,7 +196,7 @@ class BaseTestFetchAgentError(BaseAEATestCase, ABC):
         ):
             self.run_cli_command(
                 *(
-                    ["-v", "DEBUG", "fetch", "fetchai/my_first_aea"]
+                    ["-v", "DEBUG", "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest())]
                     + ([self.MODE] if self.MODE else [])
                 )
             )

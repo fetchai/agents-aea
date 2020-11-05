@@ -487,7 +487,9 @@ class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
     def test_add_connection_from_remote_registry_positive(self):
         """Test add connection from Registry positive result."""
         self.add_item(
-            "connection", str(LOCAL_CONNECTION_PUBLIC_ID), local=self.IS_LOCAL
+            "connection",
+            str(LOCAL_CONNECTION_PUBLIC_ID.to_latest()),
+            local=self.IS_LOCAL,
         )
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "connections")
