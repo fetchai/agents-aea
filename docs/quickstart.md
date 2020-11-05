@@ -14,31 +14,32 @@ You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6<
 ### Optional: using the Docker image.
 ​
 We also provide a Docker image with all the needed dependencies.
-To use the image you will first have to pull it and than run it with your
-current local directory mounted as a docker volume. 
-This allows you to keep your agents local while working on them from
-within the docker container.
 
-​
+<details><summary>Manual approach</summary>
+
+To use the image you will first have to pull it and than run it with your current local directory mounted as a docker volume. This allows you to keep your agents local while working on them from within the docker container.
+
 To pull:
+
 ```bash
-docker pull fetchai/aea-ubuntu:latest
+docker pull fetchai/aea-user:latest
 ```
+
 To run the image
 ​
 - Linux and MacOs
   ```bash
-  docker run -it -v $(pwd):/aea --workdir=/aea fetchai/aea-ubuntu:latest 
+  docker run -it -v $(pwd):/aea --workdir=/aea fetchai/aea-user:latest 
   ```
 - Windows
   ```bash
-  docker run -it -v %cd%:/aea --workdir=/aea fetchai/aea-ubuntu:latest 
+  docker run -it -v %cd%:/aea --workdir=/aea fetchai/aea-user:latest 
   ```
+
 Once successfully logged into the docker container, 
 you can follow the rest of the guide the same way as if not using docker.
 ​
-​
-​
+</details>
 
 ## Preliminaries
 
