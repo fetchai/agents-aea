@@ -19,9 +19,15 @@ RUN wget https://dl.google.com/go/go1.13.8.linux-amd64.tar.gz && \
   export PATH=$PATH:/usr/local/go/bin && echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc && \
   mkdir $HOME/go
 
-ENV PATH="${PATH}:/usr/local/go/bin"
-
 USER ubuntu
+
+ENV PATH="${PATH}:/usr/local/go/bin"
+ENV DEBIAN_FRONTEND noninteractive
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+RUN echo 'PATH="$(python3.6 -m site --user-base)/bin:${PATH}"' >> ~/.bashrc
+RUN echo "alias pip=pip3" >> ~/.bashrc
 
 ENTRYPOINT [ "/bin/bash"]
 
