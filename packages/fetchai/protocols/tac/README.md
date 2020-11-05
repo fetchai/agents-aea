@@ -69,7 +69,7 @@ ct:ErrorCode: |
 ---
 initiation: [register]
 reply:
-  register: [tac_error, game_data, cancelled]
+  register: [tac_error, game_data, cancelled, unregister]
   unregister: [tac_error]
   transaction: [transaction, transaction_confirmation, tac_error, cancelled]
   cancelled: []
