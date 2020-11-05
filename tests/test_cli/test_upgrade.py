@@ -296,7 +296,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.12.0",
+            "fetchai/generic_buyer:0.13.0",
             "--alias",
             cls.agent_name,
         )
@@ -322,7 +322,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
                 cli,
-                ["--skip-consistency-check", "upgrade"],
+                ["--skip-consistency-check", "upgrade", "--local"],
                 standalone_mode=False,
                 catch_exceptions=False,
             )
@@ -337,7 +337,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
                 cli,
-                ["--skip-consistency-check", "upgrade"],
+                ["--skip-consistency-check", "upgrade", "--local"],
                 standalone_mode=False,
                 catch_exceptions=False,
             )
@@ -377,7 +377,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.12.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.13.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -730,7 +730,9 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
         self,
     ):  # pylint: disable=unused-argument
         """Test that dependencies in non-vendor packages are updated correctly after upgrade."""
-        self.run_cli_command("--skip-consistency-check", "upgrade", cwd=self._get_cwd())
+        self.run_cli_command(
+            "--skip-consistency-check", "upgrade", "--local", cwd=self._get_cwd()
+        )
         self.assert_dependency_updated(
             ComponentType.CONNECTION, "my_connection", {DefaultMessage.protocol_id},
         )
@@ -804,7 +806,9 @@ class TestUpdateReferences(AEATestCaseEmpty):
             cwd=cls._get_cwd(),
         )
 
-        cls.run_cli_command("--skip-consistency-check", "upgrade", cwd=cls._get_cwd())
+        cls.run_cli_command(
+            "--skip-consistency-check", "upgrade", "--local", cwd=cls._get_cwd()
+        )
 
     def test_default_routing_updated_correctly(self):
         """Test default routing has been updated correctly."""

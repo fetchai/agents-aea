@@ -100,7 +100,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 In the root directory, fetch the controller AEA:
 ``` bash
-aea fetch fetchai/tac_controller:0.12.0
+aea fetch fetchai/tac_controller:0.13.0
 cd tac_controller
 aea install
 ```
@@ -113,9 +113,9 @@ The following steps create the controller from scratch:
 aea create tac_controller
 cd tac_controller
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/tac_control:0.10.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add skill fetchai/tac_control:0.11.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
@@ -124,7 +124,7 @@ aea config set agent.default_ledger fetchai
 In `tac_controller/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 
 </p>
@@ -134,8 +134,8 @@ default_routing:
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.13.0 --alias tac_participant_one
-aea fetch fetchai/tac_participant:0.13.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.14.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.14.0 --alias tac_participant_two
 cd tac_participant_two
 aea install
 ```
@@ -153,10 +153,10 @@ Build participant one:
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/tac_participation:0.11.0
-aea add skill fetchai/tac_negotiation:0.12.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add skill fetchai/tac_participation:0.12.0
+aea add skill fetchai/tac_negotiation:0.13.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
@@ -165,18 +165,18 @@ aea config set agent.default_ledger fetchai
 In `tac_participant_one/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 
 Then, build participant two:
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/tac_participation:0.11.0
-aea add skill fetchai/tac_negotiation:0.12.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add skill fetchai/tac_participation:0.12.0
+aea add skill fetchai/tac_negotiation:0.13.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
@@ -185,8 +185,8 @@ aea config set agent.default_ledger fetchai
 In `tac_participant_two/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 
 </p>

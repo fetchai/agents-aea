@@ -213,6 +213,26 @@ Get decision maker handler context.
 
 Get behaviours of the skill.
 
+<a name="aea.skills.base.SkillContext.default_ledger_id"></a>
+#### default`_`ledger`_`id
+
+```python
+ | @property
+ | default_ledger_id() -> str
+```
+
+Get the default ledger id.
+
+<a name="aea.skills.base.SkillContext.currency_denominations"></a>
+#### currency`_`denominations
+
+```python
+ | @property
+ | currency_denominations() -> Dict[str, str]
+```
+
+Get a dictionary mapping ledger ids to currency denominations.
+
 <a name="aea.skills.base.SkillContext.search_service_address"></a>
 #### search`_`service`_`address
 

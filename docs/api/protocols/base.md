@@ -44,6 +44,16 @@ Initialize a Message object.
 - `body`: the dictionary of values to hold.
 - `kwargs`: any additional value to add to the body. It will overwrite the body values.
 
+<a name="aea.protocols.base.Message.valid_performatives"></a>
+#### valid`_`performatives
+
+```python
+ | @property
+ | valid_performatives() -> Set[str]
+```
+
+Get valid performatives.
+
 <a name="aea.protocols.base.Message.has_sender"></a>
 #### has`_`sender
 
@@ -290,45 +300,6 @@ class Serializer(Encoder,  Decoder,  ABC)
 ```
 
 The implementations of this class defines a serialization layer for a protocol.
-
-<a name="aea.protocols.base.ProtobufSerializer"></a>
-## ProtobufSerializer Objects
-
-```python
-class ProtobufSerializer(Serializer)
-```
-
-Default Protobuf serializer.
-
-It assumes that the Message contains a JSON-serializable body.
-
-<a name="aea.protocols.base.ProtobufSerializer.encode"></a>
-#### encode
-
-```python
- | @staticmethod
- | encode(msg: Message) -> bytes
-```
-
-Encode a message into bytes using Protobuf.
-
-- if one of message_id, target and dialogue_reference are not defined,
-  serialize only the message body/
-- otherwise, extract those fields from the body and instantiate
-  a Message struct.
-
-<a name="aea.protocols.base.ProtobufSerializer.decode"></a>
-#### decode
-
-```python
- | @staticmethod
- | decode(obj: bytes) -> Message
-```
-
-Decode bytes into a message using Protobuf.
-
-First, try to parse the input as a Protobuf 'Message';
-if it fails, parse the bytes as struct.
 
 <a name="aea.protocols.base.Protocol"></a>
 ## Protocol Objects

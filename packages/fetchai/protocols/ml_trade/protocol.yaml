@@ -1,18 +1,18 @@
 name: ml_trade
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 type: protocol
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmbcveDDdhL1n4caF1EdxqrpDumqosHV7usoHAeoato6bT
+  README.md: QmdSGnJ7eiW7xhjpc3K3XA1JFasTco7VpAfSSPNc77Xgfi
   __init__.py: QmcCS9uUQTTS2w85dTNiN5rQ14wyBhmBkr7pPPPcbLphcn
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
   dialogues.py: QmVvP34aKWEtHrKmccNMvEdDnx5B7xpE5aEGzr6GU2u8UK
-  message.py: QmNr3YY4sgP7NEQka4ktjm16JGgpHy6PNc6t1zThk9nAH9
+  message.py: QmVTfthChsVHhFx91Lro1yRdmK43PYVfg6imDWv1bFNSYV
   ml_trade.proto: QmXqDTBhno2kMLdAbNiZWcAHpjiJ95qXL4doUnhdmCNkhk
-  ml_trade_pb2.py: QmU1MrfXLsJMo91yenRNTdnGFUA9UDcxJsayHYqHN2uwjp
+  ml_trade_pb2.py: QmdV8LAo3xNJyJXUr8cdVUnPdZE7KqTDiNMwAHrvYTwsKF
   serialization.py: QmNnEyqVdHuXXQLjAvbyibmdRbWBZG8tNEQy32s7SAVtcE
 fingerprint_ignore_patterns: []
 dependencies:
