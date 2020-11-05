@@ -804,7 +804,9 @@ class TestUpdateReferences(AEATestCaseEmpty):
             cwd=cls._get_cwd(),
         )
 
-        cls.run_cli_command("--skip-consistency-check", "upgrade", "--local", cwd=cls._get_cwd())
+        cls.run_cli_command(
+            "--skip-consistency-check", "upgrade", "--local", cwd=cls._get_cwd()
+        )
 
     def test_default_routing_updated_correctly(self):
         """Test default routing has been updated correctly."""
