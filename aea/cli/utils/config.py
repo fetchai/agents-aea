@@ -368,7 +368,10 @@ def get_non_vendor_package_path(aea_project_path: Path) -> Set[Path]:
     """
     result: Set[Path] = set()
     for item_type_plural in ComponentType.plurals():
+        nonvendor_package_dir_of_type = aea_project_path / item_type_plural
         result = result.union(
-            {p for p in (aea_project_path / item_type_plural).iterdir() if p.is_dir()}
+            {p for p in nonvendor_package_dir_of_type.iterdir() if p.is_dir()}
+            if nonvendor_package_dir_of_type.exists()
+            else {}
         )
     return result

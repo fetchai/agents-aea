@@ -25,11 +25,11 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
 import pytest
-from click import BadParameter, ClickException
+from click import BadParameter, ClickException, UsageError
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import MutuallyExclusiveOption, PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -510,3 +510,13 @@ def test_override_ledger_configurations_positive():
             LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
             == DEFAULT_CHAIN_ID
         )
+
+
+def test_mutually_exclusive_usage_error():
+    """Test MutuallyExclusiveOption.handle_parse_result."""
+    opt = MutuallyExclusiveOption(["--arg1"], mutually_exclusive=["arg2"])
+    with pytest.raises(
+        UsageError,
+        match=f"Illegal usage: `arg1` is mutually exclusive with arguments `{', '.join(['arg2'])}`.",
+    ):
+        opt.handle_parse_result(MagicMock(), {"arg1": None, "arg2": None}, [])

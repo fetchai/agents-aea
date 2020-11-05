@@ -47,6 +47,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
+from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
 from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
@@ -289,6 +290,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
     def setup(cls):
         """Set up test case."""
         super(TestUpgradeProject, cls).setup()
+        cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
@@ -372,7 +374,8 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
     def setup(cls):
         """Set up test case."""
         super(TestNonVendorProject, cls).setup()
-        cls.agent_name = "generic_buyer_0.9.0"
+        cls.change_directory(Path(".."))
+        cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
             "fetch", "fetchai/generic_buyer:0.12.0", "--alias", cls.agent_name
         )
@@ -742,6 +745,102 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
         package_path = Path(self._get_cwd(), item_type.to_plural(), package_name)
         component_config = load_component_configuration(item_type, package_path)
         assert component_config.protocols == expected  # type: ignore
+
+
+class TestUpdateReferences(AEATestCaseEmpty):
+    """
+    Test that references are updated correctly after 'aea upgrade'.
+
+    In particular, 'default_routing', 'default_connection' and custom component configurations in AEA configuration.
+
+    How the test works:
+    - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
+    - add fetchai/stub:0.12.0
+    - add 'fetchai/default:0.7.0: fetchai/stub:0.12.0' to default routing
+    - add custom configuration to stub connection.
+    - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
+    """
+
+    IS_EMPTY = True
+
+    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.7.0")
+    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.7.0")
+    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.12.0")
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        super().setup_class()
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "add",
+            "skill",
+            str(cls.OLD_ERROR_SKILL_PUBLIC_ID),
+            cwd=cls._get_cwd(),
+        )
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "add",
+            "connection",
+            str(cls.OLD_STUB_CONNECTION_PUBLIC_ID),
+            cwd=cls._get_cwd(),
+        )
+
+        cls.nested_set_config(
+            "agent.default_routing",
+            {cls.OLD_DEFAULT_PROTOCOL_PUBLIC_ID: cls.OLD_STUB_CONNECTION_PUBLIC_ID},
+        )
+        cls.nested_set_config(
+            "agent.default_connection", cls.OLD_STUB_CONNECTION_PUBLIC_ID,
+        )
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "set",
+            "vendor.fetchai.skills.error.is_abstract",
+            "--type",
+            "bool",
+            "true",
+            cwd=cls._get_cwd(),
+        )
+
+        cls.run_cli_command("--skip-consistency-check", "upgrade", cwd=cls._get_cwd())
+
+    def test_default_routing_updated_correctly(self):
+        """Test default routing has been updated correctly."""
+        result = self.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "get",
+            "agent.default_routing",
+            cwd=self._get_cwd(),
+        )
+        assert (
+            result.stdout
+            == f"{{'{DefaultMessage.protocol_id}': '{StubConnection.connection_id}'}}\n"
+        )
+
+    def test_default_connection_updated_correctly(self):
+        """Test default routing has been updated correctly."""
+        result = self.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "get",
+            "agent.default_connection",
+            cwd=self._get_cwd(),
+        )
+        assert result.stdout == "fetchai/stub:0.12.0\n"
+
+    def test_custom_configuration_updated_correctly(self):
+        """Test default routing has been updated correctly."""
+        result = self.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "get",
+            "vendor.fetchai.skills.error.is_abstract",
+            cwd=self._get_cwd(),
+        )
+        assert result.stdout == "True\n"
 
 
 class TestNothingToUpgrade(AEATestCaseEmpty):
