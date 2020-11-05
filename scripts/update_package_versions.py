@@ -29,7 +29,6 @@ Run this script from the root of the project directory:
 import argparse
 import operator
 import os
-import pprint
 import re
 import subprocess  # nosec
 import sys
