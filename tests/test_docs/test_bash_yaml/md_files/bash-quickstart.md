@@ -1,3 +1,12 @@
+```bash
+docker pull fetchai/aea-user:latest
+```
+  ```bash
+  docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
+  ```
+  ```bash
+  docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
+  ```
 ``` bash
 mkdir my_aea_projects/
 cd my_aea_projects/
@@ -19,7 +28,7 @@ pip install aea[all]
 ``` bash
 sudo apt-get install python3.7-dev
 ```
-``` bash
+``` bash 
 aea init
 ```
 ``` bash
