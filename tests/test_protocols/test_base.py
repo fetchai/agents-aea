@@ -96,7 +96,7 @@ DIALOGUE_CLASSES: List[Tuple[Type, Type, Enum, Callable]] = [
 ]
 
 
-class TestMessage(Message):
+class TMessage(Message):
     """Message class for tests."""
 
     class _SlotsCls:
@@ -120,7 +120,7 @@ class TestMessageProperties:
         """Setup test."""
         cls.body = {"body_1": "1", "body_2": "2"}
         cls.kwarg = 1
-        cls.message = TestMessage(cls.body, kwarg=cls.kwarg)
+        cls.message = TMessage(cls.body, kwarg=cls.kwarg)
 
     def test_message_properties(self):
         """Test message properties."""
@@ -139,6 +139,7 @@ class TestMessageProperties:
             str(self.message)
             == "Message(sender=sender,to=to,body_1=1,body_2=2,kwarg=1)"
         )
+        assert self.message.valid_performatives == set()
 
 
 class ExampleProtobufSerializer(Serializer):
@@ -200,7 +201,7 @@ class ExampleProtobufSerializer(Serializer):
         message_type = message_pb.WhichOneof("message")
         if message_type == "body":
             body = dict(message_pb.body)  # pylint: disable=no-member
-            msg = TestMessage(_body=body)
+            msg = TMessage(_body=body)
             return msg
         if message_type == "dialogue_message":
             dialogue_message_pb = (
@@ -221,7 +222,7 @@ class ExampleProtobufSerializer(Serializer):
                 dialogue_starter_reference,
                 dialogue_responder_reference,
             )
-            return TestMessage(_body=body)
+            return TMessage(_body=body)
         raise ValueError("Message type not recognized.")  # pragma: nocover
 
 
@@ -231,9 +232,9 @@ class TestBaseSerializations:
     @classmethod
     def setup_class(cls):
         """Set up the use case."""
-        cls.message = TestMessage(content="hello")
-        cls.message2 = TestMessage(_body={"content": "hello"})
-        cls.message3 = TestMessage(
+        cls.message = TMessage(content="hello")
+        cls.message2 = TMessage(_body={"content": "hello"})
+        cls.message3 = TMessage(
             message_id=1,
             target=0,
             dialogue_reference=("", ""),
