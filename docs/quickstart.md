@@ -29,11 +29,11 @@ To run the image
 ​
 - Linux and MacOs
   ```bash
-  docker run -it -v $(pwd):/aea --workdir=/aea fetchai/aea-user:latest 
+  docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
   ```
 - Windows
   ```bash
-  docker run -it -v %cd%:/aea --workdir=/aea fetchai/aea-user:latest 
+  docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
   ```
 
 Once successfully logged into the docker container, 
