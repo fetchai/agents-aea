@@ -441,7 +441,7 @@ class Transaction(Terms):
         """Compare to another object."""
         return (
             isinstance(other, Transaction)
-            and super.__eq__()
+            and super().__eq__(other)
             and self.sender_signature == other.sender_signature
             and self.counterparty_signature == other.counterparty_signature
         )
