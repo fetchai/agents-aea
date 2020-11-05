@@ -24,6 +24,8 @@ from aea.helpers.transaction.base import SignedTransaction as BaseSignedTransact
 from aea.helpers.transaction.base import Terms as BaseTerms
 from aea.helpers.transaction.base import TransactionDigest as BaseTransactionDigest
 from aea.helpers.transaction.base import TransactionReceipt as BaseTransactionReceipt
+from aea.helpers.transaction.base import State as BaseState
+from packages.fetchai.protocols.contract_api.custom_types import Kwargs as CustomKwargs
 
 
 RawTransaction = BaseRawTransaction
@@ -31,3 +33,5 @@ SignedTransaction = BaseSignedTransaction
 Terms = BaseTerms
 TransactionDigest = BaseTransactionDigest
 TransactionReceipt = BaseTransactionReceipt
+State = BaseState
+Kwargs = CustomKwargs

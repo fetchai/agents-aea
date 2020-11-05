@@ -10,9 +10,9 @@ fingerprint:
   __init__.py: Qmdr5ks5X4YtnpH6yKUcNu9uouyv3EGmrKFhyvNH7ZBjvT
   custom_types.py: QmYAkKYj9gGHaij7uTejoJe9KRhNcsU4sJC1utMfhUYhg3
   dialogues.py: QmQPLnW3jAs6tLLmhkX4C7texGRHM9bfdjs83dUH5TkJ4v
-  message.py: QmWTa8WsNEv1rwCu3qwLxSFrrC1nTJ7ZvQNSZHCLoqu36B
+  message.py: QmcjJmk3UhPwu4xs8zqHzwxrjv89xn3dzMq9yDdvxP2Vim
   oef_search.proto: QmTUS3PAEi5kD6PxC2XQAtE2jbiA6WP3HjwtUxs5PRWTA9
-  oef_search_pb2.py: QmQ6Xfbxqk1MUFYnJGHXpsqFkGm963AWCSXxvGNFrR2tBa
+  oef_search_pb2.py: QmPNKswqxdQYVBv6E1MihV6DqvRzte7LcFDCpptLX2LsK3
   serialization.py: QmcMQLbz6fkvZeqUXyE9WwH4TEJ3Dzy6pV4txLAVw9sdwb
 fingerprint_ignore_patterns: []
 dependencies:
