@@ -582,7 +582,7 @@ True
 #### `__`init`__`
 
 ```python
- | __init__(author: str, name: str, version: Optional[PackageVersionLike] = None)
+ | __init__(author: SimpleIdOrStr, name: SimpleIdOrStr, version: Optional[PackageVersionLike] = None)
 ```
 
 Initialize the public identifier.
@@ -627,15 +627,14 @@ Get the version string.
 
 Get the package version object.
 
-<a name="aea.configurations.base.PublicId.latest"></a>
-#### latest
+<a name="aea.configurations.base.PublicId.to_any"></a>
+#### to`_`any
 
 ```python
- | @property
- | latest() -> str
+ | to_any() -> "PublicId"
 ```
 
-Get the public id in `latest` form.
+Return the same public id, but with any version.
 
 <a name="aea.configurations.base.PublicId.same_prefix"></a>
 #### same`_`prefix
@@ -1093,7 +1092,7 @@ A package can be one of:
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None)
+ | __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None)
 ```
 
 Initialize a package configuration.
@@ -1110,6 +1109,46 @@ describing the AEA versions allowed.
 The fixed version is interpreted with the specifier '=='.
 - `fingerprint`: the fingerprint.
 - `fingerprint_ignore_patterns`: a list of file patterns to ignore files to fingerprint.
+
+<a name="aea.configurations.base.PackageConfiguration.name"></a>
+#### name
+
+```python
+ | @property
+ | name() -> str
+```
+
+Get the name.
+
+<a name="aea.configurations.base.PackageConfiguration.name"></a>
+#### name
+
+```python
+ | @name.setter
+ | name(value: SimpleIdOrStr)
+```
+
+Set the name.
+
+<a name="aea.configurations.base.PackageConfiguration.author"></a>
+#### author
+
+```python
+ | @property
+ | author() -> str
+```
+
+Get the author.
+
+<a name="aea.configurations.base.PackageConfiguration.author"></a>
+#### author
+
+```python
+ | @author.setter
+ | author(value: SimpleIdOrStr)
+```
+
+Set the author.
 
 <a name="aea.configurations.base.PackageConfiguration.directory"></a>
 #### directory
@@ -1191,7 +1230,7 @@ Class to represent an agent component configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, dependencies: Optional[Dependencies] = None)
+ | __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, dependencies: Optional[Dependencies] = None)
 ```
 
 Set component configuration.
@@ -1286,7 +1325,7 @@ Handle connection configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str = "", author: str = "", version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, connections: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", connection_id: Optional[PublicId] = None, is_abstract: bool = False, **config, ,)
+ | __init__(name: SimpleIdOrStr = "", author: SimpleIdOrStr = "", version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, connections: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", connection_id: Optional[PublicId] = None, is_abstract: bool = False, **config, ,)
 ```
 
 Initialize a connection configuration object.
@@ -1363,7 +1402,7 @@ Handle protocol configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license_: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, aea_version: str = "", dependencies: Optional[Dependencies] = None, description: str = "")
+ | __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, aea_version: str = "", dependencies: Optional[Dependencies] = None, description: str = "")
 ```
 
 Initialize a connection configuration object.
@@ -1445,7 +1484,7 @@ Class to represent a skill configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, protocols: Optional[Set[PublicId]] = None, contracts: Optional[Set[PublicId]] = None, skills: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", is_abstract: bool = False)
+ | __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, connections: Optional[Set[PublicId]] = None, protocols: Optional[Set[PublicId]] = None, contracts: Optional[Set[PublicId]] = None, skills: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", is_abstract: bool = False)
 ```
 
 Initialize a skill configuration.
@@ -1520,7 +1559,7 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_routing: Optional[Dict] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None)
+ | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None)
 ```
 
 Instantiate the agent configuration object.
@@ -1574,62 +1613,6 @@ Get dictionary version of private key paths.
 ```
 
 Get dictionary version of connection private key paths.
-
-<a name="aea.configurations.base.AgentConfig.default_connection"></a>
-#### default`_`connection
-
-```python
- | @property
- | default_connection() -> str
-```
-
-Get the default connection.
-
-<a name="aea.configurations.base.AgentConfig.default_connection"></a>
-#### default`_`connection
-
-```python
- | @default_connection.setter
- | default_connection(connection_id: Optional[Union[str, PublicId]])
-```
-
-Set the default connection.
-
-**Arguments**:
-
-- `connection_id`: the name of the default connection.
-
-**Returns**:
-
-None
-
-<a name="aea.configurations.base.AgentConfig.default_ledger"></a>
-#### default`_`ledger
-
-```python
- | @property
- | default_ledger() -> str
-```
-
-Get the default ledger.
-
-<a name="aea.configurations.base.AgentConfig.default_ledger"></a>
-#### default`_`ledger
-
-```python
- | @default_ledger.setter
- | default_ledger(ledger_id: str)
-```
-
-Set the default ledger.
-
-**Arguments**:
-
-- `ledger_id`: the id of the default ledger.
-
-**Returns**:
-
-None
 
 <a name="aea.configurations.base.AgentConfig.component_configurations_json"></a>
 #### component`_`configurations`_`json
@@ -1731,7 +1714,7 @@ Handle protocol specification.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", description: str = "")
+ | __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", description: str = "")
 ```
 
 Initialize a protocol specification configuration object.
@@ -1809,7 +1792,7 @@ Handle contract configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, dependencies: Optional[Dependencies] = None, description: str = "", contract_interface_paths: Optional[Dict[str, str]] = None, class_name: str = "")
+ | __init__(name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, dependencies: Optional[Dependencies] = None, description: str = "", contract_interface_paths: Optional[Dict[str, str]] = None, class_name: str = "")
 ```
 
 Initialize a protocol configuration object.

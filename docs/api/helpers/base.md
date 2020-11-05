@@ -127,6 +127,36 @@ attribute to implement a different behaviour.
 
 Initialize a regex constrained string.
 
+<a name="aea.helpers.base.SimpleId"></a>
+## SimpleId Objects
+
+```python
+class SimpleId(RegexConstrainedString)
+```
+
+A simple identifier.
+
+The allowed strings are all the strings that:
+- have at least length 1
+- have at most length 128
+- the first character must be between a-z,A-Z or underscore
+- the other characters must be either the above or digits.
+
+Examples of allowed strings:
+>>> SimpleId("an_identifier")
+'an_identifier'
+
+Examples of not allowed strings:
+>>> SimpleId("0an_identifier")
+Traceback (most recent call last):
+...
+ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
+>>> SimpleId("")
+Traceback (most recent call last):
+...
+ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
 <a name="aea.helpers.base.cd"></a>
 #### cd
 

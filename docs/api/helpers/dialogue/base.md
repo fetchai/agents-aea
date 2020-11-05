@@ -160,11 +160,32 @@ Get the string representation.
 
 Get the dialogue label from string representation.
 
+<a name="aea.protocols.dialogue.base._DialogueMeta"></a>
+## `_`DialogueMeta Objects
+
+```python
+class _DialogueMeta(type)
+```
+
+Metaclass for Dialogue.
+
+Adds slot support forevery subclass
+Creates classlevvel Rules instance
+
+<a name="aea.protocols.dialogue.base._DialogueMeta.__new__"></a>
+#### `__`new`__`
+
+```python
+ | __new__(cls, name: str, bases: Tuple[Type], dct: Dict)
+```
+
+Construct a new type.
+
 <a name="aea.protocols.dialogue.base.Dialogue"></a>
 ## Dialogue Objects
 
 ```python
-class Dialogue(ABC)
+class Dialogue(, metaclass=_DialogueMeta)
 ```
 
 The dialogue class maintains state of a dialogue and manages it.
@@ -518,7 +539,7 @@ The string representation of the dialogue
 ## DialogueStats Objects
 
 ```python
-class DialogueStats(ABC)
+class DialogueStats()
 ```
 
 Class to handle statistics on default dialogues.
@@ -578,7 +599,7 @@ None
 ## Dialogues Objects
 
 ```python
-class Dialogues(ABC)
+class Dialogues()
 ```
 
 The dialogues class keeps track of all dialogues for an agent.
