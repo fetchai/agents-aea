@@ -6,7 +6,7 @@
 - Refactors dialogue class to optimize for memory
 - Refactors message class to optimize for memory
 - Adds mixed registry mode to CLI and makes it default
-- Extends update command to automatically update references of non-vendor packages
+- Extends upgrade command to automatically update references of non-vendor packages
 - Adds deployment scripts for kubernetes
 - Extends config set/get support for lists and dicts
 - Fixes location specifiers throughout code base
