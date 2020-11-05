@@ -94,9 +94,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_outbox() == dummy_message_2
 
     def test_dismiss_messages_from_outbox(self):
-        """Test the dismiss_messages_from_outbox method."""
+        """Test the drop_messages_from_outbox method."""
         assert self.get_quantity_in_outbox() == 0
-        self.dismiss_messages_from_outbox(5)
+        self.drop_messages_from_outbox(5)
         assert self.get_quantity_in_outbox() == 0
 
         dummy_message_1 = Message(dummy_1="dummy_1")
@@ -116,7 +116,7 @@ class TestSkillTestCase(BaseSkillTestCase):
 
         assert self.get_quantity_in_outbox() == 3
 
-        self.dismiss_messages_from_outbox(2)
+        self.drop_messages_from_outbox(2)
 
         assert self.get_quantity_in_outbox() == 1
         assert self.get_message_from_outbox() == dummy_message_3
@@ -150,9 +150,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_decision_maker_inbox() == dummy_message_2
 
     def test_dismiss_messages_from_decision_maker_inbox(self):
-        """Test the dismiss_messages_from_decision_maker_inbox method."""
+        """Test the drop_messages_from_decision_maker_inbox method."""
         assert self.get_quantity_in_decision_maker_inbox() == 0
-        self.dismiss_messages_from_decision_maker_inbox(5)
+        self.drop_messages_from_decision_maker_inbox(5)
         assert self.get_quantity_in_decision_maker_inbox() == 0
 
         dummy_message_1 = Message(dummy_1="dummy_1")
@@ -172,7 +172,7 @@ class TestSkillTestCase(BaseSkillTestCase):
 
         assert self.get_quantity_in_decision_maker_inbox() == 3
 
-        self.dismiss_messages_from_decision_maker_inbox(2)
+        self.drop_messages_from_decision_maker_inbox(2)
 
         assert self.get_quantity_in_decision_maker_inbox() == 1
         assert self.get_message_from_decision_maker_inbox() == dummy_message_3

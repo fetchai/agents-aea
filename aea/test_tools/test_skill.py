@@ -67,7 +67,7 @@ class BaseSkillTestCase:
         envelope = self._multiplexer.out_queue.get_nowait()
         return envelope.message
 
-    def dismiss_messages_from_outbox(self, number: int = 1) -> None:
+    def drop_messages_from_outbox(self, number: int = 1) -> None:
         """Dismiss the first 'number' number of message from outbox."""
         while (not self._outbox.empty()) and number != 0:
             self._multiplexer.out_queue.get_nowait()
@@ -83,7 +83,7 @@ class BaseSkillTestCase:
             return None
         return self._skill.skill_context.decision_maker_message_queue.get_nowait()
 
-    def dismiss_messages_from_decision_maker_inbox(self, number: int = 1) -> None:
+    def drop_messages_from_decision_maker_inbox(self, number: int = 1) -> None:
         """Dismiss the first 'number' number of message from decision maker inbox."""
         while (
             not self._skill.skill_context.decision_maker_message_queue.empty()

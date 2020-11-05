@@ -117,7 +117,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(2)
 
         # first message is produced in superclass (from tac_control skill) which has its own unit tests
-        self.dismiss_messages_from_outbox(1)
+        self.drop_messages_from_outbox(1)
 
         # _request_contract_deploy_transaction
         message = self.get_message_from_outbox()
