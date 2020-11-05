@@ -608,7 +608,7 @@ class AgentState:
         elif self.agent_address == tx.counterparty_address:
             # settling the transaction for the counterparty
             for currency_id, amount in tx.amount_by_currency_id.items():
-                new_amount_by_currency_id[currency_id] += amount
+                new_amount_by_currency_id[currency_id] -= amount
 
         self._amount_by_currency_id = new_amount_by_currency_id
 

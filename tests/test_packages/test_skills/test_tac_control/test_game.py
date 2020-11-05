@@ -666,9 +666,7 @@ class TestAgentState:
         self.agent_state.update(self.transaction_1)
 
         # after
-        assert self.agent_state.amount_by_currency_id == {
-            "1": 20
-        }  # shouldn't this be 0? game module line 611: should it be -=?
+        assert self.agent_state.amount_by_currency_id == {"1": 0}
         assert self.agent_state.quantities_by_good_id == {"2": 2, "3": 4}
 
     def test_update_counterparty_ii(self):
@@ -681,9 +679,7 @@ class TestAgentState:
         self.agent_state.update(self.transaction_2)
 
         # after
-        assert self.agent_state.amount_by_currency_id == {
-            "1": 1
-        }  # shouldn't this be 19? game module line 611: should it be -=?
+        assert self.agent_state.amount_by_currency_id == {"1": 19}
         assert self.agent_state.quantities_by_good_id == {"2": 0, "3": 0}
 
     def test__copy__(self):
@@ -1268,7 +1264,7 @@ class TestGame(BaseSkillTestCase):
         )
         expected_agent_state_2 = AgentState(
             agent_address_2,
-            {"1": 20},  # shouldn't this be 0? game module line 611: should it be -=?
+            {"1": 0},
             {"1": 1.0},
             {"2": 2, "3": 2},
             {"2": 1.0, "3": 1.5},

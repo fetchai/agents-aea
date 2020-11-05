@@ -99,23 +99,23 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_outbox() == dummy_message_1
         assert self.get_message_from_outbox() == dummy_message_2
 
-    def test_dismiss_messages_from_outbox(self):
+    def test_drop_messages_from_outbox(self):
         """Test the drop_messages_from_outbox method."""
         assert self.get_quantity_in_outbox() == 0
         self.drop_messages_from_outbox(5)
         assert self.get_quantity_in_outbox() == 0
 
-        dummy_message_1 = Message(dummy_1="dummy_1")
+        dummy_message_1 = Message()
         dummy_message_1.to = "some_to_1"
         dummy_message_1.sender = "some_sender_1"
         self.skill.skill_context.outbox.put_message(dummy_message_1)
 
-        dummy_message_2 = Message(dummy_2="dummy_2")
+        dummy_message_2 = Message()
         dummy_message_2.to = "some_to_2"
         dummy_message_2.sender = "some_sender_2"
         self.skill.skill_context.outbox.put_message(dummy_message_2)
 
-        dummy_message_3 = Message(dummy_3="dummy_3")
+        dummy_message_3 = Message()
         dummy_message_3.to = "some_to_3"
         dummy_message_3.sender = "some_sender_3"
         self.skill.skill_context.outbox.put_message(dummy_message_3)
@@ -161,23 +161,23 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_decision_maker_inbox() == dummy_message_1
         assert self.get_message_from_decision_maker_inbox() == dummy_message_2
 
-    def test_dismiss_messages_from_decision_maker_inbox(self):
+    def test_drop_messages_from_decision_maker_inbox(self):
         """Test the drop_messages_from_decision_maker_inbox method."""
         assert self.get_quantity_in_decision_maker_inbox() == 0
         self.drop_messages_from_decision_maker_inbox(5)
         assert self.get_quantity_in_decision_maker_inbox() == 0
 
-        dummy_message_1 = Message(dummy_1="dummy_1")
+        dummy_message_1 = Message()
         dummy_message_1.to = "some_to_1"
         dummy_message_1.sender = "some_sender_1"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message_1)
 
-        dummy_message_2 = Message(dummy_2="dummy_2")
+        dummy_message_2 = Message()
         dummy_message_2.to = "some_to_2"
         dummy_message_2.sender = "some_sender_2"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message_2)
 
-        dummy_message_3 = Message(dummy_3="dummy_3")
+        dummy_message_3 = Message()
         dummy_message_3.to = "some_to_3"
         dummy_message_3.sender = "some_sender_3"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message_3)

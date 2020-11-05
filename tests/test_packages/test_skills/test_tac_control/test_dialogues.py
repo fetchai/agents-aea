@@ -70,7 +70,6 @@ class TestTacDialogues(BaseSkillTestCase):
         _, dialogue = self.oef_search_dialogues.create(
             counterparty=COUNTERPARTY_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            ledger_id="some_ledger_id",
             query="some_query",
         )
         assert dialogue.role == OefSearchDialogue.Role.AGENT
