@@ -1,13 +1,14 @@
-name: buyer_aw2
+name: simple_buyer
 author: fetchai
 version: 0.1.0
 type: skill
-description: The scaffold skill is a scaffold for your own skill implementation.
+description: This skill purchases information from other agents as specified in its
+  configuration.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmSoRorRWRpEo8MpmWzjJBv7ZHLmJXGf2BddFxBV63Zf28
-  __init__.py: QmXxNReykJAKJt1SpzficiYRi5QtyaPFbKfCDWZ1ezSTnt
+  README.md: QmP8XSiNmnaYmc4FcXXY8ftX1LYJJWc2CVjUpkP4QVgDhW
+  __init__.py: QmVChGiJTQUzknNuJi6Dd65AbF6UTzm2cUChumLnS3yE8g
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz

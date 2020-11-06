@@ -2,7 +2,7 @@
 
 ## Description
 
-The registration_aw1 skill is a skill for registration in Agent World 1.
+The `registration_aw1` skill is for registration in Agent World 1.
 
 ## Behaviours
 

@@ -1,6 +1,6 @@
 # Simple Buyer AW2
 
-This is an agent to buy data in Agent World 2.
+This is an agent that buys data in Agent World 2.
 
 ## Description
 

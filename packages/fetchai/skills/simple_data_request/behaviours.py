@@ -40,7 +40,7 @@ class HttpRequestBehaviour(TickerBehaviour):
         self.method = kwargs.pop("method", None)
         self.body = kwargs.pop("body", None)
         if self.url is None or self.method is None or self.body is None:
-            raise ValueError("Url, method and content must be provided.")
+            raise ValueError("Url, method and body must be provided.")
         super().__init__(**kwargs)
 
     def setup(self) -> None:

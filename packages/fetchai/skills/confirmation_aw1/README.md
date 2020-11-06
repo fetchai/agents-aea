@@ -2,7 +2,7 @@
 
 ## Description
 
-The confirmation_aw1 skill is a skill for handling registrations in Agent World 1.
+The confirmation_aw1 skill is for handling registrations in Agent World 1.
 
 ## Handlers
 

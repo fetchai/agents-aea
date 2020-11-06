@@ -1,6 +1,6 @@
 # Simple Seller AW2
 
-This is an agent to sell data in Agent World 2.
+This is an agent that sells data in Agent World 2.
 
 ## Description
 

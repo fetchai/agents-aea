@@ -99,7 +99,7 @@ class HttpHandler(Handler):
         )
         data_received = http_msg.body
 
-        # safe the data in the shared state to make it accessible to other skills
+        # save the data in the shared state to make it accessible to other skills
         self.context.logger.info("updating shared_state with received data!")
         self.context.shared_state[self.shared_state_key] = data_received
 
