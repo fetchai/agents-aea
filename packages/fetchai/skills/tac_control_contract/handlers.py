@@ -158,7 +158,7 @@ class ContractApiHandler(Handler):
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "received ledger_api error message={} in dialogue={}.".format(
+            "received contract_api error message={} in dialogue={}.".format(
                 contract_api_msg, contract_api_dialogue
             )
         )
