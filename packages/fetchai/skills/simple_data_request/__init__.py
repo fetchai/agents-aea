@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the default skill."""
+"""This module contains the implementation of the simple_data_request skill."""
 
 from aea.configurations.base import PublicId
 

@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contains the classes required for dialogue management.
+This module contains the classes required for dialogue management (reused from generic_seller skill).
 
 - DefaultDialogues: The dialogues class keeps track of all dialogues of type default.
 - FipaDialogues: The dialogues class keeps track of all dialogues of type fipa.

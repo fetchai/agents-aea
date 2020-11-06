@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a behaviour."""
+"""This package contains a a behaviour to request data from a HTTP endpoint."""
 
 import json
 from typing import cast
@@ -61,7 +61,7 @@ class HttpRequestBehaviour(TickerBehaviour):
 
     def _generate_http_request(self) -> None:
         """
-        Generate http request to provided url.
+        Generate http request to provided url with provided body and method.
 
         :return: None
         """

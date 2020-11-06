@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a behaviour."""
+"""This package contains a service registration behaviour (reused from generic_seller skill)."""
 
 from packages.fetchai.skills.generic_seller.behaviours import (
     GenericServiceRegistrationBehaviour,

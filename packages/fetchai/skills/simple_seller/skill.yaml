@@ -2,15 +2,17 @@ name: simple_seller
 author: fetchai
 version: 0.1.0
 type: skill
-description: The scaffold skill is a scaffold for your own skill implementation.
+description: The simple_seller skill extends the generic_seller skill and sells data
+  from the shared state of the AEA.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  __init__.py: QmUphBNuQKMAwCMuZK8SNGroh1K89NXbPh3osynaTHG1YQ
-  behaviours.py: QmbBR51xJFy3A9Lji2VDg8t2LqLvafZFdzi8D6t861wu6C
-  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
-  handlers.py: QmPa1rUdpBNWVqJXQibYnGEW1Xhb5PRtxwb2Sq5mKEXSDq
-  strategy.py: QmYm26mz8gE1ibhzfV3mgsFxccXdAFpBaF9gsjq7X1MwzZ
+  README.md: QmNLnExXb3B4YgNWFGsDcEKMxJZQUfYrpPmTA6RY96r6fL
+  __init__.py: QmPAhft5Qrs3j8ZrrNe3abkZ3mK3Jw3BvRwybCy4HzxvtN
+  behaviours.py: QmZR55xAQJ2WfCKyAL4GTFAXqbuR68W8Kw2nKdkdvx9mk4
+  dialogues.py: Qmc1ASXsWSmnshtQzwokHavnnEKxW5NMyhEHYT4zrGTgRs
+  handlers.py: QmSnbhbz1f7SUrDQrouTaQ8Ugj7c5sCyRBKst5Vg3KUv2n
+  strategy.py: QmXnqiomh3VRKRsKUsm5iM8Mv51iyLYJ4a8hMskHY6CDEd
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
@@ -60,6 +62,7 @@ models:
         key: seller_service
         value: weather_data
       service_id: weather_data
+      shared_state_key: null
       unit_price: 10
     class_name: Strategy
 dependencies: {}

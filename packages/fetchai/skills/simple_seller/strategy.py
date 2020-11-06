@@ -17,8 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the strategy class."""
+"""This module contains the strategy class (extended from the generic_seller skill)."""
 
+import json
 from typing import Dict
 
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
@@ -31,9 +32,6 @@ class Strategy(GenericStrategy):
         """
         Initialize the strategy of the agent.
 
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
         :return: None
         """
         self.shared_state_key = kwargs.pop("shared_state_key", None)
@@ -45,8 +43,20 @@ class Strategy(GenericStrategy):
         """
         Build the data payload.
 
-        :param fetched_data: the fetched data
-        :return: a tuple of the data and the rows
+        :return: a dict of the data found in the shared state.
         """
-        data = self.context.shared_state.get(self.shared_state_key, {})
-        return data
+        data = self.context.shared_state.get(self.shared_state_key, "{}")
+        result: Dict[str, str] = {}
+        try:
+            loaded = json.load(data)
+            if not isinstance(loaded, dict) or not all(
+                [
+                    isinstance(key, str) and isinstance(value, str)
+                    for key, value in loaded.items()
+                ]
+            ):
+                raise ValueError("Invalid data, must be Dict[str, str]")
+            result = loaded
+        except (TypeError, ValueError) as e:
+            self.context.logger.warning(f"error when loading json: {e}")
+        return result

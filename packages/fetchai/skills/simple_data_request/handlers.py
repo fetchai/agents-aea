@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a handler."""
+"""This package contains a handler to process HTTP responses."""
 
 from typing import cast
 
@@ -67,7 +67,7 @@ class HttpHandler(Handler):
             self._handle_unidentified_dialogue(http_msg)
             return
 
-        # handle message
+        # handle message (only process responses, we do not expect requests)
         if http_msg.performative == HttpMessage.Performative.RESPONSE:
             self._handle_response(http_msg, http_dialogue)
         else:

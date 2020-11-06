@@ -6,10 +6,11 @@ description: The scaffold skill is a scaffold for your own skill implementation.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  __init__.py: QmWpga5inSHsCrj3GfCq7SmdAUVTRdaAe8spVRAVdjeM3i
-  behaviours.py: QmbLjtA6UeQW7C6SYn7vM3L8RSiEEqeHowYRCX11imTVzC
-  dialogues.py: QmQQmr4X7yWFihTrv8yXWxbHMcoREsz74gSQPzDNPfj5HE
-  handlers.py: QmRJiT8Cqk123nBQMsSj39e4ijCW4wBayhTeuyqdryr4tH
+  README.md: QmUUgWQJ8J8jLfjtYFKnSzRgV9RZA3NLx1MNyNGtt5arXv
+  __init__.py: QmT7pLksZdtpiaqtiZPoFHCnHV2LDQaewHkpd5x1JKKRCv
+  behaviours.py: QmVnKU1H5XLCGo924Co9vtZyy4Fz9ZVG3Q9eEzM7GJfWoA
+  dialogues.py: Qmb9KW4G2K3Kk9Nz8tNw85TNic4JhkFnapbkXoq2ssqiba
+  handlers.py: QmWhYD4BxVFeUshzBzDXjhF9GkLPDk5cDPuzvL8SiFFEtN
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.11.0

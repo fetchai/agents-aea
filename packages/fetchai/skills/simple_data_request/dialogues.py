@@ -20,8 +20,8 @@
 """
 This module contains the classes required for dialogue management.
 
-- Dialogue: The dialogue class maintains state of a dialogue and manages it.
-- Dialogues: The dialogues class keeps track of all dialogues.
+- HttpDialogue: The dialogue class maintains state of a http dialogue and manages it.
+- HttpDialogues: The dialogues class keeps track of all http dialogues.
 """
 
 from aea.protocols.base import Address, Message

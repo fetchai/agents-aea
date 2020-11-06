@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains handlers."""
+"""This package contains handlers (reused from the generic_seller skill)."""
 
 from packages.fetchai.skills.generic_seller.handlers import (
     GenericFipaHandler,
