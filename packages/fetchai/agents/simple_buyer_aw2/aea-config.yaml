@@ -1,0 +1,33 @@
+agent_name: simple_buyer_aw2
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+description: This AEA buys data from a simple seller in Agent World 2.
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.9.0
+- fetchai/stub:0.12.0
+contracts: []
+protocols:
+- fetchai/contract_api:0.8.0
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
+- fetchai/signing:0.7.0
+- fetchai/state_update:0.7.0
+skills:
+- fetchai/buyer_aw2:0.1.0
+- fetchai/error:0.9.0
+- fetchai/generic_buyer:0.15.0
+default_connection: fetchai/stub:any
+default_ledger: fetchai
+default_routing: {}
+connection_private_key_paths: {}
+private_key_paths: {}
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+registry_path: ../packages

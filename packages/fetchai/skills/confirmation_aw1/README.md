@@ -1,4 +1,4 @@
-# Registration AW1
+# Confirmation AW1
 
 ## Description
 
