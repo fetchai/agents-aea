@@ -7,9 +7,9 @@ description: This skill is used to request data from a HTTP endpoint and then sa
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmaCs8KLoVriiLGF8EpbXayC2P96x2bDDFZkEUxoS2aCzB
+  README.md: QmQ9M6KDnQaHvwfCEGCytUuPszHh9HPb7QaHjTUpRFcejZ
   __init__.py: QmT7pLksZdtpiaqtiZPoFHCnHV2LDQaewHkpd5x1JKKRCv
-  behaviours.py: QmTfinQmDWfAfsdLLb4i9BX1nR6KtsxL425o8QQiNDv5Eb
+  behaviours.py: QmQRxhndZZmBQvMtZW3dB3YKJoHk6bbpvRNeyjp8zteFg2
   dialogues.py: Qmb9KW4G2K3Kk9Nz8tNw85TNic4JhkFnapbkXoq2ssqiba
   handlers.py: Qmb2btZjizJFy64JYcxpMRzwuxxzUxgWZp926XmoLSrCBW
 fingerprint_ignore_patterns: []

@@ -2,8 +2,15 @@
 
 ## Description
 
-The error skill is used to handle incoming envelopes which cannot be properly decoded or have no target skill.
+The error skill is used to handle incoming envelops that cannot be properly handled by the framework.
+
+It handles the following cases:
+
+- AEA receives an envelope referencing an unsupported protocol,
+- AEA experiences a decoding error when reading an envelope,
+- AEA receives an envelope referencing a protocol for which no skill is active.
+
 
 ## Handlers
 
-* error_handler: handles problematic messages.
+* error_handler: handles problematic envelopes/messages.

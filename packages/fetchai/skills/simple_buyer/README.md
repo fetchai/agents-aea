@@ -4,7 +4,7 @@
 
 This skill purchases information from other agents as specified in its configuration.
 
-This skill searches for an agent in a vicinity on the SOEF that sells the data this skill is configured to buy. Once found, it requests this data, negotiates the price, pays the proposed amount if agreement is reach, and receives the data bought.
+This skill searches for an agent in a vicinity on the SOEF that sells the data this skill is configured to buy. Once found, it requests this data, negotiates the price, pays the proposed amount if agreement is reached, and receives the data bought.
 
 
 ## Behaviours

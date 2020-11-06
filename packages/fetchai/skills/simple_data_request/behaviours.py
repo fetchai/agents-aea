@@ -35,7 +35,7 @@ DEFAULT_REQUEST_INTERVAL = 20.0
 
 
 class HttpRequestBehaviour(TickerBehaviour):
-    """This class scaffolds a behaviour."""
+    """This class defines an http request behaviour."""
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""

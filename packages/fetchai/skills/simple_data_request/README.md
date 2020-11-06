@@ -2,7 +2,7 @@
 
 ## Description
 
-This skill is used to request data from a HTTP endpoint and then saving it in the AEA's shared state for use by other skills.
+This skill is used to request data from a HTTP endpoint and then save it in the AEA's shared state for use by other skills.
 
 ## Behaviours
 

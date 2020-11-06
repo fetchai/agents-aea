@@ -28,8 +28,8 @@ from traceback import format_exc
 from typing import Any, Optional, Set, Tuple, Type, Union, cast
 
 import aiohttp
-import certifi
 from aiohttp.client_reqrep import ClientResponse
+import certifi
 
 from aea.common import Address
 from aea.configurations.base import PublicId

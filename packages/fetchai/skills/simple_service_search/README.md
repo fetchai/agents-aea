@@ -10,7 +10,7 @@ This skill searches for services on the SOEF.
 
 ## Handlers
 
-* oef_search: handles oef_search messages, in particular search responses. Search results are stroed in the shared state using the key `shared_storage_key`.
+* oef_search: handles oef_search messages, in particular search responses. Search results are stored in the shared state using the key `shared_storage_key`.
 
 ## Models
 
