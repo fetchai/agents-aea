@@ -56,13 +56,13 @@ class TestTacDialogues(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.contract_api_dialogues = cast(
-            ContractApiDialogues, cls._skill.skill_context.default_dialogues
+            ContractApiDialogues, cls._skill.skill_context.contract_api_dialogues
         )
         cls.signing_dialogues = cast(
-            SigningDialogues, cls._skill.skill_context.tac_dialogues
+            SigningDialogues, cls._skill.skill_context.signing_dialogues
         )
         cls.ledger_api_dialogues = cast(
-            LedgerApiDialogues, cls._skill.skill_context.oef_search_dialogues
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
 
     def test_contract_api_dialogue(self):

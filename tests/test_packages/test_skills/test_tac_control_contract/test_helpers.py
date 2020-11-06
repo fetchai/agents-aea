@@ -26,7 +26,7 @@ import pytest
 from aea.exceptions import AEAEnforceError
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.skills.tac_control.helpers import (
+from packages.fetchai.skills.tac_control_contract.helpers import (
     ERC1155Contract,
     _sample_good_instances,
     determine_scaling_factor,
@@ -55,16 +55,16 @@ class TestHelpers(BaseSkillTestCase):
         super().setup()
 
     def test_generate_good_ids_succeeds(self):
-        """Test the generate_good_ids of Helpers module."""
+        """Test the generate_good_ids of Helpers module which succeeds."""
         expected_list = [1, 2, 3, 4, 5]
         with patch.object(
             ERC1155Contract, "generate_token_ids", return_value=expected_list
         ):
-            good_ids = generate_good_ids(5, 2)
+            good_ids = generate_good_ids(5)
         assert good_ids == expected_list
 
     def test_generate_good_ids_fails(self):
-        """Test the generate_good_ids of Helpers module which fails because the generate_token_ids generates wrong good ids."""
+        """Test the generate_good_ids of Helpers module which fails because generate_token_ids generates wrong good ids."""
         expected_list = [1, 2, 3, 4, 5, 6]
         with patch.object(
             ERC1155Contract, "generate_token_ids", return_value=expected_list
@@ -73,7 +73,7 @@ class TestHelpers(BaseSkillTestCase):
                 AEAEnforceError,
                 match="Length of good ids and number of goods must match.",
             ):
-                assert generate_good_ids(5, 2)
+                assert generate_good_ids(5)
 
     def test_generate_currency_ids_succeeds(self):
         """Test the generate_good_ids of Helpers module which succeeds."""
@@ -81,7 +81,7 @@ class TestHelpers(BaseSkillTestCase):
         with patch.object(
             ERC1155Contract, "generate_token_ids", return_value=expected_list
         ):
-            currency_ids = generate_currency_ids(5, 2)
+            currency_ids = generate_currency_ids(5)
         assert currency_ids == expected_list
 
     def test_generate_currency_ids_fails(self):
@@ -94,7 +94,7 @@ class TestHelpers(BaseSkillTestCase):
                 AEAEnforceError,
                 match="Length of currency ids and number of currencies must match.",
             ):
-                assert generate_currency_ids(5, 2)
+                assert generate_currency_ids(5)
 
     def test_generate_currency_id_to_name(self):
         """Test the generate_currency_id_to_name of Helpers module."""
@@ -105,17 +105,8 @@ class TestHelpers(BaseSkillTestCase):
             "7": "FT_7",
             "9": "FT_9",
         }
-        currency_id_to_name = generate_currency_id_to_name(5, [1, 3, 5, 7, 9])
+        currency_id_to_name = generate_currency_id_to_name([1, 3, 5, 7, 9])
         assert currency_id_to_name == expected_currency_id_to_name
-
-    def test_generate_currency_id_to_name_invalid_lengths(self):
-        """Test the generate_currency_id_to_name of Helpers module where the lengths do not match."""
-        # phase
-        with pytest.raises(
-            AEAEnforceError,
-            match="Length of currency_ids does not match nb_currencies.",
-        ):
-            assert generate_currency_id_to_name(nb_currencies=1, currency_ids=[1, 2])
 
     def test_generate_good_id_to_name(self):
         """Test the generate_good_id_to_name of Helpers module."""
@@ -126,16 +117,8 @@ class TestHelpers(BaseSkillTestCase):
             "7": "FT_7",
             "9": "FT_9",
         }
-        good_id_to_name = generate_good_id_to_name(5, [1, 3, 5, 7, 9])
+        good_id_to_name = generate_good_id_to_name([1, 3, 5, 7, 9])
         assert good_id_to_name == expected_good_id_to_name
-
-    def test_generate_good_id_to_name_invalid_lengths(self):
-        """Test the generate_good_id_to_name of Helpers module."""
-        # phase
-        with pytest.raises(
-            AEAEnforceError, match="Length of good_ids does not match nb_goods."
-        ):
-            assert generate_good_id_to_name(nb_goods=1, good_ids=[1, 2])
 
     def test_determine_scaling_factor(self):
         """Test the determine_scaling_factor of Helpers module."""
