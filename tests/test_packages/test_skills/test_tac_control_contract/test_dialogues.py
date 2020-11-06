@@ -125,9 +125,7 @@ class TestTacDialogues(BaseSkillTestCase):
         )
 
         # associated_signing_dialogue
-        with pytest.raises(
-            AEAEnforceError, match="Associated signing dialogue not set!"
-        ):
+        with pytest.raises(ValueError, match="Associated signing dialogue not set!"):
             assert ledger_api_dialogue.associated_signing_dialogue
         signing_dialogue = SigningDialogue(
             DialogueLabel(
