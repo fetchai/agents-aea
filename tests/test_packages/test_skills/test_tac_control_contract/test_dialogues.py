@@ -76,7 +76,7 @@ class TestTacDialogues(BaseSkillTestCase):
         )
 
         # callable
-        with pytest.raises(AEAEnforceError, match="Callable not set!"):
+        with pytest.raises(ValueError, match="Callable not set!"):
             assert contract_api_dialogue.callable
 
         callable = ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
@@ -86,7 +86,7 @@ class TestTacDialogues(BaseSkillTestCase):
         assert contract_api_dialogue.callable == callable
 
         # terms
-        with pytest.raises(AEAEnforceError, match="Terms not set!"):
+        with pytest.raises(ValueError, match="Terms not set!"):
             assert contract_api_dialogue.terms
         terms = Terms(
             "some_ledger_id",
@@ -116,7 +116,7 @@ class TestTacDialogues(BaseSkillTestCase):
 
     def test_ledger_api_dialogue(self):
         """Test the LedgerApiDialogue class."""
-        ledger_api_dialogue = SigningDialogue(
+        ledger_api_dialogue = LedgerApiDialogue(
             DialogueLabel(
                 ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
             ),
@@ -166,7 +166,7 @@ class TestTacDialogues(BaseSkillTestCase):
 
         # associated_contract_api_dialogue
         with pytest.raises(
-            AEAEnforceError, match="Associated contract api dialogue not set!"
+            ValueError, match="Associated contract api dialogue not set!"
         ):
             assert signing_dialogue.associated_contract_api_dialogue
         contract_api_dialogue = ContractApiDialogue(
@@ -201,4 +201,4 @@ class TestTacDialogues(BaseSkillTestCase):
             raw_transaction=RawTransaction("some_ledger_id", "some_body"),
         )
         assert dialogue.role == SigningDialogue.Role.SKILL
-        assert dialogue.self_address == self.skill.skill_context.skill_id
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
