@@ -28,7 +28,7 @@ from traceback import format_exc
 from typing import Any, Optional, Set, Tuple, Type, Union, cast
 
 import aiohttp
-import certifi
+import certifi  # pylint: disable=wrong-import-order
 from aiohttp.client_reqrep import ClientResponse
 
 from aea.common import Address
