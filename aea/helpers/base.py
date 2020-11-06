@@ -385,6 +385,7 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             not both_are_dict
             and value_type != value_to_update_type
             and value is not None
+            and value_to_update is not None
         ):
             raise ValueError(
                 f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."

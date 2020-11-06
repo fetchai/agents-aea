@@ -108,12 +108,14 @@ class GenericStrategy(Model):
             self.context.agent_addresses.get(self._ledger_id, None) is not None,
             "Wallet does not contain cryptos for provided ledger id.",
         )
+        self._data_for_sale = data_for_sale
 
+    @property
+    def data_for_sale(self) -> Dict[str, str]:
+        """Get the data for sale."""
         if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
-        else:
-            self._data_for_sale = data_for_sale
-        self._sale_quantity = len(data_for_sale)
+            return self.collect_from_data_source()  # pragma: nocover
+        return self._data_for_sale
 
     @property
     def ledger_id(self) -> str:
@@ -188,8 +190,10 @@ class GenericStrategy(Model):
         :param counterparty_address: the counterparty of the proposal.
         :return: a tuple of proposal, terms and the weather data
         """
+        data_for_sale = self.data_for_sale
+        sale_quantity = len(data_for_sale)
         seller_address = self.context.agent_addresses[self.ledger_id]
-        total_price = self._sale_quantity * self._unit_price
+        total_price = sale_quantity * self._unit_price
         if self.is_ledger_tx:
             tx_nonce = LedgerApis.generate_tx_nonce(
                 identifier=self.ledger_id,
@@ -204,7 +208,7 @@ class GenericStrategy(Model):
                 "price": total_price,
                 "currency_id": self._currency_id,
                 "service_id": self._service_id,
-                "quantity": self._sale_quantity,
+                "quantity": sale_quantity,
                 "tx_nonce": tx_nonce,
             }
         )
@@ -213,12 +217,12 @@ class GenericStrategy(Model):
             sender_address=seller_address,
             counterparty_address=counterparty_address,
             amount_by_currency_id={self._currency_id: total_price},
-            quantities_by_good_id={self._service_id: -self._sale_quantity},
+            quantities_by_good_id={self._service_id: -sale_quantity},
             is_sender_payable_tx_fee=False,
             nonce=tx_nonce,
             fee_by_currency_id={self._currency_id: 0},
         )
-        return proposal, terms, self._data_for_sale
+        return proposal, terms, data_for_sale
 
     def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to communicate with the sensor."""

@@ -13,11 +13,11 @@
 
 6. Check the docs are up-to-date by running `python scripts/generate_api_docs.py` and `python scripts/check_doc_links.py`. Commit if satisfied.
 
-7. Write release notes and place them in `HISTORY.md`
+7. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`.
 
-8. Open PRs and merge into master
+8. Open PRs and merge into master.
 
-9. Tag version on master
+9. Tag version on master.
 
 10. Pull master, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`
 
