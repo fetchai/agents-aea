@@ -45,18 +45,28 @@ class Strategy(GenericStrategy):
 
         :return: a dict of the data found in the shared state.
         """
-        data = self.context.shared_state.get(self.shared_state_key, "{}")
+        data = self.context.shared_state.get(self.shared_state_key, b"{}")
+        formatted_data = self._format_data(data)
+        return formatted_data
+
+    def _format_data(self, data: bytes) -> Dict[str, str]:
+        """
+        Convert to dict.
+
+        :return: a dict with key and values as strings
+        """
         result: Dict[str, str] = {}
         try:
-            loaded = json.load(data)
-            if not isinstance(loaded, dict) or not all(
+            loaded = json.loads(data)
+            if isinstance(loaded, dict) and all(
                 [
                     isinstance(key, str) and isinstance(value, str)
                     for key, value in loaded.items()
                 ]
             ):
-                raise ValueError("Invalid data, must be Dict[str, str]")
-            result = loaded
-        except (TypeError, ValueError) as e:
+                result = loaded
+            else:
+                result = {"data": json.dumps(loaded)}
+        except json.decoder.JSONDecodeError as e:
             self.context.logger.warning(f"error when loading json: {e}")
         return result

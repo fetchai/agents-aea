@@ -71,7 +71,7 @@ models:
         constraint_type: ==
         search_key: seller_service
         search_value: weather_data
-      search_radius: 200.0
+      search_radius: 50.0
       service_id: weather_data
 ---
 public_id: fetchai/p2p_libp2p:0.12.0
