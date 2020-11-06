@@ -48,6 +48,7 @@ class HttpMessage(Message):
             return str(self.value)
 
     _performatives = {"request", "response"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

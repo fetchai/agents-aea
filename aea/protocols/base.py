@@ -44,6 +44,8 @@ class Message:
     protocol_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
 
+    __slots__ = ("_slots", "_to", "_sender")
+
     class Performative(Enum):
         """Performatives for the base message."""
 

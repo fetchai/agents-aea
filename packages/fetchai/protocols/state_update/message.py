@@ -50,6 +50,7 @@ class StateUpdateMessage(Message):
             return str(self.value)
 
     _performatives = {"apply", "initialize"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

@@ -89,6 +89,7 @@ class LedgerApiMessage(Message):
         "transaction_digest",
         "transaction_receipt",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

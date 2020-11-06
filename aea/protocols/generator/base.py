@@ -642,6 +642,8 @@ class ProtocolGenerator:
         )
 
         # slots
+        cls_str += self.indent + "__slots__: Tuple[str, ...] = tuple()\n"
+
         cls_str += self.indent + "class _SlotsCls():\n"
         self._change_indent(1)
         cls_str += self.indent + "__slots__ = (\n"
