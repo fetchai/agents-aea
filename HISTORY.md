@@ -1,5 +1,24 @@
 # Release History
 
+## 0.7.1 (2020-11-05)
+
+- Adds two AEAs for Agent World 2
+- Refactors dialogue class to optimize for memory
+- Refactors message class to optimize for memory
+- Adds mixed registry mode to CLI and makes it default
+- Extends upgrade command to automatically update references of non-vendor packages
+- Adds deployment scripts for kubernetes
+- Extends config set/get support for lists and dicts
+- Fixes location specifiers throughout code base
+- Imposes limits on length of user defined strings like author and package name
+- Relaxes version specifiers for some dependencies
+- Adds support for skills to reference connections as dependencies
+- Makes ledger and currency ids configurable
+- Adds test coverage for the tac control skills
+- Improves quickstart guidance and adds docker images
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.7.0 (2020-10-22)
 
 - Adds two AEAs for Agent World 1

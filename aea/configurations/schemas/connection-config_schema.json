@@ -12,6 +12,7 @@
     "aea_version",
     "class_name",
     "config",
+    "connections",
     "protocols"
   ],
   "properties": {

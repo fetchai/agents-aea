@@ -69,7 +69,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         """Test the get_quantity_in_outbox method."""
         assert self.get_quantity_in_outbox() == 0
 
-        dummy_message = Message(dummy="dummy")
+        dummy_message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy"
+        )
         dummy_message.to = "some_to"
         dummy_message.sender = "some_sender"
         self.skill.skill_context.outbox.put_message(dummy_message)
@@ -80,12 +82,16 @@ class TestSkillTestCase(BaseSkillTestCase):
         """Test the get_message_from_outbox method."""
         assert self.get_message_from_outbox() is None
 
-        dummy_message_1 = Message(dummy_1="dummy_1")
+        dummy_message_1 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_1"
+        )
         dummy_message_1.to = "some_to_1"
         dummy_message_1.sender = "some_sender_1"
         self.skill.skill_context.outbox.put_message(dummy_message_1)
 
-        dummy_message_2 = Message(dummy_2="dummy_2")
+        dummy_message_2 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_2.to = "some_to_2"
         dummy_message_2.sender = "some_sender_2"
         self.skill.skill_context.outbox.put_message(dummy_message_2)
@@ -93,11 +99,41 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_outbox() == dummy_message_1
         assert self.get_message_from_outbox() == dummy_message_2
 
+    def test_drop_messages_from_outbox(self):
+        """Test the drop_messages_from_outbox method."""
+        assert self.get_quantity_in_outbox() == 0
+        self.drop_messages_from_outbox(5)
+        assert self.get_quantity_in_outbox() == 0
+
+        dummy_message_1 = Message()
+        dummy_message_1.to = "some_to_1"
+        dummy_message_1.sender = "some_sender_1"
+        self.skill.skill_context.outbox.put_message(dummy_message_1)
+
+        dummy_message_2 = Message()
+        dummy_message_2.to = "some_to_2"
+        dummy_message_2.sender = "some_sender_2"
+        self.skill.skill_context.outbox.put_message(dummy_message_2)
+
+        dummy_message_3 = Message()
+        dummy_message_3.to = "some_to_3"
+        dummy_message_3.sender = "some_sender_3"
+        self.skill.skill_context.outbox.put_message(dummy_message_3)
+
+        assert self.get_quantity_in_outbox() == 3
+
+        self.drop_messages_from_outbox(2)
+
+        assert self.get_quantity_in_outbox() == 1
+        assert self.get_message_from_outbox() == dummy_message_3
+
     def test_get_quantity_in_decision_maker_inbox(self):
         """Test the get_quantity_in_decision_maker_inbox method."""
         assert self.get_quantity_in_decision_maker_inbox() == 0
 
-        dummy_message = Message(dummy="dummy")
+        dummy_message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy"
+        )
         dummy_message.to = "some_to"
         dummy_message.sender = "some_sender"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message)
@@ -108,18 +144,50 @@ class TestSkillTestCase(BaseSkillTestCase):
         """Test the get_message_from_decision_maker_inbox method."""
         assert self.get_message_from_decision_maker_inbox() is None
 
-        dummy_message_1 = Message(dummy_1="dummy_1")
+        dummy_message_1 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_1"
+        )
         dummy_message_1.to = "some_to_1"
         dummy_message_1.sender = "some_sender_1"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message_1)
 
-        dummy_message_2 = Message(dummy_2="dummy_2")
+        dummy_message_2 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_2.to = "some_to_2"
         dummy_message_2.sender = "some_sender_2"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message_2)
 
         assert self.get_message_from_decision_maker_inbox() == dummy_message_1
         assert self.get_message_from_decision_maker_inbox() == dummy_message_2
+
+    def test_drop_messages_from_decision_maker_inbox(self):
+        """Test the drop_messages_from_decision_maker_inbox method."""
+        assert self.get_quantity_in_decision_maker_inbox() == 0
+        self.drop_messages_from_decision_maker_inbox(5)
+        assert self.get_quantity_in_decision_maker_inbox() == 0
+
+        dummy_message_1 = Message()
+        dummy_message_1.to = "some_to_1"
+        dummy_message_1.sender = "some_sender_1"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message_1)
+
+        dummy_message_2 = Message()
+        dummy_message_2.to = "some_to_2"
+        dummy_message_2.sender = "some_sender_2"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message_2)
+
+        dummy_message_3 = Message()
+        dummy_message_3.to = "some_to_3"
+        dummy_message_3.sender = "some_sender_3"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message_3)
+
+        assert self.get_quantity_in_decision_maker_inbox() == 3
+
+        self.drop_messages_from_decision_maker_inbox(2)
+
+        assert self.get_quantity_in_decision_maker_inbox() == 1
+        assert self.get_message_from_decision_maker_inbox() == dummy_message_3
 
     def test_assert_quantity_in_outbox(self):
         """Test the assert_quantity_in_outbox method."""
@@ -129,7 +197,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         ):
             self.assert_quantity_in_outbox(1)
 
-        dummy_message = Message(dummy="dummy")
+        dummy_message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy"
+        )
         dummy_message.to = "some_to"
         dummy_message.sender = "some_sender"
         self.skill.skill_context.outbox.put_message(dummy_message)
@@ -144,7 +214,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         ):
             self.assert_quantity_in_decision_making_queue(1)
 
-        dummy_message = Message(dummy_1="dummy_1")
+        dummy_message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_1"
+        )
         dummy_message.to = "some_to_1"
         dummy_message.sender = "some_sender_1"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message)

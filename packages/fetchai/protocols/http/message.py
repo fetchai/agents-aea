@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/http:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/http:0.9.0")
 
     class Performative(Message.Performative):
         """Performatives for the http protocol."""
@@ -46,6 +46,23 @@ class HttpMessage(Message):
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {"request", "response"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "body",
+            "dialogue_reference",
+            "headers",
+            "message_id",
+            "method",
+            "performative",
+            "status_code",
+            "status_text",
+            "target",
+            "url",
+            "version",
+        )
 
     def __init__(
         self,
@@ -63,7 +80,6 @@ class HttpMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"request", "response"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

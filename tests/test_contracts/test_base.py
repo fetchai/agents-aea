@@ -22,6 +22,7 @@
 import os
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
 
 import pytest
 import web3
@@ -110,9 +111,13 @@ def test_get_deploy_transaction_ethereum(dummy_contract):
     """Tests the deploy transaction classmethod for ethereum."""
     ethereum_crypto = crypto_registry.make(ETHEREUM)
     ledger_api = ledger_apis_registry.make(ETHEREUM, address=ETHEREUM_DEFAULT_ADDRESS,)
-    deploy_tx = dummy_contract.get_deploy_transaction(
-        ledger_api, ethereum_crypto.address
-    )
+    with patch(
+        "web3.contract.ContractConstructor.buildTransaction",
+        return_value={"data": "0xstub"},
+    ):
+        deploy_tx = dummy_contract.get_deploy_transaction(
+            ledger_api, ethereum_crypto.address
+        )
     assert deploy_tx is not None and len(deploy_tx) == 6
     assert all(
         key in ["from", "value", "gas", "gasPrice", "nonce", "data"]

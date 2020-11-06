@@ -61,7 +61,6 @@ from tests.conftest import (
     AUTHOR,
     CUR_PATH,
     DUMMY_SKILL_PATH,
-    DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     agent_config_files,
     connection_config_files,
@@ -70,6 +69,7 @@ from tests.conftest import (
     random_string,
     skill_config_files,
 )
+from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
 class TestCRUDCollection:
@@ -151,7 +151,7 @@ class TestContractConfig:
         assert config.contract_interfaces != {}
         assert (
             "cosmos" in config.contract_interfaces
-            and "ethereum" in config.contract_interfaces
+            or "ethereum" in config.contract_interfaces
         )
 
 
@@ -260,7 +260,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match="The custom configuration for skill fetchai/error:0.8.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+            match="The custom configuration for skill fetchai/error:0.9.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
         ):
             skill_config.update(new_configurations)
 
@@ -284,7 +284,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.8.0' are not allowed to change: {'class_name'}.",
+            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.9.0' are not allowed to change: {'class_name'}.",
         ):
             skill_config.update(new_configurations)
 
@@ -420,12 +420,6 @@ class PublicIdTestCase(TestCase):
         """Test case for from_json method positive result."""
         obj = {"author": AUTHOR, "name": "name", "version": "0.1.0"}
         PublicId.from_json(obj)
-
-    def test_public_id_latest_positive(self):
-        """Test case for latest property positive result."""
-        name = "name"
-        obj = PublicId(AUTHOR, name, "0.1.0")
-        assert obj.latest == "{}/{}:*".format(AUTHOR, name)
 
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""
@@ -646,6 +640,14 @@ def test_pubic_id_to_latest():
     assert expected_public_id == actual_public_id
 
 
+def test_pubic_id_to_any():
+    """Test PublicId.to_any"""
+    public_id = PublicId("author", "name", "0.1.0")
+    expected_public_id = PublicId("author", "name", "any")
+    actual_public_id = public_id.to_any()
+    assert expected_public_id == actual_public_id
+
+
 def test_pubic_id_same_prefix():
     """Test PublicId.same_prefix"""
     same_1 = PublicId("author", "name", "0.1.0")
@@ -838,6 +840,7 @@ def test_agent_config_to_json_with_optional_configurations():
         skill_exception_policy="propagate",
         connection_exception_policy="propagate",
         default_routing={"author/name:0.1.0": "author/name:0.1.0"},
+        currency_denominations={"fetchai": "fet"},
         loop_mode="sync",
         runtime_mode="async",
     )

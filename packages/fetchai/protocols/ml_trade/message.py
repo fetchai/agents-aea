@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = PublicId.from_str("fetchai/ml_trade:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/ml_trade:0.9.0")
 
     Description = CustomDescription
 
@@ -58,6 +58,20 @@ class MlTradeMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {"accept", "cfp", "data", "terms"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "dialogue_reference",
+            "message_id",
+            "payload",
+            "performative",
+            "query",
+            "target",
+            "terms",
+            "tx_digest",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -74,7 +88,6 @@ class MlTradeMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"accept", "cfp", "data", "terms"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

@@ -25,7 +25,10 @@ import pytest
 from aea.configurations.base import PublicId
 from aea.manager import MultiAgentManager
 
+from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
+
 from tests.common.utils import wait_for_condition
+from tests.conftest import MY_FIRST_AEA_PUBLIC_ID
 
 
 class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
@@ -33,13 +36,13 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
 
     MODE = "async"
 
-    echo_skill_id = PublicId.from_str("fetchai/echo:0.10.0")
+    echo_skill_id = ECHO_SKILL_PUBLIC_ID
 
     def setup(self):
         """Set test case."""
         self.agent_name = "test_what_ever12"
         self.working_dir = "MultiAgentManager_dir"
-        self.project_public_id = PublicId.from_str("fetchai/my_first_aea:0.14.0")
+        self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
         self.project_path = os.path.join(
             self.working_dir, self.project_public_id.author, self.project_public_id.name
         )

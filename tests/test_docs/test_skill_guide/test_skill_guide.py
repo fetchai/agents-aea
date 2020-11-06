@@ -78,7 +78,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.15.0",
+            "fetchai/simple_service_registration:0.16.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -96,7 +96,7 @@ class TestBuildSkill(AEATestCaseMany):
         self.set_config(setting_path, COSMOS)
 
         default_routing = {
-            "fetchai/oef_search:0.9.0": "fetchai/soef:0.11.0",
+            "fetchai/oef_search:0.10.0": "fetchai/soef:0.12.0",
         }
 
         # replace location
@@ -110,7 +110,7 @@ class TestBuildSkill(AEATestCaseMany):
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
@@ -144,7 +144,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         path = Path(self.t, search_aea, "skills", skill_name, "__init__.py")
         original = Path(AEA_DIR, "skills", "scaffold", "__init__.py")
-        assert filecmp.cmp(path, original)
+        assert not filecmp.cmp(path, original)  # the public id gets updated
         with open(path, "w") as file:
             file.write(self.code_blocks[3])  # block four is init
 

@@ -17,10 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains some utils for testing purposes."""
+import filecmp
 import os
 import time
 from contextlib import contextmanager
 from functools import wraps
+from pathlib import Path
 from threading import Thread
 from typing import Any, Callable, Tuple, Type, Union
 
@@ -293,3 +295,9 @@ def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout", period
         time.sleep(period)
         if time.time() > start_time + timeout:
             raise TimeoutError(error_msg)
+
+
+def are_dirs_equal(dir1: Path, dir2: Path) -> bool:
+    """Compare the content of two directories, recursively."""
+    comparison = filecmp.dircmp(str(dir1), str(dir2))
+    return comparison.diff_files == []

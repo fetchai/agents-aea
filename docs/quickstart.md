@@ -10,6 +10,36 @@ This example will take you through the simplest AEA in order to make you familia
 The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target="_blank">Go 1.14.2</a> or higher installed.
+​
+### Optional: using the Docker image.
+​
+We also provide a Docker image with all the needed dependencies.
+
+<details><summary>Manual approach</summary>
+
+To use the image you will first have to pull it and than run it with your current local directory mounted as a docker volume. This allows you to keep your agents local while working on them from within the docker container.
+
+To pull:
+
+```bash
+docker pull fetchai/aea-user:latest
+```
+
+To run the image
+​
+- Linux and MacOs
+  ```bash
+  docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
+  ```
+- Windows
+  ```bash
+  docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
+  ```
+
+Once successfully logged into the docker container, 
+you can follow the rest of the guide the same way as if not using docker.
+​
+</details>
 
 ## Preliminaries
 
@@ -20,7 +50,7 @@ mkdir my_aea_projects/
 cd my_aea_projects/
 ```
 
-We highly recommend using a virtual environment to ensure consistency across dependencies.
+Unless you are using the docker image, we highly recommend using a virtual environment to ensure consistency across dependencies.
 
 Check that you have <a href="https://github.com/pypa/pipenv" target="_blank">`pipenv`</a>.
 
@@ -55,12 +85,28 @@ If the installation steps fail, it might be a dependency issue.
 
 The following hints can help:
 
-- Ubuntu/Debian systems only: install Python 3.7 headers.
+- Ubuntu/Debian systems only: install Python headers,
+  depending on the Python version you have installed on your machine.
+  E.g. for Python 3.7: 
 ``` bash
 sudo apt-get install python3.7-dev
 ```
 
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
+
+- To install Go, follow the
+ official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a>
+
+- Python is already included by default on 
+many Linux distributions (e.g. Ubuntu), as well as MacOS.
+To check you have the right version, open a terminal and run: 
+```
+python3 --version
+```
+
+- To install Python on Windows machines, 
+you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
+
 
 ## Setup author name
 
@@ -88,7 +134,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.7.0
+v0.7.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -105,7 +151,7 @@ The echo skill demo is a simple demo that introduces you to the main business lo
 The fastest way to create your first AEA is to fetch it!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.14.0
+aea fetch fetchai/my_first_aea:0.15.0
 cd my_first_aea
 ```
 
@@ -125,9 +171,9 @@ cd my_first_aea
 <br>
 Second, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.10.0
+aea add skill fetchai/echo:0.11.0
 ```
-This copies the `fetchai/echo:0.10.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.10.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `fetchai/echo:0.11.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.11.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ## Communication via envelopes and messages
@@ -153,7 +199,7 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.8.0,\x08\x01\x12\x011*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.9.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
 ## Run the AEA
@@ -179,7 +225,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.7.0
+v0.7.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -216,7 +262,7 @@ info: Echo Behaviour: act method called.
 Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.8.0,\x08\x01\x12\x011*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.9.0,\x08\x01\x12\x011*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.

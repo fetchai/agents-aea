@@ -46,7 +46,7 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = PublicId.from_str("fetchai/oef_search:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/oef_search:0.10.0")
 
     AgentsInfo = CustomAgentsInfo
 
@@ -70,6 +70,28 @@ class OefSearchMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "oef_error",
+        "register_service",
+        "search_result",
+        "search_services",
+        "success",
+        "unregister_service",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "agents",
+            "agents_info",
+            "dialogue_reference",
+            "message_id",
+            "oef_error_operation",
+            "performative",
+            "query",
+            "service_description",
+            "target",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -86,14 +108,6 @@ class OefSearchMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "oef_error",
-            "register_service",
-            "search_result",
-            "search_services",
-            "success",
-            "unregister_service",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

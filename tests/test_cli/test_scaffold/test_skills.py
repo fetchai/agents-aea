@@ -22,6 +22,7 @@
 import filecmp
 import json
 import os
+import re
 import shutil
 import tempfile
 import unittest.mock
@@ -33,7 +34,7 @@ from jsonschema import Draft4Validator, ValidationError
 
 from aea import AEA_DIR
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE, DEFAULT_VERSION
 from aea.configurations.loader import make_jsonschema_base_uri
 
 from tests.conftest import (
@@ -121,6 +122,18 @@ class TestScaffoldSkill:
         )
         config_file = yaml.safe_load(open(p))
         self.validator.validate(instance=config_file)
+
+    def test_init_module_contains_new_public_id(self):
+        """Test that the PUBLIC ID variable in the init module is replaced correctly."""
+        p = Path(self.t, self.agent_name, "skills", self.resource_name, "__init__.py")
+        init_module_content = p.read_text()
+        expected_public_id = f"{AUTHOR}/{self.resource_name}:{DEFAULT_VERSION}"
+        matches = re.findall(
+            fr'^PUBLIC_ID = PublicId\.from_str\("{expected_public_id}"\)$',
+            init_module_content,
+            re.MULTILINE,
+        )
+        assert len(matches) == 1
 
     @classmethod
     def teardown_class(cls):

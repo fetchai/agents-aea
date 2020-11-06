@@ -24,16 +24,16 @@ from typing import Dict, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
+)
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.aries_faber.dialogues import (
     HttpDialogues,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.aries_faber.strategy import (
-    FaberStrategy,
-    HTTP_COUNTERPARTY,
-)
+from packages.fetchai.skills.aries_faber.strategy import FaberStrategy
 
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -66,7 +66,7 @@ class FaberBehaviour(TickerBehaviour):
 
         # http request message
         request_http_message, _ = http_dialogues.create(
-            counterparty=HTTP_COUNTERPARTY,
+            counterparty=str(HTTP_CLIENT_PUBLIC_ID),
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=url,

@@ -1,0 +1,69 @@
+name: simple_seller
+author: fetchai
+version: 0.1.0
+type: skill
+description: The simple_seller skill extends the generic_seller skill and sells data
+  from the shared state of the AEA.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  README.md: QmNLnExXb3B4YgNWFGsDcEKMxJZQUfYrpPmTA6RY96r6fL
+  __init__.py: QmPAhft5Qrs3j8ZrrNe3abkZ3mK3Jw3BvRwybCy4HzxvtN
+  behaviours.py: QmZR55xAQJ2WfCKyAL4GTFAXqbuR68W8Kw2nKdkdvx9mk4
+  dialogues.py: Qmc1ASXsWSmnshtQzwokHavnnEKxW5NMyhEHYT4zrGTgRs
+  handlers.py: QmSnbhbz1f7SUrDQrouTaQ8Ugj7c5sCyRBKst5Vg3KUv2n
+  strategy.py: QmeC9cknv9kjW2RHW6Ts4thuYK6FwpCZvb5vbUjBtbn3w8
+fingerprint_ignore_patterns: []
+connections: []
+contracts: []
+protocols:
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
+skills:
+- fetchai/generic_seller:0.16.0
+behaviours:
+  service_registration:
+    args:
+      services_interval: 20
+    class_name: ServiceRegistrationBehaviour
+handlers:
+  fipa:
+    args: {}
+    class_name: FipaHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  strategy:
+    args:
+      has_data_source: true
+      is_ledger_tx: true
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      service_data:
+        key: seller_service
+        value: weather_data
+      service_id: weather_data
+      shared_state_key: null
+      unit_price: 10
+    class_name: Strategy
+dependencies: {}
+is_abstract: false

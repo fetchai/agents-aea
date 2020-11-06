@@ -30,7 +30,7 @@ import pytest
 from aiohttp.client_reqrep import ClientResponse
 
 from aea.common import Address
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -164,7 +164,7 @@ class TestWebhookConnection:
         envelope = Envelope(
             to="addr",
             sender="my_id",
-            protocol_id=PublicId.from_str("fetchai/http:0.8.0"),
+            protocol_id=HttpMessage.protocol_id,
             message=http_message,
         )
         with patch.object(self.webhook_connection.logger, "warning") as mock_logger:

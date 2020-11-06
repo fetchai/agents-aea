@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
-    protocol_id = PublicId.from_str("fetchai/default:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/default:0.9.0")
 
     ErrorCode = CustomErrorCode
 
@@ -50,6 +50,20 @@ class DefaultMessage(Message):
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {"bytes", "error"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "content",
+            "dialogue_reference",
+            "error_code",
+            "error_data",
+            "error_msg",
+            "message_id",
+            "performative",
+            "target",
+        )
 
     def __init__(
         self,
@@ -67,7 +81,6 @@ class DefaultMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"bytes", "error"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

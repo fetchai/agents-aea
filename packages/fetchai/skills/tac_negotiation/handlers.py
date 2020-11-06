@@ -28,6 +28,9 @@ from aea.helpers.transaction.base import RawMessage
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -51,7 +54,7 @@ from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class FipaNegotiationHandler(Handler):

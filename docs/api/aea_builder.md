@@ -430,7 +430,7 @@ the AEABuilder
 #### set`_`default`_`connection
 
 ```python
- | set_default_connection(public_id: PublicId) -> "AEABuilder"
+ | set_default_connection(public_id: Optional[PublicId] = None) -> "AEABuilder"
 ```
 
 Set the default connection.
@@ -505,7 +505,7 @@ Get the connection private key paths.
 #### set`_`default`_`ledger
 
 ```python
- | set_default_ledger(identifier: str) -> "AEABuilder"
+ | set_default_ledger(identifier: Optional[str]) -> "AEABuilder"
 ```
 
 Set a default ledger API to use.
@@ -513,6 +513,23 @@ Set a default ledger API to use.
 **Arguments**:
 
 - `identifier`: the identifier of the ledger api
+
+**Returns**:
+
+the AEABuilder
+
+<a name="aea.aea_builder.AEABuilder.set_currency_denominations"></a>
+#### set`_`currency`_`denominations
+
+```python
+ | set_currency_denominations(currency_denominations: Dict[str, str]) -> "AEABuilder"
+```
+
+Set the mapping from ledger ids to currency denomincations.
+
+**Arguments**:
+
+- `currency_denominations`: the mapping
 
 **Returns**:
 

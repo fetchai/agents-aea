@@ -40,6 +40,8 @@ from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
 from dotenv import load_dotenv
 
 
+STRING_LENGTH_LIMIT = 128
+
 _default_logger = logging.getLogger(__name__)
 
 
@@ -199,6 +201,38 @@ class RegexConstrainedString(UserString):
         )
 
 
+class SimpleId(RegexConstrainedString):
+    """
+    A simple identifier.
+
+    The allowed strings are all the strings that:
+    - have at least length 1
+    - have at most length 128
+    - the first character must be between a-z,A-Z or underscore
+    - the other characters must be either the above or digits.
+
+    Examples of allowed strings:
+    >>> SimpleId("an_identifier")
+    'an_identifier'
+
+    Examples of not allowed strings:
+    >>> SimpleId("0an_identifier")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
+    >>> SimpleId("")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    """
+
+    REGEX = re.compile(fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}")
+
+
+SimpleIdOrStr = Union[SimpleId, str]
+
+
 @contextlib.contextmanager
 def cd(path):  # pragma: nocover
     """Change working directory temporarily."""
@@ -351,6 +385,7 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             not both_are_dict
             and value_type != value_to_update_type
             and value is not None
+            and value_to_update is not None
         ):
             raise ValueError(
                 f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."

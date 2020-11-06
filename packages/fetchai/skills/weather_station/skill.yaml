@@ -1,6 +1,6 @@
 name: weather_station
 author: fetchai
-version: 0.14.0
+version: 0.15.0
 type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: Qma72715sXAgDLggNNVkXQoVxCu9hyEEFKbyWTKSavEF2v
-  __init__.py: QmTW6R8VC8Hy7eYFPesBZWQry1Hwv6Q5ko7iezJQbQ4Ncp
+  __init__.py: QmZNRfXh6TGnJ6kna28Q4T9bE8kvU8EFLuEn6GmyR37RzA
   behaviours.py: QmfPE6zrMmY2QARQt3gNZ2oiV3uAqvAQXSvU3XWnFDUQkG
   db_communication.py: QmSLm4jic8JbP2wz35WyWevc9H2ZxsEYfaBMWcEx4pzVcy
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
@@ -17,14 +17,15 @@ fingerprint:
   strategy.py: QmVDAXUA1YBGa2PSQKDekyf5j1qZfEfLvZpuLJ6MnURvS8
 fingerprint_ignore_patterns:
 - '*.db'
+connections: []
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
 skills:
-- fetchai/generic_seller:0.15.0
+- fetchai/generic_seller:0.16.0
 behaviours:
   service_registration:
     args:
@@ -55,14 +56,12 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
-      currency_id: FET
       data_for_sale:
         pressure: 20
         temperature: 26
         wind: 10
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127

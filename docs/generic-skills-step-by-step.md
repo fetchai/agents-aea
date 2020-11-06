@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.12.0
+aea fetch fetchai/generic_seller:0.13.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.15.0
+aea eject skill fetchai/generic_seller:0.16.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.12.0
+aea fetch fetchai/generic_buyer:0.13.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.14.0
+aea eject skill fetchai/generic_buyer:0.15.0
 cd ..
 ```
 
@@ -95,6 +95,9 @@ from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_seller.dialogues import (
@@ -105,7 +108,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
@@ -298,6 +301,9 @@ from aea.helpers.transaction.base import TransactionDigest
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -314,7 +320,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class GenericFipaHandler(Handler):
@@ -840,7 +846,6 @@ import uuid
 from typing import Any, Dict, Optional, Tuple
 
 from aea.common import Address
-from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
@@ -854,14 +859,12 @@ from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
 
-DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
-DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_UNIT_PRICE = 4
 DEFAULT_SERVICE_ID = "generic_service"
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
 
 DEFAULT_HAS_DATA_SOURCE = False
@@ -882,10 +885,10 @@ class GenericStrategy(Model):
 
         :return: None
         """
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        ledger_id = kwargs.pop("ledger_id", None)
+        currency_id = kwargs.pop("currency_id", None)
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
 
-        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
         self._unit_price = kwargs.pop("unit_price", DEFAULT_UNIT_PRICE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
@@ -914,16 +917,21 @@ class GenericStrategy(Model):
         }
 
         super().__init__(**kwargs)
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
+        if currency_id is None:
+            currency_id = self.context.currency_denominations.get(self._ledger_id, None)
+            enforce(
+                currency_id is not None,
+                f"Currency denomination for ledger_id={self._ledger_id} not specified.",
+            )
+        self._currency_id = currency_id
         enforce(
             self.context.agent_addresses.get(self._ledger_id, None) is not None,
             "Wallet does not contain cryptos for provided ledger id.",
         )
-
-        if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
-        else:
-            self._data_for_sale = data_for_sale
-        self._sale_quantity = len(data_for_sale)
+        self._data_for_sale = data_for_sale
 ```
 
 We initialise the strategy class. We are trying to read the strategy variables from the yaml file. If this is not possible we specified some default values.
@@ -931,6 +939,13 @@ We initialise the strategy class. We are trying to read the strategy variables f
 The following properties and methods deal with different aspects of the strategy. Add them under the initialization of the class:
 
 ``` python
+    @property
+    def data_for_sale(self) -> Dict[str, str]:
+        """Get the data for sale."""
+        if self._has_data_source:
+            return self.collect_from_data_source()  # pragma: nocover
+        return self._data_for_sale
+
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
@@ -1004,8 +1019,10 @@ The following properties and methods deal with different aspects of the strategy
         :param counterparty_address: the counterparty of the proposal.
         :return: a tuple of proposal, terms and the weather data
         """
+        data_for_sale = self.data_for_sale
+        sale_quantity = len(data_for_sale)
         seller_address = self.context.agent_addresses[self.ledger_id]
-        total_price = self._sale_quantity * self._unit_price
+        total_price = sale_quantity * self._unit_price
         if self.is_ledger_tx:
             tx_nonce = LedgerApis.generate_tx_nonce(
                 identifier=self.ledger_id,
@@ -1020,7 +1037,7 @@ The following properties and methods deal with different aspects of the strategy
                 "price": total_price,
                 "currency_id": self._currency_id,
                 "service_id": self._service_id,
-                "quantity": self._sale_quantity,
+                "quantity": sale_quantity,
                 "tx_nonce": tx_nonce,
             }
         )
@@ -1029,12 +1046,12 @@ The following properties and methods deal with different aspects of the strategy
             sender_address=seller_address,
             counterparty_address=counterparty_address,
             amount_by_currency_id={self._currency_id: total_price},
-            quantities_by_good_id={self._service_id: -self._sale_quantity},
+            quantities_by_good_id={self._service_id: -sale_quantity},
             is_sender_payable_tx_fee=False,
             nonce=tx_nonce,
             fee_by_currency_id={self._currency_id: 0},
         )
-        return proposal, terms, self._data_for_sale
+        return proposal, terms, data_for_sale
 
     def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to communicate with the sensor."""
@@ -1318,10 +1335,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
 skills: []
 behaviours:
   service_registration:
@@ -1418,6 +1435,9 @@ from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
@@ -1428,7 +1448,7 @@ from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
 DEFAULT_SEARCH_INTERVAL = 5.0
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class GenericSearchBehaviour(TickerBehaviour):
@@ -1502,6 +1522,9 @@ from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -1521,7 +1544,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.8.0"
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class GenericFipaHandler(Handler):
@@ -2200,7 +2223,6 @@ We are going to create the strategy that we want our AEA to follow. Rename the `
 
 ``` python
 from aea.common import Address
-from aea.configurations.constants import DEFAULT_LEDGER
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
 from aea.helpers.search.models import (
@@ -2214,15 +2236,13 @@ from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
 
-DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 DEFAULT_IS_LEDGER_TX = True
 
-DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
 
-DEFAULT_LOCATION = {"longitude": 51.5194, "latitude": 0.1270}
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "seller_service",
     "search_value": "generic_service",
@@ -2242,10 +2262,10 @@ class GenericStrategy(Model):
 
         :return: None
         """
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        ledger_id = kwargs.pop("ledger_id", None)
+        currency_id = kwargs.pop("currency_id", None)
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
 
-        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_UNIT_PRICE)
         self._max_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
@@ -2262,6 +2282,16 @@ class GenericStrategy(Model):
         )
 
         super().__init__(**kwargs)
+        self._ledger_id = (
+            ledger_id if ledger_id is not None else self.context.default_ledger_id
+        )
+        if currency_id is None:
+            currency_id = self.context.currency_denominations.get(self._ledger_id, None)
+            enforce(
+                currency_id is not None,
+                f"Currency denomination for ledger_id={self._ledger_id} not specified.",
+            )
+        self._currency_id = currency_id
         self._is_searching = False
         self._balance = 0
 ```
@@ -2790,11 +2820,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
-- fetchai/signing:0.6.0
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
+- fetchai/signing:0.7.0
 skills: []
 behaviours:
   search:
@@ -2895,8 +2925,8 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 
 ### Fund the buyer AEA
@@ -2913,9 +2943,9 @@ Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add protocol fetchai/fipa:0.9.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add protocol fetchai/fipa:0.10.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea run
@@ -2929,10 +2959,10 @@ Add the remaining packages for the buyer AEA:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add protocol fetchai/fipa:0.9.0
-aea add protocol fetchai/signing:0.6.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add protocol fetchai/fipa:0.10.0
+aea add protocol fetchai/signing:0.7.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```

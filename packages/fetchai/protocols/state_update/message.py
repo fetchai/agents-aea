@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = PublicId.from_str("fetchai/state_update:0.6.0")
+    protocol_id = PublicId.from_str("fetchai/state_update:0.7.0")
 
     class Performative(Message.Performative):
         """Performatives for the state_update protocol."""
@@ -48,6 +48,20 @@ class StateUpdateMessage(Message):
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {"apply", "initialize"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "amount_by_currency_id",
+            "dialogue_reference",
+            "exchange_params_by_currency_id",
+            "message_id",
+            "performative",
+            "quantities_by_good_id",
+            "target",
+            "utility_params_by_good_id",
+        )
 
     def __init__(
         self,
@@ -65,7 +79,6 @@ class StateUpdateMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"apply", "initialize"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
