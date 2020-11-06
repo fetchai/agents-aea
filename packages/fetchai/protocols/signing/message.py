@@ -50,7 +50,7 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = PublicId.from_str("fetchai/signing:0.6.0")
+    protocol_id = PublicId.from_str("fetchai/signing:0.7.0")
 
     ErrorCode = CustomErrorCode
 
@@ -77,6 +77,28 @@ class SigningMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "error",
+        "sign_message",
+        "sign_transaction",
+        "signed_message",
+        "signed_transaction",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "dialogue_reference",
+            "error_code",
+            "message_id",
+            "performative",
+            "raw_message",
+            "raw_transaction",
+            "signed_message",
+            "signed_transaction",
+            "target",
+            "terms",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -93,13 +115,6 @@ class SigningMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "error",
-            "sign_message",
-            "sign_transaction",
-            "signed_message",
-            "signed_transaction",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

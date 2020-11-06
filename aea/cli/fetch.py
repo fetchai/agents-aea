@@ -27,7 +27,7 @@ import click
 
 from aea.cli.add import add_item
 from aea.cli.registry.fetch import fetch_agent
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
@@ -37,19 +37,22 @@ from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 
 
 @click.command(name="fetch")
-@click.option("--local", is_flag=True, help="For fetching agent from local folder.")
+@registry_flag(
+    help_local="For fetching agent from local folder.",
+    help_remote="For fetching agent from remote registry.",
+)
 @click.option(
     "--alias", type=str, required=False, help="Provide a local alias for the agent.",
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
-def fetch(click_context, public_id, alias, local):
+def fetch(click_context, public_id, alias, local, remote):
     """Fetch Agent from Registry."""
     ctx = cast(Context, click_context.obj)
-    if local:
-        fetch_agent_locally(ctx, public_id, alias)
-    else:
+    if remote:
         fetch_agent(ctx, public_id, alias)
+    else:
+        fetch_agent_locally(ctx, public_id, alias, is_mixed=not local)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
@@ -73,6 +76,7 @@ def fetch_agent_locally(
     public_id: PublicId,
     alias: Optional[str] = None,
     target_dir: Optional[str] = None,
+    is_mixed: bool = True,
 ) -> None:
     """
     Fetch Agent from local packages.
@@ -81,6 +85,7 @@ def fetch_agent_locally(
     :param public_id: public ID of agent to be fetched.
     :param alias: an optional alias.
     :param target_dir: the target directory to which the agent is fetched.
+    :param is_mixed: flag to enable mixed mode (try first local, then remote).
     :return: None
     """
     packages_path = (
@@ -120,30 +125,58 @@ def fetch_agent_locally(
         )
 
     # add dependencies
-    _fetch_agent_deps(ctx)
+    _fetch_agent_deps(ctx, is_mixed)
     click.echo("Agent {} successfully fetched.".format(public_id.name))
 
 
-def _fetch_agent_deps(ctx: Context) -> None:
+def _fetch_agent_deps(ctx: Context, is_mixed: bool = True) -> None:
     """
     Fetch agent dependencies.
 
     :param ctx: context object.
+    :param is_mixed: flag to enable mixed mode (try first local, then remote).
 
     :return: None
-    :raises: ClickException re-raises if occures in add_item call.
+    :raises: ClickException re-raises if occurs in add_item call.
     """
     ctx.set_config("is_local", True)
-
+    ctx.set_config("is_mixed", is_mixed)
     for item_type in ("protocol", "contract", "connection", "skill"):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:
-            try:
-                add_item(ctx, item_type, item_id)
-            except click.ClickException as e:
-                raise click.ClickException(
-                    "Failed to add {} dependency {}: {}".format(
-                        item_type, item_id, str(e)
-                    )
-                )
+            fetch_local_or_mixed(ctx, item_type, item_id)
+
+
+def fetch_local_or_mixed(ctx: Context, item_type: str, item_id: PublicId) -> None:
+    """
+    Fetch item, either local or mixed, depending on the parameters/context configuration.
+
+    It will first try to fetch from local registry; in case of failure,
+    if the 'is_mixed' flag is set, it will try to fetch from remote registry.
+
+    Context expects 'is_local' and 'is_mixed' to be set.
+
+    :param ctx: the CLI context.
+    :param item_type: the type of the package.
+    :param item_id: the public id of the item.
+    :return: None
+    """
+
+    def _raise(item_type_: str, item_id_: PublicId, exception):
+        """Temporary function to raise exception (used below twice)."""
+        raise click.ClickException(
+            f"Failed to add {item_type_} dependency {item_id_}: {str(exception)}"
+        )
+
+    try:
+        add_item(ctx, item_type, item_id)
+    except click.ClickException as e:
+        if not ctx.config.get("is_mixed", False):
+            _raise(item_type, item_id, e)
+        ctx.set_config("is_local", False)
+        try:
+            add_item(ctx, item_type, item_id)
+        except click.ClickException as e:
+            _raise(item_type, item_id, e)
+        ctx.set_config("is_local", True)

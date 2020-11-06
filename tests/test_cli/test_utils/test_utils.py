@@ -25,11 +25,11 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
 import pytest
-from click import BadParameter, ClickException
+from click import BadParameter, ClickException, UsageError
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import MutuallyExclusiveOption, PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -297,7 +297,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -311,7 +311,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -330,7 +330,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -339,7 +339,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -353,7 +353,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -510,3 +510,13 @@ def test_override_ledger_configurations_positive():
             LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
             == DEFAULT_CHAIN_ID
         )
+
+
+def test_mutually_exclusive_usage_error():
+    """Test MutuallyExclusiveOption.handle_parse_result."""
+    opt = MutuallyExclusiveOption(["--arg1"], mutually_exclusive=["arg2"])
+    with pytest.raises(
+        UsageError,
+        match=f"Illegal usage: `arg1` is mutually exclusive with arguments `{', '.join(['arg2'])}`.",
+    ):
+        opt.handle_parse_result(MagicMock(), {"arg1": None, "arg2": None}, [])

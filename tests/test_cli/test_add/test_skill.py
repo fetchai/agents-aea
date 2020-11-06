@@ -490,7 +490,7 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""
-        self.add_item("skill", str(ECHO_PUBLIC_ID), local=self.IS_LOCAL)
+        self.add_item("skill", str(ECHO_PUBLIC_ID.to_latest()), local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)

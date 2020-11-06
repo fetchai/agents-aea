@@ -49,7 +49,7 @@ DEFAULT_BODY_SIZE = 4
 class LedgerApiMessage(Message):
     """A protocol for ledger APIs requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/ledger_api:0.6.0")
+    protocol_id = PublicId.from_str("fetchai/ledger_api:0.7.0")
 
     RawTransaction = CustomRawTransaction
 
@@ -78,6 +78,37 @@ class LedgerApiMessage(Message):
             """Get the string representation."""
             return str(self.value)
 
+    _performatives = {
+        "balance",
+        "error",
+        "get_balance",
+        "get_raw_transaction",
+        "get_transaction_receipt",
+        "raw_transaction",
+        "send_signed_transaction",
+        "transaction_digest",
+        "transaction_receipt",
+    }
+
+    class _SlotsCls:
+        __slots__ = (
+            "address",
+            "balance",
+            "code",
+            "data",
+            "dialogue_reference",
+            "ledger_id",
+            "message",
+            "message_id",
+            "performative",
+            "raw_transaction",
+            "signed_transaction",
+            "target",
+            "terms",
+            "transaction_digest",
+            "transaction_receipt",
+        )
+
     def __init__(
         self,
         performative: Performative,
@@ -94,17 +125,6 @@ class LedgerApiMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "balance",
-            "error",
-            "get_balance",
-            "get_raw_transaction",
-            "get_transaction_receipt",
-            "raw_transaction",
-            "send_signed_transaction",
-            "transaction_digest",
-            "transaction_receipt",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

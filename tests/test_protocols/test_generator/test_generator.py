@@ -196,6 +196,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         # compare message.py
         message_file_generated = Path(self.t, protocol_name, "message.py")
         message_file_original = Path(path_to_protocol, "message.py",)
+        print(open(message_file_generated).read())
         assert _match_files(message_file_generated, message_file_original)
 
         # compare serialization.py

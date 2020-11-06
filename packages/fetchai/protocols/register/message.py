@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class RegisterMessage(Message):
     """A protocol for communication between two AEAs for registration."""
 
-    protocol_id = PublicId.from_str("fetchai/register:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/register:0.2.0")
 
     class Performative(Message.Performative):
         """Performatives for the register protocol."""
@@ -47,6 +47,19 @@ class RegisterMessage(Message):
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {"error", "register", "success"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "dialogue_reference",
+            "error_code",
+            "error_msg",
+            "info",
+            "message_id",
+            "performative",
+            "target",
+        )
 
     def __init__(
         self,
@@ -64,7 +77,6 @@ class RegisterMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"error", "register", "success"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

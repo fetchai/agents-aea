@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
-    protocol_id = PublicId.from_str("fetchai/gym:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/gym:0.9.0")
 
     AnyObject = CustomAnyObject
 
@@ -53,6 +53,23 @@ class GymMessage(Message):
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {"act", "close", "percept", "reset", "status"}
+
+    class _SlotsCls:
+        __slots__ = (
+            "action",
+            "content",
+            "dialogue_reference",
+            "done",
+            "info",
+            "message_id",
+            "observation",
+            "performative",
+            "reward",
+            "step_id",
+            "target",
+        )
 
     def __init__(
         self,
@@ -70,7 +87,6 @@ class GymMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"act", "close", "percept", "reset", "status"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,

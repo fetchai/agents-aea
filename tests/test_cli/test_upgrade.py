@@ -23,32 +23,37 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List
+from typing import List, Set
 from unittest.mock import patch
 
 import pytest
 from click.exceptions import ClickException
+from click.testing import Result
 
 from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.configurations.base import (
     AgentConfig,
     ComponentId,
+    ComponentType,
     DEFAULT_AEA_CONFIG_FILE,
     PackageId,
     PackageType,
     PublicId,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.helpers.base import cd
-from aea.test_tools.test_cases import BaseAEATestCase
+from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
+from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
+from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.common.utils import are_dirs_equal
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
@@ -285,12 +290,13 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
     def setup(cls):
         """Set up test case."""
         super(TestUpgradeProject, cls).setup()
+        cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.12.0",
+            "fetchai/generic_buyer:0.13.0",
             "--alias",
             cls.agent_name,
         )
@@ -316,7 +322,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
                 cli,
-                ["--skip-consistency-check", "upgrade"],
+                ["--skip-consistency-check", "upgrade", "--local"],
                 standalone_mode=False,
                 catch_exceptions=False,
             )
@@ -331,7 +337,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         with cd(self.agent_name):
             self.runner.invoke(  # pylint: disable=no-member
                 cli,
-                ["--skip-consistency-check", "upgrade"],
+                ["--skip-consistency-check", "upgrade", "--local"],
                 standalone_mode=False,
                 catch_exceptions=False,
             )
@@ -368,9 +374,10 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
     def setup(cls):
         """Set up test case."""
         super(TestNonVendorProject, cls).setup()
-        cls.agent_name = "generic_buyer_0.9.0"
+        cls.change_directory(Path(".."))
+        cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.12.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.13.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -660,3 +667,190 @@ class TestUpgradeContractRemoteRegistry(TestUpgradeContractLocally):
     def test_upgrade_to_latest_but_same_version(self):
         """Skip."""
         pass
+
+
+@pytest.mark.integration
+class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
+    """
+    Test that the command 'aea upgrade' correctly updates non-vendor package data.
+
+    In particular, check that 'aea upgrade' updates the public ids of
+    the package dependencies and the 'aea_version' field.
+
+    The test works as follows:
+    - scaffold a package, one for each possible package type;
+    - add the protocol "fetchai/default:0.7.0" as dependency to each of them.
+    - add the skill "fetchai/error:0.7.0"; this will also add the default protocol.
+    - run 'aea upgrade'
+    - check that the reference to "fetchai/default" in each scaffolded package
+      has the new version.
+    """
+
+    capture_log = True
+    IS_EMPTY = True
+    old_default_protocol_id = PublicId(
+        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.7.0"
+    )
+    old_error_skill_id = PublicId(
+        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.7.0"
+    )
+
+    @classmethod
+    def scaffold_item(cls, item_type: str, name: str) -> Result:
+        """Override default behaviour by adding a custom dependency to the scaffolded item."""
+        result = super(TestUpgradeNonVendorDependencies, cls).scaffold_item(
+            item_type, name
+        )
+        # add custom dependency (a protocol) to each package
+        # that supports dependencies (only connections and skills)
+        if item_type in {ComponentType.CONNECTION.value, ComponentType.SKILL.value}:
+            cls.nested_set_config(
+                f"{ComponentType(item_type).to_plural()}.{name}.protocols",
+                [str(cls.old_default_protocol_id)],
+            )
+        return result
+
+    @classmethod
+    def setup_class(cls):
+        """Set up test case."""
+        super(TestUpgradeNonVendorDependencies, cls).setup_class()
+        cls.scaffold_item("protocol", "my_protocol")
+        cls.scaffold_item("connection", "my_connection")
+        cls.scaffold_item("contract", "my_contract")
+        cls.scaffold_item("skill", "my_skill")
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "add",
+            "skill",
+            str(cls.old_error_skill_id),
+            cwd=cls._get_cwd(),
+        )
+
+    def test_non_vendor_update_references_to_upgraded_packages(
+        self,
+    ):  # pylint: disable=unused-argument
+        """Test that dependencies in non-vendor packages are updated correctly after upgrade."""
+        self.run_cli_command(
+            "--skip-consistency-check", "upgrade", "--local", cwd=self._get_cwd()
+        )
+        self.assert_dependency_updated(
+            ComponentType.CONNECTION, "my_connection", {DefaultMessage.protocol_id},
+        )
+        self.assert_dependency_updated(
+            ComponentType.SKILL, "my_skill", {DefaultMessage.protocol_id}
+        )
+
+    def assert_dependency_updated(
+        self, item_type: ComponentType, package_name: str, expected: Set[PublicId]
+    ):
+        """Assert dependency is updated."""
+        package_path = Path(self._get_cwd(), item_type.to_plural(), package_name)
+        component_config = load_component_configuration(item_type, package_path)
+        assert component_config.protocols == expected  # type: ignore
+
+
+class TestUpdateReferences(AEATestCaseEmpty):
+    """
+    Test that references are updated correctly after 'aea upgrade'.
+
+    In particular, 'default_routing', 'default_connection' and custom component configurations in AEA configuration.
+
+    How the test works:
+    - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
+    - add fetchai/stub:0.12.0
+    - add 'fetchai/default:0.7.0: fetchai/stub:0.12.0' to default routing
+    - add custom configuration to stub connection.
+    - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
+    """
+
+    IS_EMPTY = True
+
+    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.7.0")
+    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.7.0")
+    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.12.0")
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        super().setup_class()
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "add",
+            "skill",
+            str(cls.OLD_ERROR_SKILL_PUBLIC_ID),
+            cwd=cls._get_cwd(),
+        )
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "add",
+            "connection",
+            str(cls.OLD_STUB_CONNECTION_PUBLIC_ID),
+            cwd=cls._get_cwd(),
+        )
+
+        cls.nested_set_config(
+            "agent.default_routing",
+            {cls.OLD_DEFAULT_PROTOCOL_PUBLIC_ID: cls.OLD_STUB_CONNECTION_PUBLIC_ID},
+        )
+        cls.nested_set_config(
+            "agent.default_connection", cls.OLD_STUB_CONNECTION_PUBLIC_ID,
+        )
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "set",
+            "vendor.fetchai.skills.error.is_abstract",
+            "--type",
+            "bool",
+            "true",
+            cwd=cls._get_cwd(),
+        )
+
+        cls.run_cli_command(
+            "--skip-consistency-check", "upgrade", "--local", cwd=cls._get_cwd()
+        )
+
+    def test_default_routing_updated_correctly(self):
+        """Test default routing has been updated correctly."""
+        result = self.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "get",
+            "agent.default_routing",
+            cwd=self._get_cwd(),
+        )
+        assert (
+            result.stdout
+            == f"{{'{DefaultMessage.protocol_id}': '{StubConnection.connection_id}'}}\n"
+        )
+
+    def test_default_connection_updated_correctly(self):
+        """Test default routing has been updated correctly."""
+        result = self.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "get",
+            "agent.default_connection",
+            cwd=self._get_cwd(),
+        )
+        assert result.stdout == "fetchai/stub:0.12.0\n"
+
+    def test_custom_configuration_updated_correctly(self):
+        """Test default routing has been updated correctly."""
+        result = self.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "get",
+            "vendor.fetchai.skills.error.is_abstract",
+            cwd=self._get_cwd(),
+        )
+        assert result.stdout == "True\n"
+
+
+class TestNothingToUpgrade(AEATestCaseEmpty):
+    """Test the upgrade command when there's nothing t upgrade."""
+
+    def test_nothing_to_upgrade(self):
+        """Test nothing to upgrade."""
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert result.stdout == "Starting project upgrade...\n"

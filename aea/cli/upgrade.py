@@ -17,38 +17,56 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea upgrade' subcommand."""
+
 from contextlib import suppress
+from functools import singledispatch
 from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
 
-from aea.cli.add import add_item
+from aea.cli.fetch import fetch_local_or_mixed
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.remove import (
     ItemRemoveHelper,
     RemoveItem,
     remove_unused_component_configurations,
 )
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
+from aea.cli.utils.config import get_non_vendor_package_path
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
     get_item_public_id_by_author_name,
     is_item_present,
 )
-from aea.configurations.base import ComponentId, ComponentType, PackageId, PublicId
+from aea.configurations.base import (
+    ComponentConfiguration,
+    ComponentId,
+    ComponentType,
+    ConnectionConfig,
+    ContractConfig,
+    PackageId,
+    PackageType,
+    ProtocolConfig,
+    PublicId,
+    SkillConfig,
+)
+from aea.configurations.loader import ConfigLoaders
 
 
 @click.group(invoke_without_command=True)
-@click.option("--local", is_flag=True, help="For upgrading from local folder.")
+@registry_flag(
+    help_local="For fetching packages only from local folder.",
+    help_remote="For fetching packages only from remote registry.",
+)
 @click.pass_context
 @check_aea_project
-def upgrade(click_context, local):
+def upgrade(click_context, local, remote):  # pylint: disable=unused-argument
     """Upgrade agent's component."""
     ctx = cast(Context, click_context.obj)
-    if local:
-        ctx.set_config("is_local", True)
+    ctx.set_config("is_local", local and not remote)
+    ctx.set_config("is_mixed", not (local or remote))
 
     if click_context.invoked_subcommand is None:
         upgrade_project(ctx)
@@ -94,7 +112,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     item_remover = ItemRemoveHelper(ctx.agent_config)
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
     items_to_upgrade = set()
-    upgraders: List[Tuple[ItemUpgrader, str]] = []
+    upgraders: List[ItemUpgrader] = []
     shared_deps: Set[PackageId] = set()
     shared_deps_to_remove = set()
     items_to_upgrade_dependencies = set()
@@ -110,7 +128,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         with suppress(UpgraderException):
             new_version = item_upgrader.check_upgrade_is_required()
             items_to_upgrade.add((package_id, new_version))
-            upgraders.append((item_upgrader, new_version))
+            upgraders.append(item_upgrader)
 
         items_to_upgrade_dependencies.add(package_id)
         items_to_upgrade_dependencies.update(item_upgrader.dependencies)
@@ -147,10 +165,11 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
                 ).remove_item()
             click.echo("Shared dependencies removed.")
 
-        for upgrader, new_item_version in upgraders:
+        for upgrader in upgraders:
             upgrader.remove_item()
             upgrader.add_item()
-            upgrader.update_references(new_item_version)
+
+        _update_references(ctx)
 
     click.echo("Finished project upgrade. Everything is up to date now!")
     click.echo(
@@ -199,6 +218,7 @@ class ItemUpgrader:
         self.ctx.set_config("with_dependencies", True)
         self.item_type = item_type
         self.item_public_id = item_public_id
+        self.component_id = ComponentId(self.item_type, self.item_public_id)
         self.current_item_public_id = self.get_current_item()
         (
             self.in_requirements,
@@ -291,55 +311,7 @@ class ItemUpgrader:
     def add_item(self) -> None:
         """Add new package version to agent."""
         click.echo(f"Adding item {self.item_type} {self.item_public_id}.")
-        add_item(self.ctx, str(self.item_type), self.item_public_id)
-
-    def update_references(self, new_version: str) -> None:
-        """
-        Update references across the AEA project.
-
-        It breaks down in:
-        - update default routing mapping
-        - update default connection
-        - update component configurations
-
-        :param new_version: the new item version.
-        """
-        # update default routing
-        public_id = PublicId(
-            self.item_public_id.author, self.item_public_id.name, new_version
-        )
-        for key, value in list(self.ctx.agent_config.default_routing.items()):
-            if self.item_type == ComponentType.PROTOCOL.value and key.same_prefix(
-                public_id
-            ):
-                old_value = self.ctx.agent_config.default_routing.pop(key)
-                self.ctx.agent_config.default_routing[public_id] = old_value
-                # in case needs to be used below
-                key = public_id
-            if self.item_type == ComponentType.CONNECTION.value and value.same_prefix(
-                public_id
-            ):
-                self.ctx.agent_config.default_routing[key] = public_id
-
-        # update default connection
-        if (
-            self.item_type == ComponentType.CONNECTION.value
-            and self.ctx.agent_config.default_connection is not None
-        ):
-            if self.ctx.agent_config.default_connection.same_prefix(public_id):
-                self.ctx.agent_config.default_connection = public_id
-
-        # update component configurations
-        current_component_id = ComponentId(ComponentType(self.item_type), public_id)
-        current_component_prefix = current_component_id.component_prefix
-        for component_id, config in list(
-            self.ctx.agent_config.component_configurations.items()
-        ):
-            if component_id.component_prefix == current_component_prefix:
-                self.ctx.agent_config.component_configurations.pop(component_id)
-                self.ctx.agent_config.component_configurations[
-                    current_component_id
-                ] = config
+        fetch_local_or_mixed(self.ctx, str(self.item_type), self.item_public_id)
 
 
 @clean_after
@@ -362,7 +334,8 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
 
             item_upgrader.remove_item()
             item_upgrader.add_item()
-            item_upgrader.update_references(version)
+
+            _update_references(ctx)
 
         click.echo(
             f"The {item_type} '{item_public_id.author}/{item_public_id.name}' for the agent '{ctx.agent_config.agent_name}' has been successfully upgraded from version '{item_upgrader.current_item_public_id.version}' to '{version}'."
@@ -380,3 +353,165 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
         raise click.ClickException(
             f"Can not upgrade {item_type} '{item_public_id.author}/{item_public_id.name}' because it is required by '{', '.join(map(str, e.required_by))}'"
         )
+
+
+def _update_references(ctx: Context):
+    """
+    Update references after upgrade.
+
+    First, compute the replacements; then,
+    both in agent configuration and in non-vendor package configurations,
+    replace the old public ids.
+    """
+    # index from component type to replacements
+    # a replacement is a map from (package_author, package_name) to public id with the new version
+    replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]] = {}
+    for dependency_id in ctx.agent_config.package_dependencies:
+        replacements.setdefault(dependency_id.component_type, {})[
+            (dependency_id.author, dependency_id.name)
+        ] = dependency_id.public_id
+
+    _update_agent_configuration(ctx, replacements)
+    _update_non_vendor_packages(ctx, replacements)
+
+
+def _update_agent_configuration(
+    ctx: Context, replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]]
+):
+    """Update agent configuration."""
+    protocol_replacements = replacements.get(ComponentType.PROTOCOL, {})
+    connection_replacements = replacements.get(ComponentType.CONNECTION, {})
+    # update default routing
+    for protocol_id, connection_id in list(ctx.agent_config.default_routing.items()):
+        protocol_prefix = protocol_id.author, protocol_id.name
+        connection_prefix = connection_id.author, connection_id.name
+
+        # update protocol (if replacements provides it)
+        new_protocol_id = protocol_replacements.get(protocol_prefix, protocol_id)
+        old_value = ctx.agent_config.default_routing.pop(protocol_id)
+        ctx.agent_config.default_routing[new_protocol_id] = old_value
+        # in case needs to be used below
+        protocol_id = new_protocol_id
+
+        # update connection (if replacements provides it)
+        new_connection_id = connection_replacements.get(
+            connection_prefix, connection_id
+        )
+        ctx.agent_config.default_routing[protocol_id] = new_connection_id
+
+    # update default connection
+    if ctx.agent_config.default_connection is not None:
+        default_connection_public_id = ctx.agent_config.default_connection
+        default_connection_prefix = (
+            default_connection_public_id.author,
+            default_connection_public_id.name,
+        )
+        new_default_connection_public_id = replacements.get(
+            ComponentType.CONNECTION, {}
+        ).get(default_connection_prefix, default_connection_public_id)
+        ctx.agent_config.default_connection = new_default_connection_public_id
+
+
+def _update_non_vendor_packages(
+    ctx: Context, replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]]
+) -> None:
+    """
+    Update non-vendor packages.
+
+    :param ctx: the CLI context
+    :return: None
+    """
+    non_vendor_packages_paths = get_non_vendor_package_path(Path(ctx.cwd))
+    for non_vendor_path in non_vendor_packages_paths:
+        _update_non_vendor_package(non_vendor_path, replacements)
+
+
+def _update_non_vendor_package(
+    package_path: Path,
+    replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
+) -> None:
+    """Update a single non-vendor package."""
+    """
+    A path to a non-vendor package in an AEA project is of the form:
+
+        .../aea-project-path/package-type/package-name/
+
+    so we need to get the second-to-last part of the path to infer the type.
+    """
+    type_plural = package_path.parts[-2]
+    loader = ConfigLoaders.from_package_type(PackageType(type_plural[:-1]))
+    path_to_config = (
+        package_path / loader.configuration_class.default_configuration_filename
+    )
+    with path_to_config.open() as file_in:
+        component_config = loader.load(file_in)
+    update_dependencies(component_config, replacements)
+    with path_to_config.open(mode="w") as file_out:
+        loader.dump(component_config, file_out)
+
+
+@singledispatch
+def update_dependencies(
+    _arg: ComponentConfiguration,
+    _replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
+):
+    """Update dependencies in a component configuration."""
+
+
+def _replace_component_id(
+    config: ComponentConfiguration,
+    types_to_update: Set[ComponentType],
+    replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
+):
+    """Replace a component id."""
+    for component_type in types_to_update:
+        public_id_set = getattr(config, component_type.to_plural(), set())
+        replacements_given_type = replacements.get(component_type, {})
+        for old_public_id in list(public_id_set):
+            old_prefix = (old_public_id.author, old_public_id.name)
+            if old_prefix in replacements_given_type:
+                new_public_id = replacements_given_type[old_prefix]
+                public_id_set.discard(old_public_id)
+                public_id_set.add(new_public_id)
+
+
+@update_dependencies.register(ProtocolConfig)  # type: ignore
+def _(
+    _arg: ProtocolConfig,
+    _replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
+):
+    pass
+
+
+@update_dependencies.register(ConnectionConfig)  # type: ignore
+def _(
+    arg: ConnectionConfig,
+    replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
+):
+    _replace_component_id(
+        arg, {ComponentType.PROTOCOL, ComponentType.CONNECTION}, replacements
+    )
+
+
+@update_dependencies.register(ContractConfig)  # type: ignore
+def _(  # type: ignore
+    _arg: ContractConfig,
+    _replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]],
+):
+    """Update contract config with new dependencies."""
+
+
+@update_dependencies.register(SkillConfig)  # type: ignore
+def _(
+    arg: SkillConfig, replacements: Dict[ComponentType, Dict[Tuple[str, str], PublicId]]
+):
+    _replace_component_id(
+        arg,
+        {
+            ComponentType.PROTOCOL,
+            ComponentType.CONNECTION,
+            ComponentType.CONTRACT,
+            ComponentType.SKILL,
+        },
+        replacements,
+    )
