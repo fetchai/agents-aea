@@ -31,17 +31,23 @@ from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.simple_data_request.dialogues import HttpDialogues
 
 
+DEFAULT_REQUEST_INTERVAL = 20.0
+
+
 class HttpRequestBehaviour(TickerBehaviour):
     """This class scaffolds a behaviour."""
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
+        request_interval = kwargs.pop(
+            "request_interval", DEFAULT_REQUEST_INTERVAL
+        )  # type: int
         self.url = kwargs.pop("url", None)
         self.method = kwargs.pop("method", None)
         self.body = kwargs.pop("body", None)
         if self.url is None or self.method is None or self.body is None:
             raise ValueError("Url, method and body must be provided.")
-        super().__init__(**kwargs)
+        super().__init__(tick_interval=request_interval, **kwargs)
 
     def setup(self) -> None:
         """

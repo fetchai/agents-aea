@@ -6,7 +6,7 @@ This skill is used to request data from a HTTP endpoint and then saving it in th
 
 ## Behaviours
 
-* http_request: requests data from a HTTP endpoint using the `url`, `method` and `body` specified in the skill config.
+* http_request: requests data every `request_interval` seconds from a HTTP endpoint using the `url`, `method` and `body` specified in the skill config.
 
 ## Handlers
 

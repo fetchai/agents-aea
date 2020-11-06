@@ -100,7 +100,9 @@ class HttpHandler(Handler):
         data_received = http_msg.body
 
         # save the data in the shared state to make it accessible to other skills
-        self.context.logger.info("updating shared_state with received data!")
+        self.context.logger.info(
+            "updating shared_state with received data={!r}!".format(data_received)
+        )
         self.context.shared_state[self.shared_state_key] = data_received
 
     def _handle_invalid(

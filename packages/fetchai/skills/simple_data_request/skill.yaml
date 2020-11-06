@@ -7,11 +7,11 @@ description: This skill is used to request data from a HTTP endpoint and then sa
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmUUgWQJ8J8jLfjtYFKnSzRgV9RZA3NLx1MNyNGtt5arXv
+  README.md: QmaCs8KLoVriiLGF8EpbXayC2P96x2bDDFZkEUxoS2aCzB
   __init__.py: QmT7pLksZdtpiaqtiZPoFHCnHV2LDQaewHkpd5x1JKKRCv
-  behaviours.py: QmS4UWXF5q9jJzbJn3uKZ81FhBez1LVgr59pLveYPgxpKb
+  behaviours.py: QmTfinQmDWfAfsdLLb4i9BX1nR6KtsxL425o8QQiNDv5Eb
   dialogues.py: Qmb9KW4G2K3Kk9Nz8tNw85TNic4JhkFnapbkXoq2ssqiba
-  handlers.py: Qme5amDNmKamskVGHMWmBVv81hiABFcjiDYiCBWyF7tjwP
+  handlers.py: Qmb2btZjizJFy64JYcxpMRzwuxxzUxgWZp926XmoLSrCBW
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.12.0
@@ -24,6 +24,7 @@ behaviours:
     args:
       body: ''
       method: null
+      request_interval: 20
       url: null
     class_name: HttpRequestBehaviour
 handlers:

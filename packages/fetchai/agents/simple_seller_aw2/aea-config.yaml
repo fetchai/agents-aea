@@ -81,9 +81,14 @@ type: skill
 behaviours:
   http_request:
     args:
+      request_interval: 20
       body: ''
       method: null
       url: null
+handlers:
+  http:
+    args:
+      shared_state_key: null
 ---
 public_id: fetchai/p2p_libp2p:0.12.0
 type: connection

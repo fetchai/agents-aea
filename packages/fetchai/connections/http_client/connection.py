@@ -22,6 +22,7 @@
 import asyncio
 import json
 import logging
+import ssl
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
@@ -53,6 +54,19 @@ PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.12.0")
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
+
+try:
+    _create_unverified_https_context = (
+        ssl._create_unverified_context  # pylint: disable=protected-access
+    )
+except AttributeError:
+    # Legacy Python that doesn't verify HTTPS certificates by default
+    pass
+else:
+    # Handle target environment that doesn't support HTTPS verification
+    ssl._create_default_https_context = (  # pylint: disable=protected-access
+        _create_unverified_https_context
+    )
 
 
 class HttpDialogue(BaseHttpDialogue):
@@ -167,7 +181,7 @@ class HTTPClientAsyncChannel:
         self._tasks: Set[Task] = set()
 
         self.logger = _default_logger
-        self.logger.info("Initialised the HTTP client channel")
+        self.logger.debug("Initialised the HTTP client channel")
 
     async def connect(self, loop: AbstractEventLoop) -> None:
         """
