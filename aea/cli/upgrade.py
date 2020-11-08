@@ -109,7 +109,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     """Perform project upgrade."""
     click.echo("Starting project upgrade...")
 
-    item_remover = ItemRemoveHelper(ctx.agent_config)
+    item_remover = ItemRemoveHelper(ctx.agent_config, ignore_non_vendor=True)
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
     items_to_upgrade = set()
     upgraders: List[ItemUpgrader] = []
@@ -256,9 +256,9 @@ class ItemUpgrader:
 
         :return: same as for ItemRemoveHelper.check_remove
         """
-        return ItemRemoveHelper(self.ctx.agent_config).check_remove(
-            self.item_type, self.current_item_public_id
-        )
+        return ItemRemoveHelper(
+            self.ctx.agent_config, ignore_non_vendor=True
+        ).check_remove(self.item_type, self.current_item_public_id)
 
     @property
     def is_non_vendor(self) -> bool:
@@ -301,6 +301,7 @@ class ItemUpgrader:
             self.item_public_id,
             with_dependencies=True,
             force=True,
+            ignore_non_vendor=True,
         )
         remove_item.remove()
         click.echo(f"Item { self.item_type} {self.item_public_id} removed!")
