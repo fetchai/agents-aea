@@ -352,7 +352,7 @@ class RemoveItem:
         click.echo(
             "{item_type} '{item_name}' was removed from the agent '{agent_name}'...".format(
                 agent_name=self.agent_name,
-                item_type=self.item_type,
+                item_type=self.item_type.capitalize(),
                 item_name=self.item_name,
             )
         )
