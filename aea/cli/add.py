@@ -30,9 +30,11 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
     copy_package_directory,
+    find_item_in_distribution,
     find_item_locally,
     get_item_id_present,
     get_package_path,
+    is_distributed_item,
     is_fingerprint_correct,
     is_item_present,
     register_item,
@@ -117,8 +119,9 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     if is_mixed:
         package_path = fetch_item_mixed(ctx, item_type, item_public_id, dest_path)
     elif is_local:
-        source_path, _ = find_item_locally(ctx, item_type, item_public_id)
-        package_path = copy_package_directory(source_path, dest_path)
+        package_path = find_item_locally_or_distributed(
+            ctx, item_type, item_public_id, dest_path
+        )
     else:
         package_path = fetch_package(
             item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
@@ -166,13 +169,36 @@ def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
                 add_item(ctx, "skill", skill_public_id)
 
 
-def fetch_item_mixed(
+def find_item_locally_or_distributed(
     ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str
+) -> Path:
+    """
+    Unify find item locally both in case it is distributed or not.
+
+    :param ctx: the CLI context.
+    :param item_type: the item type.
+    :param item_public_id: the item public id.
+    :param dest_path: the path to the destination.
+    :return: the path to the found package.
+    """
+    is_distributed = is_distributed_item(item_public_id)
+    if is_distributed:  # pragma: nocover
+        source_path = find_item_in_distribution(ctx, item_type, item_public_id)
+        package_path = copy_package_directory(source_path, dest_path)
+    else:
+        source_path, _ = find_item_locally(ctx, item_type, item_public_id)
+        package_path = copy_package_directory(source_path, dest_path)
+
+    return package_path
+
+
+def fetch_item_mixed(
+    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.
 
-    That is, give priority to remote registry, and fall back to local registry
+    That is, give priority to local registry, and fall back to remote registry
     in case of failure.
 
     :param ctx: the CLI context.
@@ -188,7 +214,7 @@ def fetch_item_mixed(
     except click.ClickException:
         click.echo("Fetch from remote registry failed, trying locally...")
         # the following might raise exception, but we don't catch it this time
-        source_path, _ = find_item_locally(ctx, item_type, item_public_id)
-        package_path = copy_package_directory(source_path, dest_path)
-
+        package_path = find_item_locally_or_distributed(
+            ctx, item_type, item_public_id, dest_path
+        )
     return package_path

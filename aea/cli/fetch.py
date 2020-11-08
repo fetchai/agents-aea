@@ -50,7 +50,7 @@ def fetch(click_context, public_id, alias, local, remote):
     """Fetch Agent from Registry."""
     ctx = cast(Context, click_context.obj)
     is_mixed = not local and not remote
-    ctx.set_config("is_local", local)
+    ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", is_mixed)
     if remote:
         fetch_agent(ctx, public_id, alias)
@@ -164,7 +164,7 @@ def fetch_mixed(
     :return: None
     """
     try:
-        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
-    except click.ClickException:
-        click.echo("Fetch from remote registry failed, trying locally...")
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
+    except click.ClickException:
+        click.echo("Fetch from local registry failed, trying on remote registry...")
+        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
