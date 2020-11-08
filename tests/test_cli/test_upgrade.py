@@ -681,6 +681,7 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
     - scaffold a package, one for each possible package type;
     - add the protocol "fetchai/default:0.7.0" as dependency to each of them.
     - add the skill "fetchai/error:0.7.0"; this will also add the default protocol.
+      add it also as dependency of non-vendor skill.
     - run 'aea upgrade'
     - check that the reference to "fetchai/default" in each scaffolded package
       has the new version.
@@ -708,6 +709,13 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
                 f"{ComponentType(item_type).to_plural()}.{name}.protocols",
                 [str(cls.old_default_protocol_id)],
             )
+
+        # add the vendor skill as dependency of the non-vendor skill
+        if item_type == ComponentType.SKILL.value:
+            cls.nested_set_config(
+                f"{ComponentType(item_type).to_plural()}.{name}.skills",
+                [str(cls.old_error_skill_id)],
+            )
         return result
 
     @classmethod
@@ -725,28 +733,47 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
             str(cls.old_error_skill_id),
             cwd=cls._get_cwd(),
         )
+        cls.run_cli_command(
+            "--skip-consistency-check", "upgrade", "--local", cwd=cls._get_cwd()
+        )
+
+    def test_agent_config_updated(self):
+        """Test the agent configuration is updated."""
+        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+        with Path(self._get_cwd(), DEFAULT_AEA_CONFIG_FILE).open() as fp:
+            agent_config = loader.load(fp)
+        assert DefaultMessage.protocol_id in agent_config.protocols
+        assert ERROR_SKILL_PUBLIC_ID in agent_config.skills
 
     def test_non_vendor_update_references_to_upgraded_packages(
         self,
     ):  # pylint: disable=unused-argument
         """Test that dependencies in non-vendor packages are updated correctly after upgrade."""
-        self.run_cli_command(
-            "--skip-consistency-check", "upgrade", "--local", cwd=self._get_cwd()
+        self.assert_dependency_updated(
+            ComponentType.CONNECTION,
+            "my_connection",
+            "protocols",
+            {DefaultMessage.protocol_id},
         )
         self.assert_dependency_updated(
-            ComponentType.CONNECTION, "my_connection", {DefaultMessage.protocol_id},
+            ComponentType.SKILL, "my_skill", "protocols", {DefaultMessage.protocol_id}
         )
         self.assert_dependency_updated(
-            ComponentType.SKILL, "my_skill", {DefaultMessage.protocol_id}
+            ComponentType.SKILL, "my_skill", "skills", {ERROR_SKILL_PUBLIC_ID}
         )
 
     def assert_dependency_updated(
-        self, item_type: ComponentType, package_name: str, expected: Set[PublicId]
+        self,
+        item_type: ComponentType,
+        package_name: str,
+        package_type: str,
+        expected: Set[PublicId],
     ):
         """Assert dependency is updated."""
         package_path = Path(self._get_cwd(), item_type.to_plural(), package_name)
         component_config = load_component_configuration(item_type, package_path)
-        assert component_config.protocols == expected  # type: ignore
+        assert hasattr(component_config, package_type), "Test is not well-written."
+        assert getattr(component_config, package_type) == expected  # type: ignore
 
 
 class TestUpdateReferences(AEATestCaseEmpty):
