@@ -293,6 +293,15 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Get the balance of a given account."""
         return self._api.eth.getBalance(address)  # pylint: disable=no-member
 
+    def get_block(self, block_id: Union[int, str] = "latest") -> Optional[Any]:
+        """Get the block header and metadata."""
+        return self._try_get_block(block_id)
+
+    @try_decorator("Unable to retrieve block: {}", logger_method="warning")
+    def _try_get_block(self, block_id: Union[int, str] = "latest") -> Optional[Any]:
+        """Get the block header and metadata."""
+        return self._api.eth.getBlock(block_id)  # pylint: disable=no-member
+
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
         sender_address: Address,

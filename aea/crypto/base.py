@@ -249,6 +249,17 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
+    def get_block(self, block_id: Union[int,str]) -> Optional[Any]:
+        """
+        Get the block header and metadata.
+
+        This usually takes the form of a web request to be waited synchronously.
+
+        :param block_id: the block number, block hash, or the string "latest".
+        :return: the block header and metadata.
+        """
+
+    @abstractmethod
     def get_transfer_transaction(
         self,
         sender_address: Address,
