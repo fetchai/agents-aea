@@ -120,17 +120,22 @@ class FetchCommandTestCase(TestCase):
         """Set it up."""
         self.runner = CliRunner()
 
-    def test_fetch_positive(self, *mocks):
+    def test_fetch_positive_mixed(self, *mocks):
         """Test for CLI push connection positive result."""
-        # mixed mode
         self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "fetch", "author/name:0.1.0"], standalone_mode=False,
         )
+
+    def test_fetch_positive_local(self, *mocks):
+        """Test for CLI push connection positive result."""
         self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "fetch", "--local", "author/name:0.1.0"],
             standalone_mode=False,
         )
+
+    def test_fetch_positive_remote(self, *mocks):
+        """Test for CLI push connection positive result."""
         self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "fetch", "--remote", "author/name:0.1.0"],
