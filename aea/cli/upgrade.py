@@ -172,9 +172,6 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         _update_references(ctx)
 
     click.echo("Finished project upgrade. Everything is up to date now!")
-    click.echo(
-        'Please manually update package versions in your non-vendor packages as well as in "default_connection" and "default_routing"'
-    )
 
 
 class UpgraderException(Exception):
