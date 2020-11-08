@@ -62,7 +62,7 @@ class TestParameters(BaseSkillTestCase):
             "competition_timeout": 300,
             "inactivity_timeout": 30,
             "whitelist": [],
-            "location": {"longitude": 51.5194, "latitude": 0.1270},
+            "location": {"longitude": 0.1270, "latitude": 51.5194},
             "service_data": {"key": "tac", "value": "v1"},
             "name": "parameters",
             "skill_context": cls._skill.skill_context,
@@ -140,7 +140,7 @@ class TestParameters(BaseSkillTestCase):
         assert self.parameters.inactivity_timeout == 30
 
         assert self.parameters.agent_location == {
-            "location": Location(latitude=0.1270, longitude=51.5194)
+            "location": Location(latitude=51.5194, longitude=0.1270)
         }
         assert self.parameters.set_service_data == {"key": "tac", "value": "v1"}
         assert self.parameters.remove_service_data == {"key": "tac"}
