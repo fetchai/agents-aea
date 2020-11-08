@@ -242,7 +242,7 @@ class ItemRemoveHelper:
 
         required by - set of components that requires this component
         can be deleted - set of dependencies used only by component so can be deleted
-        can not be deleted  - dict - keys - packages can not be deleted, values are set of packages requireed by.
+        can not be deleted  - dict - keys - packages can not be deleted, values are set of packages required by.
 
         :return: Tuple[required by, can be deleted, can not be deleted.]
         """
