@@ -41,11 +41,9 @@ from aea.cli.utils.formatting import format_items
 from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.package_utils import (
     _override_ledger_configurations,
-    find_item_in_distribution,
     find_item_locally,
     get_package_path_unified,
     get_wallet_from_context,
-    is_distributed_item,
     is_fingerprint_correct,
     is_item_present_unified,
     try_get_balance,
@@ -54,14 +52,8 @@ from aea.cli.utils.package_utils import (
     validate_author_name,
     validate_package_name,
 )
-from aea.configurations.base import ComponentId, ComponentType, PublicId
-from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
-    DEFAULT_LEDGER,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
-    LEDGER_CONNECTION,
-)
+from aea.configurations.base import ComponentId, ComponentType
+from aea.configurations.constants import DEFAULT_LEDGER, LEDGER_CONNECTION
 from aea.crypto.fetchai import DEFAULT_CHAIN_ID
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -320,48 +312,6 @@ class FindItemLocallyTestCase(TestCase):
         )
 
 
-class FindItemInDistributionTestCase(TestCase):
-    """Test case for find_item_in_distribution method."""
-
-    @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=True)
-    @mock.patch(
-        "aea.cli.utils.package_utils.ConfigLoader.from_configuration_type",
-        _raise_validation_error,
-    )
-    def testfind_item_in_distribution_bad_config(self, *mocks):
-        """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
-        with self.assertRaises(ClickException) as cm:
-            find_item_in_distribution(ContextMock(), "skill", public_id)
-
-        self.assertIn("configuration file not valid", cm.exception.message)
-
-    @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
-    def testfind_item_in_distribution_not_found(self, *mocks):
-        """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
-        with self.assertRaises(ClickException) as cm:
-            find_item_in_distribution(ContextMock(), "skill", public_id)
-
-        self.assertIn("Cannot find skill", cm.exception.message)
-
-    @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=True)
-    @mock.patch("aea.cli.utils.package_utils.Path.open", mock.mock_open())
-    @mock.patch(
-        "aea.cli.utils.package_utils.ConfigLoader.from_configuration_type",
-        return_value=ConfigLoaderMock(),
-    )
-    def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
-        """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
-        with self.assertRaises(ClickException) as cm:
-            find_item_in_distribution(ContextMock(), "skill", public_id)
-
-        self.assertEqual(
-            cm.exception.message, "Cannot find skill with author and version specified."
-        )
-
-
 class ValidateConfigConsistencyTestCase(TestCase):
     """Test case for _validate_config_consistency method."""
 
@@ -446,23 +396,6 @@ def test_is_item_present_unified(mock_, vendor):
     public_id_mock = mock.MagicMock(author="some_author")
     result = is_item_present_unified(contex_mock, "some_component_type", public_id_mock)
     assert not result
-
-
-@pytest.mark.parametrize(
-    ["public_id", "expected_outcome"],
-    [
-        (PublicId.from_str("author/package:0.1.0"), False),
-        (PublicId.from_str("author/package:latest"), False),
-        (PublicId.from_str("fetchai/oef:0.1.0"), False),
-        (PublicId.from_str("fetchai/oef:latest"), False),
-        (DEFAULT_CONNECTION, False),
-        (DEFAULT_SKILL, False),
-        (DEFAULT_PROTOCOL, False),
-    ],
-)
-def test_is_distributed_item(public_id, expected_outcome):
-    """Test the 'is_distributed_item' CLI utility function."""
-    assert is_distributed_item(public_id) is expected_outcome
 
 
 class TestGetWalletFromtx(AEATestCaseEmpty):

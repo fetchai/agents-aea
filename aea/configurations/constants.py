@@ -19,8 +19,6 @@
 
 """Module to declare constants."""
 
-from typing import List
-
 from aea.configurations.base import DEFAULT_LICENSE as DL
 from aea.configurations.base import DEFAULT_REGISTRY_PATH as DRP
 from aea.configurations.base import PublicId
@@ -38,7 +36,6 @@ DEFAULT_LEDGER = FetchAICrypto.identifier
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
 DEFAULT_REGISTRY_PATH = DRP
 DEFAULT_LICENSE = DL
-DISTRIBUTED_PACKAGES = []  # type: List[PublicId]
 DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:any"
 DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"

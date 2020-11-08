@@ -27,7 +27,6 @@ from typing import Dict, Optional, Set, Tuple
 import click
 from jsonschema import ValidationError
 
-from aea import AEA_DIR
 from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
@@ -43,7 +42,7 @@ from aea.configurations.base import (
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import DISTRIBUTED_PACKAGES, LEDGER_CONNECTION
+from aea.configurations.constants import LEDGER_CONNECTION
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
@@ -283,58 +282,6 @@ def find_item_locally(
     return package_path, item_configuration
 
 
-def find_item_in_distribution(  # pylint: disable=unused-argument
-    ctx, item_type, item_public_id: PublicId
-) -> Path:
-    """
-    Find an item in the AEA directory.
-
-    :param ctx: the CLI context.
-    :param item_type: the type of the item to load. One of: protocols, connections, skills
-    :param item_public_id: the public id of the item to find.
-    :return: path to the package directory (either in registry or in aea directory).
-    :raises SystemExit: if the search fails.
-    """
-    item_type_plural = item_type + "s"
-    item_name = item_public_id.name
-
-    # check in aea dir
-    registry_path = AEA_DIR
-    package_path = Path(registry_path, item_type_plural, item_name)
-    config_file_name = _get_default_configuration_file_name_from_type(item_type)
-    item_configuration_filepath = package_path / config_file_name
-    if not item_configuration_filepath.exists():
-        raise click.ClickException(
-            "Cannot find {}: '{}'.".format(item_type, item_public_id)
-        )
-
-    # try to load the item configuration file
-    try:
-        item_configuration_loader = ConfigLoader.from_configuration_type(
-            PackageType(item_type)
-        )
-        item_configuration = item_configuration_loader.load(
-            item_configuration_filepath.open()
-        )
-    except ValidationError as e:
-        raise click.ClickException(
-            "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
-        )
-
-    # check that the configuration file of the found package matches the expected author and version.
-    version = item_configuration.version
-    author = item_configuration.author
-    if item_public_id.author != author or (
-        not item_public_id.package_version.is_latest
-        and item_public_id.version != version
-    ):
-        raise click.ClickException(
-            "Cannot find {} with author and version specified.".format(item_type)
-        )
-
-    return package_path  # pragma: no cover
-
-
 def validate_author_name(author: Optional[str] = None) -> str:
     """
     Validate an author name.
@@ -509,18 +456,6 @@ def get_items(agent_config: AgentConfig, item_type: str) -> Set[PublicId]:
     """
     item_type_plural = item_type + "s"
     return getattr(agent_config, item_type_plural)
-
-
-def is_distributed_item(item_public_id: PublicId) -> bool:
-    """
-    Check whether the item public id correspond to a package in the distribution.
-
-    If the provided item has version 'latest', only the prefixes are compared.
-    Otherwise, the function will try to match the exact version occurrence among the distributed packages.
-    """
-    if item_public_id.package_version.is_latest:
-        return any(item_public_id.same_prefix(other) for other in DISTRIBUTED_PACKAGES)
-    return item_public_id in DISTRIBUTED_PACKAGES
 
 
 def _override_ledger_configurations(agent_config: AgentConfig) -> None:
