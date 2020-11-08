@@ -339,23 +339,11 @@ class RemoveItem:
 
     def remove(self) -> None:
         """Remove item and it's dependencies if specified."""
-        click.echo(
-            "Removing {item_type} '{item_name}' from the agent '{agent_name}'...".format(
-                agent_name=self.agent_name,
-                item_type=self.item_type,
-                item_name=self.item_name,
-            )
-        )
+        click.echo(f"Removing {self.item_type} '{self.current_item}'...")
         self.remove_item()
         if self.with_dependencies:
             self.remove_dependencies()
-        click.echo(
-            "{item_type} '{item_name}' was removed from the agent '{agent_name}'...".format(
-                agent_name=self.agent_name,
-                item_type=self.item_type.capitalize(),
-                item_name=self.item_name,
-            )
-        )
+        click.echo(f"Successfully removed {self.item_type} '{self.current_item}'.")
 
     @property
     def agent_items(self) -> Set[PublicId]:
@@ -435,10 +423,10 @@ class RemoveItem:
         """Remove all the dependecies related only to the package."""
         if not self.dependencies_can_be_removed:
             return
-        click.echo(
-            f"Removing obsolete dependencies for {self.agent_name}: {self.dependencies_can_be_removed}..."
-        )
         for dependency in self.dependencies_can_be_removed:
+            click.echo(
+                f"Removing obsolete dependency {str(dependency.package_type)} '{str(dependency.public_id)}'..."
+            )
             RemoveItem(
                 self.ctx,
                 str(dependency.package_type),
@@ -447,7 +435,7 @@ class RemoveItem:
                 force=True,
             ).remove_item()
             click.echo(
-                f"{str(dependency.package_type).capitalize()} {dependency.public_id} was removed from {self.agent_name}."
+                f"Successfully removed {str(dependency.package_type)} '{dependency.public_id}'."
             )
 
 
