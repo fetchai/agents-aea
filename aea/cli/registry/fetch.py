@@ -48,7 +48,7 @@ def fetch_agent(
     :return: None
     """
     author, name, version = public_id.author, public_id.name, public_id.version
-    api_path = "/agents/{}/{}/{}".format(author, name, version)
+    api_path = f"/agents/{author}/{name}/{version}"
     resp = request_api("GET", api_path)
     file_url = resp["file"]
 
@@ -88,9 +88,7 @@ def fetch_agent(
                 add_item(ctx, item_type, item_public_id)
             except Exception as e:
                 raise click.ClickException(
-                    'Unable to fetch dependency for agent "{}", aborting. {}'.format(
-                        name, e
-                    )
+                    f'Unable to fetch dependency for agent "{name}", aborting. {e}'
                 )
     click.echo("Dependencies successfully fetched.")
-    click.echo("Agent {} successfully fetched to {}.".format(name, aea_folder))
+    click.echo(f"Agent {name} successfully fetched to {aea_folder}.")

@@ -284,7 +284,7 @@ def find_item_locally(
 
 
 def find_item_in_distribution(  # pylint: disable=unused-argument
-    ctx, item_type, item_public_id: PublicId
+    ctx: Context, item_type: str, item_public_id: PublicId
 ) -> Path:
     """
     Find an item in the AEA directory.

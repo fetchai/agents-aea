@@ -25,7 +25,7 @@ from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
 
-from aea.cli.fetch import fetch_local_or_mixed
+from aea.cli.add import add_item
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.remove import (
     ItemRemoveHelper,
@@ -308,7 +308,7 @@ class ItemUpgrader:
     def add_item(self) -> None:
         """Add new package version to agent."""
         click.echo(f"Adding item {self.item_type} {self.item_public_id}.")
-        fetch_local_or_mixed(self.ctx, str(self.item_type), self.item_public_id)
+        add_item(self.ctx, str(self.item_type), self.item_public_id)
 
 
 @clean_after
