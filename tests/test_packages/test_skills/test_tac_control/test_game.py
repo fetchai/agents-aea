@@ -1342,7 +1342,9 @@ class TestGame(BaseSkillTestCase):
 
         assert type(description) == Description
         assert description.data_model is AGENT_LOCATION_MODEL
-        assert description.values.get("location", "") == Location(0.1270, 51.5194)
+        assert description.values.get("location", "") == Location(
+            longitude=0.1270, latitude=51.5194
+        )
 
     def test_get_register_tac_description(self):
         """Test the get_register_tac_description method of the Game class."""
