@@ -27,7 +27,8 @@ from typing import Dict, Optional, Set, Tuple
 import click
 from jsonschema import ValidationError
 
-from aea.cli.utils.constants import AEA_DIR, NOT_PERMITTED_AUTHORS
+from aea import AEA_DIR
+from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
