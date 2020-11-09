@@ -23,7 +23,7 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Set
+from typing import List, Set, cast
 from unittest.mock import patch
 
 import pytest
@@ -32,6 +32,7 @@ from click.testing import Result
 
 from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
+from aea.cli.utils.config import load_item_config
 from aea.configurations.base import (
     AgentConfig,
     ComponentId,
@@ -46,6 +47,7 @@ from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
+from packages.fetchai.connections.oef.connection import PUBLIC_ID as OEF_PUBLIC_ID
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
@@ -279,6 +281,45 @@ class TestRemoveAndDependencies(BaseTestCase):
             )
             assert result.exit_code == 0
             assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+
+
+class TestUpgradeSharedDependencies(AEATestCaseEmpty):
+    """
+    Test removal of shared dependency.
+
+    The shared dependency in this test case is 'fetchai/oef_search:0.9.0'.
+    """
+
+    IS_EMPTY = True
+    OLD_SOEF_ID = PublicId.from_str("fetchai/soef:0.11.0")
+    OLD_OEF_SEARCH_ID = PublicId.from_str("fetchai/oef_search:0.9.0")
+    OLD_OEF_ID = PublicId.from_str("fetchai/oef:0.12.0")
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        super().setup_class()
+        result = cls.run_cli_command(
+            "add", "connection", str(cls.OLD_SOEF_ID), cwd=cls._get_cwd()
+        )
+        assert result.exit_code == 0
+        result = cls.run_cli_command(
+            "add", "connection", str(cls.OLD_OEF_ID), cwd=cls._get_cwd()
+        )
+        assert result.exit_code == 0
+
+    def test_upgrade_shared_dependencies(self):
+        """Test upgrade shared dependencies."""
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert result.exit_code == 0
+
+        agent_config: AgentConfig = cast(
+            AgentConfig,
+            load_item_config(PackageType.AGENT.value, Path(self.current_agent_context)),
+        )
+        assert OefSearchMessage.protocol_id in agent_config.protocols
+        assert SOEF_PUBLIC_ID in agent_config.connections
+        assert OEF_PUBLIC_ID in agent_config.connections
 
 
 class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
