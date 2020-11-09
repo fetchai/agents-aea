@@ -36,6 +36,9 @@ class Strategy(GenericStrategy):
         :return: None
         """
         self.mininum_hours_between_txs = kwargs.pop("mininum_hours_between_txs", 4)
+        self.minimum_minutes_since_last_attempt = kwargs.pop(
+            "minimum_minutes_since_last_attempt", 2
+        )
         super().__init__(**kwargs)
         self.last_attempt: Dict[str, datetime.datetime] = {}
 
@@ -62,7 +65,9 @@ class Strategy(GenericStrategy):
         last_time = self.last_attempt.get(counterparty, None)
         if last_time is None:
             return True
-        result = datetime.datetime.now() > last_time + datetime.timedelta(minutes=2)
+        result = datetime.datetime.now() > last_time + datetime.timedelta(
+            minutes=self.minimum_minutes_since_last_attempt
+        )
         return result
 
     def is_valid_counterparty(self, counterparty: str) -> bool:
@@ -73,9 +78,16 @@ class Strategy(GenericStrategy):
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         if not registration_db.is_registered(counterparty):
+            self.context.logger.info(
+                f"Invalid counterparty={counterparty}, not registered!"
+            )
             return False
         if not self.is_enough_time_since_last_attempt(counterparty):
+            self.context.logger.debug(
+                f"Not enough time since last attempt for counterparty={counterparty}!"
+            )
             return False
+        self.last_attempt[counterparty] = datetime.datetime.now()
         if not registration_db.is_allowed_to_trade(
             counterparty, self.mininum_hours_between_txs
         ):
@@ -94,3 +106,6 @@ class Strategy(GenericStrategy):
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         registration_db.set_trade(counterparty, datetime.datetime.now(), data)
+        self.context.logger.info(
+            f"Successful trade with={counterparty}. Data acquired={data}!"
+        )

@@ -79,6 +79,7 @@ class GenericStrategy(Model):
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
         )
+        self._is_stop_searching_on_result = kwargs.pop("stop_searching_on_result", True)
 
         super().__init__(**kwargs)
         self._ledger_id = (
@@ -103,6 +104,11 @@ class GenericStrategy(Model):
     def is_ledger_tx(self) -> bool:
         """Check whether or not tx are settled on a ledger."""
         return self._is_ledger_tx
+
+    @property
+    def is_stop_searching_on_result(self) -> bool:
+        """Check if search is stopped on result."""
+        return self._is_stop_searching_on_result
 
     @property
     def is_searching(self) -> bool:

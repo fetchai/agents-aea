@@ -366,14 +366,20 @@ class GenericOefSearchHandler(Handler):
                 f"found no agents in dialogue={oef_search_dialogue}, continue searching."
             )
             return
-
-        self.context.logger.info(
-            "found agents={}, stopping search.".format(
-                list(map(lambda x: x[-5:], oef_search_msg.agents)),
-            )
-        )
         strategy = cast(GenericStrategy, self.context.strategy)
-        strategy.is_searching = False  # stopping search
+        if strategy.is_stop_searching_on_result:
+            self.context.logger.info(
+                "found agents={}, stopping search.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
+            strategy.is_searching = False  # stopping search
+        else:
+            self.context.logger.info(
+                "found agents={}.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
         query = strategy.get_service_query()
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
         counterparties = strategy.get_acceptable_counterparties(oef_search_msg.agents)

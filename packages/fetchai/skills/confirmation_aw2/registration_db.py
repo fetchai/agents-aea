@@ -79,7 +79,7 @@ class RegistrationDB(Model):
             is_more_than_two = first_trade is not None and second_trade is not None
             if is_more_than_two or not is_second:
                 return
-            command = "INSERT INTO trade_table(address, first_trade, second_trade, first_info, second_info) values(?, ?, ?, ?, ?)"
+            command = "INSERT or REPLACE into trade_table(address, first_trade, second_trade, first_info, second_info) values(?, ?, ?, ?, ?)"
             variables = (
                 address,
                 first_trade,
@@ -108,8 +108,8 @@ class RegistrationDB(Model):
         if record is None:
             # no record on trade: go ahead
             return True
-        first_trade: Optional[datetime.datetime] = record[1]
-        second_trade: Optional[datetime.datetime] = record[2]
+        first_trade: Optional[str] = record[1]
+        second_trade: Optional[str] = record[2]
         first_trade_present: bool = first_trade is not None
         second_trade_present: bool = second_trade is not None
         if not first_trade_present and not second_trade_present:
@@ -117,9 +117,20 @@ class RegistrationDB(Model):
             return True
         if first_trade is not None and not second_trade_present:
             now = datetime.datetime.now()
-            return now - first_trade > datetime.timedelta(
+            first_trade_dt = datetime.datetime.strptime(
+                first_trade, "%Y-%m-%d %H:%M:%S.%f"
+            )
+            is_allowed_to_trade_ = now - first_trade_dt > datetime.timedelta(
                 hours=mininum_hours_between_txs
             )
+            if not is_allowed_to_trade_:
+                self.context.logger.info(
+                    f"Invalid attempt for counterparty={address}, not enough time since last trade!"
+                )
+            return is_allowed_to_trade_
+        self.context.logger.info(
+            f"Invalid attempt for counterparty={address}, already completed 2 trades!"
+        )
         return False
 
     def _execute_single_sql(

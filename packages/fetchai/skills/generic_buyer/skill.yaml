@@ -10,8 +10,8 @@ fingerprint:
   __init__.py: QmQYSnjUXeR5Xor1LoYDAkwsJZXT9Gkz7U65GCvrUjj3jk
   behaviours.py: QmahzTqjJjHBzVucyGCece62enLiuaVsYMnQqknHH4smsz
   dialogues.py: QmQEx6kqdAEjq8zmTBxmQsoXhNejdvCVoucyNArkoaP8VT
-  handlers.py: Qmcoee69SHQdBcdSZYuWJmabAWHveWuFYAS6dd8aFmQQLR
-  strategy.py: QmWA1JWkbsHWk8mmDncYBMZCdSuT9vJvNwsAswK5DW7Gpx
+  handlers.py: QmdpmxJGTZQFzfPb1vdYjwQYRHKypyEbm2VU2MPJxpjWSv
+  strategy.py: QmRDqoyAsLK4SUWMZ9J6x1XyLmHQLoYbVB94g4VAvYmDVp
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.9.0
@@ -72,6 +72,7 @@ models:
         search_value: generic_service
       search_radius: 5.0
       service_id: generic_service
+      stop_searching_on_result: true
     class_name: GenericStrategy
 dependencies: {}
 is_abstract: true
