@@ -357,3 +357,21 @@ def _try_get_component_id_from_prefix(
         return None
     enforce(len(results) == 1, f"Expected only one component, found {len(results)}.")
     return results[0]
+
+
+def get_non_vendor_package_path(aea_project_path: Path) -> Set[Path]:
+    """
+    Get all the paths to non-vendor packages.
+
+    :param aea_project_path: the path to an AEA project.
+    :return: the set of paths, one for each non-vendor package configuration file.
+    """
+    result: Set[Path] = set()
+    for item_type_plural in ComponentType.plurals():
+        nonvendor_package_dir_of_type = aea_project_path / item_type_plural
+        result = result.union(
+            {p for p in nonvendor_package_dir_of_type.iterdir() if p.is_dir()}
+            if nonvendor_package_dir_of_type.exists()
+            else {}
+        )
+    return result

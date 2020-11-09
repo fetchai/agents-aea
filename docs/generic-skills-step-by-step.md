@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.12.0
+aea fetch fetchai/generic_seller:0.13.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.15.0
+aea eject skill fetchai/generic_seller:0.16.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.12.0
+aea fetch fetchai/generic_buyer:0.13.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.14.0
+aea eject skill fetchai/generic_buyer:0.15.0
 cd ..
 ```
 
@@ -931,12 +931,7 @@ class GenericStrategy(Model):
             self.context.agent_addresses.get(self._ledger_id, None) is not None,
             "Wallet does not contain cryptos for provided ledger id.",
         )
-
-        if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
-        else:
-            self._data_for_sale = data_for_sale
-        self._sale_quantity = len(data_for_sale)
+        self._data_for_sale = data_for_sale
 ```
 
 We initialise the strategy class. We are trying to read the strategy variables from the yaml file. If this is not possible we specified some default values.
@@ -944,6 +939,13 @@ We initialise the strategy class. We are trying to read the strategy variables f
 The following properties and methods deal with different aspects of the strategy. Add them under the initialization of the class:
 
 ``` python
+    @property
+    def data_for_sale(self) -> Dict[str, str]:
+        """Get the data for sale."""
+        if self._has_data_source:
+            return self.collect_from_data_source()  # pragma: nocover
+        return self._data_for_sale
+
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
@@ -1017,8 +1019,10 @@ The following properties and methods deal with different aspects of the strategy
         :param counterparty_address: the counterparty of the proposal.
         :return: a tuple of proposal, terms and the weather data
         """
+        data_for_sale = self.data_for_sale
+        sale_quantity = len(data_for_sale)
         seller_address = self.context.agent_addresses[self.ledger_id]
-        total_price = self._sale_quantity * self._unit_price
+        total_price = sale_quantity * self._unit_price
         if self.is_ledger_tx:
             tx_nonce = LedgerApis.generate_tx_nonce(
                 identifier=self.ledger_id,
@@ -1033,7 +1037,7 @@ The following properties and methods deal with different aspects of the strategy
                 "price": total_price,
                 "currency_id": self._currency_id,
                 "service_id": self._service_id,
-                "quantity": self._sale_quantity,
+                "quantity": sale_quantity,
                 "tx_nonce": tx_nonce,
             }
         )
@@ -1042,12 +1046,12 @@ The following properties and methods deal with different aspects of the strategy
             sender_address=seller_address,
             counterparty_address=counterparty_address,
             amount_by_currency_id={self._currency_id: total_price},
-            quantities_by_good_id={self._service_id: -self._sale_quantity},
+            quantities_by_good_id={self._service_id: -sale_quantity},
             is_sender_payable_tx_fee=False,
             nonce=tx_nonce,
             fee_by_currency_id={self._currency_id: 0},
         )
-        return proposal, terms, self._data_for_sale
+        return proposal, terms, data_for_sale
 
     def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to communicate with the sensor."""
@@ -1331,10 +1335,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
 skills: []
 behaviours:
   service_registration:
@@ -2816,11 +2820,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
-- fetchai/signing:0.6.0
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
+- fetchai/signing:0.7.0
 skills: []
 behaviours:
   search:
@@ -2921,8 +2925,8 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 
 ### Fund the buyer AEA
@@ -2939,9 +2943,9 @@ Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add protocol fetchai/fipa:0.9.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add protocol fetchai/fipa:0.10.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea run
@@ -2955,10 +2959,10 @@ Add the remaining packages for the buyer AEA:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add protocol fetchai/fipa:0.9.0
-aea add protocol fetchai/signing:0.6.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add protocol fetchai/fipa:0.10.0
+aea add protocol fetchai/signing:0.7.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```

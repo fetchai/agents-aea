@@ -61,7 +61,7 @@ trusts the seller AEA to send the data upon successful payment.
 
 First, fetch the AEA that will provide weather measurements:
 ``` bash
-aea fetch fetchai/weather_station:0.15.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.16.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -74,9 +74,9 @@ The following steps create the weather station from scratch:
 aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/weather_station:0.14.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add skill fetchai/weather_station:0.15.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -84,8 +84,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 In `weather_station/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 
 </p>
@@ -96,7 +96,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.15.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.16.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```
@@ -109,9 +109,9 @@ The following steps create the weather client from scratch:
 aea create my_weather_client
 cd my_weather_client
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/weather_client:0.13.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add skill fetchai/weather_client:0.14.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -119,8 +119,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 In `my_weather_client/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 
 </p>

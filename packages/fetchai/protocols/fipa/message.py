@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
-    protocol_id = PublicId.from_str("fetchai/fipa:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/fipa:0.10.0")
 
     Description = CustomDescription
 

@@ -33,6 +33,16 @@ Instantiate the identity.
 - `addresses`: the addresses of the agent.
 - `default_address_key`: the key for the default address.
 
+<a name="aea.identity.base.Identity.default_address_key"></a>
+#### default`_`address`_`key
+
+```python
+ | @property
+ | default_address_key() -> str
+```
+
+Get the default address key.
+
 <a name="aea.identity.base.Identity.name"></a>
 #### name
 

@@ -10,7 +10,7 @@ This is a protocol for participating in a Trading Agent Competition (TAC).
 ---
 name: tac
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
@@ -69,7 +69,7 @@ ct:ErrorCode: |
 ---
 initiation: [register]
 reply:
-  register: [tac_error, game_data, cancelled]
+  register: [tac_error, game_data, cancelled, unregister]
   unregister: [tac_error]
   transaction: [transaction, transaction_confirmation, tac_error, cancelled]
   cancelled: []

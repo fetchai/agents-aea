@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, **kwargs)
+ | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_ledger_id: str, currency_denominations: Dict[str, str], default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, **kwargs)
 ```
 
 Initialize an agent context.
@@ -29,6 +29,8 @@ Initialize an agent context.
 - `decision_maker_message_queue`: the (in) queue of the decision maker
 - `decision_maker_handler_context`: the decision maker's name space
 - `task_manager`: the task manager
+- `default_ledger_id`: the default ledger id
+- `ledger_it_to_currency_denom`: mapping from ledger ids to currency denominations
 - `default_connection`: the default connection
 - `default_routing`: the default routing
 - `search_service_address`: the address of the search service
@@ -158,6 +160,26 @@ Get the address of the search service.
 ```
 
 Get the address of the decision maker.
+
+<a name="aea.context.base.AgentContext.default_ledger_id"></a>
+#### default`_`ledger`_`id
+
+```python
+ | @property
+ | default_ledger_id() -> str
+```
+
+Get the default ledger id.
+
+<a name="aea.context.base.AgentContext.currency_denominations"></a>
+#### currency`_`denominations
+
+```python
+ | @property
+ | currency_denominations() -> Dict[str, str]
+```
+
+Get a dictionary mapping ledger ids to currency denominations.
 
 <a name="aea.context.base.AgentContext.default_connection"></a>
 #### default`_`connection

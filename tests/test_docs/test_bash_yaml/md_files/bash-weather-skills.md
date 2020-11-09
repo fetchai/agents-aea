@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/weather_station:0.15.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.16.0 --alias my_weather_station
 cd my_weather_station
 aea install
 ```
@@ -7,14 +7,14 @@ aea install
 aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/weather_station:0.14.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add skill fetchai/weather_station:0.15.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 ``` bash
-aea fetch fetchai/weather_client:0.15.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.16.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```
@@ -22,9 +22,9 @@ aea install
 aea create my_weather_client
 cd my_weather_client
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/weather_client:0.13.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add skill fetchai/weather_client:0.14.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -54,13 +54,13 @@ aea delete my_weather_client
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 ``` yaml
 config:
