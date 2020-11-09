@@ -13,7 +13,7 @@
 
 6. Check the docs are up-to-date by running `python scripts/generate_api_docs.py` and `python scripts/check_doc_links.py`. Commit if satisfied.
 
-7. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`.
+7. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. Commit if satisfied.
 
 8. Open PRs and merge into master.
 
