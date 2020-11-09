@@ -400,7 +400,7 @@ class RemoveItem:
         return self.ctx.agent_config
 
     @property
-    def agent_name(self) -> str:
+    def agent_name(self) -> str:  # pragma: nocover
         """Get agent name."""
         return self.ctx.agent_config.agent_name
 
