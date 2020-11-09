@@ -5,7 +5,7 @@
 
 2. Determine the next AEA version and run `python scripts/bump_aea_version.py --new-version NEW_VERSION_HERE`. Commit if satisfied.
 
-3. Check the protocols are up-to-date by running `python scripts/generate_all_protocols.py`.
+3. Check the protocols are up-to-date by running `python scripts/generate_all_protocols.py`. Commit if changes occured.
 
 4. Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
 
