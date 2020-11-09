@@ -65,26 +65,28 @@ class RegistrationDB(Model):
 
     def set_trade(
         self, address: str, timestamp: datetime.datetime, data: Dict[str, str],
-    ):
+    ) -> None:
         """Record a registration."""
         record = self.get_trade_table(address)
         if record is None:
-            return
-
-        _, first_trade, second_trade, first_info, second_info = record
-        is_second = first_trade is not None and second_trade is None
-        if is_second:
+            command = "INSERT INTO trade_table(address, first_trade, second_trade, first_info, second_info) values(?, ?, ?, ?, ?)"
+            variables: Tuple[
+                str, datetime.datetime, Optional[datetime.datetime], str, Optional[str]
+            ] = (address, timestamp, None, json.dumps(data), None)
+        else:
+            _, first_trade, second_trade, first_info, _ = record
+            is_second = first_trade is not None and second_trade is None
+            is_more_than_two = first_trade is not None and second_trade is not None
+            if is_more_than_two or not is_second:
+                return
             command = "INSERT INTO trade_table(address, first_trade, second_trade, first_info, second_info) values(?, ?, ?, ?, ?)"
             variables = (
                 address,
+                first_trade,
                 timestamp,
-                second_trade,
+                first_info,
                 json.dumps(data),
-                second_info,
             )
-        else:
-            command = "INSERT INTO trade_table(address, first_trade, second_trade, first_info, second_info) values(?, ?, ?, ?, ?)"
-            variables = (address, first_trade, timestamp, first_info, json.dumps(data))
         self._execute_single_sql(command, variables)
 
     def get_trade_table(self, address: str) -> Optional[Tuple]:
@@ -102,18 +104,20 @@ class RegistrationDB(Model):
 
     def is_allowed_to_trade(self, address: str, mininum_hours_between_txs: int) -> bool:
         """Check if an address is registered."""
-        command = "SELECT * FROM trade_table WHERE address=?"
-        variables = (address,)
-        result = self._execute_single_sql(command, variables)
-        record = result[0]
-        first_trade: datetime.datetime = record[1]
-        second_trade: datetime.datetime = record[2]
+        record = self.get_trade_table(address)
+        if record is None:
+            # no record on trade: go ahead
+            return True
+        first_trade: Optional[datetime.datetime] = record[1]
+        second_trade: Optional[datetime.datetime] = record[2]
         first_trade_present: bool = first_trade is not None
         second_trade_present: bool = second_trade is not None
         if not first_trade_present and not second_trade_present:
+            # all trades empty: go ahead
             return True
-        if first_trade_present and not second_trade_present:
-            return second_trade - first_trade > datetime.timedelta(
+        if first_trade is not None and not second_trade_present:
+            now = datetime.datetime.now()
+            return now - first_trade > datetime.timedelta(
                 hours=mininum_hours_between_txs
             )
         return False
