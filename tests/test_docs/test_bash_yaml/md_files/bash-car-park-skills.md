@@ -14,7 +14,7 @@ aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 ``` bash
-aea fetch fetchai/car_data_buyer:0.16.0
+aea fetch fetchai/car_data_buyer:0.17.0
 cd car_data_buyer
 aea install
 ```
@@ -24,7 +24,7 @@ cd car_data_buyer
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.12.0
 aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/carpark_client:0.15.0
+aea add skill fetchai/carpark_client:0.16.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```

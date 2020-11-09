@@ -14,7 +14,7 @@ aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 ``` bash
-aea fetch fetchai/weather_client:0.16.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.17.0 --alias my_weather_client
 cd my_weather_client
 aea install
 ```
@@ -24,7 +24,7 @@ cd my_weather_client
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.12.0
 aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/weather_client:0.14.0
+aea add skill fetchai/weather_client:0.15.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```

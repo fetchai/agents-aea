@@ -48,9 +48,9 @@ cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.13.0
+aea fetch fetchai/generic_buyer:0.14.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.15.0
+aea eject skill fetchai/generic_buyer:0.16.0
 cd ..
 ```
 

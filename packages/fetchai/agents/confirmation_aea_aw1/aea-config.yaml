@@ -1,6 +1,6 @@
 agent_name: confirmation_aea_aw1
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: This agent manages confirmation of registration for Agent World 1
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'

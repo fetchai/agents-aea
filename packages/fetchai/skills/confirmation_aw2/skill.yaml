@@ -25,7 +25,7 @@ protocols:
 - fetchai/oef_search:0.10.0
 - fetchai/signing:0.7.0
 skills:
-- fetchai/generic_buyer:0.15.0
+- fetchai/generic_buyer:0.16.0
 behaviours:
   search:
     args:
