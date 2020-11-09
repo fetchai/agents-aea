@@ -26,10 +26,9 @@ import click
 import pytest
 from click import ClickException
 
+import aea
 from aea.cli import cli
-from aea.cli.add import add_item
 from aea.cli.fetch import _is_version_correct, fetch_agent_locally
-from aea.cli.registry.add import fetch_package
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
 from aea.test_tools.test_cases import AEATestCaseMany, BaseAEATestCase
@@ -205,23 +204,16 @@ class TestFetchLatestVersion(AEATestCaseMany):
 class TestFetchAgentMixed(BaseAEATestCase):
     """Test 'aea fetch' in mixed mode."""
 
-    @staticmethod
-    def _mock_add_item(ctx: Context, *args, **kwargs):
-        """
-        Mock 'add_item'.
-
-        Make add_item to fail only when is in local mode.
-        """
-        if ctx.config["is_local"]:
-            raise click.ClickException("some error.")
-        return add_item(ctx, *args, **kwargs)
-
     @pytest.mark.integration
-    @mock.patch("aea.cli.fetch.add_item")
-    @mock.patch("aea.cli.add.fetch_package", side_effect=fetch_package)
-    def test_fetch_mixed(self, mock_fetch_package, mock_add_item) -> None:
+    @mock.patch(
+        "aea.cli.registry.add.fetch_package", wraps=aea.cli.registry.add.fetch_package
+    )
+    @mock.patch(
+        "aea.cli.add.find_item_locally_or_distributed",
+        side_effect=click.ClickException(""),
+    )
+    def test_fetch_mixed(self, mock_fetch_package, _mock_fetch_locally) -> None:
         """Test fetch in mixed mode."""
-        mock_add_item.side_effect = self._mock_add_item
         self.run_cli_command(
             "-v", "DEBUG", "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest())
         )

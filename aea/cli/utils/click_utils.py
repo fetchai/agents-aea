@@ -124,7 +124,7 @@ def registry_flag(
     help_local: str = "Use only local registry.",
     help_remote: str = "Use ony remote registry.",
 ):
-    """Choice of one flag between: '--local/--remote/--mixed'."""
+    """Choice of one flag between: '--local/--remote'."""
 
     def wrapper(f):
         f = option(
