@@ -41,6 +41,7 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     PackageConfiguration,
     PackageId,
+    PackageType,
     PublicId,
 )
 
@@ -112,9 +113,12 @@ def skill(ctx: Context, skill_id):
 class ItemRemoveHelper:
     """Helper to check dependencies on removing component from agent config."""
 
-    def __init__(self, agent_config: AgentConfig) -> None:
+    def __init__(
+        self, agent_config: AgentConfig, ignore_non_vendor: bool = False
+    ) -> None:
         """Init helper."""
         self._agent_config = agent_config
+        self._ignore_non_vendor = ignore_non_vendor
 
     def get_agent_dependencies_with_reverse_dependencies(
         self,
@@ -171,16 +175,22 @@ class ItemRemoveHelper:
 
     @staticmethod
     def _get_item_requirements(
-        item: PackageConfiguration,
+        item: PackageConfiguration, ignore_non_vendor: bool = False
     ) -> Generator[PackageId, None, None]:
         """
-        List all the requiemenents for item provided.
+        List all the requirements for item provided.
 
         :return: generator with package ids: (type, public_id)
         """
         for item_type in map(str, ComponentType):
             items = getattr(item, f"{item_type}s", set())
             for item_public_id in items:
+                if (
+                    ignore_non_vendor
+                    and item.package_type == PackageType.AGENT
+                    and item.author == item_public_id.author
+                ):
+                    continue
                 yield PackageId(item_type, item_public_id)
 
     def get_item_dependencies_with_reverse_dependencies(
@@ -195,7 +205,9 @@ class ItemRemoveHelper:
         """
         result: defaultdict = defaultdict(set)
 
-        for dep_package_id in self._get_item_requirements(item):
+        for dep_package_id in self._get_item_requirements(
+            item, self._ignore_non_vendor
+        ):
             if package_id is None:
                 _ = result[dep_package_id]  # init default dict value
             else:
@@ -230,7 +242,7 @@ class ItemRemoveHelper:
 
         required by - set of components that requires this component
         can be deleted - set of dependencies used only by component so can be deleted
-        can not be deleted  - dict - keys - packages can not be deleted, values are set of packages requireed by.
+        can not be deleted  - dict - keys - packages can not be deleted, values are set of packages required by.
 
         :return: Tuple[required by, can be deleted, can not be deleted.]
         """
@@ -290,6 +302,7 @@ class RemoveItem:
         item_id: PublicId,
         with_dependencies: bool,
         force: bool = False,
+        ignore_non_vendor: bool = False,
     ) -> None:
         """
         Init remove item tool.
@@ -298,11 +311,14 @@ class RemoveItem:
         :param item_type: str, package type
         :param item_id: PublicId of the item to remove.
         :param force: bool. if True remove even required by another package.
+        :param ignore_non_vendor: bool. if True, ignore non-vendor packages when computing
+          inverse dependencies. The effect of this flag is ignored if force = True
 
         :return: None
         """
         self.ctx = ctx
         self.force = force
+        self.ignore_non_vendor = ignore_non_vendor
         self.item_type = item_type
         self.item_id = item_id
         self.with_dependencies = with_dependencies
@@ -317,7 +333,9 @@ class RemoveItem:
                 self.required_by,
                 self.dependencies_can_be_removed,
                 *_,
-            ) = ItemRemoveHelper(self.agent_config).check_remove(
+            ) = ItemRemoveHelper(
+                self.agent_config, ignore_non_vendor=self.ignore_non_vendor
+            ).check_remove(
                 self.item_type, self.current_item
             )
         except FileNotFoundError:  # pragma: nocover
@@ -339,23 +357,11 @@ class RemoveItem:
 
     def remove(self) -> None:
         """Remove item and it's dependencies if specified."""
-        click.echo(
-            "Removing {item_type} '{item_name}' from the agent '{agent_name}'...".format(
-                agent_name=self.agent_name,
-                item_type=self.item_type,
-                item_name=self.item_name,
-            )
-        )
+        click.echo(f"Removing {self.item_type} '{self.current_item}'...")
         self.remove_item()
         if self.with_dependencies:
             self.remove_dependencies()
-        click.echo(
-            "{item_type} '{item_name}' was removed from the agent '{agent_name}'...".format(
-                agent_name=self.agent_name,
-                item_type=self.item_type,
-                item_name=self.item_name,
-            )
-        )
+        click.echo(f"Successfully removed {self.item_type} '{self.current_item}'.")
 
     @property
     def agent_items(self) -> Set[PublicId]:
@@ -394,7 +400,7 @@ class RemoveItem:
         return self.ctx.agent_config
 
     @property
-    def agent_name(self) -> str:
+    def agent_name(self) -> str:  # pragma: nocover
         """Get agent name."""
         return self.ctx.agent_config.agent_name
 
@@ -435,10 +441,10 @@ class RemoveItem:
         """Remove all the dependecies related only to the package."""
         if not self.dependencies_can_be_removed:
             return
-        click.echo(
-            f"Removing obsolete dependencies for {self.agent_name}: {self.dependencies_can_be_removed}..."
-        )
         for dependency in self.dependencies_can_be_removed:
+            click.echo(
+                f"Removing obsolete dependency {str(dependency.package_type)} '{str(dependency.public_id)}'..."
+            )
             RemoveItem(
                 self.ctx,
                 str(dependency.package_type),
@@ -447,7 +453,7 @@ class RemoveItem:
                 force=True,
             ).remove_item()
             click.echo(
-                f"{str(dependency.package_type).capitalize()} {dependency.public_id} was removed from {self.agent_name}."
+                f"Successfully removed {str(dependency.package_type)} '{dependency.public_id}'."
             )
 
 

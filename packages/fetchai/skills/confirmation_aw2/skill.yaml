@@ -1,18 +1,19 @@
-name: simple_buyer
+name: confirmation_aw2
 author: fetchai
-version: 0.2.0
+version: 0.1.0
 type: skill
 description: This skill purchases information from other agents as specified in its
-  configuration.
+  configuration. It is the confirmation buyer for Agent World 2.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmPGf61Zh32daECQRnErBsjADpXd5YVEc3SeJA96qEJBzV
-  __init__.py: QmYRuBLb7yAVEWMNMP87pwjjn31Cdxm6L9DXk9jmJEAv8M
+  README.md: QmSgFDQ7YjDzts8JKfTbnJZhnYEFaDQ42j5b1vAQy764Xw
+  __init__.py: QmZMzRtyy3pGznfYNkoF5aX6KQqyfcxY4kyFFEGUUkCBzP
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
-  strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
+  registration_db.py: QmTrF3EJALFjLajgVoeSDxVB67RvbjhqTvT22hUdjBM7ud
+  strategy.py: QmW2S3pRbJFgBikL6FBDAiEvSEehpWFqV9HJrB3mJg5dFR
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.9.0
@@ -56,6 +57,10 @@ models:
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
+  registration_db:
+    args:
+      custom_path: path_to_db
+    class_name: RegistrationDB
   signing_dialogues:
     args: {}
     class_name: SigningDialogues
@@ -68,12 +73,15 @@ models:
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
+      minimum_minutes_since_last_attempt: 2
+      mininum_hours_between_txs: 4
       search_query:
         constraint_type: ==
         search_key: seller_service
         search_value: weather_data
       search_radius: 50.0
       service_id: weather_data
+      stop_searching_on_result: false
     class_name: Strategy
 dependencies: {}
 is_abstract: false

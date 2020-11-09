@@ -51,6 +51,7 @@ def update_version_for_files(current_version: str, new_version: str) -> None:
         Path("develop-image", "docker-env.sh"),
         Path("docs", "quickstart.md"),
         Path("tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"),
+        Path("user-image", "docker-env.sh"),
     ]
     for filepath in files:
         update_version_for_file(filepath, current_version, new_version)

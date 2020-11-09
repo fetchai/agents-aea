@@ -55,7 +55,7 @@ def publish(click_context, local, remote):  # pylint: disable=unused-argument
     if remote:
         publish_agent(ctx)
     else:
-        _save_agent_locally(ctx, is_mixed=not local)
+        _save_agent_locally(ctx, is_mixed=not local and not remote)
 
 
 def _validate_config(ctx: Context) -> None:

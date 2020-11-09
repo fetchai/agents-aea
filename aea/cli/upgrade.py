@@ -25,7 +25,7 @@ from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
 
-from aea.cli.fetch import fetch_local_or_mixed
+from aea.cli.add import add_item
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.remove import (
     ItemRemoveHelper,
@@ -109,7 +109,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     """Perform project upgrade."""
     click.echo("Starting project upgrade...")
 
-    item_remover = ItemRemoveHelper(ctx.agent_config)
+    item_remover = ItemRemoveHelper(ctx.agent_config, ignore_non_vendor=True)
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
     items_to_upgrade = set()
     upgraders: List[ItemUpgrader] = []
@@ -147,15 +147,15 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
 
     with remove_unused_component_configurations(ctx):
         if shared_deps_to_remove:
-            click.echo(
-                f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
-            )
             for dep in shared_deps_to_remove:  # pragma: nocover
                 if ItemUpgrader(
                     ctx, str(dep.package_type), dep.public_id
                 ).is_non_vendor:
                     # non vendor package, do not remove!
                     continue
+                click.echo(
+                    f"Removing shared dependency {str(dep.package_type)} '{dep.public_id}'..."
+                )
                 RemoveItem(
                     ctx,
                     str(dep.package_type),
@@ -163,7 +163,9 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
                     with_dependencies=False,
                     force=True,
                 ).remove_item()
-            click.echo("Shared dependencies removed.")
+                click.echo(
+                    f"Successfully removed {str(dep.package_type)} '{dep.public_id}'."
+                )
 
         for upgrader in upgraders:
             upgrader.remove_item()
@@ -172,9 +174,6 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         _update_references(ctx)
 
     click.echo("Finished project upgrade. Everything is up to date now!")
-    click.echo(
-        'Please manually update package versions in your non-vendor packages as well as in "default_connection" and "default_routing"'
-    )
 
 
 class UpgraderException(Exception):
@@ -259,9 +258,9 @@ class ItemUpgrader:
 
         :return: same as for ItemRemoveHelper.check_remove
         """
-        return ItemRemoveHelper(self.ctx.agent_config).check_remove(
-            self.item_type, self.current_item_public_id
-        )
+        return ItemRemoveHelper(
+            self.ctx.agent_config, ignore_non_vendor=True
+        ).check_remove(self.item_type, self.current_item_public_id)
 
     @property
     def is_non_vendor(self) -> bool:
@@ -304,14 +303,13 @@ class ItemUpgrader:
             self.item_public_id,
             with_dependencies=True,
             force=True,
+            ignore_non_vendor=True,
         )
         remove_item.remove()
-        click.echo(f"Item { self.item_type} {self.item_public_id} removed!")
 
     def add_item(self) -> None:
         """Add new package version to agent."""
-        click.echo(f"Adding item {self.item_type} {self.item_public_id}.")
-        fetch_local_or_mixed(self.ctx, str(self.item_type), self.item_public_id)
+        add_item(self.ctx, str(self.item_type), self.item_public_id)
 
 
 @clean_after

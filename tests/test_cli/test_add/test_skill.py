@@ -26,6 +26,7 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
+import click
 import pytest
 import yaml
 from jsonschema import ValidationError
@@ -504,6 +505,44 @@ class TestAddSkillWithLatestVersion(AEATestCaseEmpty):
     def test_add_skill_latest_version(self):
         """Test add skill with latest version."""
         self.add_item("skill", str(ECHO_PUBLIC_ID.to_latest()), local=True)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
+        items_folders = os.listdir(items_path)
+        item_name = "echo"
+        assert item_name in items_folders
+
+
+class TestAddSkillMixedModeFallsBack(AEATestCaseEmpty):
+    """Test add skill in mixed mode that fails with local falls back to remote registry."""
+
+    @mock.patch(
+        "aea.cli.add.find_item_locally_or_distributed",
+        side_effect=click.ClickException(""),
+    )
+    def test_add_skill_remote_mode_negative_local_positive_remote(self, *_mocks):
+        """Test add skill mixed mode."""
+        self.run_cli_command(
+            "add", "skill", str(ECHO_PUBLIC_ID.to_latest()), cwd=self._get_cwd()
+        )
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
+        items_folders = os.listdir(items_path)
+        item_name = "echo"
+        assert item_name in items_folders
+
+
+class TestAddSkillRemoteMode(AEATestCaseEmpty):
+    """Test case for add skill, --remote mode."""
+
+    def test_add_skill_remote_mode(self):
+        """Test add skill mixed mode."""
+        self.run_cli_command(
+            "add",
+            "--remote",
+            "skill",
+            str(ECHO_PUBLIC_ID.to_latest()),
+            cwd=self._get_cwd(),
+        )
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)

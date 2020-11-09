@@ -119,7 +119,7 @@ class TestMLSkills(AEATestCaseMany):
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/ml_train:0.15.0")
+        self.add_item("skill", "fetchai/ml_train:0.16.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -299,13 +299,13 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/ml_train:0.15.0")
+        self.add_item("skill", "fetchai/ml_train:0.16.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.16.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.17.0", model_trainer_aea_name
         )
         assert (
             diff == []

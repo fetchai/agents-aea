@@ -17,9 +17,17 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the carpark client skill."""
+"""This package contains the handlers of the agent."""
 
-from aea.configurations.base import PublicId
+from packages.fetchai.skills.generic_buyer.handlers import (
+    GenericFipaHandler,
+    GenericLedgerApiHandler,
+    GenericOefSearchHandler,
+    GenericSigningHandler,
+)
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/carpark_client:0.16.0")
+FipaHandler = GenericFipaHandler
+LedgerApiHandler = GenericLedgerApiHandler
+OefSearchHandler = GenericOefSearchHandler
+SigningHandler = GenericSigningHandler

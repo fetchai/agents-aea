@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the carpark client skill."""
+"""This package contains the behaviours of the agent."""
 
-from aea.configurations.base import PublicId
+from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/carpark_client:0.16.0")
+SearchBehaviour = GenericSearchBehaviour

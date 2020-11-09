@@ -48,9 +48,9 @@ cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.13.0
+aea fetch fetchai/generic_buyer:0.14.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.15.0
+aea eject skill fetchai/generic_buyer:0.16.0
 cd ..
 ```
 
@@ -1772,6 +1772,8 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
+            strategy = cast(GenericStrategy, self.context.strategy)
+            strategy.successful_trade_with_counterparty(fipa_msg.sender, data)
         else:
             self.context.logger.info(
                 "received no data from sender={}".format(fipa_msg.sender[-5:])
@@ -1887,19 +1889,24 @@ class GenericOefSearchHandler(Handler):
                 f"found no agents in dialogue={oef_search_dialogue}, continue searching."
             )
             return
-
-        self.context.logger.info(
-            "found agents={}, stopping search.".format(
-                list(map(lambda x: x[-5:], oef_search_msg.agents)),
-            )
-        )
         strategy = cast(GenericStrategy, self.context.strategy)
-        strategy.is_searching = False  # stopping search
+        if strategy.is_stop_searching_on_result:
+            self.context.logger.info(
+                "found agents={}, stopping search.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
+            strategy.is_searching = False  # stopping search
+        else:
+            self.context.logger.info(
+                "found agents={}.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
         query = strategy.get_service_query()
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-        for idx, counterparty in enumerate(oef_search_msg.agents):
-            if idx >= strategy.max_negotiations:
-                continue
+        counterparties = strategy.get_acceptable_counterparties(oef_search_msg.agents)
+        for counterparty in counterparties:
             cfp_msg, _ = fipa_dialogues.create(
                 counterparty=counterparty,
                 performative=FipaMessage.Performative.CFP,
@@ -2280,6 +2287,7 @@ class GenericStrategy(Model):
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
         )
+        self._is_stop_searching_on_result = kwargs.pop("stop_searching_on_result", True)
 
         super().__init__(**kwargs)
         self._ledger_id = (
@@ -2308,6 +2316,11 @@ We initialize the strategy class by trying to read the strategy variables from t
     def is_ledger_tx(self) -> bool:
         """Check whether or not tx are settled on a ledger."""
         return self._is_ledger_tx
+
+    @property
+    def is_stop_searching_on_result(self) -> bool:
+        """Check if search is stopped on result."""
+        return self._is_stop_searching_on_result
 
     @property
     def is_searching(self) -> bool:
@@ -2421,6 +2434,20 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
             result = True
         return result
 
+    def get_acceptable_counterparties(
+        self, counterparties: Tuple[str, ...]
+    ) -> Tuple[str, ...]:
+        """
+        Process counterparties and drop unacceptable ones.
+
+        :return: list of counterparties
+        """
+        valid_counterparties: List[str] = []
+        for idx, counterparty in enumerate(counterparties):
+            if idx < self.max_negotiations:
+                valid_counterparties.append(counterparty)
+        return tuple(valid_counterparties)
+
     def terms_from_proposal(
         self, proposal: Description, counterparty_address: Address
     ) -> Terms:
@@ -2446,6 +2473,18 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
             fee_by_currency_id={proposal.values["currency_id"]: self._max_tx_fee},
         )
         return terms
+
+    def successful_trade_with_counterparty(
+        self, counterparty: str, data: Dict[str, str]
+    ) -> None:
+        """
+        Do something on successful trade.
+
+        :param counterparty: the counterparty address
+        :param data: the data
+        :return: False
+        """
+        pass
 ```
 
 ### Step 5: Create the dialogues

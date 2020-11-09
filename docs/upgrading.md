@@ -1,5 +1,9 @@
 This page provides some tipps of how to upgrade between versions.
 
+## v0.7.1 to v0.7.2
+
+No backwards incompatible changes for skill and connection development.
+
 ## v0.7.0 to v0.7.1
 
 To improve performance, in particular optimize memory usage, we refactored the `Message` and `Dialogue` classes. This means all protocols need to be bumped to the latest version or regenerated using the generate command.

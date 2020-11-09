@@ -284,7 +284,7 @@ def find_item_locally(
 
 
 def find_item_in_distribution(  # pylint: disable=unused-argument
-    ctx, item_type, item_public_id: PublicId
+    ctx: Context, item_type: str, item_public_id: PublicId
 ) -> Path:
     """
     Find an item in the AEA directory.
@@ -526,11 +526,15 @@ def is_distributed_item(item_public_id: PublicId) -> bool:
 def _override_ledger_configurations(agent_config: AgentConfig) -> None:
     """Override LedgerApis configurations with agent override configurations."""
     ledger_component_id = ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION)
-    if ledger_component_id not in agent_config.component_configurations:
+    prefix_to_component_configuration = {
+        key.component_prefix: value
+        for key, value in agent_config.component_configurations.items()
+    }
+    if ledger_component_id.component_prefix not in prefix_to_component_configuration:
         return
-    ledger_apis_config = agent_config.component_configurations[ledger_component_id][
-        "config"
-    ].get("ledger_apis", {})
+    ledger_apis_config = prefix_to_component_configuration[
+        ledger_component_id.component_prefix
+    ]["config"].get("ledger_apis", {})
     recursive_update(LedgerApis.ledger_api_configs, ledger_apis_config)
 
 
