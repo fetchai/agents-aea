@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+from typing import Dict, List, Tuple
+
 from aea.common import Address
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
@@ -77,6 +79,7 @@ class GenericStrategy(Model):
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
         )
+        self._is_stop_searching_on_result = kwargs.pop("stop_searching_on_result", True)
 
         super().__init__(**kwargs)
         self._ledger_id = (
@@ -101,6 +104,11 @@ class GenericStrategy(Model):
     def is_ledger_tx(self) -> bool:
         """Check whether or not tx are settled on a ledger."""
         return self._is_ledger_tx
+
+    @property
+    def is_stop_searching_on_result(self) -> bool:
+        """Check if search is stopped on result."""
+        return self._is_stop_searching_on_result
 
     @property
     def is_searching(self) -> bool:
@@ -206,6 +214,20 @@ class GenericStrategy(Model):
             result = True
         return result
 
+    def get_acceptable_counterparties(
+        self, counterparties: Tuple[str, ...]
+    ) -> Tuple[str, ...]:
+        """
+        Process counterparties and drop unacceptable ones.
+
+        :return: list of counterparties
+        """
+        valid_counterparties: List[str] = []
+        for idx, counterparty in enumerate(counterparties):
+            if idx < self.max_negotiations:
+                valid_counterparties.append(counterparty)
+        return tuple(valid_counterparties)
+
     def terms_from_proposal(
         self, proposal: Description, counterparty_address: Address
     ) -> Terms:
@@ -231,3 +253,15 @@ class GenericStrategy(Model):
             fee_by_currency_id={proposal.values["currency_id"]: self._max_tx_fee},
         )
         return terms
+
+    def successful_trade_with_counterparty(
+        self, counterparty: str, data: Dict[str, str]
+    ) -> None:
+        """
+        Do something on successful trade.
+
+        :param counterparty: the counterparty address
+        :param data: the data
+        :return: False
+        """
+        pass

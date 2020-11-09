@@ -191,7 +191,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.14.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.15.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
