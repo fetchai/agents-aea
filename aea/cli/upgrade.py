@@ -147,15 +147,15 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
 
     with remove_unused_component_configurations(ctx):
         if shared_deps_to_remove:
-            click.echo(
-                f"Removing shared dependencies: {', '.join(map(str, shared_deps_to_remove))}..."
-            )
             for dep in shared_deps_to_remove:  # pragma: nocover
                 if ItemUpgrader(
                     ctx, str(dep.package_type), dep.public_id
                 ).is_non_vendor:
                     # non vendor package, do not remove!
                     continue
+                click.echo(
+                    f"Removing shared dependency {str(dep.package_type)} '{dep.public_id}'..."
+                )
                 RemoveItem(
                     ctx,
                     str(dep.package_type),
@@ -163,7 +163,9 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
                     with_dependencies=False,
                     force=True,
                 ).remove_item()
-            click.echo("Shared dependencies removed.")
+                click.echo(
+                    f"Successfully removed {str(dep.package_type)} '{dep.public_id}'."
+                )
 
         for upgrader in upgraders:
             upgrader.remove_item()
@@ -304,11 +306,9 @@ class ItemUpgrader:
             ignore_non_vendor=True,
         )
         remove_item.remove()
-        click.echo(f"Item { self.item_type} {self.item_public_id} removed!")
 
     def add_item(self) -> None:
         """Add new package version to agent."""
-        click.echo(f"Adding item {self.item_type} {self.item_public_id}.")
         add_item(self.ctx, str(self.item_type), self.item_public_id)
 
 

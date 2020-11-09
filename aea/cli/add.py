@@ -95,13 +95,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     :param item_public_id: the item public id.
     :return: None
     """
-    agent_name = cast(str, ctx.agent_config.agent_name)
-
-    click.echo(
-        "Adding {} '{}' to the agent '{}'...".format(
-            item_type, item_public_id, agent_name
-        )
-    )
+    click.echo(f"Adding {item_type} '{item_public_id}'...")
     if is_item_present(ctx, item_type, item_public_id):
         present_item_id = get_item_id_present(ctx, item_type, item_public_id)
         raise click.ClickException(
