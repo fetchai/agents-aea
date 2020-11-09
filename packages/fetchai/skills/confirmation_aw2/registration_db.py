@@ -20,10 +20,11 @@
 """This package contains a the registration db model."""
 
 import datetime
+import json
 import logging
 import os
 import sqlite3
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from aea.skills.base import Model
 
@@ -58,29 +59,39 @@ class RegistrationDB(Model):
             "developer_handle TEXT, tweet TEXT)"
         )
         self._execute_single_sql(
-            "CREATE TABLE IF NOT EXISTS trade_table (address TEXT, first_trade timestamp, "
-            "second_trade timestamp)"
+            "CREATE TABLE IF NOT EXISTS trade_table (address TEXT PRIMARY KEY, first_trade timestamp, "
+            "second_trade timestamp, first_info TEXT, second_info TEXT)"
         )
 
     def set_trade(
         self, address: str, timestamp: datetime.datetime, data: Dict[str, str],
     ):
         """Record a registration."""
-        is_second = False  # todo, query from db
-        # todo: also save data
+        record = self.get_trade_table(address)
+        if record is None:
+            return
+
+        _, first_trade, second_trade, first_info, second_info = record
+        is_second = first_trade is not None and second_trade is None
         if is_second:
-            command = (
-                "INSERT OR REPLACE INTO trade_table(address, second_trade) values(?, ?)"
+            command = "INSERT INTO trade_table(address, first_trade, second_trade, first_info, second_info) values(?, ?, ?, ?, ?)"
+            variables = (
+                address,
+                timestamp,
+                second_trade,
+                json.dumps(data),
+                second_info,
             )
         else:
-            command = (
-                "INSERT OR REPLACE INTO trade_table(address, first_trade) values(?, ?)"
-            )
-        variables = (
-            address,
-            timestamp,
-        )
+            command = "INSERT INTO trade_table(address, first_trade, second_trade, first_info, second_info) values(?, ?, ?, ?, ?)"
+            variables = (address, first_trade, timestamp, first_info, json.dumps(data))
         self._execute_single_sql(command, variables)
+
+    def get_trade_table(self, address: str) -> Optional[Tuple]:
+        """Check whether a trade is second or not."""
+        command = "SELECT * FROM trade_table where address=?"
+        ret = self._execute_single_sql(command, (address,))
+        return ret[0] if len(ret) > 0 else None
 
     def is_registered(self, address: str) -> bool:
         """Check if an address is registered."""
@@ -94,11 +105,18 @@ class RegistrationDB(Model):
         command = "SELECT * FROM trade_table WHERE address=?"
         variables = (address,)
         result = self._execute_single_sql(command, variables)
-        # todo: check :
-        #  - if no timestamp present: return true
-        #  - if first timestamp is present: return true iff the trade is 4 hours in past
-        #  - if second timestamp is present: return false
-        return result is None
+        record = result[0]
+        first_trade: datetime.datetime = record[1]
+        second_trade: datetime.datetime = record[2]
+        first_trade_present: bool = first_trade is not None
+        second_trade_present: bool = second_trade is not None
+        if not first_trade_present and not second_trade_present:
+            return True
+        if first_trade_present and not second_trade_present:
+            return second_trade - first_trade > datetime.timedelta(
+                hours=mininum_hours_between_txs
+            )
+        return False
 
     def _execute_single_sql(
         self,
