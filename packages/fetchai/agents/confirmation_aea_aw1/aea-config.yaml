@@ -99,7 +99,7 @@ type: skill
 models:
   registration_db:
     args:
-      custom_path: path_to_db
+      custom_path: /data/registration.db
   strategy:
     args:
-      token_dispense_amount: 100000
+      token_dispense_amount: 100000000000000000000
