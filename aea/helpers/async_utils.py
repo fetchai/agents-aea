@@ -649,7 +649,7 @@ class Runnable(ABC):
         """Stop runnable."""
         _default_logger.debug(f"{self} is going to be stopped {self._task}")
         if not self._task or not self._loop:
-            return
+            return  # pragma: nocover
 
         if self._task.done():
             return
