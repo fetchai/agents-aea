@@ -21,6 +21,7 @@
 
 import shutil
 from pathlib import Path
+from typing import cast
 
 import click
 
@@ -117,7 +118,9 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     copy_package_directory(Path(src), dst)
 
     try_to_load_agent_config(ctx)
-    cli_author = ctx.config.get("cli_author")
+
+    # we know cli_author is set because of the above checks.
+    cli_author: str = cast(str, ctx.config.get("cli_author"))
     new_public_id = PublicId(
         author=cli_author, name=public_id.name, version=DEFAULT_VERSION
     )

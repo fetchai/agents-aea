@@ -19,11 +19,14 @@
 """This test module contains the tests for commands in aea.cli.eject module."""
 
 import os
+import shutil
 from pathlib import Path
 
-import yaml
+import click
+import pytest
 
-from aea.configurations.base import ComponentType
+from aea.cli.utils.constants import CLI_CONFIG_PATH
+from aea.configurations.base import ComponentType, DEFAULT_VERSION, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
 
@@ -75,19 +78,59 @@ class TestEjectCommands(AEATestCaseMany):
         assert "erc1155" in os.listdir((os.path.join(cwd, "contracts")))
 
 
-class TestEjectCommandReplacesReferences(AEATestCaseEmpty):
-    """Test that eject command replaces the right references to the new package."""
+class BaseTestEjectCommand(AEATestCaseEmpty):
+    """Replace CLI author with a known author."""
 
-    IS_EMPTY = True
     EXPECTED_AUTHOR = "some_author_name"
 
     @classmethod
     def setup_class(cls):
         """Set up the class."""
         super().setup_class()
-        cls.old_aea_author = yaml.safe_load(
-            Path("~", ".aea", "cli_config.yaml").expanduser().open()
-        )["author"]
+        # copy file temporarily - it will be restored in the teardown
+        cls.aea_cli_config = Path(CLI_CONFIG_PATH).expanduser()
+        shutil.copy(cls.aea_cli_config, Path(cls.t, cls.aea_cli_config.name))
+        os.remove(cls.aea_cli_config)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the class."""
+        shutil.copy(Path(cls.t, cls.aea_cli_config.name), cls.aea_cli_config)
+        super().teardown_class()
+
+
+class TestEjectCommandCliConfigNotAvailable(BaseTestEjectCommand):
+    """Test that 'aea eject' cannot be run if CLI configuration not provided."""
+
+    IS_EMPTY = True
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        super().setup_class()
+        # we don't set the CLI configuration
+        cls.add_item("protocol", str(DefaultMessage.protocol_id))
+
+    def test_error(self):
+        """Test that without CLI configuration, 'aea eject' won't work."""
+        with pytest.raises(
+            click.ClickException,
+            match="The AEA configurations are not initialized. Use `aea init` before continuing.",
+        ):
+            self.invoke(
+                "eject", "protocol", str(DefaultMessage.protocol_id),
+            )
+
+
+class TestEjectCommandReplacesReferences(BaseTestEjectCommand):
+    """Test that eject command replaces the right references to the new package."""
+
+    IS_EMPTY = True
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        super().setup_class()
         cls.run_cli_command(
             "init", "--local", "--reset", "--author", cls.EXPECTED_AUTHOR, cwd=cls.t
         )
@@ -95,7 +138,7 @@ class TestEjectCommandReplacesReferences(AEATestCaseEmpty):
         cls.eject_item("protocol", str(DefaultMessage.protocol_id))
 
     def test_username_is_correct(self):
-        """Run the test."""
+        """Test that the author name in the ejected component configuration is updated correctly."""
         package_path = Path(
             self.current_agent_context, "protocols", DefaultMessage.protocol_id.name
         )
@@ -107,8 +150,11 @@ class TestEjectCommandReplacesReferences(AEATestCaseEmpty):
         )
         assert component_configuration.author == self.EXPECTED_AUTHOR
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the class."""
-        cls.initialize_aea(cls.old_aea_author)
-        super().teardown_class()
+    def test_aea_config_references_updated_correctly(self):
+        """Test that the references in the AEA configuration is updated correctly."""
+        agent_config = self.load_agent_config(self.agent_name)
+        assert agent_config.protocols == {
+            PublicId(
+                self.EXPECTED_AUTHOR, DefaultMessage.protocol_id.name, DEFAULT_VERSION
+            )
+        }

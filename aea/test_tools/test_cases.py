@@ -39,14 +39,19 @@ import pytest
 import yaml
 
 from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.base import (
+    AgentConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    PackageType,
+    _get_default_configuration_file_name_from_type,
+)
 from aea.configurations.constants import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_LEDGER,
     DEFAULT_OUTPUT_FILE_NAME,
     DEFAULT_PRIVATE_KEY_FILE,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import enforce
 from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope
@@ -784,6 +789,29 @@ class BaseAEATestCase(ABC):
         )
 
         return missing_strings == []
+
+    def invoke(self, *args):
+        """Call the cli command."""
+        with cd(self._get_cwd()):
+            result = self.runner.invoke(
+                cli, args, standalone_mode=False, catch_exceptions=False
+            )
+        return result
+
+    def load_agent_config(self, agent_name: str) -> AgentConfig:
+        """Load agent configuration."""
+        if agent_name not in self.agents:
+            raise AEATestingException(
+                f"Cannot find agent '{agent_name}' in the current test case."
+            )
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        config_file_name = _get_default_configuration_file_name_from_type(
+            PackageType.AGENT
+        )
+        configuration_file_path = Path(self.t, agent_name, config_file_name)
+        with configuration_file_path.open() as file_input:
+            agent_config = loader.load(file_input)
+        return agent_config
 
     @classmethod
     def setup_class(cls):
