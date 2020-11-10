@@ -88,7 +88,7 @@ test-sub:
 
 .PHONY: test-sub-p
 test-sub-p:
-	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
+	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 
