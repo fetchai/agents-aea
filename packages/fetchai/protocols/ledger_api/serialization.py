@@ -27,10 +27,8 @@ from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.ledger_api import ledger_api_pb2
 from packages.fetchai.protocols.ledger_api.custom_types import (
-    Kwargs,
     RawTransaction,
     SignedTransaction,
-    State,
     Terms,
     TransactionDigest,
     TransactionReceipt,
@@ -117,15 +115,11 @@ class LedgerApiSerializer(Serializer):
             performative = ledger_api_pb2.LedgerApiMessage.Get_State_Performative()  # type: ignore
             ledger_id = msg.ledger_id
             performative.ledger_id = ledger_id
-            callable = msg.callable
-            performative.callable = callable
-            kwargs = msg.kwargs
-            Kwargs.encode(performative.kwargs, kwargs)
             ledger_api_msg.get_state.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.STATE:
             performative = ledger_api_pb2.LedgerApiMessage.State_Performative()  # type: ignore
             state = msg.state
-            State.encode(performative.state, state)
+            performative.state = state
             ledger_api_msg.state.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.ERROR:
             performative = ledger_api_pb2.LedgerApiMessage.Error_Performative()  # type: ignore
@@ -214,14 +208,8 @@ class LedgerApiSerializer(Serializer):
         elif performative_id == LedgerApiMessage.Performative.GET_STATE:
             ledger_id = ledger_api_pb.get_state.ledger_id
             performative_content["ledger_id"] = ledger_id
-            callable = ledger_api_pb.get_state.callable
-            performative_content["callable"] = callable
-            pb2_kwargs = ledger_api_pb.get_state.kwargs
-            kwargs = Kwargs.decode(pb2_kwargs)
-            performative_content["kwargs"] = kwargs
         elif performative_id == LedgerApiMessage.Performative.STATE:
-            pb2_state = ledger_api_pb.state.state
-            state = State.decode(pb2_state)
+            state = ledger_api_pb.state.state
             performative_content["state"] = state
         elif performative_id == LedgerApiMessage.Performative.ERROR:
             code = ledger_api_pb.error.code

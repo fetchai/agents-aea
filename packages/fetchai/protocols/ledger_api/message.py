@@ -26,14 +26,12 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.ledger_api.custom_types import Kwargs as CustomKwargs
 from packages.fetchai.protocols.ledger_api.custom_types import (
     RawTransaction as CustomRawTransaction,
 )
 from packages.fetchai.protocols.ledger_api.custom_types import (
     SignedTransaction as CustomSignedTransaction,
 )
-from packages.fetchai.protocols.ledger_api.custom_types import State as CustomState
 from packages.fetchai.protocols.ledger_api.custom_types import Terms as CustomTerms
 from packages.fetchai.protocols.ledger_api.custom_types import (
     TransactionDigest as CustomTransactionDigest,
@@ -53,13 +51,9 @@ class LedgerApiMessage(Message):
 
     protocol_id = PublicId.from_str("fetchai/ledger_api:0.6.0")
 
-    Kwargs = CustomKwargs
-
     RawTransaction = CustomRawTransaction
 
     SignedTransaction = CustomSignedTransaction
-
-    State = CustomState
 
     Terms = CustomTerms
 
@@ -165,12 +159,6 @@ class LedgerApiMessage(Message):
         return cast(int, self.get("balance"))
 
     @property
-    def callable(self) -> str:
-        """Get the 'callable' content from the message."""
-        enforce(self.is_set("callable"), "'callable' content is not set.")
-        return cast(str, self.get("callable"))
-
-    @property
     def code(self) -> int:
         """Get the 'code' content from the message."""
         enforce(self.is_set("code"), "'code' content is not set.")
@@ -180,12 +168,6 @@ class LedgerApiMessage(Message):
     def data(self) -> Optional[bytes]:
         """Get the 'data' content from the message."""
         return cast(Optional[bytes], self.get("data"))
-
-    @property
-    def kwargs(self) -> CustomKwargs:
-        """Get the 'kwargs' content from the message."""
-        enforce(self.is_set("kwargs"), "'kwargs' content is not set.")
-        return cast(CustomKwargs, self.get("kwargs"))
 
     @property
     def ledger_id(self) -> str:
@@ -214,10 +196,10 @@ class LedgerApiMessage(Message):
         return cast(CustomSignedTransaction, self.get("signed_transaction"))
 
     @property
-    def state(self) -> CustomState:
+    def state(self) -> str:
         """Get the 'state' content from the message."""
         enforce(self.is_set("state"), "'state' content is not set.")
-        return cast(CustomState, self.get("state"))
+        return cast(str, self.get("state"))
 
     @property
     def terms(self) -> CustomTerms:
@@ -372,30 +354,18 @@ class LedgerApiMessage(Message):
                     ),
                 )
             elif self.performative == LedgerApiMessage.Performative.GET_STATE:
-                expected_nb_of_contents = 3
+                expected_nb_of_contents = 1
                 enforce(
                     type(self.ledger_id) == str,
                     "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
                         type(self.ledger_id)
                     ),
                 )
-                enforce(
-                    type(self.callable) == str,
-                    "Invalid type for content 'callable'. Expected 'str'. Found '{}'.".format(
-                        type(self.callable)
-                    ),
-                )
-                enforce(
-                    type(self.kwargs) == CustomKwargs,
-                    "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
-                        type(self.kwargs)
-                    ),
-                )
             elif self.performative == LedgerApiMessage.Performative.STATE:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.state) == CustomState,
-                    "Invalid type for content 'state'. Expected 'State'. Found '{}'.".format(
+                    type(self.state) == str,
+                    "Invalid type for content 'state'. Expected 'str'. Found '{}'.".format(
                         type(self.state)
                     ),
                 )

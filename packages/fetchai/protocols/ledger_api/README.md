@@ -35,10 +35,8 @@ speech_acts:
     transaction_receipt: ct:TransactionReceipt
   get_state:
     ledger_id: pt:str
-    callable: pt:str
-    kwargs: ct:Kwargs
   state:
-    state: ct:State
+    state: pt:str
   error:
     code: pt:int
     message: pt:optional[pt:str]
@@ -55,10 +53,6 @@ ct:TransactionDigest: |
   bytes transaction_digest = 1;
 ct:TransactionReceipt: |
   bytes transaction_receipt = 1;
-ct:Kwargs: |
-  bytes kwargs = 1;
-ct:State: |
-  bytes state = 1;
 ...
 ---
 initiation: [get_balance, get_raw_transaction, send_signed_transaction, get_transaction_receipt]
