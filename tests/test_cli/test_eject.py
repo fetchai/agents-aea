@@ -36,6 +36,7 @@ from packages.fetchai.connections.gym.connection import (
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
 from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.gym.message import GymMessage
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_PUBLIC_ID
 from packages.fetchai.skills.gym import PUBLIC_ID as GYM_SKILL_PUBLIC_ID
 
 
@@ -157,4 +158,50 @@ class TestEjectCommandReplacesReferences(BaseTestEjectCommand):
             PublicId(
                 self.EXPECTED_AUTHOR, DefaultMessage.protocol_id.name, DEFAULT_VERSION
             )
+        }
+
+
+class TestEjectCommandReplacesCustomConfigurationReference(BaseTestEjectCommand):
+    """Test that eject command replaces references in AEA configuration."""
+
+    IS_EMPTY = True
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        super().setup_class()
+        cls.run_cli_command(
+            "init", "--local", "--reset", "--author", cls.EXPECTED_AUTHOR, cwd=cls.t
+        )
+        cls.add_item("skill", str(ERROR_PUBLIC_ID))
+        # add a custom configuration to the error skill
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "config",
+            "set",
+            "vendor.fetchai.skills.error.is_abstract",
+            "--type",
+            "bool",
+            "true",
+            cwd=cls._get_cwd(),
+        )
+
+        cls.eject_item("skill", str(ERROR_PUBLIC_ID))
+
+    def test_username_is_correct(self):
+        """Test that the author name in the ejected component configuration is updated correctly."""
+        package_path = Path(self.current_agent_context, "skills", ERROR_PUBLIC_ID.name)
+        assert (
+            package_path.exists()
+        ), f"Expected ejected package in '{package_path}', but not found."
+        component_configuration = load_component_configuration(
+            ComponentType.SKILL, package_path
+        )
+        assert component_configuration.author == self.EXPECTED_AUTHOR
+
+    def test_aea_config_references_updated_correctly(self):
+        """Test that the references in the AEA configuration is updated correctly."""
+        agent_config = self.load_agent_config(self.agent_name)
+        assert agent_config.skills == {
+            PublicId(self.EXPECTED_AUTHOR, ERROR_PUBLIC_ID.name, DEFAULT_VERSION)
         }

@@ -76,7 +76,7 @@ DEFAULT_LAUNCH_TIMEOUT = 10
 LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
 
 
-class BaseAEATestCase(ABC):
+class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     """Base class for AEA test cases."""
 
     runner: CliRunner  # CLI runner
@@ -790,17 +790,19 @@ class BaseAEATestCase(ABC):
 
         return missing_strings == []
 
-    def invoke(self, *args):
+    @classmethod
+    def invoke(cls, *args):
         """Call the cli command."""
-        with cd(self._get_cwd()):
-            result = self.runner.invoke(
+        with cd(cls._get_cwd()):
+            result = cls.runner.invoke(
                 cli, args, standalone_mode=False, catch_exceptions=False
             )
         return result
 
-    def load_agent_config(self, agent_name: str) -> AgentConfig:
+    @classmethod
+    def load_agent_config(cls, agent_name: str) -> AgentConfig:
         """Load agent configuration."""
-        if agent_name not in self.agents:
+        if agent_name not in cls.agents:
             raise AEATestingException(
                 f"Cannot find agent '{agent_name}' in the current test case."
             )
@@ -808,7 +810,7 @@ class BaseAEATestCase(ABC):
         config_file_name = _get_default_configuration_file_name_from_type(
             PackageType.AGENT
         )
-        configuration_file_path = Path(self.t, agent_name, config_file_name)
+        configuration_file_path = Path(cls.t, agent_name, config_file_name)
         with configuration_file_path.open() as file_input:
             agent_config = loader.load(file_input)
         return agent_config

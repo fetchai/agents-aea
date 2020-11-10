@@ -222,7 +222,7 @@ class TestGenericCases(AEATestCaseEmpty):
 
 
 class TestLoadAgentConfig(AEATestCaseEmpty):
-    """Test function load_agent_config."""
+    """Test function 'load_agent_config'."""
 
     def test_load_agent_config(self):
         """Test load_agent_config."""

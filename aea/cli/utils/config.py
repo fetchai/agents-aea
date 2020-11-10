@@ -29,6 +29,7 @@ import yaml
 
 from aea.cli.utils.constants import (
     ALLOWED_PATH_ROOTS,
+    AUTHOR_KEY,
     CLI_CONFIG_PATH,
     RESOURCE_TYPE_TO_CONFIG_FILE,
 )
@@ -124,6 +125,24 @@ def get_or_create_cli_config() -> Dict:
     except FileNotFoundError:
         _init_cli_config()
     return load_yaml(CLI_CONFIG_PATH)
+
+
+def set_cli_author(click_context) -> None:
+    """
+    Set CLI author in the CLI Context.
+
+    The key of the new field is 'cli_author'.
+
+    :param click_context: the Click context
+    :return: None.
+    """
+    config = get_or_create_cli_config()
+    cli_author = config.get(AUTHOR_KEY, None)
+    if cli_author is None:
+        raise click.ClickException(
+            "The AEA configurations are not initialized. Use `aea init` before continuing."
+        )
+    click_context.obj.set_config("cli_author", cli_author)
 
 
 def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:
