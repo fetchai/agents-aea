@@ -33,6 +33,10 @@ speech_acts:
     transaction_digest: ct:TransactionDigest
   transaction_receipt:
     transaction_receipt: ct:TransactionReceipt
+  get_state:
+    ledger_id: pt:str
+  state:
+    state: pt:str
   error:
     code: pt:int
     message: pt:optional[pt:str]
@@ -55,6 +59,8 @@ initiation: [get_balance, get_raw_transaction, send_signed_transaction, get_tran
 reply:
   get_balance: [balance, error]
   balance: []
+  get_state: [state, error]
+  state: []
   get_raw_transaction: [raw_transaction, error]
   raw_transaction: [send_signed_transaction]
   send_signed_transaction: [transaction_digest, error]

@@ -68,9 +68,11 @@ class LedgerApiMessage(Message):
         ERROR = "error"
         GET_BALANCE = "get_balance"
         GET_RAW_TRANSACTION = "get_raw_transaction"
+        GET_STATE = "get_state"
         GET_TRANSACTION_RECEIPT = "get_transaction_receipt"
         RAW_TRANSACTION = "raw_transaction"
         SEND_SIGNED_TRANSACTION = "send_signed_transaction"
+        STATE = "state"
         TRANSACTION_DIGEST = "transaction_digest"
         TRANSACTION_RECEIPT = "transaction_receipt"
 
@@ -125,6 +127,19 @@ class LedgerApiMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
+        self._performatives = {
+            "balance",
+            "error",
+            "get_balance",
+            "get_raw_transaction",
+            "get_state",
+            "get_transaction_receipt",
+            "raw_transaction",
+            "send_signed_transaction",
+            "state",
+            "transaction_digest",
+            "transaction_receipt",
+        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -210,6 +225,12 @@ class LedgerApiMessage(Message):
             "'signed_transaction' content is not set.",
         )
         return cast(CustomSignedTransaction, self.get("signed_transaction"))
+
+    @property
+    def state(self) -> str:
+        """Get the 'state' content from the message."""
+        enforce(self.is_set("state"), "'state' content is not set.")
+        return cast(str, self.get("state"))
 
     @property
     def terms(self) -> CustomTerms:
@@ -363,6 +384,22 @@ class LedgerApiMessage(Message):
                         type(self.transaction_receipt)
                     ),
                 )
+            elif self.performative == LedgerApiMessage.Performative.GET_STATE:
+                expected_nb_of_contents = 1
+                enforce(
+                    type(self.ledger_id) == str,
+                    "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                        type(self.ledger_id)
+                    ),
+                )
+            elif self.performative == LedgerApiMessage.Performative.STATE:
+                expected_nb_of_contents = 1
+                enforce(
+                    type(self.state) == str,
+                    "Invalid type for content 'state'. Expected 'str'. Found '{}'.".format(
+                        type(self.state)
+                    ),
+                )
             elif self.performative == LedgerApiMessage.Performative.ERROR:
                 expected_nb_of_contents = 1
                 enforce(
@@ -410,7 +447,8 @@ class LedgerApiMessage(Message):
                 enforce(
                     0 < self.target < self.message_id,
                     "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
+                        self.message_id - 1,
+                        self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
