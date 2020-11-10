@@ -20,7 +20,6 @@
 import asyncio
 import os
 import unittest
-from unittest import TestCase
 from unittest.mock import MagicMock
 
 import pytest
@@ -39,7 +38,7 @@ from aea.mail.base import Envelope
 from tests.conftest import CUR_PATH
 
 
-class TestConnection(Connection):
+class TConnection(Connection):
     """Test class for Connection."""
 
     connection_id = PublicId.from_str("fetchai/some_connection:0.1.0")
@@ -65,41 +64,33 @@ class TestConnection(Connection):
         pass
 
 
-class ConnectionTestCase(TestCase):
+class TestConnectionTestCase:
     """Test case for Connection abstract class."""
 
-    def setUp(self):
-        """Set the tst up."""
-        self.TestConnection = TestConnection
+    TConnection = TConnection
 
     @pytest.mark.asyncio
     async def test_loop_only_in_running_loop(self):
         """Test loop property positive result."""
-        obj = self.TestConnection(
-            ConnectionConfig("some_connection", "fetchai", "0.1.0")
-        )
+        obj = self.TConnection(ConnectionConfig("some_connection", "fetchai", "0.1.0"))
         obj.loop
 
     def test_loop_fails_on_non_running_loop(self):
         """Test loop property positive result."""
-        obj = self.TestConnection(
-            ConnectionConfig("some_connection", "fetchai", "0.1.0")
-        )
+        obj = self.TConnection(ConnectionConfig("some_connection", "fetchai", "0.1.0"))
         with pytest.raises(AEAEnforceError):
             obj.loop
 
     def test_excluded_protocols_positive(self):
         """Test excluded_protocols property positive result."""
-        obj = self.TestConnection(
-            ConnectionConfig("some_connection", "fetchai", "0.1.0")
-        )
+        obj = self.TConnection(ConnectionConfig("some_connection", "fetchai", "0.1.0"))
         obj._excluded_protocols = "excluded_protocols"
         obj.excluded_protocols
 
 
 def test_loop_property():
     """Test connection's loop property."""
-    connection = TestConnection(MagicMock(public_id=TestConnection.connection_id))
+    connection = TConnection(MagicMock(public_id=TConnection.connection_id))
     with unittest.mock.patch.object(aea.connections.base, "enforce"):
         loop = connection.loop
         assert isinstance(loop, asyncio.AbstractEventLoop)
@@ -130,7 +121,7 @@ def test_ensure_valid_envelope_for_external_comms_negative_cases():
 
 def test_state():
     """Test connect context of a connection."""
-    connection = TestConnection(MagicMock(public_id=TestConnection.connection_id))
+    connection = TConnection(MagicMock(public_id=TConnection.connection_id))
     assert connection.state == ConnectionStates.disconnected
 
     with connection._connect_context():

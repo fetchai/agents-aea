@@ -163,6 +163,20 @@ class TestSkillContext:
             == self.my_aea.context.decision_maker_address
         )
 
+    def test_default_ledger_id(self):
+        """Test 'default_ledger_id' property getter."""
+        assert (
+            self.skill_context.default_ledger_id
+            == self.my_aea.context.default_ledger_id
+        )
+
+    def test_currency_denominations(self):
+        """Test 'currency_denominations' property getter."""
+        assert (
+            self.skill_context.currency_denominations
+            == self.my_aea.context.currency_denominations
+        )
+
     def test_namespace(self):
         """Test the 'namespace' property getter."""
         assert isinstance(self.skill_context.namespace, SimpleNamespace)
