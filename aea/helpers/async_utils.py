@@ -516,8 +516,9 @@ class Runnable(ABC):
 
         if self._threaded:
             self._thread = Thread(
-                target=self._loop.run_until_complete, args=[self._task]  # type: ignore # loop was set in set_loop
+                target=self._loop.run_until_complete, args=[self._task], name=self.__class__.__name__  # type: ignore # loop was set in set_loop
             )
+            self._thread.setDaemon(True)
             self._thread.start()
 
         return True

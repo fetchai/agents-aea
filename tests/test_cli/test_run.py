@@ -124,6 +124,71 @@ def test_run():
             pass
 
 
+def test_run_with_profiling():
+    """Test profiling data showed."""
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
+
+    os.chdir(t)
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(
+        cli,
+        [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_connection",
+            str(HTTP_ClIENT_PUBLIC_ID),
+        ],
+    )
+    assert result.exit_code == 0
+
+    try:
+        process = PexpectWrapper(  # nosec
+            [sys.executable, "-m", "aea.cli", "run", "--profiling", "1"],
+            env=os.environ.copy(),
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
+        )
+
+        process.expect("Start processing messages", timeout=10)
+        process.expect("Profiling details:", timeout=10)
+        process.control_c()
+        process.wait_to_complete(10)
+
+        assert process.returncode == 0
+
+    finally:
+        process.terminate()
+        process.wait_to_complete(10)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
+
+
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_run_with_default_connection():
     """Test that the command 'aea run' works as expected."""

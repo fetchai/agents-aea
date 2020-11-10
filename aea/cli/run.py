@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea run' subcommand."""
 
 from pathlib import Path
@@ -35,6 +34,7 @@ from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import load_env_file
+from aea.helpers.profiling import Profiling
 
 
 @click.command()
@@ -62,13 +62,27 @@ from aea.helpers.base import load_env_file
     default=False,
     help="Install all the dependencies before running the agent.",
 )
+@click.option(
+    "--profiling",
+    "profiling",
+    required=False,
+    default=0,
+    help="Enable profiling, print profiling every amount of seconds",
+)
 @click.pass_context
 @check_aea_project
 def run(
-    click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
+    click_context,
+    connection_ids: List[PublicId],
+    env_file: str,
+    is_install_deps: bool,
+    profiling: int,
 ):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
+    profiling = int(profiling)
+    if profiling > 0:
+        Profiling(profiling).start()
     run_aea(ctx, connection_ids, env_file, is_install_deps)
 
 
