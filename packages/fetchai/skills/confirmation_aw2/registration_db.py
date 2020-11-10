@@ -51,8 +51,6 @@ class RegistrationDB(Model):
 
     def _initialise_backend(self) -> None:
         """Set up database and initialise the tables."""
-        if os.path.isfile(self.db_path):
-            return
         self._execute_single_sql(
             "CREATE TABLE IF NOT EXISTS registered_table (address TEXT, ethereum_address TEXT, "
             "ethereum_signature TEXT, fetchai_signature TEXT, "
