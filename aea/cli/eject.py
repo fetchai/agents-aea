@@ -26,7 +26,12 @@ import click
 
 from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.click_utils import PublicIdParameter
-from aea.cli.utils.config import try_to_load_agent_config, update_item_config
+from aea.cli.utils.config import (
+    get_or_create_cli_config,
+    try_to_load_agent_config,
+    update_item_config,
+)
+from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
@@ -41,8 +46,15 @@ from aea.configurations.base import DEFAULT_VERSION, PublicId
 @click.group()
 @click.pass_context
 @check_aea_project
-def eject(click_context: click.core.Context):  # pylint: disable=unused-argument
+def eject(click_context: click.core.Context):
     """Eject an installed item."""
+    config = get_or_create_cli_config()
+    cli_author = config.get(AUTHOR_KEY, None)
+    if cli_author is None:
+        raise click.ClickException(
+            "The AEA configurations are not initialized. Use `aea init` before continuing."
+        )
+    click_context.obj.set_config("cli_author", cli_author)
 
 
 @eject.command()
@@ -92,25 +104,22 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     item_type_plural = item_type + "s"
     if not is_item_present(ctx, item_type, public_id):  # pragma: no cover
         raise click.ClickException(
-            "{} {} not found in agent's vendor items.".format(
-                item_type.title(), public_id
-            )
+            f"{item_type.title()} {public_id} not found in agent's vendor items."
         )
     src = get_package_path(ctx, item_type, public_id)
     dst = get_package_path(ctx, item_type, public_id, is_vendor=False)
     if is_item_present(ctx, item_type, public_id, is_vendor=False):  # pragma: no cover
         raise click.ClickException(
-            "{} {} is already in a non-vendor item.".format(
-                item_type.title(), public_id
-            )
+            f"{item_type.title()} {public_id} is already in a non-vendor item."
         )
 
     ctx.clean_paths.append(dst)
     copy_package_directory(Path(src), dst)
 
     try_to_load_agent_config(ctx)
+    cli_author = ctx.config.get("cli_author")
     new_public_id = PublicId(
-        author=ctx.agent_config.author, name=public_id.name, version=DEFAULT_VERSION
+        author=cli_author, name=public_id.name, version=DEFAULT_VERSION
     )
     update_item_config(
         item_type, Path(dst), author=new_public_id.author, version=new_public_id.version
@@ -128,7 +137,5 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     shutil.rmtree(src)
     fingerprint_item(ctx, item_type, new_public_id)
     click.echo(
-        "Successfully ejected {} {} to {} as {}.".format(
-            item_type, public_id, dst, new_public_id
-        )
+        f"Successfully ejected {item_type} {public_id} to {dst} as {new_public_id}."
     )

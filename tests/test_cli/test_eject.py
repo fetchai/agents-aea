@@ -19,13 +19,19 @@
 """This test module contains the tests for commands in aea.cli.eject module."""
 
 import os
+from pathlib import Path
 
-from aea.test_tools.test_cases import AEATestCaseMany
+import yaml
+
+from aea.configurations.base import ComponentType
+from aea.configurations.loader import load_component_configuration
+from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
 
 from packages.fetchai.connections.gym.connection import (
     PUBLIC_ID as GYM_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
+from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym import PUBLIC_ID as GYM_SKILL_PUBLIC_ID
 
@@ -67,3 +73,42 @@ class TestEjectCommands(AEATestCaseMany):
             (os.path.join(cwd, "vendor", "fetchai", "contracts"))
         )
         assert "erc1155" in os.listdir((os.path.join(cwd, "contracts")))
+
+
+class TestEjectCommandReplacesReferences(AEATestCaseEmpty):
+    """Test that eject command replaces the right references to the new package."""
+
+    IS_EMPTY = True
+    EXPECTED_AUTHOR = "some_author_name"
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        super().setup_class()
+        cls.old_aea_author = yaml.safe_load(
+            Path("~", ".aea", "cli_config.yaml").expanduser().open()
+        )["author"]
+        cls.run_cli_command(
+            "init", "--local", "--reset", "--author", cls.EXPECTED_AUTHOR, cwd=cls.t
+        )
+        cls.add_item("protocol", str(DefaultMessage.protocol_id))
+        cls.eject_item("protocol", str(DefaultMessage.protocol_id))
+
+    def test_username_is_correct(self):
+        """Run the test."""
+        package_path = Path(
+            self.current_agent_context, "protocols", DefaultMessage.protocol_id.name
+        )
+        assert (
+            package_path.exists()
+        ), f"Expected ejected package in '{package_path}', but not found."
+        component_configuration = load_component_configuration(
+            ComponentType.PROTOCOL, package_path
+        )
+        assert component_configuration.author == self.EXPECTED_AUTHOR
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the class."""
+        cls.initialize_aea(cls.old_aea_author)
+        super().teardown_class()
