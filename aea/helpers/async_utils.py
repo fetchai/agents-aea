@@ -543,7 +543,7 @@ class Runnable(ABC):
         """Wrap run() method."""
         if not self._completed_event or not self._loop:  # pragma: nocover
             raise ValueError("Start was not called!")
-
+        self._is_running = True
         try:
             with suppress(asyncio.CancelledError):
                 return await self.run()
