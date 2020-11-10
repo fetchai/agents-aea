@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the carpark client skill."""
+"""This module contains the implementation of the buyer_aw2 skill."""
 
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/carpark_client:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/confirmation_aw2:0.1.0")

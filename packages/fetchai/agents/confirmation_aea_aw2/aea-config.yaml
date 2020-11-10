@@ -1,8 +1,9 @@
-agent_name: simple_buyer_aw2
+agent_name: confirmation_aea_aw2
 author: fetchai
-version: 0.2.0
+version: 0.1.0
+description: This agent purchases information from other agents as specified in its
+  configuration. It acts as the confirmation AEA in Agent World 2.
 license: Apache-2.0
-description: This AEA buys data from a simple seller in Agent World 2.
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
@@ -12,17 +13,15 @@ connections:
 - fetchai/soef:0.12.0
 contracts: []
 protocols:
-- fetchai/contract_api:0.8.0
 - fetchai/default:0.9.0
-- fetchai/fipa:0.10.0
 - fetchai/ledger_api:0.7.0
 - fetchai/oef_search:0.10.0
 - fetchai/signing:0.7.0
 - fetchai/state_update:0.7.0
 skills:
+- fetchai/confirmation_aw2:0.1.0
 - fetchai/error:0.9.0
 - fetchai/generic_buyer:0.16.0
-- fetchai/simple_buyer:0.2.0
 default_connection: fetchai/p2p_libp2p:0.12.0
 default_ledger: fetchai
 default_routing:
@@ -57,23 +56,6 @@ logging_config:
       propagate: false
 registry_path: ../packages
 ---
-public_id: fetchai/simple_buyer:0.2.0
-type: skill
-models:
-  strategy:
-    args:
-      location:
-        latitude: 51.5194
-        longitude: 0.127
-      max_negotiations: 2
-      max_unit_price: 20
-      search_query:
-        constraint_type: ==
-        search_key: seller_service
-        search_value: weather_data
-      search_radius: 50.0
-      service_id: weather_data
----
 public_id: fetchai/p2p_libp2p:0.12.0
 type: connection
 config:
@@ -91,6 +73,33 @@ public_id: fetchai/ledger:0.9.0
 type: connection
 config:
   ledger_apis:
+    ethereum:
+      address: https://mainnet.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     fetchai:
       address: https://rest-agentworld.prod.fetch-ai.com:443
       chain_id: agentworld-1
+---
+public_id: fetchai/confirmation_aw2:0.1.0
+type: skill
+behaviours:
+  search:
+    args:
+      search_interval: 30
+models:
+  registration_db:
+    args:
+      custom_path: /data/registration.db
+  strategy:
+    args:
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      max_tx_fee: 1
+      max_unit_price: 20
+      mininum_hours_between_txs: 4
+      search_query:
+        constraint_type: ==
+        search_key: seller_service
+        search_value: weather_data
+      search_radius: 50.0
+      service_id: weather_data

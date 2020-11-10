@@ -1,6 +1,6 @@
 agent_name: confirmation_aea_aw1
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: This agent manages confirmation of registration for Agent World 1
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
@@ -93,3 +93,13 @@ models:
       service_data:
         key: registration_service
         value: aw1-registration
+---
+public_id: fetchai/confirmation_aw1:0.2.0
+type: skill
+models:
+  registration_db:
+    args:
+      custom_path: /data/registration.db
+  strategy:
+    args:
+      token_dispense_amount: 100000000000000000000

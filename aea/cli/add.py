@@ -28,6 +28,7 @@ from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
+from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import (
     copy_package_directory,
     find_item_in_distribution,
@@ -202,13 +203,13 @@ def fetch_item_mixed(
     :return: the path to the found package.
     """
     try:
-        package_path = fetch_package(
-            item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
-        )
-    except click.ClickException:
-        click.echo("Fetch from remote registry failed, trying locally...")
-        # the following might raise exception, but we don't catch it this time
         package_path = find_item_locally_or_distributed(
             ctx, item_type, item_public_id, dest_path
+        )
+    except click.ClickException:
+        logger.debug("Fetch from local registry failed, trying remote registry...")
+        # the following might raise exception, but we don't catch it this time
+        package_path = fetch_package(
+            item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
         )
     return package_path
