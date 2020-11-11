@@ -338,7 +338,7 @@ class AEA(Agent):
             return
 
         for handler in handlers:
-            handler.handle(msg)
+            handler.handle_wrapper(msg)
 
     def _setup_loggers(self):
         """Set up logger with agent name."""
@@ -402,10 +402,14 @@ class AEA(Agent):
         :return: bool, propagate exception if True otherwise skip it.
         """
         # docstyle: ignore # noqa: E800
-        def log_exception(e, fn):
-            self.logger.exception(f"<{e}> raised during `{fn}`")
+        def log_exception(e, fn, is_debug: bool = False):
+            if is_debug:
+                self.logger.debug(f"<{e}> raised during `{fn}`")
+            else:
+                self.logger.exception(f"<{e}> raised during `{fn}`")
 
         if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
+            log_exception(exception, function, is_debug=True)
             return True
 
         if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:

@@ -39,6 +39,14 @@ class AEATeardownError(AEAException):
     """Class for exceptions that are raised for teardown errors of AEA packages."""
 
 
+class AEAActException(AEAException):
+    """Class for exceptions that are raised for act errors of AEA packages."""
+
+
+class AEAHandleException(AEAException):
+    """Class for exceptions that are raised for handler errors of AEA packages."""
+
+
 class AEAEnforceError(AEAException):
     """Class for enforcement errors."""
 

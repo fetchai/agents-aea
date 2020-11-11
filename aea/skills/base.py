@@ -41,7 +41,13 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
-from aea.exceptions import AEAException, enforce
+from aea.exceptions import (
+    AEAActException,
+    AEAException,
+    AEAHandleException,
+    enforce,
+    parse_exception,
+)
 from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.multiplexer import MultiplexerStatus, OutBox
@@ -366,7 +372,13 @@ class Behaviour(AbstractBehaviour, ABC):
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
-        self.act()
+        try:
+            self.act()
+        except Exception as e:
+            e_str = parse_exception(e)
+            raise AEAActException(
+                f"An error occured during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+            )
 
     @classmethod
     def parse_module(  # pylint: disable=arguments-differ
@@ -456,6 +468,16 @@ class Handler(SkillComponent, ABC):
         :param message: the message
         :return: None
         """
+
+    def handle_wrapper(self, message: Message) -> None:
+        """Wrap the call of the handler. This method must be called only by the framework."""
+        try:
+            self.handle(message)
+        except Exception as e:
+            e_str = parse_exception(e)
+            raise AEAHandleException(
+                f"An error occured during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+            )
 
     @classmethod
     def parse_module(  # pylint: disable=arguments-differ
