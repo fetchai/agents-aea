@@ -170,12 +170,24 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
             fee_by_currency_id={"1": 2},
         )
         cls.terms = [cls.terms_1, cls.terms_2]
-
         cls.sender_signatures = ["sender_signature_1", "sender_signature_2"]
         cls.counterparty_signatures = [
             "counterparty_signature_1",
             "counterparty_signature_2",
         ]
+
+        cls.txs = {
+            cls.tx_ids[0]: {
+                "terms": cls.terms[0],
+                "sender_signature": cls.sender_signatures[0],
+                "counterparty_signature": cls.counterparty_signatures[0],
+            },
+            cls.tx_ids[1]: {
+                "terms": cls.terms[1],
+                "sender_signature": cls.sender_signatures[1],
+                "counterparty_signature": cls.counterparty_signatures[1],
+            },
+        }
 
     def test_setup(self):
         """Test the setup method of the transaction_process behaviour."""
@@ -199,20 +211,10 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         """Test the act method of the transaction_process behaviour where phase is GAME."""
         # setup
         self.game._phase = Phase.GAME
-        txs = {
-            self.tx_ids[0]: {
-                "terms": self.terms[0],
-                "sender_signature": self.sender_signatures[0],
-                "counterparty_signature": self.counterparty_signatures[0],
-            },
-            self.tx_ids[1]: {
-                "terms": self.terms[1],
-                "sender_signature": self.sender_signatures[1],
-                "counterparty_signature": self.counterparty_signatures[1],
-            },
+        no_tx = len(self.txs)
+        self.skill.skill_context._agent_context._shared_state = {
+            "transactions": self.txs
         }
-
-        self.skill.skill_context._agent_context._shared_state = {"transactions": txs}
 
         tac_dialogue = self.prepare_skill_dialogue(
             self.tac_dialogues, self.list_of_tac_messages,
@@ -224,11 +226,11 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
             self.transaction_process_behaviour.act()
 
         # after
-        self.assert_quantity_in_outbox(len(txs))
+        self.assert_quantity_in_outbox(no_tx)
 
         # _process_transactions
         count = 0
-        while count != len(txs):
+        while count != no_tx:
             mock_logger.assert_any_call(
                 logging.INFO, f"sending transaction {self.tx_ids[count]} to controller."
             )
@@ -239,7 +241,7 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
                 performative=TacMessage.Performative.TRANSACTION,
                 to=COUNTERPARTY_ADDRESS,
                 sender=self.skill.skill_context.agent_address,
-                target=tac_dialogue.last_message.message_id - len(txs) + count,
+                target=tac_dialogue.last_message.message_id - no_tx + count,
                 transaction_id=self.tx_ids[count],
                 ledger_id=self.terms[count].ledger_id,
                 sender_address=self.terms[count].sender_address,
@@ -258,20 +260,8 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         """Test the _process_transactions method of the transaction_process behaviour where last message of tac_dialogue is None."""
         # setup
         self.game._phase = Phase.GAME
-
         self.skill.skill_context._agent_context._shared_state = {
-            "transactions": {
-                self.tx_ids[0]: {
-                    "terms": self.terms[0],
-                    "sender_signature": self.sender_signatures[0],
-                    "counterparty_signature": self.counterparty_signatures[0],
-                },
-                self.tx_ids[1]: {
-                    "terms": self.terms[1],
-                    "sender_signature": self.sender_signatures[1],
-                    "counterparty_signature": self.counterparty_signatures[1],
-                },
-            }
+            "transactions": self.txs
         }
 
         tac_dialogue = self.prepare_skill_dialogue(
