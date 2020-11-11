@@ -228,8 +228,6 @@ def test_libp2pconnection_mixed_ip_address():
     assert _ip_all_private_or_all_public(["fetch.ai", "127.0.0.1"]) is False
     assert _ip_all_private_or_all_public(["104.26.2.97", "127.0.0.1"]) is False
     assert (
-        _ip_all_private_or_all_public(
-            ["fetch.ai", "agents-p2p-dht.prod.fetch-ai.com"]
-        )
+        _ip_all_private_or_all_public(["fetch.ai", "agents-p2p-dht.prod.fetch-ai.com"])
         is True
     )
