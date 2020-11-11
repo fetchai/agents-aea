@@ -394,6 +394,36 @@ class TestTacHandler(BaseSkillTestCase):
         assert self.tac_handler.setup() is None
         self.assert_quantity_in_outbox(0)
 
+    def test_handle_sender_not_equal_to_expected_controller(self):
+        """Test the handle method of the tac handler where message sender is NOT equal to the expected controller."""
+        # setup
+        self.game._expected_controller_addr = "some_different_controller_address"
+
+        dialogue = self.prepare_skill_dialogue(
+            self.tac_dialogues, self.list_of_messages[:1]
+        )
+
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=dialogue,
+            message_type=TacMessage,
+            performative=TacMessage.Performative.TAC_ERROR,
+            error_code=TacMessage.ErrorCode.AGENT_ADDR_ALREADY_REGISTERED,
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            with pytest.raises(
+                ValueError,
+                match="The sender of the message is not the controller agent we registered with.",
+            ):
+                self.tac_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.DEBUG,
+            f"handling controller response. performative={incoming_message.performative}",
+        )
+
     def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the tac handler."""
         # setup
