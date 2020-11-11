@@ -199,21 +199,20 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         """Test the act method of the transaction_process behaviour where phase is GAME."""
         # setup
         self.game._phase = Phase.GAME
-
-        self.skill.skill_context._agent_context._shared_state = {
-            "transactions": {
-                self.tx_ids[0]: {
-                    "terms": self.terms[0],
-                    "sender_signature": self.sender_signatures[0],
-                    "counterparty_signature": self.counterparty_signatures[0],
-                },
-                self.tx_ids[1]: {
-                    "terms": self.terms[1],
-                    "sender_signature": self.sender_signatures[1],
-                    "counterparty_signature": self.counterparty_signatures[1],
-                },
-            }
+        txs = {
+            self.tx_ids[0]: {
+                "terms": self.terms[0],
+                "sender_signature": self.sender_signatures[0],
+                "counterparty_signature": self.counterparty_signatures[0],
+            },
+            self.tx_ids[1]: {
+                "terms": self.terms[1],
+                "sender_signature": self.sender_signatures[1],
+                "counterparty_signature": self.counterparty_signatures[1],
+            },
         }
+
+        self.skill.skill_context._agent_context._shared_state = {"transactions": txs}
 
         tac_dialogue = self.prepare_skill_dialogue(
             self.tac_dialogues, self.list_of_tac_messages,
@@ -225,11 +224,11 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
             self.transaction_process_behaviour.act()
 
         # after
-        self.assert_quantity_in_outbox(2)
+        self.assert_quantity_in_outbox(len(txs))
 
         # _process_transactions
         count = 0
-        while count != len(self.terms):
+        while count != len(txs):
             mock_logger.assert_any_call(
                 logging.INFO, f"sending transaction {self.tx_ids[count]} to controller."
             )
@@ -240,9 +239,7 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
                 performative=TacMessage.Performative.TRANSACTION,
                 to=COUNTERPARTY_ADDRESS,
                 sender=self.skill.skill_context.agent_address,
-                target=tac_dialogue.last_message.message_id
-                - 2
-                + count,  # 2 tx messages already added to the tac_dialogue
+                target=tac_dialogue.last_message.message_id - len(txs) + count,
                 transaction_id=self.tx_ids[count],
                 ledger_id=self.terms[count].ledger_id,
                 sender_address=self.terms[count].sender_address,
