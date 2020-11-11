@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.12.0
+aea fetch fetchai/generic_seller:0.13.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.15.0
+aea eject skill fetchai/generic_seller:0.16.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.12.0
+aea fetch fetchai/generic_buyer:0.14.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.14.0
+aea eject skill fetchai/generic_buyer:0.16.0
 cd ..
 ```
 
@@ -931,12 +931,7 @@ class GenericStrategy(Model):
             self.context.agent_addresses.get(self._ledger_id, None) is not None,
             "Wallet does not contain cryptos for provided ledger id.",
         )
-
-        if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
-        else:
-            self._data_for_sale = data_for_sale
-        self._sale_quantity = len(data_for_sale)
+        self._data_for_sale = data_for_sale
 ```
 
 We initialise the strategy class. We are trying to read the strategy variables from the yaml file. If this is not possible we specified some default values.
@@ -944,6 +939,13 @@ We initialise the strategy class. We are trying to read the strategy variables f
 The following properties and methods deal with different aspects of the strategy. Add them under the initialization of the class:
 
 ``` python
+    @property
+    def data_for_sale(self) -> Dict[str, str]:
+        """Get the data for sale."""
+        if self._has_data_source:
+            return self.collect_from_data_source()  # pragma: nocover
+        return self._data_for_sale
+
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
@@ -1017,8 +1019,10 @@ The following properties and methods deal with different aspects of the strategy
         :param counterparty_address: the counterparty of the proposal.
         :return: a tuple of proposal, terms and the weather data
         """
+        data_for_sale = self.data_for_sale
+        sale_quantity = len(data_for_sale)
         seller_address = self.context.agent_addresses[self.ledger_id]
-        total_price = self._sale_quantity * self._unit_price
+        total_price = sale_quantity * self._unit_price
         if self.is_ledger_tx:
             tx_nonce = LedgerApis.generate_tx_nonce(
                 identifier=self.ledger_id,
@@ -1033,7 +1037,7 @@ The following properties and methods deal with different aspects of the strategy
                 "price": total_price,
                 "currency_id": self._currency_id,
                 "service_id": self._service_id,
-                "quantity": self._sale_quantity,
+                "quantity": sale_quantity,
                 "tx_nonce": tx_nonce,
             }
         )
@@ -1042,12 +1046,12 @@ The following properties and methods deal with different aspects of the strategy
             sender_address=seller_address,
             counterparty_address=counterparty_address,
             amount_by_currency_id={self._currency_id: total_price},
-            quantities_by_good_id={self._service_id: -self._sale_quantity},
+            quantities_by_good_id={self._service_id: -sale_quantity},
             is_sender_payable_tx_fee=False,
             nonce=tx_nonce,
             fee_by_currency_id={self._currency_id: 0},
         )
-        return proposal, terms, self._data_for_sale
+        return proposal, terms, data_for_sale
 
     def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to communicate with the sensor."""
@@ -1331,10 +1335,10 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
 skills: []
 behaviours:
   service_registration:
@@ -1768,6 +1772,8 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
+            strategy = cast(GenericStrategy, self.context.strategy)
+            strategy.successful_trade_with_counterparty(fipa_msg.sender, data)
         else:
             self.context.logger.info(
                 "received no data from sender={}".format(fipa_msg.sender[-5:])
@@ -1883,19 +1889,24 @@ class GenericOefSearchHandler(Handler):
                 f"found no agents in dialogue={oef_search_dialogue}, continue searching."
             )
             return
-
-        self.context.logger.info(
-            "found agents={}, stopping search.".format(
-                list(map(lambda x: x[-5:], oef_search_msg.agents)),
-            )
-        )
         strategy = cast(GenericStrategy, self.context.strategy)
-        strategy.is_searching = False  # stopping search
+        if strategy.is_stop_searching_on_result:
+            self.context.logger.info(
+                "found agents={}, stopping search.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
+            strategy.is_searching = False  # stopping search
+        else:
+            self.context.logger.info(
+                "found agents={}.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
         query = strategy.get_service_query()
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-        for idx, counterparty in enumerate(oef_search_msg.agents):
-            if idx >= strategy.max_negotiations:
-                continue
+        counterparties = strategy.get_acceptable_counterparties(oef_search_msg.agents)
+        for counterparty in counterparties:
             cfp_msg, _ = fipa_dialogues.create(
                 counterparty=counterparty,
                 performative=FipaMessage.Performative.CFP,
@@ -2276,6 +2287,7 @@ class GenericStrategy(Model):
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
         )
+        self._is_stop_searching_on_result = kwargs.pop("stop_searching_on_result", True)
 
         super().__init__(**kwargs)
         self._ledger_id = (
@@ -2304,6 +2316,11 @@ We initialize the strategy class by trying to read the strategy variables from t
     def is_ledger_tx(self) -> bool:
         """Check whether or not tx are settled on a ledger."""
         return self._is_ledger_tx
+
+    @property
+    def is_stop_searching_on_result(self) -> bool:
+        """Check if search is stopped on result."""
+        return self._is_stop_searching_on_result
 
     @property
     def is_searching(self) -> bool:
@@ -2417,6 +2434,20 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
             result = True
         return result
 
+    def get_acceptable_counterparties(
+        self, counterparties: Tuple[str, ...]
+    ) -> Tuple[str, ...]:
+        """
+        Process counterparties and drop unacceptable ones.
+
+        :return: list of counterparties
+        """
+        valid_counterparties: List[str] = []
+        for idx, counterparty in enumerate(counterparties):
+            if idx < self.max_negotiations:
+                valid_counterparties.append(counterparty)
+        return tuple(valid_counterparties)
+
     def terms_from_proposal(
         self, proposal: Description, counterparty_address: Address
     ) -> Terms:
@@ -2442,6 +2473,18 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
             fee_by_currency_id={proposal.values["currency_id"]: self._max_tx_fee},
         )
         return terms
+
+    def successful_trade_with_counterparty(
+        self, counterparty: str, data: Dict[str, str]
+    ) -> None:
+        """
+        Do something on successful trade.
+
+        :param counterparty: the counterparty address
+        :param data: the data
+        :return: False
+        """
+        pass
 ```
 
 ### Step 5: Create the dialogues
@@ -2816,11 +2859,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
-- fetchai/signing:0.6.0
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/ledger_api:0.7.0
+- fetchai/oef_search:0.10.0
+- fetchai/signing:0.7.0
 skills: []
 behaviours:
   search:
@@ -2921,8 +2964,8 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
 ```
 
 ### Fund the buyer AEA
@@ -2939,9 +2982,9 @@ Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add protocol fetchai/fipa:0.9.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add protocol fetchai/fipa:0.10.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea run
@@ -2955,10 +2998,10 @@ Add the remaining packages for the buyer AEA:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add protocol fetchai/fipa:0.9.0
-aea add protocol fetchai/signing:0.6.0
+aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/ledger:0.9.0
+aea add protocol fetchai/fipa:0.10.0
+aea add protocol fetchai/signing:0.7.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```

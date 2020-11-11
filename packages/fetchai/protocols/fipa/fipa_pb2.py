@@ -8,6 +8,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf import descriptor_pb2
 
 # @@protoc_insertion_point(imports)
 
@@ -18,11 +19,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="fipa.proto",
     package="aea.fetchai.fipa",
     syntax="proto3",
-    serialized_options=None,
     serialized_pb=_b(
         '\n\nfipa.proto\x12\x10\x61\x65\x61.fetchai.fipa"\xf2\x0b\n\x0b\x46ipaMessage\x12\x43\n\x06\x61\x63\x63\x65pt\x18\x05 \x01(\x0b\x32\x31.aea.fetchai.fipa.FipaMessage.Accept_PerformativeH\x00\x12U\n\x0f\x61\x63\x63\x65pt_w_inform\x18\x06 \x01(\x0b\x32:.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_PerformativeH\x00\x12=\n\x03\x63\x66p\x18\x07 \x01(\x0b\x32..aea.fetchai.fipa.FipaMessage.Cfp_PerformativeH\x00\x12\x45\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32\x32.aea.fetchai.fipa.FipaMessage.Decline_PerformativeH\x00\x12\x43\n\x06inform\x18\t \x01(\x0b\x32\x31.aea.fetchai.fipa.FipaMessage.Inform_PerformativeH\x00\x12O\n\x0cmatch_accept\x18\n \x01(\x0b\x32\x37.aea.fetchai.fipa.FipaMessage.Match_Accept_PerformativeH\x00\x12\x61\n\x15match_accept_w_inform\x18\x0b \x01(\x0b\x32@.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_PerformativeH\x00\x12\x45\n\x07propose\x18\x0c \x01(\x0b\x32\x32.aea.fetchai.fipa.FipaMessage.Propose_PerformativeH\x00\x1a"\n\x0b\x44\x65scription\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\x0c\x1a\x83\x01\n\x05Query\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12>\n\x07nothing\x18\x02 \x01(\x0b\x32+.aea.fetchai.fipa.FipaMessage.Query.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1a\x46\n\x10\x43\x66p_Performative\x12\x32\n\x05query\x18\x01 \x01(\x0b\x32#.aea.fetchai.fipa.FipaMessage.Query\x1aS\n\x14Propose_Performative\x12;\n\x08proposal\x18\x01 \x01(\x0b\x32).aea.fetchai.fipa.FipaMessage.Description\x1a\x9f\x01\n\x1c\x41\x63\x63\x65pt_W_Inform_Performative\x12R\n\x04info\x18\x01 \x03(\x0b\x32\x44.aea.fetchai.fipa.FipaMessage.Accept_W_Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xab\x01\n"Match_Accept_W_Inform_Performative\x12X\n\x04info\x18\x01 \x03(\x0b\x32J.aea.fetchai.fipa.FipaMessage.Match_Accept_W_Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x8d\x01\n\x13Inform_Performative\x12I\n\x04info\x18\x01 \x03(\x0b\x32;.aea.fetchai.fipa.FipaMessage.Inform_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x15\n\x13\x41\x63\x63\x65pt_Performative\x1a\x16\n\x14\x44\x65\x63line_Performative\x1a\x1b\n\x19Match_Accept_PerformativeB\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 _FIPAMESSAGE_DESCRIPTION = _descriptor.Descriptor(
@@ -47,14 +48,13 @@ _FIPAMESSAGE_DESCRIPTION = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -73,7 +73,7 @@ _FIPAMESSAGE_QUERY_NOTHING = _descriptor.Descriptor(
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -104,8 +104,7 @@ _FIPAMESSAGE_QUERY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="nothing",
@@ -122,8 +121,7 @@ _FIPAMESSAGE_QUERY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="query_bytes",
@@ -140,14 +138,15 @@ _FIPAMESSAGE_QUERY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
-    nested_types=[_FIPAMESSAGE_QUERY_NOTHING,],
+    nested_types=[
+        _FIPAMESSAGE_QUERY_NOTHING,
+    ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -186,14 +185,13 @@ _FIPAMESSAGE_CFP_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -224,14 +222,13 @@ _FIPAMESSAGE_PROPOSE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -262,8 +259,7 @@ _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -280,14 +276,13 @@ _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -318,14 +313,15 @@ _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
-    nested_types=[_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,],
+    nested_types=[
+        _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,
+    ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -356,8 +352,7 @@ _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descript
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -374,14 +369,13 @@ _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descript
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -412,14 +406,15 @@ _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
-    nested_types=[_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,],
+    nested_types=[
+        _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,
+    ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -450,8 +445,7 @@ _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -468,14 +462,13 @@ _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -506,14 +499,15 @@ _FIPAMESSAGE_INFORM_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
-    nested_types=[_FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY,],
+    nested_types=[
+        _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY,
+    ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -532,7 +526,7 @@ _FIPAMESSAGE_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -551,7 +545,7 @@ _FIPAMESSAGE_DECLINE_PERFORMATIVE = _descriptor.Descriptor(
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -570,7 +564,7 @@ _FIPAMESSAGE_MATCH_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -601,8 +595,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="accept_w_inform",
@@ -619,8 +612,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="cfp",
@@ -637,8 +629,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="decline",
@@ -655,8 +646,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="inform",
@@ -673,8 +663,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="match_accept",
@@ -691,8 +680,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="match_accept_w_inform",
@@ -709,8 +697,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="propose",
@@ -727,8 +714,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
@@ -745,7 +731,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
         _FIPAMESSAGE_MATCH_ACCEPT_PERFORMATIVE,
     ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -877,7 +863,6 @@ _FIPAMESSAGE.fields_by_name["propose"].containing_oneof = _FIPAMESSAGE.oneofs_by
     "performative"
 ]
 DESCRIPTOR.message_types_by_name["FipaMessage"] = _FIPAMESSAGE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 FipaMessage = _reflection.GeneratedProtocolMessageType(
     "FipaMessage",
@@ -1031,7 +1016,16 @@ _sym_db.RegisterMessage(FipaMessage.Decline_Performative)
 _sym_db.RegisterMessage(FipaMessage.Match_Accept_Performative)
 
 
-_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = None
-_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = None
-_FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY._options = None
+_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY.has_options = True
+_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = (
+    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+)
+_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY.has_options = True
+_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = (
+    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+)
+_FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY.has_options = True
+_FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
+)
 # @@protoc_insertion_point(module_scope)

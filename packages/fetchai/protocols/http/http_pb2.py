@@ -8,6 +8,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf import descriptor_pb2
 
 # @@protoc_insertion_point(imports)
 
@@ -18,11 +19,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="http.proto",
     package="aea.fetchai.http",
     syntax="proto3",
-    serialized_options=None,
     serialized_pb=_b(
         '\n\nhttp.proto\x12\x10\x61\x65\x61.fetchai.http"\x85\x03\n\x0bHttpMessage\x12\x45\n\x07request\x18\x05 \x01(\x0b\x32\x32.aea.fetchai.http.HttpMessage.Request_PerformativeH\x00\x12G\n\x08response\x18\x06 \x01(\x0b\x32\x33.aea.fetchai.http.HttpMessage.Response_PerformativeH\x00\x1a\x63\n\x14Request_Performative\x12\x0e\n\x06method\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\x0c\x1aq\n\x15Response_Performative\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x13\n\x0bstatus_code\x18\x02 \x01(\x05\x12\x13\n\x0bstatus_text\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
@@ -47,8 +48,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="url",
@@ -65,8 +65,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="version",
@@ -83,8 +82,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="headers",
@@ -101,8 +99,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="body",
@@ -119,14 +116,13 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -157,8 +153,7 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="status_code",
@@ -175,8 +170,7 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="status_text",
@@ -193,8 +187,7 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="headers",
@@ -211,8 +204,7 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="body",
@@ -229,14 +221,13 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -267,8 +258,7 @@ _HTTPMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="response",
@@ -285,8 +275,7 @@ _HTTPMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
@@ -295,7 +284,7 @@ _HTTPMESSAGE = _descriptor.Descriptor(
         _HTTPMESSAGE_RESPONSE_PERFORMATIVE,
     ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -331,7 +320,6 @@ _HTTPMESSAGE.fields_by_name["response"].containing_oneof = _HTTPMESSAGE.oneofs_b
     "performative"
 ]
 DESCRIPTOR.message_types_by_name["HttpMessage"] = _HTTPMESSAGE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 HttpMessage = _reflection.GeneratedProtocolMessageType(
     "HttpMessage",

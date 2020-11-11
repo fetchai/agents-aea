@@ -23,6 +23,7 @@
 import os
 import shutil
 import sys
+import time
 from itertools import chain
 from pathlib import Path
 from typing import Dict, List, Set
@@ -214,15 +215,20 @@ def publish_agent(package_id: PackageId, runner: CliRunner) -> None:
             [*CLI_LOG_OPTION, "fetch", "--local", str(package_id.public_id)],
             standalone_mode=False,
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, "Local fetch failed."
         os.chdir(str(package_id.public_id.name))
         result = runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish", "--remote"], standalone_mode=False,
         )
         assert (
             result.exit_code == 0
         ), "Pushing {} with public_id '{}' failed with: {}".format(
-            package_id.package_type, package_id.public_id, result.output
+            package_id.package_type, package_id.public_id, str(result.exception)
+        )
+        print(
+            "Successfully pushed {}: {}".format(
+                package_id.package_type.value, str(package_id.public_id)
+            )
         )
     except Exception as e:  # pylint: disable=broad-except
         print("An exception occured: {}".format(e))
@@ -233,12 +239,9 @@ def publish_agent(package_id: PackageId, runner: CliRunner) -> None:
             [*CLI_LOG_OPTION, "delete", str(package_id.public_id.name)],
             standalone_mode=False,
         )
-        assert result.exit_code == 0
-    print(
-        "Successfully pushed {}: {}".format(
-            package_id.package_type.value, str(package_id.public_id)
-        )
-    )
+        if result.exit_code != 0:
+            print("Unsuccessful delete code: {}".format(str(result.exception)))
+    time.sleep(1.0)
 
 
 def check_and_upload(package_id: PackageId, runner: CliRunner) -> None:

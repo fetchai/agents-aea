@@ -46,7 +46,7 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = PublicId.from_str("fetchai/oef_search:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/oef_search:0.10.0")
 
     AgentsInfo = CustomAgentsInfo
 
@@ -306,7 +306,8 @@ class OefSearchMessage(Message):
                 enforce(
                     0 < self.target < self.message_id,
                     "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
+                        self.message_id - 1,
+                        self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

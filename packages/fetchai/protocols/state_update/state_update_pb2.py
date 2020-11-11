@@ -8,6 +8,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf import descriptor_pb2
 
 # @@protoc_insertion_point(imports)
 
@@ -18,11 +19,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="state_update.proto",
     package="aea.fetchai.state_update",
     syntax="proto3",
-    serialized_options=None,
     serialized_pb=_b(
         '\n\x12state_update.proto\x12\x18\x61\x65\x61.fetchai.state_update"\xf0\n\n\x12StateUpdateMessage\x12P\n\x05\x61pply\x18\x05 \x01(\x0b\x32?.aea.fetchai.state_update.StateUpdateMessage.Apply_PerformativeH\x00\x12Z\n\ninitialize\x18\x06 \x01(\x0b\x32\x44.aea.fetchai.state_update.StateUpdateMessage.Initialize_PerformativeH\x00\x1a\x9e\x06\n\x17Initialize_Performative\x12\x8c\x01\n\x1e\x65xchange_params_by_currency_id\x18\x01 \x03(\x0b\x32\x64.aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry\x12\x82\x01\n\x19utility_params_by_good_id\x18\x02 \x03(\x0b\x32_.aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry\x12{\n\x15\x61mount_by_currency_id\x18\x03 \x03(\x0b\x32\\.aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry\x12{\n\x15quantities_by_good_id\x18\x04 \x03(\x0b\x32\\.aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry\x1a\x41\n\x1f\x45xchangeParamsByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a<\n\x1aUtilityParamsByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\xfa\x02\n\x12\x41pply_Performative\x12v\n\x15\x61mount_by_currency_id\x18\x01 \x03(\x0b\x32W.aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry\x12v\n\x15quantities_by_good_id\x18\x02 \x03(\x0b\x32W.aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY = _descriptor.Descriptor(
@@ -47,8 +48,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY = _d
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -65,14 +65,13 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY = _d
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -103,8 +102,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -121,14 +119,13 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -159,8 +156,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descripto
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -177,14 +173,13 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descripto
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -215,8 +210,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descripto
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -233,14 +227,13 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descripto
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -271,8 +264,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="utility_params_by_good_id",
@@ -289,8 +281,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="amount_by_currency_id",
@@ -307,8 +298,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="quantities_by_good_id",
@@ -325,8 +315,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
@@ -337,7 +326,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
         _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY,
     ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -368,8 +357,7 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -386,14 +374,13 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -424,8 +411,7 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -442,14 +428,13 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=_b("8\001"),
+    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -480,8 +465,7 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="quantities_by_good_id",
@@ -498,8 +482,7 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
@@ -508,7 +491,7 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE = _descriptor.Descriptor(
         _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY,
     ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -539,8 +522,7 @@ _STATEUPDATEMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="initialize",
@@ -557,8 +539,7 @@ _STATEUPDATEMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
@@ -567,7 +548,7 @@ _STATEUPDATEMESSAGE = _descriptor.Descriptor(
         _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE,
     ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -643,7 +624,6 @@ _STATEUPDATEMESSAGE.fields_by_name[
     "initialize"
 ].containing_oneof = _STATEUPDATEMESSAGE.oneofs_by_name["performative"]
 DESCRIPTOR.message_types_by_name["StateUpdateMessage"] = _STATEUPDATEMESSAGE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 StateUpdateMessage = _reflection.GeneratedProtocolMessageType(
     "StateUpdateMessage",
@@ -745,12 +725,32 @@ _sym_db.RegisterMessage(StateUpdateMessage.Apply_Performative.AmountByCurrencyId
 _sym_db.RegisterMessage(StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry)
 
 
-_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY._options = (
-    None
+_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY.has_options = (
+    True
 )
-_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY._options = None
-_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = None
-_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = None
-_STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = None
-_STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = None
+_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY._options = (
+    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+)
+_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY.has_options = (
+    True
+)
+_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY._options = (
+    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+)
+_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY.has_options = True
+_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = (
+    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+)
+_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY.has_options = True
+_STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = (
+    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+)
+_STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY.has_options = True
+_STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = (
+    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+)
+_STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY.has_options = True
+_STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = (
+    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+)
 # @@protoc_insertion_point(module_scope)

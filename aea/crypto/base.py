@@ -20,7 +20,7 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar
+from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar, Union
 
 from aea.common import Address
 
@@ -246,6 +246,17 @@ class LedgerApi(Helper, ABC):
 
         :param address: the address.
         :return: the balance.
+        """
+
+    @abstractmethod
+    def get_block(self, block_id: Union[int,str]) -> Optional[Any]:
+        """
+        Get the block header and metadata.
+
+        This usually takes the form of a web request to be waited synchronously.
+
+        :param block_id: the block number, block hash, or the string "latest".
+        :return: the block header and metadata.
         """
 
     @abstractmethod

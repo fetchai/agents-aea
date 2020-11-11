@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = PublicId.from_str("fetchai/ml_trade:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/ml_trade:0.9.0")
 
     Description = CustomDescription
 
@@ -260,7 +260,8 @@ class MlTradeMessage(Message):
                 enforce(
                     0 < self.target < self.message_id,
                     "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
+                        self.message_id - 1,
+                        self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class RegisterMessage(Message):
     """A protocol for communication between two AEAs for registration."""
 
-    protocol_id = PublicId.from_str("fetchai/register:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/register:0.2.0")
 
     class Performative(Message.Performative):
         """Performatives for the register protocol."""
@@ -274,7 +274,8 @@ class RegisterMessage(Message):
                 enforce(
                     0 < self.target < self.message_id,
                     "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
+                        self.message_id - 1,
+                        self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

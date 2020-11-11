@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
-    protocol_id = PublicId.from_str("fetchai/gym:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/gym:0.9.0")
 
     AnyObject = CustomAnyObject
 
@@ -304,7 +304,8 @@ class GymMessage(Message):
                 enforce(
                     0 < self.target < self.message_id,
                     "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
+                        self.message_id - 1,
+                        self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

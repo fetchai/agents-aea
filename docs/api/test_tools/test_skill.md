@@ -40,6 +40,15 @@ Get the quantity of envelopes in the outbox.
 
 Get message from outbox.
 
+<a name="aea.test_tools.test_skill.BaseSkillTestCase.drop_messages_from_outbox"></a>
+#### drop`_`messages`_`from`_`outbox
+
+```python
+ | drop_messages_from_outbox(number: int = 1) -> None
+```
+
+Dismiss the first 'number' number of message from outbox.
+
 <a name="aea.test_tools.test_skill.BaseSkillTestCase.get_quantity_in_decision_maker_inbox"></a>
 #### get`_`quantity`_`in`_`decision`_`maker`_`inbox
 
@@ -57,6 +66,15 @@ Get the quantity of messages in the decision maker inbox.
 ```
 
 Get message from decision maker inbox.
+
+<a name="aea.test_tools.test_skill.BaseSkillTestCase.drop_messages_from_decision_maker_inbox"></a>
+#### drop`_`messages`_`from`_`decision`_`maker`_`inbox
+
+```python
+ | drop_messages_from_decision_maker_inbox(number: int = 1) -> None
+```
+
+Dismiss the first 'number' number of message from decision maker inbox.
 
 <a name="aea.test_tools.test_skill.BaseSkillTestCase.assert_quantity_in_outbox"></a>
 #### assert`_`quantity`_`in`_`outbox
@@ -100,7 +118,7 @@ boolean result of the evaluation and accompanied message
 #### build`_`incoming`_`message
 
 ```python
- | build_incoming_message(message_type: Type[Message], performative: Message.Performative, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Address = COUNTERPARTY_NAME, **kwargs, ,) -> Message
+ | build_incoming_message(message_type: Type[Message], performative: Message.Performative, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Address = COUNTERPARTY_ADDRESS, **kwargs, ,) -> Message
 ```
 
 Quickly create an incoming message with the provided attributes.
@@ -158,7 +176,7 @@ the created incoming message
 #### prepare`_`skill`_`dialogue
 
 ```python
- | prepare_skill_dialogue(dialogues: Dialogues, messages: Tuple[DialogueMessage, ...], counterparty: Address = COUNTERPARTY_NAME) -> Dialogue
+ | prepare_skill_dialogue(dialogues: Dialogues, messages: Tuple[DialogueMessage, ...], counterparty: Address = COUNTERPARTY_ADDRESS) -> Dialogue
 ```
 
 Quickly create a dialogue.

@@ -29,6 +29,9 @@ import gym
 from aea.protocols.base import Message
 from aea.skills.base import SkillContext
 
+from packages.fetchai.connections.gym.connection import (
+    PUBLIC_ID as GYM_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym.dialogues import GymDialogue, GymDialogues
 
@@ -40,7 +43,6 @@ Done = bool
 Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
 
-DEFAULT_GYM = "gym"
 NB_STEPS = 500
 
 
@@ -60,7 +62,7 @@ class ProxyEnv(gym.Env):
         self._is_rl_agent_trained = False
         self._step_count = 0
         self._active_dialogue = None  # type: Optional[GymDialogue]
-        self.gym_address = "fetchai/gym:0.10.0"
+        self.gym_address = str(GYM_CONNECTION_PUBLIC_ID)
 
     @property
     def gym_dialogues(self) -> GymDialogues:

@@ -5,7 +5,7 @@ aea --version
 
 if [ -z ${AGENT_REPO_URL+x} ] ; then
         rm myagent -rf
-        aea fetch fetchai/my_first_aea:0.10.0
+        aea fetch fetchai/my_first_aea
         cd my_first_aea
     else
         echo "cloning $AGENT_REPO_URL inside '$(pwd)/my_aea'"

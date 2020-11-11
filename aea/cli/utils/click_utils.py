@@ -21,9 +21,10 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import click
+from click import Context, Option, UsageError, option
 
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
@@ -117,3 +118,63 @@ class AgentDirectory(click.Path):
             )
         finally:
             os.chdir(cwd)
+
+
+def registry_flag(
+    help_local: str = "Use only local registry.",
+    help_remote: str = "Use ony remote registry.",
+):
+    """Choice of one flag between: '--local/--remote'."""
+
+    def wrapper(f):
+        f = option(
+            "--local",
+            is_flag=True,
+            cls=MutuallyExclusiveOption,
+            help=help_local,
+            mutually_exclusive=["remote"],
+        )(f)
+        f = option(
+            "--remote",
+            is_flag=True,
+            cls=MutuallyExclusiveOption,
+            help=help_remote,
+            mutually_exclusive=["local"],
+        )(f)
+
+        return f
+
+    return wrapper
+
+
+class MutuallyExclusiveOption(Option):
+    """Represent a mutually exclusive option."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize the option."""
+        self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
+        help_ = kwargs.get("help", "")
+        if self.mutually_exclusive:
+            ex_str = ", ".join(self.mutually_exclusive)
+            kwargs["help"] = help_ + (
+                " NOTE: This argument is mutually exclusive with "
+                " arguments: [" + ex_str + "]."
+            )
+        super().__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx: Context, opts: Dict[str, Any], args: List[Any]):
+        """
+        Handle parse result.
+
+        :param ctx: the click context.
+        :param opts: the options.
+        :param args: the list of arguments (to be forwarded to the parent class).
+        :return:
+        """
+        if self.mutually_exclusive.intersection(opts) and self.name in opts:
+            raise UsageError(
+                f"Illegal usage: `{self.name}` is mutually exclusive with "
+                f"arguments `{', '.join(self.mutually_exclusive)}`."
+            )
+
+        return super().handle_parse_result(ctx, opts, args)

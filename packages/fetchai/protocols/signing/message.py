@@ -50,7 +50,7 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = PublicId.from_str("fetchai/signing:0.6.0")
+    protocol_id = PublicId.from_str("fetchai/signing:0.7.0")
 
     ErrorCode = CustomErrorCode
 
@@ -310,7 +310,8 @@ class SigningMessage(Message):
                 enforce(
                     0 < self.target < self.message_id,
                     "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
+                        self.message_id - 1,
+                        self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

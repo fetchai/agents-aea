@@ -8,6 +8,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf import descriptor_pb2
 
 # @@protoc_insertion_point(imports)
 
@@ -18,11 +19,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="ml_trade.proto",
     package="aea.fetchai.ml_trade",
     syntax="proto3",
-    serialized_options=None,
     serialized_pb=_b(
         '\n\x0eml_trade.proto\x12\x14\x61\x65\x61.fetchai.ml_trade"\xed\x06\n\x0eMlTradeMessage\x12J\n\x06\x61\x63\x63\x65pt\x18\x05 \x01(\x0b\x32\x38.aea.fetchai.ml_trade.MlTradeMessage.Accept_PerformativeH\x00\x12\x44\n\x03\x63\x66p\x18\x06 \x01(\x0b\x32\x35.aea.fetchai.ml_trade.MlTradeMessage.Cfp_PerformativeH\x00\x12\x46\n\x04\x64\x61ta\x18\x07 \x01(\x0b\x32\x36.aea.fetchai.ml_trade.MlTradeMessage.Data_PerformativeH\x00\x12H\n\x05terms\x18\x08 \x01(\x0b\x32\x37.aea.fetchai.ml_trade.MlTradeMessage.Terms_PerformativeH\x00\x1a"\n\x0b\x44\x65scription\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\x0c\x1a\x8a\x01\n\x05Query\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12\x45\n\x07nothing\x18\x02 \x01(\x0b\x32\x32.aea.fetchai.ml_trade.MlTradeMessage.Query.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1aM\n\x10\x43\x66p_Performative\x12\x39\n\x05query\x18\x01 \x01(\x0b\x32*.aea.fetchai.ml_trade.MlTradeMessage.Query\x1aU\n\x12Terms_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.ml_trade.MlTradeMessage.Description\x1ai\n\x13\x41\x63\x63\x65pt_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.ml_trade.MlTradeMessage.Description\x12\x11\n\ttx_digest\x18\x02 \x01(\t\x1a\x65\n\x11\x44\x61ta_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.ml_trade.MlTradeMessage.Description\x12\x0f\n\x07payload\x18\x02 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 _MLTRADEMESSAGE_DESCRIPTION = _descriptor.Descriptor(
@@ -47,14 +48,13 @@ _MLTRADEMESSAGE_DESCRIPTION = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -73,7 +73,7 @@ _MLTRADEMESSAGE_QUERY_NOTHING = _descriptor.Descriptor(
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -104,8 +104,7 @@ _MLTRADEMESSAGE_QUERY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="nothing",
@@ -122,8 +121,7 @@ _MLTRADEMESSAGE_QUERY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="query_bytes",
@@ -140,14 +138,15 @@ _MLTRADEMESSAGE_QUERY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
-    nested_types=[_MLTRADEMESSAGE_QUERY_NOTHING,],
+    nested_types=[
+        _MLTRADEMESSAGE_QUERY_NOTHING,
+    ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -186,14 +185,13 @@ _MLTRADEMESSAGE_CFP_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -224,14 +222,13 @@ _MLTRADEMESSAGE_TERMS_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -262,8 +259,7 @@ _MLTRADEMESSAGE_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="tx_digest",
@@ -280,14 +276,13 @@ _MLTRADEMESSAGE_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -318,8 +313,7 @@ _MLTRADEMESSAGE_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="payload",
@@ -336,14 +330,13 @@ _MLTRADEMESSAGE_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -374,8 +367,7 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="cfp",
@@ -392,8 +384,7 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="data",
@@ -410,8 +401,7 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
         _descriptor.FieldDescriptor(
             name="terms",
@@ -428,8 +418,7 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
+            options=None,
         ),
     ],
     extensions=[],
@@ -442,7 +431,7 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
         _MLTRADEMESSAGE_DATA_PERFORMATIVE,
     ],
     enum_types=[],
-    serialized_options=None,
+    options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -532,7 +521,6 @@ _MLTRADEMESSAGE.fields_by_name[
     "terms"
 ].containing_oneof = _MLTRADEMESSAGE.oneofs_by_name["performative"]
 DESCRIPTOR.message_types_by_name["MlTradeMessage"] = _MLTRADEMESSAGE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 MlTradeMessage = _reflection.GeneratedProtocolMessageType(
     "MlTradeMessage",

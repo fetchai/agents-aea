@@ -36,7 +36,7 @@ from aea.skills.base import Skill
 from aea.skills.tasks import TaskManager
 
 
-COUNTERPARTY_NAME = "counterparty"
+COUNTERPARTY_ADDRESS = "counterparty"
 
 
 class BaseSkillTestCase:
@@ -67,6 +67,12 @@ class BaseSkillTestCase:
         envelope = self._multiplexer.out_queue.get_nowait()
         return envelope.message
 
+    def drop_messages_from_outbox(self, number: int = 1) -> None:
+        """Dismiss the first 'number' number of message from outbox."""
+        while (not self._outbox.empty()) and number != 0:
+            self._multiplexer.out_queue.get_nowait()
+            number -= 1
+
     def get_quantity_in_decision_maker_inbox(self) -> int:
         """Get the quantity of messages in the decision maker inbox."""
         return self._skill.skill_context.decision_maker_message_queue.qsize()
@@ -76,6 +82,14 @@ class BaseSkillTestCase:
         if self._skill.skill_context.decision_maker_message_queue.empty():
             return None
         return self._skill.skill_context.decision_maker_message_queue.get_nowait()
+
+    def drop_messages_from_decision_maker_inbox(self, number: int = 1) -> None:
+        """Dismiss the first 'number' number of message from decision maker inbox."""
+        while (
+            not self._skill.skill_context.decision_maker_message_queue.empty()
+        ) and number != 0:
+            self._skill.skill_context.decision_maker_message_queue.get_nowait()
+            number -= 1
 
     def assert_quantity_in_outbox(self, expected_quantity) -> None:
         """Assert the quantity of messages in the outbox."""
@@ -133,7 +147,7 @@ class BaseSkillTestCase:
         message_id: Optional[int] = None,
         target: Optional[int] = None,
         to: Optional[Address] = None,
-        sender: Address = COUNTERPARTY_NAME,
+        sender: Address = COUNTERPARTY_ADDRESS,
         **kwargs,
     ) -> Message:
         """
@@ -319,7 +333,7 @@ class BaseSkillTestCase:
         self,
         dialogues: Dialogues,
         messages: Tuple[DialogueMessage, ...],
-        counterparty: Address = COUNTERPARTY_NAME,
+        counterparty: Address = COUNTERPARTY_ADDRESS,
     ) -> Dialogue:
         """
         Quickly create a dialogue.
