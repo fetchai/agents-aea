@@ -275,7 +275,7 @@ class Connection(Component, ABC):
                 crypto_store=crypto_store,
                 **kwargs,
             )
-        except Exception as e:
+        except Exception as e:  # pragma: nocover
             e_str = parse_exception(e)
             raise AEAInstantiationException(
                 f"An error occured during instantiation of connection {configuration.public_id}/{configuration.class_name}:\n{e_str}"

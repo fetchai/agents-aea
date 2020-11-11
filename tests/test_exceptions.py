@@ -20,7 +20,7 @@
 
 import pytest
 
-from aea.exceptions import AEAEnforceError, enforce
+from aea.exceptions import AEAEnforceError, _StopRuntime, enforce, parse_exception
 
 
 def test_enforce_no_exception():
@@ -33,3 +33,30 @@ def test_enforce_exception():
     error_msg = "Error message"
     with pytest.raises(AEAEnforceError, match=error_msg):
         enforce(False, error_msg)
+
+
+def test_stop_runtime():
+    """Test thes stop runtime exception."""
+    test = "test string"
+    e = _StopRuntime(test)
+    assert e.reraise == test
+
+
+def test_parse_exception():
+    """Test parse exception."""
+
+    def exception_raise():
+        """A function that raises an exception."""
+        raise ValueError("expected")
+
+    try:
+        exception_raise()
+    except Exception as e:
+        out = parse_exception(e)
+
+    expected = [
+        "Traceback (most recent call last):\n\n",
+        'tests/test_exceptions.py", line 50, in exception_raise\n',
+        'raise ValueError("expected")\n\nValueError: expected\n',
+    ]
+    assert all([string in out for string in expected])
