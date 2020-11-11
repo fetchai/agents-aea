@@ -124,6 +124,9 @@ def try_get_item_source_path(
 
     :return: the item source path
     """
+    import pdb
+
+    pdb.set_trace()
     if author_name is None:
         source_path = os.path.join(path, item_type_plural, item_name)
     else:

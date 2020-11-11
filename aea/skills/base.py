@@ -46,6 +46,7 @@ from aea.exceptions import (
     AEAException,
     AEAHandleException,
     AEAInstantiationException,
+    _StopRuntime,
     enforce,
     parse_exception,
 )
@@ -375,6 +376,8 @@ class Behaviour(AbstractBehaviour, ABC):
         """Wrap the call of the action. This method must be called only by the framework."""
         try:
             self.act()
+        except _StopRuntime:
+            raise
         except Exception as e:
             e_str = parse_exception(e)
             raise AEAActException(
@@ -480,6 +483,8 @@ class Handler(SkillComponent, ABC):
         """Wrap the call of the handler. This method must be called only by the framework."""
         try:
             self.handle(message)
+        except _StopRuntime:
+            raise
         except Exception as e:
             e_str = parse_exception(e)
             raise AEAHandleException(

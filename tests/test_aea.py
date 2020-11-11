@@ -34,13 +34,18 @@ from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
-from aea.exceptions import AEAActException, AEAException, AEAHandleException
+from aea.exceptions import (
+    AEAActException,
+    AEAException,
+    AEAHandleException,
+    _StopRuntime,
+)
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
-from aea.runtime import RuntimeStates, _StopRuntime
+from aea.runtime import RuntimeStates
 from aea.skills.base import Skill, SkillContext
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection

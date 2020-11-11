@@ -29,31 +29,12 @@ from aea.abstract_agent import AbstractAgent
 from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
 from aea.connections.base import ConnectionStates
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
+from aea.exceptions import _StopRuntime
 from aea.helpers.async_utils import Runnable
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
 from aea.multiplexer import AsyncMultiplexer
 from aea.skills.tasks import TaskManager
-
-
-class _StopRuntime(Exception):
-    """
-    Exception to stop runtime.
-
-    For internal usage only!
-    Used to perform asyncio call from sync callbacks.
-    """
-
-    def __init__(self, reraise: Optional[Exception] = None):
-        """
-        Init _StopRuntime exception.
-
-        :param reraise: exception to reraise.
-
-        :return: None
-        """
-        self.reraise = reraise
-        super().__init__("Stop runtime exception.")
 
 
 class RuntimeStates(Enum):

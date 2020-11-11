@@ -45,7 +45,7 @@ from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, _StopRuntime
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
 from aea.identity.base import Identity
@@ -53,7 +53,6 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
-from aea.runtime import _StopRuntime
 from aea.skills.base import Behaviour, Handler
 
 

@@ -20,7 +20,7 @@
 """Exceptions for the AEA package."""
 
 import traceback
-from typing import Type
+from typing import Optional, Type
 
 
 class AEAException(Exception):
@@ -53,6 +53,26 @@ class AEAInstantiationException(AEAException):
 
 class AEAEnforceError(AEAException):
     """Class for enforcement errors."""
+
+
+class _StopRuntime(Exception):
+    """
+    Exception to stop runtime.
+
+    For internal usage only!
+    Used to perform asyncio call from sync callbacks.
+    """
+
+    def __init__(self, reraise: Optional[Exception] = None):
+        """
+        Init _StopRuntime exception.
+
+        :param reraise: exception to reraise.
+
+        :return: None
+        """
+        self.reraise = reraise
+        super().__init__("Stop runtime exception.")
 
 
 def enforce(
