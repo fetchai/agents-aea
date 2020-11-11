@@ -474,7 +474,7 @@ class ComponentRegistry(
                 )
                 try:
                     item.setup()
-                except Exception as e:
+                except Exception as e:  # pragma: nocover
                     e_str = parse_exception(e)
                     e_str = f"An error occurred while setting up item {item.skill_id}/{type(item).__name__}:\n{e_str}"
                     raise AEASetupError(e_str)

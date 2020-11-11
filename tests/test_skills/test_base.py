@@ -33,7 +33,7 @@ from aea.aea import AEA
 from aea.configurations.base import PublicId, SkillComponentConfiguration, SkillConfig
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
@@ -549,3 +549,35 @@ class TestSkillProgrammatic:
     def test_models(self):
         """Test the handlers getter on skill context."""
         assert getattr(self.skill.skill_context, self.model_name, None) == self.model
+
+
+class TestHandlerHandleExceptions:
+    """Test exceptions in the handle wrapper."""
+
+    @classmethod
+    def setup_class(cls):
+        """Setup test class."""
+
+        class StandardExceptionHandler(Handler):
+            def setup(self):
+                pass
+
+            def handle(self, message: Message):
+                raise ValueError("expected")
+
+            def teardown(self):
+                pass
+
+        cls.handler = StandardExceptionHandler(skill_context=mock.Mock(), name="name")
+
+    def test_handler_standard_exception(self):
+        """Test the handler exception."""
+        with pytest.raises(AEAHandleException):
+            with pytest.raises(ValueError):
+                self.handler.handle_wrapper("msg")
+
+    def test_handler_stop_exception(self):
+        """Test the handler exception."""
+        with pytest.raises(_StopRuntime):
+            with mock.patch.object(self.handler, "handle", side_effect=_StopRuntime()):
+                self.handler.handle_wrapper("msg")
