@@ -549,6 +549,7 @@ class Runnable(ABC):
                 return await self.run()
         finally:
             self._loop.call_soon_threadsafe(self._completed_event.set)
+            self._is_running = False
 
     @property
     def is_running(self) -> bool:  # pragma: nocover

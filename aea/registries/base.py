@@ -26,6 +26,7 @@ from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.components.base import Component
 from aea.configurations.base import ComponentId, ComponentType, PublicId
+from aea.exceptions import AEASetupError, AEATeardownError, parse_exception
 from aea.helpers.logging import WithLogger, get_logger
 from aea.skills.base import Behaviour, Handler, Model
 
@@ -471,7 +472,11 @@ class ComponentRegistry(
                         item.name, item.skill_id
                     )
                 )
-                item.setup()
+                try:
+                    item.setup()
+                except Exception as e:
+                    e_str = parse_exception(e)
+                    raise AEASetupError(e_str)
             else:
                 self.logger.debug(
                     "Ignoring setup() of component {} of skill {}, because the skill is not active.".format(
@@ -490,8 +495,10 @@ class ComponentRegistry(
                 try:
                     item.teardown()
                 except Exception as e:  # pragma: nocover # pylint: disable=broad-except
+                    e_str = parse_exception(e)
+                    e = AEATeardownError(e_str)
                     self.logger.warning(
-                        "An error occurred while tearing down item {}/{}: {}".format(
+                        "An error occurred while tearing down item {}/{}:\n{}".format(
                             item.skill_id, type(item).__name__, str(e)
                         )
                     )

@@ -193,6 +193,7 @@ class BaseRuntime(Runnable, WithLogger):
         if self._decision_maker is not None:  # pragma: nocover
             self.decision_maker.stop()
         self.task_manager.stop()
+        self.logger.debug("[{}]: Calling teardown method...".format(self._agent.name))
         self._agent.teardown()
         self.logger.debug("[{}]: Runtime teardown completed".format(self._agent.name))
 
