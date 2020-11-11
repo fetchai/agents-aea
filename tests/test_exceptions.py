@@ -56,7 +56,8 @@ def test_parse_exception():
 
     expected = [
         "Traceback (most recent call last):\n\n",
-        'tests/test_exceptions.py", line 50, in exception_raise\n',
+        'test_exceptions.py", line ',
+        "in exception_raise\n",
         'raise ValueError("expected")\n\nValueError: expected\n',
     ]
     assert all([string in out for string in expected])
