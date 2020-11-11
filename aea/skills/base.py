@@ -45,6 +45,7 @@ from aea.exceptions import (
     AEAActException,
     AEAException,
     AEAHandleException,
+    AEAInstantiationException,
     enforce,
     parse_exception,
 )
@@ -444,12 +445,18 @@ class Behaviour(AbstractBehaviour, ABC):
                     "Behaviour '{}' cannot be found.".format(behaviour_class_name)
                 )
             else:
-                behaviour = behaviour_class(
-                    name=behaviour_id,
-                    configuration=behaviour_config,
-                    skill_context=skill_context,
-                    **dict(behaviour_config.args),
-                )
+                try:
+                    behaviour = behaviour_class(
+                        name=behaviour_id,
+                        configuration=behaviour_config,
+                        skill_context=skill_context,
+                        **dict(behaviour_config.args),
+                    )
+                except Exception as e:
+                    e_str = parse_exception(e)
+                    raise AEAInstantiationException(
+                        f"An error occured during instantiation of behaviour {skill_context.skill_id}/{behaviour_config.class_name}:\n{e_str}"
+                    )
                 behaviours[behaviour_id] = behaviour
 
         return behaviours
@@ -535,12 +542,18 @@ class Handler(SkillComponent, ABC):
                     "Handler '{}' cannot be found.".format(handler_class_name)
                 )
             else:
-                handler = handler_class(
-                    name=handler_id,
-                    configuration=handler_config,
-                    skill_context=skill_context,
-                    **dict(handler_config.args),
-                )
+                try:
+                    handler = handler_class(
+                        name=handler_id,
+                        configuration=handler_config,
+                        skill_context=skill_context,
+                        **dict(handler_config.args),
+                    )
+                except Exception as e:
+                    e_str = parse_exception(e)
+                    raise AEAInstantiationException(
+                        f"An error occured during instantiation of handler {skill_context.skill_id}/{handler_config.class_name}:\n{e_str}"
+                    )
                 handlers[handler_id] = handler
 
         return handlers
@@ -632,12 +645,18 @@ class Model(SkillComponent, ABC):
                     "Model '{}' cannot be found.".format(model_class_name)
                 )
             else:
-                model_instance = model(
-                    name=model_id,
-                    skill_context=skill_context,
-                    configuration=model_config,
-                    **dict(model_config.args),
-                )
+                try:
+                    model_instance = model(
+                        name=model_id,
+                        skill_context=skill_context,
+                        configuration=model_config,
+                        **dict(model_config.args),
+                    )
+                except Exception as e:
+                    e_str = parse_exception(e)
+                    raise AEAInstantiationException(
+                        f"An error occured during instantiation of model {skill_context.skill_id}/{model_config.class_name}:\n{e_str}"
+                    )
                 instances[model_id] = model_instance
                 setattr(skill_context, model_id, model_instance)
         return instances

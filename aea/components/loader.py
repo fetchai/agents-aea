@@ -25,7 +25,7 @@ from aea.components.base import Component
 from aea.configurations.base import ComponentConfiguration, ComponentType
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
-from aea.exceptions import AEAPackageLoadingError, enforce, parse_exception
+from aea.exceptions import AEAInstantiationException, AEAPackageLoadingError, enforce
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
 
@@ -59,6 +59,8 @@ def load_component_from_config(  # type: ignore
     component_class = component_type_to_class(component_type)
     try:
         return component_class.from_config(*args, configuration=configuration, **kwargs)  # type: ignore
+    except AEAInstantiationException as e:
+        raise e
     except ModuleNotFoundError as e:
         _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:  # pylint: disable=broad-except
@@ -150,9 +152,8 @@ def _handle_error_while_loading_component_generic_error(
 
     :raises Exception: the same exception, but prepending an informative message.
     """
-    e_str = parse_exception(e)
     raise Exception(
-        "An error occurred while loading {} {}:\n{}".format(
-            str(configuration.component_type), configuration.public_id, e_str
+        "An error occurred while loading {} {}: {}".format(
+            str(configuration.component_type), configuration.public_id, e
         )
     )

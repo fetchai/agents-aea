@@ -47,6 +47,10 @@ class AEAHandleException(AEAException):
     """Class for exceptions that are raised for handler errors of AEA packages."""
 
 
+class AEAInstantiationException(AEAException):
+    """Class for exceptions that are raised for instantiation errors of AEA packages."""
+
+
 class AEAEnforceError(AEAException):
     """Class for enforcement errors."""
 
