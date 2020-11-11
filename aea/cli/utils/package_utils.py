@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Module with package utils of the aea cli."""
-
 import os
 import re
 import shutil
@@ -28,6 +27,11 @@ import click
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
+from aea.cli.utils.config import (
+    dump_item_config,
+    get_non_vendor_package_path,
+    load_item_config,
+)
 from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
@@ -45,6 +49,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DISTRIBUTED_PACKAGES, LEDGER_CONNECTION
 from aea.configurations.loader import ConfigLoader
+from aea.configurations.utils import replace_component_ids
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
@@ -612,3 +617,37 @@ def update_item_public_id_in_init(
                 )
             else:
                 f.write(line)
+
+
+def update_references(ctx: Context, replacements: Dict[ComponentId, ComponentId]):
+    """
+    Update references across an AEA project.
+
+    Caveat: the update is done in a sequential manner. There is no check
+    of multiple updates, due to the occurrence of transitive relations.
+    E.g. replacements as {c1: c2, c2: c3} might lead to c1 replaced with c3
+      instead of c2.
+
+    :param ctx: the context.
+    :param replacements: mapping from old component ids to new component ids.
+    :return: None.
+    """
+    # preprocess replacement so to index them by component type
+    replacements_by_type: Dict[ComponentType, Dict[PublicId, PublicId]] = {}
+    for old, new in replacements.items():
+        replacements_by_type.setdefault(old.component_type, {})[
+            old.public_id
+        ] = new.public_id
+
+    aea_project_root = Path(ctx.cwd)
+    # update agent configuration
+    agent_config = load_item_config(PackageType.AGENT.value, aea_project_root)
+    replace_component_ids(agent_config, replacements_by_type)
+    dump_item_config(agent_config, aea_project_root)
+
+    # update every (non-vendor) AEA package.
+    for package_path in get_non_vendor_package_path(aea_project_root):
+        package_type = PackageType(package_path.parent.name[:-1])
+        package_config = load_item_config(package_type.value, package_path)
+        replace_component_ids(package_config, replacements_by_type)
+        dump_item_config(package_config, package_path)

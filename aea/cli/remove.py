@@ -29,7 +29,7 @@ import click
 
 from aea.aea_builder import AEABuilder
 from aea.cli.utils.click_utils import PublicIdParameter
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.config import load_item_config, try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.loggers import logger
@@ -280,6 +280,7 @@ def remove_unused_component_configurations(ctx: Context):
         saved_configuration_by_component_prefix = {
             key.component_prefix: value for key, value in saved_configuration.items()
         }
+        try_to_load_agent_config(ctx)
         for component_id in ctx.agent_config.package_dependencies:
             if component_id.component_prefix in saved_configuration_by_component_prefix:
                 ctx.agent_config.component_configurations[

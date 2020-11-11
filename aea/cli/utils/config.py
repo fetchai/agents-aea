@@ -16,6 +16,24 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2020 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
 """A module with config tools of the aea cli."""
 import logging
 import logging.config
@@ -157,8 +175,31 @@ def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration
     configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
     configuration_path = package_path / configuration_file_name
     configuration_loader = ConfigLoader.from_configuration_type(PackageType(item_type))
-    item_config = configuration_loader.load(configuration_path.open())
+    with configuration_path.open() as file_input:
+        item_config = configuration_loader.load(file_input)
     return item_config
+
+
+def dump_item_config(
+    package_configuration: PackageConfiguration, package_path: Path
+) -> None:
+    """
+    Dump item configuration.
+
+    :param package_configuration: the package configuration.
+    :param package_path: path to package from which config should be dumped.
+
+    :return: None
+    """
+    configuration_file_name = _get_default_configuration_file_name_from_type(
+        package_configuration.package_type
+    )
+    configuration_path = package_path / configuration_file_name
+    configuration_loader = ConfigLoader.from_configuration_type(
+        package_configuration.package_type
+    )
+    with configuration_path.open("w") as file_output:
+        configuration_loader.dump(package_configuration, file_output)  # type: ignore
 
 
 def handle_dotted_path(

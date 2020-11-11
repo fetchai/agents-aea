@@ -21,17 +21,13 @@
 
 import shutil
 from pathlib import Path
-from typing import Dict, cast
+from typing import cast
 
 import click
 
 from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.click_utils import PublicIdParameter
-from aea.cli.utils.config import (
-    set_cli_author,
-    try_to_load_agent_config,
-    update_item_config,
-)
+from aea.cli.utils.config import set_cli_author, update_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
@@ -39,6 +35,7 @@ from aea.cli.utils.package_utils import (
     get_package_path,
     is_item_present,
     update_item_public_id_in_init,
+    update_references,
 )
 from aea.configurations.base import (
     ComponentId,
@@ -115,67 +112,21 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     ctx.clean_paths.append(dst)
     copy_package_directory(Path(src), dst)
 
-    try_to_load_agent_config(ctx)
-
     # we know cli_author is set because of the above checks.
     cli_author: str = cast(str, ctx.config.get("cli_author"))
-    new_public_id = PublicId(
-        author=cli_author, name=public_id.name, version=DEFAULT_VERSION
-    )
+    new_public_id = PublicId(cli_author, public_id.name, DEFAULT_VERSION)
     update_item_config(
         item_type, Path(dst), author=new_public_id.author, version=new_public_id.version
     )
     update_item_public_id_in_init(item_type, Path(dst), new_public_id)
-    supported_items = getattr(ctx.agent_config, item_type_plural)
-    for p_id in supported_items:
-        if p_id.author == public_id.author and p_id.name == public_id.name:
-            present_public_id = p_id
-            break
-    supported_items.add(new_public_id)
-    supported_items.remove(present_public_id)
-    component_type = ComponentType(item_type)
-    _update_custom_configurations(
-        ctx.agent_config.component_configurations,
-        ComponentId(component_type, present_public_id),
-        ComponentId(component_type, new_public_id),
-    )
-    update_item_config(
-        "agent",
-        Path(ctx.cwd),
-        **{
-            item_type_plural: supported_items,
-            "component_configurations": ctx.agent_config.component_configurations,
-        },
-    )
-
-    shutil.rmtree(src)
     fingerprint_item(ctx, item_type, new_public_id)
+    shutil.rmtree(src)
+
+    component_type = ComponentType(item_type_plural[:-1])
+    old_component_id = ComponentId(component_type, public_id)
+    new_component_id = ComponentId(component_type, new_public_id)
+    update_references(ctx, {old_component_id: new_component_id})
+
     click.echo(
         f"Successfully ejected {item_type} {public_id} to {dst} as {new_public_id}."
     )
-
-
-def _update_custom_configurations(
-    component_configurations: Dict[ComponentId, Dict],
-    old_component_id: ComponentId,
-    new_component_id: ComponentId,
-):
-    """
-    Update custom configurations of the AEA configuration.
-
-    Namely, if the public id of the ejected package has a custom configuration
-    in the AEA configuration, then replace the identifier with the new
-    one (change the author name and the version).
-
-    This function does side-effect on the 'component_configurations' input.
-
-    :param component_configurations: the dictionary of component configurations.
-    :param old_component_id: the component id to replace.
-    :param new_component_id: the component id to add.
-    :return: None
-    """
-    if old_component_id not in component_configurations:
-        return
-
-    old_value = component_configurations.pop(old_component_id)
-    component_configurations[new_component_id] = old_value
