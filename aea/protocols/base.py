@@ -191,7 +191,7 @@ class Message:
         """
         try:
             setattr(self._slots, key, value)
-        except AttributeError as e:
+        except AttributeError as e:  # pragma: nocover
             raise ValueError(f"Field `{key}` is not supported {e}")
 
     def get(self, key: str) -> Optional[Any]:

@@ -265,7 +265,7 @@ class HTTPClientAsyncChannel:
                     url=request_http_message.url,
                     headers=request_http_message.headers,
                     data=request_http_message.body,
-                    ssl_context=ssl_context,
+                    ssl=ssl_context,
                 ) as resp:
                     await resp.read()
                 return resp

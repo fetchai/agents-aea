@@ -41,7 +41,15 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
-from aea.exceptions import AEAException, enforce
+from aea.exceptions import (
+    AEAActException,
+    AEAException,
+    AEAHandleException,
+    AEAInstantiationException,
+    _StopRuntime,
+    enforce,
+    parse_exception,
+)
 from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.multiplexer import MultiplexerStatus, OutBox
@@ -366,7 +374,15 @@ class Behaviour(AbstractBehaviour, ABC):
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
-        self.act()
+        try:
+            self.act()
+        except _StopRuntime:
+            raise
+        except Exception as e:
+            e_str = parse_exception(e)
+            raise AEAActException(
+                f"An error occured during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+            )
 
     @classmethod
     def parse_module(  # pylint: disable=arguments-differ
@@ -432,12 +448,18 @@ class Behaviour(AbstractBehaviour, ABC):
                     "Behaviour '{}' cannot be found.".format(behaviour_class_name)
                 )
             else:
-                behaviour = behaviour_class(
-                    name=behaviour_id,
-                    configuration=behaviour_config,
-                    skill_context=skill_context,
-                    **dict(behaviour_config.args),
-                )
+                try:
+                    behaviour = behaviour_class(
+                        name=behaviour_id,
+                        configuration=behaviour_config,
+                        skill_context=skill_context,
+                        **dict(behaviour_config.args),
+                    )
+                except Exception as e:
+                    e_str = parse_exception(e)
+                    raise AEAInstantiationException(
+                        f"An error occured during instantiation of behaviour {skill_context.skill_id}/{behaviour_config.class_name}:\n{e_str}"
+                    )
                 behaviours[behaviour_id] = behaviour
 
         return behaviours
@@ -456,6 +478,18 @@ class Handler(SkillComponent, ABC):
         :param message: the message
         :return: None
         """
+
+    def handle_wrapper(self, message: Message) -> None:
+        """Wrap the call of the handler. This method must be called only by the framework."""
+        try:
+            self.handle(message)
+        except _StopRuntime:
+            raise
+        except Exception as e:
+            e_str = parse_exception(e)
+            raise AEAHandleException(
+                f"An error occured during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+            )
 
     @classmethod
     def parse_module(  # pylint: disable=arguments-differ
@@ -513,12 +547,18 @@ class Handler(SkillComponent, ABC):
                     "Handler '{}' cannot be found.".format(handler_class_name)
                 )
             else:
-                handler = handler_class(
-                    name=handler_id,
-                    configuration=handler_config,
-                    skill_context=skill_context,
-                    **dict(handler_config.args),
-                )
+                try:
+                    handler = handler_class(
+                        name=handler_id,
+                        configuration=handler_config,
+                        skill_context=skill_context,
+                        **dict(handler_config.args),
+                    )
+                except Exception as e:
+                    e_str = parse_exception(e)
+                    raise AEAInstantiationException(
+                        f"An error occured during instantiation of handler {skill_context.skill_id}/{handler_config.class_name}:\n{e_str}"
+                    )
                 handlers[handler_id] = handler
 
         return handlers
@@ -610,12 +650,18 @@ class Model(SkillComponent, ABC):
                     "Model '{}' cannot be found.".format(model_class_name)
                 )
             else:
-                model_instance = model(
-                    name=model_id,
-                    skill_context=skill_context,
-                    configuration=model_config,
-                    **dict(model_config.args),
-                )
+                try:
+                    model_instance = model(
+                        name=model_id,
+                        skill_context=skill_context,
+                        configuration=model_config,
+                        **dict(model_config.args),
+                    )
+                except Exception as e:
+                    e_str = parse_exception(e)
+                    raise AEAInstantiationException(
+                        f"An error occured during instantiation of model {skill_context.skill_id}/{model_config.class_name}:\n{e_str}"
+                    )
                 instances[model_id] = model_instance
                 setattr(skill_context, model_id, model_instance)
         return instances

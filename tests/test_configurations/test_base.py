@@ -458,6 +458,12 @@ class AgentConfigTestCase(TestCase):
         agent_config.default_connection = 1
         agent_config.public_id
 
+    def test_name_and_author(self):
+        """Test case for default_connection setter positive result."""
+        agent_config = AgentConfig(agent_name="my_agent", author="fetchai")
+        agent_config.name = "new_name"
+        agent_config.author = "new_author"
+
 
 class SpeechActContentConfigTestCase(TestCase):
     """Test case for SpeechActContentConfig class."""

@@ -28,13 +28,8 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
-from aea.runtime import (
-    AsyncRuntime,
-    BaseRuntime,
-    RuntimeStates,
-    ThreadedRuntime,
-    _StopRuntime,
-)
+from aea.exceptions import _StopRuntime
+from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import CUR_PATH

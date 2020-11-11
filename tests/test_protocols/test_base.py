@@ -294,6 +294,21 @@ class TestBaseSerializations:
         assert self.message2._body == m_dict
 
 
+class TestMessageEncode:
+    """Test the 'Protocol.from_dir' method."""
+
+    def test_encode(self):
+        """Test encode on message."""
+
+        class TTMessage(TMessage):
+            """Test class extended."""
+
+            serializer = ExampleProtobufSerializer
+
+        msg = TTMessage({"body_1": "1", "body_2": "2"})
+        msg.encode()
+
+
 class TestProtocolFromDir:
     """Test the 'Protocol.from_dir' method."""
 
