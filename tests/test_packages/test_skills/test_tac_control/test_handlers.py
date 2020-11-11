@@ -47,7 +47,7 @@ from packages.fetchai.skills.tac_control.parameters import Parameters
 from tests.conftest import ROOT_DIR
 
 
-class TestGenericTacHandler(BaseSkillTestCase):
+class TestTacHandler(BaseSkillTestCase):
     """Test tac handler of tac control."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_control")
@@ -779,7 +779,7 @@ class TestGenericTacHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
 
-class TestGenericOefSearchHandler(BaseSkillTestCase):
+class TestOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of tac control."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_control")
