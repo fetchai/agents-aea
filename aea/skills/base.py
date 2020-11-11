@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the base classes for the skills."""
-
 import datetime
 import inspect
 import logging
@@ -44,6 +42,7 @@ from aea.context.base import AgentContext
 from aea.exceptions import AEAException, enforce
 from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.logging import AgentLoggerAdapter
+from aea.helpers.storage import Storage
 from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
@@ -172,6 +171,11 @@ class SkillContext:
     def outbox(self) -> OutBox:
         """Get outbox."""
         return self._get_agent_context().outbox
+
+    @property
+    def storage(self) -> Optional[Storage]:
+        """Get optional storage for agent."""
+        return self._get_agent_context().storage
 
     @property
     def message_in_queue(self) -> Queue:

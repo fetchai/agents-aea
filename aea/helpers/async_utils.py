@@ -231,6 +231,7 @@ class PeriodicCaller:
         try:
             self._periodic_callable()
         except Exception as exception:  # pylint: disable=broad-except
+            self.stop()
             if not self._exception_callback:  # pragma: nocover
                 raise
             self._exception_callback(self._periodic_callable, exception)

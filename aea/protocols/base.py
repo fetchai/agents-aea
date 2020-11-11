@@ -81,6 +81,22 @@ class Message:
         except Exception as e:  # pylint: disable=broad-except
             _default_logger.error(e)
 
+    def to_json(self) -> dict:
+        """Get json representation of the message."""
+        return {"to": self._to, "sender": self._sender, "body": self._body}
+
+    @classmethod
+    def from_json(cls, data) -> "Message":
+        """Construct message instance from json data."""
+        instance = cls(_body=data["body"])
+        sender = data["sender"]
+        if sender:
+            instance.sender = sender
+        to = data["to"]
+        if to:
+            instance.to = sender
+        return instance
+
     @property
     def valid_performatives(self) -> Set[str]:
         """Get valid performatives."""

@@ -172,6 +172,7 @@ class AEA(Agent):
             default_routing if default_routing is not None else {},
             search_service_address,
             decision_maker_handler.self_address,
+            storage_callable=lambda: self._runtime.storage,
             **kwargs,
         )
         self._execution_timeout = execution_timeout
@@ -406,6 +407,7 @@ class AEA(Agent):
             self.logger.exception(f"<{e}> raised during `{fn}`")
 
         if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
+            log_exception(exception, function)
             return True
 
         if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:

@@ -16,8 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the implementation of runtime for economic agent (AEA)."""
 
+
+"""This module contains the implementation of runtime for economic agent (AEA)."""
 import asyncio
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
@@ -32,6 +33,7 @@ from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.helpers.async_utils import Runnable
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
+from aea.helpers.storage import Storage
 from aea.multiplexer import AsyncMultiplexer
 from aea.skills.tasks import TaskManager
 
@@ -100,9 +102,15 @@ class BaseRuntime(Runnable, WithLogger):
         self._multiplexer: AsyncMultiplexer = self._get_multiplexer_instance()
         self._task_manager = TaskManager()
         self._decision_maker: Optional[DecisionMaker] = None
+        self._storage: Optional[Storage] = None
 
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
         self.main_loop: BaseAgentLoop = self._get_main_loop_instance(self._loop_mode)
+
+    @property
+    def storage(self) -> Optional[Storage]:
+        """Get optional storage."""
+        return self._storage
 
     @property
     def loop_mode(self) -> str:  # pragma: nocover
@@ -288,6 +296,10 @@ class AsyncRuntime(BaseRuntime):
             await self.main_loop.wait_completed()
         self._teardown()
 
+        if self._storage is not None:
+            self._storage.stop()
+            await self._storage.wait_completed()
+
         self.multiplexer.stop()
         await self.multiplexer.wait_completed()
         self.logger.debug("Runtime loop stopped!")
@@ -295,7 +307,15 @@ class AsyncRuntime(BaseRuntime):
     async def run_runtime(self) -> None:
         """Run agent and starts multiplexer."""
         self._state.set(RuntimeStates.starting)
-        await asyncio.gather(self._start_multiplexer(), self._start_agent_loop())
+        await asyncio.gather(
+            self._start_multiplexer(), self._start_agent_loop(), self._start_storage()
+        )
+
+    async def _start_storage(self) -> None:
+        """Start storage component."""
+        self._storage = Storage("sqlite://:memory:", threaded=True)
+        self._storage.start()
+        await self._storage.wait_completed()
 
     async def _start_multiplexer(self) -> None:
         """Call multiplexer connect asynchronous way."""
