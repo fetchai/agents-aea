@@ -1,16 +1,22 @@
 
 
-An AEA <a href="../package-imports">consists of many packages </a>. When developing, it helps to be able to save packages in a local package registry. This guide helps setting up a local package registry and configuring the working directory for development.
+An AEA <a href="../package-imports">consists of many packages </a>. When developing, it helps to be able to save packages in a local package registry, rather than pushing them to <a href="https://aea-registry.fetch.ai" target="_blank">remote registry</a>. This guide helps setting up a local package registry and configuring the working directory for development.
 
 ## Development setup
 
 To prepare a directory (henceforth working directory) for development with the AEA framework you can take a few steps:
 
-- Ensure you start with an empty working directory to avoid any unnecessary side-effects.
+- Either, manually:
 
-- In your working directory, create an empty folder called `packages`. This folder will act as the local registry for packages.
+	- Ensure you start with an empty working directory to avoid any unnecessary side-effects.
 
-- In your working directory, create a `.env` file with the constant `PYTHONPATH=path_to_packages_dir` where `path_to_packages_dir` is the path to the packages folder in your working directory.
+	- In your working directory, create an empty folder called `packages`. This folder will act as the local registry for packages.
+
+	- In your working directory, create a `.env` file with the constant `PYTHONPATH=$PYTHONPATH:path_to_packages_dir` where `path_to_packages_dir` is the path to the packages folder in your working directory.
+
+- Or, automated:
+
+	- Fork our <a href="https://github.com/fetchai/agents-template" target="_blank">template repo</a> for AEA development. Then clone it to your machine.
 
 - Depending on your editor, you might take further steps:
 
