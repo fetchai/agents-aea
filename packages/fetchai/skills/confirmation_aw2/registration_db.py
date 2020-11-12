@@ -24,7 +24,7 @@ import json
 import logging
 import os
 import sqlite3
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from aea.skills.base import Model
 
@@ -47,6 +47,8 @@ class RegistrationDB(Model):
             if custom_path is None
             else custom_path
         )
+        if not os.path.exists(os.path.dirname(os.path.abspath(self.db_path))):
+            raise ValueError(f"Path={self.db_path} not valid!")
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:
@@ -93,6 +95,23 @@ class RegistrationDB(Model):
         ret = self._execute_single_sql(command, (address,))
         return ret[0] if len(ret) > 0 else None
 
+    def set_registered(
+        self, address: str,
+    ):
+        """Record a registration."""
+        if self.is_registered(address):
+            return
+        command = "INSERT OR REPLACE INTO registered_table(address, ethereum_address, ethereum_signature, fetchai_signature, developer_handle, tweet) values(?, ?, ?, ?, ?, ?)"
+        variables = (
+            address,
+            "",
+            "",
+            "",
+            "",
+            "",
+        )
+        self._execute_single_sql(command, variables)
+
     def is_registered(self, address: str) -> bool:
         """Check if an address is registered."""
         command = "SELECT * FROM registered_table WHERE address=?"
@@ -136,10 +155,10 @@ class RegistrationDB(Model):
         command: str,
         variables: Tuple[Any, ...] = (),
         print_exceptions: bool = True,
-    ):
+    ) -> List[Tuple[str, ...]]:
         """Query the database - all the other functions use this under the hood."""
         conn = None
-        ret = []
+        ret: List[Tuple[str, ...]] = []
         try:
             conn = sqlite3.connect(self.db_path, timeout=300)  # 5 mins
             c = conn.cursor()

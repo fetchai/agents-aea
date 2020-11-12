@@ -11,9 +11,9 @@ fingerprint:
   __init__.py: QmZMzRtyy3pGznfYNkoF5aX6KQqyfcxY4kyFFEGUUkCBzP
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
-  handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
-  registration_db.py: QmUkRE29WhMjDQtochWCQBmUzVGaRhAxmKcK36AWtG38d6
-  strategy.py: QmW2S3pRbJFgBikL6FBDAiEvSEehpWFqV9HJrB3mJg5dFR
+  handlers.py: QmViy7gtnJm92dxNBwaroj7XH4bzWMaLH5rQWdtRovuRti
+  registration_db.py: Qmeto6Yr25Nzbr4aVxumjHWSP4c73vvkQMyDsD6Q8isWHs
+  strategy.py: Qmb7MsZSfTmHV5mGq7Um5vCTQDVQBKY3nK692zBWbWgiRD
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.9.0
@@ -32,6 +32,9 @@ behaviours:
       search_interval: 5
     class_name: SearchBehaviour
 handlers:
+  default_handler:
+    args: {}
+    class_name: DefaultHandler
   fipa:
     args: {}
     class_name: FipaHandler
@@ -66,6 +69,7 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      aw1_aea: null
       is_ledger_tx: true
       location:
         latitude: 51.5194

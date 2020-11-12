@@ -9,16 +9,17 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmYRNztBr6i8G1T5mgdMLoKBEi5C68EeWM8pZCzpDXSMgd
   __init__.py: QmZqjAQt2MaZBHNybRwUd2541wmj4XpUCTcGxjyysQPVAo
-  dialogues.py: QmdMjuAT8h7ZUSfqMVkF88Hnz1kc6advg8oVg8QB7xGPw1
-  handlers.py: QmVmTJCyEqPn2BR6ucPCe7nV3t8N9cYwoASKSxoJYkr9Wp
-  registration_db.py: QmfUXubG3ZRbTmMDs7AKjC3zKg9mRhxuTi1CtfU1DMcNsL
-  strategy.py: Qma26LVujewf4BGs6DZkrRg5uwRfBBnWEBy1nSSjt1ntfV
+  dialogues.py: QmcAKRkSpd3TYdXdjVQSgiJ6vhaHHVNPtTNbEey6b52R6u
+  handlers.py: QmajpXePiMHt4BSRSpcMvzWYvpMTVDjLMvwE1k6BzkrA4s
+  registration_db.py: QmaMQ3d7fTiH17Jxh2ZgSNmUAE87MBfRyxU4YJNUhWtKrU
+  strategy.py: Qmb9bUtzt2RjjjxYxoNPYJZvQV8fYzFRtmTwykXH1ZZKsC
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.9.0
 contracts:
 - fetchai/staking_erc20:0.1.0
 protocols:
+- fetchai/default:0.9.0
 - fetchai/ledger_api:0.7.0
 - fetchai/register:0.2.0
 - fetchai/signing:0.7.0
@@ -41,6 +42,9 @@ models:
   contract_api_dialogues:
     args: {}
     class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
@@ -56,6 +60,7 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      aw2_aeas: []
       fetchai_staking_contract_address: '0x351bac612b50e87b46e4b10a282f632d41397de2'
       override_staking_check: false
       token_denomination: atestfet
