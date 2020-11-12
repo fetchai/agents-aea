@@ -22,7 +22,7 @@
 import logging
 import os
 import sqlite3
-from typing import Tuple
+from typing import List, Tuple
 
 from aea.skills.base import Model
 
@@ -84,6 +84,13 @@ class RegistrationDB(Model):
         variables = (address,)
         result = self._execute_single_sql(command, variables)
         return len(result) != 0
+
+    def get_all_registered(self) -> List[str]:
+        """Get all registered AW-1 AEAs."""
+        command = "SELECT address FROM registered_table"
+        variables = ()
+        result = self._execute_single_sql(command, variables)
+        return result
 
     def _execute_single_sql(
         self,

@@ -93,6 +93,23 @@ class RegistrationDB(Model):
         ret = self._execute_single_sql(command, (address,))
         return ret[0] if len(ret) > 0 else None
 
+    def set_registered(
+        self, address: str,
+    ):
+        """Record a registration."""
+        if self.is_registered(address):
+            return
+        command = "INSERT OR REPLACE INTO registered_table(address, ethereum_address, ethereum_signature, fetchai_signature, developer_handle, tweet) values(?, ?, ?, ?, ?, ?)"
+        variables = (
+            address,
+            "",
+            "",
+            "",
+            "",
+            "",
+        )
+        self._execute_single_sql(command, variables)
+
     def is_registered(self, address: str) -> bool:
         """Check if an address is registered."""
         command = "SELECT * FROM registered_table WHERE address=?"

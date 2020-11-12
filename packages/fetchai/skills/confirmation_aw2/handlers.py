@@ -19,6 +19,19 @@
 
 """This package contains the handlers of the agent."""
 
+from typing import Optional, cast
+
+from aea.configurations.base import PublicId
+from aea.crypto.ledger_apis import LedgerApis
+from aea.protocols.base import Message
+from aea.skills.base import Handler
+
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.skills.confirmation_aw2.strategy import Strategy
+from packages.fetchai.skills.generic_buyer.dialogues import (
+    DefaultDialogue,
+    DefaultDialogues,
+)
 from packages.fetchai.skills.generic_buyer.handlers import (
     GenericFipaHandler,
     GenericLedgerApiHandler,
@@ -31,3 +44,92 @@ FipaHandler = GenericFipaHandler
 LedgerApiHandler = GenericLedgerApiHandler
 OefSearchHandler = GenericOefSearchHandler
 SigningHandler = GenericSigningHandler
+
+
+class DefaultHandler(Handler):
+    """This class implements the default handler."""
+
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to an envelope.
+
+        :param message: the message
+        """
+        default_msg = cast(DefaultMessage, message)
+
+        # recover dialogue
+        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
+        default_dialogue = cast(DefaultDialogue, default_dialogues.update(default_msg))
+        if default_dialogue is None:
+            self._handle_unidentified_dialogue(default_dialogue)
+            return
+
+        # handle message
+        if default_msg.performative == DefaultMessage.Performative.BYTES:
+            self._handle_bytes(default_msg, default_dialogue)
+        else:
+            self._handle_invalid(default_msg, default_dialogue)
+
+    def _handle_unidentified_dialogue(self, default_msg: DefaultMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param fipa_msg: the message
+        """
+        self.context.logger.info(
+            f"received invalid default message={default_msg}, unidentified dialogue."
+        )
+
+    def _handle_bytes(
+        self, default_msg: DefaultMessage, default_dialogue: DefaultDialogue
+    ) -> None:
+        """
+        Handle a default message of invalid performative.
+
+        :param default_msg: the message
+        :param default_dialogue: the default dialogue
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        if default_msg.sender == strategy.aw1_aea:
+            confirmed_aea = default_msg.content.decode("utf-8")
+            if not LedgerApis.is_valid_address("fetchai", confirmed_aea):
+                self.context.logger.warning(
+                    f"received invalid address={confirmed_aea} in dialogue={default_dialogue}."
+                )
+                return
+            self.context.logger.warning(f"adding ={default_msg.performative} to db.")
+        else:
+            self.context.logger.warning(
+                f"cannot handle default message of performative={default_msg.performative} in dialogue={default_dialogue}. Invalid sender={default_msg.sender}"
+            )
+
+    def _handle_invalid(
+        self, default_msg: DefaultMessage, default_dialogue: DefaultDialogue
+    ) -> None:
+        """
+        Handle a default message of invalid performative.
+
+        :param default_msg: the message
+        :param default_dialogue: the default dialogue
+        :return: None
+        """
+        self.context.logger.warning(
+            f"cannot handle default message of performative={default_msg.performative} in dialogue={default_dialogue}."
+        )
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """

@@ -20,7 +20,7 @@
 """This module contains the strategy class."""
 
 import datetime
-from typing import Dict, List, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 from packages.fetchai.skills.confirmation_aw2.registration_db import RegistrationDB
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
@@ -35,6 +35,10 @@ class Strategy(GenericStrategy):
 
         :return: None
         """
+        aw1_aea: Optional[str] = kwargs.pop("aw1_aea", None)
+        if aw1_aea is None:
+            raise ValueError("aw1_aea must be provided!")
+        self.aw1_aea = aw1_aea
         self.mininum_hours_between_txs = kwargs.pop("mininum_hours_between_txs", 4)
         self.minimum_minutes_since_last_attempt = kwargs.pop(
             "minimum_minutes_since_last_attempt", 2
