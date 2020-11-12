@@ -75,7 +75,7 @@ reply:
   get_transaction_receipt: [transaction_receipt, error]
   transaction_receipt: []
   error: []
-termination: [balance, transaction_receipt]
+termination: [balance, state, transaction_receipt]
 roles: {agent, ledger}
 end_states: [successful]
 ...
