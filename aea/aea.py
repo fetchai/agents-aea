@@ -45,7 +45,7 @@ from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, _StopRuntime
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
 from aea.identity.base import Identity
@@ -53,7 +53,6 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
-from aea.runtime import _StopRuntime
 from aea.skills.base import Behaviour, Handler
 
 
@@ -338,7 +337,7 @@ class AEA(Agent):
             return
 
         for handler in handlers:
-            handler.handle(msg)
+            handler.handle_wrapper(msg)
 
     def _setup_loggers(self):
         """Set up logger with agent name."""
@@ -402,10 +401,14 @@ class AEA(Agent):
         :return: bool, propagate exception if True otherwise skip it.
         """
         # docstyle: ignore # noqa: E800
-        def log_exception(e, fn):
-            self.logger.exception(f"<{e}> raised during `{fn}`")
+        def log_exception(e, fn, is_debug: bool = False):
+            if is_debug:
+                self.logger.debug(f"<{e}> raised during `{fn}`")
+            else:
+                self.logger.exception(f"<{e}> raised during `{fn}`")
 
         if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
+            log_exception(exception, function, is_debug=True)
             return True
 
         if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
@@ -434,7 +437,6 @@ class AEA(Agent):
 
         :return: None
         """
-        self.logger.debug("Calling teardown method...")
         self.resources.teardown()
 
     def get_task_result(self, task_id: int) -> AsyncResult:

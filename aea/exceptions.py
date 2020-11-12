@@ -19,7 +19,8 @@
 
 """Exceptions for the AEA package."""
 
-from typing import Type
+import traceback
+from typing import Optional, Type
 
 
 class AEAException(Exception):
@@ -30,8 +31,48 @@ class AEAPackageLoadingError(AEAException):
     """Class for exceptions that are raised for loading errors of AEA packages."""
 
 
+class AEASetupError(AEAException):
+    """Class for exceptions that are raised for setup errors of AEA packages."""
+
+
+class AEATeardownError(AEAException):
+    """Class for exceptions that are raised for teardown errors of AEA packages."""
+
+
+class AEAActException(AEAException):
+    """Class for exceptions that are raised for act errors of AEA packages."""
+
+
+class AEAHandleException(AEAException):
+    """Class for exceptions that are raised for handler errors of AEA packages."""
+
+
+class AEAInstantiationException(AEAException):
+    """Class for exceptions that are raised for instantiation errors of AEA packages."""
+
+
 class AEAEnforceError(AEAException):
     """Class for enforcement errors."""
+
+
+class _StopRuntime(Exception):
+    """
+    Exception to stop runtime.
+
+    For internal usage only!
+    Used to perform asyncio call from sync callbacks.
+    """
+
+    def __init__(self, reraise: Optional[Exception] = None):
+        """
+        Init _StopRuntime exception.
+
+        :param reraise: exception to reraise.
+
+        :return: None
+        """
+        self.reraise = reraise
+        super().__init__("Stop runtime exception.")
 
 
 def enforce(
@@ -48,3 +89,17 @@ def enforce(
     """
     if not is_valid_condition:
         raise exception_class(exception_text)
+
+
+def parse_exception(exception: Exception, limit=-1) -> str:
+    """
+    Parse an exception to get the relevant lines.
+
+    :param limit: the limit
+    :return: exception as string
+    """
+    msgs = traceback.format_exception(
+        type(exception), exception, exception.__traceback__, limit=limit
+    )
+    e_str = "\n".join(msgs)
+    return e_str

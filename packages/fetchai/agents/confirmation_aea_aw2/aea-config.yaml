@@ -91,6 +91,7 @@ models:
       custom_path: /data/registration.db
   strategy:
     args:
+      aw1_aea: null
       location:
         latitude: 51.5194
         longitude: 0.127

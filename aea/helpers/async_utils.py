@@ -231,6 +231,7 @@ class PeriodicCaller:
         try:
             self._periodic_callable()
         except Exception as exception:  # pylint: disable=broad-except
+            self.stop()
             if not self._exception_callback:  # pragma: nocover
                 raise
             self._exception_callback(self._periodic_callable, exception)
@@ -543,12 +544,13 @@ class Runnable(ABC):
         """Wrap run() method."""
         if not self._completed_event or not self._loop:  # pragma: nocover
             raise ValueError("Start was not called!")
-
+        self._is_running = True
         try:
             with suppress(asyncio.CancelledError):
                 return await self.run()
         finally:
             self._loop.call_soon_threadsafe(self._completed_event.set)
+            self._is_running = False
 
     @property
     def is_running(self) -> bool:  # pragma: nocover
@@ -649,7 +651,7 @@ class Runnable(ABC):
         """Stop runnable."""
         _default_logger.debug(f"{self} is going to be stopped {self._task}")
         if not self._task or not self._loop:
-            return
+            return  # pragma: nocover
 
         if self._task.done():
             return

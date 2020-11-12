@@ -726,14 +726,14 @@ class _CosmosApi(LedgerApi):
     )
     def _try_get_account_number_and_sequence(
         self, address: Address
-    ) -> Optional[Tuple[int, int]]:
+    ) -> Tuple[Optional[int], Optional[int]]:
         """
         Try get account number and sequence for an address.
 
         :param address: the address
         :return: a tuple of account number and sequence
         """
-        result = None  # type: Optional[Tuple[int, int]]
+        result: Tuple[Optional[int], Optional[int]] = (None, None)
         url = self.network_address + f"/auth/accounts/{address}"
         response = requests.get(url=url)
         if response.status_code == 200:
