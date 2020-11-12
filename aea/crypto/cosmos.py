@@ -29,7 +29,7 @@ import tempfile
 import time
 from collections import namedtuple
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, List, Optional, Tuple, Union
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
 import requests
 from bech32 import bech32_decode, bech32_encode, convertbits
@@ -408,11 +408,9 @@ class _CosmosApi(LedgerApi):
     )
     def _try_get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
         """Try to call a function on the ledger API."""
-        result = None  # type: Optional[Any]  
-
-        query = "".join([f"?{kwarg[0]}={kwarg[1]}" for kwarg in kwargs.items()])        
+        result = None  # type: Optional[Any]
+        query = "".join([f"?{kwarg[0]}={kwarg[1]}" for kwarg in kwargs.items()])
         url = self.network_address + f"/{callable_name}{query}"
-
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()["result"]

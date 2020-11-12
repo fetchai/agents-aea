@@ -20,7 +20,7 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar, Union
+from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar
 
 from aea.common import Address
 
