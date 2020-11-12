@@ -296,7 +296,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     def get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
         """Call a specified function on the ledger API."""
-        response = self._try_get_state(callable_name, kwargs)
+        response = self._try_get_state(callable_name, **kwargs)
         return response
 
     @try_decorator("Unable to retrieve block: {}", logger_method="warning")
