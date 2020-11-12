@@ -110,9 +110,7 @@ _TACMESSAGE_ERRORCODE = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[],
-    enum_types=[
-        _TACMESSAGE_ERRORCODE_ERRORCODEENUM,
-    ],
+    enum_types=[_TACMESSAGE_ERRORCODE_ERRORCODEENUM,],
     options=None,
     is_extendable=False,
     syntax="proto3",
@@ -1552,9 +1550,7 @@ _TACMESSAGE_TAC_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     options=None,
     is_extendable=False,
@@ -2142,48 +2138,48 @@ _sym_db.RegisterMessage(TacMessage.Tac_Error_Performative.InfoEntry)
 
 
 _TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_TRANSACTION_PERFORMATIVE_FEEBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_FEEBYCURRENCYIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_TRANSACTION_PERFORMATIVE_FEEBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY.has_options = True
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_QUANTITIESBYGOODIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_FEEBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_FEEBYCURRENCYIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_FEEBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_AGENTADDRTONAMEENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_AGENTADDRTONAMEENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_AGENTADDRTONAMEENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_CURRENCYIDTONAMEENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_CURRENCYIDTONAMEENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_CURRENCYIDTONAMEENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_GOODIDTONAMEENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_GOODIDTONAMEENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_GOODIDTONAMEENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY.has_options = True
 _TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
@@ -2192,14 +2188,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOption
 _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY.has_options = (
     True
 )
-_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY.has_options = (
     True
 )
-_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY.has_options = True
 _TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(

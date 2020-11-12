@@ -138,19 +138,6 @@ class LedgerApiMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "balance",
-            "error",
-            "get_balance",
-            "get_raw_transaction",
-            "get_state",
-            "get_transaction_receipt",
-            "raw_transaction",
-            "send_signed_transaction",
-            "state",
-            "transaction_digest",
-            "transaction_receipt",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -488,8 +475,7 @@ class LedgerApiMessage(Message):
                 enforce(
                     0 < self.target < self.message_id,
                     "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1,
-                        self.target,
+                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

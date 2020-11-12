@@ -142,9 +142,7 @@ _FIPAMESSAGE_QUERY = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _FIPAMESSAGE_QUERY_NOTHING,
-    ],
+    nested_types=[_FIPAMESSAGE_QUERY_NOTHING,],
     enum_types=[],
     options=None,
     is_extendable=False,
@@ -317,9 +315,7 @@ _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     options=None,
     is_extendable=False,
@@ -410,9 +406,7 @@ _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     options=None,
     is_extendable=False,
@@ -503,9 +497,7 @@ _FIPAMESSAGE_INFORM_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     options=None,
     is_extendable=False,
@@ -1017,12 +1009,12 @@ _sym_db.RegisterMessage(FipaMessage.Match_Accept_Performative)
 
 
 _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY.has_options = True
-_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY.has_options = True
-_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = (
-    _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001"))
+_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
+    descriptor_pb2.MessageOptions(), _b("8\001")
 )
 _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY.has_options = True
 _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(

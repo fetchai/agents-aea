@@ -142,9 +142,7 @@ _MLTRADEMESSAGE_QUERY = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _MLTRADEMESSAGE_QUERY_NOTHING,
-    ],
+    nested_types=[_MLTRADEMESSAGE_QUERY_NOTHING,],
     enum_types=[],
     options=None,
     is_extendable=False,

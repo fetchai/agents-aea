@@ -106,9 +106,7 @@ _REGISTERMESSAGE_REGISTER_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     options=None,
     is_extendable=False,
@@ -199,9 +197,7 @@ _REGISTERMESSAGE_SUCCESS_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     options=None,
     is_extendable=False,
@@ -326,9 +322,7 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     options=None,
     is_extendable=False,

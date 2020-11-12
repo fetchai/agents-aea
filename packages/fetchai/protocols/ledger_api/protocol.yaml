@@ -12,7 +12,7 @@ fingerprint:
   dialogues.py: QmRaN3EmdYamhmaepk5Vfjy4JEw4XfnXPY6cfEfQXHJhS2
   ledger_api.proto: QmPKFGxUC7xgPZJ3M6mkyBLFR7ewno3614EGZUAxVWbU9K
   ledger_api_pb2.py: QmVt37XH1jNqYg5KJj2H3ozQP1iSoMHsm1wKk8m2xsNwD5
-  message.py: QmY1HD5qtcQdGQMB3UBjPQvyEUDrXbQGw5NJ6yaNenuS2p
+  message.py: QmZAhCAe6unh6Rse6f7dCdV4tfMHPMREK6MFNp3PbdjhvT
   serialization.py: QmdaW1rvK8kyHy5L8UR6tN7QjMKQjA32h25G92y2Acc3p1
 fingerprint_ignore_patterns: []
 dependencies:

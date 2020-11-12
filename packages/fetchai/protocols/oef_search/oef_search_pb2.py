@@ -154,9 +154,7 @@ _OEFSEARCHMESSAGE_OEFERROROPERATION = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[],
-    enum_types=[
-        _OEFSEARCHMESSAGE_OEFERROROPERATION_OEFERRORENUM,
-    ],
+    enum_types=[_OEFSEARCHMESSAGE_OEFERROROPERATION_OEFERRORENUM,],
     options=None,
     is_extendable=False,
     syntax="proto3",
@@ -245,9 +243,7 @@ _OEFSEARCHMESSAGE_QUERY = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _OEFSEARCHMESSAGE_QUERY_NOTHING,
-    ],
+    nested_types=[_OEFSEARCHMESSAGE_QUERY_NOTHING,],
     enum_types=[],
     options=None,
     is_extendable=False,
