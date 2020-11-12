@@ -146,7 +146,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :return: None
         """
         result = api.get_state(message.callable, message.kwargs.body)
-        if data is None:
+        if result is None:
             response = self.get_error_message(
                 ValueError("Failed to get state"), api, message, dialogue
             )
@@ -156,7 +156,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 dialogue.reply(
                     performative=LedgerApiMessage.Performative.STATE,
                     target_message=message,
-                    state=State(message.ledger_id, data),
+                    state=State(message.ledger_id, result),
                     ledger_id=message.ledger_id,
                 ),
             )
