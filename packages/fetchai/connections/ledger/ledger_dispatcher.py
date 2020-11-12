@@ -145,12 +145,10 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :param message: the Ledger API message
         :return: None
         """
-        method = getattr(api, message.callable)
-        args = tuple(message.kwargs.body.values())
-        data = method(*args)
+        result = api.get_state(message.callable, message.kwargs.body)
         if data is None:
             response = self.get_error_message(
-                ValueError("No block returned"), api, message, dialogue
+                ValueError("Failed to get state"), api, message, dialogue
             )
         else:
             response = cast(

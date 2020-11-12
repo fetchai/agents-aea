@@ -249,14 +249,15 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_block(self, block_id: Union[int, str]) -> Optional[Any]:
+    def get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
         """
-        Get the block header and metadata.
+        Call a specified function on the underlying ledger API.
 
         This usually takes the form of a web request to be waited synchronously.
 
-        :param block_id: the block number, block hash, or the string "latest".
-        :return: the block header and metadata.
+        :param callable_name: the name of the API function to be called.
+        :param kwargs: the keyword arguments for the API function
+        :return: the ledger API response.
         """
 
     @abstractmethod

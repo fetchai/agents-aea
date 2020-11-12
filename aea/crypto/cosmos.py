@@ -397,30 +397,26 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_block(self, block_id: Union[int, str]) -> Optional[Any]:
-        """Get the block header and metadata."""
-        block = self._try_get_block(block_id)
-        return block
+    def get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+        """Call a specified function on the ledger API."""
+        response = self._try_get_state(callable_name, kwargs)
+        return response
 
     @try_decorator(
-        "Encountered exception when trying get block: {}",
+        "Encountered exception when trying get state: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_block(self, block_id: Union[int, str]) -> Optional[Any]:
-        """Try to get the block header and metadata."""
-        block = None  # type: Optional[Dict]
-        if block_id == "latest":
-            url = self.network_address + "/block"
-        else:
-            url = self.network_address + f"/block?height={block_id}"
+    def _try_get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+        """Try to call a function on the ledger API."""
+        result = None  # type: Optional[Any]  
+
+        query = "".join([f"?{kwarg[0]}={kwarg[1]}" for kwarg in kwargs.items()])        
+        url = self.network_address + f"/{callable_name}{query}"
+
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()["result"]
-            if len(result) == 0:
-                block = {}
-            else:
-                block = result.get("block", {})
-        return block
+        return result
 
     def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,

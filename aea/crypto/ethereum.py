@@ -294,14 +294,20 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Get the balance of a given account."""
         return self._api.eth.getBalance(address)  # pylint: disable=no-member
 
-    def get_block(self, block_id: Union[int, str] = "latest") -> Optional[Any]:
-        """Get the block header and metadata."""
-        return self._try_get_block(block_id)
+    def get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+        """Call a specified function on the ledger API."""
+        response = self._try_get_state(callable_name, kwargs)
+        return response
 
     @try_decorator("Unable to retrieve block: {}", logger_method="warning")
-    def _try_get_block(self, block_id: Union[int, str] = "latest") -> Optional[Any]:
-        """Get the block header and metadata."""
-        return self._api.eth.getBlock(block_id)  # pylint: disable=no-member
+    def _try_get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+        """Try to call a function on the ledger API."""
+
+        function = getattr(self._api.eth, callable_name)
+        args = tuple(kwargs.values())
+        response = function(*args)
+
+        return response  # pylint: disable=no-member
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
