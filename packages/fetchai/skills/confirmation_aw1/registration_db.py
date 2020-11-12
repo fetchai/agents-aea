@@ -89,15 +89,16 @@ class RegistrationDB(Model):
         """Get all registered AW-1 AEAs."""
         command = "SELECT address FROM registered_table"
         variables = ()
-        result = self._execute_single_sql(command, variables)
-        return result
+        results = self._execute_single_sql(command, variables)
+        registered = [result[0] for result in results]
+        return registered
 
     def _execute_single_sql(
         self,
         command: str,
         variables: Tuple[str, ...] = (),
         print_exceptions: bool = True,
-    ):
+    ) -> List[Tuple[str, ...]]:
         """Query the database - all the other functions use this under the hood."""
         conn = None
         ret = []

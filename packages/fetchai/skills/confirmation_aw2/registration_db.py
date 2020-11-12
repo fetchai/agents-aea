@@ -24,7 +24,7 @@ import json
 import logging
 import os
 import sqlite3
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from aea.skills.base import Model
 
@@ -153,10 +153,10 @@ class RegistrationDB(Model):
         command: str,
         variables: Tuple[Any, ...] = (),
         print_exceptions: bool = True,
-    ):
+    ) -> List[Tuple[str, ...]]:
         """Query the database - all the other functions use this under the hood."""
         conn = None
-        ret = []
+        ret: List[Tuple[str, ...]] = []
         try:
             conn = sqlite3.connect(self.db_path, timeout=300)  # 5 mins
             c = conn.cursor()
