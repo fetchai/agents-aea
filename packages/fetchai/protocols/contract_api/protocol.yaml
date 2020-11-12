@@ -12,7 +12,7 @@ fingerprint:
   contract_api_pb2.py: QmXksQozuTpCfimhiqyqk3envqw8B5r6hFUq2tUojtBERn
   custom_types.py: QmcMtzozPhcL2H9hDmnUd9bHDE3ihy7HQgvGKkhqxdAXf4
   dialogues.py: QmTjXH8JUtziUFDawKsSTYE5dxn1n1FmMPeWexyxiPYd6k
-  message.py: QmSqEvcqvYrxw79HFAUJC8SwtTji9tExJhQvcSLTA1U2Lh
+  message.py: QmQAY8UxrNdaKHJbYvV2Tq2pCNZA8JhntXAKzpbaYfNeP4
   serialization.py: QmPNTw6vXbdw9GMUwCCGyoHNxopVE1ipcp5DriSn3kGiB8
 fingerprint_ignore_patterns: []
 dependencies:

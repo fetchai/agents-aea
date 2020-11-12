@@ -12,7 +12,7 @@ fingerprint:
   default.proto: QmbbAXpav8jfU1r59afGbLAj3FpPXEwWuezPocAMyqcfax
   default_pb2.py: Qmf9eiLHYARHbiBzRvkVn98zREj6fNSkV9vjCDuLVfYTVv
   dialogues.py: QmfAXmyjyW6SeGPTeeNrQvRYtcaDshA8rxBqTfVG4MeU4Z
-  message.py: QmU7s4bb2zdEGpN7imbwhoDW3v6qvbHykbCT2yeN2SSBRx
+  message.py: QmbvduqSfRYCDMeKyk5kRGhghpwCnprEWxwgmUApa5Wi9G
   serialization.py: QmXGv9ERazqdBfJKGBB1kfCDWWdDSZFNodX3xE5BtaVMBH
 fingerprint_ignore_patterns: []
 dependencies:
