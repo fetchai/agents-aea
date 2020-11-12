@@ -66,3 +66,4 @@ def test_accessors():
     assert identity.name == name
     assert identity.address == address
     assert identity.addresses == {DEFAULT_LEDGER: address}
+    assert identity.default_address_key == DEFAULT_LEDGER

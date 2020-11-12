@@ -921,4 +921,7 @@ class TestNothingToUpgrade(AEATestCaseEmpty):
     def test_nothing_to_upgrade(self):
         """Test nothing to upgrade."""
         result = self.run_cli_command("upgrade", cwd=self._get_cwd())
-        assert result.stdout == "Starting project upgrade...\n"
+        assert (
+            result.stdout
+            == "Starting project upgrade...\nEverything is already up to date!\n"
+        )

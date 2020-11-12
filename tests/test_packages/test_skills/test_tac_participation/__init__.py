@@ -17,9 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the default skill."""
-
-from aea.configurations.base import PublicId
-
-
-PUBLIC_ID = PublicId.from_str("fetchai/confirmation_aw1:0.3.0")
+"""The tests module contains the tests of the packages/skills/tac_participation dir."""

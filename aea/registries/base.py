@@ -26,6 +26,7 @@ from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.components.base import Component
 from aea.configurations.base import ComponentId, ComponentType, PublicId
+from aea.exceptions import AEASetupError, AEATeardownError, parse_exception
 from aea.helpers.logging import WithLogger, get_logger
 from aea.skills.base import Behaviour, Handler, Model
 
@@ -471,7 +472,12 @@ class ComponentRegistry(
                         item.name, item.skill_id
                     )
                 )
-                item.setup()
+                try:
+                    item.setup()
+                except Exception as e:  # pragma: nocover
+                    e_str = parse_exception(e)
+                    e_str = f"An error occurred while setting up item {item.skill_id}/{type(item).__name__}:\n{e_str}"
+                    raise AEASetupError(e_str)
             else:
                 self.logger.debug(
                     "Ignoring setup() of component {} of skill {}, because the skill is not active.".format(
@@ -487,14 +493,18 @@ class ComponentRegistry(
         """
         for name_to_items in self._items.fetch_all():
             for _, item in name_to_items.items():
+                self.logger.debug(
+                    "Calling teardown() of component {} of skill {}".format(
+                        item.name, item.skill_id
+                    )
+                )
                 try:
                     item.teardown()
                 except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-                    self.logger.warning(
-                        "An error occurred while tearing down item {}/{}: {}".format(
-                            item.skill_id, type(item).__name__, str(e)
-                        )
-                    )
+                    e_str = parse_exception(e)
+                    e_str = f"An error occurred while tearing down item {item.skill_id}/{type(item).__name__}:\n{str(e_str)}"
+                    e = AEATeardownError(e_str)
+                    self.logger.error(str(e))
         _dynamically_added = copy.deepcopy(self._dynamically_added)
         for skill_id, items_names in _dynamically_added.items():
             for item_name in items_names:

@@ -25,7 +25,7 @@ from aea.components.base import Component
 from aea.configurations.base import ComponentConfiguration, ComponentType
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
-from aea.exceptions import AEAPackageLoadingError, enforce
+from aea.exceptions import AEAInstantiationException, AEAPackageLoadingError, enforce
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
 
@@ -59,6 +59,8 @@ def load_component_from_config(  # type: ignore
     component_class = component_type_to_class(component_type)
     try:
         return component_class.from_config(*args, configuration=configuration, **kwargs)  # type: ignore
+    except AEAInstantiationException as e:
+        raise e  # pramga: nocover
     except ModuleNotFoundError as e:
         _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:  # pylint: disable=broad-except
@@ -133,7 +135,7 @@ def _handle_error_while_loading_component_module_not_found(
         new_message = get_new_error_message_with_package_found()
 
     raise AEAPackageLoadingError(
-        "An error occurred while loading {} {}: No module named {}; {}".format(
+        "Package loading error: An error occurred while loading {} {}: No module named {}; {}".format(
             str(configuration.component_type),
             configuration.public_id,
             import_path,
@@ -152,6 +154,6 @@ def _handle_error_while_loading_component_generic_error(
     """
     raise Exception(
         "An error occurred while loading {} {}: {}".format(
-            str(configuration.component_type), configuration.public_id, str(e)
+            str(configuration.component_type), configuration.public_id, e
         )
-    ) from e
+    )

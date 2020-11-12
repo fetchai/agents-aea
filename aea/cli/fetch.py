@@ -31,6 +31,7 @@ from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
+from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import try_get_item_source_path
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
@@ -166,5 +167,5 @@ def fetch_mixed(
     try:
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
     except click.ClickException:
-        click.echo("Fetch from local registry failed, trying on remote registry...")
+        logger.debug("Fetch from local registry failed, trying on remote registry...")
         fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)

@@ -20,6 +20,7 @@
 """Module wrapping the helpers of public and private key cryptography."""
 
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -61,6 +62,12 @@ def verify_or_create_private_keys(
         if config_private_key_path is None:
             private_key_path = PRIVATE_KEY_PATH_SCHEMA.format(identifier)
             if identifier == aea_conf.default_ledger:  # pragma: nocover
+                if os.path.exists(private_key_path):
+                    raise ValueError(
+                        "File {} for private key {} already exists. Add to aea-config.yaml.".format(
+                            repr(config_private_key_path), identifier
+                        )
+                    )
                 create_private_key(
                     identifier,
                     private_key_file=str(aea_project_path / private_key_path),

@@ -31,7 +31,7 @@ from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ConnectionConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
-from aea.exceptions import enforce
+from aea.exceptions import AEAInstantiationException, enforce, parse_exception
 from aea.helpers.async_utils import AsyncState
 from aea.helpers.base import load_module
 from aea.helpers.logging import get_logger
@@ -268,12 +268,19 @@ class Connection(Component, ABC):
             connection_class is not None,
             "Connection class '{}' not found.".format(connection_class_name),
         )
-        return connection_class(
-            configuration=configuration,
-            identity=identity,
-            crypto_store=crypto_store,
-            **kwargs,
-        )
+        try:
+            connection = connection_class(
+                configuration=configuration,
+                identity=identity,
+                crypto_store=crypto_store,
+                **kwargs,
+            )
+        except Exception as e:  # pragma: nocover
+            e_str = parse_exception(e)
+            raise AEAInstantiationException(
+                f"An error occured during instantiation of connection {configuration.public_id}/{configuration.class_name}:\n{e_str}"
+            )
+        return connection
 
     @property
     def is_connected(self) -> bool:  # pragma: nocover
