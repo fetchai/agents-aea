@@ -107,7 +107,7 @@ class DefaultHandler(Handler):
                     f"received invalid address={confirmed_aea} in dialogue={default_dialogue}."
                 )
                 return
-            self.context.logger.warning(f"adding ={default_msg.performative} to db.")
+            self.context.logger.info(f"adding confirmed_aea={confirmed_aea} to db.")
             strategy.register_counterparty(confirmed_aea)
         else:
             self.context.logger.warning(

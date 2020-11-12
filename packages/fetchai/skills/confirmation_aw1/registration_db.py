@@ -45,6 +45,8 @@ class RegistrationDB(Model):
             if custom_path is None
             else custom_path
         )
+        if not os.path.exists(os.path.dirname(os.path.abspath(self.db_path))):
+            raise ValueError(f"Path={self.db_path} not valid!")
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:
