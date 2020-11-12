@@ -38,6 +38,7 @@ speech_acts:
     callable: pt:str
     kwargs: ct:Kwargs
   state:
+    ledger_id: pt:str
     state: ct:State
   error:
     code: pt:int

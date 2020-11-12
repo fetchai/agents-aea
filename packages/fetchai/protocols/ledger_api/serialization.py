@@ -124,6 +124,8 @@ class LedgerApiSerializer(Serializer):
             ledger_api_msg.get_state.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.STATE:
             performative = ledger_api_pb2.LedgerApiMessage.State_Performative()  # type: ignore
+            ledger_id = msg.ledger_id
+            performative.ledger_id = ledger_id
             state = msg.state
             State.encode(performative.state, state)
             ledger_api_msg.state.CopyFrom(performative)
@@ -220,6 +222,8 @@ class LedgerApiSerializer(Serializer):
             kwargs = Kwargs.decode(pb2_kwargs)
             performative_content["kwargs"] = kwargs
         elif performative_id == LedgerApiMessage.Performative.STATE:
+            ledger_id = ledger_api_pb.state.ledger_id
+            performative_content["ledger_id"] = ledger_id
             pb2_state = ledger_api_pb.state.state
             state = State.decode(pb2_state)
             performative_content["state"] = state

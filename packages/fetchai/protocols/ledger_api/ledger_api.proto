@@ -76,7 +76,8 @@ message LedgerApiMessage{
     }
 
     message State_Performative{
-        State state = 1;
+        string ledger_id = 1;
+        State state = 2;
     }
 
     message Error_Performative{

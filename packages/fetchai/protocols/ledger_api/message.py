@@ -415,7 +415,13 @@ class LedgerApiMessage(Message):
                     ),
                 )
             elif self.performative == LedgerApiMessage.Performative.STATE:
-                expected_nb_of_contents = 1
+                expected_nb_of_contents = 2
+                enforce(
+                    type(self.ledger_id) == str,
+                    "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
+                        type(self.ledger_id)
+                    ),
+                )
                 enforce(
                     type(self.state) == CustomState,
                     "Invalid type for content 'state'. Expected 'State'. Found '{}'.".format(

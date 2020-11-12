@@ -17,13 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of the ledger API request dispatcher."""
+import inspect
 import logging
 import time
 from typing import cast
 
 from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
-from aea.helpers.transaction.base import RawTransaction, TransactionDigest
+from aea.helpers.transaction.base import RawTransaction, TransactionDigest, State
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
@@ -130,6 +131,35 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                     performative=LedgerApiMessage.Performative.BALANCE,
                     target_message=message,
                     balance=balance,
+                    ledger_id=message.ledger_id,
+                ),
+            )
+        return response
+
+    def get_state(
+        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+    ) -> LedgerApiMessage:
+        """
+        Send the request 'get_state'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :return: None
+        """
+        callable = getattr(api, message.callable)
+        args = tuple(message.kwargs.body.values())
+        data = callable(*args)
+        if data is None:
+            response = self.get_error_message(
+                ValueError("No block returned"), api, message, dialogue
+            )
+        else:
+            response = cast(
+                LedgerApiMessage,
+                dialogue.reply(
+                    performative=LedgerApiMessage.Performative.STATE,
+                    target_message=message,
+                    state=State(message.ledger_id, data),
                     ledger_id=message.ledger_id,
                 ),
             )
