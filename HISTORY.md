@@ -1,5 +1,18 @@
 # Release History
 
+## 0.7.3 (2020-11-12)
+
+- Extends AW AEAs
+- Fixes overwriting of private key files on startup
+- Fixes behaviour bugs
+- Adds tests for tac participation skill
+- Adds development setup guide
+- Improves exception logging for easier debugging
+- Fixes mixed mode in upgrade command
+- Reduces verbosity of some CLI commands
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.7.2 (2020-11-09)
 
 - Fixes some AW2 AEAs
