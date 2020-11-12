@@ -34,7 +34,8 @@ from aea.crypto.helpers import verify_or_create_private_keys
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.common.utils import MAX_FLAKY_RERUNS, wait_for_condition
+from tests.common.utils import wait_for_condition
+from tests.conftest import MAX_FLAKY_RERUNS
 
 
 class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
