@@ -108,6 +108,7 @@ class DefaultHandler(Handler):
                 )
                 return
             self.context.logger.warning(f"adding ={default_msg.performative} to db.")
+            strategy.register_counterparty(confirmed_aea)
         else:
             self.context.logger.warning(
                 f"cannot handle default message of performative={default_msg.performative} in dialogue={default_dialogue}. Invalid sender={default_msg.sender}"

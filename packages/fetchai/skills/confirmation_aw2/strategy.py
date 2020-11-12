@@ -113,3 +113,14 @@ class Strategy(GenericStrategy):
         self.context.logger.info(
             f"Successful trade with={counterparty}. Data acquired={data}!"
         )
+
+    def register_counterparty(self, counterparty: str) -> None:
+        """
+        Register a counterparty.
+
+        :param counterparty: the counterparty address
+        :param data: the data
+        :return: False
+        """
+        registration_db = cast(RegistrationDB, self.context.registration_db)
+        registration_db.set_registered(counterparty)

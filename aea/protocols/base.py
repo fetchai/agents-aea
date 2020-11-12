@@ -35,6 +35,8 @@ from aea.exceptions import enforce
 
 _default_logger = logging.getLogger(__name__)
 
+MAX_PRINT_INNER = 200
+MAX_PRINT_OUTER = 2000
 Address = str
 
 
@@ -230,12 +232,14 @@ class Message:
             "Message(sender={},to={},".format(self._sender, self._to)
             + ",".join(
                 map(
-                    lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
+                    lambda key_value: str(key_value[0])[:MAX_PRINT_INNER]
+                    + "="
+                    + str(key_value[1])[:MAX_PRINT_INNER],
                     self._body.items(),
                 )
             )
             + ")"
-        )
+        )[:MAX_PRINT_OUTER]
 
     def encode(self) -> bytes:
         """Encode the message."""
