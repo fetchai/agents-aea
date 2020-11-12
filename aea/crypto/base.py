@@ -249,7 +249,7 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_block(self, block_id: Union[int,str]) -> Optional[Any]:
+    def get_block(self, block_id: Union[int, str]) -> Optional[Any]:
         """
         Get the block header and metadata.
 

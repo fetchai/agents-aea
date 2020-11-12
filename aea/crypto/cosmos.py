@@ -397,7 +397,7 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_block(self, block_id: Union[int,str]) -> Optional[Any]:
+    def get_block(self, block_id: Union[int, str]) -> Optional[Any]:
         """Get the block header and metadata."""
         block = self._try_get_block(block_id)
         return block
@@ -406,18 +406,21 @@ class _CosmosApi(LedgerApi):
         "Encountered exception when trying get block: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_block(self, block_id: Union[int,str]) -> Optional[Any]:
+    def _try_get_block(self, block_id: Union[int, str]) -> Optional[Any]:
         """Try to get the block header and metadata."""
-        block = None  # type: Optional[int]
-        url = self.network_address + f"/block"
+        block = None  # type: Optional[Dict]
+        if block_id == "latest":
+            url = self.network_address + "/block"
+        else:
+            url = self.network_address + f"/block?height={block_id}"
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()["result"]
             if len(result) == 0:
-                balance = 0
+                block = {}
             else:
-                balance = int(result[0]["amount"])
-        return balance
+                block = result.get("block", {})
+        return block
 
     def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,

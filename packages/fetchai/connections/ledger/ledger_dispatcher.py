@@ -17,14 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of the ledger API request dispatcher."""
-import inspect
 import logging
 import time
 from typing import cast
 
 from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
-from aea.helpers.transaction.base import RawTransaction, TransactionDigest, State
+from aea.helpers.transaction.base import RawTransaction, State, TransactionDigest
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
@@ -146,9 +145,9 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :param message: the Ledger API message
         :return: None
         """
-        callable = getattr(api, message.callable)
+        method = getattr(api, message.callable)
         args = tuple(message.kwargs.body.values())
-        data = callable(*args)
+        data = method(*args)
         if data is None:
             response = self.get_error_message(
                 ValueError("No block returned"), api, message, dialogue
