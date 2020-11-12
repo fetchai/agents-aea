@@ -329,6 +329,7 @@ class TestTacSkillsContract(AEATestCaseMany):
         self.set_config(setting_path, True, "bool")
 
         default_routing = {
+            "fetchai/contract_api:0.8.0": "fetchai/ledger:0.9.0",
             "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.9.0",
             "fetchai/oef_search:0.10.0": "fetchai/soef:0.12.0",
         }
