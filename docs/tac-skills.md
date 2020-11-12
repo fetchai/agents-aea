@@ -224,9 +224,7 @@ Then, update the configuration of the weather client AEA's p2p connection (in `a
 
 ``` yaml
 ---
-name: p2p_libp2p
-author: fetchai
-version: 0.12.0
+public_id: fetchai/p2p_libp2p:0.12.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001
@@ -238,9 +236,7 @@ config:
 
 ``` yaml
 ---
-name: p2p_libp2p
-author: fetchai
-version: 0.12.0
+public_id: fetchai/p2p_libp2p:0.12.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11002
