@@ -13,6 +13,7 @@
     "private_key_paths",
     "default_ledger",
     "connections",
+    "contracts",
     "default_connection",
     "protocols",
     "skills"

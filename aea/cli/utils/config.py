@@ -295,7 +295,9 @@ def validate_item_config(item_type: str, package_path: Path) -> None:
     item_config = load_item_config(item_type, package_path)
     loader = ConfigLoaders.from_package_type(item_type)
     for field_name in loader.required_fields:
-        if not getattr(item_config, field_name):
+        try:
+            getattr(item_config, field_name)
+        except AttributeError:
             raise AEAConfigException(
                 "Parameter '{}' is missing from {} config.".format(
                     field_name, item_type
