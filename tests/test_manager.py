@@ -18,12 +18,13 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
 import os
+from unittest import TestCase
 from unittest.mock import Mock, patch
 
 import pytest
 
 from aea.configurations.base import PublicId
-from aea.manager import MultiAgentManager
+from aea.manager import MAMAgentState, MAMState, MultiAgentManager
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
@@ -319,8 +320,52 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
             self.manager.install_pypi_dependencies()
             install_mock.assert_called_once()
 
+    def test_save_load_positive(self):
+        """Test save-load func of MultiAgentManager for positive result."""
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+
+        self.manager.add_agent(self.project_public_id, self.agent_name)
+        self.manager.stop_manager(save=True)
+        assert os.path.exists(self.manager._save_path)
+
+        self.manager.start_manager()
+        assert self.project_public_id in self.manager._projects.keys()
+        assert self.agent_name in self.manager._agents.keys()
+
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
+
+
+class MAMAgentStateTestCase(TestCase):
+    """Test case for MAMAgentState class."""
+
+    def test_dict_positive(self):
+        """Test dict property for positive result."""
+        public_id = "public_id"
+        agent_name = "agent_name"
+        config = [{"some": "config"}]
+        result = MAMAgentState(public_id, agent_name, config).dict
+        expected_result = {
+            "public_id": public_id,
+            "agent_name": agent_name,
+            "config": config,
+        }
+        self.assertEqual(result, expected_result)
+
+
+class MAMStateTestCase(TestCase):
+    """Test case for MAMState class."""
+
+    def test_dict_positive(self):
+        """Test dict property for positive result."""
+        projects = ["public_id"]
+        agent = Mock()
+        agent.dict = {"agent": "settings"}
+        agents = [agent]
+        result = MAMState(projects, agents).dict
+        expected_result = {"projects": projects, "agents": [agent.dict]}
+        self.assertEqual(result, expected_result)

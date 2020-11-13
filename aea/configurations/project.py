@@ -60,10 +60,12 @@ class Project:
         ctx.set_config("skip_consistency_check", skip_consistency_check)
         path = os.path.join(working_dir, public_id.author, public_id.name)
         target_dir = os.path.join(public_id.author, public_id.name)
-        if is_local:
-            fetch_agent_locally(ctx, public_id, target_dir=target_dir)
-        else:
-            fetch_agent(ctx, public_id, target_dir=target_dir)
+
+        if not os.path.exists(target_dir):
+            if is_local:
+                fetch_agent_locally(ctx, public_id, target_dir=target_dir)
+            else:
+                fetch_agent(ctx, public_id, target_dir=target_dir)
         return cls(public_id, path)
 
     def remove(self) -> None:
