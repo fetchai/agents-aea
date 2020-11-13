@@ -86,7 +86,7 @@ class AgentRunAsyncTask:
 
     def _set_result(self, exc: Optional[BaseException]) -> None:
         """Set result of task execution."""
-        if not self._done_future:  # pragma: nocover
+        if not self._done_future or self._done_future.done():  # pragma: nocover
             return
         if exc:
             self._done_future.set_exception(exc)
