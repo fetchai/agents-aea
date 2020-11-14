@@ -19,6 +19,10 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
+import pickle  # nosec
+from typing import Any, Tuple
+
+from aea.exceptions import enforce
 from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
 from aea.helpers.transaction.base import SignedTransaction as BaseSignedTransaction
 from aea.helpers.transaction.base import State as BaseState
@@ -50,8 +54,7 @@ class Args:
         if self._body is None:
             raise ValueError("body must not be None")
         enforce(
-            isinstance(self._body, tuple),
-            "Body must be tupleZ.",
+            isinstance(self._body, tuple), "Body must be tupleZ.",
         )
 
     @property

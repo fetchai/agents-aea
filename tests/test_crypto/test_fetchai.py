@@ -208,7 +208,6 @@ def test_get_balance():
 def test_get_state():
     """Test that get_state() with 'block' function returns something containing the block height."""
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    fc = FetchAICrypto()
     callable_name = "blocks"
     args = ("latest",)
     block = fetchai_api.get_state(callable_name, *args)

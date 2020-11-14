@@ -39,7 +39,7 @@ class Kwargs:
     def __init__(
         self, body: Dict[str, Any],
     ):
-        """Initialise an instance of Kwargs."""
+        """Initialise an instance of RawTransaction."""
         self._body = body
         self._check_consistency()
 

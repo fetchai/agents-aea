@@ -145,7 +145,6 @@ def test_get_balance():
 def test_get_state():
     """Test that get_state() with 'getBlock' function returns something containing the block number."""
     ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
-    ec = EthereumCrypto()
     callable_name = "getBlock"
     args = ("latest",)
     block = ethereum_api.get_state(callable_name, *args)
