@@ -166,6 +166,8 @@ def fetch_mixed(
     """
     try:
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
-    except click.ClickException:
-        logger.debug("Fetch from local registry failed, trying on remote registry...")
+    except click.ClickException as e:
+        logger.debug(
+            f"Fetch from local registry failed (reason={str(e)}), trying remote registry..."
+        )
         fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)

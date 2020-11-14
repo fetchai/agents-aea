@@ -112,7 +112,7 @@ def _check_aea_project(args):
         skip_consistency_check = ctx.config["skip_consistency_check"]
         if not skip_consistency_check:
             _validate_config_consistency(ctx)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e))
 
 

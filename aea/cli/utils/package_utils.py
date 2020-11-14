@@ -215,7 +215,7 @@ def copy_package_directory(src: Path, dst: str) -> Path:
     logger.debug("Copying modules. src={} dst={}".format(src_path, dst))
     try:
         shutil.copytree(src_path, dst)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e))
 
     items_folder = os.path.split(dst)[0]

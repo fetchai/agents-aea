@@ -199,7 +199,7 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
     while current not in (home, root):
         files = set(map(lambda x: x.name, current.iterdir()))
         if DEFAULT_AEA_CONFIG_FILE in files:
-            raise Exception(
+            raise ValueError(
                 "Folder {} has file named {}".format(current, DEFAULT_AEA_CONFIG_FILE)
             )
         current = current.parent.resolve()

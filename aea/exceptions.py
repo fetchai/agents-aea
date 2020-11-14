@@ -55,6 +55,10 @@ class AEAEnforceError(AEAException):
     """Class for enforcement errors."""
 
 
+class AEAValidationError(AEAException):
+    """Class for validation errors of an AEA."""
+
+
 class _StopRuntime(Exception):
     """
     Exception to stop runtime.

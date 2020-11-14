@@ -25,7 +25,12 @@ from aea.components.base import Component
 from aea.configurations.base import ComponentConfiguration, ComponentType
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
-from aea.exceptions import AEAInstantiationException, AEAPackageLoadingError, enforce
+from aea.exceptions import (
+    AEAInstantiationException,
+    AEAPackageLoadingError,
+    enforce,
+    parse_exception,
+)
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
 
@@ -152,8 +157,9 @@ def _handle_error_while_loading_component_generic_error(
 
     :raises Exception: the same exception, but prepending an informative message.
     """
-    raise Exception(
-        "An error occurred while loading {} {}: {}".format(
-            str(configuration.component_type), configuration.public_id, e
+    e_str = parse_exception(e)
+    raise AEAPackageLoadingError(
+        "Package loading error: An error occurred while loading {} {}: {}".format(
+            str(configuration.component_type), configuration.public_id, e_str
         )
     )

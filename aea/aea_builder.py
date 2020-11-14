@@ -69,7 +69,7 @@ from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, AEAValidationError
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
@@ -1185,13 +1185,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 agent_configuration = loader.load(fp)
                 logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
         except FileNotFoundError:  # pragma: nocover
-            raise Exception(
+            raise ValueError(
                 "Agent configuration file '{}' not found in the current directory.".format(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
         except jsonschema.exceptions.ValidationError:  # pragma: nocover
-            raise Exception(
+            raise AEAValidationError(
                 "Agent configuration file '{}' is invalid. Please check the documentation.".format(
                     DEFAULT_AEA_CONFIG_FILE
                 )

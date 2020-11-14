@@ -123,7 +123,9 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
         )
     item_config = load_item_config(item_type, package_path)
 
-    if not is_fingerprint_correct(package_path, item_config):  # pragma: no cover
+    if not ctx.config.get("skip_consistency_check") and not is_fingerprint_correct(
+        package_path, item_config
+    ):  # pragma: no cover
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
     _add_item_deps(ctx, item_type, item_config)
@@ -206,8 +208,10 @@ def fetch_item_mixed(
         package_path = find_item_locally_or_distributed(
             ctx, item_type, item_public_id, dest_path
         )
-    except click.ClickException:
-        logger.debug("Fetch from local registry failed, trying remote registry...")
+    except click.ClickException as e:
+        logger.debug(
+            f"Fetch from local registry failed (reason={str(e)}), trying remote registry..."
+        )
         # the following might raise exception, but we don't catch it this time
         package_path = fetch_package(
             item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path

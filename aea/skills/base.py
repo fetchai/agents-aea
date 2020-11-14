@@ -378,7 +378,7 @@ class Behaviour(AbstractBehaviour, ABC):
             self.act()
         except _StopRuntime:
             raise
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAActException(
                 f"An error occured during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
@@ -455,7 +455,7 @@ class Behaviour(AbstractBehaviour, ABC):
                         skill_context=skill_context,
                         **dict(behaviour_config.args),
                     )
-                except Exception as e:  # pragma: nocover
+                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                     e_str = parse_exception(e)
                     raise AEAInstantiationException(
                         f"An error occured during instantiation of behaviour {skill_context.skill_id}/{behaviour_config.class_name}:\n{e_str}"
@@ -485,7 +485,7 @@ class Handler(SkillComponent, ABC):
             self.handle(message)
         except _StopRuntime:
             raise
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAHandleException(
                 f"An error occured during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
@@ -554,7 +554,7 @@ class Handler(SkillComponent, ABC):
                         skill_context=skill_context,
                         **dict(handler_config.args),
                     )
-                except Exception as e:  # pragma: nocover
+                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                     e_str = parse_exception(e)
                     raise AEAInstantiationException(
                         f"An error occured during instantiation of handler {skill_context.skill_id}/{handler_config.class_name}:\n{e_str}"
@@ -657,7 +657,7 @@ class Model(SkillComponent, ABC):
                         configuration=model_config,
                         **dict(model_config.args),
                     )
-                except Exception as e:  # pragma: nocover
+                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                     e_str = parse_exception(e)
                     raise AEAInstantiationException(
                         f"An error occured during instantiation of model {skill_context.skill_id}/{model_config.class_name}:\n{e_str}"
