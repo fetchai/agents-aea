@@ -50,6 +50,7 @@ from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import recursive_update
+from aea.helpers.sym_link import create_symlink
 
 
 ROOT = Path(".")
@@ -612,3 +613,20 @@ def update_item_public_id_in_init(
                 )
             else:
                 f.write(line)
+
+
+def create_symlink_vendor_to_local(
+    ctx: Context, item_type: str, public_id: PublicId
+) -> None:
+    """
+    Creates a symlink from the vendor to the local folder.
+
+    :param ctx: click context
+    :param item_type: item type
+    :param public_id: public_id of the item
+
+    :return: None
+    """
+    vendor_path = get_package_path(ctx, item_type, public_id, is_vendor=True)
+    local_path = get_package_path(ctx, item_type, public_id, is_vendor=False)
+    create_symlink(Path(vendor_path), Path(local_path), Path(ctx.cwd))

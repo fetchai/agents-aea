@@ -32,7 +32,10 @@ from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import validate_package_name
+from aea.cli.utils.package_utils import (
+    create_symlink_vendor_to_local,
+    validate_package_name,
+)
 from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-import
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
@@ -163,6 +166,8 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
         # fingerprint item.
         fingerprint_item(ctx, item_type, new_public_id)
+
+        create_symlink_vendor_to_local(ctx, item_type, new_public_id)
 
     except ValidationError:
         raise click.ClickException(

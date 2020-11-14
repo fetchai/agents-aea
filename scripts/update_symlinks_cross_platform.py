@@ -21,14 +21,14 @@
 
 """This script will update the symlinks of the project, cross-platform compatible."""
 
-import contextlib
 import inspect
 import os
 import sys
 import traceback
-from functools import reduce
 from pathlib import Path
 from typing import List, Tuple
+
+from aea.helpers.sym_link import create_symlink
 
 
 SCRIPTS_PATH = Path(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
@@ -79,75 +79,6 @@ SYMLINKS = [
 """A list of pairs: (link_path, target_path)"""
 
 
-def make_symlink(link_name: str, target: str):
-    """
-    Make a symbolic link, cross platform.
-
-    :param link_name: the link name.
-    :param target: the target.
-    """
-    try:
-        Path(link_name).unlink()
-    except FileNotFoundError:
-        pass
-    Path(link_name).symlink_to(target, target_is_directory=True)
-
-
-@contextlib.contextmanager
-def cd(path):
-    """Change directory with context manager."""
-    old_cwd = os.getcwd()
-    try:
-        os.chdir(path)
-        yield
-    except Exception as e:  # pylint: disable=broad-except
-        os.chdir(old_cwd)
-        raise e from e
-
-
-def do_symlink(link_path: Path, target_path: Path):
-    """
-    Change directory and call the cross-platform script.
-
-    The working directory must be the parent of the symbolic link name
-    when executing 'create_symlink_crossplatform.sh'. Hence, we
-    need to translate target_path into the relatve path from the
-    symbolic link directory to the target directory.
-
-    So:
-    1) from link_path, extract the number of jumps to the parent directory
-      in order to reach the repository root directory, and chain many "../" paths.
-    2) from target_path, compute the relative path to the root
-    3) relative_target_path is just the concatenation of the results from step (1) and (2).
-
-
-    For instance, given
-    - link_path: './directory_1//symbolic_link
-    - target_path: './directory_2/target_path
-
-    we want to compute:
-    - link_path: 'symbolic_link' (just the last bit)
-    - relative_target_path: '../../directory_1/target_path'
-
-    The resulting command on UNIX systems will be:
-
-        cd directory_1 && ln -s ../../directory_1/target_path symbolic_link
-
-    """
-    working_directory = link_path.parent
-    target_relative_to_root = target_path.relative_to(ROOT_PATH)
-    cwd_relative_to_root = working_directory.relative_to(ROOT_PATH)
-    nb_parents = len(cwd_relative_to_root.parents)
-    root_relative_to_cwd = reduce(
-        lambda x, y: x / y, [Path("../")] * nb_parents, Path(".")
-    )
-    link_name = link_path.name
-    target = root_relative_to_cwd / target_relative_to_root
-    with cd(working_directory.absolute()):
-        make_symlink(str(link_name), str(target))
-    return 0
-
-
 def main():
     """Run main script."""
     failed = False
@@ -158,7 +89,7 @@ def main():
         except FileNotFoundError:
             pass
         try:
-            return_code = do_symlink(link_name, target)
+            return_code = create_symlink(link_name, target, ROOT_PATH)
         except Exception as e:  # pylint: disable=broad-except
             exception = e
             return_code = 1
