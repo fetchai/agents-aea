@@ -20,22 +20,22 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="aea.fetchai.ledger_api",
     syntax="proto3",
     serialized_pb=_b(
-        '\n\x10ledger_api.proto\x12\x16\x61\x65\x61.fetchai.ledger_api"\xee\x13\n\x10LedgerApiMessage\x12P\n\x07\x62\x61lance\x18\x05 \x01(\x0b\x32=.aea.fetchai.ledger_api.LedgerApiMessage.Balance_PerformativeH\x00\x12L\n\x05\x65rror\x18\x06 \x01(\x0b\x32;.aea.fetchai.ledger_api.LedgerApiMessage.Error_PerformativeH\x00\x12X\n\x0bget_balance\x18\x07 \x01(\x0b\x32\x41.aea.fetchai.ledger_api.LedgerApiMessage.Get_Balance_PerformativeH\x00\x12h\n\x13get_raw_transaction\x18\x08 \x01(\x0b\x32I.aea.fetchai.ledger_api.LedgerApiMessage.Get_Raw_Transaction_PerformativeH\x00\x12T\n\tget_state\x18\t \x01(\x0b\x32?.aea.fetchai.ledger_api.LedgerApiMessage.Get_State_PerformativeH\x00\x12p\n\x17get_transaction_receipt\x18\n \x01(\x0b\x32M.aea.fetchai.ledger_api.LedgerApiMessage.Get_Transaction_Receipt_PerformativeH\x00\x12`\n\x0fraw_transaction\x18\x0b \x01(\x0b\x32\x45.aea.fetchai.ledger_api.LedgerApiMessage.Raw_Transaction_PerformativeH\x00\x12p\n\x17send_signed_transaction\x18\x0c \x01(\x0b\x32M.aea.fetchai.ledger_api.LedgerApiMessage.Send_Signed_Transaction_PerformativeH\x00\x12L\n\x05state\x18\r \x01(\x0b\x32;.aea.fetchai.ledger_api.LedgerApiMessage.State_PerformativeH\x00\x12\x66\n\x12transaction_digest\x18\x0e \x01(\x0b\x32H.aea.fetchai.ledger_api.LedgerApiMessage.Transaction_Digest_PerformativeH\x00\x12h\n\x13transaction_receipt\x18\x0f \x01(\x0b\x32I.aea.fetchai.ledger_api.LedgerApiMessage.Transaction_Receipt_PerformativeH\x00\x1a\x18\n\x06Kwargs\x12\x0e\n\x06kwargs\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05State\x12\r\n\x05state\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a/\n\x11TransactionDigest\x12\x1a\n\x12transaction_digest\x18\x01 \x01(\x0c\x1a\x31\n\x12TransactionReceipt\x12\x1b\n\x13transaction_receipt\x18\x01 \x01(\x0c\x1a>\n\x18Get_Balance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x1a\x61\n Get_Raw_Transaction_Performative\x12=\n\x05terms\x18\x01 \x01(\x0b\x32..aea.fetchai.ledger_api.LedgerApiMessage.Terms\x1a~\n$Send_Signed_Transaction_Performative\x12V\n\x12signed_transaction\x18\x01 \x01(\x0b\x32:.aea.fetchai.ledger_api.LedgerApiMessage.SignedTransaction\x1a~\n$Get_Transaction_Receipt_Performative\x12V\n\x12transaction_digest\x18\x01 \x01(\x0b\x32:.aea.fetchai.ledger_api.LedgerApiMessage.TransactionDigest\x1a:\n\x14\x42\x61lance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\x05\x1ap\n\x1cRaw_Transaction_Performative\x12P\n\x0fraw_transaction\x18\x01 \x01(\x0b\x32\x37.aea.fetchai.ledger_api.LedgerApiMessage.RawTransaction\x1ay\n\x1fTransaction_Digest_Performative\x12V\n\x12transaction_digest\x18\x01 \x01(\x0b\x32:.aea.fetchai.ledger_api.LedgerApiMessage.TransactionDigest\x1a|\n Transaction_Receipt_Performative\x12X\n\x13transaction_receipt\x18\x01 \x01(\x0b\x32;.aea.fetchai.ledger_api.LedgerApiMessage.TransactionReceipt\x1a~\n\x16Get_State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12?\n\x06kwargs\x18\x03 \x01(\x0b\x32/.aea.fetchai.ledger_api.LedgerApiMessage.Kwargs\x1a\x66\n\x12State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12=\n\x05state\x18\x02 \x01(\x0b\x32..aea.fetchai.ledger_api.LedgerApiMessage.State\x1an\n\x12\x45rror_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\x12\x13\n\x0b\x64\x61ta_is_set\x18\x05 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3'
+        '\n\x10ledger_api.proto\x12\x16\x61\x65\x61.fetchai.ledger_api"\xe6\x13\n\x10LedgerApiMessage\x12P\n\x07\x62\x61lance\x18\x05 \x01(\x0b\x32=.aea.fetchai.ledger_api.LedgerApiMessage.Balance_PerformativeH\x00\x12L\n\x05\x65rror\x18\x06 \x01(\x0b\x32;.aea.fetchai.ledger_api.LedgerApiMessage.Error_PerformativeH\x00\x12X\n\x0bget_balance\x18\x07 \x01(\x0b\x32\x41.aea.fetchai.ledger_api.LedgerApiMessage.Get_Balance_PerformativeH\x00\x12h\n\x13get_raw_transaction\x18\x08 \x01(\x0b\x32I.aea.fetchai.ledger_api.LedgerApiMessage.Get_Raw_Transaction_PerformativeH\x00\x12T\n\tget_state\x18\t \x01(\x0b\x32?.aea.fetchai.ledger_api.LedgerApiMessage.Get_State_PerformativeH\x00\x12p\n\x17get_transaction_receipt\x18\n \x01(\x0b\x32M.aea.fetchai.ledger_api.LedgerApiMessage.Get_Transaction_Receipt_PerformativeH\x00\x12`\n\x0fraw_transaction\x18\x0b \x01(\x0b\x32\x45.aea.fetchai.ledger_api.LedgerApiMessage.Raw_Transaction_PerformativeH\x00\x12p\n\x17send_signed_transaction\x18\x0c \x01(\x0b\x32M.aea.fetchai.ledger_api.LedgerApiMessage.Send_Signed_Transaction_PerformativeH\x00\x12L\n\x05state\x18\r \x01(\x0b\x32;.aea.fetchai.ledger_api.LedgerApiMessage.State_PerformativeH\x00\x12\x66\n\x12transaction_digest\x18\x0e \x01(\x0b\x32H.aea.fetchai.ledger_api.LedgerApiMessage.Transaction_Digest_PerformativeH\x00\x12h\n\x13transaction_receipt\x18\x0f \x01(\x0b\x32I.aea.fetchai.ledger_api.LedgerApiMessage.Transaction_Receipt_PerformativeH\x00\x1a\x14\n\x04\x41rgs\x12\x0c\n\x04\x61rgs\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05State\x12\r\n\x05state\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a/\n\x11TransactionDigest\x12\x1a\n\x12transaction_digest\x18\x01 \x01(\x0c\x1a\x31\n\x12TransactionReceipt\x12\x1b\n\x13transaction_receipt\x18\x01 \x01(\x0c\x1a>\n\x18Get_Balance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x1a\x61\n Get_Raw_Transaction_Performative\x12=\n\x05terms\x18\x01 \x01(\x0b\x32..aea.fetchai.ledger_api.LedgerApiMessage.Terms\x1a~\n$Send_Signed_Transaction_Performative\x12V\n\x12signed_transaction\x18\x01 \x01(\x0b\x32:.aea.fetchai.ledger_api.LedgerApiMessage.SignedTransaction\x1a~\n$Get_Transaction_Receipt_Performative\x12V\n\x12transaction_digest\x18\x01 \x01(\x0b\x32:.aea.fetchai.ledger_api.LedgerApiMessage.TransactionDigest\x1a:\n\x14\x42\x61lance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\x05\x1ap\n\x1cRaw_Transaction_Performative\x12P\n\x0fraw_transaction\x18\x01 \x01(\x0b\x32\x37.aea.fetchai.ledger_api.LedgerApiMessage.RawTransaction\x1ay\n\x1fTransaction_Digest_Performative\x12V\n\x12transaction_digest\x18\x01 \x01(\x0b\x32:.aea.fetchai.ledger_api.LedgerApiMessage.TransactionDigest\x1a|\n Transaction_Receipt_Performative\x12X\n\x13transaction_receipt\x18\x01 \x01(\x0b\x32;.aea.fetchai.ledger_api.LedgerApiMessage.TransactionReceipt\x1az\n\x16Get_State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12;\n\x04\x61rgs\x18\x03 \x01(\x0b\x32-.aea.fetchai.ledger_api.LedgerApiMessage.Args\x1a\x66\n\x12State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12=\n\x05state\x18\x02 \x01(\x0b\x32..aea.fetchai.ledger_api.LedgerApiMessage.State\x1an\n\x12\x45rror_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\x12\x13\n\x0b\x64\x61ta_is_set\x18\x05 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
-_LEDGERAPIMESSAGE_KWARGS = _descriptor.Descriptor(
-    name="Kwargs",
-    full_name="aea.fetchai.ledger_api.LedgerApiMessage.Kwargs",
+_LEDGERAPIMESSAGE_ARGS = _descriptor.Descriptor(
+    name="Args",
+    full_name="aea.fetchai.ledger_api.LedgerApiMessage.Args",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="kwargs",
-            full_name="aea.fetchai.ledger_api.LedgerApiMessage.Kwargs.kwargs",
+            name="args",
+            full_name="aea.fetchai.ledger_api.LedgerApiMessage.Args.args",
             index=0,
             number=1,
             type=12,
@@ -60,7 +60,7 @@ _LEDGERAPIMESSAGE_KWARGS = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=1121,
-    serialized_end=1145,
+    serialized_end=1141,
 )
 
 _LEDGERAPIMESSAGE_RAWTRANSACTION = _descriptor.Descriptor(
@@ -96,8 +96,8 @@ _LEDGERAPIMESSAGE_RAWTRANSACTION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1147,
-    serialized_end=1188,
+    serialized_start=1143,
+    serialized_end=1184,
 )
 
 _LEDGERAPIMESSAGE_SIGNEDTRANSACTION = _descriptor.Descriptor(
@@ -133,8 +133,8 @@ _LEDGERAPIMESSAGE_SIGNEDTRANSACTION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1190,
-    serialized_end=1237,
+    serialized_start=1186,
+    serialized_end=1233,
 )
 
 _LEDGERAPIMESSAGE_STATE = _descriptor.Descriptor(
@@ -170,8 +170,8 @@ _LEDGERAPIMESSAGE_STATE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1239,
-    serialized_end=1261,
+    serialized_start=1235,
+    serialized_end=1257,
 )
 
 _LEDGERAPIMESSAGE_TERMS = _descriptor.Descriptor(
@@ -207,8 +207,8 @@ _LEDGERAPIMESSAGE_TERMS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1263,
-    serialized_end=1285,
+    serialized_start=1259,
+    serialized_end=1281,
 )
 
 _LEDGERAPIMESSAGE_TRANSACTIONDIGEST = _descriptor.Descriptor(
@@ -244,8 +244,8 @@ _LEDGERAPIMESSAGE_TRANSACTIONDIGEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1287,
-    serialized_end=1334,
+    serialized_start=1283,
+    serialized_end=1330,
 )
 
 _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT = _descriptor.Descriptor(
@@ -281,8 +281,8 @@ _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1336,
-    serialized_end=1385,
+    serialized_start=1332,
+    serialized_end=1381,
 )
 
 _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
@@ -335,8 +335,8 @@ _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1387,
-    serialized_end=1449,
+    serialized_start=1383,
+    serialized_end=1445,
 )
 
 _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
@@ -372,8 +372,8 @@ _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1451,
-    serialized_end=1548,
+    serialized_start=1447,
+    serialized_end=1544,
 )
 
 _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
@@ -409,8 +409,8 @@ _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1550,
-    serialized_end=1676,
+    serialized_start=1546,
+    serialized_end=1672,
 )
 
 _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE = _descriptor.Descriptor(
@@ -446,8 +446,8 @@ _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1678,
-    serialized_end=1804,
+    serialized_start=1674,
+    serialized_end=1800,
 )
 
 _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
@@ -500,8 +500,8 @@ _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1806,
-    serialized_end=1864,
+    serialized_start=1802,
+    serialized_end=1860,
 )
 
 _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
@@ -537,8 +537,8 @@ _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1866,
-    serialized_end=1978,
+    serialized_start=1862,
+    serialized_end=1974,
 )
 
 _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE = _descriptor.Descriptor(
@@ -574,8 +574,8 @@ _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1980,
-    serialized_end=2101,
+    serialized_start=1976,
+    serialized_end=2097,
 )
 
 _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE = _descriptor.Descriptor(
@@ -611,8 +611,8 @@ _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2103,
-    serialized_end=2227,
+    serialized_start=2099,
+    serialized_end=2223,
 )
 
 _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
@@ -657,8 +657,8 @@ _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
             options=None,
         ),
         _descriptor.FieldDescriptor(
-            name="kwargs",
-            full_name="aea.fetchai.ledger_api.LedgerApiMessage.Get_State_Performative.kwargs",
+            name="args",
+            full_name="aea.fetchai.ledger_api.LedgerApiMessage.Get_State_Performative.args",
             index=2,
             number=3,
             type=11,
@@ -682,8 +682,8 @@ _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2229,
-    serialized_end=2355,
+    serialized_start=2225,
+    serialized_end=2347,
 )
 
 _LEDGERAPIMESSAGE_STATE_PERFORMATIVE = _descriptor.Descriptor(
@@ -736,8 +736,8 @@ _LEDGERAPIMESSAGE_STATE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2357,
-    serialized_end=2459,
+    serialized_start=2349,
+    serialized_end=2451,
 )
 
 _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
@@ -841,8 +841,8 @@ _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2461,
-    serialized_end=2571,
+    serialized_start=2453,
+    serialized_end=2563,
 )
 
 _LEDGERAPIMESSAGE = _descriptor.Descriptor(
@@ -1042,7 +1042,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[
-        _LEDGERAPIMESSAGE_KWARGS,
+        _LEDGERAPIMESSAGE_ARGS,
         _LEDGERAPIMESSAGE_RAWTRANSACTION,
         _LEDGERAPIMESSAGE_SIGNEDTRANSACTION,
         _LEDGERAPIMESSAGE_STATE,
@@ -1076,10 +1076,10 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=45,
-    serialized_end=2587,
+    serialized_end=2579,
 )
 
-_LEDGERAPIMESSAGE_KWARGS.containing_type = _LEDGERAPIMESSAGE
+_LEDGERAPIMESSAGE_ARGS.containing_type = _LEDGERAPIMESSAGE
 _LEDGERAPIMESSAGE_RAWTRANSACTION.containing_type = _LEDGERAPIMESSAGE
 _LEDGERAPIMESSAGE_SIGNEDTRANSACTION.containing_type = _LEDGERAPIMESSAGE
 _LEDGERAPIMESSAGE_STATE.containing_type = _LEDGERAPIMESSAGE
@@ -1117,8 +1117,8 @@ _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE.fields_by_name[
 ].message_type = _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT
 _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE.containing_type = _LEDGERAPIMESSAGE
 _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE.fields_by_name[
-    "kwargs"
-].message_type = _LEDGERAPIMESSAGE_KWARGS
+    "args"
+].message_type = _LEDGERAPIMESSAGE_ARGS
 _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE.containing_type = _LEDGERAPIMESSAGE
 _LEDGERAPIMESSAGE_STATE_PERFORMATIVE.fields_by_name[
     "state"
@@ -1230,13 +1230,13 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
     "LedgerApiMessage",
     (_message.Message,),
     dict(
-        Kwargs=_reflection.GeneratedProtocolMessageType(
-            "Kwargs",
+        Args=_reflection.GeneratedProtocolMessageType(
+            "Args",
             (_message.Message,),
             dict(
-                DESCRIPTOR=_LEDGERAPIMESSAGE_KWARGS,
+                DESCRIPTOR=_LEDGERAPIMESSAGE_ARGS,
                 __module__="ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.LedgerApiMessage.Kwargs)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.LedgerApiMessage.Args)
             ),
         ),
         RawTransaction=_reflection.GeneratedProtocolMessageType(
@@ -1398,7 +1398,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
     ),
 )
 _sym_db.RegisterMessage(LedgerApiMessage)
-_sym_db.RegisterMessage(LedgerApiMessage.Kwargs)
+_sym_db.RegisterMessage(LedgerApiMessage.Args)
 _sym_db.RegisterMessage(LedgerApiMessage.RawTransaction)
 _sym_db.RegisterMessage(LedgerApiMessage.SignedTransaction)
 _sym_db.RegisterMessage(LedgerApiMessage.State)

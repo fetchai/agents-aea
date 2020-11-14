@@ -27,7 +27,7 @@ from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.ledger_api import ledger_api_pb2
 from packages.fetchai.protocols.ledger_api.custom_types import (
-    Kwargs,
+    Args,
     RawTransaction,
     SignedTransaction,
     State,
@@ -119,8 +119,8 @@ class LedgerApiSerializer(Serializer):
             performative.ledger_id = ledger_id
             callable = msg.callable
             performative.callable = callable
-            kwargs = msg.kwargs
-            Kwargs.encode(performative.kwargs, kwargs)
+            args = msg.args
+            Args.encode(performative.args, args)
             ledger_api_msg.get_state.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.STATE:
             performative = ledger_api_pb2.LedgerApiMessage.State_Performative()  # type: ignore
@@ -218,9 +218,9 @@ class LedgerApiSerializer(Serializer):
             performative_content["ledger_id"] = ledger_id
             callable = ledger_api_pb.get_state.callable
             performative_content["callable"] = callable
-            pb2_kwargs = ledger_api_pb.get_state.kwargs
-            kwargs = Kwargs.decode(pb2_kwargs)
-            performative_content["kwargs"] = kwargs
+            pb2_args = ledger_api_pb.get_state.args
+            args = Args.decode(pb2_args)
+            performative_content["args"] = args
         elif performative_id == LedgerApiMessage.Performative.STATE:
             ledger_id = ledger_api_pb.state.ledger_id
             performative_content["ledger_id"] = ledger_id

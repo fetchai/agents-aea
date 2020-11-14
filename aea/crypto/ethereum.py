@@ -294,17 +294,16 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Get the balance of a given account."""
         return self._api.eth.getBalance(address)  # pylint: disable=no-member
 
-    def get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+    def get_state(self, callable_name: str, *args) -> Optional[Any]:
         """Call a specified function on the ledger API."""
-        response = self._try_get_state(callable_name, **kwargs)
+        response = self._try_get_state(callable_name, *args)
         return response
 
     @try_decorator("Unable to retrieve block: {}", logger_method="warning")
-    def _try_get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+    def _try_get_state(self, callable_name: str, *args) -> Optional[Any]:
         """Try to call a function on the ledger API."""
 
         function = getattr(self._api.eth, callable_name)
-        args = tuple(kwargs.values())
         response = function(*args)
 
         return response  # pylint: disable=no-member

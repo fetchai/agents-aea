@@ -36,7 +36,7 @@ speech_acts:
   get_state:
     ledger_id: pt:str
     callable: pt:str
-    kwargs: ct:Kwargs
+    args: ct:Args
   state:
     ledger_id: pt:str
     state: ct:State
@@ -48,8 +48,8 @@ speech_acts:
 ---
 ct:Terms: |
   bytes terms = 1;
-ct:Kwargs: |
-  bytes kwargs = 1;
+ct:Args: |
+  bytes args = 1;
 ct:State: |
   bytes state = 1;
 ct:SignedTransaction: |

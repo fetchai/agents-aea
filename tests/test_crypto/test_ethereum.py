@@ -142,6 +142,20 @@ def test_get_balance():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
+def test_get_state():
+    """Test that get_state() with 'getBlock' function returns something containing the block number."""
+    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    ec = EthereumCrypto()
+    callable_name = "getBlock"
+    kwargs = {"block_id": "latest"}
+    block = ethereum_api.get_state(callable_name, **kwargs)
+    assert block is not None, "response to getBlock is empty."
+    assert "number" in dict(block), "response to getBlock() does not contain 'number'"
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction():
     """Test the construction, signing and submitting of a transfer transaction."""
     account = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)

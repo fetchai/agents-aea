@@ -202,6 +202,20 @@ def test_get_balance():
     assert balance > 0, "Existing account has no balance."
 
 
+# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_state():
+    """Test that get_state() with 'block' function returns something containing the block number."""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    fc = FetchAICrypto()
+    callable_name = "block"
+    kwargs = {"height": 1}
+    block = fetchai_api.get_state(callable_name, **kwargs)
+    print(block)
+    assert block is not None, "No response to 'block' query."
+
+
 def get_wealth(address: str):
     """Get wealth for test."""
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)

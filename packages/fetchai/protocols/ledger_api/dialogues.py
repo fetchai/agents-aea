@@ -49,6 +49,7 @@ class LedgerApiDialogue(Dialogue):
     TERMINAL_PERFORMATIVES = frozenset(
         {
             LedgerApiMessage.Performative.BALANCE,
+            LedgerApiMessage.Performative.STATE,
             LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
         }
     )

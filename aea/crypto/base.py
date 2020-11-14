@@ -249,7 +249,7 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+    def get_state(self, callable_name: str, *args) -> Optional[Any]:
         """
         Call a specified function on the underlying ledger API.
 

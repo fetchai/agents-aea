@@ -397,19 +397,19 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+    def get_state(self, callable_name: str, *args) -> Optional[Any]:
         """Call a specified function on the ledger API."""
-        response = self._try_get_state(callable_name, **kwargs)
+        response = self._try_get_state(callable_name, *args)
         return response
 
     @try_decorator(
         "Encountered exception when trying get state: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_state(self, callable_name: str, **kwargs) -> Optional[Any]:
+    def _try_get_state(self, callable_name: str, *args) -> Optional[Any]:
         """Try to call a function on the ledger API."""
         result = None  # type: Optional[Any]
-        query = "".join([f"?{kwarg[0]}={kwarg[1]}" for kwarg in kwargs.items()])
+        query = "/".join(args)
         url = self.network_address + f"/{callable_name}{query}"
         response = requests.get(url=url)
         if response.status_code == 200:

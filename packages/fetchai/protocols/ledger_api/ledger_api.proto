@@ -5,8 +5,8 @@ package aea.fetchai.ledger_api;
 message LedgerApiMessage{
 
     // Custom Types
-    message Kwargs{
-        bytes kwargs = 1;
+    message Args{
+        bytes args = 1;
     }
 
     message RawTransaction{
@@ -72,7 +72,7 @@ message LedgerApiMessage{
     message Get_State_Performative{
         string ledger_id = 1;
         string callable = 2;
-        Kwargs kwargs = 3;
+        Args args = 3;
     }
 
     message State_Performative{

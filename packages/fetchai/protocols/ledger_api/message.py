@@ -26,7 +26,7 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.ledger_api.custom_types import Kwargs as CustomKwargs
+from packages.fetchai.protocols.ledger_api.custom_types import Args as CustomArgs
 from packages.fetchai.protocols.ledger_api.custom_types import (
     RawTransaction as CustomRawTransaction,
 )
@@ -53,7 +53,7 @@ class LedgerApiMessage(Message):
 
     protocol_id = PublicId.from_str("fetchai/ledger_api:0.7.0")
 
-    Kwargs = CustomKwargs
+    Args = CustomArgs
 
     RawTransaction = CustomRawTransaction
 
@@ -103,12 +103,12 @@ class LedgerApiMessage(Message):
     class _SlotsCls:
         __slots__ = (
             "address",
+            "args",
             "balance",
             "callable",
             "code",
             "data",
             "dialogue_reference",
-            "kwargs",
             "ledger_id",
             "message",
             "message_id",
@@ -182,6 +182,12 @@ class LedgerApiMessage(Message):
         return cast(str, self.get("address"))
 
     @property
+    def args(self) -> CustomArgs:
+        """Get the 'args' content from the message."""
+        enforce(self.is_set("args"), "'args' content is not set.")
+        return cast(CustomArgs, self.get("args"))
+
+    @property
     def balance(self) -> int:
         """Get the 'balance' content from the message."""
         enforce(self.is_set("balance"), "'balance' content is not set.")
@@ -203,12 +209,6 @@ class LedgerApiMessage(Message):
     def data(self) -> Optional[bytes]:
         """Get the 'data' content from the message."""
         return cast(Optional[bytes], self.get("data"))
-
-    @property
-    def kwargs(self) -> CustomKwargs:
-        """Get the 'kwargs' content from the message."""
-        enforce(self.is_set("kwargs"), "'kwargs' content is not set.")
-        return cast(CustomKwargs, self.get("kwargs"))
 
     @property
     def ledger_id(self) -> str:
@@ -409,9 +409,9 @@ class LedgerApiMessage(Message):
                     ),
                 )
                 enforce(
-                    type(self.kwargs) == CustomKwargs,
-                    "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
-                        type(self.kwargs)
+                    type(self.args) == CustomArgs,
+                    "Invalid type for content 'args'. Expected 'Args'. Found '{}'.".format(
+                        type(self.args)
                     ),
                 )
             elif self.performative == LedgerApiMessage.Performative.STATE:
@@ -475,7 +475,8 @@ class LedgerApiMessage(Message):
                 enforce(
                     0 < self.target < self.message_id,
                     "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
+                        self.message_id - 1,
+                        self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
