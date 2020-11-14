@@ -410,7 +410,7 @@ class _CosmosApi(LedgerApi):
         """Try to call a function on the ledger API."""
         result = None  # type: Optional[Any]
         query = "/".join(args)
-        url = self.network_address + f"/{callable_name}{query}"
+        url = self.network_address + f"/{callable_name}/{query}"
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()["result"]

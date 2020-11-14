@@ -147,8 +147,8 @@ def test_get_state():
     ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
     ec = EthereumCrypto()
     callable_name = "getBlock"
-    kwargs = {"block_id": "latest"}
-    block = ethereum_api.get_state(callable_name, **kwargs)
+    args = ("latest")
+    block = ethereum_api.get_state(callable_name, *args)
     assert block is not None, "response to getBlock is empty."
     assert "number" in dict(block), "response to getBlock() does not contain 'number'"
 
