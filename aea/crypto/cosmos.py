@@ -413,7 +413,7 @@ class _CosmosApi(LedgerApi):
         url = self.network_address + f"/{callable_name}/{query}"
         response = requests.get(url=url)
         if response.status_code == 200:
-            result = response.json()["result"]
+            result = response.json()
         return result
 
     def get_deploy_transaction(  # pylint: disable=arguments-differ
