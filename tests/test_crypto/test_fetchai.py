@@ -206,13 +206,15 @@ def test_get_balance():
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_state():
-    """Test that get_state() with 'block' function returns something containing the block height."""
+    """Test that get_state() with 'blocks' function returns something containing the block height."""
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     callable_name = "blocks"
     args = ("latest",)
     block = fetchai_api.get_state(callable_name, *args)
-    assert block is not None, "No response to 'block' query."
-    assert block["block"]["header"]["height"] is not None
+    assert block is not None, "No response to 'blocks/latest' query."
+    assert (
+        block["block"]["header"]["height"] is not None
+    ), "Block height not found in response."
 
 
 def get_wealth(address: str):
