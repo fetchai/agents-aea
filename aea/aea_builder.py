@@ -43,7 +43,6 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     ContractConfig,
-    DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
     PackageType,
     ProtocolConfig,
@@ -51,17 +50,24 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.constants import (
+    CONNECTIONS,
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
+    DEFAULT_REGISTRY_NAME,
 )
 from aea.configurations.constants import (
     DEFAULT_SEARCH_SERVICE_ADDRESS as _DEFAULT_SEARCH_SERVICE_ADDRESS,
 )
 from aea.configurations.constants import (
     DEFAULT_SKILL,
+    FETCHAI,
+    PROTOCOLS,
     SIGNING_PROTOCOL,
+    SKILLS,
     STATE_UPDATE_PROTOCOL,
+    VENDOR,
 )
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
@@ -281,7 +287,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     """
 
     DEFAULT_LEDGER = DEFAULT_LEDGER
-    DEFAULT_CONNECTION = DEFAULT_CONNECTION
+    DEFAULT_CONNECTION = PublicId.from_str(DEFAULT_CONNECTION)
     DEFAULT_CURRENCY_DENOMINATIONS = DEFAULT_CURRENCY_DENOMINATIONS
     DEFAULT_AGENT_ACT_PERIOD = 0.05  # seconds
     DEFAULT_EXECUTION_TIMEOUT = 0
@@ -297,7 +303,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     # pylint: disable=attribute-defined-outside-init
 
     def __init__(
-        self, with_default_packages: bool = True, registry_dir: str = "packages"
+        self,
+        with_default_packages: bool = True,
+        registry_dir: str = DEFAULT_REGISTRY_NAME,
     ):
         """
         Initialize the builder.
@@ -516,24 +524,27 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     def _add_default_packages(self) -> None:
         """Add default packages."""
         # add default protocol
+        default_protocol = PublicId.from_str(DEFAULT_PROTOCOL)
         self.add_protocol(
-            Path(self.registry_dir, "fetchai", "protocols", DEFAULT_PROTOCOL.name)
+            Path(self.registry_dir, FETCHAI, PROTOCOLS, default_protocol.name)
         )
         # add signing protocol
+        signing_protocol = PublicId.from_str(SIGNING_PROTOCOL)
         self.add_protocol(
-            Path(self.registry_dir, "fetchai", "protocols", SIGNING_PROTOCOL.name)
+            Path(self.registry_dir, FETCHAI, PROTOCOLS, signing_protocol.name)
         )
         # add state update protocol
+        state_update_protocol = PublicId.from_str(STATE_UPDATE_PROTOCOL)
         self.add_protocol(
-            Path(self.registry_dir, "fetchai", "protocols", STATE_UPDATE_PROTOCOL.name)
+            Path(self.registry_dir, FETCHAI, PROTOCOLS, state_update_protocol.name)
         )
-
         # add stub connection
         self.add_connection(
-            Path(self.registry_dir, "fetchai", "connections", DEFAULT_CONNECTION.name)
+            Path(self.registry_dir, FETCHAI, CONNECTIONS, self.DEFAULT_CONNECTION.name)
         )
         # add error skill
-        self.add_skill(Path(self.registry_dir, "fetchai", "skills", DEFAULT_SKILL.name))
+        default_skill = PublicId.from_str(DEFAULT_SKILL)
+        self.add_skill(Path(self.registry_dir, FETCHAI, SKILLS, default_skill.name))
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
         """
@@ -1156,7 +1167,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # search in vendor first
         vendor_package_path = (
             aea_project_directory
-            / "vendor"
+            / VENDOR
             / component_id.public_id.author
             / component_id.component_type.to_plural()
             / component_id.public_id.name
@@ -1345,9 +1356,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             if component_id not in dependency_to_supported_dependencies:
                 dependency_to_supported_dependencies[component_id] = set()
             if isinstance(configuration, SkillConfig):
-                dependencies, component_type = configuration.skills, "skills"
+                dependencies, component_type = configuration.skills, SKILLS
             elif isinstance(configuration, ConnectionConfig):
-                dependencies, component_type = configuration.connections, "connections"
+                dependencies, component_type = configuration.connections, CONNECTIONS
             else:
                 raise AEAException("Not a valid configuration type.")  # pragma: nocover
             for dependency in dependencies:

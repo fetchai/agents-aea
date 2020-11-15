@@ -36,16 +36,20 @@ from aea.cli.utils.package_utils import (
     create_symlink_vendor_to_local,
     validate_package_name,
 )
-from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-import
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unused-import
+    CONNECTION,
+    CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
-    PublicId,
+    PROTOCOL,
+    SCAFFOLD_PUBLIC_ID,
+    SKILL,
 )
-from aea.configurations.constants import SCAFFOLD_PUBLIC_ID
 
 
 @click.group()
@@ -60,7 +64,7 @@ def scaffold(click_context):  # pylint: disable=unused-argument
 @pass_ctx
 def connection(ctx: Context, connection_name: str) -> None:
     """Add a connection scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "connection", connection_name)
+    scaffold_item(ctx, CONNECTION, connection_name)
 
 
 @scaffold.command()
@@ -68,7 +72,7 @@ def connection(ctx: Context, connection_name: str) -> None:
 @pass_ctx
 def contract(ctx: Context, contract_name: str) -> None:
     """Add a contract scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "contract", contract_name)
+    scaffold_item(ctx, CONTRACT, contract_name)
 
 
 @scaffold.command()
@@ -76,7 +80,7 @@ def contract(ctx: Context, contract_name: str) -> None:
 @pass_ctx
 def protocol(ctx: Context, protocol_name: str):
     """Add a protocol scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "protocol", protocol_name)
+    scaffold_item(ctx, PROTOCOL, protocol_name)
 
 
 @scaffold.command()
@@ -84,7 +88,7 @@ def protocol(ctx: Context, protocol_name: str):
 @pass_ctx
 def skill(ctx: Context, skill_name: str):
     """Add a skill scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "skill", skill_name)
+    scaffold_item(ctx, SKILL, skill_name)
 
 
 @scaffold.command()

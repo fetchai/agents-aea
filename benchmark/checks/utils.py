@@ -71,13 +71,23 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
 
     resources.add_skill(
         Skill.from_dir(
-            str(PACKAGES_DIR / "fetchai" / "skills" / DEFAULT_SKILL.name),
+            str(
+                PACKAGES_DIR
+                / "fetchai"
+                / "skills"
+                / PublicId.from_str(DEFAULT_SKILL).name
+            ),
             agent_context=agent_context,
         )
     )
     resources.add_protocol(
         Protocol.from_dir(
-            str(PACKAGES_DIR / "fetchai" / "protocols" / DEFAULT_PROTOCOL.name)
+            str(
+                PACKAGES_DIR
+                / "fetchai"
+                / "protocols"
+                / PublicId.from_str(DEFAULT_PROTOCOL).name
+            )
         )
     )
     return AEA(identity, wallet, resources, runtime_mode=runtime_mode)

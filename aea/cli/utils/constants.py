@@ -23,28 +23,39 @@ import os
 from pathlib import Path
 from typing import Dict
 
-from aea.configurations.base import (
+from aea.configurations.constants import (
+    AGENT,
+    CONNECTION,
+    CONNECTIONS,
+    CONTRACT,
+    CONTRACTS,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+    PACKAGES_NAME,
+    PROTOCOL,
+    PROTOCOLS,
+    SKILL,
+    SKILLS,
+    VENDOR,
 )
 
 
 AEA_DIR = str(Path("."))
 
-ITEM_TYPES = ("connection", "contract", "protocol", "skill")
+ITEM_TYPES = (CONNECTION, CONTRACT, PROTOCOL, SKILL)
 
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 AUTHOR_KEY = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
 NOT_PERMITTED_AUTHORS = [
-    "skills",
-    "connections",
-    "protocols",
-    "contracts",
-    "vendor",
-    "packages",
+    CONNECTIONS,
+    CONTRACTS,
+    PROTOCOLS,
+    SKILLS,
+    VENDOR,
+    PACKAGES_NAME,
     "aea",
 ]
 
@@ -54,18 +65,18 @@ FROM_STRING_TO_TYPE = dict(
 )
 
 ALLOWED_PATH_ROOTS = [
-    "agent",
-    "skills",
-    "protocols",
-    "connections",
-    "contracts",
-    "vendor",
+    AGENT,
+    CONNECTIONS,
+    CONTRACTS,
+    PROTOCOLS,
+    SKILLS,
+    VENDOR,
 ]
 RESOURCE_TYPE_TO_CONFIG_FILE = {
-    "skills": DEFAULT_SKILL_CONFIG_FILE,
-    "protocols": DEFAULT_PROTOCOL_CONFIG_FILE,
-    "connections": DEFAULT_CONNECTION_CONFIG_FILE,
-    "contracts": DEFAULT_CONTRACT_CONFIG_FILE,
+    SKILLS: DEFAULT_SKILL_CONFIG_FILE,
+    PROTOCOLS: DEFAULT_PROTOCOL_CONFIG_FILE,
+    CONNECTIONS: DEFAULT_CONNECTION_CONFIG_FILE,
+    CONTRACTS: DEFAULT_CONTRACT_CONFIG_FILE,
 }  # type: Dict[str, str]
 FALSE_EQUIVALENTS = ["f", "false", "False"]
 

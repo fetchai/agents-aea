@@ -33,8 +33,16 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import try_get_item_source_path
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
-from aea.configurations.constants import DEFAULT_REGISTRY_PATH
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    AGENTS,
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_REGISTRY_NAME,
+    PROTOCOL,
+    SKILL,
+)
 
 
 @click.command(name="fetch")
@@ -93,10 +101,10 @@ def fetch_agent_locally(
     :return: None
     """
     packages_path = (
-        DEFAULT_REGISTRY_PATH if ctx.registry_path is None else ctx.registry_path
+        DEFAULT_REGISTRY_NAME if ctx.registry_path is None else ctx.registry_path
     )
     source_path = try_get_item_source_path(
-        packages_path, public_id.author, "agents", public_id.name
+        packages_path, public_id.author, AGENTS, public_id.name
     )
 
     try_to_load_agent_config(ctx, agent_src_path=source_path)
@@ -142,7 +150,7 @@ def _fetch_agent_deps(ctx: Context) -> None:
     :return: None
     :raises: ClickException re-raises if occurs in add_item call.
     """
-    for item_type in ("protocol", "contract", "connection", "skill"):
+    for item_type in (SKILL, PROTOCOL, CONNECTION, CONTRACT):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:

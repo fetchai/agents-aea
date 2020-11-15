@@ -31,7 +31,14 @@ from typing import Callable, Dict, List, Optional
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import AgentConfig, ComponentId, PackageType, PublicId
-from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.constants import (
+    CONNECTIONS,
+    CONTRACTS,
+    DEFAULT_LEDGER,
+    DEFAULT_REGISTRY_NAME,
+    PROTOCOLS,
+    SKILLS,
+)
 from aea.configurations.loader import ConfigLoaders
 from aea.configurations.project import AgentAlias, Project
 from aea.crypto.helpers import create_private_key
@@ -128,12 +135,15 @@ class AgentRunThreadTask(AgentRunAsyncTask):
 class MultiAgentManager:
     """Multi agents manager."""
 
-    AGENT_DO_NOT_OVERRIDE_VALUES = ["skills", "connections", "protocols", "contracts"]
+    AGENT_DO_NOT_OVERRIDE_VALUES = [CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS]
     MODES = ["async", "threaded"]
     DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
 
     def __init__(
-        self, working_dir: str, mode: str = "async", registry_path: str = "packages"
+        self,
+        working_dir: str,
+        mode: str = "async",
+        registry_path: str = DEFAULT_REGISTRY_NAME,
     ) -> None:
         """
         Initialize manager.
