@@ -34,7 +34,15 @@ import psutil  # type: ignore
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
-from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PROTOCOL, DEFAULT_SKILL
+from aea.configurations.constants import (
+    DEFAULT_LEDGER,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+    FETCHAI,
+    PACKAGES,
+    PROTOCOLS,
+    SKILLS,
+)
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -47,7 +55,7 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
-PACKAGES_DIR = Path(AEA_DIR, "..", "packages")
+PACKAGES_DIR = Path(AEA_DIR, "..", PACKAGES)
 
 
 def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout") -> None:
@@ -72,10 +80,7 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
     resources.add_skill(
         Skill.from_dir(
             str(
-                PACKAGES_DIR
-                / "fetchai"
-                / "skills"
-                / PublicId.from_str(DEFAULT_SKILL).name
+                PACKAGES_DIR / FETCHAI / SKILLS / PublicId.from_str(DEFAULT_SKILL).name
             ),
             agent_context=agent_context,
         )
@@ -84,8 +89,8 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
         Protocol.from_dir(
             str(
                 PACKAGES_DIR
-                / "fetchai"
-                / "protocols"
+                / FETCHAI
+                / PROTOCOLS
                 / PublicId.from_str(DEFAULT_PROTOCOL).name
             )
         )

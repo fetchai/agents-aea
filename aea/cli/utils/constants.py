@@ -33,7 +33,7 @@ from aea.configurations.constants import (
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
-    PACKAGES_NAME,
+    PACKAGES,
     PROTOCOL,
     PROTOCOLS,
     SKILL,
@@ -55,7 +55,7 @@ NOT_PERMITTED_AUTHORS = [
     PROTOCOLS,
     SKILLS,
     VENDOR,
-    PACKAGES_NAME,
+    PACKAGES,
     "aea",
 ]
 
