@@ -19,6 +19,7 @@
 
 """This module contains tests for aea.contracts.base."""
 
+import logging
 import os
 from pathlib import Path
 from typing import cast
@@ -38,6 +39,9 @@ from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
 
 from tests.conftest import ETHEREUM, FETCHAI, ROOT_DIR
+
+
+logger = logging.getLogger(__name__)
 
 
 def test_from_dir():
@@ -73,8 +77,8 @@ def test_from_config_and_registration():
 
     try:
         contract_registry.specs.pop(str(configuration.public_id))
-    except Exception:
-        pass
+    except Exception as e:
+        logger.exception(e)
 
 
 def test_from_config_negative():
@@ -94,8 +98,8 @@ def test_from_config_negative():
 
     try:
         contract_registry.specs.pop(str(configuration.public_id))
-    except Exception:
-        pass
+    except Exception as e:
+        logger.exception(e)
 
 
 def test_non_implemented_class_methods():
