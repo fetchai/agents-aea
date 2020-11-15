@@ -26,8 +26,13 @@ from typing import cast
 import click
 
 from aea.cli.fingerprint import fingerprint_item
+from aea.cli.remove import ItemRemoveHelper
 from aea.cli.utils.click_utils import PublicIdParameter
-from aea.cli.utils.config import set_cli_author, update_item_config
+from aea.cli.utils.config import (
+    set_cli_author,
+    try_to_load_agent_config,
+    update_item_config,
+)
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
@@ -41,8 +46,11 @@ from aea.configurations.base import (
     ComponentId,
     ComponentType,
     DEFAULT_VERSION,
+    PackageId,
+    PackageType,
     PublicId,
 )
+from aea.helpers.base import find_topological_order, reachable_nodes
 
 
 @click.group()
@@ -109,6 +117,30 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
             f"{item_type.title()} {public_id} is already in a non-vendor item."
         )
 
+    # first, eject all the vendor packages that depend on this
+    package_id = PackageId(PackageType(item_type), public_id)
+    item_remover = ItemRemoveHelper(ctx.agent_config, ignore_non_vendor=True)
+    reverse_dependencies = (
+        item_remover.get_agent_dependencies_with_reverse_dependencies()
+    )
+    reverse_reachable_dependencies = reachable_nodes(reverse_dependencies, {package_id})
+    # the reversed topological order of a graph
+    # is the topological order of the reverse graph.
+    eject_order = reversed(find_topological_order(reverse_reachable_dependencies))
+    for dependency_package_id in eject_order:
+        if dependency_package_id == package_id:
+            # we removed all the packages that recursively
+            # depend on the package being ejected
+            break
+        # 'dependency_package_id' depends on 'package_id',
+        # so we need to eject it first
+        _eject_item(
+            ctx,
+            dependency_package_id.package_type.value,
+            dependency_package_id.public_id,
+        )
+
+    # copy the vendor package into the non-vendor packages
     ctx.clean_paths.append(dst)
     copy_package_directory(Path(src), dst)
 
@@ -126,6 +158,8 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     old_component_id = ComponentId(component_type, public_id)
     new_component_id = ComponentId(component_type, new_public_id)
     update_references(ctx, {old_component_id: new_component_id})
+    # need to reload agent configuration with the updated references
+    try_to_load_agent_config(ctx)
 
     click.echo(
         f"Successfully ejected {item_type} {public_id} to {dst} as {new_public_id}."

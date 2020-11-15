@@ -79,6 +79,38 @@ class TestEjectCommands(AEATestCaseMany):
         assert "erc1155" in os.listdir((os.path.join(cwd, "contracts")))
 
 
+class TestRecursiveEject(AEATestCaseEmpty):
+    """Test that eject is recursive."""
+
+    def test_recursive_eject_commands_positive(self):
+        """Test eject commands for positive result."""
+        agent_name = "test_aea"
+        self.create_agents(agent_name)
+
+        self.set_agent_context(agent_name)
+        cwd = os.path.join(self.t, agent_name)
+        self.add_item("connection", str(GYM_CONNECTION_PUBLIC_ID))
+        self.add_item("skill", str(GYM_SKILL_PUBLIC_ID))
+        self.add_item("contract", str(ERC1155_PUBLIC_ID))
+
+        # ejecting the gym protocol will cause the ejection of
+        # all the other packages that depend on it,
+        # that is, gym connection and gym skill.
+        self.eject_item("protocol", str(GymMessage.protocol_id))
+        assert "gym" not in os.listdir(
+            (os.path.join(cwd, "vendor", "fetchai", "protocols"))
+        )
+        assert "gym" in os.listdir((os.path.join(cwd, "protocols")))
+        assert "gym" not in os.listdir(
+            (os.path.join(cwd, "vendor", "fetchai", "connections"))
+        )
+        assert "gym" in os.listdir((os.path.join(cwd, "connections")))
+        assert "gym" not in os.listdir(
+            (os.path.join(cwd, "vendor", "fetchai", "skills"))
+        )
+        assert "gym" in os.listdir((os.path.join(cwd, "skills")))
+
+
 class BaseTestEjectCommand(AEATestCaseEmpty):
     """Replace CLI author with a known author."""
 
