@@ -54,10 +54,20 @@ from aea.helpers.base import find_topological_order, reachable_nodes
 
 
 @click.group()
+@click.option(
+    "-q",
+    "--quiet",
+    "quiet",
+    is_flag=True,
+    required=False,
+    default=False,
+    help="If provided, the command will not ask the user for confirmation.",
+)
 @click.pass_context
 @check_aea_project
-def eject(click_context: click.core.Context):
+def eject(click_context: click.core.Context, quiet):
     """Eject an installed item."""
+    click_context.obj.set_config("quiet", quiet)
     set_cli_author(click_context)
 
 
@@ -66,7 +76,8 @@ def eject(click_context: click.core.Context):
 @pass_ctx
 def connection(ctx: Context, public_id: PublicId):
     """Eject an installed connection."""
-    _eject_item(ctx, "connection", public_id)
+    quiet = ctx.config.get("quiet")
+    _eject_item(ctx, "connection", public_id, quiet=quiet)
 
 
 @eject.command()
@@ -74,7 +85,8 @@ def connection(ctx: Context, public_id: PublicId):
 @pass_ctx
 def contract(ctx: Context, public_id: PublicId):
     """Eject an installed contract."""
-    _eject_item(ctx, "contract", public_id)
+    quiet = ctx.config.get("quiet")
+    _eject_item(ctx, "contract", public_id, quiet=quiet)
 
 
 @eject.command()
@@ -82,7 +94,8 @@ def contract(ctx: Context, public_id: PublicId):
 @pass_ctx
 def protocol(ctx: Context, public_id: PublicId):
     """Eject an installed protocol."""
-    _eject_item(ctx, "protocol", public_id)
+    quiet = ctx.config.get("quiet")
+    _eject_item(ctx, "protocol", public_id, quiet=quiet)
 
 
 @eject.command()
@@ -90,17 +103,19 @@ def protocol(ctx: Context, public_id: PublicId):
 @pass_ctx
 def skill(ctx: Context, public_id: PublicId):
     """Eject an installed skill."""
-    _eject_item(ctx, "skill", public_id)
+    quiet = ctx.config.get("quiet")
+    _eject_item(ctx, "skill", public_id, quiet=quiet)
 
 
 @clean_after
-def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
+def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool = True):
     """
     Eject item from installed (vendor) to custom folder.
 
     :param ctx: context object.
     :param item_type: item type.
     :param public_id: item public ID.
+    :param quiet: if false, the function will ask the user in case of recursive eject.
 
     :return: None
     :raises: ClickException if item is absent at source path or present at destenation path.
@@ -117,8 +132,10 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
             f"{item_type.title()} {public_id} is already in a non-vendor item."
         )
 
-    # first, eject all the vendor packages that depend on this
     package_id = PackageId(PackageType(item_type), public_id)
+    click.echo(f"Ejecting item {package_id}")
+
+    # first, eject all the vendor packages that depend on this
     item_remover = ItemRemoveHelper(ctx.agent_config, ignore_non_vendor=True)
     reverse_dependencies = (
         item_remover.get_agent_dependencies_with_reverse_dependencies()
@@ -126,18 +143,23 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
     reverse_reachable_dependencies = reachable_nodes(reverse_dependencies, {package_id})
     # the reversed topological order of a graph
     # is the topological order of the reverse graph.
-    eject_order = reversed(find_topological_order(reverse_reachable_dependencies))
+    eject_order = list(reversed(find_topological_order(reverse_reachable_dependencies)))
+    eject_order.remove(package_id)
+    if len(eject_order) > 0 and not quiet:
+        click.echo(f"The following vendor packages will be ejected: {eject_order}")
+        answer = click.confirm("Do you want to proceed?")
+        if not answer:
+            click.echo("Aborted.")
+            return
+
     for dependency_package_id in eject_order:
-        if dependency_package_id == package_id:
-            # we removed all the packages that recursively
-            # depend on the package being ejected
-            break
         # 'dependency_package_id' depends on 'package_id',
         # so we need to eject it first
         _eject_item(
             ctx,
             dependency_package_id.package_type.value,
             dependency_package_id.public_id,
+            quiet=True,
         )
 
     # copy the vendor package into the non-vendor packages

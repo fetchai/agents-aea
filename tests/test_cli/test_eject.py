@@ -25,6 +25,7 @@ from pathlib import Path
 import click
 import pytest
 
+from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import CLI_CONFIG_PATH
 from aea.configurations.base import ComponentType, DEFAULT_VERSION, PublicId
 from aea.configurations.loader import load_component_configuration
@@ -54,6 +55,12 @@ class TestEjectCommands(AEATestCaseMany):
         self.add_item("skill", str(GYM_SKILL_PUBLIC_ID))
         self.add_item("contract", str(ERC1155_PUBLIC_ID))
 
+        # the order must be kept as is, because of recursive ejects
+        self.eject_item("skill", str(GYM_SKILL_PUBLIC_ID))
+        assert "gym" not in os.listdir(
+            (os.path.join(cwd, "vendor", "fetchai", "skills"))
+        )
+        assert "gym" in os.listdir((os.path.join(cwd, "skills")))
         self.eject_item("connection", str(GYM_CONNECTION_PUBLIC_ID))
         assert "gym" not in os.listdir(
             (os.path.join(cwd, "vendor", "fetchai", "connections"))
@@ -65,12 +72,6 @@ class TestEjectCommands(AEATestCaseMany):
             (os.path.join(cwd, "vendor", "fetchai", "protocols"))
         )
         assert "gym" in os.listdir((os.path.join(cwd, "protocols")))
-
-        self.eject_item("skill", str(GYM_SKILL_PUBLIC_ID))
-        assert "gym" not in os.listdir(
-            (os.path.join(cwd, "vendor", "fetchai", "skills"))
-        )
-        assert "gym" in os.listdir((os.path.join(cwd, "skills")))
 
         self.eject_item("contract", str(ERC1155_PUBLIC_ID))
         assert "erc1155" not in os.listdir(
@@ -111,25 +112,47 @@ class TestRecursiveEject(AEATestCaseEmpty):
         assert "gym" in os.listdir((os.path.join(cwd, "skills")))
 
 
+class TestRecursiveEjectIsAborted(AEATestCaseEmpty):
+    """Test that recursive eject is aborted in non-quiet mode."""
+
+    def test_recursive_eject_commands_non_quiet_negative(self):
+        """Test eject command for negative result in interactive mode."""
+        agent_name = "test_aea"
+        self.create_agents(agent_name)
+
+        self.set_agent_context(agent_name)
+        cwd = os.path.join(self.t, agent_name)
+        self.add_item("connection", str(GYM_CONNECTION_PUBLIC_ID))
+        self.add_item("skill", str(GYM_SKILL_PUBLIC_ID))
+        self.add_item("contract", str(ERC1155_PUBLIC_ID))
+
+        self.run_cli_command(
+            "eject", "protocol", str(GymMessage.protocol_id), cwd=self._get_cwd()
+        )
+        # assert packages not ejected
+        assert "gym" in os.listdir(
+            (os.path.join(cwd, "vendor", "fetchai", "protocols"))
+        )
+        assert "gym" not in os.listdir((os.path.join(cwd, "protocols")))
+        assert "gym" in os.listdir(
+            (os.path.join(cwd, "vendor", "fetchai", "connections"))
+        )
+        assert "gym" not in os.listdir((os.path.join(cwd, "connections")))
+        assert "gym" in os.listdir((os.path.join(cwd, "vendor", "fetchai", "skills")))
+        assert "gym" not in os.listdir((os.path.join(cwd, "skills")))
+
+
 class BaseTestEjectCommand(AEATestCaseEmpty):
     """Replace CLI author with a known author."""
 
-    EXPECTED_AUTHOR = "some_author_name"
+    EXPECTED_AUTHOR = ""
 
     @classmethod
     def setup_class(cls):
         """Set up the class."""
         super().setup_class()
-        # copy file temporarily - it will be restored in the teardown
-        cls.aea_cli_config = Path(CLI_CONFIG_PATH).expanduser()
-        shutil.copy(cls.aea_cli_config, Path(cls.t, cls.aea_cli_config.name))
-        os.remove(cls.aea_cli_config)
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the class."""
-        shutil.copy(Path(cls.t, cls.aea_cli_config.name), cls.aea_cli_config)
-        super().teardown_class()
+        config = get_or_create_cli_config()
+        cls.EXPECTED_AUTHOR = config.get("author", "")
 
 
 class TestEjectCommandCliConfigNotAvailable(BaseTestEjectCommand):
@@ -141,6 +164,8 @@ class TestEjectCommandCliConfigNotAvailable(BaseTestEjectCommand):
     def setup_class(cls):
         """Set up the class."""
         super().setup_class()
+        path = CLI_CONFIG_PATH
+        shutil.move(path, os.path.join(cls.t, "cli_config.yaml"))
         # we don't set the CLI configuration
         cls.add_item("protocol", str(DefaultMessage.protocol_id))
 
@@ -154,6 +179,12 @@ class TestEjectCommandCliConfigNotAvailable(BaseTestEjectCommand):
                 "eject", "protocol", str(DefaultMessage.protocol_id),
             )
 
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the class."""
+        shutil.copy(os.path.join(cls.t, "cli_config.yaml"), CLI_CONFIG_PATH)
+        super().teardown_class()
+
 
 class TestEjectCommandReplacesReferences(BaseTestEjectCommand):
     """Test that eject command replaces the right references to the new package."""
@@ -164,9 +195,6 @@ class TestEjectCommandReplacesReferences(BaseTestEjectCommand):
     def setup_class(cls):
         """Set up the class."""
         super().setup_class()
-        cls.run_cli_command(
-            "init", "--local", "--reset", "--author", cls.EXPECTED_AUTHOR, cwd=cls.t
-        )
         cls.add_item("protocol", str(DefaultMessage.protocol_id))
         cls.eject_item("protocol", str(DefaultMessage.protocol_id))
 
@@ -202,9 +230,6 @@ class TestEjectCommandReplacesCustomConfigurationReference(BaseTestEjectCommand)
     def setup_class(cls):
         """Set up the class."""
         super().setup_class()
-        cls.run_cli_command(
-            "init", "--local", "--reset", "--author", cls.EXPECTED_AUTHOR, cwd=cls.t
-        )
         cls.add_item("skill", str(ERROR_PUBLIC_ID))
         # add a custom configuration to the error skill
         cls.run_cli_command(

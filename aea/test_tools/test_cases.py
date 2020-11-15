@@ -503,7 +503,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     @classmethod
     def eject_item(cls, item_type: str, public_id: str) -> Result:
         """
-        Eject an item in the agent.
+        Eject an item in the agent in quiet mode (i.e. no interaction).
 
         Run from agent's directory.
 
@@ -512,7 +512,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :return: None
         """
-        cli_args = ["eject", item_type, public_id]
+        cli_args = ["eject", "--quiet", item_type, public_id]
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
