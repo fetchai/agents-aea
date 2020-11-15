@@ -41,12 +41,13 @@ from aea.configurations.base import (
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, DEFAULT_REGISTRY_PATH
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.constants import (
     DISTRIBUTED_PACKAGES as DISTRIBUTED_PACKAGES_STR,
 )
 from aea.configurations.constants import (
     LEDGER_CONNECTION,
+    PACKAGES,
     PACKAGE_PUBLIC_ID_VAR_NAME,
     SKILL,
     VENDOR,
@@ -643,5 +644,15 @@ def create_symlink_vendor_to_local(
     if not os.path.exists(vendor_path.parent):
         os.makedirs(vendor_path.parent)
     create_symlink(vendor_path, Path(local_path), Path(ctx.cwd))
-    if not os.path.exists(DEFAULT_REGISTRY_PATH):
-        create_symlink(DEFAULT_REGISTRY_PATH, Path(VENDOR), Path(ctx.cwd))
+
+
+def create_symlink_packages_to_vendor(ctx: Context) -> None:
+    """
+    Creates a symlink from a local packages to the vendor folder.
+
+    :param ctx: click context
+
+    :return: None
+    """
+    if not os.path.exists(PACKAGES):
+        create_symlink(Path(PACKAGES), Path(VENDOR), Path(ctx.cwd))

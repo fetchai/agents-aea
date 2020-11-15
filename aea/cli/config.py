@@ -194,7 +194,7 @@ class ConfigGetSet:
         if attr_name not in parent_obj:
             raise click.ClickException("Attribute '{}' not found.".format(attr_name))
         if not isinstance(
-            parent_obj.get(attr_name), (str, int, bool, float, dict, list)
+            parent_obj.get(attr_name), (str, int, bool, float, dict, list, type(None))
         ):
             raise click.ClickException(  # pragma: nocover
                 "Attribute '{}' is not of primitive type.".format(attr_name)

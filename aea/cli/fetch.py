@@ -150,7 +150,7 @@ def _fetch_agent_deps(ctx: Context) -> None:
     :return: None
     :raises: ClickException re-raises if occurs in add_item call.
     """
-    for item_type in (SKILL, PROTOCOL, CONNECTION, CONTRACT):
+    for item_type in (PROTOCOL, CONTRACT, CONNECTION, SKILL):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:

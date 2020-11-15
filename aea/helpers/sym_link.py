@@ -46,6 +46,7 @@ def cd(path):
     try:
         os.chdir(path)
         yield
+        os.chdir(old_cwd)
     except Exception as e:  # pylint: disable=broad-except
         os.chdir(old_cwd)
         raise e from e

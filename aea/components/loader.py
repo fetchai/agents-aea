@@ -69,7 +69,11 @@ def load_component_from_config(  # type: ignore
     except AEAInstantiationException as e:
         raise e  # pramga: nocover
     except AEAComponentLoadException as e:
-        raise e
+        raise AEAPackageLoadingError(
+            "Package loading error: An error occurred while loading {} {}: {}".format(
+                str(configuration.component_type), configuration.public_id, e
+            )
+        )
     except ModuleNotFoundError as e:
         _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:  # pylint: disable=broad-except
