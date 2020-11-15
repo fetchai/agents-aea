@@ -67,7 +67,7 @@ def load_component_from_config(  # type: ignore
     try:
         return component_class.from_config(*args, configuration=configuration, **kwargs)  # type: ignore
     except AEAInstantiationException as e:
-        raise e  # pramga: nocover
+        raise e
     except AEAComponentLoadException as e:
         raise AEAPackageLoadingError(
             "Package loading error: An error occurred while loading {} {}: {}".format(

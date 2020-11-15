@@ -47,7 +47,7 @@ def cd(path):
         os.chdir(path)
         yield
         os.chdir(old_cwd)
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
         os.chdir(old_cwd)
         raise e from e
 

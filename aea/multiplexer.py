@@ -387,7 +387,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
                     self._disconnect_one(connection_id), timeout=self.DISCONNECT_TIMEOUT
                 )
             except FuturesTimeoutError:
-                self.logger.debug(f"Disconnection of `{connection_id}` timed out.")
+                self.logger.debug(
+                    f"Disconnection of `{connection_id}` timed out."
+                )  # pragma: nocover
             except Exception as e:  # pylint: disable=broad-except
                 self.logger.exception(
                     "Error while disconnecting {}: {}".format(

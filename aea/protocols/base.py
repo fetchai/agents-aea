@@ -356,7 +356,7 @@ class Protocol(Component):
         message_classes = list(
             filter(lambda x: re.match(f"{name_camel_case}Message", x[0]), classes)
         )
-        if len(message_classes) != 1:
+        if len(message_classes) != 1:  # pragma: nocover
             raise AEAComponentLoadException("Not exactly one message class detected.")
         message_class = message_classes[0][1]
         class_module = importlib.import_module(
@@ -366,7 +366,7 @@ class Protocol(Component):
         serializer_classes = list(
             filter(lambda x: re.match(f"{name_camel_case}Serializer", x[0]), classes,)
         )
-        if len(serializer_classes) != 1:
+        if len(serializer_classes) != 1:  # pragma: nocover
             raise AEAComponentLoadException(
                 "Not exactly one serializer class detected."
             )
