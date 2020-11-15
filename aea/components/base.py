@@ -32,6 +32,7 @@ from aea.configurations.base import (
     ComponentType,
     PublicId,
 )
+from aea.configurations.constants import PACKAGES
 from aea.exceptions import AEAEnforceError
 from aea.helpers.logging import WithLogger
 
@@ -120,7 +121,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
         raise AEAEnforceError("configuration directory does not exists.")
 
     # patch sys.modules with dummy modules
-    prefix_root = "packages"
+    prefix_root = PACKAGES
     prefix_author = prefix_root + f".{configuration.author}"
     prefix_pkg_type = prefix_author + f".{configuration.component_type.to_plural()}"
     prefix_pkg = prefix_pkg_type + f".{configuration.name}"

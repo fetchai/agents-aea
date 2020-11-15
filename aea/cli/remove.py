@@ -38,11 +38,17 @@ from aea.configurations.base import (
     AgentConfig,
     ComponentId,
     ComponentType,
-    DEFAULT_AEA_CONFIG_FILE,
     PackageConfiguration,
     PackageId,
     PackageType,
     PublicId,
+)
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
 )
 
 
@@ -71,7 +77,7 @@ def connection(ctx: Context, connection_id):
 
     It expects the public id of the connection to remove from the local registry.
     """
-    remove_item(ctx, "connection", connection_id)
+    remove_item(ctx, CONNECTION, connection_id)
 
 
 @remove.command()
@@ -83,7 +89,7 @@ def contract(ctx: Context, contract_id):
 
     It expects the public id of the contract to remove from the local registry.
     """
-    remove_item(ctx, "contract", contract_id)
+    remove_item(ctx, CONTRACT, contract_id)
 
 
 @remove.command()
@@ -95,7 +101,7 @@ def protocol(ctx: Context, protocol_id):
 
     It expects the public id of the protocol to remove from the local registry.
     """
-    remove_item(ctx, "protocol", protocol_id)
+    remove_item(ctx, PROTOCOL, protocol_id)
 
 
 @remove.command()
@@ -107,7 +113,7 @@ def skill(ctx: Context, skill_id):
 
     It expects the public id of the skill to remove from the local registry.
     """
-    remove_item(ctx, "skill", skill_id)
+    remove_item(ctx, SKILL, skill_id)
 
 
 class ItemRemoveHelper:

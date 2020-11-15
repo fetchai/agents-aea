@@ -38,12 +38,12 @@ from aea.cli.utils.generic import load_yaml
 from aea.configurations.base import (
     ComponentId,
     ComponentType,
-    DEFAULT_AEA_CONFIG_FILE,
     PackageConfiguration,
     PackageType,
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import AGENT, AGENTS, DEFAULT_AEA_CONFIG_FILE, VENDOR
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import AEAEnforceError, AEAException, enforce
 
@@ -175,11 +175,11 @@ def handle_dotted_path(
 
     if (
         len(parts) < 2
-        or parts[0] == "agent"
+        or parts[0] == AGENT
         and len(parts) < 2
-        or parts[0] == "vendor"
+        or parts[0] == VENDOR
         and len(parts) < 5
-        or parts[0] != "agent"
+        or parts[0] != AGENT
         and len(parts) < 3
     ):
         raise AEAException(
@@ -187,12 +187,12 @@ def handle_dotted_path(
         )
 
     # if the root is 'agent', stop.
-    if root == "agent":
-        resource_type_plural = "agents"
+    if root == AGENT:
+        resource_type_plural = AGENTS
         path_to_resource_configuration = Path(DEFAULT_AEA_CONFIG_FILE)
         json_path = parts[1:]
         component_id = None
-    elif root == "vendor":
+    elif root == VENDOR:
         # parse json path
         resource_author = parts[1]
         resource_type_plural = parts[2]
@@ -212,11 +212,7 @@ def handle_dotted_path(
 
         # find path to the resource directory
         path_to_resource_directory = (
-            Path(".")
-            / "vendor"
-            / resource_author
-            / resource_type_plural
-            / resource_name
+            Path(".") / VENDOR / resource_author / resource_type_plural / resource_name
         )
         path_to_resource_configuration = (
             path_to_resource_directory

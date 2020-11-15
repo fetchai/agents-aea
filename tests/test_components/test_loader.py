@@ -41,7 +41,7 @@ def test_component_loading_generic_exception(component_configuration):
         Protocol, "from_config", side_effect=Exception("Generic exception")
     ):
         with pytest.raises(
-            Exception, match="An error occurred while loading .*: Generic exception"
+            Exception, match="Package loading error: An error occurred while loading"
         ):
             load_component_from_config(component_configuration)
 
@@ -53,7 +53,7 @@ def test_component_loading_generic_module_not_found_error(component_configuratio
         Protocol,
         "from_config",
         side_effect=ModuleNotFoundError(
-            "An error occurred while loading .*: Generic error"
+            "Package loading error: An error occurred while loading .*: Generic error"
         ),
     ):
         with pytest.raises(ModuleNotFoundError, match="Generic error"):

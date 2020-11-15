@@ -43,11 +43,11 @@ from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
 from aea.exceptions import (
     AEAActException,
+    AEAComponentLoadException,
     AEAException,
     AEAHandleException,
     AEAInstantiationException,
     _StopRuntime,
-    enforce,
     parse_exception,
 )
 from aea.helpers.base import _get_aea_logger_name_prefix, load_module
@@ -438,10 +438,10 @@ class Behaviour(AbstractBehaviour, ABC):
             skill_context.logger.debug(
                 "Processing behaviour {}".format(behaviour_class_name)
             )
-            enforce(
-                behaviour_id.isidentifier(),
-                "'{}' is not a valid identifier.".format(behaviour_id),
-            )
+            if not behaviour_id.isidentifier():
+                raise AEAComponentLoadException(
+                    f"'{behaviour_id}' is not a valid identifier."
+                )
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
                 skill_context.logger.warning(
@@ -537,10 +537,10 @@ class Handler(SkillComponent, ABC):
             skill_context.logger.debug(
                 "Processing handler {}".format(handler_class_name)
             )
-            enforce(
-                handler_id.isidentifier(),
-                "'{}' is not a valid identifier.".format(handler_id),
-            )
+            if not handler_id.isidentifier():
+                raise AEAComponentLoadException(
+                    f"'{handler_id}' is not a valid identifier."
+                )
             handler_class = name_to_class.get(handler_class_name, None)
             if handler_class is None:
                 skill_context.logger.warning(
@@ -640,10 +640,10 @@ class Model(SkillComponent, ABC):
             skill_context.logger.debug(
                 "Processing model id={}, class={}".format(model_id, model_class_name)
             )
-            enforce(
-                model_id.isidentifier(),
-                "'{}' is not a valid identifier.".format(model_id),
-            )
+            if not model_id.isidentifier():
+                raise AEAComponentLoadException(
+                    f"'{model_id}' is not a valid identifier."
+                )
             model = name_to_class.get(model_class_name, None)
             if model is None:
                 skill_context.logger.warning(

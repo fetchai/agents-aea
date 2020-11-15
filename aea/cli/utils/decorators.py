@@ -37,6 +37,7 @@ from aea.configurations.base import (
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import VENDOR
 from aea.configurations.loader import ConfigLoaders
 from aea.exceptions import AEAException, enforce
 
@@ -72,7 +73,7 @@ def _validate_config_consistency(ctx: Context):
             is_vendor = False
             if not package_directory.exists():
                 package_directory = Path(
-                    "vendor", public_id.author, item_type.to_plural(), public_id.name
+                    VENDOR, public_id.author, item_type.to_plural(), public_id.name
                 )
                 is_vendor = True
             # we fail if none of the two alternative works.

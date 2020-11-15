@@ -30,6 +30,7 @@ from aea.configurations.base import (
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL, VENDOR
 from aea.configurations.loader import ConfigLoader
 
 
@@ -95,7 +96,7 @@ class Context:
             item_type
         )
         path = Path(
-            "vendor",
+            VENDOR,
             public_id.author,
             item_type_plural,
             public_id.name,
@@ -115,17 +116,15 @@ class Context:
         """
         dependencies = {}  # type: Dependencies
         for protocol_id in self.agent_config.protocols:
-            dependencies.update(self._get_item_dependencies("protocol", protocol_id))
+            dependencies.update(self._get_item_dependencies(PROTOCOL, protocol_id))
 
         for connection_id in self.agent_config.connections:
-            dependencies.update(
-                self._get_item_dependencies("connection", connection_id)
-            )
+            dependencies.update(self._get_item_dependencies(CONNECTION, connection_id))
 
         for skill_id in self.agent_config.skills:
-            dependencies.update(self._get_item_dependencies("skill", skill_id))
+            dependencies.update(self._get_item_dependencies(SKILL, skill_id))
 
         for contract_id in self.agent_config.contracts:
-            dependencies.update(self._get_item_dependencies("contract", contract_id))
+            dependencies.update(self._get_item_dependencies(CONTRACT, contract_id))
 
         return dependencies

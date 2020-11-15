@@ -41,6 +41,7 @@ from aea.cli.utils.package_utils import (
     register_item,
 )
 from aea.configurations.base import PublicId
+from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 
 
 @click.group()
@@ -59,7 +60,7 @@ def add(click_context, local, remote):
 @pass_ctx
 def connection(ctx: Context, connection_public_id: PublicId):
     """Add a connection to the configuration file."""
-    add_item(ctx, "connection", connection_public_id)
+    add_item(ctx, CONNECTION, connection_public_id)
 
 
 @add.command()
@@ -67,7 +68,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @pass_ctx
 def contract(ctx: Context, contract_public_id: PublicId):
     """Add a contract to the configuration file."""
-    add_item(ctx, "contract", contract_public_id)
+    add_item(ctx, CONTRACT, contract_public_id)
 
 
 @add.command()
@@ -75,7 +76,7 @@ def contract(ctx: Context, contract_public_id: PublicId):
 @pass_ctx
 def protocol(ctx: Context, protocol_public_id):
     """Add a protocol to the agent."""
-    add_item(ctx, "protocol", protocol_public_id)
+    add_item(ctx, PROTOCOL, protocol_public_id)
 
 
 @add.command()
@@ -83,7 +84,7 @@ def protocol(ctx: Context, protocol_public_id):
 @pass_ctx
 def skill(ctx: Context, skill_public_id: PublicId):
     """Add a skill to the agent."""
-    add_item(ctx, "skill", skill_public_id)
+    add_item(ctx, SKILL, skill_public_id)
 
 
 @clean_after
@@ -143,27 +144,27 @@ def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
 
     :return: None
     """
-    if item_type in {"connection", "skill"}:
+    if item_type in {CONNECTION, SKILL}:
         # add missing protocols
         for protocol_public_id in item_config.protocols:
             if protocol_public_id not in ctx.agent_config.protocols:
-                add_item(ctx, "protocol", protocol_public_id)
+                add_item(ctx, PROTOCOL, protocol_public_id)
 
-    if item_type == "skill":
+    if item_type == SKILL:
         # add missing contracts
         for contract_public_id in item_config.contracts:
             if contract_public_id not in ctx.agent_config.contracts:
-                add_item(ctx, "contract", contract_public_id)
+                add_item(ctx, CONTRACT, contract_public_id)
 
         # add missing connections
         for connection_public_id in item_config.connections:
             if connection_public_id not in ctx.agent_config.connections:
-                add_item(ctx, "connection", connection_public_id)
+                add_item(ctx, CONNECTION, connection_public_id)
 
         # add missing skill
         for skill_public_id in item_config.skills:
             if skill_public_id not in ctx.agent_config.skills:
-                add_item(ctx, "skill", skill_public_id)
+                add_item(ctx, SKILL, skill_public_id)
 
 
 def find_item_locally_or_distributed(
