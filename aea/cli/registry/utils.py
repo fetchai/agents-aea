@@ -227,20 +227,52 @@ def get_package_meta(obj_type: str, public_id: PublicId) -> dict:
     return resp
 
 
+def get_latest_public_id_mixed(
+    ctx: Context, item_type: str, item_public_id: PublicId,
+) -> PublicId:
+    """
+    Get latest public id of the message, mixed mode.
+
+    That is, give priority to local registry, and fall back to remote registry
+    in case of failure.
+
+    :param ctx: the CLI context.
+    :param item_type: the item type.
+    :param item_public_id: the item public id.
+    :return: the path to the found package.
+    """
+    try:
+        _, item_config = find_item_locally(ctx, item_type, item_public_id)
+        latest_item_public_id = item_config.public_id
+    except click.ClickException:
+        logger.debug(
+            "Get latest public id from local registry failed, trying remote registry..."
+        )
+        # the following might raise exception, but we don't catch it this time
+        package_meta = get_package_meta(item_type, item_public_id)
+        latest_item_public_id = PublicId.from_str(package_meta["public_id"])
+    return latest_item_public_id
+
+
 def get_latest_version_available_in_registry(
     ctx: Context, item_type: str, item_public_id: PublicId
 ) -> PublicId:
     """
-    Get latest avalable package version public id.
+    Get latest available package version public id.
 
     :param ctx: Context object.
     :param item_type: the item type.
     :param item_public_id: the item public id.
-    :return: PublicId
+    :return: the latest public id.
     """
     is_local = ctx.config.get("is_local")
+    is_mixed = ctx.config.get("is_mixed")
     try:
-        if is_local:
+        if is_mixed:
+            latest_item_public_id = get_latest_public_id_mixed(
+                ctx, item_type, item_public_id
+            )
+        elif is_local:
             _, item_config = find_item_locally(ctx, item_type, item_public_id)
             latest_item_public_id = item_config.public_id
         else:

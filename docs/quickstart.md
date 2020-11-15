@@ -11,11 +11,40 @@ The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 ​
-### Optional: using the Docker image.
+### Option 1: Manual system preparation
+
+Install a compatible Python and Go version on your system.
+
+The following hints can help:
+
+- To install Go, follow the
+ official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a>
+
+- Python is already included by default on 
+many Linux distributions (e.g. Ubuntu), as well as MacOS.
+To check you have the right version, open a terminal and run: 
+```
+python3 --version
+```
+
+- To install Python on Windows machines, 
+you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
+
+- Ubuntu/Debian systems only: install Python headers,
+  depending on the Python version you have installed on your machine.
+  E.g. for Python 3.7: 
+``` bash
+sudo apt-get install python3.7-dev
+```
+
+- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
+
+
+### Option 2: Using Docker
 ​
 We also provide a Docker image with all the needed dependencies.
 
-<details><summary>Manual approach</summary>
+<details><summary>Docker approach</summary>
 
 To use the image you will first have to pull it and than run it with your current local directory mounted as a docker volume. This allows you to keep your agents local while working on them from within the docker container.
 
@@ -25,16 +54,17 @@ To pull:
 docker pull fetchai/aea-user:latest
 ```
 
-To run the image
-​
-- Linux and MacOs
-  ```bash
-  docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
-  ```
-- Windows
-  ```bash
-  docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
-  ```
+To run the image on Linux and MacOs:
+
+```bash
+docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
+```
+
+And on Windows:
+
+```bash
+docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
+```
 
 Once successfully logged into the docker container, 
 you can follow the rest of the guide the same way as if not using docker.
@@ -43,7 +73,9 @@ you can follow the rest of the guide the same way as if not using docker.
 
 ## Preliminaries
 
-Create and enter into a new working directory.
+We have created a  <a href="https://github.com/fetchai/agents-template" target="_blank">template repo for AEA development</a> here which you can optionally fork and use immediately.
+
+Alternatively, create and enter into a new working directory:
 
 ``` bash
 mkdir my_aea_projects/
@@ -66,6 +98,8 @@ Once installed, create a new environment and open it (here we use Python 3.7 but
 touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
+For more guidance on setting up a development environment check out <a href="../development-setup">this guide</a>.
+
 ## Installation
 
 The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>.
@@ -79,34 +113,7 @@ If you are using `zsh` rather than `bash` type
 pip install 'aea[all]'
 ```
 
-### Known issues
-
-If the installation steps fail, it might be a dependency issue.
-
-The following hints can help:
-
-- Ubuntu/Debian systems only: install Python headers,
-  depending on the Python version you have installed on your machine.
-  E.g. for Python 3.7: 
-``` bash
-sudo apt-get install python3.7-dev
-```
-
-- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
-
-- To install Go, follow the
- official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a>
-
-- Python is already included by default on 
-many Linux distributions (e.g. Ubuntu), as well as MacOS.
-To check you have the right version, open a terminal and run: 
-```
-python3 --version
-```
-
-- To install Python on Windows machines, 
-you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
-
+If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
 
 ## Setup author name
 
@@ -134,7 +141,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.7.2
+v0.7.3
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -225,7 +232,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.7.2
+v0.7.3
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
