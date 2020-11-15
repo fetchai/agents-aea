@@ -78,6 +78,47 @@ def test_get_balance_serialization():
     assert expected_msg == actual_msg
 
 
+def test_get_state_serialization():
+    """Test the serialization for 'get_state' speech-act works."""
+
+    # Test Args
+    args = ("arg1", "arg2")
+    some_args = LedgerApiMessage.Args(args)
+    assert some_args == LedgerApiMessage.Args(args)
+    with pytest.raises(ValueError, match="Body must not be None."):
+        some_args = LedgerApiMessage.Args(None)
+
+    msg = LedgerApiMessage(
+        performative=LedgerApiMessage.Performative.GET_STATE,
+        ledger_id="some_ledger_id",
+        callable="some_function",
+        args=LedgerApiMessage.Args(("arg1", "arg2")),
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        protocol_id=LedgerApiMessage.protocol_id,
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = LedgerApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    print(msg)
+    print(actual_msg)
+    assert expected_msg == actual_msg
+
+
 def test_get_raw_transaction_serialization():
     """Test the serialization for 'get_raw_transaction' speech-act works."""
     terms_arg = LedgerApiMessage.Terms(

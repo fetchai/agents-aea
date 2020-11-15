@@ -52,9 +52,9 @@ class Args:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         if self._body is None:
-            raise ValueError("body must not be None")
+            raise ValueError("Body must not be None.")
         enforce(
-            isinstance(self._body, tuple), "Body must be tupleZ.",
+            isinstance(self._body, tuple), "Body must be tuple.",
         )
 
     @property
