@@ -19,18 +19,16 @@
 """This test module contains the tests for commands in aea.cli.eject module."""
 
 import os
-import shutil
 from pathlib import Path
+from unittest import mock
 
 import click
 import pytest
 
 from aea.cli.utils.config import get_or_create_cli_config
-from aea.cli.utils.constants import CLI_CONFIG_PATH
 from aea.configurations.base import ComponentType, DEFAULT_VERSION, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
-
 from packages.fetchai.connections.gym.connection import (
     PUBLIC_ID as GYM_CONNECTION_PUBLIC_ID,
 )
@@ -115,7 +113,8 @@ class TestRecursiveEject(AEATestCaseEmpty):
 class TestRecursiveEjectIsAborted(AEATestCaseEmpty):
     """Test that recursive eject is aborted in non-quiet mode."""
 
-    def test_recursive_eject_commands_non_quiet_negative(self):
+    @mock.patch("click.confirm", return_value=False)
+    def test_recursive_eject_commands_non_quiet_negative(self, *_mocks):
         """Test eject command for negative result in interactive mode."""
         agent_name = "test_aea"
         self.create_agents(agent_name)
@@ -155,7 +154,7 @@ class BaseTestEjectCommand(AEATestCaseEmpty):
         cls.EXPECTED_AUTHOR = config.get("author", "")
 
 
-class TestEjectCommandCliConfigNotAvailable(BaseTestEjectCommand):
+class TestEjectCommandCliConfigNotAvailable(AEATestCaseEmpty):
     """Test that 'aea eject' cannot be run if CLI configuration not provided."""
 
     IS_EMPTY = True
@@ -164,26 +163,18 @@ class TestEjectCommandCliConfigNotAvailable(BaseTestEjectCommand):
     def setup_class(cls):
         """Set up the class."""
         super().setup_class()
-        path = CLI_CONFIG_PATH
-        shutil.move(path, os.path.join(cls.t, "cli_config.yaml"))
-        # we don't set the CLI configuration
         cls.add_item("protocol", str(DefaultMessage.protocol_id))
 
-    def test_error(self):
+    @mock.patch("aea.cli.utils.config.get_or_create_cli_config", return_value={})
+    def test_error(self, *_mocks):
         """Test that without CLI configuration, 'aea eject' won't work."""
         with pytest.raises(
             click.ClickException,
             match="The AEA configurations are not initialized. Use `aea init` before continuing.",
         ):
             self.invoke(
-                "eject", "protocol", str(DefaultMessage.protocol_id),
+                "eject", "--quiet", "protocol", str(DefaultMessage.protocol_id),
             )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the class."""
-        shutil.copy(os.path.join(cls.t, "cli_config.yaml"), CLI_CONFIG_PATH)
-        super().teardown_class()
 
 
 class TestEjectCommandReplacesReferences(BaseTestEjectCommand):
@@ -262,3 +253,18 @@ class TestEjectCommandReplacesCustomConfigurationReference(BaseTestEjectCommand)
         assert agent_config.skills == {
             PublicId(self.EXPECTED_AUTHOR, ERROR_PUBLIC_ID.name, DEFAULT_VERSION)
         }
+
+
+class TestEjectWithLatest(AEATestCaseEmpty):
+    """Test the eject command when a public id 'latest' is provided."""
+
+    def test_command(self):
+        """Run the test."""
+        latest_public_id = ERROR_PUBLIC_ID.to_latest()
+        self.eject_item("skill", str(latest_public_id))
+        cwd = os.path.join(self.t, self.agent_name)
+        # assert packages ejected
+        assert "error" not in os.listdir(
+            (os.path.join(cwd, "vendor", "fetchai", "skills"))
+        )
+        assert "error" in os.listdir((os.path.join(cwd, "skills")))

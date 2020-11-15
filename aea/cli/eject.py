@@ -50,6 +50,7 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
+from aea.configurations.utils import get_latest_component_id_from_prefix
 from aea.helpers.base import find_topological_order, reachable_nodes
 
 
@@ -120,6 +121,8 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
     :return: None
     :raises: ClickException if item is absent at source path or present at destenation path.
     """
+    # we know cli_author is set because of the above checks.
+    cli_author: str = cast(str, ctx.config.get("cli_author"))
     item_type_plural = item_type + "s"
     if not is_item_present(ctx, item_type, public_id):  # pragma: no cover
         raise click.ClickException(
@@ -132,7 +135,17 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
             f"{item_type.title()} {public_id} is already in a non-vendor item."
         )
 
+    if public_id.package_version.is_latest:
+        # get 'concrete' public id, in case it is 'latest'
+        component_prefix = ComponentType(item_type), public_id.author, public_id.name
+        component_id = get_latest_component_id_from_prefix(
+            ctx.agent_config, component_prefix
+        )
+        # component id is necessarily found, due to the checks above.
+        public_id = cast(ComponentId, component_id).public_id
+
     package_id = PackageId(PackageType(item_type), public_id)
+
     click.echo(f"Ejecting item {package_id}")
 
     # first, eject all the vendor packages that depend on this
@@ -166,8 +179,6 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
     ctx.clean_paths.append(dst)
     copy_package_directory(Path(src), dst)
 
-    # we know cli_author is set because of the above checks.
-    cli_author: str = cast(str, ctx.config.get("cli_author"))
     new_public_id = PublicId(cli_author, public_id.name, DEFAULT_VERSION)
     update_item_config(
         item_type, Path(dst), author=new_public_id.author, version=new_public_id.version
@@ -182,6 +193,8 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
     update_references(ctx, {old_component_id: new_component_id})
     # need to reload agent configuration with the updated references
     try_to_load_agent_config(ctx)
+
+    # replace import statements in all the non-ve
 
     click.echo(
         f"Successfully ejected {item_type} {public_id} to {dst} as {new_public_id}."

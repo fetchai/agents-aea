@@ -19,7 +19,7 @@
 
 """AEA configuration utils."""
 from functools import singledispatch
-from typing import Dict, Set
+from typing import Dict, Optional, Set, Tuple
 
 from aea.configurations.base import (
     AgentConfig,
@@ -181,3 +181,21 @@ def _replace_component_id(
             new_public_id = replacements_given_type.get(old_public_id, old_public_id)
             public_id_set.remove(old_public_id)
             public_id_set.add(new_public_id)
+
+
+def get_latest_component_id_from_prefix(
+    agent_config: AgentConfig, component_prefix: Tuple[ComponentType, str, str]
+) -> Optional[ComponentId]:
+    """
+    Get component id with the greatest version in an agent configuration given its prefix.
+
+    :param agent_config: the agent configuration.
+    :param component_prefix: the package prefix.
+    :return: the package id with the greatest version, or None if not found.
+    """
+    all_dependencies = agent_config.package_dependencies
+    chosen_component_ids = [
+        c for c in all_dependencies if c.component_prefix == component_prefix
+    ]
+    nb_results = len(chosen_component_ids)
+    return chosen_component_ids[0] if nb_results == 1 else None
