@@ -29,6 +29,7 @@ from aea.cli.utils.config import get_or_create_cli_config
 from aea.configurations.base import ComponentType, DEFAULT_VERSION, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
+
 from packages.fetchai.connections.gym.connection import (
     PUBLIC_ID as GYM_CONNECTION_PUBLIC_ID,
 )
@@ -201,6 +202,8 @@ class TestEjectCommandReplacesReferences(BaseTestEjectCommand):
             ComponentType.PROTOCOL, package_path
         )
         assert component_configuration.author == self.EXPECTED_AUTHOR
+        assert component_configuration.name == DefaultMessage.protocol_id.name
+        assert component_configuration.version == DEFAULT_VERSION
 
     def test_aea_config_references_updated_correctly(self):
         """Test that the references in the AEA configuration is updated correctly."""

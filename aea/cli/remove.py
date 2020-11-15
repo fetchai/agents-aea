@@ -280,6 +280,7 @@ def remove_unused_component_configurations(ctx: Context):
         saved_configuration_by_component_prefix = {
             key.component_prefix: value for key, value in saved_configuration.items()
         }
+        # need to reload agent configuration with the updated references
         try_to_load_agent_config(ctx)
         for component_id in ctx.agent_config.package_dependencies:
             if component_id.component_prefix in saved_configuration_by_component_prefix:
