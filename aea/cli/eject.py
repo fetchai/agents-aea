@@ -40,7 +40,7 @@ from aea.cli.utils.package_utils import (
     is_item_present,
     replace_all_import_statements,
     update_item_public_id_in_init,
-    update_references,
+    update_references, create_symlink_vendor_to_local, create_symlink_packages_to_vendor,
 )
 from aea.configurations.base import (
     ComponentId,
@@ -62,6 +62,11 @@ from aea.helpers.base import find_topological_order, reachable_nodes
 
 @click.group()
 @click.option(
+    "--with-symlinks",
+    is_flag=True,
+    help="Add symlinks from vendor to non-vendor and packages to vendor folders.",
+)
+@click.option(
     "-q",
     "--quiet",
     "quiet",
@@ -72,9 +77,10 @@ from aea.helpers.base import find_topological_order, reachable_nodes
 )
 @click.pass_context
 @check_aea_project
-def eject(click_context: click.core.Context, quiet: bool):
+def eject(click_context: click.core.Context, quiet: bool, with_symlinks: bool):
     """Eject an installed item."""
     click_context.obj.set_config("quiet", quiet)
+    click_context.obj.set_config("with_symlinks", with_symlinks)
     set_cli_author(click_context)
 
 
@@ -84,7 +90,8 @@ def eject(click_context: click.core.Context, quiet: bool):
 def connection(ctx: Context, public_id: PublicId):
     """Eject an installed connection."""
     quiet = ctx.config.get("quiet")
-    _eject_item(ctx, CONNECTION, public_id, quiet=quiet)
+    with_symlinks = ctx.config.get("with_symlinks")
+    _eject_item(ctx, CONNECTION, public_id, quiet=quiet, with_symlinks=with_symlinks)
 
 
 @eject.command()
@@ -93,7 +100,8 @@ def connection(ctx: Context, public_id: PublicId):
 def contract(ctx: Context, public_id: PublicId):
     """Eject an installed contract."""
     quiet = ctx.config.get("quiet")
-    _eject_item(ctx, CONTRACT, public_id, quiet=quiet)
+    with_symlinks = ctx.config.get("with_symlinks")
+    _eject_item(ctx, CONTRACT, public_id, quiet=quiet, with_symlinks=with_symlinks)
 
 
 @eject.command()
@@ -102,7 +110,8 @@ def contract(ctx: Context, public_id: PublicId):
 def protocol(ctx: Context, public_id: PublicId):
     """Eject an installed protocol."""
     quiet = ctx.config.get("quiet")
-    _eject_item(ctx, PROTOCOL, public_id, quiet=quiet)
+    with_symlinks = ctx.config.get("with_symlinks")
+    _eject_item(ctx, PROTOCOL, public_id, quiet=quiet, with_symlinks=with_symlinks)
 
 
 @eject.command()
@@ -111,11 +120,12 @@ def protocol(ctx: Context, public_id: PublicId):
 def skill(ctx: Context, public_id: PublicId):
     """Eject an installed skill."""
     quiet = ctx.config.get("quiet")
-    _eject_item(ctx, SKILL, public_id, quiet=quiet)
+    with_symlinks = ctx.config.get("with_symlinks")
+    _eject_item(ctx, SKILL, public_id, quiet=quiet, with_symlinks=with_symlinks)
 
 
 @clean_after
-def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool = True):
+def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool = True, with_symlinks: bool = False):
     """
     Eject item from installed (vendor) to custom folder.
 
@@ -212,6 +222,13 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
 
     # fingerprint all (non-vendor) packages
     fingerprint_all(ctx)
+
+    if with_symlinks:
+        click.echo(
+            "Adding symlinks from vendor to non-vendor and packages to vendor folders."
+        )
+        create_symlink_vendor_to_local(ctx, item_type, new_public_id)
+        create_symlink_packages_to_vendor(ctx)
 
     click.echo(
         f"Successfully ejected {item_type} {public_id} to {dst} as {new_public_id}."
