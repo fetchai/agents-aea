@@ -37,6 +37,7 @@ def test_create_symlink():
         os.makedirs(target)
         create_symlink(link, target, t)
         assert os.path.islink(link)
+        assert os.readlink("here") == os.path.join("test", "nested")
     finally:
         os.chdir(cwd)
         shutil.rmtree(t)

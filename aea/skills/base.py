@@ -439,7 +439,7 @@ class Behaviour(AbstractBehaviour, ABC):
                 "Processing behaviour {}".format(behaviour_class_name)
             )
             if not behaviour_id.isidentifier():
-                raise AEAComponentLoadException(
+                raise AEAComponentLoadException(  # pragma: nocover
                     f"'{behaviour_id}' is not a valid identifier."
                 )
             behaviour_class = name_to_class.get(behaviour_class_name, None)
@@ -538,7 +538,7 @@ class Handler(SkillComponent, ABC):
                 "Processing handler {}".format(handler_class_name)
             )
             if not handler_id.isidentifier():
-                raise AEAComponentLoadException(
+                raise AEAComponentLoadException(  # pragma: nocover
                     f"'{handler_id}' is not a valid identifier."
                 )
             handler_class = name_to_class.get(handler_class_name, None)
@@ -641,7 +641,7 @@ class Model(SkillComponent, ABC):
                 "Processing model id={}, class={}".format(model_id, model_class_name)
             )
             if not model_id.isidentifier():
-                raise AEAComponentLoadException(
+                raise AEAComponentLoadException(  # pragma: nocover
                     f"'{model_id}' is not a valid identifier."
                 )
             model = name_to_class.get(model_class_name, None)
