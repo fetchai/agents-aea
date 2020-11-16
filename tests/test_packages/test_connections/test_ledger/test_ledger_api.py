@@ -186,8 +186,6 @@ async def test_get_state(
     response_dialogue = ledger_api_dialogues.update(response_msg)
     assert response_dialogue == ledger_api_dialogue
 
-    print(response_msg)
-
     assert response_msg.performative == LedgerApiMessage.Performative.STATE
     actual_block = response_msg.state.body
     expected_block = make_ledger_api(ledger_id, **config).get_state(
