@@ -271,3 +271,27 @@ class TestEjectWithLatest(AEATestCaseEmpty):
             (os.path.join(cwd, "vendor", "fetchai", "skills"))
         )
         assert "error" in os.listdir((os.path.join(cwd, "skills")))
+
+
+class TestEjectWithSymlink(AEATestCaseEmpty):
+    """Test the eject command with symlinks flag."""
+
+    def test_command(self):
+        """Run the test."""
+        latest_public_id = ERROR_PUBLIC_ID.to_latest()
+        self.run_cli_command(
+            "eject",
+            "--with-symlinks",
+            "skill",
+            str(latest_public_id),
+            cwd=self._get_cwd(),
+        )
+        cwd = os.path.join(self.t, self.agent_name)
+        # assert packages ejected
+        assert "error" not in os.listdir(
+            (os.path.join(cwd, "vendor", "fetchai", "skills"))
+        )
+        assert "error" in os.listdir((os.path.join(cwd, "skills")))
+        assert "error" in os.listdir(
+            (os.path.join(cwd, "vendor", self.author, "skills"))
+        )

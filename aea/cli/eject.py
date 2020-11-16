@@ -35,12 +35,14 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
     copy_package_directory,
+    create_symlink_packages_to_vendor,
+    create_symlink_vendor_to_local,
     fingerprint_all,
     get_package_path,
     is_item_present,
     replace_all_import_statements,
     update_item_public_id_in_init,
-    update_references, create_symlink_vendor_to_local, create_symlink_packages_to_vendor,
+    update_references,
 )
 from aea.configurations.base import (
     ComponentId,
@@ -125,7 +127,13 @@ def skill(ctx: Context, public_id: PublicId):
 
 
 @clean_after
-def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool = True, with_symlinks: bool = False):
+def _eject_item(
+    ctx: Context,
+    item_type: str,
+    public_id: PublicId,
+    quiet: bool = True,
+    with_symlinks: bool = False,
+):
     """
     Eject item from installed (vendor) to custom folder.
 
