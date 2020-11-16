@@ -159,7 +159,7 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
     click.echo(f"Ejecting item {package_id}")
 
     # first, eject all the vendor packages that depend on this
-    item_remover = ItemRemoveHelper(ctx.agent_config, ignore_non_vendor=True)
+    item_remover = ItemRemoveHelper(ctx, ignore_non_vendor=True)
     reverse_dependencies = (
         item_remover.get_agent_dependencies_with_reverse_dependencies()
     )
