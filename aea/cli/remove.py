@@ -43,7 +43,6 @@ from aea.configurations.base import (
     ComponentType,
     PackageConfiguration,
     PackageId,
-    PackageType,
     PublicId,
 )
 from aea.configurations.constants import (
