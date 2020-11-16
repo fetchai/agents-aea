@@ -8,7 +8,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: Qmap7EXFDfhniz8yiLZA6xrhWysqEgZPT345UuZ4ys76CQ
   __init__.py: QmX6ta6j6ust7qhVk1kZygzZK3gTTg7hSCBbSMKUxJgWgG
-  custom_types.py: QmR7wAChPpc4t5AccnEHs34zabDzcdVHpXh5vSR74snxR7
+  custom_types.py: Qmf4vYqwQBV9TBJMZ19DBHZKH1WaX39cZE5KMbe1aEx5t2
   dialogues.py: QmQNreriyJXkjyj1wTGHfEVqKJmo2e6r2P1k5ofPQZLG1s
   ledger_api.proto: QmTZbaYwaY57uQyYEz6B5qNrCkAJMDnokAzfWBX8BrRBEi
   ledger_api_pb2.py: QmP9PAKHhPq2wqxo9ZA2mMNMEMp3oMVKXpuLJzvz7C9com

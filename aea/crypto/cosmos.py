@@ -398,8 +398,15 @@ class _CosmosApi(LedgerApi):
         return balance
 
     def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
-        """Call a specified function on the ledger API."""
-        response = self._try_get_state(callable_name, *args)
+        """
+        Call a specified function on the ledger API.
+
+        Based on the cosmos REST
+        API specification, which takes a path (strings separated by '/'). The
+        convention here is to define the root of the path (txs, blocks, etc.)
+        as the callable_name and the rest of the path as args.
+        """
+        response = self._try_get_state(callable_name, *args, **kwargs)
         return response
 
     @try_decorator(
