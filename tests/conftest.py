@@ -429,6 +429,18 @@ def oef_port() -> int:
     return 10000
 
 
+@pytest.fixture(scope="session")
+def ganache_addr() -> str:
+    """HTTP address to the Ganache node."""
+    return "http://127.0.0.1"
+
+
+@pytest.fixture(scope="session")
+def ganache_port() -> int:
+    """Port of the connection to the OEF Node to use during the tests."""
+    return 8545
+
+
 def tcpping(ip, port, log_exception: bool = True) -> bool:
     """Ping TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -522,7 +534,7 @@ def network_node(
 
 
 @pytest.fixture(scope="session")
-def ganache(timeout: float = 2.0, max_attempts: int = 10):
+def ganache(ganache_addr, ganache_port, timeout: float = 2.0, max_attempts: int = 10):
     """Launch the Ganache image."""
     client = docker.from_env()
     image = GanacheDockerImage(client, "http://127.0.0.1", 8545)
