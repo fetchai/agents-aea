@@ -1,6 +1,6 @@
 name: confirmation_aw2
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 type: skill
 description: This skill purchases information from other agents as specified in its
   configuration. It is the confirmation buyer for Agent World 2.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmSgFDQ7YjDzts8JKfTbnJZhnYEFaDQ42j5b1vAQy764Xw
-  __init__.py: QmZMzRtyy3pGznfYNkoF5aX6KQqyfcxY4kyFFEGUUkCBzP
+  __init__.py: Qmet6WA3hbEojXGeEaM6n6GxWZxmz72S2KPanRWHwpt5jZ
   behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmViy7gtnJm92dxNBwaroj7XH4bzWMaLH5rQWdtRovuRti

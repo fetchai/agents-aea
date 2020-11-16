@@ -1,6 +1,6 @@
 name: tac_control_contract
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmUiw6Dt97mXLzSizbnMNTsfLy3edGXKdYTNR5bke6sFsm
-  __init__.py: QmPvZw3KsUhs38TPGh1HsUniYdPrwv6innFgjWTLv34mj7
+  __init__.py: QmQEwZdevkxYjKnVnX2gV3G9q73f8mHcej8gC3dKmFsXjH
   behaviours.py: QmV3Yxb1cNQNdZgCdY3JSg6A2RKLYJ4dSRmG4j7Q4NJm8U
   dialogues.py: QmYFyqgevKLuRfj4q8wdJkWmSNk7FFDTpzpDCvLdtc7dnG
   game.py: QmQwskD5DBVNv1ouRpqGNLb3zQ5krLUcR6XXHUcJ5EVc8L

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,10 +16,27 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""This module contains the tests for the sym link module."""
 
-"""This module contains the implementation of the default skill."""
+import os
+import shutil
+import tempfile
+from pathlib import Path
 
-from aea.configurations.base import PublicId
+from aea.helpers.sym_link import create_symlink
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/confirmation_aw1:0.3.0")
+def test_create_symlink():
+    """Test create_symlink method."""
+    t = Path(tempfile.mkdtemp())
+    cwd = os.getcwd()
+    os.chdir(t)
+    try:
+        link = Path(os.path.join(t, "here"))
+        target = Path(os.path.join(t, "test", "nested"))
+        os.makedirs(target)
+        create_symlink(link, target, t)
+        assert os.path.islink(link)
+    finally:
+        os.chdir(cwd)
+        shutil.rmtree(t)

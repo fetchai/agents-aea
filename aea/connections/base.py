@@ -31,7 +31,12 @@ from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ConnectionConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
-from aea.exceptions import AEAInstantiationException, enforce, parse_exception
+from aea.exceptions import (
+    AEAComponentLoadException,
+    AEAInstantiationException,
+    enforce,
+    parse_exception,
+)
 from aea.helpers.async_utils import AsyncState
 from aea.helpers.base import load_module
 from aea.helpers.logging import get_logger
@@ -248,10 +253,10 @@ class Connection(Component, ABC):
         directory = cast(Path, configuration.directory)
         load_aea_package(configuration)
         connection_module_path = directory / "connection.py"
-        enforce(
-            connection_module_path.exists() and connection_module_path.is_file(),
-            "Connection module '{}' not found.".format(connection_module_path),
-        )
+        if not (connection_module_path.exists() and connection_module_path.is_file()):
+            raise AEAComponentLoadException(
+                "Connection module '{}' not found.".format(connection_module_path)
+            )
         connection_module = load_module(
             "connection_module", directory / "connection.py"
         )
@@ -264,10 +269,10 @@ class Connection(Component, ABC):
         logger = get_logger(__name__, identity.name)
         logger.debug("Processing connection {}".format(connection_class_name))
         connection_class = name_to_class.get(connection_class_name, None)
-        enforce(
-            connection_class is not None,
-            "Connection class '{}' not found.".format(connection_class_name),
-        )
+        if connection_class is None:
+            raise AEAComponentLoadException(
+                "Connection class '{}' not found.".format(connection_class_name)
+            )
         try:
             connection = connection_class(
                 configuration=configuration,
@@ -275,7 +280,7 @@ class Connection(Component, ABC):
                 crypto_store=crypto_store,
                 **kwargs,
             )
-        except Exception as e:  # pragma: nocover
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAInstantiationException(
                 f"An error occured during instantiation of connection {configuration.public_id}/{configuration.class_name}:\n{e_str}"

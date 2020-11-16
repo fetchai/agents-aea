@@ -36,8 +36,8 @@ from jsonschema import Draft4Validator
 
 import aea
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
 from packages.fetchai.connections.stub.connection import (
@@ -151,7 +151,7 @@ class TestCreate:
     def test_default_connection_field_is_stub(self):
         """Check that the 'default_connection' is the 'stub' connection."""
         assert self.agent_config["default_connection"] == str(
-            DEFAULT_CONNECTION.to_any()
+            PublicId.from_str(DEFAULT_CONNECTION).to_any()
         )
 
     def test_license_field_is_empty_string(self):

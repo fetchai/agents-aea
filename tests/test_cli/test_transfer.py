@@ -35,6 +35,7 @@ from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.common.utils import wait_for_condition
+from tests.conftest import MAX_FLAKY_RERUNS
 
 
 class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
@@ -87,6 +88,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             wallet = get_wallet_from_agent_config(agent_config)
             return int(try_get_balance(agent_config, wallet, self.LEDGER_ID))
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_integration(self):
         """Perform integration tests of cli transfer command with real transfer."""
         self.set_agent_context(self.agent_name2)

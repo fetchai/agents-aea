@@ -36,6 +36,7 @@ from aea.cli.utils.package_utils import (
     update_item_public_id_in_init,
 )
 from aea.configurations.base import DEFAULT_VERSION, PublicId
+from aea.configurations.constants import AGENT, CONNECTION, CONTRACT, PROTOCOL, SKILL
 
 
 @click.group()
@@ -50,7 +51,7 @@ def eject(click_context: click.core.Context):  # pylint: disable=unused-argument
 @pass_ctx
 def connection(ctx: Context, public_id: PublicId):
     """Eject an installed connection."""
-    _eject_item(ctx, "connection", public_id)
+    _eject_item(ctx, CONNECTION, public_id)
 
 
 @eject.command()
@@ -58,7 +59,7 @@ def connection(ctx: Context, public_id: PublicId):
 @pass_ctx
 def contract(ctx: Context, public_id: PublicId):
     """Eject an installed contract."""
-    _eject_item(ctx, "contract", public_id)
+    _eject_item(ctx, CONTRACT, public_id)
 
 
 @eject.command()
@@ -66,7 +67,7 @@ def contract(ctx: Context, public_id: PublicId):
 @pass_ctx
 def protocol(ctx: Context, public_id: PublicId):
     """Eject an installed protocol."""
-    _eject_item(ctx, "protocol", public_id)
+    _eject_item(ctx, PROTOCOL, public_id)
 
 
 @eject.command()
@@ -74,7 +75,7 @@ def protocol(ctx: Context, public_id: PublicId):
 @pass_ctx
 def skill(ctx: Context, public_id: PublicId):
     """Eject an installed skill."""
-    _eject_item(ctx, "skill", public_id)
+    _eject_item(ctx, SKILL, public_id)
 
 
 @clean_after
@@ -123,7 +124,7 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
             break
     supported_items.add(new_public_id)
     supported_items.remove(present_public_id)
-    update_item_config("agent", Path(ctx.cwd), **{item_type_plural: supported_items})
+    update_item_config(AGENT, Path(ctx.cwd), **{item_type_plural: supported_items})
 
     shutil.rmtree(src)
     fingerprint_item(ctx, item_type, new_public_id)
