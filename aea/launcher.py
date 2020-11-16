@@ -16,11 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of multiple AEA configs launcher."""
 import logging
 import multiprocessing
 import os
+import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.process import BrokenProcessPool
 from multiprocessing.synchronize import Event
@@ -132,6 +132,8 @@ def _run_agent(
 class AEADirTask(AbstractExecutorTask):
     """Task to run agent from agent configuration directory."""
 
+    lock = threading.Lock()
+
     def __init__(self, agent_dir: Union[PathLike, str]) -> None:
         """
         Init aea config dir task.
@@ -144,6 +146,15 @@ class AEADirTask(AbstractExecutorTask):
 
     def start(self) -> None:
         """Start task."""
+        # HACK for aea.py:288
+        with self.lock:
+            with cd(self._agent_dir):
+                # pylint: disable=import-outside-toplevel,unused-import
+                # noqa: F401,I001,I005
+                from packages.fetchai.skills.error.handlers import ErrorHandler
+
+                _ = ErrorHandler
+
         self._agent.start()
 
     def stop(self):
@@ -267,9 +278,4 @@ class AEALauncher(AbstractMultipleRunner):
                 AEADirMultiprocessTask(agent_dir, log_level=self._log_level)
                 for agent_dir in self._agent_dirs
             ]
-        tasks = [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]
-
-        # HACK for aea.py:288
-        os.chdir(self._agent_dirs[0])
-
-        return tasks
+        return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]
