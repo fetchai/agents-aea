@@ -32,7 +32,14 @@ from aea.cli.registry.utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.generic import is_readme_present, load_yaml
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import DEFAULT_README_FILE, PublicId
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    CONNECTIONS,
+    CONTRACTS,
+    DEFAULT_README_FILE,
+    PROTOCOLS,
+    SKILLS,
+)
 
 
 def _remove_pycache(source_dir: str):
@@ -92,7 +99,7 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     }
 
     # dependencies
-    for key in ["connections", "contracts", "protocols", "skills"]:
+    for key in [CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS]:
         deps_list = item_config.get(key)
         if deps_list:
             data.update({key: deps_list})

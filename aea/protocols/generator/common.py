@@ -26,6 +26,7 @@ import sys
 from typing import Tuple
 
 from aea.configurations.base import ProtocolSpecification
+from aea.configurations.constants import DEFAULT_PROTOCOL_CONFIG_FILE, PACKAGES
 from aea.configurations.loader import ConfigLoader
 
 
@@ -48,9 +49,9 @@ PYTHON_COMPOSITIONAL_TYPES = [
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
 
-PATH_TO_PACKAGES = "packages"
+PATH_TO_PACKAGES = PACKAGES
 INIT_FILE_NAME = "__init__.py"
-PROTOCOL_YAML_FILE_NAME = "protocol.yaml"
+PROTOCOL_YAML_FILE_NAME = DEFAULT_PROTOCOL_CONFIG_FILE
 MESSAGE_DOT_PY_FILE_NAME = "message.py"
 DIALOGUE_DOT_PY_FILE_NAME = "dialogues.py"
 CUSTOM_TYPES_DOT_PY_FILE_NAME = "custom_types.py"

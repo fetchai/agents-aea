@@ -293,6 +293,8 @@ class TestAsyncAgentLoop:
             with pytest.raises(ValueError, match="expected!"):
                 agent_loop.start()
                 agent_loop.wait_completed(sync=True)
+        agent_loop.stop()
+        agent_loop.wait_completed(sync=True)
 
     @pytest.mark.asyncio
     async def test_stop(self):

@@ -36,22 +36,32 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    DEFAULT_AEA_CONFIG_FILE,
-    PACKAGE_PUBLIC_ID_VAR_NAME,
     PackageType,
     PublicId,
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import DISTRIBUTED_PACKAGES, LEDGER_CONNECTION
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.constants import (
+    DISTRIBUTED_PACKAGES as DISTRIBUTED_PACKAGES_STR,
+)
+from aea.configurations.constants import (
+    LEDGER_CONNECTION,
+    PACKAGES,
+    PACKAGE_PUBLIC_ID_VAR_NAME,
+    SKILL,
+    VENDOR,
+)
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import recursive_update
+from aea.helpers.sym_link import create_symlink
 
 
+DISTRIBUTED_PACKAGES = [PublicId.from_str(dp) for dp in DISTRIBUTED_PACKAGES_STR]
 ROOT = Path(".")
 
 
@@ -172,7 +182,7 @@ def get_package_path(
     item_type_plural = item_type + "s"
     if is_vendor:
         return os.path.join(
-            ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name
+            ctx.cwd, VENDOR, public_id.author, item_type_plural, public_id.name
         )
     return os.path.join(ctx.cwd, item_type_plural, public_id.name)
 
@@ -215,7 +225,7 @@ def copy_package_directory(src: Path, dst: str) -> Path:
     logger.debug("Copying modules. src={} dst={}".format(src_path, dst))
     try:
         shutil.copytree(src_path, dst)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e))
 
     items_folder = os.path.split(dst)[0]
@@ -525,7 +535,9 @@ def is_distributed_item(item_public_id: PublicId) -> bool:
 
 def _override_ledger_configurations(agent_config: AgentConfig) -> None:
     """Override LedgerApis configurations with agent override configurations."""
-    ledger_component_id = ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION)
+    ledger_component_id = ComponentId(
+        ComponentType.CONNECTION, PublicId.from_str(LEDGER_CONNECTION)
+    )
     prefix_to_component_configuration = {
         key.component_prefix: value
         for key, value in agent_config.component_configurations.items()
@@ -599,7 +611,7 @@ def update_item_public_id_in_init(
 
     :return: None
     """
-    if item_type != "skill":
+    if item_type != SKILL:
         return
     init_filepath = os.path.join(package_path, "__init__.py")
     with open(init_filepath, "r") as f:
@@ -612,3 +624,35 @@ def update_item_public_id_in_init(
                 )
             else:
                 f.write(line)
+
+
+def create_symlink_vendor_to_local(
+    ctx: Context, item_type: str, public_id: PublicId
+) -> None:
+    """
+    Creates a symlink from the vendor to the local folder.
+
+    :param ctx: click context
+    :param item_type: item type
+    :param public_id: public_id of the item
+
+    :return: None
+    """
+    vendor_path_str = get_package_path(ctx, item_type, public_id, is_vendor=True)
+    local_path = get_package_path(ctx, item_type, public_id, is_vendor=False)
+    vendor_path = Path(vendor_path_str)
+    if not os.path.exists(vendor_path.parent):
+        os.makedirs(vendor_path.parent)
+    create_symlink(vendor_path, Path(local_path), Path(ctx.cwd))
+
+
+def create_symlink_packages_to_vendor(ctx: Context) -> None:
+    """
+    Creates a symlink from a local packages to the vendor folder.
+
+    :param ctx: click context
+
+    :return: None
+    """
+    if not os.path.exists(PACKAGES):
+        create_symlink(Path(PACKAGES), Path(VENDOR), Path(ctx.cwd))
