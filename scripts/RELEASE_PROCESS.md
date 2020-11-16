@@ -19,8 +19,14 @@
 
 9. Tag version on master.
 
-10. Pull master, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`
+10. Pull master, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`.
 
-11. Publish to pypi with twine: `twine upload dist/*`
+11. Publish to pypi with twine: `twine upload dist/*`. Optionally, publish to test-pypi with twine:
+`twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.
 
-12. Release packages into registry: `python scripts/deploy_to_registry.py`
+12. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
+
+13. Release packages into registry: `python scripts/deploy_to_registry.py`.
+
+
+If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.

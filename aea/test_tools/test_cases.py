@@ -39,12 +39,14 @@ import pytest
 import yaml
 
 from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.base import AgentConfig, PackageType
 from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_LEDGER,
     DEFAULT_OUTPUT_FILE_NAME,
     DEFAULT_PRIVATE_KEY_FILE,
+    DEFAULT_REGISTRY_NAME,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.exceptions import enforce
@@ -79,9 +81,9 @@ class BaseAEATestCase(ABC):
     author: str = DEFAULT_AUTHOR  # author
     subprocesses: List[subprocess.Popen] = []  # list of launched subprocesses
     threads: List[Thread] = []  # list of started threads
-    packages_dir_path: Path = Path("packages")
+    packages_dir_path: Path = Path(DEFAULT_REGISTRY_NAME)
     use_packages_dir: bool = True
-    package_registry_src: Path = Path(ROOT_DIR, "packages")
+    package_registry_src: Path = Path(ROOT_DIR, DEFAULT_REGISTRY_NAME)
     old_cwd: Path  # current working directory path
     t: Path  # temporary directory path
     current_agent_context: str = ""  # the name of the current agent
@@ -814,11 +816,11 @@ class BaseAEATestCase(ABC):
         cls._join_threads()
         cls.unset_agent_context()
         cls.last_cli_runner_result = None
-        cls.packages_dir_path = Path("packages")
+        cls.packages_dir_path = Path(DEFAULT_REGISTRY_NAME)
         cls.use_packages_dir = True
         cls.agents = set()
         cls.current_agent_context = ""
-        cls.package_registry_src = Path(ROOT_DIR, "packages")
+        cls.package_registry_src = Path(ROOT_DIR, DEFAULT_REGISTRY_NAME)
         cls.stdout = {}
         cls.stderr = {}
 
@@ -879,7 +881,7 @@ class AEATestCase(BaseAEATestCase):
     """
 
     path_to_aea: Union[Path, str] = Path(".")
-    packages_dir_path: Path = Path("..", "packages")
+    packages_dir_path: Path = Path("..", DEFAULT_REGISTRY_NAME)
     agent_configuration: AgentConfig
     t: Path  # temporary directory path
 

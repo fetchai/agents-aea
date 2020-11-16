@@ -43,11 +43,11 @@ from aea.configurations.loader import load_component_configuration
 from aea.context.base import AgentContext
 from aea.exceptions import (
     AEAActException,
+    AEAComponentLoadException,
     AEAException,
     AEAHandleException,
     AEAInstantiationException,
     _StopRuntime,
-    enforce,
     parse_exception,
 )
 from aea.helpers.base import _get_aea_logger_name_prefix, load_module
@@ -378,7 +378,7 @@ class Behaviour(AbstractBehaviour, ABC):
             self.act()
         except _StopRuntime:
             raise
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAActException(
                 f"An error occured during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
@@ -438,10 +438,10 @@ class Behaviour(AbstractBehaviour, ABC):
             skill_context.logger.debug(
                 "Processing behaviour {}".format(behaviour_class_name)
             )
-            enforce(
-                behaviour_id.isidentifier(),
-                "'{}' is not a valid identifier.".format(behaviour_id),
-            )
+            if not behaviour_id.isidentifier():
+                raise AEAComponentLoadException(
+                    f"'{behaviour_id}' is not a valid identifier."
+                )
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
                 skill_context.logger.warning(
@@ -455,7 +455,7 @@ class Behaviour(AbstractBehaviour, ABC):
                         skill_context=skill_context,
                         **dict(behaviour_config.args),
                     )
-                except Exception as e:  # pragma: nocover
+                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                     e_str = parse_exception(e)
                     raise AEAInstantiationException(
                         f"An error occured during instantiation of behaviour {skill_context.skill_id}/{behaviour_config.class_name}:\n{e_str}"
@@ -485,7 +485,7 @@ class Handler(SkillComponent, ABC):
             self.handle(message)
         except _StopRuntime:
             raise
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAHandleException(
                 f"An error occured during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
@@ -537,10 +537,10 @@ class Handler(SkillComponent, ABC):
             skill_context.logger.debug(
                 "Processing handler {}".format(handler_class_name)
             )
-            enforce(
-                handler_id.isidentifier(),
-                "'{}' is not a valid identifier.".format(handler_id),
-            )
+            if not handler_id.isidentifier():
+                raise AEAComponentLoadException(
+                    f"'{handler_id}' is not a valid identifier."
+                )
             handler_class = name_to_class.get(handler_class_name, None)
             if handler_class is None:
                 skill_context.logger.warning(
@@ -554,7 +554,7 @@ class Handler(SkillComponent, ABC):
                         skill_context=skill_context,
                         **dict(handler_config.args),
                     )
-                except Exception as e:  # pragma: nocover
+                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                     e_str = parse_exception(e)
                     raise AEAInstantiationException(
                         f"An error occured during instantiation of handler {skill_context.skill_id}/{handler_config.class_name}:\n{e_str}"
@@ -640,10 +640,10 @@ class Model(SkillComponent, ABC):
             skill_context.logger.debug(
                 "Processing model id={}, class={}".format(model_id, model_class_name)
             )
-            enforce(
-                model_id.isidentifier(),
-                "'{}' is not a valid identifier.".format(model_id),
-            )
+            if not model_id.isidentifier():
+                raise AEAComponentLoadException(
+                    f"'{model_id}' is not a valid identifier."
+                )
             model = name_to_class.get(model_class_name, None)
             if model is None:
                 skill_context.logger.warning(
@@ -657,7 +657,7 @@ class Model(SkillComponent, ABC):
                         configuration=model_config,
                         **dict(model_config.args),
                     )
-                except Exception as e:  # pragma: nocover
+                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                     e_str = parse_exception(e)
                     raise AEAInstantiationException(
                         f"An error occured during instantiation of model {skill_context.skill_id}/{model_config.class_name}:\n{e_str}"

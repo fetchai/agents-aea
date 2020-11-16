@@ -27,3 +27,5 @@ To prepare a directory (henceforth working directory) for development with the A
 - When developing a specific AEA, it might be helpful to publish/push or fetch/add from local registry. From your working directory, simply execute the usual AEA CLI commands. The CLI will first search in the `packages` directory, then in the remote AEA registry. You can explicitly point to local registry by providing flag `--local` (see <a href="../cli-commands">here</a>) or `--remote` to only point to remote registry.
 
 - When working on an AEA it can help to provide a symbolic link to the packages directory, so that the import paths are detected by your editor. Simply create an empty file with `touch packages` in your AEA project, then create a symbolic link to the `packages` directory with `ln -s ../packages packages`.
+
+- Alternatively, it can help to provide symbolic links within an AEA to align import paths with folder structure. Simply create an empty file with `touch packages` in your AEA project, then create a symbolic link to `ln -s vendor packages`.

@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 
 from aea.common import Address
 from aea.configurations.base import PackageId, PublicId
+from aea.configurations.constants import CONNECTION, SKILL
 from aea.exceptions import enforce
 from aea.mail import base_pb2
 from aea.protocols.base import Message
@@ -194,9 +195,9 @@ class EnvelopeContext:
         try:
             package_id = PackageId.from_uri_path(uri.path)
             package_type = str(package_id.package_type)
-            if package_type == "skill":
+            if package_type == SKILL:
                 skill_id = package_id.public_id
-            elif package_type == "connection":
+            elif package_type == CONNECTION:
                 connection_id = package_id.public_id
             else:
                 raise ValueError(
