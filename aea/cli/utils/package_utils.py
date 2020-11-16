@@ -27,6 +27,7 @@ import click
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
+from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.config import (
     dump_item_config,
     get_non_vendor_package_path,
@@ -50,6 +51,8 @@ from aea.configurations.constants import (
     DISTRIBUTED_PACKAGES as DISTRIBUTED_PACKAGES_STR,
 )
 from aea.configurations.constants import (
+    IMPORT_TEMPLATE_1,
+    IMPORT_TEMPLATE_2,
     LEDGER_CONNECTION,
     PACKAGES,
     PACKAGE_PUBLIC_ID_VAR_NAME,
@@ -708,3 +711,58 @@ def create_symlink_packages_to_vendor(ctx: Context) -> None:
     """
     if not os.path.exists(PACKAGES):
         create_symlink(Path(PACKAGES), Path(VENDOR), Path(ctx.cwd))
+
+
+def replace_all_import_statements(
+    aea_project_path: Path,
+    item_type: ComponentType,
+    old_public_id: PublicId,
+    new_public_id: PublicId,
+):
+    """
+    Replace all import statements in Python modules of all the non-vendor packages.
+
+    The function looks for two patterns:
+    - from packages.<author>.<item_type_plural>.<name>
+    - import packages.<author>.<item_type_plural>.<name>
+
+    :param aea_project_path: path to the AEA project.
+    :param item_type: the item type.
+    :param old_public_id: the old public id.
+    :param new_public_id: the new public id.
+    :return: None
+    """
+    old_formats = dict(
+        author=old_public_id.author, type=item_type.to_plural(), name=old_public_id.name
+    )
+    new_formats = dict(
+        author=new_public_id.author, type=item_type.to_plural(), name=new_public_id.name
+    )
+    old_import_1 = IMPORT_TEMPLATE_1.format(**old_formats)
+    old_import_2 = IMPORT_TEMPLATE_2.format(**old_formats)
+    new_import_1 = IMPORT_TEMPLATE_1.format(**new_formats)
+    new_import_2 = IMPORT_TEMPLATE_2.format(**new_formats)
+
+    pattern_1 = re.compile(rf"^{old_import_1}", re.MULTILINE)
+    pattern_2 = re.compile(rf"^{old_import_2}", re.MULTILINE)
+
+    for package_path in get_non_vendor_package_path(aea_project_path):
+        for python_module in package_path.rglob("*.py"):
+            content = python_module.read_text()
+            content = pattern_1.sub(new_import_1, content)
+            content = pattern_2.sub(new_import_2, content)
+            python_module.write_text(content)
+
+
+def fingerprint_all(ctx: Context) -> None:
+    """
+    Fingerprint all non-vendor packages.
+
+    :param ctx: the CLI context.
+    :return: None
+    """
+    aea_project_path = Path(ctx.cwd)
+    for package_path in get_non_vendor_package_path(aea_project_path):
+        item_type = package_path.parent.name[:-1]
+        config = load_item_config(item_type, package_path)
+        fingerprint_item(ctx, item_type, config.public_id)
