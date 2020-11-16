@@ -74,3 +74,5 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
 ]
 DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
 DEFAULT_GIT_REF = "master"
+IMPORT_TEMPLATE_1 = "from packages.{author}.{type}.{name}"
+IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"

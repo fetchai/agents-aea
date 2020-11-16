@@ -139,6 +139,10 @@ class TestMessageProperties:
             str(self.message)
             == "Message(sender=sender,to=to,body_1=1,body_2=2,kwarg=1)"
         )
+        assert (
+            repr(self.message)
+            == "Message(sender=sender,to=to,body_1=1,body_2=2,kwarg=1)"
+        )
         assert self.message.valid_performatives == set()
 
 

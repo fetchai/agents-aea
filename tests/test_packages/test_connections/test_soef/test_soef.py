@@ -19,6 +19,7 @@
 """This module contains the tests of the soef connection module."""
 
 import asyncio
+import os
 from typing import Any, Callable
 from unittest.mock import MagicMock, patch
 
@@ -98,6 +99,66 @@ class OefSearchDialogues(BaseOefSearchDialogues):
         )
 
 
+class TestSoefTokenStorage:
+    """Set of unit tests for soef connection token storage."""
+
+    def setup(self):
+        """Set up."""
+        self.crypto = make_crypto(DEFAULT_LEDGER)
+        self.crypto2 = make_crypto(DEFAULT_LEDGER)
+        identity = Identity("", address=self.crypto.address)
+        self.oef_search_dialogues = OefSearchDialogues(self.crypto.address)
+
+        # create the connection and multiplexer objects
+        self.token_storage_path = "test.storage"
+        configuration = ConnectionConfig(
+            api_key="TwiCIriSl0mLahw17pyqoA",
+            soef_addr="soef.fetch.ai",
+            soef_port=9002,
+            token_storage_path=self.token_storage_path,
+            restricted_to_protocols={OefSearchMessage.protocol_id},
+            connection_id=SOEFConnection.connection_id,
+        )
+        self.connection = SOEFConnection(
+            configuration=configuration, identity=identity,
+        )
+
+    def teardown(self):
+        """Tear down."""
+        try:
+            os.remove(self.token_storage_path)
+        except Exception as e:
+            print(e)
+
+    def test_unique_page_address_default_no_file(self):
+        """Test unique page address is raises if file not found."""
+        with pytest.raises(
+            FileNotFoundError, match="No such file or directory: 'test.storage'"
+        ):
+            assert self.connection.channel.unique_page_address is None
+
+    def test_unique_page_address_default_file(self):
+        """Test unique page address is None by default for new file."""
+        with open(self.token_storage_path, "w"):
+            os.utime(self.token_storage_path, None)
+        assert self.connection.channel.unique_page_address is None
+
+    def test_unique_page_address_set_and_get(self):
+        """Test unique page address set and get including None."""
+        self.connection.channel.unique_page_address = "test"
+        assert self.connection.channel._unique_page_address == "test"
+        assert self.connection.channel.unique_page_address == "test"
+        with open(self.token_storage_path, "r") as f:
+            in_file = f.read()
+        assert in_file == "test"
+        self.connection.channel.unique_page_address = None
+        assert self.connection.channel._unique_page_address is None
+        assert self.connection.channel.unique_page_address is None
+        with open(self.token_storage_path, "r") as f:
+            in_file = f.read()
+        assert in_file == self.connection.channel.NONE_UNIQUE_PAGE_ADDRESS
+
+
 class TestSoef:
     """Set of unit tests for soef connection."""
 
@@ -126,7 +187,6 @@ class TestSoef:
         self.connection = SOEFConnection(
             configuration=configuration, identity=identity,
         )
-        self.connection.channel.unique_page_address = "some addr"
         self.connection2 = SOEFConnection(
             configuration=configuration,
             identity=Identity("", address=self.crypto2.address),
@@ -134,6 +194,7 @@ class TestSoef:
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.connection.connect())
         self.loop.run_until_complete(self.connection2.connect())
+        self.connection.channel.unique_page_address = "some_addr"
 
     @pytest.mark.asyncio
     async def test_set_service_key(self):
@@ -534,14 +595,14 @@ class TestSoef:
                 wrap_future(self.search_fail_response),
             ],
         ):
-            await self.connection.channel._find_around_me_handle_requet(
+            await self.connection.channel._find_around_me_handle_request(
                 message_1, internal_dialogue_1, 1, {}
             )
-            await self.connection.channel._find_around_me_handle_requet(
+            await self.connection.channel._find_around_me_handle_request(
                 message_2, internal_dialogue_2, 1, {}
             )
             with pytest.raises(SOEFException, match=r"`find_around_me` error: .*"):
-                await self.connection.channel._find_around_me_handle_requet(
+                await self.connection.channel._find_around_me_handle_request(
                     message_3, internal_dialogue_3, 1, {}
                 )
 
