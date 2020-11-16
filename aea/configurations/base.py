@@ -54,6 +54,28 @@ from packaging.version import Version
 from urllib3.util import Url, parse_url
 
 from aea.__version__ import __version__ as __aea_version__
+from aea.configurations.constants import (
+    AGENT,
+    CONNECTION,
+    CONNECTIONS,
+    CONTRACT,
+    CONTRACTS,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_FINGERPRINT_IGNORE_PATTERNS,
+    DEFAULT_GIT_REF,
+    DEFAULT_LICENSE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_REGISTRY_NAME,
+    DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_VERSION,
+    PACKAGE_PUBLIC_ID_VAR_NAME,
+    PROTOCOL,
+    PROTOCOLS,
+    SKILL,
+    SKILLS,
+)
 from aea.exceptions import enforce
 from aea.helpers.base import (
     RegexConstrainedString,
@@ -67,32 +89,6 @@ from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 T = TypeVar("T")
-DEFAULT_VERSION = "0.1.0"
-DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
-DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
-DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
-DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
-DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
-DEFAULT_README_FILE = "README.md"
-DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
-DEFAULT_LICENSE = "Apache-2.0"
-
-PACKAGE_PUBLIC_ID_VAR_NAME = "PUBLIC_ID"
-
-DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
-    ".DS_Store",
-    "*__pycache__/*",
-    "*__pycache__",
-    "*.pyc",
-    "aea-config.yaml",
-    "protocol.yaml",
-    "connection.yaml",
-    "skill.yaml",
-    "contract.yaml",
-]
-
-DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
-DEFAULT_GIT_REF = "master"
 
 
 class PyPIPackageName(RegexConstrainedString):
@@ -352,11 +348,11 @@ class PackageVersion:
 class PackageType(Enum):
     """Package types."""
 
-    AGENT = "agent"
-    PROTOCOL = "protocol"
-    CONNECTION = "connection"
-    CONTRACT = "contract"
-    SKILL = "skill"
+    AGENT = AGENT
+    PROTOCOL = PROTOCOL
+    CONNECTION = CONNECTION
+    CONTRACT = CONTRACT
+    SKILL = SKILL
 
     def to_plural(self) -> str:
         """
@@ -415,10 +411,10 @@ def _get_default_configuration_file_name_from_type(
 class ComponentType(Enum):
     """Enum of component types supported."""
 
-    PROTOCOL = "protocol"
-    CONNECTION = "connection"
-    SKILL = "skill"
-    CONTRACT = "contract"
+    PROTOCOL = PROTOCOL
+    CONNECTION = CONNECTION
+    SKILL = SKILL
+    CONTRACT = CONTRACT
 
     def to_configuration_type(self) -> PackageType:
         """Get package type for component type."""
@@ -1291,8 +1287,8 @@ class ConnectionConfig(ComponentConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-                "protocols": sorted(map(str, self.protocols)),
-                "connections": sorted(map(str, self.connections)),
+                PROTOCOLS: sorted(map(str, self.protocols)),
+                CONNECTIONS: sorted(map(str, self.connections)),
                 "class_name": self.class_name,
                 "config": self.config,
                 "excluded_protocols": sorted(map(str, self.excluded_protocols)),
@@ -1314,8 +1310,8 @@ class ConnectionConfig(ComponentConfiguration):
         excluded_protocols = obj.get("excluded_protocols", set())
         excluded_protocols = {PublicId.from_str(id_) for id_ in excluded_protocols}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
-        protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
-        connections = {PublicId.from_str(id_) for id_ in obj.get("connections", set())}
+        protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
+        connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1546,10 +1542,10 @@ class SkillConfig(ComponentConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-                "connections": sorted(map(str, self.connections)),
-                "contracts": sorted(map(str, self.contracts)),
-                "protocols": sorted(map(str, self.protocols)),
-                "skills": sorted(map(str, self.skills)),
+                CONNECTIONS: sorted(map(str, self.connections)),
+                CONTRACTS: sorted(map(str, self.contracts)),
+                PROTOCOLS: sorted(map(str, self.protocols)),
+                SKILLS: sorted(map(str, self.skills)),
                 "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
                 "handlers": {key: h.json for key, h in self.handlers.read_all()},
                 "models": {key: m.json for key, m in self.models.read_all()},
@@ -1571,10 +1567,10 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns = cast(
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
-        connections = {PublicId.from_str(id_) for id_ in obj.get("connections", set())}
-        protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
-        contracts = {PublicId.from_str(id_) for id_ in obj.get("contracts", set())}
-        skills = {PublicId.from_str(id_) for id_ in obj.get("skills", set())}
+        connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
+        protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
+        contracts = {PublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
+        skills = {PublicId.from_str(id_) for id_ in obj.get(SKILLS, set())}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
@@ -1692,7 +1688,7 @@ class AgentConfig(PackageConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        registry_path: str = DEFAULT_REGISTRY_PATH,
+        registry_path: str = DEFAULT_REGISTRY_NAME,
         description: str = "",
         logging_config: Optional[Dict] = None,
         period: Optional[float] = None,
@@ -1862,10 +1858,10 @@ class AgentConfig(PackageConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-                "connections": sorted(map(str, self.connections)),
-                "contracts": sorted(map(str, self.contracts)),
-                "protocols": sorted(map(str, self.protocols)),
-                "skills": sorted(map(str, self.skills)),
+                CONNECTIONS: sorted(map(str, self.connections)),
+                CONTRACTS: sorted(map(str, self.contracts)),
+                PROTOCOLS: sorted(map(str, self.protocols)),
+                SKILLS: sorted(map(str, self.skills)),
                 "default_connection": str(self.default_connection)
                 if self.default_connection is not None
                 else None,
@@ -1945,17 +1941,17 @@ class AgentConfig(PackageConfiguration):
 
         # parse connection public ids
         agent_config.connections = set(
-            map(PublicId.from_str, obj.get("connections", []),)
+            map(PublicId.from_str, obj.get(CONNECTIONS, []),)
         )
 
         # parse contracts public ids
-        agent_config.contracts = set(map(PublicId.from_str, obj.get("contracts", []),))
+        agent_config.contracts = set(map(PublicId.from_str, obj.get(CONTRACTS, []),))
 
         # parse protocol public ids
-        agent_config.protocols = set(map(PublicId.from_str, obj.get("protocols", []),))
+        agent_config.protocols = set(map(PublicId.from_str, obj.get(PROTOCOLS, []),))
 
         # parse skills public ids
-        agent_config.skills = set(map(PublicId.from_str, obj.get("skills", []),))
+        agent_config.skills = set(map(PublicId.from_str, obj.get(SKILLS, []),))
 
         # parse component configurations
         component_configurations = {}

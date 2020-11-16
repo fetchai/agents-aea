@@ -30,7 +30,7 @@ from typing import Any, Dict, Optional, Set, Tuple, Type, cast
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
-from aea.exceptions import enforce
+from aea.exceptions import AEAComponentLoadException, enforce
 
 
 _default_logger = logging.getLogger(__name__)
@@ -356,7 +356,8 @@ class Protocol(Component):
         message_classes = list(
             filter(lambda x: re.match(f"{name_camel_case}Message", x[0]), classes)
         )
-        enforce(len(message_classes) == 1, "Not exactly one message class detected.")
+        if len(message_classes) != 1:  # pragma: nocover
+            raise AEAComponentLoadException("Not exactly one message class detected.")
         message_class = message_classes[0][1]
         class_module = importlib.import_module(
             configuration.prefix_import_path + ".serialization"
@@ -365,9 +366,10 @@ class Protocol(Component):
         serializer_classes = list(
             filter(lambda x: re.match(f"{name_camel_case}Serializer", x[0]), classes,)
         )
-        enforce(
-            len(serializer_classes) == 1, "Not exactly one serializer class detected."
-        )
+        if len(serializer_classes) != 1:  # pragma: nocover
+            raise AEAComponentLoadException(
+                "Not exactly one serializer class detected."
+            )
         serialize_class = serializer_classes[0][1]
         message_class.serializer = serialize_class
 

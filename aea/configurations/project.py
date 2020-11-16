@@ -27,6 +27,7 @@ from aea.cli.fetch import fetch_agent_locally
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_REGISTRY_NAME
 
 
 class Project:
@@ -44,7 +45,7 @@ class Project:
         working_dir: str,
         public_id: PublicId,
         is_local: bool = False,
-        registry_path: str = "packages",
+        registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
     ) -> "Project":
         """

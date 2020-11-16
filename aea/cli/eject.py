@@ -52,6 +52,7 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
+from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 from aea.configurations.utils import get_latest_component_id_from_prefix
 from aea.helpers.base import find_topological_order, reachable_nodes
 
@@ -84,7 +85,7 @@ def eject(click_context: click.core.Context, quiet):
 def connection(ctx: Context, public_id: PublicId):
     """Eject an installed connection."""
     quiet = ctx.config.get("quiet")
-    _eject_item(ctx, "connection", public_id, quiet=quiet)
+    _eject_item(ctx, CONNECTION, public_id, quiet=quiet)
 
 
 @eject.command()
@@ -93,7 +94,7 @@ def connection(ctx: Context, public_id: PublicId):
 def contract(ctx: Context, public_id: PublicId):
     """Eject an installed contract."""
     quiet = ctx.config.get("quiet")
-    _eject_item(ctx, "contract", public_id, quiet=quiet)
+    _eject_item(ctx, CONTRACT, public_id, quiet=quiet)
 
 
 @eject.command()
@@ -102,7 +103,7 @@ def contract(ctx: Context, public_id: PublicId):
 def protocol(ctx: Context, public_id: PublicId):
     """Eject an installed protocol."""
     quiet = ctx.config.get("quiet")
-    _eject_item(ctx, "protocol", public_id, quiet=quiet)
+    _eject_item(ctx, PROTOCOL, public_id, quiet=quiet)
 
 
 @eject.command()
@@ -111,7 +112,7 @@ def protocol(ctx: Context, public_id: PublicId):
 def skill(ctx: Context, public_id: PublicId):
     """Eject an installed skill."""
     quiet = ctx.config.get("quiet")
-    _eject_item(ctx, "skill", public_id, quiet=quiet)
+    _eject_item(ctx, SKILL, public_id, quiet=quiet)
 
 
 @clean_after

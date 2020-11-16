@@ -24,12 +24,14 @@ import os
 import sys
 from pathlib import Path
 
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.base import AgentConfig, PackageType
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    PRIVATE_KEY_PATH_SCHEMA,
+)
 from aea.configurations.loader import ConfigLoaders
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 
-
-PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 
 _default_logger = logging.getLogger(__name__)
 

@@ -26,10 +26,11 @@ from typing import Any, Dict, Optional, cast
 
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ContractConfig, PublicId
+from aea.configurations.constants import CONTRACTS
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
-from aea.exceptions import AEAException, enforce
+from aea.exceptions import AEAComponentLoadException, AEAException
 from aea.helpers.base import load_module
 
 
@@ -107,7 +108,7 @@ class Contract(Component):
             raise ValueError("Configuration must be associated with a directory.")
         directory = configuration.directory
         load_aea_package(configuration)
-        contract_module = load_module("contracts", directory / "contract.py")
+        contract_module = load_module(CONTRACTS, directory / "contract.py")
         classes = inspect.getmembers(contract_module, inspect.isclass)
         contract_class_name = cast(str, configuration.class_name)
         contract_classes = list(
@@ -116,10 +117,10 @@ class Contract(Component):
         name_to_class = dict(contract_classes)
         _default_logger.debug(f"Processing contract {contract_class_name}")
         contract_class = name_to_class.get(contract_class_name, None)
-        enforce(
-            contract_class is not None,
-            f"Contract class '{contract_class_name}' not found.",
-        )
+        if contract_class is None:
+            raise AEAComponentLoadException(
+                f"Contract class '{contract_class_name}' not found."
+            )
 
         _try_to_register_contract(configuration)
         contract = contract_registry.make(str(configuration.public_id), **kwargs)

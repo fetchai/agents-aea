@@ -28,7 +28,14 @@ from aea.cli.registry.utils import download_file, extract, request_api
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
+)
 
 
 @clean_after
@@ -75,7 +82,7 @@ def fetch_agent(
         )
 
     click.echo("Fetching dependencies...")
-    for item_type in ("connection", "contract", "skill", "protocol"):
+    for item_type in (CONNECTION, CONTRACT, SKILL, PROTOCOL):
         item_type_plural = item_type + "s"
 
         # initialize fetched agent with empty folders for custom packages
