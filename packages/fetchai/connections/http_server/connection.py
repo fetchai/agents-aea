@@ -517,7 +517,8 @@ class HTTPChannel(BaseAsyncChannel):
                     message, dialogue.incomplete_dialogue_label
                 )
             )
-        else:
+            return
+        if not future.done():
             future.set_result(message)
 
     async def disconnect(self) -> None:
