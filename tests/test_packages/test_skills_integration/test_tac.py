@@ -117,14 +117,14 @@ class TestTacSkills(AEATestCaseMany):
             self.add_item("connection", "fetchai/soef:0.12.0")
             self.add_item("connection", "fetchai/ledger:0.9.0")
             self.remove_item("connection", "fetchai/stub:0.12.0")
-            self.add_item("skill", "fetchai/tac_participation:0.12.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.13.0")
+            self.add_item("skill", "fetchai/tac_participation:0.13.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.14.0")
             self.set_config("agent.default_ledger", FETCHAI)
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.14.0", agent_name
+                "fetchai/tac_participant:0.15.0", agent_name
             )
             assert (
                 diff == []
@@ -295,14 +295,14 @@ class TestTacSkillsContract(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.add_item("skill", "fetchai/tac_control_contract:0.12.0")
+        self.add_item("skill", "fetchai/tac_control_contract:0.13.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.14.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.15.0", tac_controller_name
         )
         assert (
             diff == []
@@ -345,8 +345,8 @@ class TestTacSkillsContract(AEATestCaseMany):
             self.add_item("connection", "fetchai/soef:0.12.0")
             self.add_item("connection", "fetchai/ledger:0.9.0")
             self.remove_item("connection", "fetchai/stub:0.12.0")
-            self.add_item("skill", "fetchai/tac_participation:0.12.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.13.0")
+            self.add_item("skill", "fetchai/tac_participation:0.13.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.14.0")
             self.set_config("agent.default_ledger", ETHEREUM)
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -362,7 +362,7 @@ class TestTacSkillsContract(AEATestCaseMany):
             )
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant_contract:0.4.0", agent_name
+                "fetchai/tac_participant_contract:0.5.0", agent_name
             )
             assert (
                 diff == []

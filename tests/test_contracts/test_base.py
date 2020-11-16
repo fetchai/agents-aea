@@ -19,6 +19,7 @@
 
 """This module contains tests for aea.contracts.base."""
 
+import logging
 import os
 from pathlib import Path
 from typing import cast
@@ -35,8 +36,12 @@ from aea.contracts.scaffold.contract import MyScaffoldContract
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
+from aea.exceptions import AEAComponentLoadException
 
 from tests.conftest import ETHEREUM, FETCHAI, ROOT_DIR
+
+
+logger = logging.getLogger(__name__)
 
 
 def test_from_dir():
@@ -69,6 +74,32 @@ def test_from_config_and_registration():
 
     # the contract is registered as side-effect
     assert str(contract.public_id) in contract_registry.specs
+
+    try:
+        contract_registry.specs.pop(str(configuration.public_id))
+    except Exception as e:
+        logger.exception(e)
+
+
+def test_from_config_negative():
+    """Tests the from config method raises."""
+
+    directory = Path(ROOT_DIR, "tests", "data", "dummy_contract")
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
+    configuration._directory = directory
+    configuration = cast(ContractConfig, configuration)
+
+    if str(configuration.public_id) in contract_registry.specs:
+        contract_registry.specs.pop(str(configuration.public_id))
+
+    configuration.class_name = "WrongName"
+    with pytest.raises(AEAComponentLoadException):
+        _ = Contract.from_config(configuration)
+
+    try:
+        contract_registry.specs.pop(str(configuration.public_id))
+    except Exception as e:
+        logger.exception(e)
 
 
 def test_non_implemented_class_methods():

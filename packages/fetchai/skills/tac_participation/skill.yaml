@@ -1,6 +1,6 @@
 name: tac_participation
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: skill
 description: The tac participation skill implements the logic for an AEA to participate
   in the TAC.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmVNxdGy1pbosYrrvbXczbkJtU7f5ddrBPSNnFoJA9GJzg
-  __init__.py: QmXobELZULsS5XW6cyMvPH1J4B7UFMkNvQQcY7ZKZUZz5Y
+  __init__.py: QmTQX82uQ5ih6Zpy5XD3rG9a3GfJM8UMriKJgEKTATiWZU
   behaviours.py: QmX3UbuLohnPSLM2W6LrWcZyo4zXCr1YN5Bznu61v27SZC
   dialogues.py: QmNpUa8xfobabDQBRGqHU136FX7w3fxTrrkporNq4VH7Lg
   game.py: QmPaTWuT7SMX6wsgfyUSYbrpHZzvkKKhmTwPpWyiVycCBF

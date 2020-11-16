@@ -391,7 +391,13 @@ class AwaitableProc:
     def _in_thread(self):
         """Run in dedicated thread."""
         self.proc.wait()
-        self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)
+        self.loop.call_soon_threadsafe(self._set_return_code, self.proc.returncode)
+
+    def _set_return_code(self, code: int) -> None:
+        """Set future with return code."""
+        if self.future.done():  # pragma: nocover
+            return
+        self.future.set_result(code)
 
 
 class ItemGetter:

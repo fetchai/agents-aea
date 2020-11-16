@@ -3,35 +3,6 @@
 
 This module contains the implementation of runtime for economic agent (AEA).
 
-<a name="aea.runtime._StopRuntime"></a>
-## `_`StopRuntime Objects
-
-```python
-class _StopRuntime(Exception)
-```
-
-Exception to stop runtime.
-
-For internal usage only!
-Used to perform asyncio call from sync callbacks.
-
-<a name="aea.runtime._StopRuntime.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(reraise: Optional[Exception] = None)
-```
-
-Init _StopRuntime exception.
-
-**Arguments**:
-
-- `reraise`: exception to reraise.
-
-**Returns**:
-
-None
-
 <a name="aea.runtime.RuntimeStates"></a>
 ## RuntimeStates Objects
 

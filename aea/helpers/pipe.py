@@ -657,7 +657,7 @@ def make_ipc_channel(
         return PosixNamedPipeChannel(logger=logger, loop=loop)
     if os.name == "nt":  # pragma: nocover
         return TCPSocketChannel(logger=logger, loop=loop)
-    raise Exception(  # pragma: nocover
+    raise NotImplementedError(  # pragma: nocover
         "make ipc channel is not supported on platform {}".format(os.name)
     )
 
@@ -681,6 +681,6 @@ def make_ipc_channel_client(
         return PosixNamedPipeChannelClient(in_path, out_path, logger=logger, loop=loop)
     if os.name == "nt":  # pragma: nocover
         return TCPSocketChannelClient(in_path, out_path, logger=logger, loop=loop)
-    raise Exception(  # pragma: nocover
+    raise NotImplementedError(  # pragma: nocover
         "make ip channel client is not supported on platform {}".format(os.name)
     )

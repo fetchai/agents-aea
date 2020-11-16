@@ -145,7 +145,7 @@ class AEADirTask(AbstractExecutorTask):
     def stop(self):
         """Stop task."""
         if not self._agent:  # pragma: nocover
-            raise Exception("Task was not started!")
+            raise ValueError("Task was not started!")
         self._agent.stop()
 
     def create_async_task(self, loop: AbstractEventLoop) -> TaskAwaitable:

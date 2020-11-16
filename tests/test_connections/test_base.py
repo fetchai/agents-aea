@@ -20,6 +20,8 @@
 import asyncio
 import os
 import unittest
+from pathlib import Path
+from typing import cast
 from unittest.mock import MagicMock
 
 import pytest
@@ -31,8 +33,9 @@ from aea.configurations.base import (
     ConnectionConfig,
     PublicId,
 )
+from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection, ConnectionStates
-from aea.exceptions import AEAEnforceError
+from aea.exceptions import AEAComponentLoadException, AEAEnforceError
 from aea.mail.base import Envelope
 
 from tests.conftest import CUR_PATH
@@ -141,3 +144,39 @@ def test_from_dir():
     assert connection.component_id == ComponentId(
         ComponentType.CONNECTION, PublicId("fetchai", "dummy", "0.1.0")
     )
+
+
+def test_from_config_exception_path():
+    """Test Connection.from_config with exception"""
+    dummy_connection_dir = os.path.join(CUR_PATH, "data", "dummy_connection")
+    configuration = cast(
+        ConnectionConfig,
+        load_component_configuration(
+            ComponentType.CONNECTION, Path(dummy_connection_dir)
+        ),
+    )
+    wrong_dir = os.path.join(CUR_PATH, "data", "wrong_connection")
+    configuration.directory = Path(wrong_dir)
+    identity = MagicMock()
+    identity.name = "agent_name"
+    crypto_store = MagicMock()
+    with pytest.raises(AEAComponentLoadException, match="Connection module"):
+        Connection.from_config(configuration, identity, crypto_store)
+
+
+def test_from_config_exception_class():
+    """Test Connection.from_config with exception"""
+    dummy_connection_dir = os.path.join(CUR_PATH, "data", "dummy_connection")
+    configuration = cast(
+        ConnectionConfig,
+        load_component_configuration(
+            ComponentType.CONNECTION, Path(dummy_connection_dir)
+        ),
+    )
+    configuration.directory = Path(dummy_connection_dir)
+    configuration.class_name = "WrongName"
+    identity = MagicMock()
+    identity.name = "agent_name"
+    crypto_store = MagicMock()
+    with pytest.raises(AEAComponentLoadException, match="Connection class"):
+        Connection.from_config(configuration, identity, crypto_store)
