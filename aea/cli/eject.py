@@ -47,7 +47,6 @@ from aea.cli.utils.package_utils import (
 from aea.configurations.base import (
     ComponentId,
     ComponentType,
-    DEFAULT_VERSION,
     PackageId,
     PackageType,
     PublicId,
@@ -55,6 +54,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import (
     CONNECTION,
     CONTRACT,
+    DEFAULT_VERSION,
     IMPORT_TEMPLATE_1,
     IMPORT_TEMPLATE_2,
     PROTOCOL,
