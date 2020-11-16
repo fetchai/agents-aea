@@ -33,6 +33,7 @@ from aea.cli.utils.click_utils import MutuallyExclusiveOption, PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
+    set_cli_author,
     update_cli_config,
 )
 from aea.cli.utils.context import Context
@@ -520,3 +521,24 @@ def test_mutually_exclusive_usage_error():
         match=f"Illegal usage: `arg1` is mutually exclusive with arguments `{', '.join(['arg2'])}`.",
     ):
         opt.handle_parse_result(MagicMock(), {"arg1": None, "arg2": None}, [])
+
+
+@mock.patch("aea.cli.utils.config.get_or_create_cli_config", return_value={})
+def test_set_cli_author_negative(*_mocks):
+    """Test set_cli_author, negative case."""
+    with pytest.raises(
+        ClickException,
+        match="The AEA configurations are not initialized. Use `aea init` before continuing.",
+    ):
+        set_cli_author(MagicMock())
+
+
+@mock.patch(
+    "aea.cli.utils.config.get_or_create_cli_config",
+    return_value=dict(author="some_author"),
+)
+def test_set_cli_author_positive(*_mocks):
+    """Test set_cli_author, positive case."""
+    context_mock = MagicMock()
+    set_cli_author(context_mock)
+    context_mock.obj.set_config.assert_called_with("cli_author", "some_author")

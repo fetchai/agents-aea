@@ -50,6 +50,7 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 @mock.patch("aea.cli.remove.shutil.rmtree")
 @mock.patch("aea.cli.remove.Path.exists", return_value=False)
+@mock.patch("aea.cli.remove.try_to_load_agent_config")
 class RemoveItemTestCase(TestCase):
     """Test case for remove_item method."""
 
@@ -66,6 +67,7 @@ class RemoveItemTestCase(TestCase):
 @mock.patch("aea.cli.remove.Path.exists", return_value=True)
 @mock.patch("aea.cli.remove.ItemRemoveHelper.get_component_directory")
 @mock.patch("aea.cli.remove.load_item_config")
+@mock.patch("aea.cli.remove.try_to_load_agent_config")
 class RemoveItemBadConfigurationTestCase(TestCase):
     """Test case for remove_item method."""
 
