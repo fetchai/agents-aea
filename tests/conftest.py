@@ -79,7 +79,11 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
-from tests.common.docker_image import DockerImage, OEFSearchDockerImage
+from tests.common.docker_image import (
+    DockerImage,
+    GanacheDockerImage,
+    OEFSearchDockerImage,
+)
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
 
@@ -515,6 +519,14 @@ def network_node(
     client = docker.from_env()
     image = OEFSearchDockerImage(client, oef_addr, oef_port)
     yield from _launch_image(image, timeout, max_attempts)
+
+
+@pytest.fixture(scope="session")
+def ganache(timeout: float = 2.0, max_attempts: int = 10):
+    """Launch the Ganache image."""
+    client = docker.from_env()
+    image = GanacheDockerImage(client, "http://127.0.0.1", 8545)
+    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
 def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 10):
