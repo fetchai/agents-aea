@@ -24,7 +24,6 @@ import inspect
 import logging
 import queue
 import re
-import sys
 from abc import ABC, abstractmethod
 from logging import Logger
 from pathlib import Path
@@ -512,13 +511,6 @@ class Handler(SkillComponent, ABC):
             return handlers
         handler_names = set(config.class_name for _, config in handler_configs.items())
         handler_module = load_module("handlers", Path(path))
-
-        # register skill.handlers in sys.modules to help with  direct import of handlers
-        skill_id = skill_context.skill_id
-        sys.modules[
-            f"packages.{skill_id.author}.skills.{skill_id.name}.handlers"
-        ] = handler_module
-
         classes = inspect.getmembers(handler_module, inspect.isclass)
         handler_classes = list(
             filter(
