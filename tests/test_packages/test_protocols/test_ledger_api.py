@@ -111,8 +111,6 @@ def test_get_state_serialization():
     actual_msg.to = actual_envelope.to
     actual_msg.sender = actual_envelope.sender
     expected_msg = msg
-    print(msg)
-    print(actual_msg)
     assert expected_msg == actual_msg
 
 
