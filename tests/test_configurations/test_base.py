@@ -34,10 +34,6 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     ContractConfig,
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_GIT_REF,
-    DEFAULT_PYPI_INDEX_URL,
-    DEFAULT_SKILL_CONFIG_FILE,
     Dependency,
     PackageId,
     PackageType,
@@ -54,7 +50,13 @@ from aea.configurations.base import (
     dependencies_from_json,
     dependencies_to_json,
 )
-from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_GIT_REF,
+    DEFAULT_LEDGER,
+    DEFAULT_PYPI_INDEX_URL,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
 
 from tests.conftest import (
@@ -457,6 +459,12 @@ class AgentConfigTestCase(TestCase):
         agent_config.default_connection = None
         agent_config.default_connection = 1
         agent_config.public_id
+
+    def test_name_and_author(self):
+        """Test case for default_connection setter positive result."""
+        agent_config = AgentConfig(agent_name="my_agent", author="fetchai")
+        agent_config.name = "new_name"
+        agent_config.author = "new_author"
 
 
 class SpeechActContentConfigTestCase(TestCase):

@@ -103,7 +103,7 @@ class TestThermometerSkill(AEATestCaseMany):
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.14.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.15.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer_client.models.strategy.args.is_ledger_tx"
         )
@@ -282,13 +282,13 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.14.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.15.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.14.0", thermometer_client_aea_name
+            "fetchai/thermometer_client:0.15.0", thermometer_client_aea_name
         )
         assert (
             diff == []

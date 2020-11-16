@@ -168,7 +168,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         self._periodic_tasks: Dict[Callable, PeriodicCaller] = {}
 
-    def _periodic_task_exception_callback(
+    def _periodic_task_exception_callback(  # pylint: disable=unused-argument
         self, task_callable: Callable, exc: Exception
     ) -> None:
         """
@@ -179,9 +179,6 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :return: None
         """
-        self.logger.exception(
-            f"Loop: Exception: `{exc}` occured during `{task_callable}` processing"
-        )
         self._exceptions.append(exc)
 
     def _execution_control(

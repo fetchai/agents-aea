@@ -455,9 +455,9 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("author/package:latest"), False),
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
-        (DEFAULT_CONNECTION, False),
-        (DEFAULT_SKILL, False),
-        (DEFAULT_PROTOCOL, False),
+        (PublicId.from_str(DEFAULT_CONNECTION), False),
+        (PublicId.from_str(DEFAULT_SKILL), False),
+        (PublicId.from_str(DEFAULT_PROTOCOL), False),
     ],
 )
 def test_is_distributed_item(public_id, expected_outcome):
@@ -490,7 +490,7 @@ def test_override_ledger_configurations_positive():
     new_chain_id = "some_chain"
     agent_config = MagicMock()
     agent_config.component_configurations = {
-        ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION): {
+        ComponentId(ComponentType.CONNECTION, PublicId.from_str(LEDGER_CONNECTION)): {
             "config": {"ledger_apis": {DEFAULT_LEDGER: {"chain_id": new_chain_id}}}
         }
     }

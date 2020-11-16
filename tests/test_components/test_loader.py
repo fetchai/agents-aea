@@ -24,7 +24,11 @@ import pytest
 
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import ProtocolConfig
-from aea.exceptions import AEAPackageLoadingError
+from aea.exceptions import (
+    AEAComponentLoadException,
+    AEAInstantiationException,
+    AEAPackageLoadingError,
+)
 from aea.protocols.base import Protocol
 
 
@@ -41,7 +45,7 @@ def test_component_loading_generic_exception(component_configuration):
         Protocol, "from_config", side_effect=Exception("Generic exception")
     ):
         with pytest.raises(
-            Exception, match="An error occurred while loading .*: Generic exception"
+            Exception, match="Package loading error: An error occurred while loading"
         ):
             load_component_from_config(component_configuration)
 
@@ -53,7 +57,7 @@ def test_component_loading_generic_module_not_found_error(component_configuratio
         Protocol,
         "from_config",
         side_effect=ModuleNotFoundError(
-            "An error occurred while loading .*: Generic error"
+            "Package loading error: An error occurred while loading .*: Generic error"
         ),
     ):
         with pytest.raises(ModuleNotFoundError, match="Generic error"):
@@ -152,5 +156,32 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_s
         with pytest.raises(
             AEAPackageLoadingError,
             match="No module named packages.some_author.protocols.some_name.some_subpackage; The package 'packages/some_author' of type 'protocols' exists, but cannot find module 'some_subpackage'",
+        ):
+            load_component_from_config(component_configuration)
+
+
+def test_component_loading_instantiation_exception(component_configuration):
+    """Test 'load_component_from_config' method when a generic "Exception" occurs."""
+
+    with mock.patch.object(
+        Protocol,
+        "from_config",
+        side_effect=AEAInstantiationException("Generic exception"),
+    ):
+        with pytest.raises(AEAInstantiationException):
+            load_component_from_config(component_configuration)
+
+
+def test_component_loading_component_exception(component_configuration):
+    """Test 'load_component_from_config' method when a generic "Exception" occurs."""
+
+    with mock.patch.object(
+        Protocol,
+        "from_config",
+        side_effect=AEAComponentLoadException("Generic exception"),
+    ):
+        with pytest.raises(
+            AEAPackageLoadingError,
+            match="Package loading error: An error occurred while loading protocol an_author/a_protocol:0.1.0: Generic exception",
         ):
             load_component_from_config(component_configuration)

@@ -24,6 +24,7 @@ import logging
 import sys
 import time
 import unittest
+import warnings
 from contextlib import suppress
 from typing import cast
 from unittest import mock
@@ -995,47 +996,52 @@ class TestSendWithOEF(UseOef):
     @pytest.mark.asyncio
     async def test_send_oef_message(self, pytestconfig, caplog):
         """Test the send oef message."""
-        oef_connection = _make_oef_connection(
-            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
-        )
-        await oef_connection.connect()
-        oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.OEF_ERROR,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
-        )
-        msg.to = str(oef_connection.connection_id)
-        msg.sender = FETCHAI_ADDRESS_ONE
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
-        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            oef_connection = _make_oef_connection(
+                address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+            )
+            await oef_connection.connect()
+            oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.OEF_ERROR,
+                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+                oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
+            )
+            msg.to = str(oef_connection.connection_id)
+            msg.sender = FETCHAI_ADDRESS_ONE
+            envelope = Envelope(
+                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            )
+            with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
+                await oef_connection.send(envelope)
+                assert "Could not create dialogue for message=" in caplog.text
+
+            data_model = DataModel("foobar", attributes=[Attribute("foo", str, True)])
+            query = Query(
+                constraints=[Constraint("foo", ConstraintType("==", "bar"))],
+                model=data_model,
+            )
+
+            msg, sending_dialogue = oef_search_dialogues.create(
+                counterparty=str(oef_connection.connection_id),
+                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+                query=query,
+            )
+            envelope = Envelope(
+                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            )
             await oef_connection.send(envelope)
-            assert "Could not create dialogue for message=" in caplog.text
-
-        data_model = DataModel("foobar", attributes=[Attribute("foo", str, True)])
-        query = Query(
-            constraints=[Constraint("foo", ConstraintType("==", "bar"))],
-            model=data_model,
-        )
-
-        msg, sending_dialogue = oef_search_dialogues.create(
-            counterparty=str(oef_connection.connection_id),
-            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            query=query,
-        )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
-        await oef_connection.send(envelope)
-        envelope = await oef_connection.receive()
-        search_result = envelope.message
-        response_dialogue = oef_search_dialogues.update(search_result)
-        assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert sending_dialogue == response_dialogue
-        await asyncio.sleep(2.0)
-        await oef_connection.disconnect()
+            envelope = await oef_connection.receive()
+            search_result = envelope.message
+            response_dialogue = oef_search_dialogues.update(search_result)
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert sending_dialogue == response_dialogue
+            await asyncio.sleep(2.0)
+            await oef_connection.disconnect()
 
     @pytest.mark.asyncio
     async def test_cancelled_receive(self, pytestconfig, caplog):

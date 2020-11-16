@@ -1,6 +1,6 @@
 agent_name: simple_buyer_aw2
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 license: Apache-2.0
 description: This AEA buys data from a simple seller in Agent World 2.
 aea_version: '>=0.7.0, <0.8.0'
@@ -21,8 +21,8 @@ protocols:
 - fetchai/state_update:0.7.0
 skills:
 - fetchai/error:0.9.0
-- fetchai/generic_buyer:0.15.0
-- fetchai/simple_buyer:0.1.0
+- fetchai/generic_buyer:0.16.0
+- fetchai/simple_buyer:0.2.0
 default_connection: fetchai/p2p_libp2p:0.12.0
 default_ledger: fetchai
 default_routing:
@@ -57,7 +57,7 @@ logging_config:
       propagate: false
 registry_path: ../packages
 ---
-public_id: fetchai/simple_buyer:0.1.0
+public_id: fetchai/simple_buyer:0.2.0
 type: skill
 models:
   strategy:

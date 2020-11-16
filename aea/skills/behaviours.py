@@ -71,7 +71,7 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
         if not self.is_done():
-            self.act()
+            super().act_wrapper()
             self._number_of_executions += 1
 
     def is_done(self) -> bool:
@@ -98,7 +98,7 @@ class OneShotBehaviour(SimpleBehaviour, ABC):
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
         if not self._already_executed:
-            self.act()
+            super().act_wrapper()
             self._already_executed = True
 
 
@@ -147,7 +147,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         """Wrap the call of the action. This method must be called only by the framework."""
         if not self.is_done() and self.is_time_to_act():
             self._last_act_time = datetime.datetime.now()
-            self.act()
+            super().act_wrapper()
 
     def is_time_to_act(self) -> bool:
         """

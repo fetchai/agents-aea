@@ -94,7 +94,7 @@ default_routing:
 
 In another terminal, fetch the AEA that will query the seller AEA.
 ``` bash
-aea fetch fetchai/thermometer_client:0.14.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.15.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -109,7 +109,7 @@ cd my_thermometer_client
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.12.0
 aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/thermometer_client:0.14.0
+aea add skill fetchai/thermometer_client:0.15.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```

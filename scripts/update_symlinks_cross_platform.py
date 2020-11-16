@@ -100,12 +100,13 @@ def cd(path):
     try:
         os.chdir(path)
         yield
+        os.chdir(old_cwd)
     except Exception as e:  # pylint: disable=broad-except
         os.chdir(old_cwd)
         raise e from e
 
 
-def do_symlink(link_path: Path, target_path: Path):
+def create_symlink(link_path: Path, target_path: Path, root_path: Path):
     """
     Change directory and call the cross-platform script.
 
@@ -135,8 +136,8 @@ def do_symlink(link_path: Path, target_path: Path):
 
     """
     working_directory = link_path.parent
-    target_relative_to_root = target_path.relative_to(ROOT_PATH)
-    cwd_relative_to_root = working_directory.relative_to(ROOT_PATH)
+    target_relative_to_root = target_path.relative_to(root_path)
+    cwd_relative_to_root = working_directory.relative_to(root_path)
     nb_parents = len(cwd_relative_to_root.parents)
     root_relative_to_cwd = reduce(
         lambda x, y: x / y, [Path("../")] * nb_parents, Path(".")
@@ -158,7 +159,7 @@ def main():
         except FileNotFoundError:
             pass
         try:
-            return_code = do_symlink(link_name, target)
+            return_code = create_symlink(link_name, target, ROOT_PATH)
         except Exception as e:  # pylint: disable=broad-except
             exception = e
             return_code = 1

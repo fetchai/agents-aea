@@ -1,6 +1,6 @@
 name: ml_train
 author: fetchai
-version: 0.15.0
+version: 0.16.0
 type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmeHcYRhDJi6gqAHpK29UJz3doiyaicoqeTrPddqM3gh64
-  __init__.py: QmQJSNbYg6EppMbEFz8DUPYfWKTFKpoNE8QuvC83oFbRg7
+  __init__.py: QmXDYdBbDbTeSmtAFEjS6JgpAg8AhpKkrX2d2xAaM3Uz6y
   behaviours.py: QmQiBzKV5rEFpMQbSjfjzAJ7SqwwGmso6TozWkjdytucLR
   dialogues.py: QmVLXHVwXXLnK4zJzPBVhxzgu7ZmohRZ7oj3yG1LPFrmhx
   handlers.py: QmZkTRL3YCGLTJ9mYUonr19rWMiyD2WCAEypTXM7tbP2aY
@@ -27,7 +27,7 @@ protocols:
 - fetchai/oef_search:0.10.0
 - fetchai/signing:0.7.0
 skills:
-- fetchai/generic_buyer:0.15.0
+- fetchai/generic_buyer:0.16.0
 behaviours:
   search:
     args:

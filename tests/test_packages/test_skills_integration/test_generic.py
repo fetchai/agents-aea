@@ -109,7 +109,7 @@ class TestGenericSkills(AEATestCaseMany):
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.15.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.16.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -293,13 +293,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.15.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.16.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.13.0", buyer_aea_name
+            "fetchai/generic_buyer:0.14.0", buyer_aea_name
         )
         assert (
             diff == []

@@ -37,7 +37,16 @@ from aea.cli.utils.package_utils import (
     try_get_item_source_path,
     try_get_item_target_path,
 )
-from aea.configurations.base import CRUDCollection, DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import CRUDCollection, PublicId
+from aea.configurations.constants import (
+    AGENT,
+    AGENTS,
+    CONNECTIONS,
+    CONTRACTS,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOLS,
+    SKILLS,
+)
 
 
 @click.command(name="publish")
@@ -68,7 +77,7 @@ def _validate_config(ctx: Context) -> None:
     :raises ClickException: if validation is failed.
     """
     try:
-        validate_item_config("agent", Path(ctx.cwd))
+        validate_item_config(AGENT, Path(ctx.cwd))
     except AEAConfigException as e:  # pragma: no cover
         raise click.ClickException("Failed to validate agent config. {}".format(str(e)))
 
@@ -138,7 +147,7 @@ def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
 
     :return: None
     """
-    for item_type_plural in ("connections", "contracts", "protocols", "skills"):
+    for item_type_plural in (CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS):
         dependencies = getattr(ctx.agent_config, item_type_plural)
         for public_id in dependencies:
             if is_mixed:
@@ -154,7 +163,7 @@ def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
                     ctx.agent_config.registry_path,
                 )
 
-    item_type_plural = "agents"
+    item_type_plural = AGENTS
 
     target_dir = try_get_item_target_path(
         ctx.agent_config.registry_path,

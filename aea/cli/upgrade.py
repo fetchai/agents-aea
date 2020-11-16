@@ -52,6 +52,7 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
+from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL, VENDOR
 from aea.configurations.loader import ConfigLoaders
 
 
@@ -77,7 +78,7 @@ def upgrade(click_context, local, remote):  # pylint: disable=unused-argument
 @pass_ctx
 def connection(ctx: Context, connection_public_id: PublicId):
     """Upgrade a connection at the configuration file."""
-    upgrade_item(ctx, "connection", connection_public_id)
+    upgrade_item(ctx, CONNECTION, connection_public_id)
 
 
 @upgrade.command()
@@ -85,7 +86,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @pass_ctx
 def contract(ctx: Context, contract_public_id: PublicId):
     """Upgrade a contract at the configuration file."""
-    upgrade_item(ctx, "contract", contract_public_id)
+    upgrade_item(ctx, CONTRACT, contract_public_id)
 
 
 @upgrade.command()
@@ -93,7 +94,7 @@ def contract(ctx: Context, contract_public_id: PublicId):
 @pass_ctx
 def protocol(ctx: Context, protocol_public_id):
     """Upgrade a protocol for the agent."""
-    upgrade_item(ctx, "protocol", protocol_public_id)
+    upgrade_item(ctx, PROTOCOL, protocol_public_id)
 
 
 @upgrade.command()
@@ -101,7 +102,7 @@ def protocol(ctx: Context, protocol_public_id):
 @pass_ctx
 def skill(ctx: Context, skill_public_id: PublicId):
     """Upgrade a skill for the agent."""
-    upgrade_item(ctx, "skill", skill_public_id)
+    upgrade_item(ctx, SKILL, skill_public_id)
 
 
 @clean_after
@@ -268,7 +269,7 @@ class ItemUpgrader:
         path = ItemRemoveHelper.get_component_directory(
             PackageId(self.item_type, self.item_public_id)
         )
-        return "vendor" not in Path(path).parts[:2]
+        return VENDOR not in Path(path).parts[:2]
 
     def check_upgrade_is_required(self) -> str:
         """

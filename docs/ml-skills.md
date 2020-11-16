@@ -96,7 +96,7 @@ default_routing:
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.16.0
+aea fetch fetchai/ml_model_trainer:0.17.0
 cd ml_model_trainer
 aea install
 ```
@@ -111,7 +111,7 @@ cd ml_model_trainer
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.12.0
 aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/ml_train:0.15.0
+aea add skill fetchai/ml_train:0.16.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea install
 ```
