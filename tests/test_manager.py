@@ -24,7 +24,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.configurations.base import PublicId
-from aea.manager import MAMAgentState, MAMState, MultiAgentManager
+from aea.manager import MAMState, MultiAgentManager
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
@@ -338,23 +338,6 @@ class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
-
-
-class MAMAgentStateTestCase(TestCase):
-    """Test case for MAMAgentState class."""
-
-    def test_dict_positive(self):
-        """Test dict property for positive result."""
-        public_id = "public_id"
-        agent_name = "agent_name"
-        config = [{"some": "config"}]
-        result = MAMAgentState(public_id, agent_name, config).dict
-        expected_result = {
-            "public_id": public_id,
-            "agent_name": agent_name,
-            "config": config,
-        }
-        self.assertEqual(result, expected_result)
 
 
 class MAMStateTestCase(TestCase):

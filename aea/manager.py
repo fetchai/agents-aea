@@ -38,39 +38,20 @@ from aea.configurations.project import AgentAlias, Project
 from aea.crypto.helpers import create_private_key
 
 
-class MAMAgentState:
-    """MultiAgentManager agent state class."""
-
-    def __init__(self, public_id: PublicId, agent_name: str, config: List[Dict]):
-        """Initialize MultiAgentManager agent state."""
-        self.public_id = public_id
-        self.agent_name = agent_name
-        self.config = config
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        """Convert MAMAgentState to dict."""
-        return {
-            "public_id": str(self.public_id),
-            "agent_name": self.agent_name,
-            "config": self.config,
-        }
-
-
 class MAMState:
     """MultiAgentManager state."""
 
-    def __init__(self, projects: List[PublicId], agents: List[MAMAgentState]):
+    def __init__(self, projects: List[PublicId], agent_aliases: List[AgentAlias]):
         """Initialize MultiAgentManager state."""
         self.projects = projects
-        self.agents = agents
+        self.agent_aliases = agent_aliases
 
     @property
-    def dict(self):
+    def dict(self) -> Dict[str, Any]:
         """Convert MAMState to dict."""
         return {
             "projects": [str(public_id) for public_id in self.projects],
-            "agents": [agent.dict for agent in self.agents],
+            "agents": [alias.dict for alias in self.agent_aliases],
         }
 
 
@@ -251,13 +232,17 @@ class MultiAgentManager:
         """Add error callback to call on error raised."""
         self._error_callbacks.append(error_callback)
 
-    def start_manager(self, local: bool = True) -> "MultiAgentManager":
+    def start_manager(
+        self, local: bool = True, skip_load: bool = False
+    ) -> "MultiAgentManager":
         """Start manager."""
         if self._is_running:
             return self
 
         self._ensure_working_dir()
-        self._load_state(local=local)
+        if not skip_load:
+            self._load_state(local=local)
+
         self._started_event.clear()
         self._is_running = True
         self._thread = Thread(target=self._run_thread, daemon=True)
@@ -703,14 +688,9 @@ class MultiAgentManager:
 
         :return: None.
         """
-        agents_state = [
-            MAMAgentState(
-                public_id=alias.project.public_id,
-                agent_name=alias.agent_name,
-                config=alias.config,
-            )
-            for alias in self._agents.values()
-        ]
-        state = MAMState(projects=list(self._projects.keys()), agents=agents_state)
+        state = MAMState(
+            projects=list(self._projects.keys()),
+            agent_aliases=list(self._agents.values()),
+        )
         with open(self._save_path, "w") as f:
             json.dump(state.dict, f, indent=4, sort_keys=True)

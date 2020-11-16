@@ -19,7 +19,7 @@
 """This module contains the implementation of AEA agents project configuiration."""
 import os
 from shutil import rmtree
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -95,3 +95,12 @@ class AgentAlias:
     def remove_from_project(self):
         """Remove agent alias from project."""
         self.project.agents.remove(self.agent_name)
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        """Convert AgentAlias to dict."""
+        return {
+            "public_id": str(self.project.public_id),
+            "agent_name": self.agent_name,
+            "config": self.config,
+        }
