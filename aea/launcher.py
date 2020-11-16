@@ -20,6 +20,7 @@
 """This module contains the implementation of multiple AEA configs launcher."""
 import logging
 import multiprocessing
+import os
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.process import BrokenProcessPool
 from multiprocessing.synchronize import Event
@@ -90,6 +91,9 @@ def _run_agent(
     import select  # pylint: disable=import-outside-toplevel
     import selectors  # pylint: disable=import-outside-toplevel
 
+    # HACK for aea.py:288
+    os.chdir(agent_dir)
+
     if hasattr(select, "kqueue"):  # pragma: nocover  # cause platform specific
         selector = selectors.SelectSelector()
         loop = asyncio.SelectorEventLoop(selector)  # type: ignore
@@ -97,7 +101,7 @@ def _run_agent(
 
     _set_logger(log_level=log_level)
 
-    agent = load_agent(agent_dir)
+    agent = load_agent(".")
 
     def stop_event_thread():
         try:
@@ -263,4 +267,9 @@ class AEALauncher(AbstractMultipleRunner):
                 AEADirMultiprocessTask(agent_dir, log_level=self._log_level)
                 for agent_dir in self._agent_dirs
             ]
-        return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]
+        tasks = [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]
+
+        # HACK for aea.py:288
+        os.chdir(self._agent_dirs[0])
+
+        return tasks
