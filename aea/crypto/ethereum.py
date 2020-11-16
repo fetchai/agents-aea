@@ -306,7 +306,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Try to call a function on the ledger API."""
 
         function = getattr(self._api.eth, callable_name)
-        response = function(*args)
+        response = function(*args, **kwargs)
 
         return response  # pylint: disable=no-member
 
