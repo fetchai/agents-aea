@@ -29,18 +29,20 @@ import click
 
 from aea.aea_builder import AEABuilder
 from aea.cli.utils.click_utils import PublicIdParameter
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.config import load_item_config, try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import get_item_public_id_by_author_name
+from aea.cli.utils.package_utils import (
+    get_item_public_id_by_author_name,
+    is_item_present,
+)
 from aea.configurations.base import (
     AgentConfig,
     ComponentId,
     ComponentType,
     PackageConfiguration,
     PackageId,
-    PackageType,
     PublicId,
 )
 from aea.configurations.constants import (
@@ -119,11 +121,10 @@ def skill(ctx: Context, skill_id):
 class ItemRemoveHelper:
     """Helper to check dependencies on removing component from agent config."""
 
-    def __init__(
-        self, agent_config: AgentConfig, ignore_non_vendor: bool = False
-    ) -> None:
+    def __init__(self, ctx: Context, ignore_non_vendor: bool = False) -> None:
         """Init helper."""
-        self._agent_config = agent_config
+        self._ctx = ctx
+        self._agent_config = ctx.agent_config
         self._ignore_non_vendor = ignore_non_vendor
 
     def get_agent_dependencies_with_reverse_dependencies(
@@ -179,9 +180,8 @@ class ItemRemoveHelper:
                 f"Can not find folder for the package: {package_id.package_type} {package_id.public_id}"
             )
 
-    @staticmethod
     def _get_item_requirements(
-        item: PackageConfiguration, ignore_non_vendor: bool = False
+        self, item: PackageConfiguration, ignore_non_vendor: bool = False
     ) -> Generator[PackageId, None, None]:
         """
         List all the requirements for item provided.
@@ -191,10 +191,8 @@ class ItemRemoveHelper:
         for item_type in map(str, ComponentType):
             items = getattr(item, f"{item_type}s", set())
             for item_public_id in items:
-                if (
-                    ignore_non_vendor
-                    and item.package_type == PackageType.AGENT
-                    and item.author == item_public_id.author
+                if ignore_non_vendor and is_item_present(
+                    self._ctx, item_type, item_public_id, is_vendor=False
                 ):
                     continue
                 yield PackageId(item_type, item_public_id)
@@ -286,6 +284,8 @@ def remove_unused_component_configurations(ctx: Context):
         saved_configuration_by_component_prefix = {
             key.component_prefix: value for key, value in saved_configuration.items()
         }
+        # need to reload agent configuration with the updated references
+        try_to_load_agent_config(ctx)
         for component_id in ctx.agent_config.package_dependencies:
             if component_id.component_prefix in saved_configuration_by_component_prefix:
                 ctx.agent_config.component_configurations[
@@ -340,7 +340,7 @@ class RemoveItem:
                 self.dependencies_can_be_removed,
                 *_,
             ) = ItemRemoveHelper(
-                self.agent_config, ignore_non_vendor=self.ignore_non_vendor
+                self.ctx, ignore_non_vendor=self.ignore_non_vendor
             ).check_remove(
                 self.item_type, self.current_item
             )

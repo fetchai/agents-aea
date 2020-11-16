@@ -948,6 +948,13 @@ class ComponentId(PackageId):
         package_type, author, name = package_prefix
         return ComponentType(package_type.value), author, name
 
+    def same_prefix(self, other: "ComponentId") -> bool:
+        """Check if the other component id has the same type, author and name of this."""
+        return (
+            self.component_type == other.component_type
+            and self.public_id.same_prefix(other.public_id)
+        )
+
     @property
     def prefix_import_path(self) -> str:
         """Get the prefix import path for this component."""
