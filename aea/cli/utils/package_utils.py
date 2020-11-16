@@ -450,27 +450,40 @@ def is_item_present_unified(ctx: Context, item_type: str, item_public_id: Public
 
 
 def is_item_present(
-    ctx: Context, item_type: str, item_public_id: PublicId, is_vendor: bool = True
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    is_vendor: bool = True,
+    with_version: bool = False,
 ) -> bool:
     """
     Check if item is already present in AEA.
 
+    Optionally, consider the check also with the version.
+
     :param ctx: context object.
     :param item_type: type of an item.
     :param item_public_id: PublicId of an item.
-    :param is_vendor: flag for vendorized path (True by defaut).
+    :param is_vendor: flag for vendorized path (True by default).
+    :param with_version: if true, consider also the package version.
 
     :return: boolean is item present.
     """
-    # check item presence only by author/package_name pair, without version.
-
-    item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
+    item_path = Path(
+        get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
+    )
     registered_item_public_id = get_item_public_id_by_author_name(
         ctx.agent_config, item_type, item_public_id.author, item_public_id.name
     )
-    is_item_registered = registered_item_public_id is not None
+    is_item_registered_no_version = registered_item_public_id is not None
+    does_path_exist = Path(item_path).exists()
+    if item_public_id.package_version.is_latest or not with_version:
+        return is_item_registered_no_version and does_path_exist
 
-    return is_item_registered and Path(item_path).exists()
+    # the following makes sense because public id is not latest
+    component_id = ComponentId(ComponentType(item_type), item_public_id)
+    component_is_registered = component_id in ctx.agent_config.package_dependencies
+    return component_is_registered and does_path_exist
 
 
 def get_item_id_present(

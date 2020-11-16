@@ -134,7 +134,9 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
     # we know cli_author is set because of the above checks.
     cli_author: str = cast(str, ctx.config.get("cli_author"))
     item_type_plural = item_type + "s"
-    if not is_item_present(ctx, item_type, public_id):  # pragma: no cover
+    if not is_item_present(
+        ctx, item_type, public_id, is_vendor=True, with_version=True
+    ):  # pragma: no cover
         raise click.ClickException(
             f"{item_type.title()} {public_id} not found in agent's vendor items."
         )
@@ -156,7 +158,9 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
 
     package_id = PackageId(PackageType(item_type), public_id)
 
-    click.echo(f"Ejecting item {package_id}")
+    click.echo(
+        f"Ejecting item {package_id.package_type.value} {str(package_id.public_id)}"
+    )
 
     # first, eject all the vendor packages that depend on this
     item_remover = ItemRemoveHelper(ctx, ignore_non_vendor=True)
