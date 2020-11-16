@@ -308,7 +308,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         function = getattr(self._api.eth, callable_name)
         response = function(*args)
 
-        return response  # pylint: disable=no-member,unused-argument
+        return response  # pylint: disable=no-member
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
