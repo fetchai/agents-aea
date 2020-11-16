@@ -397,7 +397,7 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_state(self, callable_name: str, *args) -> Optional[Any]:
+    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
         """Call a specified function on the ledger API."""
         response = self._try_get_state(callable_name, *args)
         return response
@@ -406,7 +406,9 @@ class _CosmosApi(LedgerApi):
         "Encountered exception when trying get state: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_state(self, callable_name: str, *args) -> Optional[Any]:
+    def _try_get_state(  # pylint: disable=unused-argument
+        self, callable_name: str, *args, **kwargs
+    ) -> Optional[Any]:
         """Try to call a function on the ledger API."""
         result = None  # type: Optional[Any]
         query = "/".join(args)

@@ -33,6 +33,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.helpers.async_utils import AsyncState
 from aea.helpers.transaction.base import (
+    Kwargs,
     RawTransaction,
     SignedTransaction,
     Terms,
@@ -157,6 +158,7 @@ async def test_get_state(
     else:
         callable_name = "blocks"
     args = ("latest",)
+    kwargs = Kwargs({})
 
     ledger_api_dialogues = LedgerApiDialogues(address)
     request, ledger_api_dialogue = ledger_api_dialogues.create(
@@ -164,7 +166,8 @@ async def test_get_state(
         performative=LedgerApiMessage.Performative.GET_STATE,
         ledger_id=ledger_id,
         callable=callable_name,
-        args=LedgerApiMessage.Args(args),
+        args=args,
+        kwargs=kwargs,
     )
     envelope = Envelope(
         to=request.to,
@@ -182,6 +185,9 @@ async def test_get_state(
     response_msg = cast(LedgerApiMessage, response.message)
     response_dialogue = ledger_api_dialogues.update(response_msg)
     assert response_dialogue == ledger_api_dialogue
+
+    print(response_msg)
+
     assert response_msg.performative == LedgerApiMessage.Performative.STATE
     actual_block = response_msg.state.body
     expected_block = make_ledger_api(ledger_id, **config).get_state(

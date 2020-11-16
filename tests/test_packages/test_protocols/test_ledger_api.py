@@ -27,6 +27,7 @@ import pytest
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
+from aea.helpers.transaction.base import Kwargs
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -81,18 +82,14 @@ def test_get_balance_serialization():
 def test_get_state_serialization():
     """Test the serialization for 'get_state' speech-act works."""
 
-    # Test Args
     args = ("arg1", "arg2")
-    some_args = LedgerApiMessage.Args(args)
-    assert some_args == LedgerApiMessage.Args(args)
-    with pytest.raises(ValueError, match="Body must not be None."):
-        some_args = LedgerApiMessage.Args(None)
-
+    kwargs = Kwargs({})
     msg = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_STATE,
         ledger_id="some_ledger_id",
         callable="some_function",
-        args=LedgerApiMessage.Args(("arg1", "arg2")),
+        args=args,
+        kwargs=kwargs,
     )
     msg.to = "receiver"
     envelope = Envelope(

@@ -26,7 +26,7 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.ledger_api.custom_types import Args as CustomArgs
+from packages.fetchai.protocols.ledger_api.custom_types import Kwargs as CustomKwargs
 from packages.fetchai.protocols.ledger_api.custom_types import (
     RawTransaction as CustomRawTransaction,
 )
@@ -53,7 +53,7 @@ class LedgerApiMessage(Message):
 
     protocol_id = PublicId.from_str("fetchai/ledger_api:0.7.0")
 
-    Args = CustomArgs
+    Kwargs = CustomKwargs
 
     RawTransaction = CustomRawTransaction
 
@@ -109,6 +109,7 @@ class LedgerApiMessage(Message):
             "code",
             "data",
             "dialogue_reference",
+            "kwargs",
             "ledger_id",
             "message",
             "message_id",
@@ -182,10 +183,10 @@ class LedgerApiMessage(Message):
         return cast(str, self.get("address"))
 
     @property
-    def args(self) -> CustomArgs:
+    def args(self) -> Tuple[str, ...]:
         """Get the 'args' content from the message."""
         enforce(self.is_set("args"), "'args' content is not set.")
-        return cast(CustomArgs, self.get("args"))
+        return cast(Tuple[str, ...], self.get("args"))
 
     @property
     def balance(self) -> int:
@@ -209,6 +210,12 @@ class LedgerApiMessage(Message):
     def data(self) -> Optional[bytes]:
         """Get the 'data' content from the message."""
         return cast(Optional[bytes], self.get("data"))
+
+    @property
+    def kwargs(self) -> CustomKwargs:
+        """Get the 'kwargs' content from the message."""
+        enforce(self.is_set("kwargs"), "'kwargs' content is not set.")
+        return cast(CustomKwargs, self.get("kwargs"))
 
     @property
     def ledger_id(self) -> str:
@@ -395,7 +402,7 @@ class LedgerApiMessage(Message):
                     ),
                 )
             elif self.performative == LedgerApiMessage.Performative.GET_STATE:
-                expected_nb_of_contents = 3
+                expected_nb_of_contents = 4
                 enforce(
                     type(self.ledger_id) == str,
                     "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
@@ -409,9 +416,19 @@ class LedgerApiMessage(Message):
                     ),
                 )
                 enforce(
-                    type(self.args) == CustomArgs,
-                    "Invalid type for content 'args'. Expected 'Args'. Found '{}'.".format(
+                    type(self.args) == tuple,
+                    "Invalid type for content 'args'. Expected 'tuple'. Found '{}'.".format(
                         type(self.args)
+                    ),
+                )
+                enforce(
+                    all(type(element) == str for element in self.args),
+                    "Invalid type for tuple elements in content 'args'. Expected 'str'.",
+                )
+                enforce(
+                    type(self.kwargs) == CustomKwargs,
+                    "Invalid type for content 'kwargs'. Expected 'Kwargs'. Found '{}'.".format(
+                        type(self.kwargs)
                     ),
                 )
             elif self.performative == LedgerApiMessage.Performative.STATE:
