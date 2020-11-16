@@ -299,7 +299,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         response = self._try_get_state(callable_name, *args, **kwargs)
         return response
 
-    @try_decorator("Unable to retrieve block: {}", logger_method="warning")
+    @try_decorator("Unable to get state: {}", logger_method="warning")
     def _try_get_state(  # pylint: disable=unused-argument
         self, callable_name: str, *args, **kwargs
     ) -> Optional[Any]:
