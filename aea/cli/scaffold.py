@@ -23,6 +23,7 @@ import os
 import re
 import shutil
 from pathlib import Path
+from typing import cast
 
 import click
 from jsonschema import ValidationError
@@ -54,10 +55,19 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
 
 
 @click.group()
+@click.option(
+    "--with-symlinks",
+    is_flag=True,
+    help="Add symlinks from vendor to non-vendor and packages to vendor folders.",
+)
 @click.pass_context
 @check_aea_project
-def scaffold(click_context):  # pylint: disable=unused-argument
+def scaffold(
+    click_context: click.core.Context, with_symlinks: bool
+):  # pylint: disable=unused-argument
     """Scaffold a resource for the agent."""
+    ctx = cast(Context, click_context.obj)
+    ctx.set_config("with_symlinks", with_symlinks)
 
 
 @scaffold.command()
@@ -172,8 +182,12 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         # fingerprint item.
         fingerprint_item(ctx, item_type, new_public_id)
 
-        create_symlink_vendor_to_local(ctx, item_type, new_public_id)
-        create_symlink_packages_to_vendor(ctx)
+        if ctx.config.get("with_symlinks", False):
+            click.echo(
+                "Adding symlinks from vendor to non-vendor and packages to vendor folders."
+            )
+            create_symlink_vendor_to_local(ctx, item_type, new_public_id)
+            create_symlink_packages_to_vendor(ctx)
 
     except ValidationError:
         raise click.ClickException(
