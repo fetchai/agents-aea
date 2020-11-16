@@ -144,7 +144,7 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId, quiet: bool =
     dst = get_package_path(ctx, item_type, public_id, is_vendor=False)
     if is_item_present(ctx, item_type, public_id, is_vendor=False):  # pragma: no cover
         raise click.ClickException(
-            f"{item_type.title()} {public_id} is already in a non-vendor item."
+            f"{item_type.title()} {public_id} is already a non-vendor package."
         )
 
     if public_id.package_version.is_latest:
