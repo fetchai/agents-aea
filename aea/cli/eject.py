@@ -52,13 +52,16 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
-from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    IMPORT_TEMPLATE_1,
+    IMPORT_TEMPLATE_2,
+    PROTOCOL,
+    SKILL,
+)
 from aea.configurations.utils import get_latest_component_id_from_prefix
 from aea.helpers.base import find_topological_order, reachable_nodes
-
-
-IMPORT_TEMPLATE_1 = "from packages.{author}.{type}.{name}"
-IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 
 
 @click.group()
