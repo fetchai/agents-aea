@@ -76,14 +76,17 @@ def publish_agent(ctx: Context):
         "skills": ctx.agent_config.skills,
     }
 
-    with open(output_tar, "rb") as fd:
-        files = {"file": fd}
+    files = {}
+    try:
+        files["file"] = open(output_tar, "rb")
         if is_readme_present(readme_source_path):
             files["readme"] = open(readme_source_path, "rb")
-
         path = "/agents/create"
         logger.debug("Publishing agent {} to Registry ...".format(name))
         resp = request_api("POST", path, data=data, is_auth=True, files=files)
+    finally:
+        for fd in files.values():
+            fd.close()
     click.echo(
         "Successfully published agent {} to the Registry. Public ID: {}".format(
             name, resp["public_id"]
