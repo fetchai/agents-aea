@@ -524,6 +524,7 @@ def apply_aea_loop(request) -> None:
 
 
 @pytest.fixture(scope="session")
+@action_for_platform("Linux", skip=False)
 def network_node(
     oef_addr, oef_port, pytestconfig, timeout: float = 2.0, max_attempts: int = 10
 ):
@@ -534,6 +535,7 @@ def network_node(
 
 
 @pytest.fixture(scope="session")
+@action_for_platform("Linux", skip=False)
 def ganache(ganache_addr, ganache_port, timeout: float = 2.0, max_attempts: int = 10):
     """Launch the Ganache image."""
     client = docker.from_env()

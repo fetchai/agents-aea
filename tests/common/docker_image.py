@@ -189,9 +189,6 @@ class OEFSearchDockerImage(DockerImage):
             pytest.skip("Python version < 3.7 not supported by the OEF.")
             return
 
-        if os.name == "nt":
-            pytest.skip("Skip test as it doesn't work on Windows.")
-
     def create(self) -> Container:
         """Create an instance of the OEF Search image."""
         from tests.conftest import ROOT_DIR  # pylint: disable
@@ -260,11 +257,6 @@ class GanacheDockerImage(DockerImage):
     def tag(self) -> str:
         """Get the image tag."""
         return "trufflesuite/ganache-cli:v6.12.1"
-
-    def check_skip(self):
-        """Check if the test should be skipped."""
-        if sys.platform == "win32" or sys.platform == "darwin":
-            pytest.skip("Skip test as it doesn't work on Windows/MacOS.")
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
