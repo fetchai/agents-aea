@@ -211,6 +211,8 @@ jobs:
         brew install protobuf
     - if: matrix.os == 'windows-latest'
       name: Install dependencies (windows-latest)
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       run: |
         pip install tox
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
