@@ -24,6 +24,7 @@ from pathlib import Path
 
 import pytest
 
+import aea
 from aea.configurations.base import AgentConfig
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -340,3 +341,13 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
         received_envelope = self.read_envelope_from_agent(self.agent_name)
         received_message = DefaultMessage.serializer.decode(received_envelope.message)
         assert sent_envelope.message.content == received_message.content
+
+
+class TestInvoke(AEATestCaseEmpty):
+    """Test invoke method."""
+
+    def test_invoke(self):
+        """Test invoke method."""
+        result = self.invoke("--version")
+        assert result.exit_code == 0
+        assert f"aea, version {aea.__version__}" in result.stdout
