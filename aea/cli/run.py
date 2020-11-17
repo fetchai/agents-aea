@@ -32,9 +32,14 @@ from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
+from aea.connections.base import Connection
+from aea.contracts.base import Contract
 from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import load_env_file
 from aea.helpers.profiling import Profiling
+from aea.protocols.base import Message, Protocol
+from aea.protocols.dialogue.base import Dialogue
+from aea.skills.base import Behaviour, Handler, Model, Skill
 
 
 @click.command()
@@ -82,8 +87,29 @@ def run(
     ctx = cast(Context, click_context.obj)
     profiling = int(profiling)
     if profiling > 0:
-        Profiling(profiling).start()
+        _start_profiling(period=profiling)
     run_aea(ctx, connection_ids, env_file, is_install_deps)
+
+
+def _start_profiling(period: int) -> None:
+    OBJECTS_INSTANCES = [
+        Message,
+        Dialogue,
+        Handler,
+        Model,
+        Behaviour,
+        Skill,
+        Connection,
+        Contract,
+        Protocol,
+    ]
+    OBJECTS_CREATED = [Message, Dialogue]
+
+    Profiling(
+        period=period,
+        objects_instances_to_count=OBJECTS_INSTANCES,
+        objects_created_to_count=OBJECTS_CREATED,
+    ).start()
 
 
 def run_aea(
