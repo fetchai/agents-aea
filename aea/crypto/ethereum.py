@@ -50,6 +50,8 @@ DEFAULT_ADDRESS = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
 DEFAULT_CHAIN_ID = 3
 DEFAULT_GAS_PRICE = "50"
 DEFAULT_CURRENCY_DENOM = "wei"
+_ABI = "abi"
+_BYTECODE = "bytecode"
 
 
 class EthereumCrypto(Crypto[Account]):
@@ -262,6 +264,21 @@ class EthereumHelper(Helper):
         digest = Web3.keccak(message).hex()
         return digest
 
+    @classmethod
+    def load_contract_interface(cls, file_path: Path) -> Dict[str, str]:
+        """
+        Load contract interface.
+
+        :param file_path: the file path to the interface
+        :return: the interface
+        """
+        with open(file_path, "r") as interface_file_ethereum:
+            contract_interface = json.load(interface_file_ethereum)
+        for key in [_ABI, _BYTECODE]:
+            if key not in contract_interface:
+                raise ValueError(f"Contract {file_path} missing key {key}.")
+        return contract_interface
+
 
 class EthereumApi(LedgerApi, EthereumHelper):
     """Class to interact with the Ethereum Web3 APIs."""
@@ -446,14 +463,14 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         if contract_address is None:
             instance = self.api.eth.contract(
-                abi=contract_interface["abi"], bytecode=contract_interface["bytecode"],
+                abi=contract_interface[_ABI], bytecode=contract_interface[_BYTECODE],
             )
         else:
             _contract_address = self.api.toChecksumAddress(contract_address)
             instance = self.api.eth.contract(
                 address=_contract_address,
-                abi=contract_interface["abi"],
-                bytecode=contract_interface["bytecode"],
+                abi=contract_interface[_ABI],
+                bytecode=contract_interface[_BYTECODE],
             )
         return instance
 

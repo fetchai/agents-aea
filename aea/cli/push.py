@@ -48,7 +48,7 @@ def push(click_context, local):
     ctx.set_config("local", local)
 
 
-@push.command(name="connection")
+@push.command(name=CONNECTION)
 @click.argument("connection-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def connection(ctx: Context, connection_id):
@@ -59,7 +59,7 @@ def connection(ctx: Context, connection_id):
         push_item(ctx, CONNECTION, connection_id)
 
 
-@push.command(name="contract")
+@push.command(name=CONTRACT)
 @click.argument("contract-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def contract(ctx: Context, contract_id):
@@ -70,7 +70,7 @@ def contract(ctx: Context, contract_id):
         push_item(ctx, CONTRACT, contract_id)
 
 
-@push.command(name="protocol")
+@push.command(name=PROTOCOL)
 @click.argument("protocol-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_id):
@@ -81,7 +81,7 @@ def protocol(ctx: Context, protocol_id):
         push_item(ctx, PROTOCOL, protocol_id)
 
 
-@push.command(name="skill")
+@push.command(name=SKILL)
 @click.argument("skill-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def skill(ctx: Context, skill_id):
