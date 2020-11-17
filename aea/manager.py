@@ -270,7 +270,7 @@ class MultiAgentManager:
 
         if cleanup:
             for project in list(self._projects.keys()):
-                self.remove_project(project)
+                self.remove_project(project, keep_files=save)
             self._cleanup(only_keys=save)
 
         self._is_running = False
@@ -312,7 +312,9 @@ class MultiAgentManager:
         )
         return self
 
-    def remove_project(self, public_id: PublicId) -> "MultiAgentManager":
+    def remove_project(
+        self, public_id: PublicId, keep_files: bool = False
+    ) -> "MultiAgentManager":
         """Remove agent project."""
         if public_id not in self._projects:
             raise ValueError(f"Project {public_id} is not present!")
@@ -322,7 +324,10 @@ class MultiAgentManager:
                 f"Can not remove projects with aliases exists: {self._projects[public_id].agents}"
             )
 
-        self._projects.pop(public_id).remove()
+        project = self._projects.pop(public_id)
+        if not keep_files:
+            project.remove()
+
         return self
 
     def list_projects(self) -> List[PublicId]:
