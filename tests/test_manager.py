@@ -18,13 +18,12 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
 import os
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 import pytest
 
 from aea.configurations.base import PublicId
-from aea.manager import MAMState, MultiAgentManager
+from aea.manager import MultiAgentManager
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
@@ -338,17 +337,3 @@ class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
-
-
-class MAMStateTestCase(TestCase):
-    """Test case for MAMState class."""
-
-    def test_dict_positive(self):
-        """Test dict property for positive result."""
-        projects = ["public_id"]
-        agent = Mock()
-        agent.dict = {"agent": "settings"}
-        agents = [agent]
-        result = MAMState(projects, agents).dict
-        expected_result = {"projects": projects, "agents": [agent.dict]}
-        self.assertEqual(result, expected_result)

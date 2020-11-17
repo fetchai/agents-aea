@@ -38,23 +38,6 @@ from aea.configurations.project import AgentAlias, Project
 from aea.crypto.helpers import create_private_key
 
 
-class MAMState:
-    """MultiAgentManager state."""
-
-    def __init__(self, projects: List[PublicId], agent_aliases: List[AgentAlias]):
-        """Initialize MultiAgentManager state."""
-        self.projects = projects
-        self.agent_aliases = agent_aliases
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        """Convert MAMState to dict."""
-        return {
-            "projects": [str(public_id) for public_id in self.projects],
-            "agents": [alias.dict for alias in self.agent_aliases],
-        }
-
-
 class AgentRunAsyncTask:
     """Async task wrapper for agent."""
 
@@ -188,6 +171,14 @@ class MultiAgentManager:
         """Is manager running."""
         return self._is_running
 
+    @property
+    def dict_state(self) -> Dict[str, Any]:
+        """Create MultiAgentManager dist state."""
+        return {
+            "projects": [str(public_id) for public_id in self._projects.keys()],
+            "agents": [alias.dict for alias in self._agents.values()],
+        }
+
     def _run_thread(self) -> None:
         """Run internal thread with own event loop."""
         self._loop = asyncio.new_event_loop()
@@ -232,16 +223,13 @@ class MultiAgentManager:
         """Add error callback to call on error raised."""
         self._error_callbacks.append(error_callback)
 
-    def start_manager(
-        self, local: bool = True, skip_load: bool = False
-    ) -> "MultiAgentManager":
+    def start_manager(self, local: bool = True) -> "MultiAgentManager":
         """Start manager."""
         if self._is_running:
             return self
 
         self._ensure_working_dir()
-        if not skip_load:
-            self._load_state(local=local)
+        self._load_state(local=local)
 
         self._started_event.clear()
         self._is_running = True
@@ -304,18 +292,23 @@ class MultiAgentManager:
                 rmtree(self.working_dir)
 
     def add_project(
-        self, public_id: PublicId, local: bool = True
+        self, public_id: PublicId, local: bool = True, restore: bool = False
     ) -> "MultiAgentManager":
         """
         Fetch agent project and all dependencies to working_dir.
 
         :param public_id: the public if of the agent project.
         :param local: whether or not to fetch from local registry.
+        :param restore: bool flag for restoring already fetched agent.
         """
         if public_id in self._projects:
             raise ValueError(f"Project {public_id} was already added!")
         self._projects[public_id] = Project.load(
-            self.working_dir, public_id, local, registry_path=self.registry_path
+            self.working_dir,
+            public_id,
+            local,
+            registry_path=self.registry_path,
+            is_restore=restore,
         )
         return self
 
@@ -361,6 +354,12 @@ class MultiAgentManager:
 
         :return: manager
         """
+        if any((agent_overrides, component_overrides)) and config is not None:
+            raise ValueError(
+                "Can not add agent with overrides and full config."
+                "One of those must be used."
+            )
+
         agent_name = agent_name or public_id.name
 
         if agent_name in self._agents:
@@ -671,7 +670,9 @@ class MultiAgentManager:
 
         try:
             for public_id in save_json["projects"]:
-                self.add_project(PublicId.from_str(public_id), local=local)
+                self.add_project(
+                    PublicId.from_str(public_id), local=local, restore=True
+                )
 
             for agent_settings in save_json["agents"]:
                 self.add_agent(
@@ -688,9 +689,5 @@ class MultiAgentManager:
 
         :return: None.
         """
-        state = MAMState(
-            projects=list(self._projects.keys()),
-            agent_aliases=list(self._agents.values()),
-        )
         with open(self._save_path, "w") as f:
-            json.dump(state.dict, f, indent=4, sort_keys=True)
+            json.dump(self.dict_state, f, indent=4, sort_keys=True)

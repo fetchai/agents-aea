@@ -44,6 +44,7 @@ class Project:
         working_dir: str,
         public_id: PublicId,
         is_local: bool = False,
+        is_restore: bool = False,
         registry_path: str = "packages",
         skip_consistency_check: bool = False,
     ) -> "Project":
@@ -61,11 +62,12 @@ class Project:
         path = os.path.join(working_dir, public_id.author, public_id.name)
         target_dir = os.path.join(public_id.author, public_id.name)
 
-        if not os.path.exists(target_dir):
+        if not is_restore and not os.path.exists(target_dir):
             if is_local:
                 fetch_agent_locally(ctx, public_id, target_dir=target_dir)
             else:
                 fetch_agent(ctx, public_id, target_dir=target_dir)
+
         return cls(public_id, path)
 
     def remove(self) -> None:
