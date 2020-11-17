@@ -172,7 +172,7 @@ def test_run_with_profiling():
         )
 
         process.expect("Start processing messages", timeout=10)
-        process.expect("Profiling details:", timeout=10)
+        process.expect("Profiling details", timeout=10)
         process.control_c()
         process.wait_to_complete(10)
 

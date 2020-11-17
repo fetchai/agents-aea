@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Implementation of background profiling daemon."""
 
 import asyncio
@@ -123,12 +124,12 @@ class Profiling(Runnable):
             self.set_counters()
             while True:
                 await asyncio.sleep(self._period)
-                await self.output_profile_data()
+                self.output_profile_data()
         except Exception:  # pragma: nocover
             _default_logger.exception("Exception in Profiling")
             raise
 
-    async def output_profile_data(self) -> None:
+    def output_profile_data(self) -> None:
         """Render profiling data and call output_function."""
         data = self.get_profile_data()
         text = (

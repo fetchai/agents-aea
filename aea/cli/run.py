@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea run' subcommand."""
-
+from contextlib import contextmanager
 from pathlib import Path
 from typing import List, Optional, cast
 
@@ -87,11 +87,15 @@ def run(
     ctx = cast(Context, click_context.obj)
     profiling = int(profiling)
     if profiling > 0:
-        _start_profiling(period=profiling)
+        with _profiling_context(period=profiling):
+            run_aea(ctx, connection_ids, env_file, is_install_deps)
+            return
     run_aea(ctx, connection_ids, env_file, is_install_deps)
 
 
-def _start_profiling(period: int) -> None:
+@contextmanager
+def _profiling_context(period: int):
+    """Start profiling context."""
     OBJECTS_INSTANCES = [
         Message,
         Dialogue,
@@ -105,11 +109,17 @@ def _start_profiling(period: int) -> None:
     ]
     OBJECTS_CREATED = [Message, Dialogue]
 
-    Profiling(
+    profiler = Profiling(
         period=period,
         objects_instances_to_count=OBJECTS_INSTANCES,
         objects_created_to_count=OBJECTS_CREATED,
-    ).start()
+    )
+    profiler.start()
+    try:
+        yield None
+    finally:
+        profiler.stop()
+        profiler.wait_completed(sync=True, timeout=10)
 
 
 def run_aea(

@@ -31,7 +31,7 @@ def test_profiling():
         nonlocal result
         result = report
 
-    p = Profiling(1, output_function)
+    p = Profiling(1, [Message], [Message], output_function=output_function)
     p.start()
     m = Message()
     try:
