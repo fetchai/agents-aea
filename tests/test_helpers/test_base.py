@@ -23,6 +23,7 @@ import platform
 import re
 import signal
 import time
+from copy import copy
 from pathlib import Path
 from subprocess import Popen  # nosec
 from typing import Dict, Set
@@ -30,6 +31,7 @@ from unittest.mock import patch
 
 import pytest
 
+from aea.exceptions import AEAEnforceError
 from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
@@ -38,6 +40,7 @@ from aea.helpers.base import (
     load_env_file,
     load_module,
     locate,
+    reachable_nodes,
     recursive_update,
     retry_decorator,
     send_control_c,
@@ -316,3 +319,63 @@ class TestTopologicalOrder:
 
         order = find_topological_order(adj_list)
         assert order == list(range(chain_length))
+
+
+class TestReachableNodes:
+    """Test reachable_nodes utility."""
+
+    def test_empty_graph(self):
+        """Test empty graph."""
+        result = reachable_nodes({}, set())
+        assert result == {}
+
+    def test_starting_node_not_in_the_graph(self):
+        """Test error when starting node not in the graph."""
+        with pytest.raises(
+            AEAEnforceError,
+            match="These starting nodes are not in the set of nodes: {1}",
+        ):
+            reachable_nodes({}, {1})
+
+    def test_one_node(self):
+        """Test one node."""
+        result = reachable_nodes({1: set()}, {1})
+        assert result == {1: set()}
+
+    def test_one_node_loop(self):
+        """Test one node, loop."""
+        g = {1: {1}}
+        result = reachable_nodes(g, {1})
+        assert result == g
+
+    def test_two_nodes(self):
+        """Test two nodes."""
+        g = {1: {2}}
+        result = reachable_nodes(g, {1})
+        assert result == g
+
+        result = reachable_nodes(g, {2})
+        assert result == {2: set()}
+
+    def test_two_nodes_cycle(self):
+        """Test two nodes in a cycle"""
+        g = {1: {2}, 2: {1}}
+        result = reachable_nodes(g, {1})
+        assert result == g
+
+        result = reachable_nodes(g, {2})
+        assert result == g
+
+    def test_chain(self):
+        """Test chain"""
+        g = {1: {2}, 2: {3}, 3: set()}
+        result = reachable_nodes(g, {1})
+        assert result == g
+
+        result = reachable_nodes(g, {2})
+        expected = copy(g)
+        expected.pop(1)
+        assert result == expected
+
+        result = reachable_nodes(g, {3})
+        assert result == {3: set()}

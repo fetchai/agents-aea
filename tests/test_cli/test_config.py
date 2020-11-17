@@ -329,6 +329,22 @@ class TestConfigSet:
         )
         assert result.exit_code == 0
 
+    def test_set_type_none(self):
+        """Test setting the agent name."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.logging_config.disable_existing_loggers",
+                "",
+                "--type=none",
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
     def test_set_type_dict(self):
         """Test setting the default routing."""
         result = self.runner.invoke(

@@ -34,7 +34,14 @@ from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_README_FILE
+from aea.configurations.constants import (
+    CONNECTIONS,
+    CONTRACTS,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_README_FILE,
+    PROTOCOLS,
+    SKILLS,
+)
 
 
 def _compress(output_filename: str, *filepaths):
@@ -70,19 +77,23 @@ def publish_agent(ctx: Context):
         "name": name,
         "description": ctx.agent_config.description,
         "version": ctx.agent_config.version,
-        "connections": ctx.agent_config.connections,
-        "contracts": ctx.agent_config.contracts,
-        "protocols": ctx.agent_config.protocols,
-        "skills": ctx.agent_config.skills,
+        CONNECTIONS: ctx.agent_config.connections,
+        CONTRACTS: ctx.agent_config.contracts,
+        PROTOCOLS: ctx.agent_config.protocols,
+        SKILLS: ctx.agent_config.skills,
     }
 
-    files = {"file": open(output_tar, "rb")}
-    if is_readme_present(readme_source_path):
-        files["readme"] = open(readme_source_path, "rb")
-
-    path = "/agents/create"
-    logger.debug("Publishing agent {} to Registry ...".format(name))
-    resp = request_api("POST", path, data=data, is_auth=True, files=files)
+    files = {}
+    try:
+        files["file"] = open(output_tar, "rb")
+        if is_readme_present(readme_source_path):
+            files["readme"] = open(readme_source_path, "rb")
+        path = "/agents/create"
+        logger.debug("Publishing agent {} to Registry ...".format(name))
+        resp = request_api("POST", path, data=data, is_auth=True, files=files)
+    finally:
+        for fd in files.values():
+            fd.close()
     click.echo(
         "Successfully published agent {} to the Registry. Public ID: {}".format(
             name, resp["public_id"]

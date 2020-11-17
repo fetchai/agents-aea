@@ -53,17 +53,18 @@ from aea.cli_gui.utils import (
     terminate_processes,
 )
 from aea.configurations.base import PublicId
+from aea.configurations.constants import AGENT, CONNECTION, CONTRACT, PROTOCOL, SKILL
 
 
 elements = [
-    ["local", "agent", "localAgents"],
-    ["registered", "protocol", "registeredProtocols"],
-    ["registered", "connection", "registeredConections"],
-    ["registered", "skill", "registeredSkills"],
-    ["local", "protocol", "localProtocols"],
-    ["local", "connection", "localConnections"],
-    ["local", "contract", "localContracts"],
-    ["local", "skill", "localSkills"],
+    ["local", AGENT, "localAgents"],
+    ["registered", PROTOCOL, "registeredProtocols"],
+    ["registered", CONNECTION, "registeredConections"],
+    ["registered", SKILL, "registeredSkills"],
+    ["local", PROTOCOL, "localProtocols"],
+    ["local", CONNECTION, "localConnections"],
+    ["local", CONTRACT, "localContracts"],
+    ["local", SKILL, "localSkills"],
 ]
 
 
@@ -294,7 +295,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
 
     if connection_id is not None and connection_id != "":
-        connections = get_local_items(agent_id, "connection")[0]
+        connections = get_local_items(agent_id, CONNECTION)[0]
         has_named_connection = False
         for element in connections:
             if element["public_id"] == connection_id:

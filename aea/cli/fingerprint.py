@@ -26,13 +26,19 @@ import click
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
-from aea.configurations.base import (  # noqa: F401 # pylint: disable=unused-import
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
+from aea.configurations.base import (
     PublicId,
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
+)
+from aea.configurations.constants import (  # noqa: F401 # pylint: disable=unused-import
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
 )
 from aea.configurations.loader import ConfigLoader
 
@@ -48,7 +54,7 @@ def fingerprint(click_context: click.core.Context):  # pylint: disable=unused-ar
 @pass_ctx
 def connection(ctx: Context, connection_public_id: PublicId):
     """Fingerprint a connection and add the fingerprints to the configuration file."""
-    fingerprint_item(ctx, "connection", connection_public_id)
+    fingerprint_item(ctx, CONNECTION, connection_public_id)
 
 
 @fingerprint.command()
@@ -56,7 +62,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @pass_ctx
 def contract(ctx: Context, contract_public_id: PublicId):
     """Fingerprint a contract and add the fingerprints to the configuration file."""
-    fingerprint_item(ctx, "contract", contract_public_id)
+    fingerprint_item(ctx, CONTRACT, contract_public_id)
 
 
 @fingerprint.command()
@@ -64,7 +70,7 @@ def contract(ctx: Context, contract_public_id: PublicId):
 @pass_ctx
 def protocol(ctx: Context, protocol_public_id: PublicId):
     """Fingerprint a protocol and add the fingerprints to the configuration file.."""
-    fingerprint_item(ctx, "protocol", protocol_public_id)
+    fingerprint_item(ctx, PROTOCOL, protocol_public_id)
 
 
 @fingerprint.command()
@@ -72,7 +78,7 @@ def protocol(ctx: Context, protocol_public_id: PublicId):
 @pass_ctx
 def skill(ctx: Context, skill_public_id: PublicId):
     """Fingerprint a skill and add the fingerprints to the configuration file."""
-    fingerprint_item(ctx, "skill", skill_public_id)
+    fingerprint_item(ctx, SKILL, skill_public_id)
 
 
 def fingerprint_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:

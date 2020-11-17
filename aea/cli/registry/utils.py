@@ -156,7 +156,7 @@ def extract(source: str, target: str) -> None:
         tar.extractall(path=target)
         tar.close()
     else:
-        raise Exception("Unknown file type: {}".format(source))
+        raise ValueError("Unknown file type: {}".format(source))
 
     os.remove(source)
 
