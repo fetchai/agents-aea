@@ -395,6 +395,21 @@ class MultiAgentManager:
         self._agents[agent_name] = agent_alias
         return self
 
+    def list_agents_info(self) -> List[Dict[str, Any]]:
+        """
+        List agents detailed info.
+
+        :return: list of dicts that represents agent info: public_id, name, is_running.
+        """
+        return [
+            {
+                "agent_name": agent_name,
+                "public_id": str(alias.project.public_id),
+                "is_running": self._is_agent_running(agent_name)
+            }
+            for agent_name, alias in self._agents.items()
+        ]
+
     def list_agents(self, running_only: bool = False) -> List[str]:
         """
         List all agents.

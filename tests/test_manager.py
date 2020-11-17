@@ -332,6 +332,21 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         assert self.project_public_id in self.manager._projects.keys()
         assert self.agent_name in self.manager._agents.keys()
 
+    def test_list_agents_info_positive(self):
+        """Test list_agents_info method for positive result."""
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+
+        self.manager.add_agent(self.project_public_id, self.agent_name)
+        result = self.manager.list_agents_info()
+        expected_result = [
+            {
+                "agent_name": self.agent_name,
+                "public_id": str(self.project_public_id),
+                "is_running": False
+            }
+        ]
+        assert result == expected_result
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""
