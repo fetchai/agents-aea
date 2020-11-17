@@ -36,4 +36,4 @@ For more guidance on how to use `pdb` check out <a href="https://docs.python.org
     ]
 }
 ```
-where `PATH_TO_VIRTUAL_ENV_PACKAGES` and `CWD` need to be replaced with the path to the virtual environment's packages and current working directory respectively.
+where `PATH_TO_VIRTUAL_ENV_PACKAGES` should be replaced with the path to the virtual environment's packages and `CWD` with the working directory for the agent to debug (where the `aea-config.yaml` file is).
