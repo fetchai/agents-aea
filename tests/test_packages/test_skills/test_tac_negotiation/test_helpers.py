@@ -154,8 +154,15 @@ class TestHelpers(BaseSkillTestCase):
             good_ids, currency_id, ledger_id, is_searching_for_sellers
         )
 
+        constraints = [
+            (c.constraint_type.type, c.constraint_type.value)
+            for c in actual_query.constraints[0].constraints
+        ]
         for constraint in expected_constraints:
-            assert constraint in actual_query.constraints
+            assert (
+                constraint.constraint_type.type,
+                constraint.constraint_type.value,
+            ) in constraints
         assert actual_query.model == expected_data_model
 
     def test_build_goods_query_1_good(self):

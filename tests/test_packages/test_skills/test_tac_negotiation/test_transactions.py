@@ -75,7 +75,7 @@ class TestTransactions(BaseSkillTestCase):
 
     def test_get_next_nonce(self):
         """Test the get_next_nonce method of the Transactions class."""
-        assert self.transactions.get_next_nonce() == 1
+        assert self.transactions.get_next_nonce() == "1"
 
     def test_update_confirmed_transactions(self):
         """Test the update_confirmed_transactions method of the Transactions class."""
@@ -103,6 +103,9 @@ class TestTransactions(BaseSkillTestCase):
 
     def test_pop_pending_proposal(self):
         """Test the pop_pending_proposal method of the Transactions class."""
+        self.transactions.add_pending_proposal(
+            self.dialogue_label, self.proposal_id, self.terms
+        )
         actual_terms = self.transactions.pop_pending_proposal(
             self.dialogue_label, self.proposal_id
         )
@@ -126,6 +129,9 @@ class TestTransactions(BaseSkillTestCase):
 
     def test_pop_pending_initial_acceptance(self):
         """Test the pop_pending_initial_acceptance method of the Transactions class."""
+        self.transactions.add_pending_initial_acceptance(
+            self.dialogue_label, self.proposal_id, self.terms,
+        )
         actual_terms = self.transactions.pop_pending_initial_acceptance(
             self.dialogue_label, self.proposal_id
         )
@@ -139,18 +145,16 @@ class TestTransactions(BaseSkillTestCase):
         """Test the _register_transaction_with_time method of the Transactions class."""
         transaction_id = "5"
         self.transactions._register_transaction_with_time(transaction_id)
-        assert (
-            datetime.datetime.now(),
-            transaction_id,
-        ) in self.transactions._last_update_for_transactions
+        assert (datetime.datetime.now(), transaction_id,)[
+            1
+        ] == self.transactions._last_update_for_transactions[0][1]
 
     def test_add_locked_tx_seller(self):
         """Test the add_locked_tx method of the Transactions class as Seller."""
         self.transactions.add_locked_tx(self.terms, FipaDialogue.Role.SELLER)
-        assert (
-            datetime.datetime.now(),
-            self.terms.id,
-        ) in self.transactions._last_update_for_transactions
+        assert (datetime.datetime.now(), self.terms.id,)[
+            1
+        ] == self.transactions._last_update_for_transactions[0][1]
         assert self.transactions._locked_txs[self.terms.id] == self.terms
         assert self.transactions._locked_txs_as_seller[self.terms.id] == self.terms
         assert self.terms.id not in self.transactions._locked_txs_as_buyer
@@ -158,16 +162,16 @@ class TestTransactions(BaseSkillTestCase):
     def test_add_locked_tx_buyer(self):
         """Test the add_locked_tx method of the Transactions class as Seller."""
         self.transactions.add_locked_tx(self.terms, FipaDialogue.Role.BUYER)
-        assert (
-            datetime.datetime.now(),
-            self.terms.id,
-        ) in self.transactions._last_update_for_transactions
+        assert (datetime.datetime.now(), self.terms.id,)[
+            1
+        ] == self.transactions._last_update_for_transactions[0][1]
         assert self.transactions._locked_txs[self.terms.id] == self.terms
         assert self.transactions._locked_txs_as_buyer[self.terms.id] == self.terms
         assert self.terms.id not in self.transactions._locked_txs_as_seller
 
     def test_pop_locked_tx(self):
         """Test the pop_locked_tx method of the Transactions class."""
+        self.transactions.add_locked_tx(self.terms, FipaDialogue.Role.BUYER)
         actual_terms = self.transactions.pop_locked_tx(self.terms)
         assert actual_terms == self.terms
         assert self.terms.id not in self.transactions._locked_txs

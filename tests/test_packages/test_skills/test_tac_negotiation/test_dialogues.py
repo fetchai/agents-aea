@@ -95,7 +95,7 @@ class TestDialogues(BaseSkillTestCase):
             fipa_dialogue.proposal = description
 
         # terms
-        with pytest.raises(AEAEnforceError, match="Terms not set!"):
+        with pytest.raises(ValueError, match="Terms not set!"):
             assert fipa_dialogue.terms
         terms = Terms(
             "some_ledger_id",
@@ -120,31 +120,23 @@ class TestDialogues(BaseSkillTestCase):
             role=ContractApiDialogue.Role.AGENT,
         )
 
-        # callable
-        with pytest.raises(ValueError, match="Callable not set!"):
-            assert contract_api_dialogue.callable
+        # associated_fipa_dialogue
+        with pytest.raises(ValueError, match="associated_fipa_dialogue not set!"):
+            assert contract_api_dialogue.associated_fipa_dialogue
 
-        callable = ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
-        contract_api_dialogue.callable = callable
-        with pytest.raises(AEAEnforceError, match="Callable already set!"):
-            contract_api_dialogue.callable = callable
-        assert contract_api_dialogue.callable == callable
-
-        # terms
-        with pytest.raises(ValueError, match="Terms not set!"):
-            assert contract_api_dialogue.terms
-        terms = Terms(
-            "some_ledger_id",
+        fipa_dialogue = FipaDialogue(
+            DialogueLabel(
+                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+            ),
             self.skill.skill_context.agent_address,
-            "counterprty",
-            {"currency_id": 50},
-            {"good_id": -10},
-            "some_nonce",
+            role=FipaDialogue.Role.BUYER,
         )
-        contract_api_dialogue.terms = terms
-        with pytest.raises(AEAEnforceError, match="Terms already set!"):
-            contract_api_dialogue.terms = terms
-        assert contract_api_dialogue.terms == terms
+        contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        with pytest.raises(
+            AEAEnforceError, match="associated_fipa_dialogue already set!"
+        ):
+            contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        assert contract_api_dialogue.associated_fipa_dialogue == fipa_dialogue
 
     def test_contract_api_dialogues(self):
         """Test the ContractApiDialogues class."""
@@ -208,25 +200,21 @@ class TestDialogues(BaseSkillTestCase):
         )
 
         # associated_contract_api_dialogue
-        with pytest.raises(
-            ValueError, match="Associated contract api dialogue not set!"
-        ):
-            assert signing_dialogue.associated_contract_api_dialogue
-        contract_api_dialogue = ContractApiDialogue(
+        with pytest.raises(ValueError, match="associated_fipa_dialogue not set!"):
+            assert signing_dialogue.associated_fipa_dialogue
+        fipa_dialogue = FipaDialogue(
             DialogueLabel(
                 ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
-            role=ContractApiDialogue.Role.AGENT,
+            role=FipaDialogue.Role.BUYER,
         )
-        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
         with pytest.raises(
-            AEAEnforceError, match="Associated contract api dialogue already set!"
+            AEAEnforceError, match="associated_fipa_dialogue already set!"
         ):
-            signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
-        assert (
-            signing_dialogue.associated_contract_api_dialogue == contract_api_dialogue
-        )
+            signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+        assert signing_dialogue.associated_fipa_dialogue == fipa_dialogue
 
     def test_signing_dialogues(self):
         """Test the SigningDialogues class."""

@@ -267,7 +267,7 @@ class TestFipaHandler(BaseSkillTestCase):
                     assert end_state_numbers == 0
         else:
             raise SyntaxError(
-                f"changed_agent and changed_end_state should either both be None, or neither."
+                "changed_agent and changed_end_state should either both be None, or neither."
             )
 
     def test_handle_cfp_i(self):
@@ -308,7 +308,9 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        self._assert_stat_state(self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_CFP)
+        self._assert_stat_state(
+            self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_CFP
+        )
 
     def test_handle_cfp_ii(self):
         """Test the _on_cfp method of the fipa handler where proposal_for_query is NOT None."""
@@ -451,7 +453,9 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        self._assert_stat_state(self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_PROPOSE)
+        self._assert_stat_state(
+            self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_PROPOSE
+        )
 
         mock_logger.assert_any_call(
             logging.INFO,
@@ -482,7 +486,9 @@ class TestFipaHandler(BaseSkillTestCase):
             f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
         )
 
-        self._assert_stat_state(self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_CFP)
+        self._assert_stat_state(
+            self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_CFP
+        )
 
     def test_handle_decline_decline_propose(self):
         """Test the _handle_decline method of the fipa handler where the end state is decline_propose."""
@@ -509,7 +515,9 @@ class TestFipaHandler(BaseSkillTestCase):
             f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
         )
 
-        self._assert_stat_state(self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_PROPOSE)
+        self._assert_stat_state(
+            self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_PROPOSE
+        )
 
         mock_pending.assert_called_once()
 
@@ -541,7 +549,9 @@ class TestFipaHandler(BaseSkillTestCase):
             f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
         )
 
-        self._assert_stat_state(self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_ACCEPT)
+        self._assert_stat_state(
+            self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_ACCEPT
+        )
 
         mock_pending.assert_called_once()
         mock_locked.assert_called_once()
@@ -745,7 +755,9 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        self._assert_stat_state(self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_ACCEPT)
+        self._assert_stat_state(
+            self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_ACCEPT
+        )
 
         mock_logger.assert_any_call(
             logging.INFO,
