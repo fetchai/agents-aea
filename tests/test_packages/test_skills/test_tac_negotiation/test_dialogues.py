@@ -36,13 +36,9 @@ from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
-    DefaultDialogues,
     FipaDialogue,
-    FipaDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
-    OefSearchDialogue,
-    OefSearchDialogues,
     SigningDialogue,
     SigningDialogues,
 )
@@ -53,9 +49,7 @@ from tests.conftest import ROOT_DIR
 class TestDialogues(BaseSkillTestCase):
     """Test dialogue classes of tac negotiation."""
 
-    path_to_skill = Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation"
-    )
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
 
     @classmethod
     def setup(cls):
@@ -86,7 +80,9 @@ class TestDialogues(BaseSkillTestCase):
             assert fipa_dialogue.counterparty_signature
         fipa_dialogue.counterparty_signature = "some_counterparty_signature"
         assert fipa_dialogue.counterparty_signature == "some_counterparty_signature"
-        with pytest.raises(AEAEnforceError, match="counterparty_signature already set!"):
+        with pytest.raises(
+            AEAEnforceError, match="counterparty_signature already set!"
+        ):
             fipa_dialogue.counterparty_signature = "some_other_counterparty_signature"
 
         # proposal

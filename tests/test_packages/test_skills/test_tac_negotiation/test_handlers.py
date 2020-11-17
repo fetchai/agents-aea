@@ -16,15 +16,27 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the handler classes of the tac control skill."""
+"""This module contains the tests of the handler classes of the tac negotiation skill."""
 
 import logging
 from pathlib import Path
-from typing import cast
-from unittest.mock import patch
+from typing import Optional, cast
+from unittest.mock import PropertyMock, patch
+
+import pytest
 
 from aea.crypto.ledger_apis import LedgerApis
+from aea.exceptions import AEAEnforceError
+from aea.helpers.search.models import (
+    Attribute,
+    Constraint,
+    ConstraintType,
+    DataModel,
+    Description,
+    Query,
+)
 from aea.helpers.transaction.base import (
+    RawMessage,
     RawTransaction,
     SignedTransaction,
     State,
@@ -32,46 +44,61 @@ from aea.helpers.transaction.base import (
     TransactionDigest,
     TransactionReceipt,
 )
-from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase
+from aea.protocols.dialogue.base import DialogueMessage, DialogueStats
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
 
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
-from packages.fetchai.skills.tac_control_contract.dialogues import (
+from packages.fetchai.skills.tac_negotiation.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
+    FipaDialogue,
+    FipaDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
+    OefSearchDialogue,
+    OefSearchDialogues,
     SigningDialogue,
     SigningDialogues,
 )
-from packages.fetchai.skills.tac_control_contract.game import Game, Phase
-from packages.fetchai.skills.tac_control_contract.handlers import (
+from packages.fetchai.skills.tac_negotiation.handlers import (
     ContractApiHandler,
+    FipaNegotiationHandler,
     LEDGER_API_ADDRESS,
     LedgerApiHandler,
+    OefSearchHandler,
     SigningHandler,
 )
-from packages.fetchai.skills.tac_control_contract.parameters import Parameters
+from packages.fetchai.skills.tac_negotiation.helpers import SUPPLY_DATAMODEL_NAME
+from packages.fetchai.skills.tac_negotiation.strategy import Strategy
+from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 from tests.conftest import ROOT_DIR
 
 
-class TestContractApiHandler(BaseSkillTestCase):
-    """Test contract_api handler of tac control contract."""
+class TestFipaHandler(BaseSkillTestCase):
+    """Test fipa handler of generic buyer."""
 
-    path_to_skill = Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "tac_control_contract"
-    )
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
         super().setup()
-        cls.contract_api_handler = cast(
-            ContractApiHandler, cls._skill.skill_context.handlers.contract_api
+        cls.fipa_handler = cast(
+            FipaNegotiationHandler, cls._skill.skill_context.handlers.fipa
+        )
+        cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
+        cls.transactions = cast(Transactions, cls._skill.skill_context.transactions)
+        cls.logger = cls._skill.skill_context.logger
+
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
         cls.contract_api_dialogues = cast(
             ContractApiDialogues, cls._skill.skill_context.contract_api_dialogues
@@ -79,172 +106,835 @@ class TestContractApiHandler(BaseSkillTestCase):
         cls.signing_dialogues = cast(
             SigningDialogues, cls._skill.skill_context.signing_dialogues
         )
-        cls.logger = cls.contract_api_handler.context.logger
 
+        cls.dialogue_stats = cls.fipa_dialogues.dialogue_stats
         cls.ledger_id = "some_ledger_id"
+        cls.counterprty_address = COUNTERPARTY_ADDRESS
+        cls.amount_by_currency_id = {"1": 50}
+        cls.quantities_by_good_id = {"2": -10}
+        cls.nonce = "some_nonce"
         cls.contract_id = "some_contract_id"
-        cls.callable = "some_callable"
-        cls.kwargs = Kwargs({"some_key": "some_value"})
+        cls.contract_address = "some_contract_address"
+        cls.kwargs = {"some_key": "some_value"}
+        cls.counterparty_signature = "some_counterparty_signature"
+        cls.terms = Terms(
+            cls.ledger_id,
+            cls._skill.skill_context.agent_address,
+            cls.counterprty_address,
+            cls.amount_by_currency_id,
+            cls.quantities_by_good_id,
+            cls.nonce,
+        )
+        cls.raw_message = RawMessage(
+            ledger_id=cls.ledger_id, body=cls.terms.sender_hash.encode("utf-8")
+        )
 
-        cls.list_of_contract_api_messages = (
+        cls.cfp_query = Query(
+            [Constraint("some_attribute", ConstraintType("==", "some_service"))],
+            DataModel(
+                SUPPLY_DATAMODEL_NAME,
+                [
+                    Attribute(
+                        "some_attribute", str, False, "Some attribute descriptions."
+                    )
+                ],
+            ),
+        )
+        cls.proposal = Description(
+            {
+                "ledger_id": cls.ledger_id,
+                "price": 100,
+                "currency_id": "1",
+                "fee": 1,
+                "nonce": cls.nonce,
+            }
+        )
+        cls.list_of_messages_other_initiated = (
             DialogueMessage(
-                ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
-                {
-                    "ledger_id": cls.ledger_id,
-                    "contract_id": cls.contract_id,
-                    "callable": cls.callable,
-                    "kwargs": cls.kwargs,
-                },
+                FipaMessage.Performative.CFP, {"query": cls.cfp_query}, True
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": cls.proposal}
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                {"info": {"address": "some_term_sender_address"}},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.INFORM,
+                {"info": {"transaction_digest": "some_transaction_digest_body"}},
+            ),
+        )
+        cls.list_of_messages_self_initiated = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": cls.cfp_query}),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": cls.proposal}
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                {"info": {"address": "some_term_sender_address"}},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.INFORM,
+                {"info": {"transaction_digest": "some_transaction_digest_body"}},
             ),
         )
 
     def test_setup(self):
-        """Test the setup method of the contract_api handler."""
-        assert self.contract_api_handler.setup() is None
+        """Test the setup method of the fipa handler."""
+        assert self.fipa_handler.setup() is None
         self.assert_quantity_in_outbox(0)
 
     def test_handle_unidentified_dialogue(self):
-        """Test the _handle_unidentified_dialogue method of the signing handler."""
+        """Test the _handle_unidentified_dialogue method of the fipa handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
         incoming_message = self.build_incoming_message(
-            message_type=ContractApiMessage,
+            message_type=FipaMessage,
             dialogue_reference=incorrect_dialogue_reference,
-            performative=ContractApiMessage.Performative.STATE,
-            state=State("some_ledger_id", b"some_body"),
+            performative=FipaMessage.Performative.ACCEPT,
         )
 
         # operation
         with patch.object(self.logger, "log") as mock_logger:
-            self.contract_api_handler.handle(incoming_message)
+            self.fipa_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received invalid contract_api message={incoming_message}, unidentified dialogue.",
+            f"received invalid fipa message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_raw_transaction(self,):
-        """Test the _handle_signed_transaction method of the signing handler."""
+        self.assert_quantity_in_outbox(1)
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=DefaultMessage,
+            performative=DefaultMessage.Performative.ERROR,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
+            error_msg="Invalid dialogue.",
+            error_data={"fipa_message": incoming_message.encode()},
+        )
+        assert has_attributes, error_str
+
+    def _assert_stat_state(
+        self,
+        dialogue_stats: DialogueStats,
+        changed_agent: Optional[str] = None,
+        changed_end_state: Optional[FipaDialogue.EndState] = None,
+    ) -> None:
+        """
+        Evaluates the state of dialogue stats.
+
+        If 'changed_agent' and 'changed_end_state' are None,
+        it asserts that the dialogue stats are 0 for all end_states.
+
+        If they are not None, it checks that all end_states are 0, except for 'changed_end_state'
+        in dialogues started by 'changed_agent' (i.e. 'self' or 'other').
+
+        :param changed_agent: can either by 'self' or 'other'. Dialogues started by this agent has a none-zero end_state.
+        :param changed_end_state: the changed end_state.
+        :return:
+        """
+        if changed_agent is None and changed_end_state is None:
+            unchanged_dict_1 = dialogue_stats.self_initiated
+            unchanged_dict_2 = dialogue_stats.other_initiated
+            for end_state_numbers in unchanged_dict_1.values():
+                assert end_state_numbers == 0
+            for end_state_numbers in unchanged_dict_2.values():
+                assert end_state_numbers == 0
+        elif changed_agent is not None and changed_end_state is not None:
+            if changed_agent == "self":
+                changed_dict = dialogue_stats.self_initiated
+                unchanged_dict = dialogue_stats.other_initiated
+            elif changed_agent == "other":
+                changed_dict = dialogue_stats.other_initiated
+                unchanged_dict = dialogue_stats.self_initiated
+            else:
+                raise SyntaxError(
+                    f"changed_agent can only be 'self' or 'other'. Found {changed_agent}."
+                )
+
+            for end_state_numbers in unchanged_dict.values():
+                assert end_state_numbers == 0
+            for end_state, end_state_numbers in changed_dict.items():
+                if end_state == changed_end_state:
+                    assert end_state_numbers == 1
+                else:
+                    assert end_state_numbers == 0
+        else:
+            raise SyntaxError(
+                f"changed_agent and changed_end_state should either both be None, or neither."
+            )
+
+    def test_handle_cfp_i(self):
+        """Test the _on_cfp method of the fipa handler where proposal_for_query is None."""
         # setup
-        contract_api_dialogue = cast(
-            ContractApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.contract_api_dialogues,
-                messages=self.list_of_contract_api_messages[:1],
-            ),
+        mocked_proposal = None
+        incoming_message = self.build_incoming_message(
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.CFP,
+            query=self.cfp_query,
         )
-        contract_api_dialogue.terms = Terms(
-            "some_ledger_id",
-            self.skill.skill_context.agent_address,
-            "counterprty",
-            {"currency_id": 50},
-            {"good_id": -10},
-            "some_nonce",
+
+        # before
+        self._assert_stat_state(self.dialogue_stats)
+
+        # operation
+        with patch.object(
+            self.strategy, "get_proposal_for_query", return_value=mocked_proposal,
+        ):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.fipa_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
         )
-        incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=contract_api_dialogue,
-            performative=ContractApiMessage.Performative.RAW_TRANSACTION,
-            raw_transaction=ContractApiMessage.RawTransaction(
-                "some_ledger_id", "some_body"
-            ),
+
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.DECLINE,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+        )
+        assert has_attributes, error_str
+
+        self._assert_stat_state(self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_CFP)
+
+    def test_handle_cfp_ii(self):
+        """Test the _on_cfp method of the fipa handler where proposal_for_query is NOT None."""
+        # setup
+        incoming_message = self.build_incoming_message(
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.CFP,
+            query=self.cfp_query,
         )
 
         # operation
+        with patch.object(
+            self.strategy, "get_proposal_for_query", return_value=self.proposal
+        ):
+            with patch.object(self.strategy, "terms_from_proposal") as mock_terms:
+                with patch.object(
+                    self.transactions, "add_pending_proposal"
+                ) as mock_pending:
+                    with patch.object(self.logger, "log") as mock_logger:
+                        self.fipa_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.PROPOSE,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+            proposal=self.proposal,
+        )
+        assert has_attributes, error_str
+
+        mock_terms.assert_called_once()
+        mock_pending.assert_called_once()
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"sending {message.performative} to {message.to[-5:]} (as {self.fipa_dialogues.get_dialogue(message).role}), message={message}",
+        )
+
+    def test_handle_propose_i(self):
+        """Test the _handle_propose method of the fipa handler where the tx IS profitable."""
+        # setup
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages_self_initiated[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=self.proposal,
+        )
+
+        # operation
+        with patch.object(
+            self.strategy, "is_profitable_transaction", return_value=True
+        ):
+            with patch.object(self.transactions, "add_locked_tx") as mock_lock:
+                with patch.object(
+                    self.transactions, "add_pending_initial_acceptance"
+                ) as mock_pending:
+                    with patch.object(self.logger, "log") as mock_logger:
+                        self.fipa_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.ACCEPT,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+        )
+        assert has_attributes, error_str
+
+        mock_lock.assert_called_once()
+        mock_pending.assert_called_once()
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"sending {message.performative} to {message.to[-5:]} (as {self.fipa_dialogues.get_dialogue(message).role}), message={message}",
+        )
+
+    def test_handle_propose_ii(self):
+        """Test the _handle_propose method of the fipa handler where the tx is NOT profitable."""
+        # setup
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages_self_initiated[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=self.proposal,
+        )
+
+        # before
+        self._assert_stat_state(self.dialogue_stats)
+
+        # operation
+        with patch.object(
+            self.strategy, "is_profitable_transaction", return_value=False
+        ):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.fipa_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.DECLINE,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+        )
+        assert has_attributes, error_str
+
+        self._assert_stat_state(self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_PROPOSE)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"sending {message.performative} to {message.to[-5:]} (as {self.fipa_dialogues.get_dialogue(message).role}), message={message}",
+        )
+
+    def test_handle_decline_decline_cfp(self):
+        """Test the _handle_decline method of the fipa handler where the end state is decline_cfp."""
+        # setup
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages_self_initiated[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
+        )
+
+        # before
+        self._assert_stat_state(self.dialogue_stats)
+
+        # operation
         with patch.object(self.logger, "log") as mock_logger:
-            self.contract_api_handler.handle(incoming_message)
+            self.fipa_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received raw transaction={incoming_message}"
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
         )
 
+        self._assert_stat_state(self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_CFP)
+
+    def test_handle_decline_decline_propose(self):
+        """Test the _handle_decline method of the fipa handler where the end state is decline_propose."""
+        # setup
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages_other_initiated[:2],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
+        )
+
+        # before
+        self._assert_stat_state(self.dialogue_stats)
+
+        # operation
+        with patch.object(self.transactions, "pop_pending_proposal") as mock_pending:
+            with patch.object(self.logger, "log") as mock_logger:
+                self.fipa_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        self._assert_stat_state(self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_PROPOSE)
+
+        mock_pending.assert_called_once()
+
+    def test_handle_decline_decline_accept(self):
+        """Test the _handle_decline method of the fipa handler where the end state is decline_accept."""
+        # setup
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages_self_initiated[:3],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
+        )
+
+        # before
+        self._assert_stat_state(self.dialogue_stats)
+
+        # operation
+        with patch.object(
+            self.transactions, "pop_pending_initial_acceptance"
+        ) as mock_pending:
+            with patch.object(self.transactions, "pop_locked_tx") as mock_locked:
+                with patch.object(self.logger, "log") as mock_logger:
+                    self.fipa_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        self._assert_stat_state(self.dialogue_stats, "self", FipaDialogue.EndState.DECLINED_ACCEPT)
+
+        mock_pending.assert_called_once()
+        mock_locked.assert_called_once()
+
+    def test_handle_accept_i(self):
+        """Test the _on_accept method of the fipa handler where the tx IS profitable and strategy's is_contract_tx is True."""
+        # setup
+        self.strategy._is_contract_tx = True
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_messages_other_initiated[:2],
+            ),
+        )
+        fipa_dialogue._terms = self.terms
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+        )
+
+        # operation
+        with patch.object(self.transactions, "pop_pending_proposal") as mock_pending:
+            with patch.object(
+                self.strategy, "is_profitable_transaction", return_value=True
+            ):
+                with patch.object(self.transactions, "add_locked_tx") as mock_lock:
+                    with patch.object(
+                        type(self.strategy),
+                        "ledger_id",
+                        new_callable=PropertyMock,
+                        return_value=self.ledger_id,
+                    ):
+                        with patch.object(
+                            type(self.strategy),
+                            "contract_id",
+                            new_callable=PropertyMock,
+                            return_value=self.contract_id,
+                        ):
+                            with patch.object(
+                                type(self.strategy),
+                                "contract_address",
+                                new_callable=PropertyMock,
+                                return_value=self.contract_address,
+                            ):
+                                with patch.object(
+                                    self.strategy,
+                                    "kwargs_from_terms",
+                                    return_value=self.kwargs,
+                                ):
+                                    with patch.object(
+                                        self.logger, "log"
+                                    ) as mock_logger:
+                                        self.fipa_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        mock_pending.assert_called_once()
+        mock_lock.assert_called_once()
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
+            to=LEDGER_API_ADDRESS,
+            sender=self.skill.skill_context.agent_address,
+            ledger_id=self.ledger_id,
+            contract_id=self.contract_id,
+            contract_address=self.contract_address,
+            callable="get_hash_batch",
+            kwargs=ContractApiMessage.Kwargs(self.kwargs),
+        )
+        assert has_attributes, error_str
+
+        assert (
+            cast(
+                ContractApiDialogue, self.contract_api_dialogues.get_dialogue(message)
+            ).associated_fipa_dialogue
+            == fipa_dialogue
+        )
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"requesting batch transaction hash, sending {message.performative} to {self.contract_id}, message={message}",
+        )
+
+    def test_handle_accept_ii(self):
+        """Test the _on_accept method of the fipa handler where the tx IS profitable and strategy's is_contract_tx is False."""
+        # setup
+        self.strategy._is_contract_tx = False
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_messages_other_initiated[:2],
+            ),
+        )
+        fipa_dialogue._terms = self.terms
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+        )
+
+        # operation
+        with patch.object(
+            self.transactions, "pop_pending_proposal", return_value=self.terms
+        ) as mock_pending:
+            with patch.object(
+                self.strategy, "is_profitable_transaction", return_value=True
+            ):
+                with patch.object(self.logger, "log") as mock_logger:
+                    self.fipa_handler.handle(incoming_message)
+
+        # after
         self.assert_quantity_in_decision_making_queue(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        mock_pending.assert_called_once()
+
         message = self.get_message_from_decision_maker_inbox()
         has_attributes, error_str = self.message_has_attributes(
             actual_message=message,
             message_type=SigningMessage,
-            performative=SigningMessage.Performative.SIGN_TRANSACTION,
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
             to=self.skill.skill_context.decision_maker_address,
             sender=str(self.skill.skill_context.skill_id),
-            terms=contract_api_dialogue.terms,
+            terms=self.terms,
+            raw_message=self.raw_message,
         )
         assert has_attributes, error_str
 
         assert (
             cast(
                 SigningDialogue, self.signing_dialogues.get_dialogue(message)
-            ).associated_contract_api_dialogue
-            == contract_api_dialogue
+            ).associated_fipa_dialogue
+            == fipa_dialogue
         )
 
         mock_logger.assert_any_call(
             logging.INFO,
-            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            f"requesting signature, sending {message.performative} to decision_maker, message={message}",
         )
 
-    def test_handle_error(self):
-        """Test the _handle_error method of the signing handler."""
+    def test_handle_accept_iii(self):
+        """Test the _on_accept method of the fipa handler where the tx is NOT profitable."""
         # setup
-        contract_api_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.contract_api_dialogues,
-            messages=self.list_of_contract_api_messages[:1],
-        )
-        incoming_message = cast(
-            ContractApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=contract_api_dialogue,
-                performative=ContractApiMessage.Performative.ERROR,
-                data=b"some_data",
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_messages_other_initiated[:2],
             ),
         )
+        fipa_dialogue._terms = self.terms
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+        )
+
+        # before
+        self._assert_stat_state(self.dialogue_stats)
+
+        # operation
+        with patch.object(
+            self.transactions, "pop_pending_proposal", return_value=self.terms
+        ) as mock_pending:
+            with patch.object(
+                self.strategy, "is_profitable_transaction", return_value=False
+            ):
+                with patch.object(self.logger, "log") as mock_logger:
+                    self.fipa_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        mock_pending.assert_called_once()
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.DECLINE,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            target=incoming_message.message_id,
+        )
+        assert has_attributes, error_str
+
+        self._assert_stat_state(self.dialogue_stats, "other", FipaDialogue.EndState.DECLINED_ACCEPT)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"sending {message.performative} to {message.to[-5:]} (as {self.fipa_dialogues.get_dialogue(message).role}), message={message}",
+        )
+
+    def test_handle_match_accept_i(self):
+        """Test the _handle_match_accept method of the fipa handler where is_contract_tx is True and counterparty signature is None."""
+        # setup
+        self.strategy._is_contract_tx = True
+
+        fipa_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages_self_initiated[:3],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            info={"signature": None},
+        )
 
         # operation
         with patch.object(self.logger, "log") as mock_logger:
-            self.contract_api_handler.handle(incoming_message)
+            self.fipa_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received contract_api error message={incoming_message} in dialogue={contract_api_dialogue}.",
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
         )
 
-    def test_handle_invalid(self):
-        """Test the _handle_invalid method of the signing handler."""
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"{incoming_message.performative} did not contain counterparty signature!",
+        )
+
+    def test_handle_match_accept_ii(self):
+        """Test the _handle_match_accept method of the fipa handler where is_contract_tx is True and counterparty signature is NOT None."""
         # setup
-        invalid_performative = ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION
-        incoming_message = self.build_incoming_message(
-            message_type=ContractApiMessage,
-            dialogue_reference=("1", ""),
-            performative=invalid_performative,
-            ledger_id=self.ledger_id,
-            contract_id=self.contract_id,
-            callable=self.callable,
-            kwargs=self.kwargs,
+        self.strategy._is_contract_tx = True
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_messages_self_initiated[:3],
+            ),
+        )
+        fipa_dialogue._terms = self.terms
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            info={"signature": self.counterparty_signature},
         )
 
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            self.contract_api_handler.handle(incoming_message)
+        with patch.object(
+            type(self.strategy),
+            "ledger_id",
+            new_callable=PropertyMock,
+            return_value=self.ledger_id,
+        ):
+            with patch.object(
+                type(self.strategy),
+                "contract_id",
+                new_callable=PropertyMock,
+                return_value=self.contract_id,
+            ):
+                with patch.object(
+                    type(self.strategy),
+                    "contract_address",
+                    new_callable=PropertyMock,
+                    return_value=self.contract_address,
+                ):
+                    with patch.object(
+                        self.strategy, "kwargs_from_terms", return_value=self.kwargs
+                    ):
+                        with patch.object(self.logger, "log") as mock_logger:
+                            self.fipa_handler.handle(incoming_message)
 
         # after
+        self.assert_quantity_in_outbox(1)
+
         mock_logger.assert_any_call(
-            logging.WARNING,
-            f"cannot handle contract_api message of performative={invalid_performative} in dialogue={self.contract_api_dialogues.get_dialogue(incoming_message)}.",
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        assert fipa_dialogue.counterparty_signature == self.counterparty_signature
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            to=LEDGER_API_ADDRESS,
+            sender=self.skill.skill_context.agent_address,
+            ledger_id=self.ledger_id,
+            contract_id=self.contract_id,
+            contract_address=self.contract_address,
+            callable="get_atomic_swap_batch_transaction",
+            kwargs=ContractApiMessage.Kwargs(self.kwargs),
+        )
+        assert has_attributes, error_str
+
+        assert (
+            cast(
+                ContractApiDialogue, self.contract_api_dialogues.get_dialogue(message)
+            ).associated_fipa_dialogue
+            == fipa_dialogue
+        )
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"requesting batch atomic swap transaction, sending {message.performative} to {self.contract_id}, message={message}",
+        )
+
+    def test_handle_match_accept_iii(self):
+        """Test the _handle_match_accept method of the fipa handler where is_contract_tx is False and counterparty signature is NOT None."""
+        # setup
+        self.strategy._is_contract_tx = False
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_messages_self_initiated[:3],
+            ),
+        )
+        fipa_dialogue._terms = self.terms
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            info={"signature": self.counterparty_signature},
+        )
+
+        # operation
+        with patch.object(
+            self.transactions, "pop_pending_initial_acceptance", return_value=self.terms
+        ) as mock_pending:
+            with patch.object(self.logger, "log") as mock_logger:
+                self.fipa_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_decision_making_queue(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from {incoming_message.sender[-5:]} (as {self.fipa_dialogues.get_dialogue(incoming_message).role}), message={incoming_message}",
+        )
+
+        mock_pending.assert_called_once()
+
+        assert fipa_dialogue.counterparty_signature == self.counterparty_signature
+
+        message = self.get_message_from_decision_maker_inbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=SigningMessage,
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
+            to=self.skill.skill_context.decision_maker_address,
+            sender=str(self.skill.skill_context.skill_id),
+            terms=self.terms,
+            raw_message=self.raw_message,
+        )
+        assert has_attributes, error_str
+
+        assert (
+            cast(
+                SigningDialogue, self.signing_dialogues.get_dialogue(message)
+            ).associated_fipa_dialogue
+            == fipa_dialogue
+        )
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"requesting signature, sending {message.performative} to decision_maker, message={message}",
         )
 
     def test_teardown(self):
-        """Test the teardown method of the contract_api handler."""
-        assert self.contract_api_handler.teardown() is None
+        """Test the teardown method of the fipa handler."""
+        assert self.fipa_handler.teardown() is None
         self.assert_quantity_in_outbox(0)
 
 
 class TestSigningHandler(BaseSkillTestCase):
-    """Test signing handler of tac control contract."""
+    """Test signing handler of tac negotiation."""
 
-    path_to_skill = Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "tac_control_contract"
-    )
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
 
     @classmethod
     def setup(cls):
@@ -253,14 +943,23 @@ class TestSigningHandler(BaseSkillTestCase):
         cls.signing_handler = cast(
             SigningHandler, cls._skill.skill_context.handlers.signing
         )
-        cls.ledger_api_dialogues = cast(
-            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
-        )
+        cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
+        cls.logger = cls.signing_handler.context.logger
+
         cls.signing_dialogues = cast(
             SigningDialogues, cls._skill.skill_context.signing_dialogues
         )
-        cls.logger = cls.signing_handler.context.logger
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
+        )
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
+        )
 
+        cls.ledger_id = "some_ledger_id"
+        cls.nonce = "some_nonce"
+        cls.body = "some_body"
+        cls.counterparty_signature = "some_counterparty_signature"
         cls.terms = Terms(
             "some_ledger_id",
             cls._skill.skill_context.agent_address,
@@ -269,15 +968,77 @@ class TestSigningHandler(BaseSkillTestCase):
             {"good_id": -10},
             "some_nonce",
         )
-        cls.list_of_signing_messages = (
+        cls.list_of_signing_msg_messages = (
+            DialogueMessage(
+                SigningMessage.Performative.SIGN_MESSAGE,
+                {
+                    "terms": cls.terms,
+                    "raw_message": SigningMessage.RawMessage(cls.ledger_id, cls.body),
+                },
+            ),
+        )
+        cls.list_of_signing_tx_messages = (
             DialogueMessage(
                 SigningMessage.Performative.SIGN_TRANSACTION,
                 {
                     "terms": cls.terms,
                     "raw_transaction": SigningMessage.RawTransaction(
-                        "some_ledger_id", "some_body"
+                        cls.ledger_id, cls.body
                     ),
                 },
+            ),
+        )
+
+        cls.cfp_query = Query(
+            [Constraint("some_attribute", ConstraintType("==", "some_service"))],
+            DataModel(
+                SUPPLY_DATAMODEL_NAME,
+                [
+                    Attribute(
+                        "some_attribute", str, False, "Some attribute descriptions."
+                    )
+                ],
+            ),
+        )
+        cls.proposal = Description(
+            {
+                "ledger_id": cls.ledger_id,
+                "price": 100,
+                "currency_id": "1",
+                "fee": 1,
+                "nonce": cls.nonce,
+            }
+        )
+        cls.list_of_other_initiated_fipa_messages = (
+            DialogueMessage(
+                FipaMessage.Performative.CFP, {"query": cls.cfp_query}, True
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": cls.proposal}
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                {"info": {"address": "some_term_sender_address"}},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.INFORM,
+                {"info": {"transaction_digest": "some_transaction_digest_body"}},
+            ),
+        )
+        cls.list_of_self_initiated_fipa_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": cls.cfp_query}),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": cls.proposal}
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                {"info": {"address": "some_term_sender_address"}},
+            ),
+            DialogueMessage(
+                FipaMessage.Performative.INFORM,
+                {"info": {"transaction_digest": "some_transaction_digest_body"}},
             ),
         )
 
@@ -308,25 +1069,242 @@ class TestSigningHandler(BaseSkillTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_transaction(self,):
-        """Test the _handle_signed_transaction method of the signing handler."""
+    def test_handle_signed_message_i(self):
+        """Test the _handle_signed_message method of the signing handler where last fipa message is ACCEPT."""
         # setup
-        signing_counterparty = self.skill.skill_context.decision_maker_address
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_other_initiated_fipa_messages[:3],
+            ),
+        )
+
         signing_dialogue = cast(
             SigningDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:1],
-                counterparty=signing_counterparty,
+                messages=self.list_of_signing_msg_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
             ),
         )
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_MESSAGE,
+                signed_message=SigningMessage.SignedMessage(self.ledger_id, self.body),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            to=fipa_dialogue.dialogue_label.dialogue_opponent_addr,
+            # (line below) match-accept is already added to fipa_dialogue, hence "-1"
+            target=fipa_dialogue.last_message.message_id - 1,
+            sender=self.skill.skill_context.agent_address,
+            info={"signature": incoming_message.signed_message.body},
+        )
+        assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"sending {message.performative.value} to {message.to[-5:]} (as {fipa_dialogue.role}), message={message}.",
+        )
+
+    def test_handle_signed_message_ii(self):
+        """Test the _handle_signed_message method of the signing handler where last fipa message is MATCH_ACCEPT."""
+        # setup
+        mocked_tx = {
+            "terms": self.terms,
+            "sender_signature": self.body,
+            "counterparty_signature": self.counterparty_signature,
+        }
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_self_initiated_fipa_messages[:4],
+            ),
+        )
+        fipa_dialogue.counterparty_signature = self.counterparty_signature
+        fipa_dialogue.terms = self.terms
+
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_msg_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
+            ),
+        )
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_MESSAGE,
+                signed_message=SigningMessage.SignedMessage(self.ledger_id, self.body),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+        assert (
+            self.skill.skill_context.shared_state["transactions"][
+                fipa_dialogue.terms.sender_hash
+            ]
+            == mocked_tx
+        )
+
+        mock_logger.assert_any_call(
+            logging.INFO, f"sending transaction to controller, tx={mocked_tx}."
+        )
+
+    def test_handle_signed_message_iii(self):
+        """Test the _handle_signed_message method of the signing handler where last fipa message is neither ACCEPT nor MATCH_ACCEPT."""
+        # setup
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_self_initiated_fipa_messages[:3],
+            ),
+        )
+
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_msg_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
+            ),
+        )
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_MESSAGE,
+                signed_message=SigningMessage.SignedMessage(self.ledger_id, self.body),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            with pytest.raises(
+                AEAEnforceError,
+                match="last message should be of performative accept or match accept.",
+            ):
+                self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+    def test_handle_signed_message_iv(self):
+        """Test the _handle_signed_message method of the signing handler where last fipa message is None."""
+        # setup
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_self_initiated_fipa_messages[:1],
+            ),
+        )
+        fipa_dialogue._incoming_messages = []
+        fipa_dialogue._outgoing_messages = []
+
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_msg_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
+            ),
+        )
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_MESSAGE,
+                signed_message=SigningMessage.SignedMessage(self.ledger_id, self.body),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            with pytest.raises(AEAEnforceError, match="last message not recovered."):
+                self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+    def test_handle_signed_transaction_i(self):
+        """Test the _handle_signed_transaction method of the signing handler where is_contract_tx is True and last fipa message is ACCEPT."""
+        # setup
+        self.strategy._is_contract_tx = True
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_other_initiated_fipa_messages[:3],
+            ),
+        )
+
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_tx_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
+            ),
+        )
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+
         incoming_message = cast(
             SigningMessage,
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_TRANSACTION,
                 signed_transaction=SigningMessage.SignedTransaction(
-                    "some_ledger_id", "some_body"
+                    self.ledger_id, self.body
                 ),
             ),
         )
@@ -336,9 +1314,77 @@ class TestSigningHandler(BaseSkillTestCase):
             self.signing_handler.handle(incoming_message)
 
         # after
-        mock_logger.assert_any_call(logging.INFO, "transaction signing was successful.")
-
         self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+            to=fipa_dialogue.dialogue_label.dialogue_opponent_addr,
+            # (line below) match-accept is already added to fipa_dialogue, hence "-1"
+            target=fipa_dialogue.last_message.message_id - 1,
+            sender=self.skill.skill_context.agent_address,
+            info={"tx_signature": incoming_message.signed_transaction},
+        )
+        assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"sending {message.performative.value} to {message.to[-5:]} (as {fipa_dialogue.role}), message={message}.",
+        )
+
+    def test_handle_signed_transaction_ii(self):
+        """Test the _handle_signed_transaction method of the signing handler where is_contract_tx is True and last fipa message is MATCH_ACCEPT."""
+        # setup
+        self.strategy._is_contract_tx = True
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_self_initiated_fipa_messages[:4],
+            ),
+        )
+
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_tx_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
+            ),
+        )
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+                signed_transaction=SigningMessage.SignedTransaction(
+                    self.ledger_id, self.body
+                ),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
         message = self.get_message_from_outbox()
         has_attributes, error_str = self.message_has_attributes(
             actual_message=message,
@@ -357,7 +1403,144 @@ class TestSigningHandler(BaseSkillTestCase):
             == signing_dialogue
         )
 
-        mock_logger.assert_any_call(logging.INFO, "sending transaction to ledger.")
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"sending {message.performative} to ledger {self.strategy.ledger_id}, message={message}",
+        )
+
+    def test_handle_signed_transaction_iii(self):
+        """Test the _handle_signed_transaction method of the signing handler where is_contract_tx is True and last fipa message is neither ACCEPT nor MATCH_ACCEPT."""
+        # setup
+        self.strategy._is_contract_tx = True
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_self_initiated_fipa_messages[:3],
+            ),
+        )
+
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_tx_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
+            ),
+        )
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+                signed_transaction=SigningMessage.SignedTransaction(
+                    self.ledger_id, self.body
+                ),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            with pytest.raises(
+                AEAEnforceError,
+                match="last message should be of performative accept or match accept.",
+            ):
+                self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+    def test_handle_signed_transaction_iv(self):
+        """Test the _handle_signed_transaction method of the signing handler where is_contract_tx is True and last incoming fipa message is None."""
+        # setup
+        self.strategy._is_contract_tx = True
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_self_initiated_fipa_messages[:3],
+            ),
+        )
+        fipa_dialogue._incoming_messages = []
+        fipa_dialogue._outgoing_messages = []
+
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_tx_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
+            ),
+        )
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+                signed_transaction=SigningMessage.SignedTransaction(
+                    self.ledger_id, self.body
+                ),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            with pytest.raises(AEAEnforceError, match="last message not recovered."):
+                self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+    def test_handle_signed_transaction_v(self):
+        """Test the _handle_signed_transaction method of the signing handler where is_contract_tx is False."""
+        # setup
+        self.strategy._is_contract_tx = False
+
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_tx_messages[:1],
+                counterparty=self.skill.skill_context.decision_maker_address,
+            ),
+        )
+
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+                signed_transaction=SigningMessage.SignedTransaction(
+                    self.ledger_id, self.body
+                ),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+        mock_logger.assert_any_call(
+            logging.WARNING, "signed transaction handler only for contract case."
+        )
 
     def test_handle_error(self):
         """Test the _handle_error method of the signing handler."""
@@ -365,7 +1548,7 @@ class TestSigningHandler(BaseSkillTestCase):
         signing_counterparty = self.skill.skill_context.decision_maker_address
         signing_dialogue = self.prepare_skill_dialogue(
             dialogues=self.signing_dialogues,
-            messages=self.list_of_signing_messages[:1],
+            messages=self.list_of_signing_tx_messages[:1],
             counterparty=signing_counterparty,
         )
         incoming_message = cast(
@@ -382,6 +1565,11 @@ class TestSigningHandler(BaseSkillTestCase):
             self.signing_handler.handle(incoming_message)
 
         # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
         mock_logger.assert_any_call(
             logging.INFO,
             f"transaction signing was not successful. Error_code={incoming_message.error_code} in dialogue={signing_dialogue}",
@@ -408,6 +1596,11 @@ class TestSigningHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
+            logging.INFO,
+            f"received {incoming_message.performative} from decision_maker, message={incoming_message}",
+        )
+
+        mock_logger.assert_any_call(
             logging.WARNING,
             f"cannot handle signing message of performative={invalid_performative} in dialogue={self.signing_dialogues.get_dialogue(incoming_message)}.",
         )
@@ -418,12 +1611,10 @@ class TestSigningHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
 
-class TestGenericLedgerApiHandler(BaseSkillTestCase):
-    """Test ledger_api handler of tac control contract."""
+class TestLedgerApiHandler(BaseSkillTestCase):
+    """Test ledger_api handler of tac negotiation."""
 
-    path_to_skill = Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "tac_control_contract"
-    )
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
 
     @classmethod
     def setup(cls):
@@ -432,19 +1623,11 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         cls.ledger_api_handler = cast(
             LedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
         )
+        cls.logger = cls.ledger_api_handler.context.logger
+
         cls.ledger_api_dialogues = cast(
             LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
-        cls.signing_dialogues = cast(
-            SigningDialogues, cls._skill.skill_context.signing_dialogues
-        )
-        cls.contract_api_dialogues = cast(
-            ContractApiDialogues, cls._skill.skill_context.contract_api_dialogues
-        )
-        cls.parameters = cast(Parameters, cls._skill.skill_context.parameters)
-        cls.game = cast(Game, cls._skill.skill_context.game)
-
-        cls.logger = cls.ledger_api_handler.context.logger
 
         cls.ledger_id = "some_ledger_id"
         cls.contract_id = "some_contract_id"
@@ -461,38 +1644,17 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         cls.transaction_receipt = TransactionReceipt(
             cls.ledger_id, cls.receipt, "some_transaction"
         )
+        cls.address = "some_address"
 
         cls.terms = Terms(
             cls.ledger_id,
             cls._skill.skill_context.agent_address,
-            "counterprty",
+            "counterparty",
             {"currency_id": 50},
             {"good_id": -10},
             "some_nonce",
         )
 
-        cls.list_of_signing_messages = (
-            DialogueMessage(
-                SigningMessage.Performative.SIGN_TRANSACTION,
-                {
-                    "terms": cls.terms,
-                    "raw_transaction": SigningMessage.RawTransaction(
-                        cls.ledger_id, cls.body
-                    ),
-                },
-            ),
-        )
-        cls.list_of_contract_api_messages = (
-            DialogueMessage(
-                ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
-                {
-                    "ledger_id": cls.ledger_id,
-                    "contract_id": cls.contract_id,
-                    "callable": cls.callable,
-                    "kwargs": cls.kwargs,
-                },
-            ),
-        )
         cls.list_of_ledger_api_messages = (
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_RAW_TRANSACTION, {"terms": cls.terms}
@@ -553,7 +1715,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 messages=(
                     DialogueMessage(
                         LedgerApiMessage.Performative.GET_BALANCE,
-                        {"ledger_id": self.ledger_id, "address": "some_address"},
+                        {"ledger_id": self.ledger_id, "address": self.address},
                     ),
                 ),
                 counterparty=LEDGER_API_ADDRESS,
@@ -614,6 +1776,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target=incoming_message.message_id,
             to=LEDGER_API_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             transaction_digest=incoming_message.transaction_digest,
@@ -633,24 +1796,6 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        signing_dialogue = cast(
-            SigningDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-        contract_api_dialogue = cast(
-            ContractApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-
-        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
-        ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
-
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -661,8 +1806,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=False):
+        with patch.object(LedgerApis, "is_transaction_settled", return_value=False):
+            with patch.object(self.logger, "log") as mock_logger:
                 self.ledger_api_handler.handle(incoming_message)
 
         # after
@@ -671,8 +1816,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"transaction failed. Transaction receipt={incoming_message.transaction_receipt}",
         )
 
-    def test_handle_transaction_receipt_callable_get_deploy_transaction(self):
-        """Test the _handle_transaction_receipt method of the ledger_api handler where contract_api callable is GET_DEPLOY_TRANSACTION."""
+    def test_handle_transaction_receipt_succeeds(self):
+        """Test the _handle_transaction_receipt method of the ledger_api handler where the transaction is NOT settled."""
         # setup
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
@@ -682,28 +1827,6 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        signing_dialogue = cast(
-            SigningDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-        contract_api_dialogue = cast(
-            ContractApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-
-        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
-        ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
-
-        contract_api_dialogue.callable = (
-            ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
-        )
-
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -714,231 +1837,15 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
+        with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
+            with patch.object(self.logger, "log") as mock_logger:
                 self.ledger_api_handler.handle(incoming_message)
 
         # after
-        assert self.parameters.contract_address == self.contract_address
-        assert self.game.phase == Phase.CONTRACT_DEPLOYED
-
-        mock_logger.assert_any_call(logging.INFO, "contract deployed.")
-
-    def test_handle_transaction_receipt_callable_get_create_batch_transaction(self):
-        """Test the _handle_transaction_receipt method of the ledger_api handler where contract_api callable is GET_CREATE_BATCH_TRANSACTION."""
-        # setup
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
-                counterparty=LEDGER_API_ADDRESS,
-            ),
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction was successfully settled. Transaction receipt={incoming_message.transaction_receipt}",
         )
-        signing_dialogue = cast(
-            SigningDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-        contract_api_dialogue = cast(
-            ContractApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-
-        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
-        ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
-
-        contract_api_dialogue.callable = (
-            ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION
-        )
-
-        incoming_message = cast(
-            LedgerApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-                transaction_receipt=self.transaction_receipt,
-            ),
-        )
-
-        # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
-                self.ledger_api_handler.handle(incoming_message)
-
-        # after
-        assert self.game.phase == Phase.TOKENS_CREATED
-
-        mock_logger.assert_any_call(logging.INFO, "tokens created.")
-
-    def test_handle_transaction_receipt_callable_get_mint_batch_transaction_i(self):
-        """Test the _handle_transaction_receipt method of the ledger_api handler where contract_api callable is GET_MINT_BATCH_TRANSACTION and all tokens are NOT minted."""
-        # setup
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
-                counterparty=LEDGER_API_ADDRESS,
-            ),
-        )
-        signing_dialogue = cast(
-            SigningDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-        contract_api_dialogue = cast(
-            ContractApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-
-        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
-        ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
-
-        contract_api_dialogue.callable = (
-            ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
-        )
-
-        incoming_message = cast(
-            LedgerApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-                transaction_receipt=self.transaction_receipt,
-            ),
-        )
-
-        self.parameters.nb_completed_minting = 0
-        self.game._registration._agent_addr_to_name = {
-            "some_address_1": "some_name_1",
-            "some_address_2": "some_name_2",
-        }
-
-        # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
-                self.ledger_api_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(logging.INFO, "tokens minted.")
-        assert self.parameters.nb_completed_minting == 1
-        assert self.game.is_allowed_to_mint is True
-        assert self.game.phase != Phase.TOKENS_MINTED
-
-    def test_handle_transaction_receipt_callable_get_mint_batch_transaction_ii(self):
-        """Test the _handle_transaction_receipt method of the ledger_api handler where contract_api callable is GET_MINT_BATCH_TRANSACTION and all tokens are minted."""
-        # setup
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
-                counterparty=LEDGER_API_ADDRESS,
-            ),
-        )
-        signing_dialogue = cast(
-            SigningDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-        contract_api_dialogue = cast(
-            ContractApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-
-        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
-        ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
-
-        contract_api_dialogue.callable = (
-            ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
-        )
-
-        incoming_message = cast(
-            LedgerApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-                transaction_receipt=self.transaction_receipt,
-            ),
-        )
-
-        self.parameters.nb_completed_minting = 0
-        self.game._registration._agent_addr_to_name = {"some_address": "some_name"}
-
-        # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
-                self.ledger_api_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(logging.INFO, "tokens minted.")
-        assert self.parameters.nb_completed_minting == 1
-        assert self.game.is_allowed_to_mint is True
-        assert self.game.phase == Phase.TOKENS_MINTED
-        mock_logger.assert_any_call(logging.INFO, "all tokens minted.")
-
-    def test_handle_transaction_receipt_incorrect_callable(self):
-        """Test the _handle_transaction_receipt method of the ledger_api handler where contract_api callable is incorrect."""
-        # setup
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:5],
-                counterparty=LEDGER_API_ADDRESS,
-            ),
-        )
-        signing_dialogue = cast(
-            SigningDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-        contract_api_dialogue = cast(
-            ContractApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
-            ),
-        )
-
-        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
-        ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
-
-        contract_api_dialogue.callable = "some_incorrect_callable"
-
-        incoming_message = cast(
-            LedgerApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-                transaction_receipt=self.transaction_receipt,
-            ),
-        )
-
-        # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
-                self.ledger_api_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(logging.ERROR, "unexpected transaction receipt!")
 
     def test_handle_error(self):
         """Test the _handle_error method of the ledger_api handler."""
@@ -975,7 +1882,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             dialogue_reference=("1", ""),
             performative=invalid_performative,
             ledger_id="some_ledger_id",
-            address="some_address",
+            address=self.address,
             to=self.skill.skill_context.agent_address,
         )
 
@@ -992,4 +1899,525 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     def test_teardown(self):
         """Test the teardown method of the ledger_api handler."""
         assert self.ledger_api_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
+
+
+class TestOefSearchHandler(BaseSkillTestCase):
+    """Test oef search handler of tac negotiation."""
+
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
+
+    @classmethod
+    def setup(cls):
+        """Setup the test class."""
+        super().setup()
+        cls.oef_search_handler = cast(
+            OefSearchHandler, cls._skill.skill_context.handlers.oef
+        )
+        cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
+        cls.logger = cls._skill.skill_context.logger
+
+        cls.oef_dialogues = cast(
+            OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
+        )
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
+        )
+
+        cls.controller_address = "some_controller_address"
+        cls.self_address = cls._skill.skill_context.agent_address
+        cls.found_agent_address_1 = "some_agent_address_1"
+        cls.found_agent_address_2 = "some_agent_address_2"
+        cls.found_agent_address_3 = "some_agent_address_3"
+        cls.found_agents = [
+            cls.self_address,
+            cls.found_agent_address_1,
+            cls.found_agent_address_2,
+            cls.found_agent_address_3,
+        ]
+        cls.found_agents_less_self = [
+            cls.found_agent_address_1,
+            cls.found_agent_address_2,
+            cls.found_agent_address_3,
+        ]
+        cls.cfp_query = Query(
+            [Constraint("some_attribute", ConstraintType("==", "some_service"))],
+            DataModel(
+                SUPPLY_DATAMODEL_NAME,
+                [
+                    Attribute(
+                        "some_attribute", str, False, "Some attribute descriptions."
+                    )
+                ],
+            ),
+        )
+
+        cls.list_of_messages = (
+            DialogueMessage(
+                OefSearchMessage.Performative.SEARCH_SERVICES, {"query": "some_query"}
+            ),
+        )
+
+    def test_setup(self):
+        """Test the setup method of the oef handler."""
+        assert self.oef_search_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_handle_unidentified_dialogue(self):
+        """Test the _handle_unidentified_dialogue method of the oef handler."""
+        # setup
+        incorrect_dialogue_reference = ("", "")
+        incoming_message = self.build_incoming_message(
+            message_type=OefSearchMessage,
+            dialogue_reference=incorrect_dialogue_reference,
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
+            to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"received invalid oef_search message={incoming_message}, unidentified dialogue.",
+        )
+
+    def test_handle_error(self):
+        """Test the _handle_error method of the oef handler."""
+        # setup
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+        )
+        incoming_message = cast(
+            OefSearchMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=oef_dialogue,
+                performative=OefSearchMessage.Performative.OEF_ERROR,
+                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"received OEF Search error: dialogue_reference={oef_dialogue.dialogue_label.dialogue_reference}, oef_error_operation={incoming_message.oef_error_operation}",
+        )
+
+    def test_on_search_result_i(self):
+        """Test the _on_search_result method of the oef handler."""
+        # setup
+        oef_dialogue = cast(
+            OefSearchDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            ),
+        )
+        oef_dialogue._is_seller_search = True
+        search_for = "sellers"
+
+        incoming_message = cast(
+            OefSearchMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=oef_dialogue,
+                performative=OefSearchMessage.Performative.SEARCH_RESULT,
+                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                agents=tuple(self.found_agents),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            with patch.object(
+                self.strategy, "get_own_services_query", return_value=self.cfp_query
+            ) as mock_own:
+                self.oef_search_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(len(self.found_agents_less_self))
+
+        # _handle_search
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"found potential {search_for} agents={list(map(lambda x: x[-5:], self.found_agents_less_self))} on search_id={incoming_message.dialogue_reference[0]}.",
+        )
+        mock_own.assert_called_once()
+
+        for agent in self.found_agents_less_self:
+            mock_logger.assert_any_call(
+                logging.INFO, f"sending CFP to agent={agent[-5:]}",
+            )
+            has_attributes, error_str = self.message_has_attributes(
+                actual_message=self.get_message_from_outbox(),
+                message_type=FipaMessage,
+                performative=FipaMessage.Performative.CFP,
+                to=agent,
+                sender=self.self_address,
+                query=self.cfp_query,
+            )
+            assert has_attributes, error_str
+
+    def test_on_search_result_ii(self):
+        """Test the _on_search_result method of the oef handler where number of agents found is 0."""
+        # setup
+        oef_dialogue = cast(
+            OefSearchDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            ),
+        )
+        oef_dialogue._is_seller_search = False
+        search_for = "buyers"
+
+        incoming_message = cast(
+            OefSearchMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=oef_dialogue,
+                performative=OefSearchMessage.Performative.SEARCH_RESULT,
+                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                agents=tuple(),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+        # _handle_search
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"found no {search_for} agents on search_id={incoming_message.dialogue_reference[0]}, continue searching.",
+        )
+
+    def test_handle_invalid(self):
+        """Test the _handle_invalid method of the oef handler."""
+        # setup
+        invalid_performative = OefSearchMessage.Performative.UNREGISTER_SERVICE
+        incoming_message = self.build_incoming_message(
+            message_type=OefSearchMessage,
+            dialogue_reference=("1", ""),
+            performative=invalid_performative,
+            to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+            service_description="some_service_description",
+        )
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle oef_search message of performative={invalid_performative} in dialogue={self.oef_dialogues.get_dialogue(incoming_message)}.",
+        )
+
+    def test_teardown(self):
+        """Test the teardown method of the oef_search handler."""
+        assert self.oef_search_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
+
+
+class TestContractApiHandler(BaseSkillTestCase):
+    """Test contract_api handler of tac negotiation."""
+
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
+
+    @classmethod
+    def setup(cls):
+        """Setup the test class."""
+        super().setup()
+        cls.contract_api_handler = cast(
+            ContractApiHandler, cls._skill.skill_context.handlers.contract_api
+        )
+        cls.logger = cls.contract_api_handler.context.logger
+
+        cls.contract_api_dialogues = cast(
+            ContractApiDialogues, cls._skill.skill_context.contract_api_dialogues
+        )
+        cls.signing_dialogues = cast(
+            SigningDialogues, cls._skill.skill_context.signing_dialogues
+        )
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
+        )
+
+        cls.ledger_id = "some_ledger_id"
+        cls.contract_id = "some_contract_id"
+        cls.contract_address = "some_contract_address"
+        cls.callable = "some_callable"
+        cls.kwargs = Kwargs({"some_key": "some_value"})
+        cls.body = "some_body"
+        cls.body_bytes = b"some_body"
+        cls.nonce = "some_nonce"
+        cls.counterprty_address = COUNTERPARTY_ADDRESS
+        cls.amount_by_currency_id = {"1": 50}
+        cls.quantities_by_good_id = {"2": -10}
+        cls.terms = Terms(
+            cls.ledger_id,
+            cls._skill.skill_context.agent_address,
+            cls.counterprty_address,
+            cls.amount_by_currency_id,
+            cls.quantities_by_good_id,
+            cls.nonce,
+        )
+
+        cls.list_of_contract_api_messages_get_deploy_tx = (
+            DialogueMessage(
+                ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+                {
+                    "ledger_id": cls.ledger_id,
+                    "contract_id": cls.contract_id,
+                    "callable": cls.callable,
+                    "kwargs": cls.kwargs,
+                },
+            ),
+        )
+        cls.list_of_contract_api_messages_raw_msg = (
+            DialogueMessage(
+                ContractApiMessage.Performative.GET_RAW_MESSAGE,
+                {
+                    "ledger_id": cls.ledger_id,
+                    "contract_id": cls.contract_id,
+                    "contract_address": cls.contract_address,
+                    "callable": cls.callable,
+                    "kwargs": cls.kwargs,
+                },
+            ),
+        )
+
+        cls.cfp_query = Query(
+            [Constraint("some_attribute", ConstraintType("==", "some_service"))],
+            DataModel(
+                SUPPLY_DATAMODEL_NAME,
+                [
+                    Attribute(
+                        "some_attribute", str, False, "Some attribute descriptions."
+                    )
+                ],
+            ),
+        )
+        cls.list_of_fipa_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": cls.cfp_query}),
+        )
+
+    def test_setup(self):
+        """Test the setup method of the contract_api handler."""
+        assert self.contract_api_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_handle_unidentified_dialogue(self):
+        """Test the _handle_unidentified_dialogue method of the signing handler."""
+        # setup
+        incorrect_dialogue_reference = ("", "")
+        incoming_message = self.build_incoming_message(
+            message_type=ContractApiMessage,
+            dialogue_reference=incorrect_dialogue_reference,
+            performative=ContractApiMessage.Performative.STATE,
+            state=State("some_ledger_id", b"some_body"),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid contract_api message={incoming_message}, unidentified dialogue.",
+        )
+
+    def test_handle_raw_message(self):
+        """Test the _handle_raw_message method of the signing handler."""
+        # setup
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:1],
+            ),
+        )
+        fipa_dialogue.terms = self.terms
+
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages_raw_msg[:1],
+            ),
+        )
+        contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            ContractApiMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=contract_api_dialogue,
+                performative=ContractApiMessage.Performative.RAW_MESSAGE,
+                raw_message=ContractApiMessage.RawMessage(
+                    self.ledger_id, self.body_bytes
+                ),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"received raw message={incoming_message}"
+        )
+
+        self.assert_quantity_in_decision_making_queue(1)
+        message = self.get_message_from_decision_maker_inbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=SigningMessage,
+            performative=SigningMessage.Performative.SIGN_MESSAGE,
+            to=self.skill.skill_context.decision_maker_address,
+            sender=str(self.skill.skill_context.skill_id),
+            terms=self.terms,
+            raw_message=RawMessage(
+                self.ledger_id, self.body_bytes, is_deprecated_mode=True,
+            ),
+        )
+        assert has_attributes, error_str
+
+        assert (
+            cast(
+                SigningDialogue, self.signing_dialogues.get_dialogue(message)
+            ).associated_fipa_dialogue
+            == fipa_dialogue
+        )
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            "proposing the message to the decision maker. Waiting for confirmation ...",
+        )
+
+    def test_handle_raw_transaction(self):
+        """Test the _handle_signed_transaction method of the signing handler."""
+        # setup
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:1],
+            ),
+        )
+        fipa_dialogue.terms = self.terms
+
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages_get_deploy_tx[:1],
+            ),
+        )
+        contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        incoming_message = cast(
+            ContractApiMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=contract_api_dialogue,
+                performative=ContractApiMessage.Performative.RAW_TRANSACTION,
+                raw_transaction=ContractApiMessage.RawTransaction(
+                    self.ledger_id, self.body
+                ),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"received raw transaction={incoming_message}"
+        )
+
+        self.assert_quantity_in_decision_making_queue(1)
+        message = self.get_message_from_decision_maker_inbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=SigningMessage,
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
+            to=self.skill.skill_context.decision_maker_address,
+            sender=str(self.skill.skill_context.skill_id),
+            terms=self.terms,
+            raw_transaction=incoming_message.raw_transaction,
+        )
+        assert has_attributes, error_str
+
+        assert (
+            cast(
+                SigningDialogue, self.signing_dialogues.get_dialogue(message)
+            ).associated_fipa_dialogue
+            == fipa_dialogue
+        )
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+        )
+
+    def test_handle_error(self):
+        """Test the _handle_error method of the signing handler."""
+        # setup
+        contract_api_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.contract_api_dialogues,
+            messages=self.list_of_contract_api_messages_get_deploy_tx[:1],
+        )
+        incoming_message = cast(
+            ContractApiMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=contract_api_dialogue,
+                performative=ContractApiMessage.Performative.ERROR,
+                data=b"some_data",
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received contract_api error message={incoming_message} in dialogue={contract_api_dialogue}.",
+        )
+
+    def test_handle_invalid(self):
+        """Test the _handle_invalid method of the signing handler."""
+        # setup
+        invalid_performative = ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION
+        incoming_message = self.build_incoming_message(
+            message_type=ContractApiMessage,
+            dialogue_reference=("1", ""),
+            performative=invalid_performative,
+            ledger_id=self.ledger_id,
+            contract_id=self.contract_id,
+            callable=self.callable,
+            kwargs=self.kwargs,
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle contract_api message of performative={invalid_performative} in dialogue={self.contract_api_dialogues.get_dialogue(incoming_message)}.",
+        )
+
+    def test_teardown(self):
+        """Test the teardown method of the contract_api handler."""
+        assert self.contract_api_handler.teardown() is None
         self.assert_quantity_in_outbox(0)
