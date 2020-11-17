@@ -124,6 +124,10 @@ def test_run():
             pass
 
 
+@pytest.mark.skipif(
+    sys.version_info < (3, 7),
+    reason="cannot run on 3.6 as AttributeError: 'functools._lru_list_elem' object has no attribute '__class__'",
+)
 def test_run_with_profiling():
     """Test profiling data showed."""
     runner = CliRunner()
