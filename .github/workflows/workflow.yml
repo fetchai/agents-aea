@@ -60,6 +60,8 @@ jobs:
         run: tox -e mypy
       - name: Golang code style check
         uses: golangci/golangci-lint-action@v1
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
           version: v1.28
           working-directory: packages/fetchai/connections/p2p_libp2p/
@@ -211,6 +213,8 @@ jobs:
         brew install protobuf
     - if: matrix.os == 'windows-latest'
       name: Install dependencies (windows-latest)
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       run: |
         pip install tox
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"

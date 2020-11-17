@@ -29,12 +29,14 @@ from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.confirmation_aw1.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
+    DefaultDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
     RegisterDialogue,
@@ -323,7 +325,9 @@ class LedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
+        strategy = cast(Strategy, self.context.strategy)
+        for registered_aea in strategy.all_registered_aeas:
+            self._send_confirmation_details_to_aw2_aeas(registered_aea)
 
     def handle(self, message: Message) -> None:
         """
@@ -427,6 +431,28 @@ class LedgerApiHandler(Handler):
         self.context.logger.info(
             f"informing counterparty={response.to} of registration success."
         )
+        self._send_confirmation_details_to_aw2_aeas(response.to)
+
+    def _send_confirmation_details_to_aw2_aeas(self, confirmed_aea: str) -> None:
+        """
+        Send a confirmation of registration to aw2 aeas.
+
+        :param confirmed_aea: the confirmed aea's address
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        if strategy.aw2_aeas != []:
+            self.context.logger.info(
+                f"informing aw2_aeas={strategy.aw2_aeas} of registration success of confirmed aea={confirmed_aea}."
+            )
+            default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
+            for aw2_aea in strategy.aw2_aeas:
+                msg, _ = default_dialogues.create(
+                    counterparty=aw2_aea,
+                    performative=DefaultMessage.Performative.BYTES,
+                    content=confirmed_aea.encode("utf-8"),
+                )
+                self.context.outbox.put_message(message=msg)
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue

@@ -61,6 +61,13 @@ class AgentConfigMock:
     name = "name"
 
 
+class FaultyAgentConfigMock:
+    """A Class to mock Agent config with missing attributes."""
+
+    def __init__(self, *args, **kwargs):
+        """Init faulty agent config."""
+
+
 class ContextMock:
     """A class to mock Context."""
 

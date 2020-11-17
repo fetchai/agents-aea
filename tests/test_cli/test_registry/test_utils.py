@@ -21,6 +21,7 @@
 import os
 from json.decoder import JSONDecodeError
 from unittest import TestCase, mock
+from unittest.mock import MagicMock
 
 from click import ClickException
 from requests.exceptions import ConnectionError
@@ -31,10 +32,12 @@ from aea.cli.registry.utils import (
     check_is_author_logged_in,
     download_file,
     extract,
+    get_latest_public_id_mixed,
     is_auth_token_present,
     request_api,
 )
 from aea.cli.utils.exceptions import AEAConfigException
+from aea.configurations.base import PublicId
 
 
 def _raise_connection_error(*args, **kwargs):
@@ -290,3 +293,17 @@ class IsAuthTokenPresentTestCase(TestCase):
         """Test for is_auth_token_present method positive result."""
         result = is_auth_token_present()
         self.assertTrue(result)
+
+
+@mock.patch(
+    "aea.cli.registry.utils.find_item_locally", side_effect=ClickException("some error")
+)
+@mock.patch(
+    "aea.cli.registry.utils.get_package_meta",
+    return_value=dict(public_id="author/name:0.1.0"),
+)
+def test_get_latest_public_id_mixed_negative(*_mocks):
+    """Test 'get_latest_public_id_mixed', when local fetch fails."""
+    get_latest_public_id_mixed(
+        MagicMock(), "protocol", PublicId.from_str("author/name:0.1.0")
+    )

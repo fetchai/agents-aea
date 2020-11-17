@@ -21,12 +21,13 @@ import asyncio
 import datetime
 import logging
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
 from aea.aea import AEA
 from aea.agent_loop import AgentLoopStates, AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
+from aea.exceptions import AEAActException
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.mail.base import Envelope
@@ -93,9 +94,7 @@ class FailBehaviour(TickerBehaviour):
     @classmethod
     def make(cls, tick_interval: int = 1) -> "FailBehaviour":
         """Construct behaviour."""
-        return cls(
-            name="test", skill_context=SkillContext(), tick_interval=tick_interval
-        )
+        return cls(name="test", skill_context=Mock(), tick_interval=tick_interval)
 
 
 class AsyncFakeAgent(AEA):
@@ -290,9 +289,12 @@ class TestAsyncAgentLoop:
         agent_loop = self.AGENT_LOOP_CLASS(agent, threaded=True)
 
         agent._skills_exception_policy = ExceptionPolicyEnum.propagate
-        with pytest.raises(ValueError, match="expected!"):
-            agent_loop.start()
-            agent_loop.wait_completed(sync=True)
+        with pytest.raises(AEAActException):
+            with pytest.raises(ValueError, match="expected!"):
+                agent_loop.start()
+                agent_loop.wait_completed(sync=True)
+        agent_loop.stop()
+        agent_loop.wait_completed(sync=True)
 
     @pytest.mark.asyncio
     async def test_stop(self):

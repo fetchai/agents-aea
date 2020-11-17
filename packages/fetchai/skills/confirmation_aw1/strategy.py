@@ -19,7 +19,7 @@
 
 """This package contains the strategy model."""
 
-from typing import Dict, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import Terms
@@ -63,6 +63,7 @@ class Strategy(Model):
         self._override_staking_check = kwargs.pop(
             "override_staking_check", DEFAULT_OVERRIDE
         )
+        self._aw2_aeas: List[str] = kwargs.pop("aw2_aeas", [])
         super().__init__(**kwargs)
         self._is_ready_to_register = False
         self._is_registered = False
@@ -94,6 +95,18 @@ class Strategy(Model):
     def contract_callable(self) -> str:
         """Get the ledger on which the contract is deployed."""
         return self._contract_callable
+
+    @property
+    def aw2_aeas(self) -> List[str]:
+        """Get list of AW2 AEAs."""
+        return self._aw2_aeas
+
+    @property
+    def all_registered_aeas(self) -> List[str]:
+        """Get all the registered AEAs."""
+        registration_db = cast(RegistrationDB, self.context.registration_db)
+        all_registered = registration_db.get_all_registered()
+        return all_registered
 
     def lock_registration_temporarily(self, address: str, info: Dict[str, str]) -> None:
         """Lock this address for registration."""

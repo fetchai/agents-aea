@@ -18,11 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+from pathlib import Path
 from unittest.mock import MagicMock
 
 from aea.crypto.cosmos import CosmosApi, CosmosCrypto
 
-from tests.conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG
+from tests.conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG, ROOT_DIR
 
 
 def test_creation():
@@ -98,3 +99,10 @@ def test_validate_address():
     account = CosmosCrypto()
     assert CosmosApi.is_valid_address(account.address)
     assert not CosmosApi.is_valid_address(account.address + "wrong")
+
+
+def test_load_contract_interface():
+    """Test the load_contract_interface method."""
+    path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.wasm")
+    result = CosmosApi.load_contract_interface(path)
+    assert "wasm_byte_code" in result

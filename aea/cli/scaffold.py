@@ -23,6 +23,7 @@ import os
 import re
 import shutil
 from pathlib import Path
+from typing import cast
 
 import click
 from jsonschema import ValidationError
@@ -32,24 +33,41 @@ from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import validate_package_name
-from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-import
+from aea.cli.utils.package_utils import (
+    create_symlink_packages_to_vendor,
+    create_symlink_vendor_to_local,
+    validate_package_name,
+)
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unused-import
+    CONNECTION,
+    CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
-    PublicId,
+    PROTOCOL,
+    SCAFFOLD_PUBLIC_ID,
+    SKILL,
 )
-from aea.configurations.constants import SCAFFOLD_PUBLIC_ID
 
 
 @click.group()
+@click.option(
+    "--with-symlinks",
+    is_flag=True,
+    help="Add symlinks from vendor to non-vendor and packages to vendor folders.",
+)
 @click.pass_context
 @check_aea_project
-def scaffold(click_context):  # pylint: disable=unused-argument
+def scaffold(
+    click_context: click.core.Context, with_symlinks: bool
+):  # pylint: disable=unused-argument
     """Scaffold a resource for the agent."""
+    ctx = cast(Context, click_context.obj)
+    ctx.set_config("with_symlinks", with_symlinks)
 
 
 @scaffold.command()
@@ -57,7 +75,7 @@ def scaffold(click_context):  # pylint: disable=unused-argument
 @pass_ctx
 def connection(ctx: Context, connection_name: str) -> None:
     """Add a connection scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "connection", connection_name)
+    scaffold_item(ctx, CONNECTION, connection_name)
 
 
 @scaffold.command()
@@ -65,7 +83,7 @@ def connection(ctx: Context, connection_name: str) -> None:
 @pass_ctx
 def contract(ctx: Context, contract_name: str) -> None:
     """Add a contract scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "contract", contract_name)
+    scaffold_item(ctx, CONTRACT, contract_name)
 
 
 @scaffold.command()
@@ -73,7 +91,7 @@ def contract(ctx: Context, contract_name: str) -> None:
 @pass_ctx
 def protocol(ctx: Context, protocol_name: str):
     """Add a protocol scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "protocol", protocol_name)
+    scaffold_item(ctx, PROTOCOL, protocol_name)
 
 
 @scaffold.command()
@@ -81,7 +99,7 @@ def protocol(ctx: Context, protocol_name: str):
 @pass_ctx
 def skill(ctx: Context, skill_name: str):
     """Add a skill scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "skill", skill_name)
+    scaffold_item(ctx, SKILL, skill_name)
 
 
 @scaffold.command()
@@ -163,6 +181,13 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
         # fingerprint item.
         fingerprint_item(ctx, item_type, new_public_id)
+
+        if ctx.config.get("with_symlinks", False):
+            click.echo(
+                "Adding symlinks from vendor to non-vendor and packages to vendor folders."
+            )
+            create_symlink_vendor_to_local(ctx, item_type, new_public_id)
+            create_symlink_packages_to_vendor(ctx)
 
     except ValidationError:
         raise click.ClickException(

@@ -22,6 +22,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 from click.exceptions import ClickException
@@ -109,7 +110,8 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
 
     def check_remove(self, item_type, public_id):
         """Check remove can be performed with remove helper."""
-        return ItemRemoveHelper(self.load_config()).check_remove(item_type, public_id)
+        context_mock = MagicMock(agent_config=self.load_config())
+        return ItemRemoveHelper(context_mock).check_remove(item_type, public_id)
 
     def test_package_can_be_removed_with_its_dependency(self):
         """Test package (soef) can be removed with its dependency (oef_search)."""

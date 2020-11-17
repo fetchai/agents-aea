@@ -597,10 +597,13 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             f"found no agents in dialogue={oef_dialogue}, continue searching.",
         )
 
-    def test_handle_search(self):
-        """Test the _handle_search method of the oef_search handler."""
+    def test_handle_search_i(self):
+        """Test the _handle_search method of the oef_search handler where is_stop_searching_on_result is True."""
         # setup
         self.strategy._max_negotiations = 3
+        self.strategy._is_stop_searching_on_result = True
+        self.strategy._is_searching = True
+
         oef_dialogue = self.prepare_skill_dialogue(
             dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
         )
@@ -623,7 +626,50 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             logging.INFO, f"found agents={list(agents)}, stopping search."
         )
 
-        assert not self.strategy.is_searching
+        assert self.strategy.is_searching is False
+
+        self.assert_quantity_in_outbox(len(agents))
+        for agent in agents:
+            has_attributes, error_str = self.message_has_attributes(
+                actual_message=self.get_message_from_outbox(),
+                message_type=FipaMessage,
+                performative=FipaMessage.Performative.CFP,
+                to=agent,
+                sender=self.skill.skill_context.agent_address,
+                target=0,
+                query=self.strategy.get_service_query(),
+            )
+            assert has_attributes, error_str
+            mock_logger.assert_any_call(logging.INFO, f"sending CFP to agent={agent}")
+
+    def test_handle_search_ii(self):
+        """Test the _handle_search method of the oef_search handler where is_stop_searching_on_result is False."""
+        # setup
+        self.strategy._max_negotiations = 3
+        self.strategy._is_stop_searching_on_result = False
+        self.strategy._is_searching = True
+
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+        )
+        agents = ("agnt1", "agnt2")
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=oef_dialogue,
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
+            agents=agents,
+            agents_info=OefSearchMessage.AgentsInfo(
+                {"agent_1": {"key_1": "value_1"}, "agent_2": {"key_2": "value_2"}}
+            ),
+        )
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(logging.INFO, f"found agents={list(agents)}.")
+
+        assert self.strategy.is_searching is True
 
         self.assert_quantity_in_outbox(len(agents))
         for agent in agents:
