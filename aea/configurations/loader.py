@@ -52,7 +52,7 @@ _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 _PREFIX_BASE_CONFIGURABLE_PARTS = "base"
 _SCHEMAS_CONFIGURABLE_PARTS_DIRNAME = "configurable_parts"
 _POSTFIX_CUSTOM_CONFIG = "-custom_config.json"
-STARTING_INDEX_CUSTOM_CONFIGS = 1
+_STARTING_INDEX_CUSTOM_CONFIGS = 1
 
 T = TypeVar(
     "T",
@@ -303,7 +303,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         component_configurations: Dict[ComponentId, Dict] = {}
         # load the other components.
         for i, component_configuration_json in enumerate(
-            configuration_file_jsons[STARTING_INDEX_CUSTOM_CONFIGS:]
+            configuration_file_jsons[_STARTING_INDEX_CUSTOM_CONFIGS:]
         ):
             component_id = self._process_component_section(
                 i, component_configuration_json

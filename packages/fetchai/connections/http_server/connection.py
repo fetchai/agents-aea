@@ -462,7 +462,7 @@ class HTTPChannel(BaseAsyncChannel):
         except asyncio.TimeoutError:
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
         except FuturesCancelledError:
-            return Response(
+            return Response(  # pragma: nocover
                 status=SERVER_ERROR, reason="Server terminated unexpectedly."
             )
         except BaseException:  # pragma: nocover # pylint: disable=broad-except

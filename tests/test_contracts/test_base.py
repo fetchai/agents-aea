@@ -38,7 +38,7 @@ from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
 
-from tests.conftest import ETHEREUM, FETCHAI, ROOT_DIR
+from tests.conftest import ETHEREUM, FETCHAI, ROOT_DIR, make_uri
 
 
 logger = logging.getLogger(__name__)
@@ -138,10 +138,14 @@ def test_get_instance_no_address_ethereum(dummy_contract):
     assert type(instance) == web3._utils.datatypes.PropertyCheckingFactory
 
 
-def test_get_deploy_transaction_ethereum(dummy_contract):
+def test_get_deploy_transaction_ethereum(
+    dummy_contract, ganache_addr, ganache_port, ganache
+):
     """Tests the deploy transaction classmethod for ethereum."""
     ethereum_crypto = crypto_registry.make(ETHEREUM)
-    ledger_api = ledger_apis_registry.make(ETHEREUM, address=ETHEREUM_DEFAULT_ADDRESS,)
+    ledger_api = ledger_apis_registry.make(
+        ETHEREUM, address=make_uri(ganache_addr, ganache_port)
+    )
     with patch(
         "web3.contract.ContractConstructor.buildTransaction",
         return_value={"data": "0xstub"},

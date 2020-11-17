@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Module with package utils of the aea cli."""
-
 import os
 import re
 import shutil
@@ -28,6 +27,12 @@ import click
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
+from aea.cli.fingerprint import fingerprint_item
+from aea.cli.utils.config import (
+    dump_item_config,
+    get_non_vendor_package_path,
+    load_item_config,
+)
 from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
@@ -46,6 +51,8 @@ from aea.configurations.constants import (
     DISTRIBUTED_PACKAGES as DISTRIBUTED_PACKAGES_STR,
 )
 from aea.configurations.constants import (
+    IMPORT_TEMPLATE_1,
+    IMPORT_TEMPLATE_2,
     LEDGER_CONNECTION,
     PACKAGES,
     PACKAGE_PUBLIC_ID_VAR_NAME,
@@ -53,6 +60,7 @@ from aea.configurations.constants import (
     VENDOR,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.configurations.utils import replace_component_ids
 from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
@@ -445,27 +453,40 @@ def is_item_present_unified(ctx: Context, item_type: str, item_public_id: Public
 
 
 def is_item_present(
-    ctx: Context, item_type: str, item_public_id: PublicId, is_vendor: bool = True
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    is_vendor: bool = True,
+    with_version: bool = False,
 ) -> bool:
     """
     Check if item is already present in AEA.
 
+    Optionally, consider the check also with the version.
+
     :param ctx: context object.
     :param item_type: type of an item.
     :param item_public_id: PublicId of an item.
-    :param is_vendor: flag for vendorized path (True by defaut).
+    :param is_vendor: flag for vendorized path (True by default).
+    :param with_version: if true, consider also the package version.
 
     :return: boolean is item present.
     """
-    # check item presence only by author/package_name pair, without version.
-
-    item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
+    item_path = Path(
+        get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
+    )
     registered_item_public_id = get_item_public_id_by_author_name(
         ctx.agent_config, item_type, item_public_id.author, item_public_id.name
     )
-    is_item_registered = registered_item_public_id is not None
+    is_item_registered_no_version = registered_item_public_id is not None
+    does_path_exist = Path(item_path).exists()
+    if item_public_id.package_version.is_latest or not with_version:
+        return is_item_registered_no_version and does_path_exist
 
-    return is_item_registered and Path(item_path).exists()
+    # the following makes sense because public id is not latest
+    component_id = ComponentId(ComponentType(item_type), item_public_id)
+    component_is_registered = component_id in ctx.agent_config.package_dependencies
+    return component_is_registered and does_path_exist
 
 
 def get_item_id_present(
@@ -626,6 +647,40 @@ def update_item_public_id_in_init(
                 f.write(line)
 
 
+def update_references(ctx: Context, replacements: Dict[ComponentId, ComponentId]):
+    """
+    Update references across an AEA project.
+
+    Caveat: the update is done in a sequential manner. There is no check
+    of multiple updates, due to the occurrence of transitive relations.
+    E.g. replacements as {c1: c2, c2: c3} might lead to c1 replaced with c3
+      instead of c2.
+
+    :param ctx: the context.
+    :param replacements: mapping from old component ids to new component ids.
+    :return: None.
+    """
+    # preprocess replacement so to index them by component type
+    replacements_by_type: Dict[ComponentType, Dict[PublicId, PublicId]] = {}
+    for old, new in replacements.items():
+        replacements_by_type.setdefault(old.component_type, {})[
+            old.public_id
+        ] = new.public_id
+
+    aea_project_root = Path(ctx.cwd)
+    # update agent configuration
+    agent_config = load_item_config(PackageType.AGENT.value, aea_project_root)
+    replace_component_ids(agent_config, replacements_by_type)
+    dump_item_config(agent_config, aea_project_root)
+
+    # update every (non-vendor) AEA package.
+    for package_path in get_non_vendor_package_path(aea_project_root):
+        package_type = PackageType(package_path.parent.name[:-1])
+        package_config = load_item_config(package_type.value, package_path)
+        replace_component_ids(package_config, replacements_by_type)
+        dump_item_config(package_config, package_path)
+
+
 def create_symlink_vendor_to_local(
     ctx: Context, item_type: str, public_id: PublicId
 ) -> None:
@@ -656,3 +711,58 @@ def create_symlink_packages_to_vendor(ctx: Context) -> None:
     """
     if not os.path.exists(PACKAGES):
         create_symlink(Path(PACKAGES), Path(VENDOR), Path(ctx.cwd))
+
+
+def replace_all_import_statements(
+    aea_project_path: Path,
+    item_type: ComponentType,
+    old_public_id: PublicId,
+    new_public_id: PublicId,
+):
+    """
+    Replace all import statements in Python modules of all the non-vendor packages.
+
+    The function looks for two patterns:
+    - from packages.<author>.<item_type_plural>.<name>
+    - import packages.<author>.<item_type_plural>.<name>
+
+    :param aea_project_path: path to the AEA project.
+    :param item_type: the item type.
+    :param old_public_id: the old public id.
+    :param new_public_id: the new public id.
+    :return: None
+    """
+    old_formats = dict(
+        author=old_public_id.author, type=item_type.to_plural(), name=old_public_id.name
+    )
+    new_formats = dict(
+        author=new_public_id.author, type=item_type.to_plural(), name=new_public_id.name
+    )
+    old_import_1 = IMPORT_TEMPLATE_1.format(**old_formats)
+    old_import_2 = IMPORT_TEMPLATE_2.format(**old_formats)
+    new_import_1 = IMPORT_TEMPLATE_1.format(**new_formats)
+    new_import_2 = IMPORT_TEMPLATE_2.format(**new_formats)
+
+    pattern_1 = re.compile(rf"^{old_import_1}", re.MULTILINE)
+    pattern_2 = re.compile(rf"^{old_import_2}", re.MULTILINE)
+
+    for package_path in get_non_vendor_package_path(aea_project_path):
+        for python_module in package_path.rglob("*.py"):
+            content = python_module.read_text()
+            content = pattern_1.sub(new_import_1, content)
+            content = pattern_2.sub(new_import_2, content)
+            python_module.write_text(content)
+
+
+def fingerprint_all(ctx: Context) -> None:
+    """
+    Fingerprint all non-vendor packages.
+
+    :param ctx: the CLI context.
+    :return: None
+    """
+    aea_project_path = Path(ctx.cwd)
+    for package_path in get_non_vendor_package_path(aea_project_path):
+        item_type = package_path.parent.name[:-1]
+        config = load_item_config(item_type, package_path)
+        fingerprint_item(ctx, item_type, config.public_id)

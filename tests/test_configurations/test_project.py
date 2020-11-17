@@ -87,6 +87,7 @@ class TestProjectAndAgentAlias:
         assert project.agents
         alias.remove_from_project()
         assert not project.agents
+        assert all(key in alias.dict for key in ["agent_name", "config", "public_id"])
 
     def teardown(self):
         """Tear dowm the test."""

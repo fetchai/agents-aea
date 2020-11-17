@@ -39,6 +39,8 @@ from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
 
 from dotenv import load_dotenv
 
+from aea.exceptions import enforce
+
 
 STRING_LENGTH_LIMIT = 128
 
@@ -464,3 +466,36 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
         raise ValueError("Graph has at least one cycle.")
 
     return order
+
+
+def reachable_nodes(
+    adjacency_list: Dict[T, Set[T]], starting_nodes: Set[T]
+) -> Dict[T, Set[T]]:
+    """
+    Find the reachable subgraph induced by a set of starting nodes.
+
+    :param adjacency_list: the adjacency list of the full graph.
+    :param starting_nodes: the starting nodes of the new graph.
+    :return: the adjacency list of the subgraph.
+    """
+    all_nodes = set()
+    for node, nodes in adjacency_list.items():
+        all_nodes.add(node)
+        all_nodes.update(nodes)
+    enforce(
+        all(s in all_nodes for s in starting_nodes),
+        f"These starting nodes are not in the set of nodes: {starting_nodes.difference(all_nodes)}",
+    )
+    visited: Set[T] = set()
+    result: Dict[T, Set[T]] = {start_node: set() for start_node in starting_nodes}
+    queue: Deque[T] = deque()
+    queue.extend(starting_nodes)
+    while len(queue) > 0:
+        current = queue.pop()
+        if current in visited or current not in adjacency_list:
+            continue
+        successors = adjacency_list.get(current, set())
+        result.setdefault(current, set()).update(successors)
+        queue.extendleft(successors)
+        visited.add(current)
+    return result

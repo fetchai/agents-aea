@@ -22,6 +22,7 @@
 import hashlib
 import logging
 import time
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import eth_account
@@ -33,6 +34,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     ETHEREUM_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
+    ROOT_DIR,
 )
 
 
@@ -240,3 +242,11 @@ def test_get_deploy_transaction():
         key in ["from", "value", "gas", "gasPrice", "nonce", "data"]
         for key in deploy_tx.keys()
     )
+
+
+def test_load_contract_interface():
+    """Test the load_contract_interface method."""
+    path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
+    result = EthereumApi.load_contract_interface(path)
+    assert "abi" in result
+    assert "bytecode" in result
