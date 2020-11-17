@@ -207,6 +207,7 @@ class TestInteractEcho(AEATestCaseEmpty):
     """Test 'aea interact' with the echo skill."""
 
     @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # can be flaky on Windows
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
         self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))

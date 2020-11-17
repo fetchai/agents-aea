@@ -370,7 +370,7 @@ class MultiAgentManager:
         :return: manager
         """
         if any((agent_overrides, component_overrides)) and config is not None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Can not add agent with overrides and full config."
                 "One of those must be used."
             )
@@ -681,7 +681,7 @@ class MultiAgentManager:
             save_json = json.load(f)
 
         if not save_json:
-            return
+            return  # pragma: nocover
 
         try:
             for public_id in save_json["projects"]:
@@ -695,7 +695,7 @@ class MultiAgentManager:
                     agent_name=agent_settings["agent_name"],
                     config=agent_settings["config"],
                 )
-        except ValueError as e:
+        except ValueError as e:  # pragma: nocover
             raise ValueError(f"Failed to load state. {e}")
 
     def _save_state(self) -> None:
