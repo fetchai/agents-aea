@@ -563,7 +563,7 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
     image.stop_if_already_running()
     container = image.create()
     container.start()
-    logger.info(f"Setting up image '%s'...", image.tag)
+    logger.info(f"Setting up image {image.tag}...")
     success = image.wait(max_attempts, timeout)
     if not success:
         container.stop()
@@ -573,7 +573,7 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
         logger.info("Done!")
         time.sleep(timeout)
         yield
-        logger.info("Stopping the image '%s'...", image.tag)
+        logger.info(f"Stopping the image {image.tag}...")
         container.stop()
         container.remove()
 

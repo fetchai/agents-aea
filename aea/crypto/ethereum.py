@@ -275,7 +275,7 @@ class EthereumHelper(Helper):
         with open(file_path, "r") as interface_file_ethereum:
             contract_interface = json.load(interface_file_ethereum)
         for key in [_ABI, _BYTECODE]:
-            if key not in contract_interface:
+            if key not in contract_interface:  # pragma: nocover
                 raise ValueError(f"Contract {file_path} missing key {key}.")
         return contract_interface
 
