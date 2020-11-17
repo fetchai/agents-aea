@@ -123,6 +123,10 @@ COSMOS = _COSMOS
 ETHEREUM = _ETHEREUM
 FETCHAI = _FETCHAI
 
+# URL to local Ganache instance
+DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
+DEFAULT_GANACHE_PORT = 8545
+
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
 
@@ -330,6 +334,11 @@ protocol_specification_files = [
 ]
 
 
+def make_uri(address: str, port: int):
+    """Make an URI from address and port."""
+    return address + ":" + str(port)
+
+
 def only_windows(fn: Callable) -> Callable:
     """
     Decorate a pytest method to run a test only in a case we are on Windows.
@@ -432,13 +441,13 @@ def oef_port() -> int:
 @pytest.fixture(scope="session")
 def ganache_addr() -> str:
     """HTTP address to the Ganache node."""
-    return "http://127.0.0.1"
+    return DEFAULT_GANACHE_ADDR
 
 
 @pytest.fixture(scope="session")
 def ganache_port() -> int:
     """Port of the connection to the OEF Node to use during the tests."""
-    return 8545
+    return DEFAULT_GANACHE_PORT
 
 
 def tcpping(ip, port, log_exception: bool = True) -> bool:
