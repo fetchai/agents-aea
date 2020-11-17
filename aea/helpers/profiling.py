@@ -28,11 +28,14 @@ import textwrap
 import threading
 import time
 from collections import Counter
+from concurrent.futures._base import CancelledError
 from functools import wraps
 from typing import Callable, Dict, List, Type
 
 from aea.helpers.async_utils import Runnable
 
+
+lock = threading.Lock()
 
 _default_logger = logging.getLogger(__file__)
 
@@ -125,6 +128,8 @@ class Profiling(Runnable):
             while True:
                 await asyncio.sleep(self._period)
                 self.output_profile_data()
+        except CancelledError:
+            pass
         except Exception:  # pragma: nocover
             _default_logger.exception("Exception in Profiling")
             raise
@@ -173,13 +178,17 @@ class Profiling(Runnable):
         """Return dict with counted object instances present now."""
         result: Dict = Counter()
 
-        for obj_type in self._objects_instances_to_count:
-            result[obj_type.__name__] += 0
-
-        for obj in gc.get_objects():
+        lock.acquire()
+        try:
             for obj_type in self._objects_instances_to_count:
-                if isinstance(obj, obj_type):
-                    result[obj_type.__name__] += 1
+                result[obj_type.__name__] += 0
+
+            for obj in gc.get_objects():
+                for obj_type in self._objects_instances_to_count:
+                    if isinstance(obj, obj_type):
+                        result[obj_type.__name__] += 1
+        finally:
+            lock.release()
         return result
 
     def get_objecst_created(self) -> Dict:

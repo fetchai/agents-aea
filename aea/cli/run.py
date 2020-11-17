@@ -119,6 +119,11 @@ def _profiling_context(period: int):
     finally:
         profiler.stop()
         profiler.wait_completed(sync=True, timeout=10)
+        # hack to address faulty garbage collection output being printed
+        import os  # pylint: disable=import-outside-toplevel
+        import sys  # pylint: disable=import-outside-toplevel
+
+        sys.stderr = open(os.devnull, "w")
 
 
 def run_aea(
