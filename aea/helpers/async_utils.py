@@ -533,9 +533,9 @@ class Runnable(ABC):
     def _thread_target(self) -> None:
         """Start event loop and task in the dedicated thread."""
         if not self._loop:
-            raise ValueError("Call _set_loop() first!")
+            raise ValueError("Call _set_loop() first!")  # pragma: nocover
         if not self._task:
-            raise ValueError("Call _set_task() first!")
+            raise ValueError("Call _set_task() first!")  # pragma: nocover
         self._loop.run_until_complete(self._task)
         self._loop.stop()
         self._loop.close()

@@ -33,9 +33,13 @@ def test_profiling():
 
     p = Profiling(1, [Message], [Message], output_function=output_function)
     p.start()
+    import time
+
+    time.sleep(0.5)
     m = Message()
     try:
         wait_for_condition(lambda: result, timeout=3)
+
         assert "Profiling details" in result
     finally:
         p.stop()
