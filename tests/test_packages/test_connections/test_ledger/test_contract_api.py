@@ -79,7 +79,6 @@ class ContractApiDialogues(BaseContractApiDialogues):
 @pytest.mark.asyncio
 async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
-    # TODO to fix
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     request, contract_api_dialogue = contract_api_dialogues.create(
@@ -125,8 +124,8 @@ async def test_erc1155_get_raw_transaction(
     ganache,
 ):
     """Test get state with contract erc1155."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     contract_api_dialogues = ContractApiDialogues(address)
     request, contract_api_dialogue = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
@@ -170,8 +169,8 @@ async def test_erc1155_get_raw_transaction(
 @pytest.mark.asyncio
 async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     contract_api_dialogues = ContractApiDialogues(address)
     request, contract_api_dialogue = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
@@ -221,8 +220,8 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
 @pytest.mark.asyncio
 async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     contract_api_dialogues = ContractApiDialogues(address)
     token_id = 1
     request, contract_api_dialogue = contract_api_dialogues.create(
@@ -311,10 +310,10 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
 
     Test the case of either GET_STATE, GET_RAW_MESSAGE or GET_RAW_TRANSACTION.
     """
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     token_id = 1
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     request, _ = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=ContractApiMessage.Performative.GET_STATE,
@@ -365,6 +364,7 @@ async def test_callable_wrong_number_of_arguments_apis(
 
     Test the case of either GET_DEPLOY_TRANSACTION.
     """
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     request, _ = contract_api_dialogues.create(
@@ -418,6 +418,7 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
 
     Test the case of either GET_DEPLOY_TRANSACTION.
     """
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     request, _ = contract_api_dialogues.create(
@@ -452,10 +453,10 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
 @pytest.mark.asyncio
 async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
     """Test error messages when an exception is raised while processing the request."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     token_id = 1
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     request, _ = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=ContractApiMessage.Performative.GET_STATE,
@@ -497,10 +498,10 @@ async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
 @pytest.mark.asyncio
 async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, caplog):
     """Test error messages when an exception is raised while processing the request."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     token_id = 1
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     request, _ = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=ContractApiMessage.Performative.GET_STATE,

@@ -241,7 +241,12 @@ class GanacheDockerImage(DockerImage):
     """Wrapper to Ganache Docker image."""
 
     def __init__(
-        self, client: DockerClient, addr: str, port: int, config: Optional[Dict] = None
+        self,
+        client: DockerClient,
+        addr: str,
+        port: int,
+        config: Optional[Dict] = None,
+        gas_limit: int = 10000000000000,
     ):
         """
         Initialize the Ganache Docker image.
@@ -255,6 +260,7 @@ class GanacheDockerImage(DockerImage):
         self._addr = addr
         self._port = port
         self._config = config or {}
+        self._gas_limit = gas_limit
 
     @property
     def tag(self) -> str:
@@ -268,6 +274,7 @@ class GanacheDockerImage(DockerImage):
     def _build_command(self) -> List[str]:
         """Build command."""
         cmd = ["ganache-cli"]
+        cmd += ["--gasLimit=" + str(self._gas_limit)]
         accounts_balances = self._config.get("accounts_balances", [])
         for account, balance in accounts_balances:
             cmd += [f"--account='{account},{balance}'"]
