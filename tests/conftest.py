@@ -56,10 +56,15 @@ from aea.contracts.base import Contract, contract_registry
 from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import _COSMOS
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
-from aea.crypto.ethereum import _ETHEREUM
+from aea.crypto.ethereum import DEFAULT_CHAIN_ID as ETHEREUM_DEFAULT_CHAIN_ID
+from aea.crypto.ethereum import (
+    DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM,
+)
+from aea.crypto.ethereum import EthereumApi, _ETHEREUM
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.fetchai import _FETCHAI
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
+from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
 from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
@@ -133,6 +138,8 @@ FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
 COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
 ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
 FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
+
+DEFAULT_AMOUNT = 10000000000000000000
 
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
@@ -261,7 +268,6 @@ connection_config_files = [
     os.path.join(CUR_PATH, "data", "gym-connection.yaml"),
 ]
 
-
 skill_config_files = [
     os.path.join(ROOT_DIR, "aea", "skills", "scaffold", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "aries_alice", SKILL_YAML),
@@ -295,7 +301,6 @@ skill_config_files = [
     os.path.join(CUR_PATH, "data", "dependencies_skill", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "exception_skill", SKILL_YAML),
 ]
-
 
 agent_config_files = [
     os.path.join(CUR_PATH, "data", "dummy_aea", AGENT_YAML),
@@ -332,11 +337,6 @@ protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
-
-
-def make_uri(address: str, port: int):
-    """Make an URI from address and port."""
-    return address + ":" + str(port)
 
 
 def only_windows(fn: Callable) -> Callable:
@@ -376,6 +376,7 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
 
     :return: decorated object
     """
+
     # for docstyle.
     def decorator(pytest_func):
         """
@@ -544,11 +545,54 @@ def network_node(
 
 
 @pytest.fixture(scope="session")
+def ganache_configuration():
+    """Get the Ganache configuration for testing purposes."""
+    return dict(
+        accounts_balances=[
+            (FUNDED_ETH_PRIVATE_KEY_1, DEFAULT_AMOUNT),
+            (FUNDED_ETH_PRIVATE_KEY_2, DEFAULT_AMOUNT),
+            (FUNDED_ETH_PRIVATE_KEY_3, DEFAULT_AMOUNT),
+            (Path(ETHEREUM_PRIVATE_KEY_PATH).read_text().strip(), DEFAULT_AMOUNT),
+        ],
+    )
+
+
+@pytest.fixture(scope="session")
+def ethereum_testnet_config(ganache_addr, ganache_port):
+    """Get Ethereum ledger api configurations using Ganache."""
+    new_uri = f"{ganache_addr}:{ganache_port}"
+    new_config = {
+        "address": new_uri,
+        "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
+        "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
+    }
+    return new_config
+
+
+@pytest.fixture(scope="function")
+def update_default_ethereum_ledger_api(ethereum_testnet_config):
+    """Change temporarily default Ethereum ledger api configurations to interact with local Ganache."""
+    old_config = DEFAULT_LEDGER_CONFIGS.pop(EthereumApi.identifier, None)
+    DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = ethereum_testnet_config
+    yield
+    DEFAULT_LEDGER_CONFIGS.pop(EthereumApi.identifier)
+    DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = old_config
+
+
+@pytest.fixture(scope="session")
 @action_for_platform("Linux", skip=False)
-def ganache(ganache_addr, ganache_port, timeout: float = 2.0, max_attempts: int = 10):
+def ganache(
+    ganache_configuration,
+    ganache_addr,
+    ganache_port,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
     """Launch the Ganache image."""
     client = docker.from_env()
-    image = GanacheDockerImage(client, "http://127.0.0.1", 8545)
+    image = GanacheDockerImage(
+        client, "http://127.0.0.1", 8545, config=ganache_configuration
+    )
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
@@ -758,6 +802,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
 
     :return: decorated method.
     """
+
     # for pydcostyle
     @wraps(fn)
     def wrapper(self, *args, **kwargs):
@@ -949,3 +994,8 @@ def random_string(length: int = 8) -> str:
     return "".join(
         random.choice(string.ascii_lowercase) for _ in range(length)  # nosec
     )
+
+
+def make_uri(addr: str, port: int):
+    """Make uri from address and port."""
+    return f"{addr}:{port}"

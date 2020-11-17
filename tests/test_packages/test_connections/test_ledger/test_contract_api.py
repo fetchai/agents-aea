@@ -118,7 +118,12 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
-async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connection):
+async def test_erc1155_get_raw_transaction(
+    erc1155_contract,
+    ledger_apis_connection,
+    update_default_ethereum_ledger_api,
+    ganache,
+):
     """Test get state with contract erc1155."""
     address = ETHEREUM_ADDRESS_ONE
     contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
