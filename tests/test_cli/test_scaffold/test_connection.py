@@ -204,7 +204,7 @@ class TestScaffoldConnectionWithSymlinks:
         vendor_package = Path("vendor", AUTHOR, "connections", self.resource_name)
         non_vendor_package = Path("connections", self.resource_name)
         assert os.path.islink(vendor_package)
-        assert os.readlink(vendor_package) == os.path.join(
+        assert os.readlink(str(vendor_package)) == os.path.join(
             "..", "..", "..", non_vendor_package
         )
 
