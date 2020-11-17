@@ -53,6 +53,7 @@ from aea.configurations.constants import (
     CONNECTIONS,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION,
+    DEFAULT_ENV_DOTFILE,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_NAME,
@@ -87,7 +88,6 @@ from aea.registries.resources import Resources
 PathLike = Union[os.PathLike, Path, str]
 
 _default_logger = logging.getLogger(__name__)
-DEFAULT_ENV_DOTFILE = ".env"
 
 
 class _DependenciesManager:
