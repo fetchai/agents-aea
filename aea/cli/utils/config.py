@@ -16,6 +16,24 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2020 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
 """A module with config tools of the aea cli."""
 import logging
 import logging.config
@@ -29,6 +47,7 @@ import yaml
 
 from aea.cli.utils.constants import (
     ALLOWED_PATH_ROOTS,
+    AUTHOR_KEY,
     CLI_CONFIG_PATH,
     RESOURCE_TYPE_TO_CONFIG_FILE,
 )
@@ -38,12 +57,12 @@ from aea.cli.utils.generic import load_yaml
 from aea.configurations.base import (
     ComponentId,
     ComponentType,
-    DEFAULT_AEA_CONFIG_FILE,
     PackageConfiguration,
     PackageType,
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import AGENT, AGENTS, DEFAULT_AEA_CONFIG_FILE, VENDOR
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import AEAEnforceError, AEAException, enforce
 
@@ -126,6 +145,24 @@ def get_or_create_cli_config() -> Dict:
     return load_yaml(CLI_CONFIG_PATH)
 
 
+def set_cli_author(click_context) -> None:
+    """
+    Set CLI author in the CLI Context.
+
+    The key of the new field is 'cli_author'.
+
+    :param click_context: the Click context
+    :return: None.
+    """
+    config = get_or_create_cli_config()
+    cli_author = config.get(AUTHOR_KEY, None)
+    if cli_author is None:
+        raise click.ClickException(
+            "The AEA configurations are not initialized. Use `aea init` before continuing."
+        )
+    click_context.obj.set_config("cli_author", cli_author)
+
+
 def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:
     """
     Load item configuration.
@@ -138,8 +175,31 @@ def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration
     configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
     configuration_path = package_path / configuration_file_name
     configuration_loader = ConfigLoader.from_configuration_type(PackageType(item_type))
-    item_config = configuration_loader.load(configuration_path.open())
+    with configuration_path.open() as file_input:
+        item_config = configuration_loader.load(file_input)
     return item_config
+
+
+def dump_item_config(
+    package_configuration: PackageConfiguration, package_path: Path
+) -> None:
+    """
+    Dump item configuration.
+
+    :param package_configuration: the package configuration.
+    :param package_path: path to package from which config should be dumped.
+
+    :return: None
+    """
+    configuration_file_name = _get_default_configuration_file_name_from_type(
+        package_configuration.package_type
+    )
+    configuration_path = package_path / configuration_file_name
+    configuration_loader = ConfigLoader.from_configuration_type(
+        package_configuration.package_type
+    )
+    with configuration_path.open("w") as file_output:
+        configuration_loader.dump(package_configuration, file_output)  # type: ignore
 
 
 def handle_dotted_path(
@@ -175,11 +235,11 @@ def handle_dotted_path(
 
     if (
         len(parts) < 2
-        or parts[0] == "agent"
+        or parts[0] == AGENT
         and len(parts) < 2
-        or parts[0] == "vendor"
+        or parts[0] == VENDOR
         and len(parts) < 5
-        or parts[0] != "agent"
+        or parts[0] != AGENT
         and len(parts) < 3
     ):
         raise AEAException(
@@ -187,12 +247,12 @@ def handle_dotted_path(
         )
 
     # if the root is 'agent', stop.
-    if root == "agent":
-        resource_type_plural = "agents"
+    if root == AGENT:
+        resource_type_plural = AGENTS
         path_to_resource_configuration = Path(DEFAULT_AEA_CONFIG_FILE)
         json_path = parts[1:]
         component_id = None
-    elif root == "vendor":
+    elif root == VENDOR:
         # parse json path
         resource_author = parts[1]
         resource_type_plural = parts[2]
@@ -212,11 +272,7 @@ def handle_dotted_path(
 
         # find path to the resource directory
         path_to_resource_directory = (
-            Path(".")
-            / "vendor"
-            / resource_author
-            / resource_type_plural
-            / resource_name
+            Path(".") / VENDOR / resource_author / resource_type_plural / resource_name
         )
         path_to_resource_configuration = (
             path_to_resource_directory
@@ -295,7 +351,9 @@ def validate_item_config(item_type: str, package_path: Path) -> None:
     item_config = load_item_config(item_type, package_path)
     loader = ConfigLoaders.from_package_type(item_type)
     for field_name in loader.required_fields:
-        if not getattr(item_config, field_name):
+        try:
+            getattr(item_config, field_name)
+        except AttributeError:
             raise AEAConfigException(
                 "Parameter '{}' is missing from {} config.".format(
                     field_name, item_type

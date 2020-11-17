@@ -22,7 +22,7 @@
 import logging
 import os
 import sqlite3
-from typing import Tuple
+from typing import List, Tuple
 
 from aea.skills.base import Model
 
@@ -45,6 +45,8 @@ class RegistrationDB(Model):
             if custom_path is None
             else custom_path
         )
+        if not os.path.exists(os.path.dirname(os.path.abspath(self.db_path))):
+            raise ValueError(f"Path={self.db_path} not valid!")
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:
@@ -85,12 +87,20 @@ class RegistrationDB(Model):
         result = self._execute_single_sql(command, variables)
         return len(result) != 0
 
+    def get_all_registered(self) -> List[str]:
+        """Get all registered AW-1 AEAs."""
+        command = "SELECT address FROM registered_table"
+        variables = ()
+        results = self._execute_single_sql(command, variables)
+        registered = [result[0] for result in results]
+        return registered
+
     def _execute_single_sql(
         self,
         command: str,
         variables: Tuple[str, ...] = (),
         print_exceptions: bool = True,
-    ):
+    ) -> List[Tuple[str, ...]]:
         """Query the database - all the other functions use this under the hood."""
         conn = None
         ret = []

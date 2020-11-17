@@ -35,6 +35,7 @@ from aea.cli.utils.package_utils import (
     try_get_item_target_path,
 )
 from aea.configurations.base import PublicId
+from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 
 
 @click.group()
@@ -47,48 +48,48 @@ def push(click_context, local):
     ctx.set_config("local", local)
 
 
-@push.command(name="connection")
+@push.command(name=CONNECTION)
 @click.argument("connection-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def connection(ctx: Context, connection_id):
     """Push connection to Registry or save it in local packages."""
     if ctx.config.get("local"):
-        _save_item_locally(ctx, "connection", connection_id)
+        _save_item_locally(ctx, CONNECTION, connection_id)
     else:
-        push_item(ctx, "connection", connection_id)
+        push_item(ctx, CONNECTION, connection_id)
 
 
-@push.command(name="contract")
+@push.command(name=CONTRACT)
 @click.argument("contract-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def contract(ctx: Context, contract_id):
     """Push connection to Registry or save it in local packages."""
     if ctx.config.get("local"):
-        _save_item_locally(ctx, "contract", contract_id)
+        _save_item_locally(ctx, CONTRACT, contract_id)
     else:
-        push_item(ctx, "contract", contract_id)
+        push_item(ctx, CONTRACT, contract_id)
 
 
-@push.command(name="protocol")
+@push.command(name=PROTOCOL)
 @click.argument("protocol-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_id):
     """Push protocol to Registry or save it in local packages."""
     if ctx.config.get("local"):
-        _save_item_locally(ctx, "protocol", protocol_id)
+        _save_item_locally(ctx, PROTOCOL, protocol_id)
     else:
-        push_item(ctx, "protocol", protocol_id)
+        push_item(ctx, PROTOCOL, protocol_id)
 
 
-@push.command(name="skill")
+@push.command(name=SKILL)
 @click.argument("skill-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def skill(ctx: Context, skill_id):
     """Push skill to Registry or save it in local packages."""
     if ctx.config.get("local"):
-        _save_item_locally(ctx, "skill", skill_id)
+        _save_item_locally(ctx, SKILL, skill_id)
     else:
-        push_item(ctx, "skill", skill_id)
+        push_item(ctx, SKILL, skill_id)
 
 
 def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:

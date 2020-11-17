@@ -27,11 +27,8 @@ from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import (
-    DEFAULT_AEA_CONFIG_FILE,
-    ProtocolSpecificationParseError,
-    PublicId,
-)
+from aea.configurations.base import ProtocolSpecificationParseError, PublicId
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, PROTOCOL
 from aea.protocols.generator.base import ProtocolGenerator
 from aea.protocols.generator.common import load_protocol_specification
 
@@ -48,7 +45,7 @@ def generate(click_context: click.core.Context):  # pylint: disable=unused-argum
 @pass_ctx
 def protocol(ctx: Context, protocol_specification_path: str):
     """Generate a protocol based on a specification and add it to the configuration file and agent."""
-    _generate_item(ctx, "protocol", protocol_specification_path)
+    _generate_item(ctx, PROTOCOL, protocol_specification_path)
 
 
 @clean_after
@@ -132,4 +129,4 @@ def _generate_item(ctx: Context, item_type: str, specification_path: str):
             + str(e)
         )
 
-    fingerprint_item(ctx, "protocol", protocol_spec.public_id)
+    fingerprint_item(ctx, PROTOCOL, protocol_spec.public_id)

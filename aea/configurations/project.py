@@ -19,7 +19,7 @@
 """This module contains the implementation of AEA agents project configuiration."""
 import os
 from shutil import rmtree
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -27,6 +27,7 @@ from aea.cli.fetch import fetch_agent_locally
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_REGISTRY_NAME
 
 
 class Project:
@@ -44,7 +45,8 @@ class Project:
         working_dir: str,
         public_id: PublicId,
         is_local: bool = False,
-        registry_path: str = "packages",
+        is_restore: bool = False,
+        registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
     ) -> "Project":
         """
@@ -60,10 +62,13 @@ class Project:
         ctx.set_config("skip_consistency_check", skip_consistency_check)
         path = os.path.join(working_dir, public_id.author, public_id.name)
         target_dir = os.path.join(public_id.author, public_id.name)
-        if is_local:
-            fetch_agent_locally(ctx, public_id, target_dir=target_dir)
-        else:
-            fetch_agent(ctx, public_id, target_dir=target_dir)
+
+        if not is_restore and not os.path.exists(target_dir):
+            if is_local:
+                fetch_agent_locally(ctx, public_id, target_dir=target_dir)
+            else:
+                fetch_agent(ctx, public_id, target_dir=target_dir)
+
         return cls(public_id, path)
 
     def remove(self) -> None:
@@ -93,3 +98,12 @@ class AgentAlias:
     def remove_from_project(self):
         """Remove agent alias from project."""
         self.project.agents.remove(self.agent_name)
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        """Convert AgentAlias to dict."""
+        return {
+            "public_id": str(self.project.public_id),
+            "agent_name": self.agent_name,
+            "config": self.config,
+        }
