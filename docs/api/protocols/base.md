@@ -201,6 +201,15 @@ Check value is set for key.
 
 Compare with another object.
 
+<a name="aea.protocols.base.Message.__repr__"></a>
+#### `__`repr`__`
+
+```python
+ | __repr__()
+```
+
+Get the representation of the message.
+
 <a name="aea.protocols.base.Message.__str__"></a>
 #### `__`str`__`
 
@@ -208,7 +217,7 @@ Compare with another object.
  | __str__()
 ```
 
-Get the string representation of the message.
+Get the string representation of the message. Abbreviated to prevent spamming of logs.
 
 <a name="aea.protocols.base.Message.encode"></a>
 #### encode

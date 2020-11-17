@@ -332,8 +332,10 @@ class TestRunnable:
                     await asyncio.sleep(1)
 
         run = TestRun()
-        t = Thread(target=run.start)
+        t = Thread(target=run.start_and_wait_completed, kwargs=dict(sync=True))
         t.start()
+        while not run.is_running:
+            pass
         run.stop()
         t.join()
 

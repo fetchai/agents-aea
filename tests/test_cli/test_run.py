@@ -1114,7 +1114,7 @@ class TestRunFailsWhenConnectionNotComplete:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "An error occurred while loading connection {}: Connection module '{}' not found.".format(
+        s = "Package loading error: An error occurred while loading connection {}: Connection module '{}' not found.".format(
             self.connection_id, self.relative_connection_module_path
         )
         assert self.result.exception.message == s
@@ -1202,7 +1202,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "An error occurred while loading connection {}: Connection class '{}' not found.".format(
+        s = "Package loading error: An error occurred while loading connection {}: Connection class '{}' not found.".format(
             self.connection_id, "HTTPClientConnection"
         )
         assert self.result.exception.message == s

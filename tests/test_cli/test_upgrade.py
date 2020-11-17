@@ -24,7 +24,7 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import List, Set, cast
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click.exceptions import ClickException
@@ -82,6 +82,11 @@ class BaseTestCase:
         with path.open(mode="r", encoding="utf-8") as fp:
             agent_config = agent_loader.load(fp)
         return agent_config
+
+    def load_mock_context(self) -> MagicMock:
+        """Load mock context."""
+        context_mock = MagicMock(agent_config=self.load_config())
+        return context_mock
 
     def dump_config(self, agent_config: AgentConfig) -> None:
         """Dump AgentConfig to current directory."""
@@ -355,7 +360,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         """Test upgrade project old version to latest one and compare with latest project fetched."""
         with cd(self.latest_agent_name):
             latest_agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -368,7 +373,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
                 catch_exceptions=False,
             )
             agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -383,7 +388,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
                 catch_exceptions=False,
             )
             agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -435,7 +440,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         """Test upgrade project dependencies not removed cause non vendor."""
         with cd(self.agent_name):
             base_agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -447,7 +452,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
                 catch_exceptions=False,
             )
             agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -921,4 +926,7 @@ class TestNothingToUpgrade(AEATestCaseEmpty):
     def test_nothing_to_upgrade(self):
         """Test nothing to upgrade."""
         result = self.run_cli_command("upgrade", cwd=self._get_cwd())
-        assert result.stdout == "Starting project upgrade...\n"
+        assert (
+            result.stdout
+            == "Starting project upgrade...\nEverything is already up to date!\n"
+        )

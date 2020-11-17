@@ -35,6 +35,7 @@ from aea.test_tools.click_testing import CliRunner
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
+    AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     MAX_FLAKY_RERUNS,
@@ -60,7 +61,7 @@ class TestGui:
         self.t = tempfile.mkdtemp()
         os.chdir(self.t)
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", "test_author"],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         assert result.exit_code == 0

@@ -20,18 +20,26 @@
 """This module contains the implementation of AEA agents manager."""
 import asyncio
 import copy
+import json
 import os
 import threading
 from asyncio.tasks import FIRST_COMPLETED
 from pathlib import Path
 from shutil import rmtree
 from threading import Thread
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import AgentConfig, ComponentId, PackageType, PublicId
-from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.constants import (
+    CONNECTIONS,
+    CONTRACTS,
+    DEFAULT_LEDGER,
+    DEFAULT_REGISTRY_NAME,
+    PROTOCOLS,
+    SKILLS,
+)
 from aea.configurations.loader import ConfigLoaders
 from aea.configurations.project import AgentAlias, Project
 from aea.crypto.helpers import create_private_key
@@ -86,7 +94,7 @@ class AgentRunAsyncTask:
 
     def _set_result(self, exc: Optional[BaseException]) -> None:
         """Set result of task execution."""
-        if not self._done_future:  # pragma: nocover
+        if not self._done_future or self._done_future.done():  # pragma: nocover
             return
         if exc:
             self._done_future.set_exception(exc)
@@ -128,12 +136,16 @@ class AgentRunThreadTask(AgentRunAsyncTask):
 class MultiAgentManager:
     """Multi agents manager."""
 
-    AGENT_DO_NOT_OVERRIDE_VALUES = ["skills", "connections", "protocols", "contracts"]
+    AGENT_DO_NOT_OVERRIDE_VALUES = [CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS]
     MODES = ["async", "threaded"]
     DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
+    SAVE_FILENAME = "save.json"
 
     def __init__(
-        self, working_dir: str, mode: str = "async", registry_path: str = "packages"
+        self,
+        working_dir: str,
+        mode: str = "async",
+        registry_path: str = DEFAULT_REGISTRY_NAME,
     ) -> None:
         """
         Initialize manager.
@@ -141,6 +153,8 @@ class MultiAgentManager:
         :param working_dir: directory to store base agents.
         """
         self.working_dir = working_dir
+        self._save_path = os.path.join(self.working_dir, self.SAVE_FILENAME)
+
         self.registry_path = registry_path
         self._was_working_dir_created = False
         self._is_running = False
@@ -166,6 +180,14 @@ class MultiAgentManager:
     def is_running(self) -> bool:
         """Is manager running."""
         return self._is_running
+
+    @property
+    def dict_state(self) -> Dict[str, Any]:
+        """Create MultiAgentManager dist state."""
+        return {
+            "projects": [str(public_id) for public_id in self._projects.keys()],
+            "agents": [alias.dict for alias in self._agents.values()],
+        }
 
     def _run_thread(self) -> None:
         """Run internal thread with own event loop."""
@@ -211,12 +233,14 @@ class MultiAgentManager:
         """Add error callback to call on error raised."""
         self._error_callbacks.append(error_callback)
 
-    def start_manager(self) -> "MultiAgentManager":
+    def start_manager(self, local: bool = True) -> "MultiAgentManager":
         """Start manager."""
         if self._is_running:
             return self
 
         self._ensure_working_dir()
+        self._load_state(local=local)
+
         self._started_event.clear()
         self._is_running = True
         self._thread = Thread(target=self._run_thread, daemon=True)
@@ -224,11 +248,16 @@ class MultiAgentManager:
         self._started_event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
         return self
 
-    def stop_manager(self) -> "MultiAgentManager":
+    def stop_manager(
+        self, cleanup: bool = True, save: bool = False
+    ) -> "MultiAgentManager":
         """
         Stop manager.
 
         Stops all running agents and stop agent.
+
+        :param cleanup: bool is cleanup on stop.
+        :param save: bool is save state to file on stop.
 
         :return: None
         """
@@ -243,13 +272,16 @@ class MultiAgentManager:
 
         self.stop_all_agents()
 
+        if save:
+            self._save_state()
+
         for agent_name in self.list_agents():
             self.remove_agent(agent_name)
 
-        for project in list(self._projects.keys()):
-            self.remove_project(project)
-
-        self._cleanup()
+        if cleanup:
+            for project in list(self._projects.keys()):
+                self.remove_project(project, keep_files=save)
+            self._cleanup(only_keys=save)
 
         self._is_running = False
 
@@ -261,28 +293,38 @@ class MultiAgentManager:
         self._thread = None
         return self
 
-    def _cleanup(self) -> None:
+    def _cleanup(self, only_keys: bool = False) -> None:
         """Remove workdir if was created."""
-        if self._was_working_dir_created and os.path.exists(self.working_dir):
-            rmtree(self.working_dir)
+        if only_keys:
+            rmtree(self._keys_dir)
+        else:
+            if self._was_working_dir_created and os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
 
     def add_project(
-        self, public_id: PublicId, local: bool = True
+        self, public_id: PublicId, local: bool = True, restore: bool = False
     ) -> "MultiAgentManager":
         """
         Fetch agent project and all dependencies to working_dir.
 
         :param public_id: the public if of the agent project.
         :param local: whether or not to fetch from local registry.
+        :param restore: bool flag for restoring already fetched agent.
         """
         if public_id in self._projects:
             raise ValueError(f"Project {public_id} was already added!")
         self._projects[public_id] = Project.load(
-            self.working_dir, public_id, local, registry_path=self.registry_path
+            self.working_dir,
+            public_id,
+            local,
+            registry_path=self.registry_path,
+            is_restore=restore,
         )
         return self
 
-    def remove_project(self, public_id: PublicId) -> "MultiAgentManager":
+    def remove_project(
+        self, public_id: PublicId, keep_files: bool = False
+    ) -> "MultiAgentManager":
         """Remove agent project."""
         if public_id not in self._projects:
             raise ValueError(f"Project {public_id} is not present!")
@@ -292,7 +334,10 @@ class MultiAgentManager:
                 f"Can not remove projects with aliases exists: {self._projects[public_id].agents}"
             )
 
-        self._projects.pop(public_id).remove()
+        project = self._projects.pop(public_id)
+        if not keep_files:
+            project.remove()
+
         return self
 
     def list_projects(self) -> List[PublicId]:
@@ -309,6 +354,7 @@ class MultiAgentManager:
         agent_name: Optional[str] = None,
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
+        config: Optional[List[dict]] = None,
     ) -> "MultiAgentManager":
         """
         Create new agent configuration based on project with config overrides applied.
@@ -319,9 +365,16 @@ class MultiAgentManager:
         :param agent_name: unique name for the agent
         :param agent_overrides: overrides for agent config.
         :param component_overrides: overrides for component section.
+        :param config: agent config (used for agent re-creation).
 
         :return: manager
         """
+        if any((agent_overrides, component_overrides)) and config is not None:
+            raise ValueError(
+                "Can not add agent with overrides and full config."
+                "One of those must be used."
+            )
+
         agent_name = agent_name or public_id.name
 
         if agent_name in self._agents:
@@ -337,6 +390,7 @@ class MultiAgentManager:
             agent_name=agent_name,
             agent_overrides=agent_overrides,
             component_overrides=component_overrides,
+            config=config,
         )
         self._agents[agent_name] = agent_alias
         return self
@@ -524,23 +578,25 @@ class MultiAgentManager:
         agent_name: str,
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
+        config: Optional[List[dict]] = None,
     ) -> AgentAlias:
         """Create agent alias for project, with given name and overrided values."""
-        json_config = self._make_config(
-            project.path, agent_overrides, component_overrides
-        )
+        if not config:
+            config = self._make_config(
+                project.path, agent_overrides, component_overrides
+            )
 
-        builder = AEABuilder.from_config_json(json_config, project.path)
+        builder = AEABuilder.from_config_json(config, project.path)
         builder.set_name(agent_name)
         builder.set_runtime_mode("threaded")
 
         if not builder.private_key_paths:
-            default_ledger = json_config[0].get("default_ledger", DEFAULT_LEDGER)
+            default_ledger = config[0].get("default_ledger", DEFAULT_LEDGER)
             builder.add_private_key(
                 default_ledger, self._create_private_key(agent_name, default_ledger)
             )
         agent = builder.build()
-        return AgentAlias(project, agent_name, json_config, agent, builder)
+        return AgentAlias(project, agent_name, config, agent, builder)
 
     def install_pypi_dependencies(self) -> None:
         """Install dependencies for every project has at least one agent alias."""
@@ -607,3 +663,46 @@ class MultiAgentManager:
         path = os.path.join(self._keys_dir, f"{name}_{ledger}_private.key")
         create_private_key(ledger, path)
         return path
+
+    def _load_state(self, local: bool) -> None:
+        """
+        Load saved state from file.
+
+        :param local: bool is local project and agents re-creation.
+
+        :return: None
+        :raises: ValueError if failed to load state.
+        """
+        if not os.path.exists(self._save_path):
+            return
+
+        save_json = {}
+        with open(self._save_path) as f:
+            save_json = json.load(f)
+
+        if not save_json:
+            return
+
+        try:
+            for public_id in save_json["projects"]:
+                self.add_project(
+                    PublicId.from_str(public_id), local=local, restore=True
+                )
+
+            for agent_settings in save_json["agents"]:
+                self.add_agent(
+                    public_id=PublicId.from_str(agent_settings["public_id"]),
+                    agent_name=agent_settings["agent_name"],
+                    config=agent_settings["config"],
+                )
+        except ValueError as e:
+            raise ValueError(f"Failed to load state. {e}")
+
+    def _save_state(self) -> None:
+        """
+        Save MultiAgentManager state.
+
+        :return: None.
+        """
+        with open(self._save_path, "w") as f:
+            json.dump(self.dict_state, f, indent=4, sort_keys=True)

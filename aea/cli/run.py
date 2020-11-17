@@ -34,7 +34,6 @@ from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
-from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import load_env_file
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message, Protocol
@@ -179,7 +178,5 @@ def _build_aea(
         )
         aea = builder.build(connection_ids=connection_ids)
         return aea
-    except AEAPackageLoadingError as e:  # pragma: nocover
-        raise click.ClickException("Package loading error: {}".format(str(e)))
     except Exception as e:
         raise click.ClickException(str(e))

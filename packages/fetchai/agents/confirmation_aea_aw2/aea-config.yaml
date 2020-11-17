@@ -1,6 +1,6 @@
 agent_name: confirmation_aea_aw2
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: This agent purchases information from other agents as specified in its
   configuration. It acts as the confirmation AEA in Agent World 2.
 license: Apache-2.0
@@ -19,7 +19,7 @@ protocols:
 - fetchai/signing:0.7.0
 - fetchai/state_update:0.7.0
 skills:
-- fetchai/confirmation_aw2:0.1.0
+- fetchai/confirmation_aw2:0.2.0
 - fetchai/error:0.9.0
 - fetchai/generic_buyer:0.16.0
 default_connection: fetchai/p2p_libp2p:0.12.0
@@ -79,7 +79,7 @@ config:
       address: https://rest-agentworld.prod.fetch-ai.com:443
       chain_id: agentworld-1
 ---
-public_id: fetchai/confirmation_aw2:0.1.0
+public_id: fetchai/confirmation_aw2:0.2.0
 type: skill
 behaviours:
   search:
@@ -91,6 +91,7 @@ models:
       custom_path: /data/registration.db
   strategy:
     args:
+      aw1_aea: null
       location:
         latitude: 51.5194
         longitude: 0.127

@@ -25,6 +25,7 @@ from logging import Logger
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from aea.abstract_agent import AbstractAgent
+from aea.configurations.constants import CONNECTIONS
 from aea.connections.base import Connection
 from aea.exceptions import AEAException
 from aea.helpers.logging import WithLogger
@@ -116,7 +117,7 @@ class Agent(AbstractAgent, WithLogger):
 
         :return: dict of kwargs
         """
-        return {"connections": self.active_connections}
+        return {CONNECTIONS: self.active_connections}
 
     @property
     def identity(self) -> Identity:

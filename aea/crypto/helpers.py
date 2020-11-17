@@ -20,15 +20,18 @@
 """Module wrapping the helpers of public and private key cryptography."""
 
 import logging
+import os
 import sys
 from pathlib import Path
 
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.base import AgentConfig, PackageType
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    PRIVATE_KEY_PATH_SCHEMA,
+)
 from aea.configurations.loader import ConfigLoaders
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 
-
-PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 
 _default_logger = logging.getLogger(__name__)
 
@@ -61,6 +64,12 @@ def verify_or_create_private_keys(
         if config_private_key_path is None:
             private_key_path = PRIVATE_KEY_PATH_SCHEMA.format(identifier)
             if identifier == aea_conf.default_ledger:  # pragma: nocover
+                if os.path.exists(private_key_path):
+                    raise ValueError(
+                        "File {} for private key {} already exists. Add to aea-config.yaml.".format(
+                            repr(config_private_key_path), identifier
+                        )
+                    )
                 create_private_key(
                     identifier,
                     private_key_file=str(aea_project_path / private_key_path),
