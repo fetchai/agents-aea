@@ -19,7 +19,6 @@
 """This module contains the implementation of multiple AEA configs launcher."""
 import logging
 import multiprocessing
-import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.process import BrokenProcessPool
 from multiprocessing.synchronize import Event
@@ -99,14 +98,6 @@ def _run_agent(
 
     agent = load_agent(agent_dir)
 
-    # HACK for aea.py:288
-    with cd(agent_dir):
-        # pylint: disable=import-outside-toplevel,unused-import
-        # noqa: F401,I001,I005
-        from packages.fetchai.skills.error.handlers import ErrorHandler
-
-        _ = ErrorHandler
-
     def stop_event_thread():
         try:
             stop_event.wait()
@@ -136,8 +127,6 @@ def _run_agent(
 class AEADirTask(AbstractExecutorTask):
     """Task to run agent from agent configuration directory."""
 
-    lock = threading.Lock()
-
     def __init__(self, agent_dir: Union[PathLike, str]) -> None:
         """
         Init aea config dir task.
@@ -150,15 +139,6 @@ class AEADirTask(AbstractExecutorTask):
 
     def start(self) -> None:
         """Start task."""
-        # HACK for aea.py:288
-        with self.lock:
-            with cd(self._agent_dir):
-                # pylint: disable=import-outside-toplevel,unused-import
-                # noqa: F401,I001,I005
-                from packages.fetchai.skills.error.handlers import ErrorHandler
-
-                _ = ErrorHandler
-
         self._agent.start()
 
     def stop(self):
