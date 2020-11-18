@@ -25,7 +25,10 @@ from aea.helpers.search.models import Description
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.simple_service_registration.dialogues import OefSearchDialogue, OefSearchDialogues
+from packages.fetchai.skills.simple_service_registration.dialogues import (
+    OefSearchDialogue,
+    OefSearchDialogues,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -33,7 +36,9 @@ from tests.conftest import ROOT_DIR
 class TestDialogues(BaseSkillTestCase):
     """Test dialogue class of simple_data_request."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration"
+    )
 
     @classmethod
     def setup(cls):

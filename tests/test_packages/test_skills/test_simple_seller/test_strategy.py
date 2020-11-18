@@ -34,16 +34,27 @@ from tests.conftest import ROOT_DIR
 class TestStrategy(BaseSkillTestCase):
     """Test Strategy of simple seller."""
 
-    path_to_skill = Path(ROOT_DIR, "tests", "test_packages", "test_skills", "test_simple_seller", "simple_seller")
+    path_to_skill = Path(
+        ROOT_DIR,
+        "tests",
+        "test_packages",
+        "test_skills",
+        "test_simple_seller",
+        "simple_seller",
+    )
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
         super().setup()
         cls.mocked_name_of_data = "some_name_for_data"
-        cls.mocked_data_1 = b'[{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}]'
-        cls.mocked_data_2 = b'{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}'
-        cls.mocked_data_3 = b'some_non_jason_data'
+        cls.mocked_data_1 = (
+            b'[{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}]'
+        )
+        cls.mocked_data_2 = (
+            b'{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}'
+        )
+        cls.mocked_data_3 = b"some_non_jason_data"
 
         cls.shared_state_key = cls.mocked_name_of_data
 
@@ -60,16 +71,26 @@ class TestStrategy(BaseSkillTestCase):
 
     def test_collect_from_data_source_i(self):
         """Test the collect_from_data_source method of the Strategy class where the data is NOT a dictionary."""
-        self.skill.skill_context._agent_context._shared_state[self.mocked_name_of_data] = self.mocked_data_1
-        expected_formatted_data = {'data': '[{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}]'}
+        self.skill.skill_context._agent_context._shared_state[
+            self.mocked_name_of_data
+        ] = self.mocked_data_1
+        expected_formatted_data = {
+            "data": '[{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}]'
+        }
 
         actual_data = self.strategy.collect_from_data_source()
         assert actual_data == expected_formatted_data
 
     def test_collect_from_data_source_ii(self):
         """Test the collect_from_data_source method of the Strategy class where the data IS a dictionary."""
-        self.skill.skill_context._agent_context._shared_state[self.mocked_name_of_data] = self.mocked_data_2
-        expected_formatted_data = {"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}
+        self.skill.skill_context._agent_context._shared_state[
+            self.mocked_name_of_data
+        ] = self.mocked_data_2
+        expected_formatted_data = {
+            "type_1": "data_1",
+            "type_2": "data_2",
+            "type_3": "data_3",
+        }
 
         actual_data = self.strategy.collect_from_data_source()
         assert actual_data == expected_formatted_data

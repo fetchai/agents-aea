@@ -25,8 +25,17 @@ from tests.conftest import ROOT_DIR, match_files
 
 def test_compare_test_skill_with_actual_skill():
     """Test that the "simple_seller" skill in tests with the actual package are identical except one change in skill.yaml"""
-    path_to_actual_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_seller")
-    path_to_test_skill = Path(ROOT_DIR, "tests", "test_packages", "test_skills", "test_simple_seller", "simple_seller")
+    path_to_actual_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_seller"
+    )
+    path_to_test_skill = Path(
+        ROOT_DIR,
+        "tests",
+        "test_packages",
+        "test_skills",
+        "test_simple_seller",
+        "simple_seller",
+    )
 
     # compare __init__.py
     init_file_original = Path(path_to_actual_skill, "__init__.py")

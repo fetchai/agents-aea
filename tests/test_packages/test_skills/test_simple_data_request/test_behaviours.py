@@ -27,7 +27,10 @@ import pytest
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.simple_data_request.behaviours import HttpRequestBehaviour, HTTP_CLIENT_PUBLIC_ID
+from packages.fetchai.skills.simple_data_request.behaviours import (
+    HTTP_CLIENT_PUBLIC_ID,
+    HttpRequestBehaviour,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -35,7 +38,14 @@ from tests.conftest import ROOT_DIR
 class TestSkillBehaviour(BaseSkillTestCase):
     """Test behaviours of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "tests", "test_packages", "test_skills", "test_simple_data_request", "simple_data_request")
+    path_to_skill = Path(
+        ROOT_DIR,
+        "tests",
+        "test_packages",
+        "test_skills",
+        "test_simple_data_request",
+        "simple_data_request",
+    )
 
     @classmethod
     def setup(cls):
@@ -54,7 +64,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test__init__ii(self):
         """Test the __init__ method of the http_request behaviour where ValueError is raise."""
         with pytest.raises(ValueError, match="Url, method and body must be provided."):
-            self.http_request_behaviour.__init__(url=None, method='some_method', body='some_body')
+            self.http_request_behaviour.__init__(
+                url=None, method="some_method", body="some_body"
+            )
 
     def test_setup(self):
         """Test the setup method of the http_request behaviour."""

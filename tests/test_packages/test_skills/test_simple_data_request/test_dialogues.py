@@ -24,7 +24,10 @@ from typing import cast
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.simple_data_request.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.skills.simple_data_request.dialogues import (
+    HttpDialogue,
+    HttpDialogues,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -32,7 +35,14 @@ from tests.conftest import ROOT_DIR
 class TestDialogues(BaseSkillTestCase):
     """Test dialogue class of simple_data_request."""
 
-    path_to_skill = Path(ROOT_DIR, "tests", "test_packages", "test_skills", "test_simple_data_request", "simple_data_request")
+    path_to_skill = Path(
+        ROOT_DIR,
+        "tests",
+        "test_packages",
+        "test_skills",
+        "test_simple_data_request",
+        "simple_data_request",
+    )
 
     @classmethod
     def setup(cls):
@@ -51,7 +61,7 @@ class TestDialogues(BaseSkillTestCase):
             url="some_url",
             version="some_version",
             headers="some_headers",
-            body=b'some_body',
+            body=b"some_body",
         )
         assert dialogue.role == HttpDialogue.Role.CLIENT
         assert dialogue.self_address == self.skill.skill_context.agent_address

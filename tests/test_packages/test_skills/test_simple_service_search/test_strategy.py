@@ -31,16 +31,22 @@ from tests.conftest import ROOT_DIR
 class TestStrategy(BaseSkillTestCase):
     """Test Strategy of simple_service_search."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search"
+    )
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
         super().setup()
         cls.mocked_name_of_data = "some_name_for_data"
-        cls.mocked_data_1 = b'[{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}]'
-        cls.mocked_data_2 = b'{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}'
-        cls.mocked_data_3 = b'some_non_jason_data'
+        cls.mocked_data_1 = (
+            b'[{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}]'
+        )
+        cls.mocked_data_2 = (
+            b'{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}'
+        )
+        cls.mocked_data_3 = b"some_non_jason_data"
 
         cls.search_query = {
             "search_key": "seller_service",

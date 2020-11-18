@@ -430,6 +430,7 @@ class BaseSkillTestCase:
             asyncio.Queue()
         )
         cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
+        _shared_state = cast(Dict[str, Any], kwargs.pop("shared_state", dict()))
 
         agent_context = AgentContext(
             identity=identity,
@@ -446,9 +447,8 @@ class BaseSkillTestCase:
             decision_maker_address="dummy_decision_maker_address",
         )
 
-        cls._shared_state = kwargs.pop("shared_state", dict())
-        if cls._shared_state != dict():
-            for key, value in cls._shared_state.items():
+        if _shared_state != dict():
+            for key, value in _shared_state.items():
                 agent_context.shared_state[key] = value
 
         cls._skill = Skill.from_dir(str(cls.path_to_skill), agent_context)

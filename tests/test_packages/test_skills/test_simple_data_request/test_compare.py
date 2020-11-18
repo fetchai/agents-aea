@@ -25,8 +25,17 @@ from tests.conftest import ROOT_DIR, match_files
 
 def test_compare_test_skill_with_actual_skill():
     """Test that the "simple_data_request" skill in tests with the actual package are identical except couple of changes in skill.yaml"""
-    path_to_actual_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_data_request")
-    path_to_test_skill = Path(ROOT_DIR, "tests", "test_packages", "test_skills", "test_simple_data_request", "simple_data_request")
+    path_to_actual_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_data_request"
+    )
+    path_to_test_skill = Path(
+        ROOT_DIR,
+        "tests",
+        "test_packages",
+        "test_skills",
+        "test_simple_data_request",
+        "simple_data_request",
+    )
 
     # compare __init__.py
     init_file_original = Path(path_to_actual_skill, "__init__.py")
@@ -63,4 +72,4 @@ def test_compare_test_skill_with_actual_skill():
     skill_yaml_file_test = Path(path_to_test_skill, "skill.yaml")
     is_matched, msg = match_files(skill_yaml_file_original, skill_yaml_file_test)
     assert not is_matched, "the files are identical while they should NOT be!"
-    assert msg == '      method: null\n      shared_state_key: null\n      url: null\n'
+    assert msg == "      method: null\n      shared_state_key: null\n      url: null\n"

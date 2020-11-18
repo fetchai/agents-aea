@@ -28,8 +28,12 @@ from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.simple_service_registration.dialogues import OefSearchDialogues
-from packages.fetchai.skills.simple_service_registration.handlers import OefSearchHandler
+from packages.fetchai.skills.simple_service_registration.dialogues import (
+    OefSearchDialogues,
+)
+from packages.fetchai.skills.simple_service_registration.handlers import (
+    OefSearchHandler,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -37,26 +41,30 @@ from tests.conftest import ROOT_DIR
 class TestOefSearchHandler(BaseSkillTestCase):
     """Test oef_search handler of simple_service_registration."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration"
+    )
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
         super().setup()
-        cls.oef_search_handler = cast(OefSearchHandler, cls._skill.skill_context.handlers.oef_search)
+        cls.oef_search_handler = cast(
+            OefSearchHandler, cls._skill.skill_context.handlers.oef_search
+        )
         cls.logger = cls._skill.skill_context.logger
 
         cls.oef_search_dialogues = cast(
             OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
 
-        cls.data = b'some_body'
+        cls.data = b"some_body"
         cls.mocked_description = Description({"foo1": 1, "bar1": 2})
 
         cls.list_of_messages = (
             DialogueMessage(
                 OefSearchMessage.Performative.REGISTER_SERVICE,
-                {"service_description": cls.mocked_description}
+                {"service_description": cls.mocked_description},
             ),
         )
 
@@ -90,8 +98,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler."""
         # setup
         oef_search_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_search_dialogues,
-            messages=self.list_of_messages[:1],
+            dialogues=self.oef_search_dialogues, messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_search_dialogue,

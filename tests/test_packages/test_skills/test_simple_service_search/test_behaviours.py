@@ -23,11 +23,19 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
-from aea.helpers.search.models import Attribute, Constraint, ConstraintType, DataModel, Query
+from aea.helpers.search.models import (
+    Attribute,
+    Constraint,
+    ConstraintType,
+    DataModel,
+    Query,
+)
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.simple_service_search.behaviours import ServiceSearchBehaviour
+from packages.fetchai.skills.simple_service_search.behaviours import (
+    ServiceSearchBehaviour,
+)
 from packages.fetchai.skills.simple_service_search.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
@@ -36,7 +44,9 @@ from tests.conftest import ROOT_DIR
 class TestSkillBehaviour(BaseSkillTestCase):
     """Test behaviours of simple_service_search."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search"
+    )
 
     @classmethod
     def setup(cls):
@@ -52,7 +62,11 @@ class TestSkillBehaviour(BaseSkillTestCase):
             [Constraint("some_attribute", ConstraintType("==", "some_service"))],
             DataModel(
                 "some_name",
-                [Attribute("some_attribute", str, False, "Some attribute descriptions.")],
+                [
+                    Attribute(
+                        "some_attribute", str, False, "Some attribute descriptions."
+                    )
+                ],
             ),
         )
 
@@ -81,7 +95,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        mock_logger.assert_any_call(logging.INFO, "sending search request to OEF search node")
+        mock_logger.assert_any_call(
+            logging.INFO, "sending search request to OEF search node"
+        )
 
     def test_teardown(self):
         """Test the teardown method of the search behaviour."""

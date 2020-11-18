@@ -38,7 +38,14 @@ from tests.conftest import ROOT_DIR
 class TestGenericFipaHandler(BaseSkillTestCase):
     """Test fipa handler of simple_data_request."""
 
-    path_to_skill = Path(ROOT_DIR, "tests", "test_packages", "test_skills", "test_simple_data_request", "simple_data_request")
+    path_to_skill = Path(
+        ROOT_DIR,
+        "tests",
+        "test_packages",
+        "test_skills",
+        "test_simple_data_request",
+        "simple_data_request",
+    )
 
     @classmethod
     def setup(cls):
@@ -51,7 +58,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             HttpDialogues, cls._skill.skill_context.http_dialogues
         )
 
-        cls.data = b'some_body'
+        cls.data = b"some_body"
 
         cls.list_of_messages = (
             DialogueMessage(
@@ -61,8 +68,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
                     "url": "some_url",
                     "headers": "some_headers",
                     "version": "some_version",
-                    "body": b'some_body',
-                }
+                    "body": b"some_body",
+                },
             ),
         )
 
@@ -83,7 +90,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             url="some_url",
             headers="some_headers",
             version="some_version",
-            body=b'some_body',
+            body=b"some_body",
         )
 
         # operation
@@ -100,8 +107,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         """Test the _handle_response method of the fipa handler."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues,
-            messages=self.list_of_messages[:1],
+            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=http_dialogue,
@@ -124,11 +130,15 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO,
-            f"updating shared_state with received data=b'some_body'!",
+            logging.INFO, f"updating shared_state with received data=b'some_body'!",
         )
 
-        assert self.skill.skill_context._agent_context.shared_state[self.http_handler.shared_state_key] == self.data
+        assert (
+            self.skill.skill_context._agent_context.shared_state[
+                self.http_handler.shared_state_key
+            ]
+            == self.data
+        )
 
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the fipa handler."""

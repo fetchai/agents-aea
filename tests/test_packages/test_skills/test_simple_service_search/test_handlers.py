@@ -23,7 +23,14 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
-from aea.helpers.search.models import Attribute, Constraint, ConstraintType, Description, DataModel, Query
+from aea.helpers.search.models import (
+    Attribute,
+    Constraint,
+    ConstraintType,
+    DataModel,
+    Description,
+    Query,
+)
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -38,13 +45,17 @@ from tests.conftest import ROOT_DIR
 class TestOefSearchHandler(BaseSkillTestCase):
     """Test oef_search handler of simple_service_search."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search"
+    )
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
         super().setup()
-        cls.oef_search_handler = cast(OefSearchHandler, cls._skill.skill_context.handlers.oef_search)
+        cls.oef_search_handler = cast(
+            OefSearchHandler, cls._skill.skill_context.handlers.oef_search
+        )
         cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
         cls.logger = cls._skill.skill_context.logger
 
@@ -52,20 +63,23 @@ class TestOefSearchHandler(BaseSkillTestCase):
             OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
 
-        cls.data = b'some_body'
+        cls.data = b"some_body"
         cls.query = Query(
             [Constraint("some_attribute", ConstraintType("==", "some_service"))],
             DataModel(
                 "some_name",
-                [Attribute("some_attribute", str, False, "Some attribute descriptions.")],
+                [
+                    Attribute(
+                        "some_attribute", str, False, "Some attribute descriptions."
+                    )
+                ],
             ),
         )
         cls.mocked_description = Description({"foo1": 1, "bar1": 2})
 
         cls.list_of_messages = (
             DialogueMessage(
-                OefSearchMessage.Performative.SEARCH_SERVICES,
-                {"query": cls.query}
+                OefSearchMessage.Performative.SEARCH_SERVICES, {"query": cls.query}
             ),
         )
 
@@ -99,8 +113,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler."""
         # setup
         oef_search_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_search_dialogues,
-            messages=self.list_of_messages[:1],
+            dialogues=self.oef_search_dialogues, messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_search_dialogue,
@@ -123,8 +136,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # setup
         agents = ("agent_1", "agent_2")
         oef_search_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_search_dialogues,
-            messages=self.list_of_messages[:1],
+            dialogues=self.oef_search_dialogues, messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_search_dialogue,
@@ -132,14 +144,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
             agents=agents,
             agents_info=OefSearchMessage.AgentsInfo(
                 {
-                    "agent_1": {
-                        "key_1": "value_1",
-                        "key_2": "value_2",
-                    },
-                    "agent_2": {
-                        "key_3": "value_3",
-                        "key_4": "value_4",
-                    }
+                    "agent_1": {"key_1": "value_1", "key_2": "value_2"},
+                    "agent_2": {"key_3": "value_3", "key_4": "value_4"},
                 }
             ),
         )
@@ -154,15 +160,16 @@ class TestOefSearchHandler(BaseSkillTestCase):
             f"found number of agents={len(agents)}, search_response={incoming_message}",
         )
 
-        assert self.skill.skill_context._agent_context.shared_state[self.strategy.shared_storage_key] == set(agents)
+        assert self.skill.skill_context._agent_context.shared_state[
+            self.strategy.shared_storage_key
+        ] == set(agents)
 
     def test_handle_search_ii(self):
         """Test the _handle_search method of the oef_search handler where the number of agents found is 0."""
         # setup
         agents = tuple()
         oef_search_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_search_dialogues,
-            messages=self.list_of_messages[:1],
+            dialogues=self.oef_search_dialogues, messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_search_dialogue,
@@ -170,14 +177,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
             agents=agents,
             agents_info=OefSearchMessage.AgentsInfo(
                 {
-                    "agent_1": {
-                        "key_1": "value_1",
-                        "key_2": "value_2",
-                    },
-                    "agent_2": {
-                        "key_3": "value_3",
-                        "key_4": "value_4",
-                    }
+                    "agent_1": {"key_1": "value_1", "key_2": "value_2"},
+                    "agent_2": {"key_3": "value_3", "key_4": "value_4"},
                 }
             ),
         )
@@ -188,8 +189,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO,
-            f"no agents found, search_response={incoming_message}",
+            logging.INFO, f"no agents found, search_response={incoming_message}",
         )
 
     def test_handle_invalid(self):

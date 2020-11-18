@@ -27,7 +27,9 @@ from aea.helpers.search.models import Description
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.simple_service_registration.behaviours import ServiceRegistrationBehaviour
+from packages.fetchai.skills.simple_service_registration.behaviours import (
+    ServiceRegistrationBehaviour,
+)
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
@@ -36,7 +38,9 @@ from tests.conftest import ROOT_DIR
 class TestSkillBehaviour(BaseSkillTestCase):
     """Test behaviours of simple_service_registration."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration"
+    )
 
     @classmethod
     def setup(cls):
@@ -54,8 +58,16 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test_setup(self):
         """Test the act method of the http_request behaviour."""
         # operation
-        with patch.object(self.strategy, "get_location_description", return_value=self.mocked_description_1):
-            with patch.object(self.strategy, "get_register_service_description", return_value=self.mocked_description_2):
+        with patch.object(
+            self.strategy,
+            "get_location_description",
+            return_value=self.mocked_description_1,
+        ):
+            with patch.object(
+                self.strategy,
+                "get_register_service_description",
+                return_value=self.mocked_description_2,
+            ):
                 with patch.object(self.logger, "log") as mock_logger:
                     self.service_behaviour.setup()
 
@@ -73,7 +85,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        mock_logger.assert_any_call(logging.INFO,"registering agent on SOEF.")
+        mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
 
         # _register_service
         has_attributes, error_str = self.message_has_attributes(
@@ -96,8 +108,16 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test_teardown(self):
         """Test the teardown method of the http_request behaviour."""
         # operation
-        with patch.object(self.strategy, "get_location_description", return_value=self.mocked_description_1):
-            with patch.object(self.strategy, "get_unregister_service_description", return_value=self.mocked_description_2):
+        with patch.object(
+            self.strategy,
+            "get_location_description",
+            return_value=self.mocked_description_1,
+        ):
+            with patch.object(
+                self.strategy,
+                "get_unregister_service_description",
+                return_value=self.mocked_description_2,
+            ):
                 with patch.object(self.logger, "log") as mock_logger:
                     self.service_behaviour.teardown()
 
