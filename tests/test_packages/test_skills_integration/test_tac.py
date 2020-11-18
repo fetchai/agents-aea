@@ -22,7 +22,7 @@ import datetime
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseMany, UseGanache
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -265,7 +265,7 @@ class TestTacSkills(AEATestCaseMany):
         ), "Agents weren't successfully terminated."
 
 
-class TestTacSkillsContract(AEATestCaseMany):
+class TestTacSkillsContract(AEATestCaseMany, UseGanache):
     """Test that tac skills work."""
 
     @pytest.mark.integration
