@@ -246,7 +246,8 @@ class AEA(Agent):
             default_connection=self.context.default_connection,
         )
 
-    def _get_error_handler(self) -> Type[ErrorHandler]:
+    @staticmethod
+    def _get_error_handler() -> Type[ErrorHandler]:
         """Get error handler."""
         handler = ErrorHandler
         return handler
