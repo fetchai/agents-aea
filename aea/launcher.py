@@ -90,14 +90,6 @@ def _run_agent(
     import select  # pylint: disable=import-outside-toplevel
     import selectors  # pylint: disable=import-outside-toplevel
 
-    # HACK for aea.py:288
-    with cd(agent_dir):
-        # pylint: disable=import-outside-toplevel,unused-import
-        # noqa: F401,I001,I005
-        from packages.fetchai.skills.error.handlers import ErrorHandler
-
-        _ = ErrorHandler
-
     if hasattr(select, "kqueue"):  # pragma: nocover  # cause platform specific
         selector = selectors.SelectSelector()
         loop = asyncio.SelectorEventLoop(selector)  # type: ignore
@@ -106,6 +98,14 @@ def _run_agent(
     _set_logger(log_level=log_level)
 
     agent = load_agent(agent_dir)
+
+    # HACK for aea.py:288
+    with cd(agent_dir):
+        # pylint: disable=import-outside-toplevel,unused-import
+        # noqa: F401,I001,I005
+        from packages.fetchai.skills.error.handlers import ErrorHandler
+
+        _ = ErrorHandler
 
     def stop_event_thread():
         try:
