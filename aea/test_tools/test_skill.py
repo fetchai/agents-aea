@@ -421,7 +421,7 @@ class BaseSkillTestCase:
         return dialogue
 
     @classmethod
-    def setup(cls) -> None:
+    def setup(cls, **kwargs) -> None:
         """Set up the skill test case."""
         identity = Identity("test_agent_name", "test_agent_address")
 
@@ -445,5 +445,10 @@ class BaseSkillTestCase:
             search_service_address="dummy_search_service_address",
             decision_maker_address="dummy_decision_maker_address",
         )
+
+        cls._shared_state = kwargs.pop("shared_state", dict())
+        if cls._shared_state != dict():
+            for key, value in cls._shared_state.items():
+                agent_context.shared_state[key] = value
 
         cls._skill = Skill.from_dir(str(cls.path_to_skill), agent_context)
