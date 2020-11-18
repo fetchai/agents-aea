@@ -343,10 +343,11 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
             {
                 "agent_name": self.agent_name,
                 "public_id": str(self.project_public_id),
-                "is_running": False
+                "is_running": False,
             }
         ]
         assert result == expected_result
+
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""

@@ -405,7 +405,7 @@ class MultiAgentManager:
             {
                 "agent_name": agent_name,
                 "public_id": str(alias.project.public_id),
-                "is_running": self._is_agent_running(agent_name)
+                "is_running": self._is_agent_running(agent_name),
             }
             for agent_name, alias in self._agents.items()
         ]
