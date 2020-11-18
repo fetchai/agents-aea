@@ -342,7 +342,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.14.0",
+            "fetchai/generic_buyer:0.15.0",
             "--alias",
             cls.agent_name,
         )
@@ -423,7 +423,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.14.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.15.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
