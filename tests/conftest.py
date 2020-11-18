@@ -131,6 +131,7 @@ FETCHAI = _FETCHAI
 # URL to local Ganache instance
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
 DEFAULT_GANACHE_PORT = 8545
+DEFAULT_GANACHE_CHAIN_ID = 1337
 
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
@@ -208,6 +209,7 @@ PUBLIC_DHT_DELEGATE_URI_2_PROD = "agents-p2p-dht.prod.fetch-ai.com:11001"
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
 ETHEREUM_TESTNET_CONFIG = {
     "address": ETHEREUM_DEFAULT_ADDRESS,
+    "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
     "gas_price": 50,
 }
 FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
@@ -563,7 +565,7 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
     new_uri = f"{ganache_addr}:{ganache_port}"
     new_config = {
         "address": new_uri,
-        "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
+        "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
     }
     return new_config
