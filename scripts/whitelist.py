@@ -231,3 +231,6 @@ _.load_agent_config  # unused method (aea/test_tools/test_cases.py:801)
 _.UseGanache  # unused class (aea/test_tools/test_cases.py:871)
 _._start_ganache  # unused method (aea/test_tools/test_cases.py:875)
 _.ganache  # unused variable (aea/test_tools/test_cases.py:876:)
+_.unsupported_protocol_count
+_.unsupported_skill_count
+_.decoding_error_count
