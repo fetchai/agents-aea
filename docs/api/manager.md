@@ -125,7 +125,7 @@ Multi agents manager.
 #### `__`init`__`
 
 ```python
- | __init__(working_dir: str, mode: str = "async", registry_path: str = "packages") -> None
+ | __init__(working_dir: str, mode: str = "async", registry_path: str = DEFAULT_REGISTRY_NAME) -> None
 ```
 
 Initialize manager.
@@ -144,6 +144,16 @@ Initialize manager.
 
 Is manager running.
 
+<a name="aea.manager.MultiAgentManager.dict_state"></a>
+#### dict`_`state
+
+```python
+ | @property
+ | dict_state() -> Dict[str, Any]
+```
+
+Create MultiAgentManager dist state.
+
 <a name="aea.manager.MultiAgentManager.add_error_callback"></a>
 #### add`_`error`_`callback
 
@@ -157,7 +167,7 @@ Add error callback to call on error raised.
 #### start`_`manager
 
 ```python
- | start_manager() -> "MultiAgentManager"
+ | start_manager(local: bool = True) -> "MultiAgentManager"
 ```
 
 Start manager.
@@ -166,12 +176,17 @@ Start manager.
 #### stop`_`manager
 
 ```python
- | stop_manager() -> "MultiAgentManager"
+ | stop_manager(cleanup: bool = True, save: bool = False) -> "MultiAgentManager"
 ```
 
 Stop manager.
 
 Stops all running agents and stop agent.
+
+**Arguments**:
+
+- `cleanup`: bool is cleanup on stop.
+- `save`: bool is save state to file on stop.
 
 **Returns**:
 
@@ -181,7 +196,7 @@ None
 #### add`_`project
 
 ```python
- | add_project(public_id: PublicId, local: bool = True) -> "MultiAgentManager"
+ | add_project(public_id: PublicId, local: bool = True, restore: bool = False) -> "MultiAgentManager"
 ```
 
 Fetch agent project and all dependencies to working_dir.
@@ -190,12 +205,13 @@ Fetch agent project and all dependencies to working_dir.
 
 - `public_id`: the public if of the agent project.
 - `local`: whether or not to fetch from local registry.
+- `restore`: bool flag for restoring already fetched agent.
 
 <a name="aea.manager.MultiAgentManager.remove_project"></a>
 #### remove`_`project
 
 ```python
- | remove_project(public_id: PublicId) -> "MultiAgentManager"
+ | remove_project(public_id: PublicId, keep_files: bool = False) -> "MultiAgentManager"
 ```
 
 Remove agent project.
@@ -217,7 +233,7 @@ lit of public ids of projects
 #### add`_`agent
 
 ```python
- | add_agent(public_id: PublicId, agent_name: Optional[str] = None, agent_overrides: Optional[dict] = None, component_overrides: Optional[List[dict]] = None) -> "MultiAgentManager"
+ | add_agent(public_id: PublicId, agent_name: Optional[str] = None, agent_overrides: Optional[dict] = None, component_overrides: Optional[List[dict]] = None, config: Optional[List[dict]] = None) -> "MultiAgentManager"
 ```
 
 Create new agent configuration based on project with config overrides applied.
@@ -230,10 +246,24 @@ Alias is stored in memory only!
 - `agent_name`: unique name for the agent
 - `agent_overrides`: overrides for agent config.
 - `component_overrides`: overrides for component section.
+- `config`: agent config (used for agent re-creation).
 
 **Returns**:
 
 manager
+
+<a name="aea.manager.MultiAgentManager.list_agents_info"></a>
+#### list`_`agents`_`info
+
+```python
+ | list_agents_info() -> List[Dict[str, Any]]
+```
+
+List agents detailed info.
+
+**Returns**:
+
+list of dicts that represents agent info: public_id, name, is_running.
 
 <a name="aea.manager.MultiAgentManager.list_agents"></a>
 #### list`_`agents

@@ -325,6 +325,25 @@ Check if the address is valid.
 
 - `address`: the address to validate
 
+<a name="aea.crypto.base.Helper.load_contract_interface"></a>
+#### load`_`contract`_`interface
+
+```python
+ | @classmethod
+ | @abstractmethod
+ | load_contract_interface(cls, file_path: Path) -> Dict[str, str]
+```
+
+Load contract interface.
+
+**Arguments**:
+
+- `file_path`: the file path to the interface
+
+**Returns**:
+
+the interface
+
 <a name="aea.crypto.base.LedgerApi"></a>
 ## LedgerApi Objects
 

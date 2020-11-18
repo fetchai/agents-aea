@@ -391,7 +391,7 @@ Result
  | eject_item(cls, item_type: str, public_id: str) -> Result
 ```
 
-Eject an item in the agent.
+Eject an item in the agent in quiet mode (i.e. no interaction).
 
 Run from agent's directory.
 
@@ -619,6 +619,26 @@ Check if the AEA is launched and running (ready to process messages).
 
 - `process`: agent subprocess.
 - `timeout`: the timeout to wait for launch to complete
+
+<a name="aea.test_tools.test_cases.BaseAEATestCase.invoke"></a>
+#### invoke
+
+```python
+ | @classmethod
+ | invoke(cls, *args)
+```
+
+Call the cli command.
+
+<a name="aea.test_tools.test_cases.BaseAEATestCase.load_agent_config"></a>
+#### load`_`agent`_`config
+
+```python
+ | @classmethod
+ | load_agent_config(cls, agent_name: str) -> AgentConfig
+```
+
+Load agent configuration.
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.setup_class"></a>
 #### setup`_`class

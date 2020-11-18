@@ -294,3 +294,21 @@ the topological order for the graph (as a sequence of nodes)
 
 - `ValueError`: if the graph contains a cycle.
 
+<a name="aea.helpers.base.reachable_nodes"></a>
+#### reachable`_`nodes
+
+```python
+reachable_nodes(adjacency_list: Dict[T, Set[T]], starting_nodes: Set[T]) -> Dict[T, Set[T]]
+```
+
+Find the reachable subgraph induced by a set of starting nodes.
+
+**Arguments**:
+
+- `adjacency_list`: the adjacency list of the full graph.
+- `starting_nodes`: the starting nodes of the new graph.
+
+**Returns**:
+
+the adjacency list of the subgraph.
+
