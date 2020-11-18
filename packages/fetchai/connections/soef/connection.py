@@ -66,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.13.0")
 
 NOT_SPECIFIED = object()
 
@@ -211,6 +211,7 @@ class SOEFChannel:
     ]
 
     DEFAULT_PERSONALITY_PIECES = ["architecture,agentframework"]
+    NONE_UNIQUE_PAGE_ADDRESS = ""
 
     PING_PERIOD = 30 * 60  # 30 minutes
     FIND_AROUND_ME_REQUEST_DELAY = 2  # seconds
@@ -224,6 +225,7 @@ class SOEFChannel:
         excluded_protocols: Set[PublicId],
         restricted_to_protocols: Set[PublicId],
         chain_identifier: Optional[str] = None,
+        token_storage_path: Optional[str] = None,
         logger: logging.Logger = _default_logger,
     ):
         """
@@ -253,8 +255,9 @@ class SOEFChannel:
         self.restricted_to_protocols = restricted_to_protocols
         self.oef_search_dialogues = OefSearchDialogues()
 
+        self._token_storage_path = token_storage_path
         self.declared_name = uuid4().hex
-        self.unique_page_address = None  # type: Optional[str]
+        self._unique_page_address = None  # type: Optional[str]
         self.agent_location = None  # type: Optional[Location]
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self._executor_pool: Optional[ThreadPoolExecutor] = None
@@ -266,13 +269,49 @@ class SOEFChannel:
         self.logger = logger
         self._unregister_lock: Optional[asyncio.Lock] = None
 
+    @property
+    def unique_page_address(self) -> Optional[str]:
+        """Get unique page address."""
+        if self._unique_page_address is None:
+            # check if we have it in storage
+            self._unique_page_address = self._get_unique_page_address_from_storage()
+        return self._unique_page_address
+
+    @unique_page_address.setter
+    def unique_page_address(self, unique_page_address: Optional[str]) -> None:
+        """Set the unique page address."""
+        self._unique_page_address = unique_page_address
+        self._set_unique_page_address_to_storage(unique_page_address)
+
+    def _get_unique_page_address_from_storage(self) -> Optional[str]:
+        """Get the unique page address from storage."""
+        if self._token_storage_path is None:
+            return None
+        with open(self._token_storage_path, "r") as f:
+            result = f.read().strip()
+        unique_page_address = (
+            result if result != self.NONE_UNIQUE_PAGE_ADDRESS else None
+        )
+        return unique_page_address
+
+    def _set_unique_page_address_to_storage(
+        self, unique_page_address: Optional[str]
+    ) -> None:
+        """Set the unique page address to storage."""
+        if self._token_storage_path is None:
+            return
+        if unique_page_address is None:
+            unique_page_address = self.NONE_UNIQUE_PAGE_ADDRESS
+        with open(self._token_storage_path, "w") as f:
+            f.write(unique_page_address)
+
     async def _find_around_me_processor(self) -> None:
         """Process find me around requests in background task."""
         while self._find_around_me_queue is not None:
             try:
                 task = await self._find_around_me_queue.get()
                 oef_message, oef_search_dialogue, radius, params = task
-                await self._find_around_me_handle_requet(
+                await self._find_around_me_handle_request(
                     oef_message, oef_search_dialogue, radius, params
                 )
                 await asyncio.sleep(self.FIND_AROUND_ME_REQUEST_DELAY)
@@ -609,12 +648,19 @@ class SOEFChannel:
         await self._set_service_key(key, value)
 
     async def _generic_oef_command(
-        self, command, params=None, unique_page_address=None, check_success=True
+        self,
+        command: str,
+        params: Optional[Dict[str, Union[str, List[str]]]] = None,
+        unique_page_address: Optional[str] = None,
+        check_success: bool = True,
     ) -> str:
         """
         Set service key from service description.
 
-        :param service_description: Service description
+        :param command: the command
+        :param params: the parameters of the command
+        :param unique_page_address: the unique page address
+        :param check_success: whether or not to check for success
         :return: response text
         """
         params = params or {}
@@ -645,7 +691,9 @@ class SOEFChannel:
         :param value: value to set
         :return None:
         """
-        await self._generic_oef_command("set_service_key", {"key": key, "value": value})
+        await self._generic_oef_command(
+            "set_service_key", {"key": key, "value": str(value)}
+        )
 
     async def _remove_service_key_handler(
         self,
@@ -741,15 +789,15 @@ class SOEFChannel:
         """
         latitude = agent_location.latitude
         longitude = agent_location.longitude
-        params = {
+        params: Dict[str, Union[str, List[str]]] = {
             "longitude": str(longitude),
             "latitude": str(latitude),
         }
         await self._generic_oef_command("set_position", params)
         if disclosure_accuracy:
+            params = {"accuracy": disclosure_accuracy}
             await self._generic_oef_command(
-                "set_find_position_disclosure_accuracy",
-                {"accuracy": disclosure_accuracy},
+                "set_find_position_disclosure_accuracy", params,
             )
 
         self.agent_location = agent_location
@@ -782,7 +830,7 @@ class SOEFChannel:
         :param piece: the piece to be set
         :param value: the value to be set
         """
-        params = {
+        params: Dict[str, Union[str, List[str]]] = {
             "piece": piece,
             "value": value,
         }
@@ -802,7 +850,7 @@ class SOEFChannel:
         """
         self.logger.debug("Applying to SOEF lobby with address={}".format(self.address))
         url = parse.urljoin(self.base_url, "register")
-        params = {
+        params: Dict[str, Union[str, List[str]]] = {
             "api_key": self.api_key,
             "chain_identifier": self.chain_identifier,
             "address": self.address,
@@ -836,6 +884,10 @@ class SOEFChannel:
 
         await self._set_personality_piece("architecture", "agentframework")
 
+        self.start_periodic_ping_task()
+
+    def start_periodic_ping_task(self) -> None:
+        """Start the periodic ping task."""
         if self._loop and not self._ping_periodic_task:
             self._ping_periodic_task = self._loop.create_task(
                 self._ping_periodic(self.PING_PERIOD)
@@ -951,6 +1003,8 @@ class SOEFChannel:
         self._find_around_me_processor_task = self._loop.create_task(
             self._find_around_me_processor()
         )
+        # make sure we first unregister, in case of improper previous termination
+        await self._unregister_agent()
 
     async def disconnect(self) -> None:
         """
@@ -1036,7 +1090,7 @@ class SOEFChannel:
             (oef_message, oef_search_dialogue, radius, params)
         )
 
-    async def _find_around_me_handle_requet(
+    async def _find_around_me_handle_request(
         self,
         oef_message: OefSearchMessage,
         oef_search_dialogue: OefSearchDialogue,
@@ -1122,6 +1176,9 @@ class SOEFConnection(Connection):
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
+        token_storage_path = cast(
+            Optional[str], self.configuration.config.get("token_storage_path")
+        )
         if api_key is None or soef_addr is None or soef_port is None:  # pragma: nocover
             raise ValueError("api_key, soef_addr and soef_port must be set!")
 
@@ -1136,6 +1193,7 @@ class SOEFConnection(Connection):
             self.excluded_protocols,
             self.restricted_to_protocols,
             chain_identifier=chain_identifier,
+            token_storage_path=token_storage_path,
         )
 
     async def connect(self) -> None:

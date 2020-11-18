@@ -26,7 +26,7 @@ Init project with public_id and project's path.
 
 ```python
  | @classmethod
- | load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, registry_path: str = "packages", skip_consistency_check: bool = False) -> "Project"
+ | load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, is_restore: bool = False, registry_path: str = DEFAULT_REGISTRY_NAME, skip_consistency_check: bool = False) -> "Project"
 ```
 
 Load project with given public_id to working_dir.
@@ -74,4 +74,14 @@ Init agent alias with project, config, name, agent, builder.
 ```
 
 Remove agent alias from project.
+
+<a name="aea.configurations.project.AgentAlias.dict"></a>
+#### dict
+
+```python
+ | @property
+ | dict() -> Dict[str, Any]
+```
+
+Convert AgentAlias to dict.
 

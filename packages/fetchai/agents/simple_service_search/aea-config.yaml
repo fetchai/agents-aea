@@ -1,0 +1,31 @@
+agent_name: simple_service_search
+author: fetchai
+version: 0.1.0
+description: A simple example of service search.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint: ''
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/p2p_libp2p:0.12.0
+- fetchai/soef:0.13.0
+contracts: []
+protocols:
+- fetchai/default:0.9.0
+- fetchai/fipa:0.10.0
+- fetchai/oef_search:0.10.0
+- fetchai/signing:0.7.0
+- fetchai/state_update:0.7.0
+skills:
+- fetchai/error:0.9.0
+- fetchai/simple_service_search:0.2.0
+default_connection: fetchai/p2p_libp2p:0.12.0
+default_ledger: fetchai
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: {}
+registry_path: ../packages
+default_routing:
+  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+connection_private_key_paths: {}

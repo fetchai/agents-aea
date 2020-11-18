@@ -19,9 +19,13 @@
 """This test module contains tests for CLI Registry utils."""
 
 import os
+import tempfile
 from json.decoder import JSONDecodeError
+from pathlib import Path
 from unittest import TestCase, mock
+from unittest.mock import MagicMock
 
+import pytest
 from click import ClickException
 from requests.exceptions import ConnectionError
 
@@ -29,12 +33,20 @@ from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.registry.utils import (
     _rm_tarfiles,
     check_is_author_logged_in,
+    clean_tarfiles,
     download_file,
     extract,
+    get_latest_public_id_mixed,
+    get_latest_version_available_in_registry,
+    get_package_meta,
     is_auth_token_present,
     request_api,
 )
 from aea.cli.utils.exceptions import AEAConfigException
+from aea.configurations.base import PublicId
+from aea.helpers.base import cd
+
+from packages.fetchai.protocols.default import DefaultMessage
 
 
 def _raise_connection_error(*args, **kwargs):
@@ -290,3 +302,92 @@ class IsAuthTokenPresentTestCase(TestCase):
         """Test for is_auth_token_present method positive result."""
         result = is_auth_token_present()
         self.assertTrue(result)
+
+
+@mock.patch(
+    "aea.cli.registry.utils.find_item_locally", side_effect=ClickException("some error")
+)
+@mock.patch(
+    "aea.cli.registry.utils.get_package_meta",
+    return_value=dict(public_id="author/name:0.1.0"),
+)
+def test_get_latest_public_id_mixed_negative(*_mocks):
+    """Test 'get_latest_public_id_mixed', when local fetch fails."""
+    get_latest_public_id_mixed(
+        MagicMock(), "protocol", PublicId.from_str("author/name:0.1.0")
+    )
+
+
+def test_clean_tarfiles():
+    """Test clean tarfiles wrapper."""
+
+    expected_result = "result"
+
+    def func() -> str:
+        """The function being wrapped."""
+        return expected_result
+
+    wrapped = clean_tarfiles(func)
+    with tempfile.TemporaryDirectory() as tempdir:
+        with cd(tempdir):
+            tarfile_path = Path(tempdir, "tarfile.tar.gz")
+            tarfile_path.touch()
+
+            result = wrapped()
+
+            assert not tarfile_path.exists()
+            assert result == expected_result
+
+
+def test_clean_tarfiles_error():
+    """Test clean tarfiles wrapper in case of error."""
+
+    expected_message = "some exception"
+
+    def func() -> str:
+        """The function being wrapped."""
+        raise Exception(expected_message)
+
+    wrapped = clean_tarfiles(func)
+    with tempfile.TemporaryDirectory() as tempdir:
+        with cd(tempdir):
+            tarfile_path = Path(tempdir, "tarfile.tar.gz")
+            tarfile_path.touch()
+
+            with pytest.raises(Exception, match=expected_message):
+                wrapped()
+
+            assert not tarfile_path.exists()
+
+
+@pytest.mark.integration
+def test_get_package_meta():
+    """Test get package meta."""
+    package_meta = get_package_meta("protocol", DefaultMessage.protocol_id)
+    assert isinstance(package_meta, dict)
+    assert package_meta["name"] == DefaultMessage.protocol_id.name
+
+
+@mock.patch(
+    "aea.cli.registry.utils.find_item_locally",
+    return_value=(None, MagicMock(public_id=DefaultMessage.protocol_id)),
+)
+def test_get_latest_public_id_mixed(*_mock):
+    """Test 'get_latest_public_id_mixed', in case of success."""
+    result = get_latest_public_id_mixed(
+        MagicMock(), "protocol", DefaultMessage.protocol_id
+    )
+    assert result == DefaultMessage.protocol_id
+
+
+@mock.patch(
+    "aea.cli.registry.utils.get_package_meta",
+    return_value=dict(public_id=str(DefaultMessage.protocol_id)),
+)
+def test_get_latest_version_available_in_registry_remote_mode(*_mocks):
+    """Test 'get_latest_version_available_in_registry', remote mode."""
+    context_mock = MagicMock(config=dict(is_local=False, is_mixed=False))
+    result = get_latest_version_available_in_registry(
+        context_mock, "protocol", DefaultMessage.protocol_id
+    )
+    assert result == DefaultMessage.protocol_id

@@ -127,7 +127,7 @@ class MultiAddr:
         elif multihash_id is not None:
             try:
                 multihash.decode(base58.b58decode(multihash_id))
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 raise ValueError(
                     "Malformed multihash '{}': {}".format(multihash_id, str(e))
                 )

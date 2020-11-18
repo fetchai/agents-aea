@@ -1,6 +1,6 @@
 agent_name: ml_model_trainer
 author: fetchai
-version: 0.17.0
+version: 0.18.0
 description: An agent buying data and training a model from it.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
@@ -9,7 +9,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.9.0
 - fetchai/p2p_libp2p:0.12.0
-- fetchai/soef:0.12.0
+- fetchai/soef:0.13.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -31,5 +31,5 @@ private_key_paths: {}
 registry_path: ../packages
 default_routing:
   fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 connection_private_key_paths: {}

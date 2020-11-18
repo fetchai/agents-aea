@@ -27,7 +27,8 @@ import click
 from click import Context, Option, UsageError, option
 
 from aea.cli.utils.config import try_to_load_agent_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 
 
 class ConnectionsOption(click.Option):

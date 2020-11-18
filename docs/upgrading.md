@@ -1,5 +1,9 @@
 This page provides some tipps of how to upgrade between versions.
 
+## v0.7.3 to v0.7.4
+
+No backwards incompatible changes for skill and connection development.
+
 ## v0.7.2 to v0.7.3
 
 No backwards incompatible changes for skill and connection development.

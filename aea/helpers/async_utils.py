@@ -391,7 +391,13 @@ class AwaitableProc:
     def _in_thread(self):
         """Run in dedicated thread."""
         self.proc.wait()
-        self.loop.call_soon_threadsafe(self.future.set_result, self.proc.returncode)
+        self.loop.call_soon_threadsafe(self._set_return_code, self.proc.returncode)
+
+    def _set_return_code(self, code: int) -> None:
+        """Set future with return code."""
+        if self.future.done():  # pragma: nocover
+            return
+        self.future.set_result(code)
 
 
 class ItemGetter:
@@ -517,11 +523,22 @@ class Runnable(ABC):
 
         if self._threaded:
             self._thread = Thread(
-                target=self._loop.run_until_complete, args=[self._task]  # type: ignore # loop was set in set_loop
+                target=self._thread_target, name=self.__class__.__name__  # type: ignore # loop was set in set_loop
             )
+            self._thread.setDaemon(True)
             self._thread.start()
 
         return True
+
+    def _thread_target(self) -> None:
+        """Start event loop and task in the dedicated thread."""
+        if not self._loop:
+            raise ValueError("Call _set_loop() first!")  # pragma: nocover
+        if not self._task:
+            raise ValueError("Call _set_task() first!")  # pragma: nocover
+        self._loop.run_until_complete(self._task)
+        self._loop.stop()
+        self._loop.close()
 
     def _set_loop(self) -> None:
         """Select and set loop."""
@@ -598,6 +615,9 @@ class Runnable(ABC):
                 time.sleep(0.01)
                 if timeout is not None and time.time() - start_time > timeout:
                     raise asyncio.TimeoutError()
+
+            if self._thread:
+                self._thread.join(timeout)
 
             self._got_result = True
             if self._task.exception():

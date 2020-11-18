@@ -9,13 +9,13 @@ aea fingerprint skill fetchai/my_search:0.1.0
 aea add protocol fetchai/oef_search:0.10.0
 ```
 ``` bash
-aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/soef:0.13.0
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.16.0 && cd simple_service_registration && aea install
+aea fetch fetchai/simple_service_registration:0.17.0 && cd simple_service_registration && aea install
 ```
 ``` bash
 aea generate-key fetchai
@@ -72,7 +72,7 @@ dependencies: {}
 ```
 ``` yaml
 default_routing:
-  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 ``` yaml
 name: simple_service_registration
