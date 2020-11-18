@@ -29,6 +29,7 @@ import pytest
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
+from aea.crypto import EthereumCrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.helpers.async_utils import AsyncState
@@ -54,9 +55,7 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
     ETHEREUM,
-    ETHEREUM_ADDRESS_ONE,
     ETHEREUM_PRIVATE_KEY_PATH,
-    ETHEREUM_TESTNET_CONFIG,
     FETCHAI,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
@@ -67,10 +66,10 @@ logger = logging.getLogger(__name__)
 
 
 ledger_ids = pytest.mark.parametrize(
-    "ledger_id,address,config",
+    "ledger_id,address",
     [
-        (FETCHAI, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
-        (ETHEREUM, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
+        (FETCHAI, FETCHAI_ADDRESS_ONE),
+        (ETHEREUM, EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH).address),
     ],
 )
 
@@ -108,10 +107,20 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 @pytest.mark.asyncio
 @ledger_ids
 async def test_get_balance(
-    ledger_id, address, config, ledger_apis_connection: Connection
+    ledger_id,
+    address,
+    ledger_apis_connection: Connection,
+    update_default_ethereum_ledger_api,
+    ethereum_testnet_config,
+    ganache,
 ):
     """Test get balance."""
     import aea  # noqa # to load registries
+
+    if ledger_id == FETCHAI:
+        config = FETCHAI_TESTNET_CONFIG
+    else:
+        config = ethereum_testnet_config
 
     ledger_api_dialogues = LedgerApiDialogues(address)
     request, ledger_api_dialogue = ledger_api_dialogues.create(
@@ -145,7 +154,9 @@ async def test_get_balance(
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
-async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connection):
+async def test_send_signed_transaction_ethereum(
+    ledger_apis_connection: Connection, update_default_ethereum_ledger_api, ganache
+):
     """Test send signed transaction with Ethereum APIs."""
     import aea  # noqa # to load registries
 
