@@ -16,12 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea launch` sub-command."""
 import json
 import os
 import sys
 import uuid
+
+import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
@@ -32,7 +33,7 @@ class TestLaunchEndToEnd(AEATestCaseMany):
     """Perform aea launch end to end test."""
 
     key = "seller_service"
-    value = "generic_service"
+    value = None
 
     registration_agent_connection = {
         "delegate_uri": "127.0.0.1:11011",
@@ -52,6 +53,7 @@ class TestLaunchEndToEnd(AEATestCaseMany):
         "public_uri": "127.0.0.1:9012",
     }
 
+    @pytest.mark.integration
     def test_end_to_end(self):
         """Perform end to end test with simple register/search agents."""
         registration_agent_name = "registration_agent"
