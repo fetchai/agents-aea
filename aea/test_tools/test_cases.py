@@ -868,6 +868,15 @@ class UseOef:  # pylint: disable=too-few-public-methods
         """Start an oef node."""
 
 
+@pytest.mark.integration
+class UseGanache:  # pylint: disable=too-few-public-methods
+    """Inherit from this class to use Ganache."""
+
+    @pytest.fixture(autouse=True)
+    def _start_ganache(self, ganache):
+        """Start a Ganache image."""
+
+
 class AEATestCaseEmpty(BaseAEATestCase):
     """
     Test case for a default AEA project.
