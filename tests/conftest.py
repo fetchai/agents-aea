@@ -581,6 +581,8 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
     DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = old_config
 
 
+@pytest.mark.integration
+@pytest.mark.ledger
 @pytest.fixture(scope="session")
 @action_for_platform("Linux", skip=False)
 def ganache(
