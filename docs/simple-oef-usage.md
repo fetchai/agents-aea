@@ -1,7 +1,7 @@
 You can use the <a href="../simple-oef">SOEF</a> in the agent framework by using the SOEF connection as a package in your agent project.
 
 ## Add the SOEF package
-Check out the <a href="../cli-commands">CLI guide</a> on details how to add a connection. You will want to add the `fetchai/soef:0.12.0` connection package. 
+Check out the <a href="../cli-commands">CLI guide</a> on details how to add a connection. You will want to add the `fetchai/soef:0.13.0` connection package. 
 
 ## Register your agent and its services
 
