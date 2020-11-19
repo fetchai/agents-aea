@@ -19,17 +19,15 @@
 
 """Implementation of the 'aea push' subcommand."""
 
-import os
 from shutil import copytree
 from typing import cast
 
 import click
 
-from aea.cli.registry.push import push_item
+from aea.cli.registry.push import check_package_public_id, push_item
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
-from aea.cli.utils.generic import load_yaml
 from aea.cli.utils.package_utils import (
     try_get_item_source_path,
     try_get_item_target_path,
@@ -105,32 +103,16 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     source_path = try_get_item_source_path(
         ctx.cwd, None, item_type_plural, item_id.name
     )
+
+    check_package_public_id(source_path, item_type, item_id)
+
     target_path = try_get_item_target_path(
         ctx.agent_config.registry_path,
         ctx.agent_config.author,
         item_type_plural,
         item_id.name,
     )
-    _check_package_public_id(source_path, item_type, item_id)
     copytree(source_path, target_path)
     click.echo(
         f'{item_type.title()} "{item_id}" successfully saved in packages folder.'
     )
-
-
-def _check_package_public_id(source_path, item_type, item_id) -> None:
-    # we load only based on item_name, hence also check item_version and item_author match.
-    config = load_yaml(os.path.join(source_path, item_type + ".yaml"))
-    item_author = config.get("author", "")
-    item_name = config.get("name", "")
-    item_version = config.get("version", "")
-    actual_item_id = PublicId(item_author, item_name, item_version)
-    if not actual_item_id.same_prefix(item_id) or (
-        not item_id.package_version.is_latest
-        and item_id.version != actual_item_id.version
-    ):
-        raise click.ClickException(
-            "Version, name or author does not match. Expected '{}', found '{}'".format(
-                item_id, item_author + "/" + item_name + ":" + item_version
-            )
-        )
