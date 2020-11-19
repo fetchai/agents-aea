@@ -21,7 +21,7 @@
 import logging
 from pathlib import Path
 from typing import cast
-from unittest.mock import PropertyMock, patch
+from unittest.mock import PropertyMock, patch, Mock
 
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.test_tools.test_skill import BaseSkillTestCase
@@ -92,6 +92,22 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # after
         self.assert_quantity_in_outbox(0)
         assert self.skill.skill_context.is_active is False
+
+    # def test_act_ii(self):
+    #     """Test the act method of the negotiation behaviour where goal_pursuit_readiness is NOT ready."""
+    #     # setup
+    #
+    #     mocked_now_time = self._time("00:03")
+    #     datetime_mock = Mock(wraps=datetime.datetime)
+    #     datetime_mock.now.return_value = mocked_now_time
+    #
+    #     # operation
+    #     with patch.object(self.skill.skill_context.decision_maker_handler_context, new=)
+    #         self.tac_negotiation.act()
+    #
+    #     # after
+    #     self.assert_quantity_in_outbox(0)
+    #     assert self.skill.skill_context.is_active is False
 
     def test_register_agent(self):
         """Test the _register_agent method of the negotiation behaviour."""

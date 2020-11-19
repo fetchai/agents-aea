@@ -23,6 +23,7 @@ from unittest.mock import patch
 
 import pytest
 
+from aea.decision_maker.default import OwnershipState
 from aea.exceptions import AEAEnforceError
 from aea.helpers.search.models import (
     Constraint,
@@ -35,6 +36,7 @@ from aea.helpers.transaction.base import Terms
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
+from packages.fetchai.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
 from packages.fetchai.skills.tac_negotiation.strategy import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -79,6 +81,12 @@ class TestStrategy(BaseSkillTestCase):
         cls.sender = "some_sender_address"
         cls.counterparty = "some_counterparty_address"
         cls.signature = "some_signature"
+
+        cls.mocked_currency_id = "1"
+        cls.mocked_amount_by_currency_id = {cls.mocked_currency_id: 10}
+        cls.mocked_quantities_by_good_id = {"2": 5, "3": 7}
+        cls.mocked_ownership_state = OwnershipState()
+        cls.mocked_ownership_state.set(cls.mocked_amount_by_currency_id, cls.mocked_quantities_by_good_id)
 
     def test_properties(self):
         """Test the properties of Strategy class."""
@@ -159,27 +167,53 @@ class TestStrategy(BaseSkillTestCase):
         )
         assert query.constraints[1] == service_key_filter
 
-    def test_get_own_service_description(self):
-        """Test the get_own_service_description method of the Strategy class."""
-        # ToDo complete
-        pytest.skip("not working")
+    def test_get_own_service_description_is_supply(self):
+        """Test the get_own_service_description method of the Strategy class where is_supply is True."""
+        # setup
         is_supply = True
-        mocked_description = Description({"foo1": 1, "bar1": 2})
+        mocked_supplied_quantities_by_good_id = {"2": 4, "3": 6}
+        expected_description = build_goods_description(
+            mocked_supplied_quantities_by_good_id,
+            self.mocked_currency_id,
+            self.ledger_id,
+            is_supply
+        )
 
+        # operation
         with patch.object(
-            self.skill.skill_context.transactions, "ownership_state_after_locks"
+            self.skill.skill_context.transactions,
+            "ownership_state_after_locks",
+            return_value=self.mocked_ownership_state
         ) as mock_ownership:
-            with patch.object(
-                self.strategy,
-                "build_goods_description",
-                return_value=mocked_description,
-            ) as mock_build:
-                with patch.object(self.strategy, "_supplied_goods") as mock_supplied:
-                    self.strategy.get_own_service_description(is_supply)
+            actual_description = self.strategy.get_own_service_description(is_supply)
 
-        mock_ownership.assert_any_call(is_supply)
-        mock_supplied.assert_called_once()
-        mock_build.assert_called_once()
+        # after
+        mock_ownership.assert_any_call(is_seller=is_supply)
+        assert actual_description == expected_description
+
+    def test_get_own_service_description_not_is_supply(self):
+        """Test the get_own_service_description method of the Strategy class where is_supply is False."""
+        # setup
+        is_supply = False
+        mocked_demanded_quantities_by_good_id = {"2": 1, "3": 1}
+        expected_description = build_goods_description(
+            mocked_demanded_quantities_by_good_id,
+            self.mocked_currency_id,
+            self.ledger_id,
+            is_supply
+        )
+
+        # operation
+        with patch.object(
+            self.skill.skill_context.transactions,
+            "ownership_state_after_locks",
+            return_value=self.mocked_ownership_state
+        ) as mock_ownership:
+            actual_description = self.strategy.get_own_service_description(is_supply)
+
+        # after
+        mock_ownership.assert_any_call(is_seller=is_supply)
+        assert actual_description == expected_description
 
     def test_supplied_goods(self):
         """Test the _supplied_goods method of the Strategy class."""
@@ -197,13 +231,70 @@ class TestStrategy(BaseSkillTestCase):
         expected_demand = {"1": 1, "2": 1, "3": 1, "4": 1, "5": 1}
         assert actual_demand == expected_demand
 
-    def test_get_own_services_query(self):
-        """Test the get_own_services_query method of the Strategy class."""
-        # ToDo complete
+    def test_get_own_services_query_searching_seller(self):
+        """Test the get_own_services_query method of the Strategy class where is_searching_for_sellers is True."""
+        # setup
+        is_searching_for_sellers = True
+        expected_query = build_goods_query(
+            list(self.mocked_quantities_by_good_id.keys()),
+            self.mocked_currency_id,
+            self.ledger_id,
+            is_searching_for_sellers
+        )
+
+        # operation
+        with patch.object(
+                self.skill.skill_context.transactions,
+                "ownership_state_after_locks",
+                return_value=self.mocked_ownership_state
+        ) as mock_ownership:
+            actual_query = self.strategy.get_own_services_query(is_searching_for_sellers)
+
+        # after
+        mock_ownership.assert_any_call(is_seller=not is_searching_for_sellers)
+        assert actual_query == expected_query
+
+    def test_get_own_services_query_searching_buyers(self):
+        """Test the get_own_services_query method of the Strategy class where is_searching_for_sellers is False (same as above)."""
+        # setup
+        is_searching_for_sellers = False
+        expected_query = build_goods_query(
+            list(self.mocked_quantities_by_good_id.keys()),
+            self.mocked_currency_id,
+            self.ledger_id,
+            is_searching_for_sellers
+        )
+
+        # operation
+        with patch.object(
+                self.skill.skill_context.transactions,
+                "ownership_state_after_locks",
+                return_value=self.mocked_ownership_state
+        ) as mock_ownership:
+            actual_query = self.strategy.get_own_services_query(is_searching_for_sellers)
+
+        # after
+        mock_ownership.assert_any_call(is_seller=not is_searching_for_sellers)
+        assert actual_query == expected_query
 
     def test__get_proposal_for_query(self):
         """Test the _get_proposal_for_query method of the Strategy class."""
-        # ToDo complete
+        # setup
+        is_seller = True
+        mocked_candidate_proposals = []
+        mocked_query = None
+
+        # operation
+        with patch.object(
+                self.strategy,
+                "_generate_candidate_proposals",
+                return_value=mocked_candidate_proposals
+        ) as mock_candid:
+            actual_query = self.strategy._get_proposal_for_query(mocked_query, is_seller)
+
+        # after
+        mock_candid.assert_any_call(is_seller=is_seller)
+        assert actual_query in mocked_candidate_proposals
 
     def test_get_proposal_for_query(self):
         """Test the get_proposal_for_query method of the Strategy class."""
