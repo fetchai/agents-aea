@@ -33,7 +33,7 @@ from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.helpers.async_utils import Runnable
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
-from aea.helpers.storage import Storage
+from aea.helpers.storage.generic_storage import Storage
 from aea.multiplexer import AsyncMultiplexer
 from aea.skills.tasks import TaskManager
 

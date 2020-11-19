@@ -42,7 +42,7 @@ from aea.context.base import AgentContext
 from aea.exceptions import AEAException, enforce
 from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.logging import AgentLoggerAdapter
-from aea.helpers.storage import Storage
+from aea.helpers.storage.generic_storage import Storage
 from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager

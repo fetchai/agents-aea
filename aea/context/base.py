@@ -26,7 +26,7 @@ from typing import Any, Callable, Dict, Optional
 
 from aea.common import Address
 from aea.configurations.base import PublicId
-from aea.helpers.storage import Storage
+from aea.helpers.storage.generic_storage import Storage
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.skills.tasks import TaskManager

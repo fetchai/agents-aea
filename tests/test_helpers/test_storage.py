@@ -23,7 +23,7 @@ import time
 
 import pytest
 
-from aea.helpers.storage import Storage
+from aea.helpers.storage.generic_storage import Storage
 
 
 class TestAsyncCollection:
@@ -82,6 +82,28 @@ class TestSyncCollection:
 
         s.stop()
         s.wait_completed(sync=True, timeout=5)
+
+
+class TestMisc:
+    """Various tests."""
+
+    def test_invalid_col_name(self):
+        """Test bad collection name raises exception."""
+        s = Storage("sqlite://:memory:", threaded=True)
+        s.start()
+        try:
+            with pytest.raises(ValueError, match="Invalid collection name:"):
+                s.get_sync_collection("invalid%2345346?^$$$  /// : collection name")
+        finally:
+            s.stop()
+            s.wait_completed(sync=True, timeout=10)
+
+    def test_unsupoported_backend(self):
+        """Test unsupported backed raises exception."""
+        with pytest.raises(
+            ValueError, match="Backend .* is not supported. Supported are"
+        ):
+            Storage._get_backend_instance("bad_back://test")
 
 
 if __name__ == "__main__":
