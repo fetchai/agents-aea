@@ -105,6 +105,15 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
     items_folder = os.path.join(ctx.cwd, item_type_plural)
     item_path = os.path.join(items_folder, item_id.name)
+
+    if not os.path.exists(item_path):
+        raise click.ClickException(
+            '{} "{}" not found  in {}. Make sure you run push command '
+            "from a correct folder.".format(
+                item_type.title(), item_id.name, items_folder
+            )
+        )
+
     check_package_public_id(item_path, item_type, item_id)
 
     item_config_filepath = os.path.join(item_path, "{}.yaml".format(item_type))
@@ -115,13 +124,6 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     logger.debug(
         "Searching for {} {} in {} ...".format(item_id.name, item_type, items_folder)
     )
-    if not os.path.exists(item_path):
-        raise click.ClickException(
-            '{} "{}" not found  in {}. Make sure you run push command '
-            "from a correct folder.".format(
-                item_type.title(), item_id.name, items_folder
-            )
-        )
 
     output_filename = "{}.tar.gz".format(item_id.name)
     logger.debug(
