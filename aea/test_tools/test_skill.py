@@ -22,7 +22,7 @@ import asyncio
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Tuple, Type, cast
 
 from aea.configurations.loader import ConfigLoaders, PackageType, SkillConfig
 from aea.context.base import AgentContext
