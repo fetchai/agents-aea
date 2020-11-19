@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The tests module contains the tests of the packages/skills/simple_data_request dir."""
+"""The tests module contains the tests of the packages/skills/simple_service_registration dir."""

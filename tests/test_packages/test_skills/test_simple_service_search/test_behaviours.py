@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the behaviour classes of the simple_service_search skill."""
+"""This module contains the tests of the behaviour class of the simple_service_search skill."""
 
 import logging
 from pathlib import Path
@@ -41,8 +41,8 @@ from packages.fetchai.skills.simple_service_search.strategy import Strategy
 from tests.conftest import ROOT_DIR
 
 
-class TestSkillBehaviour(BaseSkillTestCase):
-    """Test behaviours of simple_service_search."""
+class TestServiceSearchBehaviour(BaseSkillTestCase):
+    """Test service_search behaviour of simple_service_search."""
 
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search"
@@ -71,12 +71,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
 
     def test_setup(self):
-        """Test the act method of the search behaviour."""
+        """Test the setup method of the service_search behaviour."""
         assert self.search_behaviour.setup() is None
         self.assert_quantity_in_outbox(0)
 
     def test_act(self):
-        """Test the act method of the search behaviour."""
+        """Test the act method of the service_search behaviour."""
         # operation
         with patch.object(self.strategy, "get_query", return_value=self.query):
             with patch.object(self.logger, "log") as mock_logger:
@@ -100,6 +100,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
 
     def test_teardown(self):
-        """Test the teardown method of the search behaviour."""
+        """Test the teardown method of the service_search behaviour."""
         assert self.search_behaviour.teardown() is None
         self.assert_quantity_in_outbox(0)

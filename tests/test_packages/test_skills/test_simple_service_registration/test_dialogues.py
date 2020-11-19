@@ -34,7 +34,7 @@ from tests.conftest import ROOT_DIR
 
 
 class TestDialogues(BaseSkillTestCase):
-    """Test dialogue class of simple_data_request."""
+    """Test dialogue class of simple_service_registration."""
 
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration"

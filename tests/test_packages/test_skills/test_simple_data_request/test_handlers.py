@@ -35,22 +35,32 @@ from packages.fetchai.skills.simple_data_request.handlers import HttpHandler
 from tests.conftest import ROOT_DIR
 
 
-class TestGenericFipaHandler(BaseSkillTestCase):
-    """Test fipa handler of simple_data_request."""
+class TestHttpHandler(BaseSkillTestCase):
+    """Test http handler of simple_data_request."""
 
     path_to_skill = Path(
-        ROOT_DIR,
-        "tests",
-        "test_packages",
-        "test_skills",
-        "test_simple_data_request",
-        "simple_data_request",
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_data_request"
     )
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        super().setup()
+        cls.mocked_method = "some_method"
+        cls.mocked_url = "some_url"
+        cls.mocked_shared_state_key = "some_name_for_data"
+
+        config_overrides = {
+            "behaviours": {
+                "http_request": {
+                    "args": {"method": cls.mocked_method, "url": cls.mocked_url}
+                }
+            },
+            "handlers": {
+                "http": {"args": {"shared_state_key": cls.mocked_shared_state_key}}
+            },
+        }
+
+        super().setup(config_overrides=config_overrides)
         cls.http_handler = cast(HttpHandler, cls._skill.skill_context.handlers.http)
         cls.logger = cls._skill.skill_context.logger
 
@@ -74,12 +84,12 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
     def test__init__(self):
-        """Test the __init__ method of the http_handler behaviour where ValueError is raise."""
+        """Test the __init__ method of the http handler where ValueError is raise."""
         with pytest.raises(ValueError, match="No shared_state_key provided!"):
             self.http_handler.__init__(shared_state_key=None)
 
     def test_handle_unidentified_dialogue(self):
-        """Test the _handle_unidentified_dialogue method of the fipa handler."""
+        """Test the _handle_unidentified_dialogue method of the http handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
         incoming_message = self.build_incoming_message(
@@ -104,7 +114,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
     def test_handle_response(self):
-        """Test the _handle_response method of the fipa handler."""
+        """Test the _handle_response method of the http handler."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
             dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
@@ -135,13 +145,13 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         assert (
             self.skill.skill_context._agent_context.shared_state[
-                self.http_handler.shared_state_key
+                self.mocked_shared_state_key
             ]
             == self.data
         )
 
     def test_handle_invalid(self):
-        """Test the _handle_invalid method of the fipa handler."""
+        """Test the _handle_invalid method of the http handler."""
         # setup
         incoming_message = self.build_incoming_message(
             message_type=HttpMessage,
@@ -164,6 +174,6 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
     def test_teardown(self):
-        """Test the teardown method of the fipa handler."""
+        """Test the teardown method of the http handler."""
         assert self.http_handler.teardown() is None
         self.assert_quantity_in_outbox(0)

@@ -24,6 +24,7 @@ from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Tuple, Type, Union, cast
 
+from aea.configurations.loader import ConfigLoaders, PackageType, SkillConfig
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.exceptions import AEAEnforceError
@@ -42,7 +43,7 @@ COUNTERPARTY_ADDRESS = "counterparty"
 class BaseSkillTestCase:
     """A class to test a skill."""
 
-    path_to_skill: Union[Path, str] = Path(".")
+    path_to_skill: Path = Path(".")
     _skill: Skill
     _multiplexer: AsyncMultiplexer
     _outbox: OutBox
@@ -431,6 +432,9 @@ class BaseSkillTestCase:
         )
         cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
         _shared_state = cast(Dict[str, Any], kwargs.pop("shared_state", dict()))
+        _skill_config_overrides = cast(
+            Dict[str, Any], kwargs.pop("config_overrides", dict())
+        )
 
         agent_context = AgentContext(
             identity=identity,
@@ -447,8 +451,21 @@ class BaseSkillTestCase:
             decision_maker_address="dummy_decision_maker_address",
         )
 
+        # This enables pre-populating the 'shared_state' prior to loading the skill
         if _shared_state != dict():
             for key, value in _shared_state.items():
                 agent_context.shared_state[key] = value
 
-        cls._skill = Skill.from_dir(str(cls.path_to_skill), agent_context)
+        skill_configuration_file_path: Path = Path(cls.path_to_skill, "skill.yaml")
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+
+        with skill_configuration_file_path.open() as fp:
+            skill_config: SkillConfig = loader.load(fp)
+
+        # This enables overriding the skill's config prior to loading
+        if _skill_config_overrides != {}:
+            skill_config.update(_skill_config_overrides)
+
+        skill_config.directory = cls.path_to_skill
+
+        cls._skill = Skill.from_config(skill_config, agent_context)

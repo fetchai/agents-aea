@@ -35,22 +35,32 @@ from packages.fetchai.skills.simple_data_request.behaviours import (
 from tests.conftest import ROOT_DIR
 
 
-class TestSkillBehaviour(BaseSkillTestCase):
-    """Test behaviours of generic buyer."""
+class TestHttpRequestBehaviour(BaseSkillTestCase):
+    """Test http_request behaviour of http_request."""
 
     path_to_skill = Path(
-        ROOT_DIR,
-        "tests",
-        "test_packages",
-        "test_skills",
-        "test_simple_data_request",
-        "simple_data_request",
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_data_request"
     )
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        super().setup()
+        cls.mocked_method = "some_method"
+        cls.mocked_url = "some_url"
+        cls.mocked_shared_state_key = "some_name_for_data"
+
+        config_overrides = {
+            "behaviours": {
+                "http_request": {
+                    "args": {"method": cls.mocked_method, "url": cls.mocked_url}
+                }
+            },
+            "handlers": {
+                "http": {"args": {"shared_state_key": cls.mocked_shared_state_key}}
+            },
+        }
+
+        super().setup(config_overrides=config_overrides)
         cls.http_request_behaviour = cast(
             HttpRequestBehaviour, cls._skill.skill_context.behaviours.http_request
         )
@@ -86,8 +96,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
             performative=HttpMessage.Performative.REQUEST,
             to=str(HTTP_CLIENT_PUBLIC_ID),
             sender=self.skill.skill_context.agent_address,
-            method=self.http_request_behaviour.method,
-            url=self.http_request_behaviour.url,
+            method=self.mocked_method,
+            url=self.mocked_url,
             headers="",
             version="",
             body=json.dumps(self.http_request_behaviour.body).encode("utf-8"),

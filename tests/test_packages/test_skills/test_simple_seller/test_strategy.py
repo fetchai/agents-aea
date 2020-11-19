@@ -16,10 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the strategy class of the generic seller skill."""
+"""This module contains the tests of the strategy class of the simple seller skill."""
 
 import logging
 from pathlib import Path
+from typing import cast
 from unittest.mock import patch
 
 import pytest
@@ -34,20 +35,22 @@ from tests.conftest import ROOT_DIR
 class TestStrategy(BaseSkillTestCase):
     """Test Strategy of simple seller."""
 
-    path_to_skill = Path(
-        ROOT_DIR,
-        "tests",
-        "test_packages",
-        "test_skills",
-        "test_simple_seller",
-        "simple_seller",
-    )
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_seller")
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        super().setup()
         cls.mocked_name_of_data = "some_name_for_data"
+        config_overrides = {
+            "models": {
+                "strategy": {"args": {"shared_state_key": cls.mocked_name_of_data}}
+            }
+        }
+
+        super().setup(config_overrides=config_overrides)
+
+        cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
+
         cls.mocked_data_1 = (
             b'[{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}]'
         )
@@ -55,14 +58,6 @@ class TestStrategy(BaseSkillTestCase):
             b'{"type_1": "data_1", "type_2": "data_2", "type_3": "data_3"}'
         )
         cls.mocked_data_3 = b"some_non_jason_data"
-
-        cls.shared_state_key = cls.mocked_name_of_data
-
-        cls.strategy = Strategy(
-            shared_state_key=cls.shared_state_key,
-            name="strategy",
-            skill_context=cls._skill.skill_context,
-        )
 
     def test__init__(self):
         """Test the __init__ method of the Strategy class."""

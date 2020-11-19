@@ -50,7 +50,7 @@ class TestDialogues(BaseSkillTestCase):
         cls.mocked_description = Description({"foo1": 1, "bar1": 2})
 
     def test_oef_search_dialogues(self):
-        """Test the OefSearchDialogue class."""
+        """Test the OefSearchDialogues class."""
         _, dialogue = self.oef_search_dialogues.create(
             counterparty=self.skill.skill_context.search_service_address,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,

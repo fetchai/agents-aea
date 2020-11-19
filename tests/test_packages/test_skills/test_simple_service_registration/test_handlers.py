@@ -117,7 +117,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
         )
 
     def test_handle_invalid(self):
-        """Test the _handle_invalid method of the fipa handler."""
+        """Test the _handle_invalid method of the oef_search handler."""
         # setup
         incoming_message = self.build_incoming_message(
             message_type=OefSearchMessage,

@@ -35,8 +35,8 @@ from packages.fetchai.skills.simple_service_registration.strategy import Strateg
 from tests.conftest import ROOT_DIR
 
 
-class TestSkillBehaviour(BaseSkillTestCase):
-    """Test behaviours of simple_service_registration."""
+class TestServiceRegistrationBehaviour(BaseSkillTestCase):
+    """Test service behaviour of simple_service_registration."""
 
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration"
@@ -56,7 +56,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.mocked_description_2 = Description({"foo2": 1, "bar2": 2})
 
     def test_setup(self):
-        """Test the act method of the http_request behaviour."""
+        """Test the setup method of the service behaviour."""
         # operation
         with patch.object(
             self.strategy,
@@ -106,7 +106,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
     def test_teardown(self):
-        """Test the teardown method of the http_request behaviour."""
+        """Test the teardown method of the service behaviour."""
         # operation
         with patch.object(
             self.strategy,

@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the handler classes of the simple_service_search skill."""
+"""This module contains the tests of the handler class of the simple_service_search skill."""
 
 import logging
 from pathlib import Path
@@ -193,7 +193,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
         )
 
     def test_handle_invalid(self):
-        """Test the _handle_invalid method of the fipa handler."""
+        """Test the _handle_invalid method of the oef_search handler."""
         # setup
         incoming_message = self.build_incoming_message(
             message_type=OefSearchMessage,
