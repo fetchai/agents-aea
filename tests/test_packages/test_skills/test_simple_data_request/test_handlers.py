@@ -88,6 +88,11 @@ class TestHttpHandler(BaseSkillTestCase):
         with pytest.raises(ValueError, match="No shared_state_key provided!"):
             self.http_handler.__init__(shared_state_key=None)
 
+    def test_setup(self):
+        """Test the setup method of the http handler."""
+        assert self.http_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
     def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the http handler."""
         # setup
