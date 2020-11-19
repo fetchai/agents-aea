@@ -40,7 +40,7 @@ class AbstractStorageBackend(ABC):
         """
         if not self.VALID_COL_NAME.match(collection_name):
             raise ValueError(
-                f"Invalid collection name: {collection_name}, should contains ony a-z and _"
+                f"Invalid collection name: {collection_name}, should contain only alpha-numeric characters and _"
             )
 
     @abstractmethod
