@@ -39,14 +39,20 @@ import pytest
 import yaml
 
 from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.base import (
+    AgentConfig,
+    PackageType,
+    _get_default_configuration_file_name_from_type,
+)
 from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_LEDGER,
     DEFAULT_OUTPUT_FILE_NAME,
     DEFAULT_PRIVATE_KEY_FILE,
+    DEFAULT_REGISTRY_NAME,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import enforce
 from aea.helpers.base import cd, send_control_c, win_popen_kwargs
 from aea.mail.base import Envelope
@@ -71,7 +77,7 @@ DEFAULT_LAUNCH_TIMEOUT = 10
 LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
 
 
-class BaseAEATestCase(ABC):
+class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     """Base class for AEA test cases."""
 
     runner: CliRunner  # CLI runner
@@ -79,9 +85,9 @@ class BaseAEATestCase(ABC):
     author: str = DEFAULT_AUTHOR  # author
     subprocesses: List[subprocess.Popen] = []  # list of launched subprocesses
     threads: List[Thread] = []  # list of started threads
-    packages_dir_path: Path = Path("packages")
+    packages_dir_path: Path = Path(DEFAULT_REGISTRY_NAME)
     use_packages_dir: bool = True
-    package_registry_src: Path = Path(ROOT_DIR, "packages")
+    package_registry_src: Path = Path(ROOT_DIR, DEFAULT_REGISTRY_NAME)
     old_cwd: Path  # current working directory path
     t: Path  # temporary directory path
     current_agent_context: str = ""  # the name of the current agent
@@ -498,7 +504,7 @@ class BaseAEATestCase(ABC):
     @classmethod
     def eject_item(cls, item_type: str, public_id: str) -> Result:
         """
-        Eject an item in the agent.
+        Eject an item in the agent in quiet mode (i.e. no interaction).
 
         Run from agent's directory.
 
@@ -507,7 +513,7 @@ class BaseAEATestCase(ABC):
 
         :return: None
         """
-        cli_args = ["eject", item_type, public_id]
+        cli_args = ["eject", "--quiet", item_type, public_id]
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
@@ -786,6 +792,31 @@ class BaseAEATestCase(ABC):
         return missing_strings == []
 
     @classmethod
+    def invoke(cls, *args):
+        """Call the cli command."""
+        with cd(cls._get_cwd()):
+            result = cls.runner.invoke(
+                cli, args, standalone_mode=False, catch_exceptions=False
+            )
+        return result
+
+    @classmethod
+    def load_agent_config(cls, agent_name: str) -> AgentConfig:
+        """Load agent configuration."""
+        if agent_name not in cls.agents:
+            raise AEATestingException(
+                f"Cannot find agent '{agent_name}' in the current test case."
+            )
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        config_file_name = _get_default_configuration_file_name_from_type(
+            PackageType.AGENT
+        )
+        configuration_file_path = Path(cls.t, agent_name, config_file_name)
+        with configuration_file_path.open() as file_input:
+            agent_config = loader.load(file_input)
+        return agent_config
+
+    @classmethod
     def setup_class(cls):
         """Set up the test class."""
         cls.runner = CliRunner()
@@ -814,11 +845,11 @@ class BaseAEATestCase(ABC):
         cls._join_threads()
         cls.unset_agent_context()
         cls.last_cli_runner_result = None
-        cls.packages_dir_path = Path("packages")
+        cls.packages_dir_path = Path(DEFAULT_REGISTRY_NAME)
         cls.use_packages_dir = True
         cls.agents = set()
         cls.current_agent_context = ""
-        cls.package_registry_src = Path(ROOT_DIR, "packages")
+        cls.package_registry_src = Path(ROOT_DIR, DEFAULT_REGISTRY_NAME)
         cls.stdout = {}
         cls.stderr = {}
 
@@ -879,7 +910,7 @@ class AEATestCase(BaseAEATestCase):
     """
 
     path_to_aea: Union[Path, str] = Path(".")
-    packages_dir_path: Path = Path("..", "packages")
+    packages_dir_path: Path = Path("..", DEFAULT_REGISTRY_NAME)
     agent_configuration: AgentConfig
     t: Path  # temporary directory path
 

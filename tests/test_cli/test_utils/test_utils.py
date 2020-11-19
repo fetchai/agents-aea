@@ -33,6 +33,7 @@ from aea.cli.utils.click_utils import MutuallyExclusiveOption, PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
+    set_cli_author,
     update_cli_config,
 )
 from aea.cli.utils.context import Context
@@ -455,9 +456,9 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("author/package:latest"), False),
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
-        (DEFAULT_CONNECTION, False),
-        (DEFAULT_SKILL, False),
-        (DEFAULT_PROTOCOL, False),
+        (PublicId.from_str(DEFAULT_CONNECTION), False),
+        (PublicId.from_str(DEFAULT_SKILL), False),
+        (PublicId.from_str(DEFAULT_PROTOCOL), False),
     ],
 )
 def test_is_distributed_item(public_id, expected_outcome):
@@ -490,7 +491,7 @@ def test_override_ledger_configurations_positive():
     new_chain_id = "some_chain"
     agent_config = MagicMock()
     agent_config.component_configurations = {
-        ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION): {
+        ComponentId(ComponentType.CONNECTION, PublicId.from_str(LEDGER_CONNECTION)): {
             "config": {"ledger_apis": {DEFAULT_LEDGER: {"chain_id": new_chain_id}}}
         }
     }
@@ -520,3 +521,24 @@ def test_mutually_exclusive_usage_error():
         match=f"Illegal usage: `arg1` is mutually exclusive with arguments `{', '.join(['arg2'])}`.",
     ):
         opt.handle_parse_result(MagicMock(), {"arg1": None, "arg2": None}, [])
+
+
+@mock.patch("aea.cli.utils.config.get_or_create_cli_config", return_value={})
+def test_set_cli_author_negative(*_mocks):
+    """Test set_cli_author, negative case."""
+    with pytest.raises(
+        ClickException,
+        match="The AEA configurations are not initialized. Use `aea init` before continuing.",
+    ):
+        set_cli_author(MagicMock())
+
+
+@mock.patch(
+    "aea.cli.utils.config.get_or_create_cli_config",
+    return_value=dict(author="some_author"),
+)
+def test_set_cli_author_positive(*_mocks):
+    """Test set_cli_author, positive case."""
+    context_mock = MagicMock()
+    set_cli_author(context_mock)
+    context_mock.obj.set_config.assert_called_with("cli_author", "some_author")

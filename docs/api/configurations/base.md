@@ -1052,6 +1052,15 @@ Get the component type.
 
 Get the component identifier without the version.
 
+<a name="aea.configurations.base.ComponentId.same_prefix"></a>
+#### same`_`prefix
+
+```python
+ | same_prefix(other: "ComponentId") -> bool
+```
+
+Check if the other component id has the same type, author and name of this.
+
 <a name="aea.configurations.base.ComponentId.prefix_import_path"></a>
 #### prefix`_`import`_`path
 
@@ -1559,7 +1568,7 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None)
+ | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_NAME, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None)
 ```
 
 Instantiate the agent configuration object.
@@ -1796,16 +1805,6 @@ Handle contract configuration.
 ```
 
 Initialize a protocol configuration object.
-
-<a name="aea.configurations.base.ContractConfig.contract_interfaces"></a>
-#### contract`_`interfaces
-
-```python
- | @property
- | contract_interfaces() -> Dict[str, str]
-```
-
-Get the contract interfaces.
 
 <a name="aea.configurations.base.ContractConfig.json"></a>
 #### json

@@ -30,11 +30,13 @@ from typing import Any, Dict, Optional, Set, Tuple, Type, cast
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
-from aea.exceptions import enforce
+from aea.exceptions import AEAComponentLoadException, enforce
 
 
 _default_logger = logging.getLogger(__name__)
 
+MAX_PRINT_INNER = 200
+MAX_PRINT_OUTER = 2000
 Address = str
 
 
@@ -207,7 +209,7 @@ class Message:
         """
         try:
             setattr(self._slots, key, value)
-        except AttributeError as e:
+        except AttributeError as e:  # pragma: nocover
             raise ValueError(f"Field `{key}` is not supported {e}")
 
     def get(self, key: str) -> Optional[Any]:
@@ -233,25 +235,28 @@ class Message:
             isinstance(other, Message)
             and self._sender == other._sender
             and self._to == other._to
-            # and self.dialogue_reference == other.dialogue_reference  # noqa: E800
-            # and self.message_id == other.message_id  # noqa: E800
-            # and self.target == other.target  # noqa: E800
-            # and self.performative == other.performative  # noqa: E800
             and self._body == other._body
         )
 
-    def __str__(self):
-        """Get the string representation of the message."""
-        return (
-            "Message(sender={},to={},".format(self._sender, self._to)
-            + ",".join(
-                map(
-                    lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
-                    self._body.items(),
-                )
+    def __repr__(self):
+        """Get the representation of the message."""
+        body = ",".join(
+            map(
+                lambda key_value: f"{str(key_value[0])}={str(key_value[1])}",
+                self._body.items(),
             )
-            + ")"
         )
+        return f"Message(sender={self._sender},to={self._to},{body})"
+
+    def __str__(self):
+        """Get the string representation of the message. Abbreviated to prevent spamming of logs."""
+        body = ",".join(
+            map(
+                lambda key_value: f"{str(key_value[0])[:MAX_PRINT_INNER]}={str(key_value[1])[:MAX_PRINT_INNER]}",
+                self._body.items(),
+            )
+        )
+        return f"Message(sender={self._sender},to={self._to},{body})"[:MAX_PRINT_OUTER]
 
     def encode(self) -> bytes:
         """Encode the message."""
@@ -365,25 +370,22 @@ class Protocol(Component):
             word.capitalize() for word in configuration.name.split("_")
         )
         message_classes = list(
-            filter(
-                lambda x: re.match("{}Message".format(name_camel_case), x[0]), classes
-            )
+            filter(lambda x: re.match(f"{name_camel_case}Message", x[0]), classes)
         )
-        enforce(len(message_classes) == 1, "Not exactly one message class detected.")
+        if len(message_classes) != 1:  # pragma: nocover
+            raise AEAComponentLoadException("Not exactly one message class detected.")
         message_class = message_classes[0][1]
         class_module = importlib.import_module(
             configuration.prefix_import_path + ".serialization"
         )
         classes = inspect.getmembers(class_module, inspect.isclass)
         serializer_classes = list(
-            filter(
-                lambda x: re.match("{}Serializer".format(name_camel_case), x[0]),
-                classes,
+            filter(lambda x: re.match(f"{name_camel_case}Serializer", x[0]), classes,)
+        )
+        if len(serializer_classes) != 1:  # pragma: nocover
+            raise AEAComponentLoadException(
+                "Not exactly one serializer class detected."
             )
-        )
-        enforce(
-            len(serializer_classes) == 1, "Not exactly one serializer class detected."
-        )
         serialize_class = serializer_classes[0][1]
         message_class.serializer = serialize_class
 

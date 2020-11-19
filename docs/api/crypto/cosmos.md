@@ -141,6 +141,24 @@ Check if the address is valid.
 
 - `address`: the address to validate
 
+<a name="aea.crypto.cosmos.CosmosHelper.load_contract_interface"></a>
+#### load`_`contract`_`interface
+
+```python
+ | @classmethod
+ | load_contract_interface(cls, file_path: Path) -> Dict[str, str]
+```
+
+Load contract interface.
+
+**Arguments**:
+
+- `file_path`: the file path to the interface
+
+**Returns**:
+
+the interface
+
 <a name="aea.crypto.cosmos.CosmosCrypto"></a>
 ## CosmosCrypto Objects
 

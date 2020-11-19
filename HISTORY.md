@@ -1,5 +1,35 @@
 # Release History
 
+## 0.7.4 (2020-11-18)
+
+- Replaces error skill handler usage with built in handler
+- Extends MultiAgentManager to support persistence between runs
+- Replaces usage of Ropsten testnet with Ganache
+- Adds support for symlink creation during scaffold and add
+- Makes contract interface loading extensible
+- Adds support for PEP561
+- Adds integration tests for launcher command
+- Adds support for storage of unique page address in SOEF
+- Fixes publish command bug on Windows
+- Refactors constants usage throughout
+- Adds support for profiling on aea run
+- Multiple stability improvements to core async modules
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
+## 0.7.3 (2020-11-12)
+
+- Extends AW AEAs
+- Fixes overwriting of private key files on startup
+- Fixes behaviour bugs
+- Adds tests for tac participation skill
+- Adds development setup guide
+- Improves exception logging for easier debugging
+- Fixes mixed mode in upgrade command
+- Reduces verbosity of some CLI commands
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.7.2 (2020-11-09)
 
 - Fixes some AW2 AEAs

@@ -337,7 +337,7 @@ class DecisionMaker(WithLogger):
                 return
 
             self._stopped = False
-            self._thread = Thread(target=self.execute)
+            self._thread = Thread(target=self.execute, name=self.__class__.__name__)
             self._thread.start()
 
     def stop(self) -> None:

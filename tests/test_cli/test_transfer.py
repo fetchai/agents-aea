@@ -25,7 +25,6 @@ from unittest.mock import patch
 import pytest
 from click.exceptions import ClickException
 
-from aea.cli.core import cli
 from aea.cli.transfer import wait_tx_settled
 from aea.cli.utils.package_utils import get_wallet_from_agent_config, try_get_balance
 from aea.crypto.cosmos import CosmosCrypto
@@ -35,6 +34,7 @@ from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.common.utils import wait_for_condition
+from tests.conftest import MAX_FLAKY_RERUNS
 
 
 class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
@@ -72,14 +72,6 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         result = self.invoke("get-address", self.LEDGER_ID)
         return result.stdout_bytes.decode("utf-8").strip()
 
-    def invoke(self, *args):
-        """Call the cli command."""
-        with cd(self._get_cwd()):
-            result = self.runner.invoke(
-                cli, args, standalone_mode=False, catch_exceptions=False
-            )
-        return result
-
     def get_balance(self) -> int:
         """Get balance for current agent."""
         with cd(self._get_cwd()):
@@ -87,6 +79,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             wallet = get_wallet_from_agent_config(agent_config)
             return int(try_get_balance(agent_config, wallet, self.LEDGER_ID))
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_integration(self):
         """Perform integration tests of cli transfer command with real transfer."""
         self.set_agent_context(self.agent_name2)

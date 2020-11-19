@@ -46,8 +46,15 @@ class AsyncFriendlyQueue(queue.Queue):
         if self._non_empty_waiters:
             waiter = self._non_empty_waiters.popleft()
             waiter._loop.call_soon_threadsafe(  # pylint: disable=protected-access
-                waiter.set_result, True
+                self._set_waiter, waiter
             )
+
+    @staticmethod
+    def _set_waiter(waiter) -> None:
+        """Set waiter result."""
+        if waiter.done():  # pragma: nocover
+            return
+        waiter.set_result(True)
 
     def get(self, *args, **kwargs) -> Any:  # pylint: disable=signature-differs
         """

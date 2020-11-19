@@ -4,7 +4,7 @@ All the commands must be executed from the parent directory, if not stated other
 
 ## Build
 
-    ./develop-image/scripts/docker-build-img.sh
+    ./develop-image/scripts/docker-build-img.sh -t fetchai/aea-deploy:latest --
     
 
 To pass immediate parameters to the `docker build` command:

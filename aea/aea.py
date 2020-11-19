@@ -30,7 +30,6 @@ from typing import (
     List,
     Optional,
     Sequence,
-    TYPE_CHECKING,
     Tuple,
     Type,
     cast,
@@ -45,22 +44,16 @@ from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, _StopRuntime
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
+from aea.helpers.temp_error_handler import ErrorHandler
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
-from aea.runtime import _StopRuntime
 from aea.skills.base import Behaviour, Handler
-
-
-if TYPE_CHECKING:
-    from packages.fetchai.skills.error.handlers import (  # noqa: F401 # pragma: nocover
-        ErrorHandler,
-    )
 
 
 class AEA(Agent):
@@ -254,28 +247,16 @@ class AEA(Agent):
             default_connection=self.context.default_connection,
         )
 
-    def _get_error_handler(self) -> Handler:
+    @staticmethod
+    def _get_error_handler() -> Type[ErrorHandler]:
         """Get error handler."""
-
-        # temporary hack
-        from packages.fetchai.protocols.default.message import (  # noqa: F811 # pylint: disable=import-outside-toplevel
-            DefaultMessage,
-        )
-        from packages.fetchai.skills.error import (  # noqa: F811 # pylint: disable=import-outside-toplevel
-            PUBLIC_ID as ERROR_SKILL_PUBLIC_ID,
-        )
-
-        handler = self.resources.get_handler(
-            DefaultMessage.protocol_id, ERROR_SKILL_PUBLIC_ID
-        )
-        if handler is None:
-            self.logger.warning("ErrorHandler not initialized. Stopping AEA!")
-            raise _StopRuntime()
+        handler = ErrorHandler
         return handler
 
     def _get_msg_and_handlers_for_envelope(
         self, envelope: Envelope
     ) -> Tuple[Optional[Message], List[Handler]]:
+        """Get the msg and its handlers."""
         protocol = self.resources.get_protocol(envelope.protocol_id)
 
         msg, handlers = self._handle_decoding(envelope, protocol)
@@ -285,17 +266,11 @@ class AEA(Agent):
     def _handle_decoding(
         self, envelope: Envelope, protocol: Optional[Protocol]
     ) -> Tuple[Optional[Message], List[Handler]]:
-        error_handler = self._get_error_handler()
 
-        # temporary hack
-        from packages.fetchai.skills.error.handlers import (  # noqa: F811 # pylint: disable=import-outside-toplevel
-            ErrorHandler,
-        )
-
-        error_handler = cast(ErrorHandler, error_handler)
+        handler = self._get_error_handler()
 
         if protocol is None:
-            error_handler.send_unsupported_protocol(envelope)
+            handler.send_unsupported_protocol(envelope, self.logger)
             return None, []  # Tuple[Optional[Message], List[Handler]]
 
         handlers = self.filter.get_active_handlers(
@@ -303,7 +278,7 @@ class AEA(Agent):
         )
 
         if len(handlers) == 0:
-            error_handler.send_unsupported_skill(envelope)
+            handler.send_unsupported_skill(envelope, self.logger)
             return None, []
 
         if isinstance(envelope.message, Message):
@@ -316,7 +291,7 @@ class AEA(Agent):
             return msg, handlers
         except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
             self.logger.warning("Decoding error. Exception: {}".format(str(e)))
-            error_handler.send_decoding_error(envelope)
+            handler.send_decoding_error(envelope, self.logger)
             return None, []
 
     def handle_envelope(self, envelope: Envelope) -> None:
@@ -339,7 +314,7 @@ class AEA(Agent):
             return
 
         for handler in handlers:
-            handler.handle(msg)
+            handler.handle_wrapper(msg)
 
     def _setup_loggers(self):
         """Set up logger with agent name."""
@@ -403,11 +378,14 @@ class AEA(Agent):
         :return: bool, propagate exception if True otherwise skip it.
         """
         # docstyle: ignore # noqa: E800
-        def log_exception(e, fn):
-            self.logger.exception(f"<{e}> raised during `{fn}`")
+        def log_exception(e, fn, is_debug: bool = False):
+            if is_debug:
+                self.logger.debug(f"<{e}> raised during `{fn}`")
+            else:
+                self.logger.exception(f"<{e}> raised during `{fn}`")
 
         if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
-            log_exception(exception, function)
+            log_exception(exception, function, is_debug=True)
             return True
 
         if self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
@@ -436,7 +414,6 @@ class AEA(Agent):
 
         :return: None
         """
-        self.logger.debug("Calling teardown method...")
         self.resources.teardown()
 
     def get_task_result(self, task_id: int) -> AsyncResult:

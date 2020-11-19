@@ -11,6 +11,7 @@ fingerprint:
   handlers.py: QmTHd2YX941T76eS39SSdfiafXBYehL2oibugnVmmp4Tvy
   my_model.py: QmPaZ6G37Juk63mJj88nParaEp71XyURts8AmmX1axs24V
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols: []
 skills: []
@@ -31,4 +32,3 @@ models:
     class_name: MyModel
 dependencies: {}
 is_abstract: false
-connections: []

@@ -23,6 +23,7 @@ from unittest import TestCase, mock
 
 import pytest
 
+from aea.exceptions import AEAActException, _StopRuntime
 from aea.skills.behaviours import (
     CyclicBehaviour,
     FSMBehaviour,
@@ -294,6 +295,34 @@ class CyclicBehaviourTestCase(TestCase):
         obj.act_wrapper()
         obj.act.assert_called_once()
         assert obj.number_of_executions == 1
+
+    def test_act_wrapper_negative_standard_exception(self):
+        """Test for act_wrapper negative result."""
+
+        def exception_act():
+            """Act method with exception."""
+            raise ValueError("expected")
+
+        with pytest.raises(AEAActException):
+            with pytest.raises(ValueError):
+                obj = self.TestCyclicBehaviour(skill_context=mock.Mock(), name="name")
+                obj.act = exception_act
+                assert obj.number_of_executions == 0
+                obj.act_wrapper()
+                obj.act.assert_called_once()
+                assert obj.number_of_executions == 1
+
+    def test_act_wrapper_negative_stop_runtime(self):
+        """Test for act_wrapper negative result."""
+        obj = self.TestCyclicBehaviour(skill_context="skill_context", name="name")
+        obj.act = mock.Mock()
+
+        with pytest.raises(_StopRuntime):
+            with mock.patch.object(obj, "act", side_effect=_StopRuntime()):
+                assert obj.number_of_executions == 0
+                obj.act_wrapper()
+                obj.act.assert_called_once()
+                assert obj.number_of_executions == 1
 
 
 class TickerBehaviourTestCase(TestCase):

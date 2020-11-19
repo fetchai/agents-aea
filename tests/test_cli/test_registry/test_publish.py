@@ -16,16 +16,20 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Test module for Registry publish methods."""
 
+"""Test module for Registry publish methods."""
+from pathlib import Path
 from unittest import TestCase, mock
+from unittest.mock import mock_open
 
 from aea.cli.registry.publish import _compress, publish_agent
+from aea.test_tools.test_cases import AEATestCase
 
+from tests.conftest import CUR_PATH
 from tests.test_cli.tools_for_testing import ContextMock
 
 
-@mock.patch("builtins.open", return_value="opened_file")
+@mock.patch("builtins.open", mock_open(read_data="test"))
 @mock.patch("aea.cli.registry.publish.shutil.copy")
 @mock.patch("aea.cli.registry.publish.try_to_load_agent_config")
 @mock.patch("aea.cli.registry.publish.check_is_author_logged_in")
@@ -60,7 +64,7 @@ class PublishAgentTestCase(TestCase):
                 "skills": [],
             },
             is_auth=True,
-            files={"file": "opened_file", "readme": "opened_file"},
+            files={"file": mock.ANY, "readme": mock.ANY},
         )
 
     @mock.patch("aea.cli.registry.publish.is_readme_present", return_value=False)
@@ -85,7 +89,7 @@ class PublishAgentTestCase(TestCase):
                 "skills": [],
             },
             is_auth=True,
-            files={"file": "opened_file"},
+            files={"file": mock.ANY},
         )
 
 
@@ -101,3 +105,18 @@ class CompressTestCase(TestCase):
 
         _compress("output_filename", "file1", "file2")
         open_mock.assert_called_once_with("output_filename", "w:gz")
+
+
+@mock.patch("aea.cli.registry.publish.request_api", side_effect=ValueError("expected"))
+class PublishAgentCleanupOnFailTestCase(AEATestCase):
+    """Test case for publish_agent method."""
+
+    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+
+    def test_publish_agent_fails(self, *mocks):
+        """Test for publish_agent positive result."""
+        description = "Some description."
+        version = "0.1.0"
+        context_mock = ContextMock(description=description, version=version)
+        context_mock.cwd = "."
+        publish_agent(context_mock)

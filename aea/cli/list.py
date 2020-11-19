@@ -34,6 +34,7 @@ from aea.configurations.base import (
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL, VENDOR
 from aea.configurations.loader import ConfigLoader
 
 
@@ -62,7 +63,7 @@ def all_command(ctx: Context):
 @pass_ctx
 def connections(ctx: Context):
     """List all the installed connections."""
-    result = list_agent_items(ctx, "connection")
+    result = list_agent_items(ctx, CONNECTION)
     click.echo(format_items(sort_items(result)))
 
 
@@ -70,7 +71,7 @@ def connections(ctx: Context):
 @pass_ctx
 def contracts(ctx: Context):
     """List all the installed protocols."""
-    result = list_agent_items(ctx, "contract")
+    result = list_agent_items(ctx, CONTRACT)
     click.echo(format_items(sort_items(result)))
 
 
@@ -78,7 +79,7 @@ def contracts(ctx: Context):
 @pass_ctx
 def protocols(ctx: Context):
     """List all the installed protocols."""
-    result = list_agent_items(ctx, "protocol")
+    result = list_agent_items(ctx, PROTOCOL)
     click.echo(format_items(sort_items(result)))
 
 
@@ -86,7 +87,7 @@ def protocols(ctx: Context):
 @pass_ctx
 def skills(ctx: Context):
     """List all the installed skills."""
-    result = list_agent_items(ctx, "skill")
+    result = list_agent_items(ctx, SKILL)
     click.echo(format_items(sorted(result, key=lambda k: k["name"])))
 
 
@@ -100,7 +101,7 @@ def list_agent_items(ctx: Context, item_type: str) -> List[Dict]:
         # first, try to retrieve the item from the vendor directory.
         configuration_filepath = Path(
             ctx.cwd,
-            "vendor",
+            VENDOR,
             public_id.author,
             item_type_plural,
             public_id.name,

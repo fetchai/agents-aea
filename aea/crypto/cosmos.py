@@ -20,6 +20,7 @@
 """Cosmos module wrapping the public and private key cryptography and ledger api."""
 
 import base64
+import gzip
 import hashlib
 import json
 import logging
@@ -50,6 +51,7 @@ DEFAULT_FAUCET_URL = "INVALID_URL"
 DEFAULT_ADDRESS = "INVALID_URL"
 DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
 DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
+_BYTECODE = "wasm_byte_code"
 
 
 class CosmosHelper(Helper):
@@ -176,6 +178,24 @@ class CosmosHelper(Helper):
         """
         result = bech32_decode(address)
         return result != (None, None) and result[0] == cls.address_prefix
+
+    @classmethod
+    def load_contract_interface(cls, file_path: Path) -> Dict[str, str]:
+        """
+        Load contract interface.
+
+        :param file_path: the file path to the interface
+        :return: the interface
+        """
+        with open(file_path, "rb") as interface_file_cosmos:
+            contract_interface = {
+                _BYTECODE: str(
+                    base64.b64encode(
+                        gzip.compress(interface_file_cosmos.read(), 6)
+                    ).decode()
+                )
+            }
+        return contract_interface
 
 
 class CosmosCrypto(Crypto[SigningKey]):
@@ -427,7 +447,7 @@ class _CosmosApi(LedgerApi):
             "type": "wasm/store-code",
             "value": {
                 "sender": deployer_address,
-                "wasm_byte_code": contract_interface["wasm_byte_code"],
+                "wasm_byte_code": contract_interface[_BYTECODE],
                 "source": "",
                 "builder": "",
             },
@@ -704,14 +724,14 @@ class _CosmosApi(LedgerApi):
     )
     def _try_get_account_number_and_sequence(
         self, address: Address
-    ) -> Optional[Tuple[int, int]]:
+    ) -> Tuple[Optional[int], Optional[int]]:
         """
         Try get account number and sequence for an address.
 
         :param address: the address
         :return: a tuple of account number and sequence
         """
-        result = None  # type: Optional[Tuple[int, int]]
+        result: Tuple[Optional[int], Optional[int]] = (None, None)
         url = self.network_address + f"/auth/accounts/{address}"
         response = requests.get(url=url)
         if response.status_code == 200:

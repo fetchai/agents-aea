@@ -205,7 +205,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
             cls._loop = asyncio.new_event_loop()
             cls._stopped_future = Future(loop=cls._loop)
             cls._supervisor_thread = threading.Thread(
-                target=cls._supervisor_event_loop, daemon=True
+                target=cls._supervisor_event_loop, daemon=True, name="ExecTimeout"
             )
             cls._supervisor_thread.start()
 
@@ -226,11 +226,18 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
             cls._start_count -= 1
 
             if cls._start_count <= 0 or force:
-                cls._loop.call_soon_threadsafe(cls._stopped_future.set_result, True)  # type: ignore
+                cls._loop.call_soon_threadsafe(cls._set_stopped_future)  # type: ignore
                 if cls._supervisor_thread and cls._supervisor_thread.is_alive():
                     cls._supervisor_thread.join()
                 cls._supervisor_thread = None
                 cls._start_count = 0
+
+    @classmethod
+    def _set_stopped_future(cls) -> None:
+        """Set stopped future result."""
+        if not cls._stopped_future or cls._stopped_future.done():  # pragma: nocover
+            return
+        cls._stopped_future.set_result(True)
 
     @classmethod
     def _supervisor_event_loop(cls) -> None:
