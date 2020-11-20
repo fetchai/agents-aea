@@ -1673,6 +1673,7 @@ class AgentConfig(PackageConfiguration):
             "default_connection",
             "default_ledger",
             "default_routing",
+            "storage_uri",
         ]
     )
 
@@ -1700,6 +1701,7 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict[str, str]] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        storage_uri: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
     ):
         """Instantiate the agent configuration object."""
@@ -1758,6 +1760,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        self.storage_uri = storage_uri
         # this attribute will be set through the setter below
         self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
@@ -1891,6 +1894,8 @@ class AgentConfig(PackageConfiguration):
             config["loop_mode"] = self.loop_mode
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
+        if self.storage_uri is not None:
+            config["storage_uri"] = self.storage_uri
         if self.currency_denominations != {}:
             config["currency_denominations"] = self.currency_denominations
 
@@ -1926,6 +1931,7 @@ class AgentConfig(PackageConfiguration):
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
+            storage_uri=cast(str, obj.get("storage_uri")),
             component_configurations=None,
         )
 

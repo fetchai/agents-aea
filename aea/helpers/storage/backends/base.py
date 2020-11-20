@@ -20,7 +20,10 @@
 
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional, Union
+
+
+EQUALS_TYPE = Union[int, float, str, bool]
 
 
 class AbstractStorageBackend(ABC):
@@ -96,7 +99,9 @@ class AbstractStorageBackend(ABC):
         """
 
     @abstractmethod
-    async def find(self, collection_name: str, field: str, equals: Any) -> List[Dict]:
+    async def find(
+        self, collection_name: str, field: str, equals: EQUALS_TYPE
+    ) -> List[Dict]:
         """
         Get objects from the collection by filtering by field value.
 

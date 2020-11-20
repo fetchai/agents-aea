@@ -21,10 +21,10 @@ import asyncio
 import json
 import sqlite3
 import threading
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
-from aea.helpers.storage.backends.base import AbstractStorageBackend
+from aea.helpers.storage.backends.base import AbstractStorageBackend, EQUALS_TYPE
 
 
 class SqliteStorageBackend(AbstractStorageBackend):
@@ -143,7 +143,9 @@ class SqliteStorageBackend(AbstractStorageBackend):
         sql = f"""DELETE FROM {collection_name} WHERE object_id = ?;"""
         await self._executute_sql(sql, [object_id])
 
-    async def find(self, collection_name: str, field: str, equals: Any) -> List[Dict]:
+    async def find(
+        self, collection_name: str, field: str, equals: EQUALS_TYPE
+    ) -> List[Dict]:
         """
         Get objects from the collection by filtering by field value.
 

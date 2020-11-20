@@ -18,11 +18,11 @@
 # ------------------------------------------------------------------------------
 """This module contains the storage implementation."""
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 from aea.helpers.async_utils import Runnable
-from aea.helpers.storage.backends.base import AbstractStorageBackend
+from aea.helpers.storage.backends.base import AbstractStorageBackend, EQUALS_TYPE
 from aea.helpers.storage.backends.sqlite import SqliteStorageBackend
 
 
@@ -75,7 +75,7 @@ class AsyncCollection:
         """
         return await self._storage_backend.remove(self._collection_name, object_id)
 
-    async def find(self, field: str, equals: Any) -> List[Dict]:
+    async def find(self, field: str, equals: EQUALS_TYPE) -> List[Dict]:
         """
         Get objects from the collection by filtering by field value.
 
@@ -133,7 +133,7 @@ class SyncCollection:
         """
         return self._run_sync(self._async_collection.remove(object_id))
 
-    def find(self, field: str, equals: Any) -> List[Dict]:
+    def find(self, field: str, equals: EQUALS_TYPE) -> List[Dict]:
         """
         Get objects from the collection by filtering by field value.
 

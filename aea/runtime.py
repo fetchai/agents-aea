@@ -295,9 +295,10 @@ class AsyncRuntime(BaseRuntime):
 
     async def _start_storage(self) -> None:
         """Start storage component."""
-        self._storage = Storage("sqlite://:memory:", threaded=True)
-        self._storage.start()
-        await self._storage.wait_completed()
+        if self._agent.storage_uri is not None:
+            self._storage = Storage(self._agent.storage_uri, threaded=True)
+            self._storage.start()
+            await self._storage.wait_completed()
 
     async def _start_multiplexer(self) -> None:
         """Call multiplexer connect asynchronous way."""

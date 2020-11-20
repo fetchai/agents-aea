@@ -85,6 +85,7 @@ class AEA(Agent):
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
+        storage_uri: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
@@ -107,8 +108,8 @@ class AEA(Agent):
         :param default_routing: dictionary for default routing.
         :param connection_ids: active connection ids. Default: consider all the ones in the resources.
         :param search_service_address: the address of the search service used.
+        :param storage_uri: optional uri to set generic storage
         :param kwargs: keyword arguments to be attached in the agent context namespace.
-
         :return: None
         """
 
@@ -126,6 +127,7 @@ class AEA(Agent):
             period=period,
             loop_mode=loop_mode,
             runtime_mode=runtime_mode,
+            storage_uri=storage_uri,
             logger=cast(Logger, aea_logger),
         )
 
