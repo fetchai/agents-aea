@@ -664,9 +664,12 @@ class MultiAgentManager:
             )
             component_id = ComponentId(obj.pop("type"), PublicId(author, name, version))
             components_configs[component_id] = obj
-        agent_update_dictionary["component_configurations"] = components_configs
-        # do the override (and valiation)
-        agent_config.update(agent_update_dictionary)
+
+        # update components
+        agent_config.update({"component_configurations": components_configs})
+        json_data = agent_config.ordered_json
+        json_data.update(agent_update_dictionary)
+        agent_config = AgentConfig.from_json(json_data)
 
         # return the multi-paged JSON object.
         json_data = agent_config.ordered_json

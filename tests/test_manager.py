@@ -125,6 +125,21 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
                 self.project_public_id, self.agent_name,
             )
 
+    def test_override_agent_config(self):
+        """Test agent config override."""
+        self.manager.start_manager()
+
+        self.manager.add_project(self.project_public_id, local=True)
+        new_description = "funny test!"
+        self.manager.add_agent(
+            self.project_public_id,
+            self.agent_name,
+            agent_overrides={"description": new_description},
+        )
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        assert agent_alias.agent_name == self.agent_name
+        assert agent_alias.config[0]["description"] == new_description
+
     def test_remove_agent(self):
         """Test remove agent alias."""
         self.test_add_agent()
