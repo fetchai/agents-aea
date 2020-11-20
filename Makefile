@@ -78,7 +78,7 @@ common_checks: security misc_checks lint static docs
 
 .PHONY: test
 test:
-	pytest -rfE --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract packages/fetchai/skills/tac_participation tests/ --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills/generic_buyer --cov=packages/fetchai/skills/generic_seller --cov=packages/fetchai/skills/tac_control --cov=packages/fetchai/skills/tac_control_contract --cov=packages/fetchai/skills/tac_participation --cov-config=.coveragerc
+	pytest -rfE --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract packages/fetchai/skills/tac_participation packages/fetchai/skills/simple_buyer packages/fetchai/skills/simple_data_request packages/fetchai/skills/simple_seller packages/fetchai/skills/simple_service_registration packages/fetchai/skills/simple_service_search tests/ --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills/generic_buyer --cov=packages/fetchai/skills/generic_seller --cov=packages/fetchai/skills/tac_control --cov=packages/fetchai/skills/tac_control_contract --cov=packages/fetchai/skills/tac_participation --cov=packages/fetchai/skills/simple_buyer --cov=packages/fetchai/skills/simple_data_request --cov=packages/fetchai/skills/simple_seller --cov=packages/fetchai/skills/simple_service_registration --cov=packages/fetchai/skills/simple_service_search --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-sub
@@ -88,7 +88,7 @@ test-sub:
 
 .PHONY: test-sub-p
 test-sub-p:
-	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract packages/fetchai/skills/tac_participation tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
+	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract packages/fetchai/skills/tac_participation packages/fetchai/skills/simple_buyer packages/fetchai/skills/simple_data_request packages/fetchai/skills/simple_seller packages/fetchai/skills/simple_service_registration packages/fetchai/skills/simple_service_search tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 
