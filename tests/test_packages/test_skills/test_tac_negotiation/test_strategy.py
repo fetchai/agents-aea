@@ -26,8 +26,10 @@ import pytest
 from aea.decision_maker.default import OwnershipState
 from aea.exceptions import AEAEnforceError
 from aea.helpers.search.models import (
+    Attribute,
     Constraint,
     ConstraintType,
+    DataModel,
     Description,
     Location,
     Query,
@@ -281,8 +283,39 @@ class TestStrategy(BaseSkillTestCase):
         """Test the _get_proposal_for_query method of the Strategy class."""
         # setup
         is_seller = True
-        mocked_candidate_proposals = []
-        mocked_query = None
+        mocked_query = Query(
+            [Constraint("some_attribute_name", ConstraintType("==", "some_value"))],
+            DataModel(
+                "some_data_model_name",
+                [
+                    Attribute(
+                        "some_attribute_name", str, False, "Some attribute descriptions."
+                    )
+                ],
+            ),
+        )
+
+        proposal_1 = Description(
+            {
+                "some_attribute_name": "some_value",
+                "ledger_id": self.ledger_id,
+                "price": 100,
+                "currency_id": "1",
+                "fee": 1,
+                "nonce": self.nonce,
+            }
+        )
+        proposal_2 = Description(
+            {
+                "some_attribute_name": "some_value",
+                "ledger_id": self.ledger_id,
+                "price": -100,
+                "currency_id": "1",
+                "fee": 2,
+                "nonce": self.nonce,
+            }
+        )
+        mocked_candidate_proposals = [proposal_1, proposal_2]
 
         # operation
         with patch.object(
@@ -293,12 +326,55 @@ class TestStrategy(BaseSkillTestCase):
             actual_query = self.strategy._get_proposal_for_query(mocked_query, is_seller)
 
         # after
-        mock_candid.assert_any_call(is_seller=is_seller)
+        mock_candid.assert_any_call(is_seller)
         assert actual_query in mocked_candidate_proposals
 
     def test_get_proposal_for_query(self):
         """Test the get_proposal_for_query method of the Strategy class."""
-        # ToDo complete
+        role = FipaDialogue.Role.SELLER
+        is_seller = True
+
+        mocked_query = Query(
+            [Constraint("some_attribute_name", ConstraintType("==", "some_value"))],
+            DataModel(
+                "some_data_model_name",
+                [
+                    Attribute(
+                        "some_attribute_name", str, False, "Some attribute descriptions."
+                    )
+                ],
+            ),
+        )
+        own_description = Description(
+            {
+                "some_attribute_name": "some_value",
+                "ledger_id": self.ledger_id,
+                "price": 100,
+                "currency_id": "1",
+                "fee": 1,
+                "nonce": self.nonce,
+            }
+        )
+
+        expected_proposal = own_description
+
+        # operation
+        with patch.object(
+            self.strategy,
+            "get_own_service_description",
+            return_value=own_description
+        ) as mock_own:
+            with patch.object(
+                self.strategy,
+                "_get_proposal_for_query",
+                return_value=expected_proposal
+            ) as mock_get_proposal:
+                actual_proposal = self.strategy.get_proposal_for_query(mocked_query, role)
+
+        # after
+        mock_own.assert_any_call(is_supply=is_seller)
+        mock_get_proposal.assert_any_call(mocked_query, is_seller=is_seller)
+        assert actual_proposal == expected_proposal
 
     def test_generate_candidate_proposals(self):
         """Test the _generate_candidate_proposals method of the Strategy class."""

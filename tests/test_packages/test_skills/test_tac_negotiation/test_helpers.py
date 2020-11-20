@@ -30,6 +30,8 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
     build_goods_query,
 )
+# from packages.fetchai.skills.tac_negotiation.strategy import Strategy
+# from packages.fetchai.skills.tac_negotiation.behaviours import GoodsRegisterAndSearchBehaviour
 
 from tests.conftest import ROOT_DIR
 
