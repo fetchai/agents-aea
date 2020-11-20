@@ -627,7 +627,7 @@ def ganache(
     ganache_port,
     timeout: float = 2.0,
     max_attempts: int = 10,
- ):
+):
     """Launch the Ganache image."""
     client = docker.from_env()
     image = GanacheDockerImage(
