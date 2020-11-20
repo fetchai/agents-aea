@@ -19,48 +19,29 @@
 """This module contains the tests of the handler classes of the simple_data_request skill."""
 
 import logging
-from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
 import pytest
 
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.simple_data_request.dialogues import HttpDialogues
 from packages.fetchai.skills.simple_data_request.handlers import HttpHandler
 
-from tests.conftest import ROOT_DIR
+from tests.test_packages.test_skills.test_simple_data_request.intermediate_class import (
+    SimpleDataRequestTestCase,
+)
 
 
-class TestHttpHandler(BaseSkillTestCase):
+class TestHttpHandler(SimpleDataRequestTestCase):
     """Test http handler of simple_data_request."""
-
-    path_to_skill = Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "simple_data_request"
-    )
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        cls.mocked_method = "some_method"
-        cls.mocked_url = "some_url"
-        cls.mocked_shared_state_key = "some_name_for_data"
-
-        config_overrides = {
-            "behaviours": {
-                "http_request": {
-                    "args": {"method": cls.mocked_method, "url": cls.mocked_url}
-                }
-            },
-            "handlers": {
-                "http": {"args": {"shared_state_key": cls.mocked_shared_state_key}}
-            },
-        }
-
-        super().setup(config_overrides=config_overrides)
+        super().setup()
         cls.http_handler = cast(HttpHandler, cls._skill.skill_context.handlers.http)
         cls.logger = cls._skill.skill_context.logger
 

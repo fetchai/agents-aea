@@ -18,10 +18,9 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the dialogue classes of the simple_data_request skill."""
 
-from pathlib import Path
 from typing import cast
 
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import COUNTERPARTY_ADDRESS
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.simple_data_request.dialogues import (
@@ -29,35 +28,18 @@ from packages.fetchai.skills.simple_data_request.dialogues import (
     HttpDialogues,
 )
 
-from tests.conftest import ROOT_DIR
+from tests.test_packages.test_skills.test_simple_data_request.intermediate_class import (
+    SimpleDataRequestTestCase,
+)
 
 
-class TestDialogues(BaseSkillTestCase):
+class TestDialogues(SimpleDataRequestTestCase):
     """Test dialogue class of simple_data_request."""
-
-    path_to_skill = Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "simple_data_request"
-    )
 
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        cls.mocked_method = "some_method"
-        cls.mocked_url = "some_url"
-        cls.mocked_shared_state_key = "some_name_for_data"
-
-        config_overrides = {
-            "behaviours": {
-                "http_request": {
-                    "args": {"method": cls.mocked_method, "url": cls.mocked_url}
-                }
-            },
-            "handlers": {
-                "http": {"args": {"shared_state_key": cls.mocked_shared_state_key}}
-            },
-        }
-
-        super().setup(config_overrides=config_overrides)
+        super().setup()
         cls.http_dialogues = cast(
             HttpDialogues, cls._skill.skill_context.http_dialogues
         )
