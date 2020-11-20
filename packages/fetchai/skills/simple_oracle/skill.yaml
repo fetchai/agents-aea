@@ -1,0 +1,60 @@
+name: simple_oracle
+author: fetchai
+version: 0.1.0
+type: skill
+description: This skill deploys a Fetch oracle contract
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: Qmcw6tvuxTH7fCCnXZSJJJUBzXYNAovSy1Y1mgDFiEK1FW
+  dialogues.py: QmebdEEhUm7xYUwHLXtZe5qP4RsjtQvrz7RZ72PUTiigNo
+  handlers.py: QmTT95chwza2p68DmdkLfrJcZ5ZrAu9rRTSM5hd3zTTj15
+  strategy.py: QmcmE68tZZhrkKBG2mmo12Kwqutfi8AYsttoRfWFn7USUA
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/oracle:0.1.0
+protocols:
+- fetchai/contract_api:0.8.0
+- fetchai/default:0.9.0
+- fetchai/ledger_api:0.7.0
+- fetchai/signing:0.7.0
+skills: []
+behaviours:
+  oracleer:
+    args:
+      update_interval: 15
+    class_name: FetchOracleDeployer
+handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      contract_address: null
+      default_gas_grant_role: 100000
+      default_gas_update: 150000
+      initial_fee_deploy: 1000000000000
+      is_oracle_role_granted: false
+      ledger_id: ethereum
+      update_function: updateOracleValue
+    class_name: Strategy
+dependencies: {}
+is_abstract: false
+connections: []

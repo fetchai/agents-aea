@@ -1,0 +1,42 @@
+name: coin_price
+author: fetchai
+version: 0.1.0
+type: skill
+description: Retrieve coin price from an API
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmbTGcZWUpuDXphFMAFoRc6vm9rfrPra4oUPkpcCAuUcop
+  behaviours.py: QmT3Q5U1TbXVP39L5UZwTTzbZscFCUZYVNKSzL6YwRBxRP
+  coin_api_spec.yaml: QmQMyLLRpCGUvkeuckHPTzba4d1LvhUSn4GbctMpcZwtZL
+  dialogues.py: QmRVB4fysm1xkcvmCjpnkVVN5ohS3pofgsXpfXj18fJZkf
+  handlers.py: QmQeX4Zr5GGJU7HAfVtBFUtCqaPHH33S1MbKYJmT5TRBBy
+  models.py: QmVFatgohTx2dyDaykvNW5bv2h9n1Q22fkKjyrdTajM4Rw
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/http:0.9.0
+skills: []
+behaviours:
+  coin_price_behaviour:
+    args:
+      tick_interval: 30
+    class_name: CoinPriceBehaviour
+handlers:
+  http:
+    args: {}
+    class_name: HttpHandler
+models:
+  coin_price_model:
+    args:
+      coin_id: fetch-ai
+      currency: usd
+      decimals: 5
+      url: https://api.coingecko.com/api/v3/
+    class_name: CoinPriceModel
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+dependencies: {}
+is_abstract: false
+connections: []
