@@ -59,7 +59,7 @@ from aea.crypto.cosmos import _COSMOS
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.ethereum import DEFAULT_CHAIN_ID as ETHEREUM_DEFAULT_CHAIN_ID
 from aea.crypto.ethereum import (
-    DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM
+    DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM,
 )
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto, _ETHEREUM
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
@@ -271,7 +271,6 @@ connection_config_files = [
     os.path.join(CUR_PATH, "data", "gym-connection.yaml"),
 ]
 
-
 skill_config_files = [
     os.path.join(ROOT_DIR, "aea", "skills", "scaffold", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "aries_alice", SKILL_YAML),
@@ -305,7 +304,6 @@ skill_config_files = [
     os.path.join(CUR_PATH, "data", "dependencies_skill", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "exception_skill", SKILL_YAML),
 ]
-
 
 agent_config_files = [
     os.path.join(CUR_PATH, "data", "dummy_aea", AGENT_YAML),
@@ -418,6 +416,7 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
 
     :return: decorated object
     """
+
     # for docstyle.
     def decorator(pytest_func):
         """
@@ -624,10 +623,10 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
 @action_for_platform("Linux", skip=False)
 def ganache(
     ganache_configuration,
-     ganache_addr,
-     ganache_port,
-     timeout: float = 2.0,
-     max_attempts: int = 10,
+    ganache_addr,
+    ganache_port,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
  ):
     """Launch the Ganache image."""
     client = docker.from_env()
@@ -843,6 +842,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
 
     :return: decorated method.
     """
+
     # for pydcostyle
     @wraps(fn)
     def wrapper(self, *args, **kwargs):
