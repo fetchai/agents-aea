@@ -75,6 +75,24 @@ class AEAEnforceError(AEAException)
 
 Class for enforcement errors.
 
+<a name="aea.exceptions.AEAValidationError"></a>
+## AEAValidationError Objects
+
+```python
+class AEAValidationError(AEAException)
+```
+
+Class for validation errors of an AEA.
+
+<a name="aea.exceptions.AEAComponentLoadException"></a>
+## AEAComponentLoadException Objects
+
+```python
+class AEAComponentLoadException(AEAException)
+```
+
+Class for component loading errors of an AEA.
+
 <a name="aea.exceptions._StopRuntime"></a>
 ## `_`StopRuntime Objects
 

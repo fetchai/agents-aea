@@ -218,6 +218,7 @@ _.start_manager  # unused method (aea/manager.py:208)
 _.stop_manager  # unused method (aea/manager.py:221)
 _.add_project  # unused method (aea/manager.py:263)
 _.list_projects  # unused method (aea/manager.py:283)
+_.list_agents_info  # unused method (aea/manager.py:283)
 _.add_agent  # unused method (aea/manager.py:291)
 _.start_all_agents  # unused method (aea/manager.py:396)
 _.get_agent_alias  # unused method (aea/manager.py:486)
@@ -228,3 +229,9 @@ _.valid_performatives  # unused property (aea/protocols/base.py:90)
 _.has_dialogue_info  # unused property (aea/protocols/base.py:244)
 get_state  # aea/crypto/base.py:251: unused method 'get_state' (60% confidence)
 _.load_agent_config  # unused method (aea/test_tools/test_cases.py:801)
+_.UseGanache  # unused class (aea/test_tools/test_cases.py:871)
+_._start_ganache  # unused method (aea/test_tools/test_cases.py:875)
+_.ganache  # unused variable (aea/test_tools/test_cases.py:876:)
+_.unsupported_protocol_count
+_.unsupported_skill_count
+_.decoding_error_count

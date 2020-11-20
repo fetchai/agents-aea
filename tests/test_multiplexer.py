@@ -809,3 +809,14 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
             shutil.rmtree(self.t)
         except (OSError, IOError):
             pass
+
+
+def test_multiplexer_setup_replaces_connections():
+    """Test proper connections reset on setup call."""
+    m = AsyncMultiplexer([MagicMock(), MagicMock(), MagicMock()])
+    assert len(m._id_to_connection) == 3
+    assert len(m._connections) == 3
+
+    m.setup([MagicMock()], MagicMock())
+    assert len(m._id_to_connection) == 1
+    assert len(m._connections) == 1

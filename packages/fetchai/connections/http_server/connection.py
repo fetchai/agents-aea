@@ -67,7 +67,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.13.0")
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -462,7 +462,7 @@ class HTTPChannel(BaseAsyncChannel):
         except asyncio.TimeoutError:
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
         except FuturesCancelledError:
-            return Response(
+            return Response(  # pragma: nocover
                 status=SERVER_ERROR, reason="Server terminated unexpectedly."
             )
         except BaseException:  # pragma: nocover # pylint: disable=broad-except

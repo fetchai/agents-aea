@@ -1,15 +1,15 @@
 name: http_server
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: connection
 description: The HTTP server connection that wraps http server implementing a RESTful
   API specification.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmXJXxj3vUy6WNmS6M59phEbfEuUUPToMjbcUGgB5gAGRC
+  README.md: QmdVHwvPnKGsTrTb74e4NZk5LofkQ3wFnkqXbqCbCMNU1P
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
-  connection.py: QmUFx65xawZL267Mt1AQK7FSdZFVFeuuTSCmUX9jBjAAcv
+  connection.py: QmcTcmK8ZXiFU5GXNcY7aSyrTBPsmCy5bgeuy56FCZNkq4
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

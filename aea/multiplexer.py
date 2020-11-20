@@ -612,7 +612,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :return: None.
         """
         self.default_routing = default_routing or {}
+
+        # replace connections
         self._connections = []
+        self._id_to_connection = {}
+
         for c in connections:
             self.add_connection(c, c.public_id == default_connection)
 

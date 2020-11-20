@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of multiple AEA configs launcher."""
 import logging
 import multiprocessing

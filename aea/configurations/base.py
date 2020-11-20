@@ -19,10 +19,7 @@
 
 """Classes to handle AEA configurations."""
 
-import base64
 import functools
-import gzip
-import json
 import pprint
 import re
 from abc import ABC, abstractmethod
@@ -2180,38 +2177,6 @@ class ContractConfig(ComponentConfiguration):
             contract_interface_paths if contract_interface_paths is not None else {}
         )
         self.class_name = class_name
-
-    @property
-    def contract_interfaces(self) -> Dict[str, str]:
-        """Get the contract interfaces."""
-        return self._get_contract_interfaces()
-
-    def _get_contract_interfaces(self) -> Dict[str, str]:
-        """Get the contract interfaces."""
-        if self.directory is None:  # pragma: nocover
-            raise ValueError("Set directory before calling.")
-        contract_interfaces = {}  # type: Dict[str, str]
-        for identifier, path in self.contract_interface_paths.items():
-            full_path = Path(self.directory, path)
-            if identifier == "ethereum":
-                with open(full_path, "r") as interface_file_ethereum:
-                    contract_interface = json.load(interface_file_ethereum)
-                    contract_interfaces[identifier] = contract_interface
-            elif identifier in ["cosmos", "fetchai"]:
-                with open(full_path, "rb") as interface_file_cosmos:
-                    contract_interface = {
-                        "wasm_byte_code": str(
-                            base64.b64encode(
-                                gzip.compress(interface_file_cosmos.read(), 6)
-                            ).decode()
-                        )
-                    }
-                    contract_interfaces[identifier] = contract_interface
-            else:
-                raise ValueError(  # pragma: nocover
-                    "Identifier {} is not supported for contracts."
-                )
-        return contract_interfaces
 
     @property
     def json(self) -> Dict:

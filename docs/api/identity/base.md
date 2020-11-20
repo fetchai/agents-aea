@@ -21,7 +21,7 @@ It includes:
 #### `__`init`__`
 
 ```python
- | __init__(name: str, address: Optional[str] = None, addresses: Optional[Dict[str, Address]] = None, default_address_key: str = DEFAULT_ADDRESS_KEY)
+ | __init__(name: str, address: Optional[str] = None, addresses: Optional[Dict[str, Address]] = None, default_address_key: str = DEFAULT_LEDGER)
 ```
 
 Instantiate the identity.
