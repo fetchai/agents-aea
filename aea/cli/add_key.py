@@ -53,7 +53,7 @@ from aea.crypto.registries import crypto_registry
 @click.pass_context
 @check_aea_project
 def add_key(click_context, type_, file, connection):
-    """Add a private key to the wallet."""
+    """Add a private key to the wallet of the agent."""
     _add_private_key(click_context, type_, file, connection)
 
 

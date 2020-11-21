@@ -43,7 +43,7 @@ from aea.helpers.install_dependency import install_dependency, run_install_subpr
 @click.pass_context
 @check_aea_project
 def install(click_context, requirement: Optional[str]):
-    """Install the dependencies."""
+    """Install the dependencies of the agent."""
     ctx = cast(Context, click_context.obj)
     do_install(ctx, requirement)
 

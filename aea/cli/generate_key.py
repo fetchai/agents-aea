@@ -43,7 +43,7 @@ from aea.crypto.registries import crypto_registry
     required=False,
 )
 def generate_key(type_, file):
-    """Generate private keys."""
+    """Generate a private key and place it in a file."""
     _generate_private_key(type_, file)
 
 

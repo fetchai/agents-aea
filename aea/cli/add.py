@@ -49,7 +49,7 @@ from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 @click.pass_context
 @check_aea_project
 def add(click_context, local, remote):
-    """Add a resource to the agent."""
+    """Add a package to the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", not local and not remote)
@@ -59,7 +59,7 @@ def add(click_context, local, remote):
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def connection(ctx: Context, connection_public_id: PublicId):
-    """Add a connection to the configuration file."""
+    """Add a connection to the agent."""
     add_item(ctx, CONNECTION, connection_public_id)
 
 
@@ -67,7 +67,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def contract(ctx: Context, contract_public_id: PublicId):
-    """Add a contract to the configuration file."""
+    """Add a contract to the agent."""
     add_item(ctx, CONTRACT, contract_public_id)
 
 

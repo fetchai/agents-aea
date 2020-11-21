@@ -43,7 +43,7 @@ from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
 @click.pass_context
 @check_aea_project
 def generate_wealth(click_context, sync, type_):
-    """Generate wealth for address on test network."""
+    """Generate wealth for the agent on a test network."""
     ctx = cast(Context, click_context.obj)
     _try_generate_wealth(ctx, type_, sync)
 

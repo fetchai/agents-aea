@@ -24,7 +24,9 @@ import click
 from aea.cli.registry.login import registry_reset_password
 
 
-@click.command(name="reset_password", help="Reset password of Registry account.")
+@click.command(
+    name="reset_password", help="Reset the password of the registry account."
+)
 @click.argument("email", type=str, required=True)
 def reset_password(email):
     """Command to request Registry to reset password."""
