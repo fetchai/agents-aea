@@ -59,7 +59,7 @@ DEFAULT_SETTLE_TIMEOUT = 60
 @click.pass_context
 @check_aea_project
 def transfer(click_context, type_, address, amount, fee, yes, settle_timeout, sync):
-    """Get the wealth associated with the private key."""
+    """Transfer wealth associated with the private key to another account."""
     ctx = cast(Context, click_context.obj)
     try:
         own_address = _try_get_address(ctx, type_)
