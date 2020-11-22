@@ -41,8 +41,13 @@ logging_config:
     logfile:
       class: logging.FileHandler
       formatter: extra
-      level: DEBUG
+      level: NOTSET
       filename: all.log
+    logfile_error:
+      class: logging.FileHandler
+      formatter: extra
+      level: ERROR
+      filename: error.log
     console:
       class: logging.StreamHandler
       formatter: standard
@@ -51,6 +56,7 @@ logging_config:
     aea:
       handlers:
       - logfile
+      - logfile_error
       - console
       level: DEBUG
       propagate: false
@@ -68,6 +74,7 @@ public_id: fetchai/soef:0.13.0
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
+  token_storage_path: /data/soef_key.txt
 ---
 public_id: fetchai/ledger:0.9.0
 type: connection
