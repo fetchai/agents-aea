@@ -41,7 +41,7 @@ from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 @click.pass_context
 @check_aea_project
 def push(click_context, local):
-    """Push item to Registry or save it in local packages."""
+    """Push a non-vendor package of the agent to the registry."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("local", local)
 
@@ -50,7 +50,7 @@ def push(click_context, local):
 @click.argument("connection-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def connection(ctx: Context, connection_id):
-    """Push connection to Registry or save it in local packages."""
+    """Push a connection to the registry or save it in local registry."""
     if ctx.config.get("local"):
         _save_item_locally(ctx, CONNECTION, connection_id)
     else:
@@ -61,7 +61,7 @@ def connection(ctx: Context, connection_id):
 @click.argument("contract-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def contract(ctx: Context, contract_id):
-    """Push connection to Registry or save it in local packages."""
+    """Push a contract to the registry or save it in local registry."""
     if ctx.config.get("local"):
         _save_item_locally(ctx, CONTRACT, contract_id)
     else:
@@ -72,7 +72,7 @@ def contract(ctx: Context, contract_id):
 @click.argument("protocol-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_id):
-    """Push protocol to Registry or save it in local packages."""
+    """Push a protocol to the registry or save it in local registry."""
     if ctx.config.get("local"):
         _save_item_locally(ctx, PROTOCOL, protocol_id)
     else:
@@ -83,7 +83,7 @@ def protocol(ctx: Context, protocol_id):
 @click.argument("skill-id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def skill(ctx: Context, skill_id):
-    """Push skill to Registry or save it in local packages."""
+    """Push a skill to the registry or save it in local registry."""
     if ctx.config.get("local"):
         _save_item_locally(ctx, SKILL, skill_id)
     else:

@@ -57,7 +57,7 @@ from aea.configurations.constants import (
 @click.pass_context
 @check_aea_project
 def publish(click_context, local, remote):  # pylint: disable=unused-argument
-    """Publish Agent to Registry."""
+    """Publish the agent to the registry."""
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
     _validate_config(ctx)

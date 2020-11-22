@@ -51,7 +51,7 @@ from aea.exceptions import AEAException
 @click.pass_context
 @check_aea_project
 def config(click_context):  # pylint: disable=unused-argument
-    """Read or modify a configuration."""
+    """Read or modify a configuration of the agent."""
 
 
 @config.command()
