@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the buyer_aw2 skill."""
+"""This module contains the implementation of the confirmation_aw2 skill."""
 
 from aea.configurations.base import PublicId
 

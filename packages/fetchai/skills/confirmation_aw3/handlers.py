@@ -140,7 +140,7 @@ class DefaultHandler(Handler):
 
 
 class HttpHandler(Handler):
-    """This implements the echo handler."""
+    """This implements the http handler."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
@@ -195,8 +195,8 @@ class HttpHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "received http response with method={}, url={} and body={!r}".format(
-                http_msg.method, http_msg.url, http_msg.body,
+            "received http response with method={}, url={} and body={!r} in dialogue={}".format(
+                http_msg.method, http_msg.url, http_msg.body, http_dialogue
             )
         )
 

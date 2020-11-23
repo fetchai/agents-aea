@@ -36,7 +36,7 @@ class RegistrationDB(Model):
     """Communicate between the database and the python objects."""
 
     def __init__(self, **kwargs):
-        """Initialise the Detection Database Communication class."""
+        """Initialise the class."""
         custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
         this_dir = os.getcwd()

@@ -8,6 +8,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
+- fetchai/http_client:0.13.0
 - fetchai/ledger:0.9.0
 - fetchai/p2p_libp2p:0.12.0
 - fetchai/soef:0.13.0
