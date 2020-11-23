@@ -104,14 +104,23 @@ class DefaultHandler(Handler):
         """
         strategy = cast(Strategy, self.context.strategy)
         if default_msg.sender == strategy.aw1_aea:
-            confirmed_aea = default_msg.content.decode("utf-8")
+            confirmed_aea, developer_handle = default_msg.content.decode("utf-8").split(
+                "_"
+            )
             if not LedgerApis.is_valid_address("fetchai", confirmed_aea):
                 self.context.logger.warning(
                     f"received invalid address={confirmed_aea} in dialogue={default_dialogue}."
                 )
                 return
-            self.context.logger.info(f"adding confirmed_aea={confirmed_aea} to db.")
-            strategy.register_counterparty(confirmed_aea)
+            if not developer_handle != "":
+                self.context.logger.warning(
+                    f"received invalid developer_handle={developer_handle}."
+                )
+                return
+            self.context.logger.info(
+                f"adding confirmed_aea={confirmed_aea} with developer_handle={developer_handle} to db."
+            )
+            strategy.register_counterparty(confirmed_aea, developer_handle)
         else:
             self.context.logger.warning(
                 f"cannot handle default message of performative={default_msg.performative} in dialogue={default_dialogue}. Invalid sender={default_msg.sender}"
@@ -195,8 +204,8 @@ class HttpHandler(Handler):
         :return: None
         """
         self.context.logger.info(
-            "received http response with method={}, url={} and body={!r} in dialogue={}".format(
-                http_msg.method, http_msg.url, http_msg.body, http_dialogue
+            "received http response with status_code={}, status_text={} and body={!r} in dialogue={}".format(
+                http_msg.status_code, http_msg.status_text, http_msg.body, http_dialogue
             )
         )
 

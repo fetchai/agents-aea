@@ -327,7 +327,7 @@ class LedgerApiHandler(Handler):
         """Implement the setup for the handler."""
         strategy = cast(Strategy, self.context.strategy)
         for registered_aea in strategy.all_registered_aeas:
-            self._send_confirmation_details_to_aw2_aeas(registered_aea)
+            self._send_confirmation_details_to_awx_aeas(registered_aea)
 
     def handle(self, message: Message) -> None:
         """
@@ -431,9 +431,9 @@ class LedgerApiHandler(Handler):
         self.context.logger.info(
             f"informing counterparty={response.to} of registration success."
         )
-        self._send_confirmation_details_to_aw2_aeas(response.to)
+        self._send_confirmation_details_to_awx_aeas(response.to)
 
-    def _send_confirmation_details_to_aw2_aeas(self, confirmed_aea: str) -> None:
+    def _send_confirmation_details_to_awx_aeas(self, confirmed_aea: str) -> None:
         """
         Send a confirmation of registration to aw2 aeas.
 
@@ -441,16 +441,17 @@ class LedgerApiHandler(Handler):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        if strategy.aw2_aeas != []:
+        if strategy.awx_aeas != []:
+            developer_handle = strategy.get_developer_handle(confirmed_aea)
             self.context.logger.info(
-                f"informing aw2_aeas={strategy.aw2_aeas} of registration success of confirmed aea={confirmed_aea}."
+                f"informing awx_aeas={strategy.awx_aeas} of registration success of confirmed aea={confirmed_aea} of developer={developer_handle}."
             )
             default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-            for aw2_aea in strategy.aw2_aeas:
+            for awx_aea in strategy.awx_aeas:
                 msg, _ = default_dialogues.create(
-                    counterparty=aw2_aea,
+                    counterparty=awx_aea,
                     performative=DefaultMessage.Performative.BYTES,
-                    content=confirmed_aea.encode("utf-8"),
+                    content=f"{confirmed_aea}_{developer_handle}".encode("utf-8"),
                 )
                 self.context.outbox.put_message(message=msg)
 

@@ -87,6 +87,13 @@ class RegistrationDB(Model):
         result = self._execute_single_sql(command, variables)
         return len(result) != 0
 
+    def get_developer_handle(self, address: str) -> str:
+        """Get developer handle relating to an address."""
+        command = "SELECT developer_handle FROM registered_table WHERE address=?"
+        variables = (address,)
+        result = self._execute_single_sql(command, variables)
+        return result[0][0]
+
     def get_all_registered(self) -> List[str]:
         """Get all registered AW-1 AEAs."""
         command = "SELECT address FROM registered_table"

@@ -11,9 +11,9 @@ fingerprint:
   __init__.py: QmWfVzmPTaXCh45cWMvkRB4VGZZ4n8xGxHhmTLEQk1zexf
   behaviours.py: QmSF5tvfKnBRojZE5hKFE6n6iUCRySjge6Zm2CSfNNc4gg
   dialogues.py: QmeuRrNPpbvyTAcPwAtEkTfJTDunqyfzPoDhMZWTvCyrJA
-  handlers.py: QmRRZb77jb8TCy3dSGYwhZYz3RaC3TxRmnBowtzEh6RKjC
-  registration_db.py: QmSTpw67JKDTZRTCnfZnoT7kz5JXLkdURJAQJSMUw3Mpgt
-  strategy.py: QmfWqQMr5s9jx9NkkYm1SZmhB76zXNeYTiQQwcnitXfCxD
+  handlers.py: QmNWVcF5VxWYmziRXuUVYWBuxwRmaW28nZrz6i5swpvSzG
+  registration_db.py: QmXgxSv4cKk6LfeftAtHurbX4xe8oMsGMrwbB662Xj2Prd
+  strategy.py: QmQAFnVugoeGAhRXBqvJJdZ5k793gwjsyRZQM4f8PnsGBa
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.13.0
@@ -39,6 +39,9 @@ handlers:
   fipa:
     args: {}
     class_name: FipaHandler
+  http_handler:
+    args: {}
+    class_name: HttpHandler
   ledger_api:
     args: {}
     class_name: LedgerApiHandler

@@ -110,4 +110,4 @@ models:
   strategy:
     args:
       token_dispense_amount: 100000000000000000000
-      aw2_aeas: []
+      awx_aeas: []

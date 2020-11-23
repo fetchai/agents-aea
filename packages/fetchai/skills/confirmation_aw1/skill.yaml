@@ -10,9 +10,9 @@ fingerprint:
   README.md: QmYRNztBr6i8G1T5mgdMLoKBEi5C68EeWM8pZCzpDXSMgd
   __init__.py: QmfNeK1dMorsANir1LYJWgoquka7bFS5FHocyXvnWCuTsn
   dialogues.py: QmcAKRkSpd3TYdXdjVQSgiJ6vhaHHVNPtTNbEey6b52R6u
-  handlers.py: QmajpXePiMHt4BSRSpcMvzWYvpMTVDjLMvwE1k6BzkrA4s
-  registration_db.py: QmX4cuQMZHxsQLAaDRu2cKtf8HfLtDmAfDnprBwqgBq1jw
-  strategy.py: Qmb9bUtzt2RjjjxYxoNPYJZvQV8fYzFRtmTwykXH1ZZKsC
+  handlers.py: QmSRZexEEiPLbsTa1WqbpdrxWhSX6ckFx3P1NnsrohaUUN
+  registration_db.py: QmQdxvbDv6WxYq9Se4i5s6CGKHPGKkM4GRWEKiG1A9sxtT
+  strategy.py: QmVF4uYEBHTc2CDzzA7BVpvTfx2mW1L77WQ7DTkmteVL1G
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.9.0
@@ -60,7 +60,7 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
-      aw2_aeas: []
+      awx_aeas: []
       fetchai_staking_contract_address: '0x351bac612b50e87b46e4b10a282f632d41397de2'
       override_staking_check: false
       token_denomination: atestfet

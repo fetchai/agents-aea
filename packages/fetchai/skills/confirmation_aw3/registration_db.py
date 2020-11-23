@@ -54,9 +54,9 @@ class RegistrationDB(Model):
     def _initialise_backend(self) -> None:
         """Set up database and initialise the tables."""
         self._execute_single_sql(
-            "CREATE TABLE IF NOT EXISTS registered_table (address TEXT, ethereum_address TEXT, "
+            "CREATE TABLE IF NOT EXISTS registered_table (address TEXT NOT NULL, ethereum_address TEXT, "
             "ethereum_signature TEXT, fetchai_signature TEXT, "
-            "developer_handle TEXT, tweet TEXT)"
+            "developer_handle TEXT NOT NULL, tweet TEXT, PRIMARY KEY (address, developer_handle))"
         )
         self._execute_single_sql(
             "CREATE TABLE IF NOT EXISTS trades_table (address TEXT, created_at timestamp, data TEXT)"
@@ -84,17 +84,19 @@ class RegistrationDB(Model):
         """Get developer handle."""
         command = "SELECT developer_handle FROM registered_table where address=?"
         ret = self._execute_single_sql(command, (address,))
+        if len(ret[0]) != 1:
+            raise ValueError(
+                f"More than one developer_handle found for address={address}."
+            )
         return ret[0][0]
 
     def get_handle_and_trades(self, address: str) -> Tuple[str, int]:
-        """Get trades for address."""
+        """Get developer and number of trades for address."""
         trades = self.get_trade_count(address)
         developer_handle = self.get_developer_handle(address)
         return (developer_handle, trades)
 
-    def set_registered(
-        self, address: str,
-    ):
+    def set_registered(self, address: str, developer_handle: str):
         """Record a registration."""
         if self.is_registered(address):
             return
@@ -104,7 +106,7 @@ class RegistrationDB(Model):
             "",
             "",
             "",
-            "",
+            developer_handle,
             "",
         )
         self._execute_single_sql(command, variables)
