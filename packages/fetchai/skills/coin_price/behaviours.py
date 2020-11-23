@@ -86,19 +86,15 @@ class CoinPriceBehaviour(TickerBehaviour):
         :return: None
         """
 
-        model = self.context.coin_price_model
-
-        url = model.url
-        coin_id = model.coin_id
-        currency = model.currency
+        model = cast(CoinPriceModel, self.context.coin_price_model)
 
         self.context.logger.info(
-            f"Fetching price of {coin_id} in {currency} from CoinPrice"
+            f"Fetching price of {model.coin_id} in {model.currency} from CoinPrice"
         )
 
-        query = f"simple/price?ids={coin_id}&vs_currencies={currency}"
+        url = f"{model.url}simple/price?ids={model.coin_id}&vs_currencies={model.currency}"
 
-        self.send_http_request_message("GET", url + query)
+        self.send_http_request_message("GET", url)
 
     def teardown(self) -> None:
         """
