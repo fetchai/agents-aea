@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the helpers module of the tac control skill."""
+"""This module contains the tests of the helpers module of the tac control contract skill."""
 
 from pathlib import Path
 from unittest.mock import patch
