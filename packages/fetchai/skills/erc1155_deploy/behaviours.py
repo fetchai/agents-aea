@@ -137,7 +137,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             contract_id=strategy.contract_id,
             callable="get_deploy_transaction",
             kwargs=ContractApiMessage.Kwargs(
-                {"deployer_address": self.context.agent_address}
+                {"deployer_address": self.context.agent_address, "gas": strategy.gas}
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
@@ -167,6 +167,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 {
                     "deployer_address": self.context.agent_address,
                     "token_ids": strategy.token_ids,
+                    "gas": strategy.gas,
                 }
             ),
         )
@@ -199,6 +200,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                     "recipient_address": self.context.agent_address,
                     "token_ids": strategy.token_ids,
                     "mint_quantities": strategy.mint_quantities,
+                    "gas": strategy.gas,
                 }
             ),
         )
