@@ -111,10 +111,18 @@ def get_public_id_from_yaml(configuration_file: Path):
     :param configuration_file: the path to the config yaml
     """
     data = unified_yaml_load(configuration_file)
-    author = data["author"]
+    author = data.get("author", None)
+    if not author:
+        raise KeyError(f"No author field in {str(configuration_file)}")
     # handle the case when it's a package or agent config file.
-    name = data["name"] if "name" in data else data["agent_name"]
-    version = data["version"]
+    try:
+        name = data["name"] if "name" in data else data["agent_name"]
+    except KeyError:
+        print(f"No name or agent_name field in {str(configuration_file)}")
+        raise
+    version = data.get("version", None)
+    if not version:
+        raise KeyError(f"No version field in {str(configuration_file)}")
     return PublicId(author, name, version)
 
 
