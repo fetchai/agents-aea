@@ -56,7 +56,7 @@ from aea.configurations.constants import (
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
 def fetch(click_context, public_id, alias, local, remote):
-    """Fetch Agent from Registry."""
+    """Fetch an agent from the registry."""
     ctx = cast(Context, click_context.obj)
     is_mixed = not local and not remote
     ctx.set_config("is_local", local and not remote)

@@ -80,7 +80,7 @@ from aea.helpers.base import find_topological_order, reachable_nodes
 @click.pass_context
 @check_aea_project
 def eject(click_context: click.core.Context, quiet: bool, with_symlinks: bool):
-    """Eject an installed item."""
+    """Eject a vendor package of the agent."""
     click_context.obj.set_config("quiet", quiet)
     click_context.obj.set_config("with_symlinks", with_symlinks)
     set_cli_author(click_context)
@@ -90,7 +90,7 @@ def eject(click_context: click.core.Context, quiet: bool, with_symlinks: bool):
 @click.argument("public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def connection(ctx: Context, public_id: PublicId):
-    """Eject an installed connection."""
+    """Eject a vendor connection."""
     quiet = ctx.config.get("quiet")
     with_symlinks = ctx.config.get("with_symlinks")
     _eject_item(ctx, CONNECTION, public_id, quiet=quiet, with_symlinks=with_symlinks)
@@ -100,7 +100,7 @@ def connection(ctx: Context, public_id: PublicId):
 @click.argument("public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def contract(ctx: Context, public_id: PublicId):
-    """Eject an installed contract."""
+    """Eject a vendor contract."""
     quiet = ctx.config.get("quiet")
     with_symlinks = ctx.config.get("with_symlinks")
     _eject_item(ctx, CONTRACT, public_id, quiet=quiet, with_symlinks=with_symlinks)
@@ -110,7 +110,7 @@ def contract(ctx: Context, public_id: PublicId):
 @click.argument("public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def protocol(ctx: Context, public_id: PublicId):
-    """Eject an installed protocol."""
+    """Eject a vendor protocol."""
     quiet = ctx.config.get("quiet")
     with_symlinks = ctx.config.get("with_symlinks")
     _eject_item(ctx, PROTOCOL, public_id, quiet=quiet, with_symlinks=with_symlinks)
@@ -120,7 +120,7 @@ def protocol(ctx: Context, public_id: PublicId):
 @click.argument("public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def skill(ctx: Context, public_id: PublicId):
-    """Eject an installed skill."""
+    """Eject a vendor skill."""
     quiet = ctx.config.get("quiet")
     with_symlinks = ctx.config.get("with_symlinks")
     _eject_item(ctx, SKILL, public_id, quiet=quiet, with_symlinks=with_symlinks)

@@ -69,14 +69,14 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
 
         if (
             not self.context.decision_maker_handler_context.goal_pursuit_readiness.is_ready
-        ):
+        ):  # pragma: no cover
             return
 
-        if not self.is_registered:
+        if not self.is_registered:  # pragma: no cover
             self._register_agent()
             self._register_service()
             self.is_registered = True
-        self._search_services()
+        self._search_services()  # pragma: no cover
 
     def teardown(self) -> None:
         """

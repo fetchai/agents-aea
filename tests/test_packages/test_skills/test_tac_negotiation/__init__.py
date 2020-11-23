@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,29 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the 'aea reset_password' subcommand."""
-
-import click
-
-from aea.cli.registry.login import registry_reset_password
-
-
-@click.command(
-    name="reset_password", help="Reset the password of the registry account."
-)
-@click.argument("email", type=str, required=True)
-def reset_password(email):
-    """Command to request Registry to reset password."""
-    _do_password_reset(email)
-
-
-def _do_password_reset(email: str) -> None:
-    """
-    Request Registry to reset password.
-
-    :param email: str email.
-
-    :return:
-    """
-    registry_reset_password(email)
-    click.echo("An email with a password reset link was sent to {}".format(email))
+"""The tests module contains the tests of the packages/skills/tac_negotiation dir."""

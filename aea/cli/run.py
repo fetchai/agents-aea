@@ -116,6 +116,8 @@ def _profiling_context(period: int):
     profiler.start()
     try:
         yield None
+    except Exception:  # pylint: disable=try-except-raise
+        raise
     finally:
         profiler.stop()
         profiler.wait_completed(sync=True, timeout=10)

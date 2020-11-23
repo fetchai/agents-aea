@@ -57,7 +57,7 @@ from aea.configurations.loader import ConfigLoader
 @click.option("--local", is_flag=True, help="For local search.")
 @click.pass_context
 def search(click_context, local):
-    """Search for components in the registry.
+    """Search for packages in the registry.
 
     If called from an agent directory, it will check
 
