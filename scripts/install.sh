@@ -42,7 +42,7 @@ function is_python_version_ok() {
 
 function install_aea (){
 	echo "Install AEA"
-	output=$(pip3 install aea[all]==0.7.4)
+	output=$(pip3 install aea[all]==0.7.4 --force --no-cache-dir)
 	if [[  $? -ne 0 ]];
 	then
 		echo "$output"
