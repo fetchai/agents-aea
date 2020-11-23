@@ -363,6 +363,31 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         ]
         assert result == expected_result
 
+    @patch("aea.manager.AgentConfig.FIELDS_ALLOWED_TO_UPDATE", ["description"])
+    def test_get_overridable_config_positive(self):
+        """Test get_overridable_config method for positive result."""
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+
+        self.manager.add_agent(self.project_public_id, self.agent_name)
+        result = self.manager.get_overridable_config(self.agent_name)
+        expected_result = {"description": "A simple agent to demo the echo skill."}
+        assert result == expected_result
+
+    @patch("aea.manager.AgentConfig.FIELDS_ALLOWED_TO_UPDATE", ["description"])
+    def test_update_agent_config_positive(self):
+        """Test update_agent_config method for positive result."""
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+
+        self.manager.add_agent(self.project_public_id, self.agent_name)
+        new_description = "New description"
+        self.manager.update_agent_config(
+            self.agent_name, agent_overrides={"description": new_description}
+        )
+        alias = self.manager.get_agent_alias(self.agent_name)
+        assert alias.config[0]["description"] == new_description
+
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""

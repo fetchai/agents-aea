@@ -577,6 +577,49 @@ class MultiAgentManager:
             raise ValueError(f"Agent with name {agent_name} does not exist!")
         return self._agents[agent_name]
 
+    def get_overridable_config(self, agent_name: str) -> Dict[str, Any]:
+        """
+        Get overridable config of the agent.
+
+        :param agent_name: str agent name.
+
+        :return: dict overridable config.
+        """
+        alias = self.get_agent_alias(agent_name)
+        config = alias.builder.loader.load_agent_config_from_json(alias.config)
+        agent_config = {
+            key: value
+            for key, value in config.json.items()
+            if key in config.FIELDS_ALLOWED_TO_UPDATE
+        }
+        # TODO: Get agent components overridable config the same way.
+        # we miss AgentConfig class functionality to do that.
+        return agent_config
+
+    def update_agent_config(
+        self,
+        agent_name: str,
+        agent_overrides: Optional[dict] = None,
+        component_overrides: Optional[List[dict]] = None,
+    ) -> None:
+        """
+        Update agent config from overrides.
+
+        :param agent_name: str agent name.
+        :param agent_overrides: optional dict with agent settings overrides.
+        :param component_overrides: optional dict with component settings overrides.
+        """
+        alias = self.get_agent_alias(agent_name)
+        new_config = self._make_config(
+            alias.project.path,
+            agent_overrides=agent_overrides,
+            component_overrides=component_overrides,
+        )
+        new_alias = self._build_agent_alias(
+            alias.project, agent_name, config=new_config
+        )
+        self._agents[agent_name] = new_alias
+
     def _ensure_working_dir(self) -> None:
         """Create working dir if needed."""
         if not os.path.exists(self.working_dir):
@@ -640,7 +683,7 @@ class MultiAgentManager:
 
         if any([key in agent_overrides for key in self.AGENT_DO_NOT_OVERRIDE_VALUES]):
             raise ValueError(
-                'Do not override any of {" ".join(self.AGENT_DO_NOT_OVERRIDE_VALUES)}'
+                f'Do not override any of {" ".join(self.AGENT_DO_NOT_OVERRIDE_VALUES)}'
             )
 
         agent_configuration_file_path: Path = AEABuilder.get_configuration_file_path(
