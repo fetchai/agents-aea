@@ -70,7 +70,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         if (
             not self.context.decision_maker_handler_context.goal_pursuit_readiness.is_ready
         ):
-            return
+            return  # pragma: no cover
 
         if not self.is_registered:
             self._register_agent()

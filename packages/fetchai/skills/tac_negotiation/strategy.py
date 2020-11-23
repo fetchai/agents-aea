@@ -354,7 +354,10 @@ class Strategy(Model):
             )
         return proposal_description
 
-    def _generate_candidate_proposals(self, is_seller: bool):
+    def _generate_candidate_proposals(  # pragma: no cover
+        self,
+        is_seller: bool
+    ):
         """
         Generate proposals from the agent in the role of seller/buyer.
 
@@ -424,7 +427,11 @@ class Strategy(Model):
             proposals.append(proposal)
         return proposals
 
-    def is_profitable_transaction(self, terms: Terms, role: FipaDialogue.Role) -> bool:
+    def is_profitable_transaction(  # pragma: no cover
+        self,
+        terms: Terms,
+        role: FipaDialogue.Role
+    ) -> bool:
         """
         Check if a transaction is profitable.
 
