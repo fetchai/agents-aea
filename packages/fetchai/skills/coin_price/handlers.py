@@ -20,9 +20,8 @@
 """This package contains handlers for the coin_price skill."""
 
 import json
-from typing import Optional, cast
+from typing import cast
 
-from aea.configurations.base import PublicId
 from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -36,8 +35,10 @@ try:
     from packages.fetchai.connections.http_server.connection import (
         PUBLIC_ID as HTTP_SERVER_ID,
     )
+
+    USE_HTTP_SERVER = True
 except ImportError:
-    HTTP_SERVER_ID = None  # type: Optional[PublicId]
+    USE_HTTP_SERVER = False
 
 
 class HttpHandler(Handler):
@@ -101,8 +102,7 @@ class HttpHandler(Handler):
                         f"{model.coin_id} price = {price} {model.currency}"
                     )
         elif (
-            message.performative == HttpMessage.Performative.REQUEST
-            and HTTP_SERVER_ID is not None
+            message.performative == HttpMessage.Performative.REQUEST and USE_HTTP_SERVER
         ):
             self._handle_request(message, http_dialogue)
         else:
