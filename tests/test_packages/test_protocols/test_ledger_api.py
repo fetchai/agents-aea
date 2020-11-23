@@ -33,7 +33,6 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
 import packages
-from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
@@ -55,41 +54,6 @@ def test_get_balance_serialization():
         performative=LedgerApiMessage.Performative.GET_BALANCE,
         ledger_id="some_ledger_id",
         address="some_address",
-    )
-    msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=LedgerApiMessage.protocol_id,
-        message=msg,
-    )
-    envelope_bytes = envelope.encode()
-
-    actual_envelope = Envelope.decode(envelope_bytes)
-    expected_envelope = envelope
-    assert expected_envelope.to == actual_envelope.to
-    assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
-    assert expected_envelope.message != actual_envelope.message
-
-    actual_msg = LedgerApiMessage.serializer.decode(actual_envelope.message)
-    actual_msg.to = actual_envelope.to
-    actual_msg.sender = actual_envelope.sender
-    expected_msg = msg
-    assert expected_msg == actual_msg
-
-
-def test_get_state_serialization():
-    """Test the serialization for 'get_state' speech-act works."""
-
-    args = ("arg1", "arg2")
-    kwargs = Kwargs({})
-    msg = LedgerApiMessage(
-        performative=LedgerApiMessage.Performative.GET_STATE,
-        ledger_id="some_ledger_id",
-        callable="some_function",
-        args=args,
-        kwargs=kwargs,
     )
     msg.to = "receiver"
     envelope = Envelope(
