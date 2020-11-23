@@ -20,8 +20,9 @@
 """This package contains handlers for the coin_price skill."""
 
 import json
-from typing import cast
+from typing import Optional, cast
 
+from aea.configurations.base import PublicId
 from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -36,7 +37,7 @@ try:
         PUBLIC_ID as HTTP_SERVER_ID,
     )
 except ImportError:
-    HTTP_SERVER_ID = None
+    HTTP_SERVER_ID = None  # type: Optional[PublicId]
 
 
 class HttpHandler(Handler):

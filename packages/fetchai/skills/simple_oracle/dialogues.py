@@ -151,7 +151,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
             message_class=message_class,
         )
         self._associated_signing_dialogue = None  # type: Optional[SigningDialogue]
-        self._associated_transaction_type = None  # type: str
+        self._associated_transaction_type = None  # type: Optional[str]
 
     @property
     def associated_signing_dialogue(self) -> "SigningDialogue":
