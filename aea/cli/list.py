@@ -42,13 +42,13 @@ from aea.configurations.loader import ConfigLoader
 @click.pass_context
 @check_aea_project
 def list_command(click_context):  # pylint: disable=unused-argument
-    """List the installed resources."""
+    """List the installed packages of the agent."""
 
 
 @list_command.command(name="all")
 @pass_ctx
 def all_command(ctx: Context):
-    """List all the installed items."""
+    """List all the installed packages."""
     for item_type in ITEM_TYPES:
         details = list_agent_items(ctx, item_type)
         if not details:

@@ -54,6 +54,43 @@ def _compress_dir(output_filename: str, source_dir: str):
         f.add(source_dir, arcname=os.path.basename(source_dir))
 
 
+def load_component_public_id(source_path: str, item_type: str) -> PublicId:
+    """Get component version from source path."""
+    config = load_yaml(os.path.join(source_path, item_type + ".yaml"))
+    item_author = config.get("author", "")
+    item_name = config.get("name", "")
+    item_version = config.get("version", "")
+    return PublicId(item_author, item_name, item_version)
+
+
+def check_package_public_id(
+    source_path: str, item_type: str, item_id: PublicId
+) -> PublicId:
+    """
+    Check component version is corresponds to specified version.
+
+    :return: actual package public id
+    """
+    # we load only based on item_name, hence also check item_version and item_author match.
+
+    actual_item_id = load_component_public_id(source_path, item_type)
+    if not actual_item_id.same_prefix(item_id) or (
+        not item_id.package_version.is_latest
+        and item_id.version != actual_item_id.version
+    ):
+        raise click.ClickException(
+            "Version, name or author does not match. Expected '{}', found '{}'".format(
+                item_id,
+                actual_item_id.author
+                + "/"
+                + actual_item_id.name
+                + ":"
+                + actual_item_id.version,
+            )
+        )
+    return actual_item_id
+
+
 @clean_tarfiles
 def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
@@ -69,6 +106,16 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     items_folder = os.path.join(ctx.cwd, item_type_plural)
     item_path = os.path.join(items_folder, item_id.name)
 
+    if not os.path.exists(item_path):
+        raise click.ClickException(
+            '{} "{}" not found  in {}. Make sure you run push command '
+            "from a correct folder.".format(
+                item_type.title(), item_id.name, items_folder
+            )
+        )
+
+    check_package_public_id(item_path, item_type, item_id)
+
     item_config_filepath = os.path.join(item_path, "{}.yaml".format(item_type))
     logger.debug("Reading {} {} config ...".format(item_id.name, item_type))
     item_config = load_yaml(item_config_filepath)
@@ -77,13 +124,6 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     logger.debug(
         "Searching for {} {} in {} ...".format(item_id.name, item_type, items_folder)
     )
-    if not os.path.exists(item_path):
-        raise click.ClickException(
-            '{} "{}" not found  in {}. Make sure you run push command '
-            "from a correct folder.".format(
-                item_type.title(), item_id.name, items_folder
-            )
-        )
 
     output_filename = "{}.tar.gz".format(item_id.name)
     logger.debug(

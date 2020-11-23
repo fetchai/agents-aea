@@ -46,7 +46,7 @@ from aea.configurations.loader import ConfigLoader
 @click.group()
 @click.pass_context
 def fingerprint(click_context: click.core.Context):  # pylint: disable=unused-argument
-    """Fingerprint a resource."""
+    """Fingerprint a non-vendor package of the agent."""
 
 
 @fingerprint.command()

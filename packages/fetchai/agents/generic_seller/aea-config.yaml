@@ -1,6 +1,6 @@
 agent_name: generic_seller
 author: fetchai
-version: 0.13.0
+version: 0.14.0
 description: The seller AEA sells the services specified in the `skill.yaml` file
   and delivers them upon payment to the buyer.
 license: Apache-2.0
@@ -10,7 +10,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.9.0
 - fetchai/p2p_libp2p:0.12.0
-- fetchai/soef:0.12.0
+- fetchai/soef:0.13.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -31,5 +31,5 @@ private_key_paths: {}
 registry_path: ../packages
 default_routing:
   fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 connection_private_key_paths: {}

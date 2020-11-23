@@ -66,6 +66,7 @@ nav:
         - Modes of running an AEA: 'modes.md'
         - Multi agent manager: 'multi-agent-manager.md'
         - Debugging: 'debug.md'
+        - Profiling: 'runtime-cost.md'
       - Use case components:
         - Generic skills: 'generic-skills.md'
         - Front-end intergration: 'connect-a-frontend.md'
@@ -123,6 +124,7 @@ nav:
           - Loader: 'api/configurations/loader.md'
           - Project: 'api/configurations/project.md'
           - Pypi: 'api/configurations/pypi.md'
+          - Utils: 'api/configurations/utils.md'
         - Connections:
           - Base: 'api/connections/base.md'
           - Stub Connection: 'api/connections/stub/connection.md'
@@ -150,7 +152,9 @@ nav:
             - Base: 'api/helpers/dialogue/base.md'
           - Exception Policy: 'api/helpers/exception_policy.md'
           - Exec Timeout: 'api/helpers/exec_timeout.md'
+          - File IO: 'api/helpers/file_io.md'
           - File Lock: 'api/helpers/file_lock.md'
+          - Install Dependency: 'api/helpers/install_dependency.md'
           - IPFS:
             - Base: 'api/helpers/ipfs/base.md'
           - Logging: 'api/helpers/logging.md'
@@ -160,9 +164,12 @@ nav:
           - Pipe: 'api/helpers/pipe.md'
           - Preferences:
             - Base: 'api/helpers/preference_representations/base.md'
+          - Profiling: 'api/helpers/profiling.md'
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
+          - Sym Link: 'api/helpers/sym_link.md'
+          - Temp Error Handler: 'api/helpers/temp_error_handler.md'
           - Transaction:
             - Base: 'api/helpers/transaction/base.md'
           - Win32: 'api/helpers/win32.md'

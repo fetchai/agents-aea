@@ -52,7 +52,7 @@ from aea.exceptions import enforce
 @click.pass_context
 @check_aea_project
 def upgrade(click_context, local, remote):  # pylint: disable=unused-argument
-    """Upgrade agent's component."""
+    """Upgrade the packages of the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", not (local or remote))
@@ -65,7 +65,7 @@ def upgrade(click_context, local, remote):  # pylint: disable=unused-argument
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def connection(ctx: Context, connection_public_id: PublicId):
-    """Upgrade a connection at the configuration file."""
+    """Upgrade a connection of the agent."""
     upgrade_item(ctx, CONNECTION, connection_public_id)
 
 
@@ -73,7 +73,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def contract(ctx: Context, contract_public_id: PublicId):
-    """Upgrade a contract at the configuration file."""
+    """Upgrade a contract of the agent."""
     upgrade_item(ctx, CONTRACT, contract_public_id)
 
 
@@ -81,7 +81,7 @@ def contract(ctx: Context, contract_public_id: PublicId):
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_public_id):
-    """Upgrade a protocol for the agent."""
+    """Upgrade a protocol of the agent."""
     upgrade_item(ctx, PROTOCOL, protocol_public_id)
 
 
@@ -89,7 +89,7 @@ def protocol(ctx: Context, protocol_public_id):
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def skill(ctx: Context, skill_public_id: PublicId):
-    """Upgrade a skill for the agent."""
+    """Upgrade a skill of the agent."""
     upgrade_item(ctx, SKILL, skill_public_id)
 
 

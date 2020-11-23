@@ -24,7 +24,7 @@ import sys
 import time
 from abc import ABC, abstractmethod
 from threading import Timer
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import docker
 import pytest
@@ -240,17 +240,27 @@ class OEFSearchDockerImage(DockerImage):
 class GanacheDockerImage(DockerImage):
     """Wrapper to Ganache Docker image."""
 
-    def __init__(self, client: DockerClient, addr: str, port: int):
+    def __init__(
+        self,
+        client: DockerClient,
+        addr: str,
+        port: int,
+        config: Optional[Dict] = None,
+        gas_limit: int = 10000000000000,
+    ):
         """
         Initialize the Ganache Docker image.
 
         :param client: the Docker client.
         :param addr: the address.
         :param port: the port.
+        :param config: optional configuration to command line.
         """
         super().__init__(client)
         self._addr = addr
         self._port = port
+        self._config = config or {}
+        self._gas_limit = gas_limit
 
     @property
     def tag(self) -> str:
@@ -261,10 +271,20 @@ class GanacheDockerImage(DockerImage):
         """Make ports dictionary for Docker."""
         return {f"{self._port}/tcp": ("0.0.0.0", self._port)}  # nosec
 
+    def _build_command(self) -> List[str]:
+        """Build command."""
+        cmd = ["ganache-cli"]
+        cmd += ["--gasLimit=" + str(self._gas_limit)]
+        accounts_balances = self._config.get("accounts_balances", [])
+        for account, balance in accounts_balances:
+            cmd += [f"--account='{account},{balance}'"]
+        return cmd
+
     def create(self) -> Container:
         """Create the container."""
+        cmd = self._build_command()
         container = self._client.containers.run(
-            self.tag, detach=True, ports=self._make_ports()
+            self.tag, command=cmd, detach=True, ports=self._make_ports()
         )
         return container
 

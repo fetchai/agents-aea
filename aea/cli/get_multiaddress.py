@@ -73,7 +73,7 @@ def get_multiaddress(
     port_field: str,
     uri_field: str,
 ):
-    """Get the multiaddress associated with a private key or connection."""
+    """Get the multiaddress associated with a private key or connection of the agent."""
     address = _try_get_multiaddress(
         click_context,
         ledger_id,

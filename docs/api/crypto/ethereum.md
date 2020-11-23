@@ -271,6 +271,24 @@ Get the hash of a message.
 
 the hash of the message.
 
+<a name="aea.crypto.ethereum.EthereumHelper.load_contract_interface"></a>
+#### load`_`contract`_`interface
+
+```python
+ | @classmethod
+ | load_contract_interface(cls, file_path: Path) -> Dict[str, str]
+```
+
+Load contract interface.
+
+**Arguments**:
+
+- `file_path`: the file path to the interface
+
+**Returns**:
+
+the interface
+
 <a name="aea.crypto.ethereum.EthereumApi"></a>
 ## EthereumApi Objects
 

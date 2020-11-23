@@ -74,7 +74,7 @@ def create(
     local: bool,
     empty: bool,
 ):
-    """Create an agent."""
+    """Create a new agent."""
     ctx = cast(Context, click_context.obj)
     create_aea(ctx, agent_name, local, author=author, empty=empty)
 

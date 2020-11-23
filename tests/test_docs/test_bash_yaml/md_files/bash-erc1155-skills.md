@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.17.0
+aea fetch fetchai/erc1155_deployer:0.18.0
 cd erc1155_deployer
 aea install
 ```
@@ -7,7 +7,7 @@ aea install
 aea create erc1155_deployer
 cd erc1155_deployer
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/soef:0.13.0
 aea add connection fetchai/ledger:0.9.0
 aea add skill fetchai/erc1155_deploy:0.17.0
 aea install
@@ -25,7 +25,7 @@ aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt --connection
 ```
 ``` bash
-aea fetch fetchai/erc1155_client:0.17.0
+aea fetch fetchai/erc1155_client:0.18.0
 cd erc1155_client
 aea install
 ```
@@ -33,7 +33,7 @@ aea install
 aea create erc1155_client
 cd erc1155_client
 aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.12.0
+aea add connection fetchai/soef:0.13.0
 aea add connection fetchai/ledger:0.9.0
 aea add skill fetchai/erc1155_client:0.16.0
 aea install
@@ -77,13 +77,13 @@ aea delete erc1155_client
 default_routing:
   fetchai/contract_api:0.8.0: fetchai/ledger:0.9.0
   fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 ``` yaml
 default_routing:
   fetchai/contract_api:0.8.0: fetchai/ledger:0.9.0
   fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.12.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 ``` yaml
 config:

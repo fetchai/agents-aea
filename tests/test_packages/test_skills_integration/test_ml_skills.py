@@ -67,7 +67,7 @@ class TestMLSkills(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.9.0",
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.12.0",
+            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
         # generate random location
@@ -79,7 +79,7 @@ class TestMLSkills(AEATestCaseMany):
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
@@ -115,7 +115,7 @@ class TestMLSkills(AEATestCaseMany):
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
@@ -244,7 +244,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.9.0",
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.12.0",
+            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
         # generate random location
@@ -256,7 +256,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
@@ -266,7 +266,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_data_provider:0.16.0", data_provider_aea_name
+            "fetchai/ml_data_provider:0.17.0", data_provider_aea_name
         )
         assert (
             diff == []
@@ -295,7 +295,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.9.0")
@@ -305,7 +305,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.17.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.18.0", model_trainer_aea_name
         )
         assert (
             diff == []
