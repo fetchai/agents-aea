@@ -182,7 +182,7 @@ def generate_utility_params(
         normalized_fractions = [
             round(i / float(total), decimals) for i in random_integers
         ]
-        if not sum(normalized_fractions) == 1.0:
+        if not sum(normalized_fractions) == 1.0:  # pragma: no cover
             normalized_fractions[-1] = round(
                 1.0 - sum(normalized_fractions[0:-1]), decimals
             )
