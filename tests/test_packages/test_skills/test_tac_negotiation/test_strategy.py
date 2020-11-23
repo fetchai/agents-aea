@@ -38,7 +38,10 @@ from aea.helpers.transaction.base import Terms
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
-from packages.fetchai.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
+from packages.fetchai.skills.tac_negotiation.helpers import (
+    build_goods_description,
+    build_goods_query,
+)
 from packages.fetchai.skills.tac_negotiation.strategy import (
     AGENT_LOCATION_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
@@ -88,7 +91,9 @@ class TestStrategy(BaseSkillTestCase):
         cls.mocked_amount_by_currency_id = {cls.mocked_currency_id: 10}
         cls.mocked_quantities_by_good_id = {"2": 5, "3": 7}
         cls.mocked_ownership_state = OwnershipState()
-        cls.mocked_ownership_state.set(cls.mocked_amount_by_currency_id, cls.mocked_quantities_by_good_id)
+        cls.mocked_ownership_state.set(
+            cls.mocked_amount_by_currency_id, cls.mocked_quantities_by_good_id
+        )
 
     def test_properties(self):
         """Test the properties of Strategy class."""
@@ -178,14 +183,14 @@ class TestStrategy(BaseSkillTestCase):
             mocked_supplied_quantities_by_good_id,
             self.mocked_currency_id,
             self.ledger_id,
-            is_supply
+            is_supply,
         )
 
         # operation
         with patch.object(
             self.skill.skill_context.transactions,
             "ownership_state_after_locks",
-            return_value=self.mocked_ownership_state
+            return_value=self.mocked_ownership_state,
         ) as mock_ownership:
             actual_description = self.strategy.get_own_service_description(is_supply)
 
@@ -202,14 +207,14 @@ class TestStrategy(BaseSkillTestCase):
             mocked_demanded_quantities_by_good_id,
             self.mocked_currency_id,
             self.ledger_id,
-            is_supply
+            is_supply,
         )
 
         # operation
         with patch.object(
             self.skill.skill_context.transactions,
             "ownership_state_after_locks",
-            return_value=self.mocked_ownership_state
+            return_value=self.mocked_ownership_state,
         ) as mock_ownership:
             actual_description = self.strategy.get_own_service_description(is_supply)
 
@@ -241,16 +246,18 @@ class TestStrategy(BaseSkillTestCase):
             list(self.mocked_quantities_by_good_id.keys()),
             self.mocked_currency_id,
             self.ledger_id,
-            is_searching_for_sellers
+            is_searching_for_sellers,
         )
 
         # operation
         with patch.object(
-                self.skill.skill_context.transactions,
-                "ownership_state_after_locks",
-                return_value=self.mocked_ownership_state
+            self.skill.skill_context.transactions,
+            "ownership_state_after_locks",
+            return_value=self.mocked_ownership_state,
         ) as mock_ownership:
-            actual_query = self.strategy.get_own_services_query(is_searching_for_sellers)
+            actual_query = self.strategy.get_own_services_query(
+                is_searching_for_sellers
+            )
 
         # after
         mock_ownership.assert_any_call(is_seller=not is_searching_for_sellers)
@@ -264,16 +271,18 @@ class TestStrategy(BaseSkillTestCase):
             list(self.mocked_quantities_by_good_id.keys()),
             self.mocked_currency_id,
             self.ledger_id,
-            is_searching_for_sellers
+            is_searching_for_sellers,
         )
 
         # operation
         with patch.object(
-                self.skill.skill_context.transactions,
-                "ownership_state_after_locks",
-                return_value=self.mocked_ownership_state
+            self.skill.skill_context.transactions,
+            "ownership_state_after_locks",
+            return_value=self.mocked_ownership_state,
         ) as mock_ownership:
-            actual_query = self.strategy.get_own_services_query(is_searching_for_sellers)
+            actual_query = self.strategy.get_own_services_query(
+                is_searching_for_sellers
+            )
 
         # after
         mock_ownership.assert_any_call(is_seller=not is_searching_for_sellers)
@@ -289,7 +298,10 @@ class TestStrategy(BaseSkillTestCase):
                 "some_data_model_name",
                 [
                     Attribute(
-                        "some_attribute_name", str, False, "Some attribute descriptions."
+                        "some_attribute_name",
+                        str,
+                        False,
+                        "Some attribute descriptions.",
                     )
                 ],
             ),
@@ -319,11 +331,13 @@ class TestStrategy(BaseSkillTestCase):
 
         # operation
         with patch.object(
-                self.strategy,
-                "_generate_candidate_proposals",
-                return_value=mocked_candidate_proposals
+            self.strategy,
+            "_generate_candidate_proposals",
+            return_value=mocked_candidate_proposals,
         ) as mock_candid:
-            actual_query = self.strategy._get_proposal_for_query(mocked_query, is_seller)
+            actual_query = self.strategy._get_proposal_for_query(
+                mocked_query, is_seller
+            )
 
         # after
         mock_candid.assert_any_call(is_seller)
@@ -340,7 +354,10 @@ class TestStrategy(BaseSkillTestCase):
                 "some_data_model_name",
                 [
                     Attribute(
-                        "some_attribute_name", str, False, "Some attribute descriptions."
+                        "some_attribute_name",
+                        str,
+                        False,
+                        "Some attribute descriptions.",
                     )
                 ],
             ),
@@ -360,16 +377,14 @@ class TestStrategy(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.strategy,
-            "get_own_service_description",
-            return_value=own_description
+            self.strategy, "get_own_service_description", return_value=own_description
         ) as mock_own:
             with patch.object(
-                self.strategy,
-                "_get_proposal_for_query",
-                return_value=expected_proposal
+                self.strategy, "_get_proposal_for_query", return_value=expected_proposal
             ) as mock_get_proposal:
-                actual_proposal = self.strategy.get_proposal_for_query(mocked_query, role)
+                actual_proposal = self.strategy.get_proposal_for_query(
+                    mocked_query, role
+                )
 
         # after
         mock_own.assert_any_call(is_supply=is_seller)

@@ -20,7 +20,13 @@
 
 from pathlib import Path
 
-from aea.helpers.search.models import Attribute, Constraint, ConstraintType, DataModel
+from aea.helpers.search.models import (
+    Attribute,
+    Constraint,
+    ConstraintType,
+    DataModel,
+    Description,
+)
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.skills.tac_negotiation.helpers import (
@@ -30,8 +36,6 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
     build_goods_query,
 )
-# from packages.fetchai.skills.tac_negotiation.strategy import Strategy
-# from packages.fetchai.skills.tac_negotiation.behaviours import GoodsRegisterAndSearchBehaviour
 
 from tests.conftest import ROOT_DIR
 
@@ -46,8 +50,8 @@ class TestHelpers(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
 
-    def test_build_goods_datamodel(self):
-        """Test the _build_goods_datamodel of Helpers module."""
+    def test_build_goods_datamodel_supply(self):
+        """Test the _build_goods_datamodel of Helpers module for a supply."""
         good_ids = ["1", "2"]
         is_supply = True
         attributes = [
@@ -75,8 +79,75 @@ class TestHelpers(BaseSkillTestCase):
         actual_data_model = _build_goods_datamodel(good_ids, is_supply)
         assert actual_data_model == expected_data_model
 
-    def test_build_goods_description(self):
-        """Test the build_goods_description of Helpers module."""
+    def test_build_goods_datamodel_demand(self):
+        """Test the _build_goods_datamodel of Helpers module for a demand."""
+        good_ids = ["1", "2"]
+        is_supply = False
+        attributes = [
+            Attribute("1", int, True, "A good on offer."),
+            Attribute("2", int, True, "A good on offer."),
+            Attribute("ledger_id", str, True, "The ledger for transacting."),
+            Attribute(
+                "currency_id",
+                str,
+                True,
+                "The currency for pricing and transacting the goods.",
+            ),
+            Attribute("price", int, False, "The price of the goods in the currency."),
+            Attribute(
+                "fee",
+                int,
+                False,
+                "The transaction fee payable by the buyer in the currency.",
+            ),
+            Attribute(
+                "nonce", str, False, "The nonce to distinguish identical descriptions."
+            ),
+        ]
+        expected_data_model = DataModel(DEMAND_DATAMODEL_NAME, attributes)
+        actual_data_model = _build_goods_datamodel(good_ids, is_supply)
+        assert actual_data_model == expected_data_model
+
+    def test_build_goods_description_supply(self):
+        """Test the build_goods_description of Helpers module for supply."""
+        quantities_by_good_id = {"2": 5, "3": 10}
+        currency_id = "1"
+        ledger_id = "some_ledger_id"
+        is_supply = True
+
+        attributes = [
+            Attribute("2", int, True, "A good on offer."),
+            Attribute("3", int, True, "A good on offer."),
+            Attribute("ledger_id", str, True, "The ledger for transacting."),
+            Attribute(
+                "currency_id",
+                str,
+                True,
+                "The currency for pricing and transacting the goods.",
+            ),
+            Attribute("price", int, False, "The price of the goods in the currency."),
+            Attribute(
+                "fee",
+                int,
+                False,
+                "The transaction fee payable by the buyer in the currency.",
+            ),
+            Attribute(
+                "nonce", str, False, "The nonce to distinguish identical descriptions."
+            ),
+        ]
+        expected_data_model = DataModel(SUPPLY_DATAMODEL_NAME, attributes)
+        expected_values = {"currency_id": currency_id, "ledger_id": ledger_id}
+        expected_values.update(quantities_by_good_id)
+        expected_description = Description(expected_values, expected_data_model)
+
+        actual_description = build_goods_description(
+            quantities_by_good_id, currency_id, ledger_id, is_supply
+        )
+        assert actual_description == expected_description
+
+    def test_build_goods_description_demand(self):
+        """Test the build_goods_description of Helpers module for demand (same as above)."""
         quantities_by_good_id = {"2": 5, "3": 10}
         currency_id = "1"
         ledger_id = "some_ledger_id"
@@ -104,16 +175,14 @@ class TestHelpers(BaseSkillTestCase):
             ),
         ]
         expected_data_model = DataModel(DEMAND_DATAMODEL_NAME, attributes)
+        expected_values = {"currency_id": currency_id, "ledger_id": ledger_id}
+        expected_values.update(quantities_by_good_id)
+        expected_description = Description(expected_values, expected_data_model)
 
         actual_description = build_goods_description(
             quantities_by_good_id, currency_id, ledger_id, is_supply
         )
-
-        assert actual_description.values["currency_id"] == currency_id
-        assert actual_description.values["ledger_id"] == ledger_id
-        assert actual_description.values["2"] == 5
-        assert actual_description.values["3"] == 10
-        assert actual_description.data_model == expected_data_model
+        assert actual_description == expected_description
 
     def test_build_goods_query(self):
         """Test the build_goods_query of Helpers module."""
