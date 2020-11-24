@@ -20,9 +20,18 @@
 """This module contains the strategy class."""
 
 import datetime
+import json
+import random
 from typing import Dict, List, Optional, Tuple, cast
 
-from packages.fetchai.skills.confirmation_aw2.registration_db import RegistrationDB
+from aea.helpers.search.models import Location
+
+from packages.fetchai.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
+)
+from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.skills.confirmation_aw3.dialogues import HttpDialogues
+from packages.fetchai.skills.confirmation_aw3.registration_db import RegistrationDB
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
@@ -43,8 +52,26 @@ class Strategy(GenericStrategy):
         self.minimum_minutes_since_last_attempt = kwargs.pop(
             "minimum_minutes_since_last_attempt", 2
         )
+        self._locations = kwargs.pop("locations", {})
+        if len(self._locations) == 0:
+            raise ValueError("locations must have at least one entry")
+        _, location = next(iter(self._locations.items()))
+        kwargs["location"] = location
+        self._search_queries = kwargs.pop("search_queries", {})
+        if len(self._search_queries) == 0:
+            raise ValueError("search_queries must have at least one entry")
+        _, search_query = next(iter(self._search_queries.items()))
+        kwargs["search_query"] = search_query
+        kwargs["service_id"] = search_query["search_value"]
+        leaderboard_url = kwargs.pop("leaderboard_url", None)
+        if leaderboard_url is None:
+            raise ValueError("No leader board url provided!")
+        self.leaderboard_url = f"{leaderboard_url}/insert"
+        leaderboard_token = kwargs.pop("leaderboard_token")
+        if leaderboard_token is None:
+            raise ValueError("No leader board token provided!")
+        self.leaderboard_token = leaderboard_token
         super().__init__(**kwargs)
-        self.last_attempt: Dict[str, datetime.datetime] = {}
 
     def get_acceptable_counterparties(
         self, counterparties: Tuple[str, ...]
@@ -60,20 +87,6 @@ class Strategy(GenericStrategy):
                 valid_counterparties.append(counterparty)
         return tuple(valid_counterparties)
 
-    def is_enough_time_since_last_attempt(self, counterparty: str) -> bool:
-        """
-        Check if enough time has passed since last attempt for potential previous trade to complete.
-
-        :return: bool indicating validity
-        """
-        last_time = self.last_attempt.get(counterparty, None)
-        if last_time is None:
-            return True
-        result = datetime.datetime.now() > last_time + datetime.timedelta(
-            minutes=self.minimum_minutes_since_last_attempt
-        )
-        return result
-
     def is_valid_counterparty(self, counterparty: str) -> bool:
         """
         Check if the counterparty is valid.
@@ -85,16 +98,6 @@ class Strategy(GenericStrategy):
             self.context.logger.info(
                 f"Invalid counterparty={counterparty}, not registered!"
             )
-            return False
-        if not self.is_enough_time_since_last_attempt(counterparty):
-            self.context.logger.debug(
-                f"Not enough time since last attempt for counterparty={counterparty}!"
-            )
-            return False
-        self.last_attempt[counterparty] = datetime.datetime.now()
-        if not registration_db.is_allowed_to_trade(
-            counterparty, self.mininum_hours_between_txs
-        ):
             return False
         return True
 
@@ -113,6 +116,29 @@ class Strategy(GenericStrategy):
         self.context.logger.info(
             f"Successful trade with={counterparty}. Data acquired={data}!"
         )
+        developer_handle, nb_trades = registration_db.get_handle_and_trades(
+            counterparty
+        )
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+        request_http_message, _ = http_dialogues.create(
+            counterparty=str(HTTP_CLIENT_PUBLIC_ID),
+            performative=HttpMessage.Performative.REQUEST,
+            method="POST",
+            url=self.leaderboard_url,
+            headers="Content-Type: application/json; charset=utf-8",
+            version="",
+            body=json.dumps(
+                {
+                    "name": developer_handle,
+                    "points": nb_trades,
+                    "token": self.leaderboard_token,
+                }
+            ).encode("utf-8"),
+        )
+        self.context.outbox.put_message(message=request_http_message)
+        self.context.logger.info(
+            f"Notifying leaderboard: developer_handle={developer_handle}, nb_trades={nb_trades}."
+        )
 
     def register_counterparty(self, counterparty: str, developer_handle: str) -> None:
         """
@@ -125,3 +151,22 @@ class Strategy(GenericStrategy):
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         registration_db.set_registered(counterparty, developer_handle)
+
+    def update_search_query_params(self) -> None:
+        """
+        Update agent location and query for search.
+
+        :return: None
+        """
+        search_query_type, search_query = random.choice(  # nosec
+            list(self._search_queries.items())
+        )
+        self._search_query = search_query
+        self._service_id = search_query["search_value"]
+        location_name, location = random.choice(list(self._locations.items()))  # nosec
+        self._agent_location = Location(
+            latitude=location["latitude"], longitude=location["longitude"]
+        )
+        self.context.logger.info(
+            f"New search_type={search_query_type} and location={location_name}."
+        )

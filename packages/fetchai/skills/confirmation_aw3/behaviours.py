@@ -17,9 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the confirmation_aw2 skill."""
+"""This package contains the behaviours of the agent."""
 
-from aea.configurations.base import PublicId
+from typing import cast
+
+from packages.fetchai.skills.confirmation_aw3.strategy import Strategy
+from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/confirmation_aw2:0.2.0")
+class SearchBehaviour(GenericSearchBehaviour):
+    """Search behaviour extension."""
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        strategy.update_search_query_params()
+        super().act()

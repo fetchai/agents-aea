@@ -27,11 +27,14 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.skills.confirmation_aw2.strategy import Strategy
-from packages.fetchai.skills.generic_buyer.dialogues import (
+from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.skills.confirmation_aw3.dialogues import (
     DefaultDialogue,
     DefaultDialogues,
+    HttpDialogue,
+    HttpDialogues,
 )
+from packages.fetchai.skills.confirmation_aw3.strategy import Strategy
 from packages.fetchai.skills.generic_buyer.handlers import (
     GenericFipaHandler,
     GenericLedgerApiHandler,
@@ -146,3 +149,89 @@ class DefaultHandler(Handler):
 
         :return: None
         """
+
+
+class HttpHandler(Handler):
+    """This implements the http handler."""
+
+    SUPPORTED_PROTOCOL = HttpMessage.protocol_id
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to an envelope.
+
+        :param message: the message
+        :return: None
+        """
+        http_msg = cast(HttpMessage, message)
+
+        # recover dialogue
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+        http_dialogue = cast(HttpDialogue, http_dialogues.update(http_msg))
+        if http_dialogue is None:
+            self._handle_unidentified_dialogue(http_msg)
+            return
+
+        # handle message
+        if http_msg.performative == HttpMessage.Performative.RESPONSE:
+            self._handle_response(http_msg, http_dialogue)
+        else:
+            self._handle_invalid(http_msg, http_dialogue)
+
+    def _handle_unidentified_dialogue(self, http_msg: HttpMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param http_msg: the message
+        """
+        self.context.logger.info(
+            "received invalid http message={}, unidentified dialogue.".format(http_msg)
+        )
+
+    def _handle_response(
+        self, http_msg: HttpMessage, http_dialogue: HttpDialogue
+    ) -> None:
+        """
+        Handle a Http response.
+
+        :param http_msg: the http message
+        :param http_dialogue: the http dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received http response with status_code={}, status_text={} and body={!r} in dialogue={}".format(
+                http_msg.status_code, http_msg.status_text, http_msg.body, http_dialogue
+            )
+        )
+
+    def _handle_invalid(
+        self, http_msg: HttpMessage, http_dialogue: HttpDialogue
+    ) -> None:
+        """
+        Handle an invalid http message.
+
+        :param http_msg: the http message
+        :param http_dialogue: the http dialogue
+        :return: None
+        """
+        self.context.logger.warning(
+            "cannot handle http message of performative={} in dialogue={}.".format(
+                http_msg.performative, http_dialogue
+            )
+        )
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
