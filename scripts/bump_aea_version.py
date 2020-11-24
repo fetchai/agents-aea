@@ -18,24 +18,43 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This script checks that all the Python files of the repository have:
-
-- (optional) the Python shebang
-- the encoding header;
-- the copyright notice;
-
-It is assumed the script is run from the repository root.
-"""
+"""Bump the AEA version throughout the code base."""
 
 import argparse
 import re
 import sys
 from pathlib import Path
 
+from packaging.specifiers import SpecifierSet
+from packaging.version import Version
+
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
+from scripts.generate_ipfs_hashes import update_hashes
+
 
 VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
 VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+
+PACKAGES_DIR = Path("packages")
+TESTS_DIR = Path("tests")
+AEA_DIR = Path("aea")
+CONFIGURATION_FILENAME_REGEX = re.compile(
+    "|".join(
+        [
+            DEFAULT_AEA_CONFIG_FILE,
+            DEFAULT_SKILL_CONFIG_FILE,
+            DEFAULT_CONNECTION_CONFIG_FILE,
+            DEFAULT_CONTRACT_CONFIG_FILE,
+            DEFAULT_PROTOCOL_CONFIG_FILE,
+        ]
+    )
+)
 
 
 def update_version_for_files(current_version: str, new_version: str) -> None:
@@ -64,7 +83,6 @@ def update_version_for_aea(new_version: str) -> str:
     """
     Update version for file.
 
-    :param filepath: the file path
     :param new_version: the new version
     :return: the current version
     """
@@ -84,18 +102,55 @@ def update_version_for_aea(new_version: str) -> str:
     return current_version
 
 
+def compute_specifier_from_version(version: Version) -> SpecifierSet:
+    """
+    Compute the specifier set from a version, by varying only on the patch number.
+
+    I.e. from {major}.{minor}.{patch}, return "{major}.{minor}.0
+
+    :param version: the version
+    :return: the specifier set
+    """
+    new_major = version.major
+    new_minor_low = version.minor
+    new_minor_high = new_minor_low + 1
+    lower_bound = Version(f"{new_major}.{new_minor_low}.0")
+    upper_bound = Version(f"{new_major}.{new_minor_high}.0")
+    specifier_set = SpecifierSet(f">={lower_bound},<{upper_bound}")
+    return specifier_set
+
+
 def update_version_for_file(path: Path, current_version: str, new_version: str) -> None:
     """
     Update version for file.
 
-    :param filepath: the file path
+    :param path: the file path
     :param current_version: the current version
     :param new_version: the new version
     """
     content = path.read_text()
     content = content.replace(current_version, new_version)
-    with path.open(mode="w") as f:
-        f.write(content)
+    path.write_text(content)
+
+
+def update_aea_version_specifiers(old_version: Version, new_version: Version) -> bool:
+    """
+    Update aea_version specifier set in docs.
+
+    :param old_version: the old version.
+    :param new_version: the new version.
+    :return: True if the update has been done, False otherwise.
+    """
+    old_specifier_set = str(compute_specifier_from_version(old_version))
+    new_specifier_set = str(compute_specifier_from_version(new_version))
+    print(f"Old version specifier: {old_specifier_set}")
+    print(f"New version specifier: {new_specifier_set}")
+    if old_specifier_set == new_specifier_set:
+        print("Not updating version specifier - they haven't changed")
+        return False
+    for file in Path(".").rglob("*"):
+        file.write_text(file.read_text().replace(old_specifier_set, new_specifier_set))
+    return True
 
 
 def parse_args() -> argparse.Namespace:
@@ -105,16 +160,31 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--new-version", type=str, required=True, help="The new version."
     )
+    parser.add_argument("--no-fingerprint", action="store_true")
     arguments_ = parser.parse_args()
     return arguments_
 
 
 if __name__ == "__main__":
     arguments = parse_args()
-    _new_version = arguments.new_version
+    _new_version_str = arguments.new_version
 
-    _current_version = update_version_for_aea(_new_version)
-    update_version_for_files(_current_version, _new_version)
+    _current_version_str = update_version_for_aea(_new_version_str)
+    update_version_for_files(_current_version_str, _new_version_str)
+
+    _new_version: Version = Version(_new_version_str)
+    _current_version: Version = Version(_current_version_str)
+    have_updated_specifier_set = update_aea_version_specifiers(
+        _current_version, _new_version
+    )
 
     print("OK")
-    sys.exit(0)
+    return_code = 0
+    if arguments.no_fingerprint:
+        print("Not updating fingerprints, since --no-fingerprint was specified.")
+    elif not have_updated_specifier_set:
+        print("Not updating fingerprints, since no specifier set has been updated.")
+    else:
+        print("Updating hashes and fingerprints.")
+        return_code = update_hashes()
+    sys.exit(return_code)
