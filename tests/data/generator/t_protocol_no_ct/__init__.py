@@ -19,8 +19,10 @@
 
 """This module contains the support resources for the t_protocol_no_ct protocol."""
 
-from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
-from tests.data.generator.t_protocol_no_ct.serialization import TProtocolNoCtSerializer
+from packages.fetchai.protocols.t_protocol_no_ct.message import TProtocolNoCtMessage
+from packages.fetchai.protocols.t_protocol_no_ct.serialization import (
+    TProtocolNoCtSerializer,
+)
 
 
 TProtocolNoCtMessage.serializer = TProtocolNoCtSerializer

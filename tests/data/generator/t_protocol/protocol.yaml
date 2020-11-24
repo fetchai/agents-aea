@@ -6,11 +6,11 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  __init__.py: QmQy21g5sVYfmy4vSYuEFyPnobM4SA1dEouz5deXNssPWx
+  __init__.py: QmX7j9MYzkj4NKYjcVVRcoGP15kcNkK732aG9Vzv16tSnD
   custom_types.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
-  dialogues.py: QmdpXJCUP6wV6StDxByraFGveMcTSjjFhDju74S4QVQpxf
-  message.py: QmShBfDmPzvQVE9eDvjBkmUY9vVjXP6bkfuFTgK7hbacsK
-  serialization.py: QmYJLfQ49vsqRSpC7GV1ukc3PnkVBuRMM3GBtGoCgDEv5z
+  dialogues.py: QmcRVhGyMNpdwH8cRya5C9jDENpB3DQUmPnttWZVJ5MUXw
+  message.py: QmPTbkiVUUNontpDahUahudFkoZ4HBJW9Ep5v1oCsvytsC
+  serialization.py: QmNeRnKSSE6Qwzwrm1HPobPFGdcXWzwGGEtis74yQKWjPe
   t_protocol.proto: QmWdNaAJ9Mkf2SHF1RSZrsk2a5jZyXZtCD7XU5PHLCph5z
   t_protocol_pb2.py: QmRr3b2hjbN2UshSQTr1wWSCpqeNgMfDfnVyBk8BQGdFn4
 fingerprint_ignore_patterns: []

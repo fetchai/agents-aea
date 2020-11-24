@@ -19,8 +19,8 @@
 
 """This module contains the support resources for the t_protocol protocol."""
 
-from tests.data.generator.t_protocol.message import TProtocolMessage
-from tests.data.generator.t_protocol.serialization import TProtocolSerializer
+from packages.fetchai.protocols.t_protocol.message import TProtocolMessage
+from packages.fetchai.protocols.t_protocol.serialization import TProtocolSerializer
 
 
 TProtocolMessage.serializer = TProtocolSerializer

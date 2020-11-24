@@ -26,7 +26,9 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
-from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
+from packages.fetchai.protocols.t_protocol.custom_types import (
+    DataModel as CustomDataModel,
+)
 
 
 _default_logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
