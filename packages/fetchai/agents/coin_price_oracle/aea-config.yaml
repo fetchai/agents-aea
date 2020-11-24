@@ -8,30 +8,46 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.13.0
-- fetchai/http_server:0.13.0
+- fetchai/ledger:0.9.0
+- fetchai/p2p_libp2p:0.12.0
 - fetchai/stub:0.12.0
-contracts: []
+contracts:
+- fetchai/oracle:0.1.0
 protocols:
+- fetchai/contract_api:0.8.0
 - fetchai/default:0.9.0
 - fetchai/http:0.9.0
+- fetchai/ledger_api:0.7.0
 - fetchai/signing:0.7.0
 - fetchai/state_update:0.7.0
 skills:
 - fetchai/coin_price:0.1.0
 - fetchai/error:0.9.0
-default_connection: fetchai/http_server:latest
-default_ledger: fetchai
+- fetchai/simple_oracle:0.1.0
+default_connection: fetchai/p2p_libp2p:latest
+default_ledger: ethereum
 default_routing:
+  fetchai/contract_api:latest: fetchai/ledger:latest
   fetchai/http:latest: fetchai/http_client:latest
+  fetchai/ledger_api:latest: fetchai/ledger:latest
 connection_private_key_paths: {}
 private_key_paths:
-  fetchai: fetchai_private_key.txt
+  ethereum: ethereum_private_key.txt
 logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages
 ---
-public_id: fetchai/http_server:0.13.0
+public_id: fetchai/ledger:0.9.0
 type: connection
 config:
-  api_spec_path: vendor/fetchai/skills/coin_price/coin_api_spec.yaml
+  ledger_apis:
+    ethereum:
+      address: null
+---
+public_id: fetchai/coin_price:0.1.0
+type: skill
+models:
+  coin_price_model:
+    args:
+      url: https://api.coingecko.com/api/v3/
