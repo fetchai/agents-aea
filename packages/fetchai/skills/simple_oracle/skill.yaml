@@ -10,7 +10,7 @@ fingerprint:
   behaviours.py: QmT1qe1BanTBU9TCzJc3ZPSzcDMMD9qK8wnjK1F4hy6SoC
   dialogues.py: QmfYuTaa2zs9Cuyg6T8tbbEgkQNnPFhaAgyxy8oF8YUqPv
   handlers.py: QmTT95chwza2p68DmdkLfrJcZ5ZrAu9rRTSM5hd3zTTj15
-  strategy.py: QmU8PBrWBNositMpVJMLSNGZPg3PAs5337gcdURN7Gyrq2
+  strategy.py: QmV4yni8FqkYh3jvV494f9HGiCxYbQVv4ryWq6cDujGZ1t
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.1.0
@@ -51,7 +51,7 @@ models:
       default_gas_deploy: 100000
       default_gas_grant_role: 100000
       default_gas_update: 150000
-      erc20_address: "0x0000000000000000000000000000000000000000"
+      erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false
       ledger_id: ethereum

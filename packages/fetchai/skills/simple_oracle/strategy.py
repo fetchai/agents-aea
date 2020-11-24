@@ -97,7 +97,7 @@ class Strategy(Model):
         """Get the erc20 address for token payment."""
         if self._erc20_address is None:
             raise ValueError("ERC20 address not set!")
-        return self._contract_address
+        return self._erc20_address
 
     @erc20_address.setter
     def erc20_address(self, erc20_address: str) -> None:
