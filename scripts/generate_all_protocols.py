@@ -32,7 +32,6 @@ It requires the `aea` package, `black` and `isort` tools.
 """
 
 import logging
-import operator
 import os
 import pprint
 import re
@@ -41,8 +40,10 @@ import subprocess  # nosec
 import sys
 import tempfile
 from io import StringIO
+from itertools import chain
+from operator import methodcaller
 from pathlib import Path
-from typing import Match, Optional, cast
+from typing import Iterator, Match, Optional, cast
 
 from aea.configurations.base import ComponentType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, load_component_configuration
@@ -51,26 +52,22 @@ from aea.configurations.loader import ConfigLoader, load_component_configuration
 SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
+PACKAGES_DIR = Path("packages")
+TEST_DATA = Path("tests", "data").absolute()
 
-PROTOCOL_PATHS = list(
-    map(
-        operator.methodcaller("absolute"),
-        [
-            Path("packages", "fetchai", "protocols", "default"),
-            Path("packages", "fetchai", "protocols", "signing"),
-            Path("packages", "fetchai", "protocols", "state_update"),
-            Path("packages", "fetchai", "protocols", "contract_api"),
-            Path("packages", "fetchai", "protocols", "fipa"),
-            Path("packages", "fetchai", "protocols", "gym"),
-            Path("packages", "fetchai", "protocols", "http"),
-            Path("packages", "fetchai", "protocols", "ledger_api"),
-            Path("packages", "fetchai", "protocols", "ml_trade"),
-            Path("packages", "fetchai", "protocols", "oef_search"),
-            Path("packages", "fetchai", "protocols", "tac"),
-            Path("packages", "fetchai", "protocols", "register"),
-        ],
-    )
-)
+
+def subdirs(path: Path) -> Iterator[Path]:
+    """Get subdirectories of a path."""
+    return filter(methodcaller("is_dir"), path.iterdir())
+
+
+def find_protocols_in_local_registry() -> Iterator[Path]:
+    """Find all protocols in local registry."""
+    authors = subdirs(PACKAGES_DIR)
+    component_parents = chain(*map(subdirs, authors))
+    protocols_parent = filter(lambda p: p.name == "protocols", component_parents)
+    protocols = chain(*map(subdirs, protocols_parent))
+    return map(methodcaller("absolute"), protocols)
 
 
 def _setup_logger() -> logging.Logger:
@@ -282,12 +279,25 @@ def _fingerprint_protocol(name: str):
     run_aea("fingerprint", "protocol", str(protocol_config.public_id))
 
 
-def _process_protocol(package_path: Path) -> None:
+def _process_packages_protocol(package_path: Path) -> None:
+    """
+    Process protocol from local registry.
+
+    It extracts the protocol specification from the README.
+    Then, it forwards the call to _process_protocol (see below).
+
+    :param package_path: path to package.
+    :return: None
+    """
+    specification_content = _get_protocol_specification_from_readme(package_path)
+    _process_protocol(package_path, specification_content)
+
+
+def _process_protocol(package_path: Path, specification_content: str) -> None:
     """
     Process a protocol package.
 
     It means:
-    - extract protocol specification from the README
     - generate the protocol in the current AEA project
     - fix the generated protocol (e.g. import prefixed, custom types, ...)
     - update the original protocol with the newly generated one.
@@ -295,9 +305,9 @@ def _process_protocol(package_path: Path) -> None:
     It assumes the working directory is an AEA project.
 
     :param package_path: path to the package.
+    :param specification_content: the specification file.
     :return: None
     """
-    specification_content = _get_protocol_specification_from_readme(package_path)
     _save_specification_in_temporary_file(package_path.name, specification_content)
     _generate_protocol(package_path)
     _fix_generated_protocol(package_path)
@@ -306,7 +316,7 @@ def _process_protocol(package_path: Path) -> None:
 
 
 def _check_preliminaries():
-    """Check that the required software is in place."""
+    """Check that the required packages are installed."""
     try:
         import aea  # noqa: F401  # pylint: disable=import-outside-toplevel,unused-import
     except ModuleNotFoundError:
@@ -315,15 +325,37 @@ def _check_preliminaries():
     enforce(shutil.which("isort") is not None, "isort command line tool not found.")
 
 
+def _process_test_protocol(specification: Path, output_dir: Path) -> None:
+    """
+    Process a test protocol.
+
+    :param specification: path to specification.
+    :param output_dir: the output directory.
+    :return: None
+    """
+    specification_content = specification.read_text()
+    _process_protocol(output_dir, specification_content)
+
+
 def main():
     """Run the script."""
     _check_preliminaries()
-    with AEAProject():
 
-        for package_path in PROTOCOL_PATHS:
+    all_protocols = list(find_protocols_in_local_registry())
+
+    with AEAProject():
+        for package_path in all_protocols:
             log("=" * 100)
             log(f"Processing protocol at path {package_path}")
-            _process_protocol(package_path)
+            _process_packages_protocol(package_path)
+        _process_test_protocol(
+            TEST_DATA / "sample_specification.yaml",
+            TEST_DATA / "generator" / "t_protocol",
+        )
+        _process_test_protocol(
+            TEST_DATA / "sample_specification_no_custom_types.yaml",
+            TEST_DATA / "generator" / "t_protocol_no_ct",
+        )
 
 
 if __name__ == "__main__":
