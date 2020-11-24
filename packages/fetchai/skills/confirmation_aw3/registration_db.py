@@ -106,8 +106,8 @@ class RegistrationDB(Model):
         developer_handle = self.get_developer_handle(address)
         addresses = self.get_addresses(developer_handle)
         trades = 0
-        for address in addresses:
-            trades += self.get_trade_count(address)
+        for address_ in addresses:
+            trades += self.get_trade_count(address_)
         return (developer_handle, trades)
 
     def set_registered(self, address: str, developer_handle: str):
