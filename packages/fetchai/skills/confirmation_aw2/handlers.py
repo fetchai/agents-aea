@@ -105,7 +105,7 @@ class DefaultHandler(Handler):
                 confirmed_aea, developer_handle = default_msg.content.decode(
                     "utf-8"
                 ).split("_")
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 confirmed_aea, developer_handle = "", ""
             if not LedgerApis.is_valid_address("fetchai", confirmed_aea):
                 self.context.logger.warning(
