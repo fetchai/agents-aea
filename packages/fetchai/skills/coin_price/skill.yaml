@@ -7,8 +7,8 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmbTGcZWUpuDXphFMAFoRc6vm9rfrPra4oUPkpcCAuUcop
-  behaviours.py: QmVKngTQaMNpifZgphs9KvesY36hxotg3NVFDmJyugN4iN
-  coin_api_spec.yaml: QmYezMwpTHd8imGcLakeMkQ9uzDsmUvTt3ALV3ra12Jr3J
+  behaviours.py: QmTVf7oUHSZSfXCXQmntkZhcguFS58AzGUwYeMvtKKCb5K
+  coin_api_spec.yaml: QmfQRjbidHdW4sBCAsQUrCgMxSMxoN7QgW1MHoyMf6evhK
   dialogues.py: QmWHszpCB2JWHaPaiEnx7qC4VSkfegPpiVnzYaJCg5YoKe
   handlers.py: QmTBRRG3891EmvM8pcMmwDFXHrEr7JC8ytkMKKrSuzggwG
   models.py: QmRkXFnbXiv48XS56juvx2tDmDa4427AKDvUWoBgAdniux
