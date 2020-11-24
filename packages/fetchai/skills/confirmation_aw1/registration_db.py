@@ -92,6 +92,10 @@ class RegistrationDB(Model):
         command = "SELECT developer_handle FROM registered_table WHERE address=?"
         variables = (address,)
         result = self._execute_single_sql(command, variables)
+        if len(result[0]) != 1:
+            raise ValueError(
+                f"More than one developer_handle found for address={address}."
+            )
         return result[0][0]
 
     def get_all_registered(self) -> List[str]:

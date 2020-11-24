@@ -104,15 +104,18 @@ class DefaultHandler(Handler):
         """
         strategy = cast(Strategy, self.context.strategy)
         if default_msg.sender == strategy.aw1_aea:
-            confirmed_aea, developer_handle = default_msg.content.decode("utf-8").split(
-                "_"
-            )
+            try:
+                confirmed_aea, developer_handle = default_msg.content.decode(
+                    "utf-8"
+                ).split("_")
+            except Exception:
+                confirmed_aea, developer_handle = "", ""
             if not LedgerApis.is_valid_address("fetchai", confirmed_aea):
                 self.context.logger.warning(
                     f"received invalid address={confirmed_aea} in dialogue={default_dialogue}."
                 )
                 return
-            if not developer_handle != "":
+            if developer_handle == "":
                 self.context.logger.warning(
                     f"received invalid developer_handle={developer_handle}."
                 )
