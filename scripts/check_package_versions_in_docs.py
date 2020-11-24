@@ -110,7 +110,14 @@ def get_public_id_from_yaml(configuration_file: Path):
 
     :param configuration_file: the path to the config yaml
     """
+
     data = unified_yaml_load(configuration_file)
+
+    # skip api spec files
+    if 'openapi' in data:
+        print(f"Skipping api spec file: {configuration_file}")
+        return
+    
     author = data.get("author", None)
     if not author:
         raise KeyError(f"No author field in {str(configuration_file)}")
