@@ -148,7 +148,7 @@ aea add-key fetchai fetchai_private_key.txt --connection
 
 Then, create some wealth for your thermometer client based on the network you want to transact with. On the Fetch.ai `testnet` network:
 ``` bash
-aea generate-key fetchai
+aea generate-wealth fetchai
 ```
 
 ### Run both AEAs

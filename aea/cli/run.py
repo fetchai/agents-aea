@@ -116,7 +116,7 @@ def _profiling_context(period: int):
     profiler.start()
     try:
         yield None
-    except Exception:  # pylint: disable=try-except-raise
+    except Exception:  # pylint: disable=try-except-raise # pragma: nocover
         raise
     finally:
         profiler.stop()
