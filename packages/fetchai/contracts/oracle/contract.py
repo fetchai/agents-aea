@@ -46,7 +46,7 @@ class FetchOracleContract(Contract):
         ledger_api: LedgerApi,
         contract_address: Address,
         oracle_address: Address,
-        gas: int = 30000,
+        gas: int = 0,
     ) -> Dict[str, Any]:
         """
         Get transaction to grant oracle role to recipient_address
@@ -81,7 +81,7 @@ class FetchOracleContract(Contract):
         oracle_address: Address,
         update_function: str,
         update_args: Dict[str, Any],
-        gas: int = 50000,
+        gas: int = 0,
     ) -> None:
         """
         Update oracle value in contract

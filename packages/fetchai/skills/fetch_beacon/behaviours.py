@@ -20,7 +20,7 @@
 """This package contains the behaviour to get the Fetch random beacon."""
 
 import json
-from typing import Dict, cast
+from typing import Dict, cast, Optional
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -44,7 +44,7 @@ class FetchBeaconBehaviour(TickerBehaviour):
         self.beacon_url = kwargs.pop("beacon_url", DEFAULT_URL)
 
     def send_http_request_message(
-        self, method: str, url: str, content: Dict = None
+        self, method: str, url: str, content: Optional[Dict] = None
     ) -> None:
         """
         Send an http request message.
