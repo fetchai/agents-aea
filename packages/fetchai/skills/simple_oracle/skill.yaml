@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: Qmcw6tvuxTH7fCCnXZSJJJUBzXYNAovSy1Y1mgDFiEK1FW
+  behaviours.py: QmT1qe1BanTBU9TCzJc3ZPSzcDMMD9qK8wnjK1F4hy6SoC
   dialogues.py: QmfYuTaa2zs9Cuyg6T8tbbEgkQNnPFhaAgyxy8oF8YUqPv
   handlers.py: QmTT95chwza2p68DmdkLfrJcZ5ZrAu9rRTSM5hd3zTTj15
-  strategy.py: QmcmE68tZZhrkKBG2mmo12Kwqutfi8AYsttoRfWFn7USUA
+  strategy.py: QmSv2KUKeuhVZJfvA9TbZGZtRSMbWrnVGawNiSxv9cWBah
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.1.0
@@ -48,8 +48,10 @@ models:
   strategy:
     args:
       contract_address: null
+      default_gas_deploy: 100000
       default_gas_grant_role: 100000
       default_gas_update: 150000
+      erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false
       ledger_id: ethereum

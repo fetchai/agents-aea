@@ -25,7 +25,9 @@ from typing import Dict, cast
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.connections.http_client.connection import PUBLIC_ID
+from packages.fetchai.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_ID,
+)
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.coin_price.dialogues import HttpDialogues
 
@@ -56,7 +58,7 @@ class CoinPriceBehaviour(TickerBehaviour):
 
         # http request message
         request_http_message, _ = http_dialogues.create(
-            counterparty=str(PUBLIC_ID),
+            counterparty=str(HTTP_CLIENT_ID),
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=url,
@@ -66,7 +68,9 @@ class CoinPriceBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
+        envelope_context = EnvelopeContext(
+            skill_id=self.context.skill_id, connection_id=HTTP_CLIENT_ID
+        )
         self.context.outbox.put_message(
             message=request_http_message, context=envelope_context
         )

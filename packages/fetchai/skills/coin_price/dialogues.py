@@ -25,6 +25,7 @@ from aea.skills.base import Model
 
 from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+from packages.fetchai.protocols.http.message import HttpMessage
 
 
 HttpDialogue = BaseHttpDialogue
@@ -49,8 +50,11 @@ class HttpDialogues(Model, BaseHttpDialogues):
 
             :param message: an incoming/outgoing first message
             :param receiver_address: the address of the receiving agent
-            :return: The role of the agent
+            :return: The role of the agent in this dialogue
             """
+            if message.performative == HttpMessage.Performative.REQUEST:
+                return BaseHttpDialogue.Role.SERVER
+
             return BaseHttpDialogue.Role.CLIENT
 
         BaseHttpDialogues.__init__(

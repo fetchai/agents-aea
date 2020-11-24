@@ -36,9 +36,11 @@ class Strategy(Model):
         """Initialize the strategy of the agent."""
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._contract_address = kwargs.pop("contract_address", None)
+        self._erc20_address = kwargs.pop("erc20_address", None)
         self._update_function = kwargs.pop("update_function", None)
         self._is_oracle_role_granted = kwargs.pop("is_oracle_role_granted", False)
         self._initial_fee_deploy = kwargs.pop("initial_fee_deploy", 0)
+        self._default_gas_deploy = kwargs.pop("default_gas_deploy", 0)
         self._default_gas_grant_role = kwargs.pop("default_gas_grant_role", 0)
         self._default_gas_update = kwargs.pop("default_gas_update", 0)
 
@@ -63,6 +65,11 @@ class Strategy(Model):
         return self._initial_fee_deploy
 
     @property
+    def default_gas_deploy(self) -> str:
+        """Get the default gas for deploying a contract."""
+        return self._default_gas_deploy
+
+    @property
     def default_gas_grant_role(self) -> str:
         """Get the default gas for role granting."""
         return self._default_gas_grant_role
@@ -79,11 +86,24 @@ class Strategy(Model):
             raise ValueError("Contract address not set!")
         return self._contract_address
 
+    @property
+    def erc20_address(self) -> str:
+        """Get the erc20 address for token payment."""
+        if self._erc20_address is None:
+            raise ValueError("ERC20 address not set!")
+        return self._contract_address
+
     @contract_address.setter
     def contract_address(self, contract_address: str) -> None:
         """Set the contract address."""
         enforce(self._contract_address is None, "Contract address already set!")
         self._contract_address = contract_address
+
+    @erc20_address.setter
+    def erc20_address(self, erc20_address: str) -> None:
+        """Set the erc20 address for token payment."""
+        enforce(self._erc20_address is None, "ERC20 address already set!")
+        self._erc20_address = erc20_address
 
     @property
     def is_contract_deployed(self) -> bool:

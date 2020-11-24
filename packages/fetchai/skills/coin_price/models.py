@@ -26,6 +26,7 @@ DEFAULT_URL = ""
 DEFAULT_COIN_ID = "fetch-ai"
 DEFAULT_CURRENCY = "usd"
 DEFAULT_DECIMALS = 5
+USE_HTTP_SERVER = False
 
 
 class CoinPriceModel(Model):

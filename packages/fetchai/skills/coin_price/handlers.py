@@ -28,17 +28,14 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.coin_price.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.skills.coin_price.models import USE_HTTP_SERVER
 
 
 # Skill can be run with or without http_server
-try:
+if USE_HTTP_SERVER:
     from packages.fetchai.connections.http_server.connection import (
         PUBLIC_ID as HTTP_SERVER_ID,
     )
-
-    USE_HTTP_SERVER = True
-except ImportError:
-    USE_HTTP_SERVER = False
 
 
 class HttpHandler(Handler):
@@ -78,37 +75,44 @@ class HttpHandler(Handler):
             message.performative == HttpMessage.Performative.RESPONSE
             and message.status_code == 200
         ):
-
-            model = self.context.coin_price_model
-
-            msg_body = json.loads(message.body)
-            price_result = msg_body.get(model.coin_id, None)
-
-            if price_result is None:
-                self.context.logger.info("failed to get price: unexpected result")
-            else:
-                price = price_result.get(model.currency, None)
-                value = int(price * (10 ** model.decimals))
-
-                if price is None:
-                    self.context.logger.info("failed to get price: no price listed")
-                else:
-                    oracle_data = {
-                        "value": value,
-                        "decimals": model.decimals,
-                    }
-                    self.context.shared_state["oracle_data"] = oracle_data
-                    self.context.logger.info(
-                        f"{model.coin_id} price = {price} {model.currency}"
-                    )
-        elif (
-            message.performative == HttpMessage.Performative.REQUEST and USE_HTTP_SERVER
-        ):
+            self._handle_response(message)
+        elif message.performative == HttpMessage.Performative.REQUEST:
             self._handle_request(message, http_dialogue)
         else:
             self.context.logger.info(
                 "got unexpected http message: code = " + str(message.status_code)
             )
+
+    def _handle_response(self, http_msg: HttpMessage) -> None:
+        """
+        Handle an Http response.
+
+        :param http_msg: the http message
+        :return: None
+        """
+
+        model = self.context.coin_price_model
+
+        msg_body = json.loads(http_msg.body)
+        price_result = msg_body.get(model.coin_id, None)
+
+        if price_result is None:
+            self.context.logger.info("failed to get price: unexpected result")
+        else:
+            price = price_result.get(model.currency, None)
+            value = int(price * (10 ** model.decimals))
+
+            if price is None:
+                self.context.logger.info("failed to get price: no price listed")
+            else:
+                oracle_data = {
+                    "value": value,
+                    "decimals": model.decimals,
+                }
+                self.context.shared_state["oracle_data"] = oracle_data
+                self.context.logger.info(
+                    f"{model.coin_id} price = {price} {model.currency}"
+                )
 
     def _handle_request(
         self, http_msg: HttpMessage, http_dialogue: HttpDialogue
@@ -125,10 +129,14 @@ class HttpHandler(Handler):
                 http_msg.method, http_msg.url, http_msg.body,
             )
         )
-        if http_msg.method == "get":
-            self._handle_get(http_msg, http_dialogue)
-        elif http_msg.method == "post":
-            self._handle_post(http_msg, http_dialogue)
+
+        if USE_HTTP_SERVER:
+            if http_msg.method == "get":
+                self._handle_get(http_msg, http_dialogue)
+            elif http_msg.method == "post":
+                self._handle_post(http_msg, http_dialogue)
+        else:
+            self.context.logger.info("http server is not enabled.")
 
     def _handle_get(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
         """
@@ -145,7 +153,9 @@ class HttpHandler(Handler):
             status_code=200,
             status_text="Success",
             headers=http_msg.headers,
-            body=json.dumps(self.context.shared_state["oracle_data"]).encode("utf-8"),
+            body=json.dumps(self.context.shared_state.get("oracle_data", "")).encode(
+                "utf-8"
+            ),
         )
         self.context.logger.info("responding with: {}".format(http_response))
         envelope_context = EnvelopeContext(connection_id=HTTP_SERVER_ID)
@@ -189,4 +199,4 @@ class HttpHandler(Handler):
 
         :return: None
         """
-        self.context.logger.info("tearing down HttpHandler")
+        pass

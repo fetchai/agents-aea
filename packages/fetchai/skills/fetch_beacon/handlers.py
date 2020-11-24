@@ -68,43 +68,51 @@ class HttpHandler(Handler):
             message.performative == HttpMessage.Performative.RESPONSE
             and message.status_code == 200
         ):
-
-            msg_body = json.loads(message.body)
-
-            # get entropy and block data
-            entropy = (
-                msg_body.get("result", {})
-                .get("block", {})
-                .get("header", {})
-                .get("entropy", {})
-                .get("group_signature", {})
-            )
-            block_hash = msg_body.get("result", {}).get("block_id", {}).get("hash", {})
-            block_height = int(
-                msg_body.get("result", {})
-                .get("block", {})
-                .get("header", {})
-                .get("height", {})
+            self._handle_response(message)
+        else:
+            self.context.logger.info(
+                "got unexpected http response: code = " + str(message.status_code)
             )
 
-            if entropy is None:
-                self.context.logger.info("entropy not present")
-            else:
-                beacon_data = {
-                    "entropy": keccak256(entropy.encode("utf-8")),
-                    "block_hash": bytes.fromhex(block_hash),
-                    "block_height": block_height,
-                }
-                self.context.logger.info(
-                    "Beacon info: "
-                    + str({"block_height": block_height, "entropy": entropy})
-                )
-                self.context.shared_state["oracle_data"] = beacon_data
-            return
+    def _handle_response(self, message: Message) -> None:
+        """
+        Handle an http response.
 
-        self.context.logger.info(
-            "got unexpected http response: code = " + str(message.status_code)
+        :param msg: the http message to be handled
+        :return: None
+        """
+
+        msg_body = json.loads(message.body)
+
+        # get entropy and block data
+        entropy = (
+            msg_body.get("result", {})
+            .get("block", {})
+            .get("header", {})
+            .get("entropy", {})
+            .get("group_signature", {})
         )
+        block_hash = msg_body.get("result", {}).get("block_id", {}).get("hash", {})
+        block_height = int(
+            msg_body.get("result", {})
+            .get("block", {})
+            .get("header", {})
+            .get("height", {})
+        )
+
+        if entropy is None:
+            self.context.logger.info("entropy not present")
+        else:
+            beacon_data = {
+                "entropy": keccak256(entropy.encode("utf-8")),
+                "block_hash": bytes.fromhex(block_hash),
+                "block_height": block_height,
+            }
+            self.context.logger.info(
+                "Beacon info: "
+                + str({"block_height": block_height, "entropy": entropy})
+            )
+            self.context.shared_state["oracle_data"] = beacon_data
 
     def _handle_unidentified_dialogue(self, msg: Message) -> None:
         """

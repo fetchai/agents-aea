@@ -37,6 +37,7 @@ from packages.fetchai.skills.simple_oracle.strategy import Strategy
 
 
 DEFAULT_UPDATE_INTERVAL = 5
+EXPIRATION_BLOCK = 1000000000000000
 
 
 class FetchOracleDeployer(TickerBehaviour):
@@ -94,7 +95,7 @@ class FetchOracleDeployer(TickerBehaviour):
 
             # add expiration block
             update_args = oracle_data.copy()
-            update_args["expiration_block"] = 1000000000000000
+            update_args["expiration_block"] = EXPIRATION_BLOCK
             self._request_update_transaction(update_args)
 
     def _request_contract_deploy_transaction(self) -> None:
@@ -117,9 +118,9 @@ class FetchOracleDeployer(TickerBehaviour):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "deployer_address": self.context.agent_address,
-                    "ERC20Address": "0x0000000000000000000000000000000000000000",
+                    "ERC20Address": strategy.erc20_address,
                     "initialFee": strategy.initial_fee_deploy,
-                    "gas": 100000,
+                    "gas": strategy.default_gas_deploy,
                 }
             ),
         )
