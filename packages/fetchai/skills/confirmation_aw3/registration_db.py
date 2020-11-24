@@ -81,7 +81,7 @@ class RegistrationDB(Model):
         return int(ret[0][0])
 
     def get_developer_handle(self, address: str) -> str:
-        """Get developer handle."""
+        """Get developer handle for address."""
         command = "SELECT developer_handle FROM registered_table where address=?"
         ret = self._execute_single_sql(command, (address,))
         if len(ret[0]) != 1:
@@ -90,10 +90,24 @@ class RegistrationDB(Model):
             )
         return ret[0][0]
 
+    def get_addresses(self, developer_handle: str) -> List[str]:
+        """Get addresses for developer handle."""
+        command = "SELECT address FROM registered_table where developer_handle=?"
+        ret = self._execute_single_sql(command, (developer_handle,))
+        addresses = [address[0] for address in ret]
+        if len(addresses) == 0:
+            raise ValueError(
+                f"Should find at least one address for developer_handle={developer_handle}."
+            )
+        return addresses
+
     def get_handle_and_trades(self, address: str) -> Tuple[str, int]:
         """Get developer and number of trades for address."""
-        trades = self.get_trade_count(address)
         developer_handle = self.get_developer_handle(address)
+        addresses = self.get_addresses(developer_handle)
+        trades = 0
+        for address in addresses:
+            trades += self.get_trade_count(address)
         return (developer_handle, trades)
 
     def set_registered(self, address: str, developer_handle: str):

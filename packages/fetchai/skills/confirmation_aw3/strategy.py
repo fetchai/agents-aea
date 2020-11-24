@@ -125,7 +125,7 @@ class Strategy(GenericStrategy):
             performative=HttpMessage.Performative.REQUEST,
             method="POST",
             url=self.leaderboard_url,
-            headers="",
+            headers="Content-Type: application/json; charset=utf-8",
             version="",
             body=json.dumps(
                 {
