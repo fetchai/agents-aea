@@ -1048,38 +1048,37 @@ class TestDialogueStats:
 class TestDialoguesBase:
     """Test for Dialogues."""
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Initialise the environment to test Dialogue."""
-        cls.agent_address = "agent 1"
-        cls.opponent_address = "agent 2"
-        cls.dialogue_label = DialogueLabel(
+        self.agent_address = "agent 1"
+        self.opponent_address = "agent 2"
+        self.dialogue_label = DialogueLabel(
             dialogue_reference=(str(1), ""),
-            dialogue_opponent_addr=cls.opponent_address,
-            dialogue_starter_addr=cls.agent_address,
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.agent_address,
         )
-        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
-        cls.own_dialogues = Dialogues(cls.agent_address)
-        cls.opponent_dialogues = Dialogues(cls.opponent_address)
+        self.dialogue = Dialogue(dialogue_label=self.dialogue_label)
+        self.own_dialogues = Dialogues(self.agent_address)
+        self.opponent_dialogues = Dialogues(self.opponent_address)
 
         # convenient messages to reuse across tests
-        cls.valid_message_1_by_self = DefaultMessage(
+        self.valid_message_1_by_self = DefaultMessage(
             dialogue_reference=(str(1), ""),
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        cls.valid_message_1_by_self.sender = cls.agent_address
-        cls.valid_message_1_by_self.to = cls.opponent_address
+        self.valid_message_1_by_self.sender = self.agent_address
+        self.valid_message_1_by_self.to = self.opponent_address
 
-        cls.valid_message_2_by_other = DefaultMessage(
+        self.valid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        cls.valid_message_2_by_other.sender = cls.opponent_address
-        cls.valid_message_2_by_other.to = cls.agent_address
+        self.valid_message_2_by_other.sender = self.opponent_address
+        self.valid_message_2_by_other.to = self.agent_address
 
     def test_dialogues_properties(self):
         """Test dialogue properties."""
@@ -1642,3 +1641,19 @@ class TestDialoguesBase:
         assert self.own_dialogues.get_dialogues_with_counterparty(
             self.opponent_address
         ) == [dialogue]
+
+    def test_json_from_json(self):
+        """Test dialogue dumped and restored."""
+        msg = DefaultMessage(
+            dialogue_reference=self.own_dialogues.new_self_initiated_dialogue_reference(),
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        dialogue = self.own_dialogues.create_with_message("opponent", msg)
+        data = dialogue.json()
+        dialogue_restored = dialogue.__class__.from_json(dialogue.message_class, data)
+        assert dialogue.dialogue_label == dialogue_restored.dialogue_label
+        assert dialogue.message_class == dialogue_restored.message_class
+        assert dialogue._incoming_messages == dialogue_restored._incoming_messages
+        assert dialogue._outgoing_messages == dialogue_restored._outgoing_messages
+        assert dialogue.role == dialogue_restored.role

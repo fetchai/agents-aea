@@ -338,6 +338,41 @@ class Dialogue(metaclass=_DialogueMeta):
         )
         self._message_class = message_class
 
+    def json(self) -> dict:
+        """Get json representation of the dialogue."""
+        data = {
+            "dialogue_label": self._dialogue_label.json,
+            "self_address": self.self_address,
+            "role": self._role.value,
+            "incoming_messages": [i.json() for i in self._incoming_messages],
+            "outgoing_messages": [i.json() for i in self._outgoing_messages],
+        }
+        return data
+
+    @classmethod
+    def from_json(cls, message_class: Type[Message], data: dict) -> "Dialogue":
+        """
+        Create a dialogue instance with all messages from json data.
+
+        :param message_class: type of message used with this dialogue
+        :param data: dict with data exported with Dialogue.to_json() method
+
+        :return: Dialogue instance
+        """
+        obj = cls(
+            DialogueLabel.from_json(data["dialogue_label"]),
+            message_class,
+            Address(data["self_address"]),
+            cls.Role(data["role"]),
+        )
+        obj._incoming_messages = [
+            message_class.from_json(i) for i in data["incoming_messages"]
+        ]
+        obj._outgoing_messages = [
+            message_class.from_json(i) for i in data["outgoing_messages"]
+        ]
+        return obj
+
     @property
     def dialogue_label(self) -> DialogueLabel:
         """
