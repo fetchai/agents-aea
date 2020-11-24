@@ -51,8 +51,6 @@ models:
       default_gas_deploy: 100000
       default_gas_grant_role: 100000
       default_gas_update: 150000
-      # address of the ERC20 token contract to use for payment to the oracle.
-      # Default: use the native currency ETH.
       erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false
