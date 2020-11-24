@@ -86,18 +86,18 @@ class Strategy(Model):
             raise ValueError("Contract address not set!")
         return self._contract_address
 
+    @contract_address.setter
+    def contract_address(self, contract_address: str) -> None:
+        """Set the contract address."""
+        enforce(self._contract_address is None, "Contract address already set!")
+        self._contract_address = contract_address
+
     @property
     def erc20_address(self) -> str:
         """Get the erc20 address for token payment."""
         if self._erc20_address is None:
             raise ValueError("ERC20 address not set!")
         return self._contract_address
-
-    @contract_address.setter
-    def contract_address(self, contract_address: str) -> None:
-        """Set the contract address."""
-        enforce(self._contract_address is None, "Contract address already set!")
-        self._contract_address = contract_address
 
     @erc20_address.setter
     def erc20_address(self, erc20_address: str) -> None:

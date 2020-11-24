@@ -74,7 +74,7 @@ class HttpHandler(Handler):
                 "got unexpected http response: code = " + str(message.status_code)
             )
 
-    def _handle_response(self, message: Message) -> None:
+    def _handle_response(self, message: HttpMessage) -> None:
         """
         Handle an http response.
 
