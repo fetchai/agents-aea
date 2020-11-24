@@ -52,7 +52,10 @@ class HttpDialogues(Model, BaseHttpDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent in this dialogue
             """
-            if message.performative == HttpMessage.Performative.REQUEST:
+            if (
+                message.performative == HttpMessage.Performative.REQUEST
+                and message.sender != receiver_address
+            ):
                 return BaseHttpDialogue.Role.SERVER
 
             return BaseHttpDialogue.Role.CLIENT

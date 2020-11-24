@@ -1,0 +1,37 @@
+agent_name: coin_price_oracle
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+description: An AEA providing a coin price oracle service.
+aea_version: 0.7.4
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/http_client:0.13.0
+- fetchai/http_server:0.13.0
+- fetchai/stub:0.12.0
+contracts: []
+protocols:
+- fetchai/default:0.9.0
+- fetchai/http:0.9.0
+- fetchai/signing:0.7.0
+- fetchai/state_update:0.7.0
+skills:
+- fetchai/coin_price:0.1.0
+- fetchai/error:0.9.0
+default_connection: fetchai/http_server:latest
+default_ledger: fetchai
+default_routing:
+  fetchai/http:latest: fetchai/http_client:latest
+connection_private_key_paths: {}
+private_key_paths:
+  fetchai: fetchai_private_key.txt
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+registry_path: ../packages
+---
+public_id: fetchai/http_server:0.13.0
+type: connection
+config:
+  api_spec_path: vendor/fetchai/skills/coin_price/coin_api_spec.yaml

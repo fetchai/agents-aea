@@ -13,7 +13,8 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                type: array
+                items: string
         '404':
           description: The coin price was not found.
         default:
