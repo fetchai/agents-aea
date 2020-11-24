@@ -20,7 +20,7 @@
 """This package contains the behaviour to get the Fetch random beacon."""
 
 import json
-from typing import Dict, cast, Optional
+from typing import Dict, Optional, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour

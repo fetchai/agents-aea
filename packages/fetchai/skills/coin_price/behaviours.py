@@ -30,6 +30,7 @@ from packages.fetchai.connections.http_client.connection import (
 )
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.coin_price.dialogues import HttpDialogues
+from packages.fetchai.skills.coin_price.models import CoinPriceModel
 
 
 class CoinPriceBehaviour(TickerBehaviour):
