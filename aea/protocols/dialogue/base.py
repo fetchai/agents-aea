@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """
 This module contains the classes required for dialogue management.
 
@@ -28,7 +27,7 @@ This module contains the classes required for dialogue management.
 import itertools
 import secrets
 import sys
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from enum import Enum
 from inspect import signature
 from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
@@ -365,10 +364,10 @@ class Dialogue(metaclass=_DialogueMeta):
             Address(data["self_address"]),
             cls.Role(data["role"]),
         )
-        obj._incoming_messages = [
+        obj._incoming_messages = [  # pylint: disable=protected-access
             message_class.from_json(i) for i in data["incoming_messages"]
         ]
-        obj._outgoing_messages = [
+        obj._outgoing_messages = [  # pylint: disable=protected-access
             message_class.from_json(i) for i in data["outgoing_messages"]
         ]
         return obj
@@ -983,6 +982,90 @@ class DialogueStats:
             self._other_initiated[end_state] += 1
 
 
+class DialoguesStorage:
+    """Dialogues state storage."""
+
+    def __init__(self) -> None:
+        """Init dialogues storage."""
+        self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogue_by_address = defaultdict(
+            list
+        )  # type: Dict[Address, List[Dialogue]]
+        self._incomplete_to_complete_dialogue_labels = (
+            {}
+        )  # type: Dict[DialogueLabel, DialogueLabel]
+
+    def add(self, dialogue: Dialogue) -> None:
+        """
+        Add dialogue to storage.
+
+        :param dialogue: dialogue to add.
+        :return: None
+        """
+        self._dialogues_by_dialogue_label[dialogue.dialogue_label] = dialogue
+        self._dialogue_by_address[
+            dialogue.dialogue_label.dialogue_opponent_addr
+        ].append(dialogue)
+
+    def remove(self, dialogue_label: DialogueLabel) -> None:
+        """
+        Remove dialogue from storage by it's label.
+
+        :param dialogue_label: label of the dialogue to remove
+        :return: None
+        """
+        dialogue = self._dialogues_by_dialogue_label.pop(dialogue_label, None)
+        if dialogue:
+            self._dialogue_by_address[dialogue_label.dialogue_opponent_addr].remove(
+                dialogue
+            )
+
+    def get(self, dialogue_label: DialogueLabel) -> Optional[Dialogue]:
+        """
+        Get dialogue stored by it's label.
+
+        :param dialogue_label: label of the dialogue
+        :return: dialogue if presents or None
+        """
+        return self.dialogues.get(dialogue_label, None)
+
+    @property
+    def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
+        """Get dictionary of dialogues in which the agent engages."""
+        return self._dialogues_by_dialogue_label
+
+    def get_dialogues_with_counterparty(self, counterparty: Address) -> List[Dialogue]:
+        """
+        Get the dialogues by address.
+
+        :param counterparty: the counterparty
+        :return: The dialogues with the counterparty.
+        """
+        return self._dialogue_by_address.get(counterparty, [])
+
+    def is_in_incomplete(self, dialogue_label: DialogueLabel) -> bool:
+        """Check dialogue label presents in list of incomplete."""
+        return dialogue_label in self._incomplete_to_complete_dialogue_labels
+
+    def set_incomplete_dialogue(
+        self, incomplete_dialogue_label, complete_dialogue_label
+    ) -> None:
+        """Set incomplete dialogue label."""
+        self._incomplete_to_complete_dialogue_labels[
+            incomplete_dialogue_label
+        ] = complete_dialogue_label
+
+    def is_dialogue_present(self, dialogue_label: DialogueLabel) -> bool:
+        """Check dialogue with label specified presents in storage."""
+        return dialogue_label in self._dialogues_by_dialogue_label
+
+    def get_latest_label(self, dialogue_label: DialogueLabel) -> DialogueLabel:
+        """Get latest label for dialogue."""
+        return self._incomplete_to_complete_dialogue_labels.get(
+            dialogue_label, dialogue_label
+        )
+
+
 class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
@@ -1001,11 +1084,8 @@ class Dialogues:
         :param end_states: the list of dialogue endstates
         :return: None
         """
-        self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
-        self._dialogue_by_address = {}  # type: Dict[Address, List[Dialogue]]
-        self._incomplete_to_complete_dialogue_labels = (
-            {}
-        )  # type: Dict[DialogueLabel, DialogueLabel]
+
+        self._dialogues_storage = DialoguesStorage()
         self._self_address = self_address
         self._dialogue_stats = DialogueStats(end_states)
 
@@ -1056,11 +1136,6 @@ class Dialogues:
         self._role_from_first_message = role_from_first_message
 
     @property
-    def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
-        """Get dictionary of dialogues in which the agent engages."""
-        return self._dialogues_by_dialogue_label
-
-    @property
     def self_address(self) -> Address:
         """Get the address of the agent for whom dialogues are maintained."""
         enforce(self._self_address != "", "self_address is not set.")
@@ -1100,7 +1175,7 @@ class Dialogues:
         :param counterparty: the counterparty
         :return: The dialogues with the counterparty.
         """
-        return self._dialogue_by_address.get(counterparty, [])
+        return self._dialogues_storage.get_dialogues_with_counterparty(counterparty)
 
     def _is_message_by_self(self, message: Message) -> bool:
         """
@@ -1213,7 +1288,7 @@ class Dialogues:
         try:
             dialogue._update(initial_message)  # pylint: disable=protected-access
         except InvalidDialogueMessage as e:
-            self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
+            self._dialogues_storage.remove(dialogue.dialogue_label)
             raise SyntaxError(
                 "Cannot create a dialogue with the specified performative and contents."
             ) from e
@@ -1285,7 +1360,7 @@ class Dialogues:
                 if (
                     is_new_dialogue
                 ):  # remove the newly created dialogue if the initial message is invalid
-                    self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
+                    self._dialogues_storage.remove(dialogue.dialogue_label)
         else:
             # couldn't find the dialogue referenced by the message
             result = None
@@ -1315,12 +1390,13 @@ class Dialogues:
             incomplete_dialogue_reference, message.sender, self.self_address,
         )
 
-        if (
-            incomplete_dialogue_label in self.dialogues
-            and incomplete_dialogue_label
-            not in self._incomplete_to_complete_dialogue_labels
-        ):
-            dialogue = self.dialogues.pop(incomplete_dialogue_label)
+        if self._dialogues_storage.is_dialogue_present(
+            incomplete_dialogue_label
+        ) and not self._dialogues_storage.is_in_incomplete(incomplete_dialogue_label):
+            dialogue = self._dialogues_storage.get(incomplete_dialogue_label)
+            if not dialogue:
+                raise ValueError("no dialogue found")
+            self._dialogues_storage.remove(incomplete_dialogue_label)
             final_dialogue_label = DialogueLabel(
                 complete_dialogue_reference,
                 incomplete_dialogue_label.dialogue_opponent_addr,
@@ -1329,10 +1405,10 @@ class Dialogues:
             dialogue._update_dialogue_label(  # pylint: disable=protected-access
                 final_dialogue_label
             )
-            self.dialogues.update({dialogue.dialogue_label: dialogue})
-            self._incomplete_to_complete_dialogue_labels[
-                incomplete_dialogue_label
-            ] = final_dialogue_label
+            self._dialogues_storage.add(dialogue)
+            self._dialogues_storage.set_incomplete_dialogue(
+                incomplete_dialogue_label, final_dialogue_label
+            )
 
     def get_dialogue(self, message: Message) -> Optional[Dialogue]:
         """
@@ -1376,10 +1452,7 @@ class Dialogues:
         :param dialogue_label: the dialogue label
         :return dialogue_label: the dialogue label
         """
-        result = self._incomplete_to_complete_dialogue_labels.get(
-            dialogue_label, dialogue_label
-        )
-        return result
+        return self._dialogues_storage.get_latest_label(dialogue_label)
 
     def _get_dialogue_from_label(
         self, dialogue_label: DialogueLabel
@@ -1390,8 +1463,7 @@ class Dialogues:
         :param dialogue_label: the dialogue label
         :return: the dialogue if present
         """
-        result = self.dialogues.get(dialogue_label, None)
-        return result
+        return self._dialogues_storage.get(dialogue_label)
 
     def _create_self_initiated(
         self,
@@ -1469,19 +1541,18 @@ class Dialogues:
         :return: the created dialogue
         """
         enforce(
-            incomplete_dialogue_label
-            not in self._incomplete_to_complete_dialogue_labels,
+            not self._dialogues_storage.is_in_incomplete(incomplete_dialogue_label),
             "Incomplete dialogue label already present.",
         )
         if complete_dialogue_label is None:
             dialogue_label = incomplete_dialogue_label
         else:
-            self._incomplete_to_complete_dialogue_labels[
-                incomplete_dialogue_label
-            ] = complete_dialogue_label
+            self._dialogues_storage.set_incomplete_dialogue(
+                incomplete_dialogue_label, complete_dialogue_label
+            )
             dialogue_label = complete_dialogue_label
         enforce(
-            dialogue_label not in self.dialogues,
+            not self._dialogues_storage.is_dialogue_present(dialogue_label),
             "Dialogue label already present in dialogues.",
         )
         dialogue = self._dialogue_class(
@@ -1490,15 +1561,7 @@ class Dialogues:
             self_address=self.self_address,
             role=role,
         )
-        self.dialogues.update({dialogue_label: dialogue})
-        if (
-            self._dialogue_by_address.get(dialogue_label.dialogue_opponent_addr, None)
-            is None
-        ):
-            self._dialogue_by_address[dialogue_label.dialogue_opponent_addr] = []
-        self._dialogue_by_address[dialogue_label.dialogue_opponent_addr].append(
-            dialogue
-        )
+        self._dialogues_storage.add(dialogue)
         return dialogue
 
     @staticmethod
