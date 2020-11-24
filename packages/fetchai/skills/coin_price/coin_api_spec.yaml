@@ -1,9 +1,7 @@
 openapi: "3.0.0"
-name: coin_price_api
-author: fetchai
-version: 0.1.0
-servers:
-  - url: ''
+info:
+  version: 0.1.0
+  title: coin_price_api
 paths:
   /price:
     get:
