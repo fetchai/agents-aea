@@ -43,6 +43,28 @@ class TestSkillTestCase(BaseSkillTestCase):
 
     path_to_skill = Path(ROOT_DIR, "tests", "data", "dummy_skill")
 
+    @classmethod
+    def setup(cls):
+        """Setup the test class."""
+        cls.behaviour_arg_1 = 2
+        cls.behaviour_arg_2 = "3"
+
+        config_overrides = {
+            "behaviours": {
+                "dummy": {
+                    "args": {
+                        "behaviour_arg_1": cls.behaviour_arg_1,
+                        "behaviour_arg_2": cls.behaviour_arg_2,
+                    }
+                }
+            },
+        }
+        cls.shared_state_key = "some_shared_state_key"
+        cls.shared_state_value = "some_shared_state_value"
+        cls.shared_state = {cls.shared_state_key: cls.shared_state_value}
+
+        super().setup(config_overrides=config_overrides, shared_state=cls.shared_state)
+
     def test_setup(self):
         """Test the setup() class method."""
         assert self.skill.skill_context.agent_address == "test_agent_address"
@@ -59,6 +81,20 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert "dummy" in self.skill.handlers.keys()
         assert "dummy_internal" in self.skill.handlers.keys()
         assert "dummy" in self.skill.models.keys()
+
+        assert (
+            self.skill.skill_context._agent_context.shared_state[self.shared_state_key]
+            == self.shared_state_value
+        )
+
+        assert (
+            self.skill.skill_context.behaviours.dummy.kwargs["behaviour_arg_1"]
+            == self.behaviour_arg_1
+        )
+        assert (
+            self.skill.skill_context.behaviours.dummy.kwargs["behaviour_arg_2"]
+            == self.behaviour_arg_2
+        )
 
     def test_properties(self):
         """Test the properties."""

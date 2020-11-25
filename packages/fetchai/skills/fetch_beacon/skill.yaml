@@ -1,0 +1,34 @@
+name: fetch_beacon
+author: fetchai
+version: 0.1.0
+type: skill
+description: Retrieve the value of the Fetch DRB
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmZKuR31Cb34hLiQJgC67k3o7s9zN7s1gmmdwhrMzoGxQ3
+  behaviours.py: QmPVmQhvtxHHbPko3C5nTfUoGdVTKVCCatvkLTy3uhVWXc
+  dialogues.py: QmTu7FDLSLprn4KJJ1XboYfL3M7VnAAgkvGSJuw1emqCp6
+  handlers.py: QmVEKSPfR53ccUH7Kz3rs7aXZJ66ua9ZPWyGwi65pT62Gt
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/http:0.9.0
+skills: []
+behaviours:
+  fetch_beacon_behaviour:
+    args:
+      beacon_url: https://rpc-beaconworld.fetch.ai/block
+      tick_interval: 5
+    class_name: FetchBeaconBehaviour
+handlers:
+  http:
+    args: {}
+    class_name: HttpHandler
+models:
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+dependencies: {}
+is_abstract: false
+connections: []

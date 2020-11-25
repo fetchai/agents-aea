@@ -65,7 +65,7 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
 def scaffold(
     click_context: click.core.Context, with_symlinks: bool
 ):  # pylint: disable=unused-argument
-    """Scaffold a resource for the agent."""
+    """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("with_symlinks", with_symlinks)
 

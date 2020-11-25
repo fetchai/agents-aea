@@ -36,7 +36,7 @@ class RegistrationDB(Model):
     """Communicate between the database and the python objects."""
 
     def __init__(self, **kwargs):
-        """Initialise the Detection Database Communication class."""
+        """Initialise the class."""
         custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
         this_dir = os.getcwd()
@@ -86,6 +86,17 @@ class RegistrationDB(Model):
         variables = (address,)
         result = self._execute_single_sql(command, variables)
         return len(result) != 0
+
+    def get_developer_handle(self, address: str) -> str:
+        """Get developer handle relating to an address."""
+        command = "SELECT developer_handle FROM registered_table WHERE address=?"
+        variables = (address,)
+        result = self._execute_single_sql(command, variables)
+        if len(result[0]) != 1:
+            raise ValueError(
+                f"More than one developer_handle found for address={address}."
+            )
+        return result[0][0]
 
     def get_all_registered(self) -> List[str]:
         """Get all registered AW-1 AEAs."""

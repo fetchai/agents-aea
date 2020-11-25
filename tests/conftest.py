@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Conftest module for Pytest."""
+import difflib
 import inspect
 import logging
 import os
@@ -31,7 +32,7 @@ import time
 from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from types import FunctionType, MethodType
-from typing import Callable, Dict, List, Optional, Sequence, cast
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, cast
 from unittest.mock import patch
 
 import docker as docker
@@ -339,6 +340,43 @@ protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
+
+
+def match_files(fname1: str, fname2: str) -> Tuple[bool, str]:
+    """
+    Find out whether two text files match.
+
+    :param fname1: string path to file 1
+    :param fname2: string path to file 2
+
+    :return: whether files match (True) or not (False) and a string of their difference ("" if they match)
+    """
+    with open(fname1, "r") as f1, open(fname2, "r") as f2:
+        difference = set(f1).difference(f2)
+    are_identical = difference == set()
+
+    diff = ""
+    if not are_identical:
+        diff = find_difference(fname1, fname2)
+    return are_identical, diff
+
+
+def find_difference(fname1: str, fname2: str) -> str:
+    """Find the difference between two text files."""
+    diff = ""
+    with open(fname1) as f1, open(fname2) as f2:
+        differ = difflib.Differ()
+
+        for line in differ.compare(f1.readlines(), f2.readlines()):
+            if not (line.startswith(" ") or line.startswith("? ")):
+                line = line[2:].lstrip()
+                diff += line
+    return diff
+
+
+def number_of_diff_lines(diff: str) -> int:
+    """Give number of lines in a diff string."""
+    return diff.count("\n") if diff != "" else 0
 
 
 def only_windows(fn: Callable) -> Callable:

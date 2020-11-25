@@ -1,13 +1,13 @@
 agent_name: confirmation_aea_aw1
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 description: This agent manages confirmation of registration for Agent World 1
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.9.0
+- fetchai/ledger:0.10.0
 - fetchai/p2p_libp2p:0.12.0
 - fetchai/soef:0.13.0
 contracts:
@@ -21,14 +21,14 @@ protocols:
 - fetchai/signing:0.7.0
 - fetchai/state_update:0.7.0
 skills:
-- fetchai/confirmation_aw1:0.3.0
+- fetchai/confirmation_aw1:0.4.0
 - fetchai/error:0.9.0
 - fetchai/simple_service_registration:0.13.0
 default_connection: fetchai/p2p_libp2p:0.12.0
 default_ledger: fetchai
 default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.9.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 connection_private_key_paths: {}
 private_key_paths: {}
@@ -44,8 +44,13 @@ logging_config:
     logfile:
       class: logging.FileHandler
       formatter: extra
-      level: DEBUG
+      level: NOTSET
       filename: all.log
+    logfile_error:
+      class: logging.FileHandler
+      formatter: extra
+      level: ERROR
+      filename: error.log
     console:
       class: logging.StreamHandler
       formatter: standard
@@ -54,6 +59,7 @@ logging_config:
     aea:
       handlers:
       - logfile
+      - logfile_error
       - console
       level: DEBUG
       propagate: false
@@ -71,13 +77,14 @@ public_id: fetchai/soef:0.13.0
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
+  token_storage_path: /data/soef_key.txt
 ---
-public_id: fetchai/ledger:0.9.0
+public_id: fetchai/ledger:0.10.0
 type: connection
 config:
   ledger_apis:
     ethereum:
-      address: https://mainnet.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+      address: null
     fetchai:
       address: https://rest-agentworld.prod.fetch-ai.com:443
       chain_id: agentworld-1
@@ -94,7 +101,7 @@ models:
         key: registration_service
         value: aw1-registration
 ---
-public_id: fetchai/confirmation_aw1:0.3.0
+public_id: fetchai/confirmation_aw1:0.4.0
 type: skill
 models:
   registration_db:
@@ -103,4 +110,4 @@ models:
   strategy:
     args:
       token_dispense_amount: 100000000000000000000
-      aw2_aeas: []
+      awx_aeas: []

@@ -30,7 +30,7 @@ from aea.skills.base import Model
 
 
 _default_logger = logging.getLogger(
-    "aea.packages.fetchai.skills.carpark_detection.detection_database"
+    "aea.packages.fetchai.skills.confirmation_aw2.registration_db"
 )
 
 
@@ -38,7 +38,7 @@ class RegistrationDB(Model):
     """Communicate between the database and the python objects."""
 
     def __init__(self, **kwargs):
-        """Initialise the Detection Database Communication class."""
+        """Initialise the class."""
         custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
         this_dir = os.getcwd()
@@ -95,9 +95,7 @@ class RegistrationDB(Model):
         ret = self._execute_single_sql(command, (address,))
         return ret[0] if len(ret) > 0 else None
 
-    def set_registered(
-        self, address: str,
-    ):
+    def set_registered(self, address: str, developer_handle: str):
         """Record a registration."""
         if self.is_registered(address):
             return
@@ -107,7 +105,7 @@ class RegistrationDB(Model):
             "",
             "",
             "",
-            "",
+            developer_handle,
             "",
         )
         self._execute_single_sql(command, variables)

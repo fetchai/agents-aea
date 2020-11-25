@@ -72,11 +72,11 @@ from aea.helpers.win32 import enable_ctrl_c_support
     is_flag=True,
     required=False,
     default=False,
-    help="Skip consistency check.",
+    help="Skip consistency checks.",
 )
 @click.pass_context
 def cli(click_context, skip_consistency_check: bool) -> None:
-    """Command-line tool for setting up an Autonomous Economic Agent."""
+    """Command-line tool for setting up an Autonomous Economic Agent (AEA)."""
     verbosity_option = click_context.meta.pop("verbosity")
     click_context.obj = Context(cwd=".", verbosity=verbosity_option)
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)

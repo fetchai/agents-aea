@@ -73,6 +73,18 @@ A framework for autonomous economic agent (AEA) development
   </a>
 </p>
 
+## Alternatively: Use Pipx (CLI usage only)
+
+1. Install [PipX](https://github.com/pipxproject/pipx)
+
+2. Install the package from [PyPI](https://pypi.org/project/aea/):
+
+       pipx install aea[all]
+
+3. Run aea cli e.g.:
+
+       aea --help
+
 ## Alternatively: Install from Source
 
 This approach is not recommended!

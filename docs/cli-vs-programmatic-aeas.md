@@ -28,7 +28,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.17.0
+aea fetch fetchai/weather_station:0.18.0
 cd weather_station
 ```
 

@@ -64,7 +64,7 @@ from aea.configurations.constants import (
 @click.pass_context
 @check_aea_project
 def remove(click_context, with_dependencies):  # pylint: disable=unused-argument
-    """Remove a resource from the agent."""
+    """Remove a package from the agent."""
     ctx = cast(Context, click_context.obj)
     if with_dependencies:
         ctx.set_config("with_dependencies", True)

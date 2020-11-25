@@ -63,7 +63,7 @@ class Strategy(Model):
         self._override_staking_check = kwargs.pop(
             "override_staking_check", DEFAULT_OVERRIDE
         )
-        self._aw2_aeas: List[str] = kwargs.pop("aw2_aeas", [])
+        self._awx_aeas: List[str] = kwargs.pop("awx_aeas", [])
         super().__init__(**kwargs)
         self._is_ready_to_register = False
         self._is_registered = False
@@ -97,9 +97,9 @@ class Strategy(Model):
         return self._contract_callable
 
     @property
-    def aw2_aeas(self) -> List[str]:
-        """Get list of AW2 AEAs."""
-        return self._aw2_aeas
+    def awx_aeas(self) -> List[str]:
+        """Get list of AWx AEAs."""
+        return self._awx_aeas
 
     @property
     def all_registered_aeas(self) -> List[str]:
@@ -134,6 +134,12 @@ class Strategy(Model):
         self.context.logger.info(
             f"registration info did not pass staking checks = {info}"
         )
+
+    def get_developer_handle(self, address: str) -> str:
+        """Get developer handle."""
+        registration_db = cast(RegistrationDB, self.context.registration_db)
+        handle = registration_db.get_developer_handle(address)
+        return handle
 
     def valid_registration(
         self, registration_info: Dict[str, str], sender: str

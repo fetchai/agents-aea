@@ -62,7 +62,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the data provider AEA:
 ``` bash
-aea fetch fetchai/ml_data_provider:0.17.0
+aea fetch fetchai/ml_data_provider:0.18.0
 cd ml_data_provider
 aea install
 ```
@@ -76,8 +76,8 @@ aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/ml_data_provider:0.15.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/ml_data_provider:0.16.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea install
 ```
@@ -85,7 +85,7 @@ aea install
 In `ml_data_provider/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 
@@ -96,7 +96,7 @@ default_routing:
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.18.0
+aea fetch fetchai/ml_model_trainer:0.19.0
 cd ml_model_trainer
 aea install
 ```
@@ -110,8 +110,8 @@ aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/ml_train:0.16.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/ml_train:0.17.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea install
 ```
@@ -119,7 +119,7 @@ aea install
 In `ml_model_trainer/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 

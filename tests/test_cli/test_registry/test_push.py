@@ -16,16 +16,23 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """Test module for Registry push methods."""
 
 import os
 from unittest import TestCase, mock
 
+import pytest
 from click import ClickException
 
-from aea.cli.registry.push import _compress_dir, _remove_pycache, push_item
+from aea.cli.registry.push import (
+    _compress_dir,
+    _remove_pycache,
+    check_package_public_id,
+    push_item,
+)
+from aea.configurations.base import PublicId
 
-from tests.conftest import AUTHOR
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
@@ -38,8 +45,9 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
     "aea.cli.registry.push.load_yaml",
     return_value={
         "description": "some-description",
-        "version": "some-version",
-        "author": AUTHOR,
+        "version": PublicIdMock.DEFAULT_VERSION,
+        "author": "some-author",
+        "name": "some-name",
         "protocols": ["protocol_id"],
     },
 )
@@ -76,7 +84,7 @@ class PushItemTestCase(TestCase):
             data={
                 "name": "some-name",
                 "description": "some-description",
-                "version": "some-version",
+                "version": PublicIdMock.DEFAULT_VERSION,
                 "protocols": ["protocol_id"],
             },
             is_auth=True,
@@ -101,7 +109,7 @@ class PushItemTestCase(TestCase):
             data={
                 "name": "some-name",
                 "description": "some-description",
-                "version": "some-version",
+                "version": PublicIdMock.DEFAULT_VERSION,
                 "protocols": ["protocol_id"],
             },
             is_auth=True,
@@ -162,3 +170,23 @@ class CompressDirTestCase(TestCase):
         _compress_dir("output_filename", "source_dir")
         _remove_pycache_mock.assert_called_once_with("source_dir")
         open_mock.assert_called_once_with("output_filename", "w:gz")
+
+
+def test_check_package_public_id():
+    """Test check_package_public_id."""
+    public_id = PublicId("test", "test", "10.0.1")
+
+    with mock.patch(
+        "aea.cli.registry.push.load_component_public_id", return_value=public_id
+    ):
+        check_package_public_id(mock.Mock(), mock.Mock(), public_id)
+
+    with mock.patch(
+        "aea.cli.registry.push.load_component_public_id", return_value=public_id
+    ):
+        with pytest.raises(
+            ClickException, match="Version, name or author does not match"
+        ):
+            check_package_public_id(
+                mock.Mock(), mock.Mock(), PublicId("test", "test", "10.0.2")
+            )

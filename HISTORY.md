@@ -1,5 +1,18 @@
 # Release History
 
+## 0.7.5 (2020-11-25)
+
+- Adds AW3 AEAs
+- Adds basic oracle skills and contracts
+- Replaces usage of Ropsten testnet with Ganache in packages
+- Fixes multiplexer setup when used outside AEA
+- Improves help command output of CLI
+- Adds integration tests for simple skills
+- Adds version check on CLI push
+- Adds integration tests for tac negotiation skills
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.7.4 (2020-11-18)
 
 - Replaces error skill handler usage with built in handler

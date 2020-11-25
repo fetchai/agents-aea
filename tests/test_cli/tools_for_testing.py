@@ -17,11 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """Tools used for CLI registry testing."""
-
 from typing import List
 from unittest.mock import Mock
 
 from click import ClickException
+
+from aea.configurations.base import PackageVersion
 
 from tests.conftest import AUTHOR, COSMOS, ETHEREUM
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
@@ -105,6 +106,11 @@ class PublicIdMock:
         """Create object from str public_id without validation."""
         author, name, version = public_id.replace(":", "/").split("/")
         return cls(author, name, version)
+
+    @property
+    def package_version(self) -> PackageVersion:
+        """Get package version."""
+        return PackageVersion(self.version)
 
 
 class AEAConfMock:

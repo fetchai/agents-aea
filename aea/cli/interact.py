@@ -68,7 +68,7 @@ if TYPE_CHECKING:  # pragma: nocover
 @click.pass_context
 @check_aea_project
 def interact(click_context: click.core.Context):  # pylint: disable=unused-argument
-    """Interact with a running AEA via the stub connection."""
+    """Interact with the running agent via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
 
