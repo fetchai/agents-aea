@@ -23,6 +23,7 @@
 import argparse
 import re
 import sys
+from operator import methodcaller
 from pathlib import Path
 
 from packaging.specifiers import SpecifierSet
@@ -102,11 +103,13 @@ def update_version_for_aea(new_version: str) -> str:
     return current_version
 
 
-def compute_specifier_from_version(version: Version) -> SpecifierSet:
+def compute_specifier_from_version(version: Version) -> str:
     """
     Compute the specifier set from a version, by varying only on the patch number.
 
-    I.e. from {major}.{minor}.{patch}, return "{major}.{minor}.0
+    I.e. from "{major}.{minor}.{patch}", return
+
+    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
 
     :param version: the version
     :return: the specifier set
@@ -116,7 +119,7 @@ def compute_specifier_from_version(version: Version) -> SpecifierSet:
     new_minor_high = new_minor_low + 1
     lower_bound = Version(f"{new_major}.{new_minor_low}.0")
     upper_bound = Version(f"{new_major}.{new_minor_high}.0")
-    specifier_set = SpecifierSet(f">={lower_bound},<{upper_bound}")
+    specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set
 
 
@@ -141,15 +144,24 @@ def update_aea_version_specifiers(old_version: Version, new_version: Version) ->
     :param new_version: the new version.
     :return: True if the update has been done, False otherwise.
     """
-    old_specifier_set = str(compute_specifier_from_version(old_version))
-    new_specifier_set = str(compute_specifier_from_version(new_version))
+    old_specifier_set = compute_specifier_from_version(old_version)
+    new_specifier_set = compute_specifier_from_version(new_version)
     print(f"Old version specifier: {old_specifier_set}")
     print(f"New version specifier: {new_specifier_set}")
+    old_specifier_set_regex = re.compile(str(old_specifier_set).replace(" ", " *"))
     if old_specifier_set == new_specifier_set:
-        print("Not updating version specifier - they haven't changed")
+        print("Not updating version specifier - they haven't changed.")
         return False
-    for file in Path(".").rglob("*"):
-        file.write_text(file.read_text().replace(old_specifier_set, new_specifier_set))
+    for file in filter(lambda p: not p.is_dir(), Path(".").rglob("*")):
+        print(f"Replacing {old_specifier_set} with {new_specifier_set} in {file}...")
+        try:
+            content = file.read_text()
+        except UnicodeDecodeError as e:
+            print(f"Cannot read {file}: {str(e)}. Continue...")
+        else:
+            if old_specifier_set_regex.search(content) is not None:
+                content = old_specifier_set_regex.sub(new_specifier_set, content)
+                file.write_text(content)
     return True
 
 
