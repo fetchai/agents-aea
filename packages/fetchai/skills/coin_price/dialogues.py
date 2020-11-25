@@ -55,7 +55,7 @@ class HttpDialogues(Model, BaseHttpDialogues):
             if (
                 message.performative == HttpMessage.Performative.REQUEST
                 and message.sender != receiver_address
-            ):
+            ) or (message.performative == HttpMessage.Performative.RESPONSE and message.sender == receiver_address):
                 return BaseHttpDialogue.Role.SERVER
 
             return BaseHttpDialogue.Role.CLIENT
