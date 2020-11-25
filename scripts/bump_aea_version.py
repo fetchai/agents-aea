@@ -23,10 +23,8 @@
 import argparse
 import re
 import sys
-from operator import methodcaller
 from pathlib import Path
 
-from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 from aea.configurations.constants import (
@@ -56,6 +54,8 @@ CONFIGURATION_FILENAME_REGEX = re.compile(
         ]
     )
 )
+
+IGNORE_DIRS = [Path(".git")]
 
 
 def update_version_for_files(current_version: str, new_version: str) -> None:
@@ -153,7 +153,14 @@ def update_aea_version_specifiers(old_version: Version, new_version: Version) ->
         print("Not updating version specifier - they haven't changed.")
         return False
     for file in filter(lambda p: not p.is_dir(), Path(".").rglob("*")):
-        print(f"Replacing {old_specifier_set} with {new_specifier_set} in {file}...")
+        dir_root = Path(file.parts[0])
+        if dir_root in IGNORE_DIRS:
+            print(f"Skipping '{file}'...")
+            continue
+        print(
+            f"Replacing '{old_specifier_set}' with '{new_specifier_set}' in '{file}'... ",
+            end="",
+        )
         try:
             content = file.read_text()
         except UnicodeDecodeError as e:
