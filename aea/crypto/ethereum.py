@@ -44,14 +44,12 @@ _default_logger = logging.getLogger(__name__)
 
 _ETHEREUM = "ethereum"
 GAS_ID = "gwei"
-ETHEREUM_TESTNET_FAUCET_URL = "TBD"
-TESTNET_NAME = "ganache"
-DEFAULT_ADDRESS = "http://127.0.0.1:8545"
-DEFAULT_CHAIN_ID = 1337
+ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
+TESTNET_NAME = "ropsten"
+DEFAULT_ADDRESS = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe"
+DEFAULT_CHAIN_ID = 3
 DEFAULT_GAS_PRICE = "50"
 DEFAULT_CURRENCY_DENOM = "wei"
-_ABI = "abi"
-_BYTECODE = "bytecode"
 
 
 class EthereumCrypto(Crypto[Account]):
@@ -264,21 +262,6 @@ class EthereumHelper(Helper):
         digest = Web3.keccak(message).hex()
         return digest
 
-    @classmethod
-    def load_contract_interface(cls, file_path: Path) -> Dict[str, str]:
-        """
-        Load contract interface.
-
-        :param file_path: the file path to the interface
-        :return: the interface
-        """
-        with open(file_path, "r") as interface_file_ethereum:
-            contract_interface = json.load(interface_file_ethereum)
-        for key in [_ABI, _BYTECODE]:
-            if key not in contract_interface:  # pragma: nocover
-                raise ValueError(f"Contract {file_path} missing key {key}.")
-        return contract_interface
-
 
 class EthereumApi(LedgerApi, EthereumHelper):
     """Class to interact with the Ethereum Web3 APIs."""
@@ -310,6 +293,22 @@ class EthereumApi(LedgerApi, EthereumHelper):
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Get the balance of a given account."""
         return self._api.eth.getBalance(address)  # pylint: disable=no-member
+
+    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
+        """Call a specified function on the ledger API."""
+        response = self._try_get_state(callable_name, *args, **kwargs)
+        return response
+
+    @try_decorator("Unable to get state: {}", logger_method="warning")
+    def _try_get_state(  # pylint: disable=unused-argument
+        self, callable_name: str, *args, **kwargs
+    ) -> Optional[Any]:
+        """Try to call a function on the ledger API."""
+
+        function = getattr(self._api.eth, callable_name)
+        response = function(*args, **kwargs)
+
+        return response  # pylint: disable=no-member
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -463,14 +462,14 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         if contract_address is None:
             instance = self.api.eth.contract(
-                abi=contract_interface[_ABI], bytecode=contract_interface[_BYTECODE],
+                abi=contract_interface["abi"], bytecode=contract_interface["bytecode"],
             )
         else:
             _contract_address = self.api.toChecksumAddress(contract_address)
             instance = self.api.eth.contract(
                 address=_contract_address,
-                abi=contract_interface[_ABI],
-                bytecode=contract_interface[_BYTECODE],
+                abi=contract_interface["abi"],
+                bytecode=contract_interface["bytecode"],
             )
         return instance
 

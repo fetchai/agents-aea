@@ -20,7 +20,6 @@
 """Cosmos module wrapping the public and private key cryptography and ledger api."""
 
 import base64
-import gzip
 import hashlib
 import json
 import logging
@@ -51,7 +50,6 @@ DEFAULT_FAUCET_URL = "INVALID_URL"
 DEFAULT_ADDRESS = "INVALID_URL"
 DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
 DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
-_BYTECODE = "wasm_byte_code"
 
 
 class CosmosHelper(Helper):
@@ -178,24 +176,6 @@ class CosmosHelper(Helper):
         """
         result = bech32_decode(address)
         return result != (None, None) and result[0] == cls.address_prefix
-
-    @classmethod
-    def load_contract_interface(cls, file_path: Path) -> Dict[str, str]:
-        """
-        Load contract interface.
-
-        :param file_path: the file path to the interface
-        :return: the interface
-        """
-        with open(file_path, "rb") as interface_file_cosmos:
-            contract_interface = {
-                _BYTECODE: str(
-                    base64.b64encode(
-                        gzip.compress(interface_file_cosmos.read(), 6)
-                    ).decode()
-                )
-            }
-        return contract_interface
 
 
 class CosmosCrypto(Crypto[SigningKey]):
@@ -417,6 +397,34 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
+    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
+        """
+        Call a specified function on the ledger API.
+
+        Based on the cosmos REST
+        API specification, which takes a path (strings separated by '/'). The
+        convention here is to define the root of the path (txs, blocks, etc.)
+        as the callable_name and the rest of the path as args.
+        """
+        response = self._try_get_state(callable_name, *args, **kwargs)
+        return response
+
+    @try_decorator(
+        "Encountered exception when trying get state: {}",
+        logger_method=_default_logger.warning,
+    )
+    def _try_get_state(  # pylint: disable=unused-argument
+        self, callable_name: str, *args, **kwargs
+    ) -> Optional[Any]:
+        """Try to call a function on the ledger API."""
+        result = None  # type: Optional[Any]
+        query = "/".join(args)
+        url = self.network_address + f"/{callable_name}/{query}"
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            result = response.json()
+        return result
+
     def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],
@@ -447,7 +455,7 @@ class _CosmosApi(LedgerApi):
             "type": "wasm/store-code",
             "value": {
                 "sender": deployer_address,
-                "wasm_byte_code": contract_interface[_BYTECODE],
+                "wasm_byte_code": contract_interface["wasm_byte_code"],
                 "source": "",
                 "builder": "",
             },

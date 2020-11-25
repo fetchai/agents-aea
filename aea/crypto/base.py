@@ -20,7 +20,6 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar
 
 from aea.common import Address
@@ -222,16 +221,6 @@ class Helper(ABC):
         :param address: the address to validate
         """
 
-    @classmethod
-    @abstractmethod
-    def load_contract_interface(cls, file_path: Path) -> Dict[str, str]:
-        """
-        Load contract interface.
-
-        :param file_path: the file path to the interface
-        :return: the interface
-        """
-
 
 class LedgerApi(Helper, ABC):
     """Interface for ledger APIs."""
@@ -257,6 +246,19 @@ class LedgerApi(Helper, ABC):
 
         :param address: the address.
         :return: the balance.
+        """
+
+    @abstractmethod
+    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
+        """
+        Call a specified function on the underlying ledger API.
+
+        This usually takes the form of a web request to be waited synchronously.
+
+        :param callable_name: the name of the API function to be called.
+        :param args: the positional arguments for the API function.
+        :param kwargs: the keyword arguments for the API function.
+        :return: the ledger API response.
         """
 
     @abstractmethod
