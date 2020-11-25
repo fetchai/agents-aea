@@ -26,7 +26,7 @@ with a one-step atomic swap functionality. That means the trade between the two 
 Fetch the AEA that will deploy the contract.
 
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.18.0
+aea fetch fetchai/erc1155_deployer:0.19.0
 cd erc1155_deployer
 aea install
 ```
@@ -41,8 +41,8 @@ aea create erc1155_deployer
 cd erc1155_deployer
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/erc1155_deploy:0.17.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/erc1155_deploy:0.18.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -50,8 +50,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 Then update the agent config (`aea-config.yaml`) with the default routing:
 ``` yaml
 default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.9.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 
@@ -81,7 +81,7 @@ aea add-key cosmos cosmos_private_key.txt --connection
 In another terminal, fetch the AEA that will get some tokens from the deployer.
 
 ``` bash
-aea fetch fetchai/erc1155_client:0.18.0
+aea fetch fetchai/erc1155_client:0.19.0
 cd erc1155_client
 aea install
 ```
@@ -96,8 +96,8 @@ aea create erc1155_client
 cd erc1155_client
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/erc1155_client:0.16.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/erc1155_client:0.17.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -105,8 +105,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 Then update the agent config (`aea-config.yaml`) with the default routing:
 ``` yaml
 default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.9.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 

@@ -1,13 +1,13 @@
 agent_name: registration_aea_aw1
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: This is an agent to register for Agent World 1.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.9.0
+- fetchai/ledger:0.10.0
 - fetchai/p2p_libp2p:0.12.0
 - fetchai/soef:0.13.0
 contracts: []
@@ -80,7 +80,7 @@ type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
 ---
-public_id: fetchai/ledger:0.9.0
+public_id: fetchai/ledger:0.10.0
 type: connection
 config:
   ledger_apis:

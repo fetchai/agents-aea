@@ -203,7 +203,7 @@ the created incoming message
 
 ```python
  | @classmethod
- | setup(cls) -> None
+ | setup(cls, **kwargs) -> None
 ```
 
 Set up the skill test case.

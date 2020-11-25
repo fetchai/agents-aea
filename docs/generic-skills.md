@@ -59,7 +59,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.14.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.15.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 ```
@@ -73,8 +73,8 @@ aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/generic_seller:0.16.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/generic_seller:0.17.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -82,7 +82,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 In `my_seller_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 
@@ -93,7 +93,7 @@ default_routing:
 
 Then, fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.15.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.16.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 ```
@@ -107,8 +107,8 @@ aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/generic_buyer:0.16.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/generic_buyer:0.17.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -116,7 +116,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 In `my_buyer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 

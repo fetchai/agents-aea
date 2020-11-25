@@ -1,13 +1,13 @@
 agent_name: ml_data_provider
 author: fetchai
-version: 0.17.0
+version: 0.18.0
 description: An agent that sells data.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.9.0
+- fetchai/ledger:0.10.0
 - fetchai/p2p_libp2p:0.12.0
 - fetchai/soef:0.13.0
 contracts: []
@@ -20,8 +20,8 @@ protocols:
 - fetchai/state_update:0.7.0
 skills:
 - fetchai/error:0.9.0
-- fetchai/generic_seller:0.16.0
-- fetchai/ml_data_provider:0.15.0
+- fetchai/generic_seller:0.17.0
+- fetchai/ml_data_provider:0.16.0
 default_connection: fetchai/p2p_libp2p:0.12.0
 default_ledger: fetchai
 logging_config:
@@ -30,6 +30,6 @@ logging_config:
 private_key_paths: {}
 registry_path: ../packages
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 connection_private_key_paths: {}
