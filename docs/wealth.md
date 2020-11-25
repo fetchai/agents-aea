@@ -29,7 +29,7 @@ or
 aea get-address ethereum
 ```
 
-This will print the address to the console. Copy the address into the clipboard and request test tokens from the faucet <a href="https://explore-testnet.fetch.ai/tokentap" target="_blank">here for Fetch.ai</a> or <a href="https://faucet.metamask.io/" target="_blank">here for Ethereum</a>. It will take a while for the tokens to become available.
+This will print the address to the console. Copy the address into the clipboard and request test tokens from the faucet <a href="https://explore-agent-land.fetch.ai" target="_blank">here for Fetch.ai</a> or <a href="https://faucet.metamask.io/" target="_blank">here for Ethereum</a>. It will take a while for the tokens to become available.
 
 Second, after some time, check the wealth associated with the address:
 ``` bash
