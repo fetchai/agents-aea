@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/tac_controller:0.14.0
+aea fetch fetchai/tac_controller:0.15.0
 cd tac_controller
 aea install
 ```
@@ -8,15 +8,15 @@ aea create tac_controller
 cd tac_controller
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/tac_control:0.11.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/tac_control:0.12.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
 ```
 ``` bash
-aea fetch fetchai/tac_participant:0.16.0 --alias tac_participant_one
-aea fetch fetchai/tac_participant:0.16.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.17.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.17.0 --alias tac_participant_two
 cd tac_participant_two
 aea install
 ```
@@ -28,9 +28,9 @@ aea create tac_participant_two
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
+aea add connection fetchai/ledger:0.10.0
 aea add skill fetchai/tac_participation:0.13.0
-aea add skill fetchai/tac_negotiation:0.14.0
+aea add skill fetchai/tac_negotiation:0.15.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
@@ -39,9 +39,9 @@ aea config set agent.default_ledger fetchai
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
+aea add connection fetchai/ledger:0.10.0
 aea add skill fetchai/tac_participation:0.13.0
-aea add skill fetchai/tac_negotiation:0.14.0
+aea add skill fetchai/tac_negotiation:0.15.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger fetchai
@@ -72,12 +72,12 @@ default_routing:
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 ``` yaml

@@ -8,4 +8,4 @@ The connection uses the ledger apis registered in the ledger api registry.
 
 ## Usage
 
-First, add the connection to your AEA project (`aea add connection fetchai/ledger:0.9.0`). Optionally, update the `ledger_apis` in `config` of `connection.yaml`.
+First, add the connection to your AEA project (`aea add connection fetchai/ledger:0.10.0`). Optionally, update the `ledger_apis` in `config` of `connection.yaml`.

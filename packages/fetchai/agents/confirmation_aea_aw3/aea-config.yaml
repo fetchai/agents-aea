@@ -8,8 +8,8 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.13.0
-- fetchai/ledger:0.9.0
+- fetchai/http_client:0.14.0
+- fetchai/ledger:0.10.0
 - fetchai/p2p_libp2p:0.12.0
 - fetchai/soef:0.13.0
 contracts: []
@@ -25,12 +25,12 @@ protocols:
 skills:
 - fetchai/confirmation_aw3:0.1.0
 - fetchai/error:0.9.0
-- fetchai/generic_buyer:0.16.0
+- fetchai/generic_buyer:0.17.0
 default_connection: fetchai/p2p_libp2p:0.12.0
 default_ledger: fetchai
 default_routing:
-  fetchai/http:0.9.0: fetchai/http_client:0.13.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/http:0.9.0: fetchai/http_client:0.14.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 connection_private_key_paths: {}
 private_key_paths: {}
@@ -81,7 +81,7 @@ config:
   chain_identifier: fetchai_v2_testnet_incentivised
   token_storage_path: /data/soef_key.txt
 ---
-public_id: fetchai/ledger:0.9.0
+public_id: fetchai/ledger:0.10.0
 type: connection
 config:
   ledger_apis:

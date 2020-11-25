@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.14.0
+aea fetch fetchai/generic_seller:0.15.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.16.0
+aea eject skill fetchai/generic_seller:0.17.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.15.0
+aea fetch fetchai/generic_buyer:0.16.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.16.0
+aea eject skill fetchai/generic_buyer:0.17.0
 cd ..
 ```
 
@@ -2964,7 +2964,7 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 
@@ -2983,7 +2983,7 @@ Add the remaining packages for the seller AEA, then run it:
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
+aea add connection fetchai/ledger:0.10.0
 aea add protocol fetchai/fipa:0.10.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
@@ -2999,7 +2999,7 @@ Add the remaining packages for the buyer AEA:
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
+aea add connection fetchai/ledger:0.10.0
 aea add protocol fetchai/fipa:0.10.0
 aea add protocol fetchai/signing:0.7.0
 aea install

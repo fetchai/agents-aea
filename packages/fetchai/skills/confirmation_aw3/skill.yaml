@@ -16,8 +16,8 @@ fingerprint:
   strategy.py: QmVpRvSF5pKPTHAbB83F9Y6jqARYtmdKBxqXUMm95L8qdA
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.13.0
-- fetchai/ledger:0.9.0
+- fetchai/http_client:0.14.0
+- fetchai/ledger:0.10.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -26,7 +26,7 @@ protocols:
 - fetchai/oef_search:0.10.0
 - fetchai/signing:0.7.0
 skills:
-- fetchai/generic_buyer:0.16.0
+- fetchai/generic_buyer:0.17.0
 behaviours:
   search:
     args:
