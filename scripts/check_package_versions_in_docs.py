@@ -79,6 +79,14 @@ class PackageIdNotFound(Exception):
 
 DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
 
+CONFIG_FILE_NAMES = [
+    "aea-config.yaml",
+    "skill.yaml",
+    "connection.yaml",
+    "contract.yaml",
+    "protocol.yaml",
+]  # type: List[str]
+
 
 def default_config_file_paths():
     """Get (generator) the default config file paths."""
@@ -111,10 +119,18 @@ def get_public_id_from_yaml(configuration_file: Path):
     :param configuration_file: the path to the config yaml
     """
     data = unified_yaml_load(configuration_file)
-    author = data["author"]
+    author = data.get("author", None)
+    if not author:
+        raise KeyError(f"No author field in {str(configuration_file)}")
     # handle the case when it's a package or agent config file.
-    name = data["name"] if "name" in data else data["agent_name"]
-    version = data["version"]
+    try:
+        name = data["name"] if "name" in data else data["agent_name"]
+    except KeyError:
+        print(f"No name or agent_name field in {str(configuration_file)}")
+        raise
+    version = data.get("version", None)
+    if not version:
+        raise KeyError(f"No version field in {str(configuration_file)}")
     return PublicId(author, name, version)
 
 
@@ -122,9 +138,12 @@ def find_all_packages_ids() -> Set[PackageId]:
     """Find all packages ids."""
     package_ids: Set[PackageId] = set()
     packages_dir = Path("packages")
-    for configuration_file in chain(
-        packages_dir.glob("*/*/*/*.yaml"), default_config_file_paths()
-    ):
+    config_files = [
+        path
+        for path in packages_dir.glob("*/*/*/*.yaml")
+        if any([file in str(path) for file in CONFIG_FILE_NAMES])
+    ]
+    for configuration_file in chain(config_files, default_config_file_paths()):
         package_type = PackageType(configuration_file.parts[-3][:-1])
         package_public_id = get_public_id_from_yaml(configuration_file)
         package_id = PackageId(package_type, package_public_id)
