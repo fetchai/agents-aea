@@ -26,7 +26,7 @@ DEFAULT_URL = ""
 DEFAULT_COIN_ID = "fetch-ai"
 DEFAULT_CURRENCY = "usd"
 DEFAULT_DECIMALS = 5
-USE_HTTP_SERVER = False
+DEFAULT_USE_HTTP_SERVER = False
 
 
 class CoinPriceModel(Model):
@@ -43,5 +43,6 @@ class CoinPriceModel(Model):
         self.coin_id = kwargs.pop("coin_id", DEFAULT_COIN_ID)
         self.currency = kwargs.pop("currency", DEFAULT_CURRENCY)
         self.decimals = kwargs.pop("decimals", DEFAULT_DECIMALS)
+        self.use_http_server = kwargs.pop("use_http_server", DEFAULT_USE_HTTP_SERVER)
 
         Model.__init__(self, **kwargs)

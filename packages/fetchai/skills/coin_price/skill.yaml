@@ -6,12 +6,12 @@ description: Retrieve coin price from an API
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  __init__.py: QmbTGcZWUpuDXphFMAFoRc6vm9rfrPra4oUPkpcCAuUcop
+  __init__.py: QmX5WhZZrXfasUVaWY8fUGUELNiEF7mBjRhHt6KB8vEknM
   behaviours.py: QmZBEmrp5RZRbKg4mx6jzcHfbgbda2AkuN822Gem4KdpAK
   coin_api_spec.yaml: QmTBEFUiZcB8SRMBBvqfK6arTT7e64SsjdEvxW49pym2H4
-  dialogues.py: QmehNJacLG5wXcQVNhyWwtKVZnJNFkMm3FXbczNif3hEYX
-  handlers.py: QmTBRRG3891EmvM8pcMmwDFXHrEr7JC8ytkMKKrSuzggwG
-  models.py: QmRkXFnbXiv48XS56juvx2tDmDa4427AKDvUWoBgAdniux
+  dialogues.py: QmWhVtpJNH8Jhyg2kzKQnCouePVpLfnG2WTgiRLPLSPbDo
+  handlers.py: QmcMsx7pZLwx33s9qk6eiDJzB8dbPQJiwvcf2AFi8hNcid
+  models.py: QmP878qJZGF4tJTrbxZez3puAZ8epECtmrhTB8RYKQUkri
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -33,6 +33,7 @@ models:
       currency: usd
       decimals: 5
       url: https://api.coingecko.com/api/v3/
+      use_http_server: false
     class_name: CoinPriceModel
   http_dialogues:
     args: {}

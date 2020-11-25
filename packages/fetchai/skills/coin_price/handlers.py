@@ -20,22 +20,15 @@
 """This package contains handlers for the coin_price skill."""
 
 import json
-from typing import cast
+from typing import Optional, cast
 
+from aea.configurations.base import PublicId
 from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.coin_price.dialogues import HttpDialogue, HttpDialogues
-from packages.fetchai.skills.coin_price.models import USE_HTTP_SERVER
-
-
-# Skill can be run with or without http_server
-if USE_HTTP_SERVER:
-    from packages.fetchai.connections.http_server.connection import (
-        PUBLIC_ID as HTTP_SERVER_ID,
-    )
 
 
 class HttpHandler(Handler):
@@ -48,10 +41,21 @@ class HttpHandler(Handler):
         super().__init__(**kwargs)
 
         self.handled_message = None
+        self._http_server_id = None  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info("setting up HttpHandler")
+
+        # skill can be used with or without http server
+        if (
+            self.context.coin_price_model.use_http_server
+        ):  # pylint: disable=import-outside-toplevel
+            from packages.fetchai.connections.http_server.connection import (
+                PUBLIC_ID as HTTP_SERVER_ID,
+            )
+
+            self._http_server_id = HTTP_SERVER_ID
 
     def handle(self, message: Message) -> None:
         """
@@ -130,7 +134,7 @@ class HttpHandler(Handler):
             )
         )
 
-        if USE_HTTP_SERVER:
+        if self._http_server_id:
             if http_msg.method == "get":
                 self._handle_get(http_msg, http_dialogue)
             elif http_msg.method == "post":
@@ -158,7 +162,7 @@ class HttpHandler(Handler):
             ),
         )
         self.context.logger.info("responding with: {}".format(http_response))
-        envelope_context = EnvelopeContext(connection_id=HTTP_SERVER_ID)
+        envelope_context = EnvelopeContext(connection_id=self._http_server_id)
         self.context.outbox.put_message(message=http_response, context=envelope_context)
 
     def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
