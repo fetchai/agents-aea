@@ -31,7 +31,7 @@ from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
-from packages.fetchai.protocols.t_protocol_no_ct.message import TProtocolNoCtMessage
+from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
 
 
 class TProtocolNoCtDialogue(Dialogue):

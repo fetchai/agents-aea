@@ -43,7 +43,7 @@ from io import StringIO
 from itertools import chain
 from operator import methodcaller
 from pathlib import Path
-from typing import Iterator, Match, Optional, cast
+from typing import Iterator, List, Match, Optional, Tuple, cast
 
 from aea.configurations.base import ComponentType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, load_component_configuration
@@ -54,6 +54,8 @@ CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
 PACKAGES_DIR = Path("packages")
 TEST_DATA = Path("tests", "data").absolute()
+PROTOCOLS_PLURALS = "protocols"
+ROOT_DIR = Path(".").absolute()
 
 
 def subdirs(path: Path) -> Iterator[Path]:
@@ -65,7 +67,7 @@ def find_protocols_in_local_registry() -> Iterator[Path]:
     """Find all protocols in local registry."""
     authors = subdirs(PACKAGES_DIR)
     component_parents = chain(*map(subdirs, authors))
-    protocols_parent = filter(lambda p: p.name == "protocols", component_parents)
+    protocols_parent = filter(lambda p: p.name == PROTOCOLS_PLURALS, component_parents)
     protocols = chain(*map(subdirs, protocols_parent))
     return map(methodcaller("absolute"), protocols)
 
@@ -95,6 +97,7 @@ def enforce(condition, message=""):
 
 def run_cli(*args, **kwargs):
     """Run a CLI command."""
+    log(f"Calling command {args} with kwargs {kwargs}")
     return_code = subprocess.check_call(args, **kwargs)  # nosec
     enforce(
         return_code == 0,
@@ -203,26 +206,39 @@ def _generate_protocol(package_path: Path) -> None:
     run_aea(*cmd)
 
 
-def replace_in_directory(name: str):
+def run_isort_and_black(directory: Path, **kwargs):
+    """Run black and isort against a directory."""
+    run_cli(
+        sys.executable, "-m", "black", "--verbose", str(directory.absolute()), **kwargs,
+    )
+    run_cli(
+        sys.executable,
+        "-m",
+        "isort",
+        "--settings-path",
+        "setup.cfg",
+        "--verbose",
+        str(directory.absolute()),
+        **kwargs,
+    )
+
+
+def replace_in_directory(name: str, replacement_pairs: List[Tuple[str, str]]):
     """
     Replace text in directory.
 
     :param name: the protocol name.
+    :param replacement_pairs: a list of pairs of strings (to_replace, replacement).
     :return: None
     """
     log(f"Replace prefix of import statements in directory '{name}'")
-    replace_replacement_pairs = [
-        (f"from packages.fetchai.protocols.{name}", f"from aea.protocols.{name}"),
-    ]
-    package_dir = Path("protocols", name)
+    package_dir = Path(PROTOCOLS_PLURALS, name)
     for submodule in package_dir.rglob("*.py"):
         log(f"Process submodule {submodule.relative_to(package_dir)}")
-        for to_replace, replacement in replace_replacement_pairs:
+        for to_replace, replacement in replacement_pairs:
             if to_replace not in submodule.read_text():
                 continue
             submodule.write_text(submodule.read_text().replace(to_replace, replacement))
-            run_cli("isort", str(submodule))
-            run_cli("black", str(submodule))
 
 
 def _fix_generated_protocol(package_path: Path) -> None:
@@ -241,19 +257,17 @@ def _fix_generated_protocol(package_path: Path) -> None:
     log(f"Restore original custom types in {package_path}")
     custom_types_module = package_path / CUSTOM_TYPE_MODULE_NAME
     if custom_types_module.exists():
-        file_to_replace = Path("protocols", package_path.name, CUSTOM_TYPE_MODULE_NAME)
+        file_to_replace = Path(
+            PROTOCOLS_PLURALS, package_path.name, CUSTOM_TYPE_MODULE_NAME
+        )
         file_to_replace.write_text(custom_types_module.read_text())
-
-    # if it is a library protocol, replace import prefixes.
-    if package_path.parents[1].name == "aea":
-        log("Replace import prefixes (it's a library protocol)")
-        replace_in_directory(package_path.name)
 
     package_readme_file = package_path / README_FILENAME
     if package_readme_file.exists():
         log(f"Copy the README {package_readme_file} into the new generated protocol.")
         shutil.copyfile(
-            package_readme_file, Path("protocols", package_path.name, README_FILENAME)
+            package_readme_file,
+            Path(PROTOCOLS_PLURALS, package_path.name, README_FILENAME),
         )
 
 
@@ -267,37 +281,26 @@ def _update_original_protocol(package_path: Path) -> None:
     """
     log(f"Copy the new protocol into the original directory {package_path}")
     shutil.rmtree(package_path)
-    shutil.copytree(Path("protocols", package_path.name), package_path)
+    shutil.copytree(Path(PROTOCOLS_PLURALS, package_path.name), package_path)
 
 
 def _fingerprint_protocol(name: str):
     """Fingerprint the generated (and modified) protocol."""
     log(f"Fingerprint the generated (and modified) protocol '{name}'")
     protocol_config = load_component_configuration(
-        ComponentType.PROTOCOL, Path("protocols", name), skip_consistency_check=True
+        ComponentType.PROTOCOL,
+        Path(PROTOCOLS_PLURALS, name),
+        skip_consistency_check=True,
     )
     run_aea("fingerprint", "protocol", str(protocol_config.public_id))
 
 
 def _process_packages_protocol(package_path: Path) -> None:
     """
-    Process protocol from local registry.
-
-    It extracts the protocol specification from the README.
-    Then, it forwards the call to _process_protocol (see below).
-
-    :param package_path: path to package.
-    :return: None
-    """
-    specification_content = _get_protocol_specification_from_readme(package_path)
-    _process_protocol(package_path, specification_content)
-
-
-def _process_protocol(package_path: Path, specification_content: str) -> None:
-    """
-    Process a protocol package.
+    Process protocol pacakge from local registry.
 
     It means:
+    - extract protocol specification from README
     - generate the protocol in the current AEA project
     - fix the generated protocol (e.g. import prefixed, custom types, ...)
     - update the original protocol with the newly generated one.
@@ -305,12 +308,13 @@ def _process_protocol(package_path: Path, specification_content: str) -> None:
     It assumes the working directory is an AEA project.
 
     :param package_path: path to the package.
-    :param specification_content: the specification file.
     :return: None
     """
+    specification_content = _get_protocol_specification_from_readme(package_path)
     _save_specification_in_temporary_file(package_path.name, specification_content)
     _generate_protocol(package_path)
     _fix_generated_protocol(package_path)
+    run_isort_and_black(Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(ROOT_DIR))
     _fingerprint_protocol(package_path.name)
     _update_original_protocol(package_path)
 
@@ -325,16 +329,28 @@ def _check_preliminaries():
     enforce(shutil.which("isort") is not None, "isort command line tool not found.")
 
 
-def _process_test_protocol(specification: Path, output_dir: Path) -> None:
+def _process_test_protocol(specification: Path, package_path: Path) -> None:
     """
     Process a test protocol.
 
     :param specification: path to specification.
-    :param output_dir: the output directory.
+    :param package_path: the output directory.
     :return: None
     """
     specification_content = specification.read_text()
-    _process_protocol(output_dir, specification_content)
+    _save_specification_in_temporary_file(package_path.name, specification_content)
+    _generate_protocol(package_path)
+    _fix_generated_protocol(package_path)
+    replacements = [
+        (
+            f"from packages.fetchai.protocols.{package_path.name}",
+            f"from tests.data.generator.{package_path.name}",
+        )
+    ]
+    replace_in_directory(package_path.name, replacements)
+    run_isort_and_black(Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(ROOT_DIR))
+    _fingerprint_protocol(package_path.name)
+    _update_original_protocol(package_path)
 
 
 def main():
@@ -344,18 +360,20 @@ def main():
     all_protocols = list(find_protocols_in_local_registry())
 
     with AEAProject():
-        for package_path in all_protocols:
-            log("=" * 100)
-            log(f"Processing protocol at path {package_path}")
-            _process_packages_protocol(package_path)
+        log("=" * 100)
         _process_test_protocol(
             TEST_DATA / "sample_specification.yaml",
             TEST_DATA / "generator" / "t_protocol",
         )
+        log("=" * 100)
         _process_test_protocol(
             TEST_DATA / "sample_specification_no_custom_types.yaml",
             TEST_DATA / "generator" / "t_protocol_no_ct",
         )
+        for package_path in all_protocols:
+            log("=" * 100)
+            log(f"Processing protocol at path {package_path}")
+            _process_packages_protocol(package_path)
 
 
 if __name__ == "__main__":

@@ -25,8 +25,8 @@ from aea.mail.base_pb2 import DialogueMessage
 from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
-from packages.fetchai.protocols.t_protocol_no_ct import t_protocol_no_ct_pb2
-from packages.fetchai.protocols.t_protocol_no_ct.message import TProtocolNoCtMessage
+from tests.data.generator.t_protocol_no_ct import t_protocol_no_ct_pb2
+from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
 
 
 class TProtocolNoCtSerializer(Serializer):
