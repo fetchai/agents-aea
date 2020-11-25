@@ -24,8 +24,7 @@ default_ledger: fetchai
 default_routing:
   fetchai/http:latest: fetchai/http_client:latest
 connection_private_key_paths: {}
-private_key_paths:
-  fetchai: fetchai_private_key.txt
+private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
