@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """HTTP client connection and channel."""
 import asyncio
+import email
 import json
 import logging
 import ssl
@@ -259,11 +260,17 @@ class HTTPClientAsyncChannel:
         :return: aiohttp.ClientResponse
         """
         try:
+            if request_http_message.is_set("headers") and request_http_message.headers:
+                headers: Optional[dict] = dict(
+                    email.message_from_string(request_http_message.headers).items()
+                )
+            else:
+                headers = None
             async with aiohttp.ClientSession() as session:
                 async with session.request(
                     method=request_http_message.method,
                     url=request_http_message.url,
-                    headers=request_http_message.headers,
+                    headers=headers,
                     data=request_http_message.body,
                     ssl=ssl_context,
                 ) as resp:

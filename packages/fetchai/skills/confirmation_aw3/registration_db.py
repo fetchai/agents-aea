@@ -19,16 +19,18 @@
 
 """This package contains a the registration db model."""
 
+import datetime
+import json
 import logging
 import os
 import sqlite3
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from aea.skills.base import Model
 
 
 _default_logger = logging.getLogger(
-    "aea.packages.fetchai.skills.carpark_detection.detection_database"
+    "aea.packages.fetchai.skills.confirmation_aw3.registration_db"
 )
 
 
@@ -51,32 +53,75 @@ class RegistrationDB(Model):
 
     def _initialise_backend(self) -> None:
         """Set up database and initialise the tables."""
-        if os.path.isfile(self.db_path):
-            return
         self._execute_single_sql(
-            "CREATE TABLE IF NOT EXISTS registered_table (address TEXT, ethereum_address TEXT, "
+            "CREATE TABLE IF NOT EXISTS registered_table (address TEXT NOT NULL, ethereum_address TEXT, "
             "ethereum_signature TEXT, fetchai_signature TEXT, "
-            "developer_handle TEXT, tweet TEXT)"
+            "developer_handle TEXT NOT NULL, tweet TEXT, PRIMARY KEY (address, developer_handle))"
+        )
+        self._execute_single_sql(
+            "CREATE TABLE IF NOT EXISTS trades_table (address TEXT, created_at timestamp, data TEXT)"
         )
 
-    def set_registered(
-        self,
-        address: str,
-        ethereum_address: str,
-        ethereum_signature: str,
-        fetchai_signature: str,
-        developer_handle: str,
-        tweet: str,
-    ):
+    def set_trade(
+        self, address: str, timestamp: datetime.datetime, data: Dict[str, str],
+    ) -> None:
         """Record a registration."""
+        command = "INSERT INTO trades_table(address, created_at, data) values(?, ?, ?)"
+        variables: Tuple[str, datetime.datetime, str] = (
+            address,
+            timestamp,
+            json.dumps(data),
+        )
+        self._execute_single_sql(command, variables)
+
+    def get_trade_count(self, address: str) -> int:
+        """Get trade count."""
+        command = "SELECT COUNT(*) FROM trades_table where address=?"
+        ret = self._execute_single_sql(command, (address,))
+        return int(ret[0][0])
+
+    def get_developer_handle(self, address: str) -> str:
+        """Get developer handle for address."""
+        command = "SELECT developer_handle FROM registered_table where address=?"
+        ret = self._execute_single_sql(command, (address,))
+        if len(ret[0]) != 1:
+            raise ValueError(
+                f"More than one developer_handle found for address={address}."
+            )
+        return ret[0][0]
+
+    def get_addresses(self, developer_handle: str) -> List[str]:
+        """Get addresses for developer handle."""
+        command = "SELECT address FROM registered_table where developer_handle=?"
+        ret = self._execute_single_sql(command, (developer_handle,))
+        addresses = [address[0] for address in ret]
+        if len(addresses) == 0:
+            raise ValueError(
+                f"Should find at least one address for developer_handle={developer_handle}."
+            )
+        return addresses
+
+    def get_handle_and_trades(self, address: str) -> Tuple[str, int]:
+        """Get developer and number of trades for address."""
+        developer_handle = self.get_developer_handle(address)
+        addresses = self.get_addresses(developer_handle)
+        trades = 0
+        for address_ in addresses:
+            trades += self.get_trade_count(address_)
+        return (developer_handle, trades)
+
+    def set_registered(self, address: str, developer_handle: str):
+        """Record a registration."""
+        if self.is_registered(address):
+            return
         command = "INSERT OR REPLACE INTO registered_table(address, ethereum_address, ethereum_signature, fetchai_signature, developer_handle, tweet) values(?, ?, ?, ?, ?, ?)"
         variables = (
             address,
-            ethereum_address,
-            ethereum_signature,
-            fetchai_signature,
+            "",
+            "",
+            "",
             developer_handle,
-            tweet,
+            "",
         )
         self._execute_single_sql(command, variables)
 
@@ -87,34 +132,15 @@ class RegistrationDB(Model):
         result = self._execute_single_sql(command, variables)
         return len(result) != 0
 
-    def get_developer_handle(self, address: str) -> str:
-        """Get developer handle relating to an address."""
-        command = "SELECT developer_handle FROM registered_table WHERE address=?"
-        variables = (address,)
-        result = self._execute_single_sql(command, variables)
-        if len(result[0]) != 1:
-            raise ValueError(
-                f"More than one developer_handle found for address={address}."
-            )
-        return result[0][0]
-
-    def get_all_registered(self) -> List[str]:
-        """Get all registered AW-1 AEAs."""
-        command = "SELECT address FROM registered_table"
-        variables = ()
-        results = self._execute_single_sql(command, variables)
-        registered = [result[0] for result in results]
-        return registered
-
     def _execute_single_sql(
         self,
         command: str,
-        variables: Tuple[str, ...] = (),
+        variables: Tuple[Any, ...] = (),
         print_exceptions: bool = True,
     ) -> List[Tuple[str, ...]]:
         """Query the database - all the other functions use this under the hood."""
         conn = None
-        ret = []
+        ret: List[Tuple[str, ...]] = []
         try:
             conn = sqlite3.connect(self.db_path, timeout=300)  # 5 mins
             c = conn.cursor()

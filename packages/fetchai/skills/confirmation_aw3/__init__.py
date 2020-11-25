@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the confirmation_aw2 skill."""
+"""This module contains the implementation of the confirmation_aw3 skill."""
 
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/confirmation_aw2:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/confirmation_aw3:0.1.0")
