@@ -196,7 +196,7 @@ def push_package(package_id: PackageId, runner: CliRunner) -> None:
             package_id.package_type, package_id.public_id, result.output
         )
     except Exception as e:  # pylint: disable=broad-except
-        print("An exception occured: {}".format(e))
+        print("\n\nAn exception occured: {}\n\n".format(e))
     finally:
         os.chdir(cwd)
         result = runner.invoke(
@@ -222,6 +222,11 @@ def publish_agent(package_id: PackageId, runner: CliRunner) -> None:
     :param runner: the cli runner
     :return: None
     """
+    if os.path.isdir(package_id.public_id.name):
+        print(
+            f"\n\nFolder with name '{package_id.public_id.name}' already exists. Skipping publication of {str(package_id.public_id)}\n\n"
+        )
+        return
     print(
         "Trying to push {}: {}".format(
             package_id.package_type.value, str(package_id.public_id)
@@ -250,7 +255,7 @@ def publish_agent(package_id: PackageId, runner: CliRunner) -> None:
             )
         )
     except Exception as e:  # pylint: disable=broad-except
-        print("An exception occured: {}".format(e))
+        print("\n\nAn exception occured: {}\n\n".format(e))
     finally:
         os.chdir(cwd)
         result = runner.invoke(
