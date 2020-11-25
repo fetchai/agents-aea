@@ -33,7 +33,23 @@ from click.testing import CliRunner
 
 from aea.cli import cli
 from aea.configurations.base import PackageId, PackageType, PublicId
+from aea.configurations.constants import (
+    AGENTS,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
+
+CONFIG_FILE_NAMES = [
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+]  # type: List[str]
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 
@@ -55,7 +71,7 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
     """
     package_type = configuration_file.parent.parent.name
     with configuration_file.open() as fp:
-        if package_type != "agents":
+        if package_type != AGENTS:
             return yaml.safe_load(fp)
         # when it is an agent configuration file,
         # we are interested only in the first page of the YAML,
@@ -82,9 +98,12 @@ def find_all_packages_ids() -> Set[PackageId]:
     """Find all packages ids."""
     package_ids: Set[PackageId] = set()
     packages_dir = Path("packages")
-    for configuration_file in chain(
-        packages_dir.glob("*/*/*/*.yaml"), default_config_file_paths()
-    ):
+    config_files = [
+        path
+        for path in packages_dir.glob("*/*/*/*.yaml")
+        if any([file in str(path) for file in CONFIG_FILE_NAMES])
+    ]
+    for configuration_file in chain(config_files, default_config_file_paths()):
         package_type = PackageType(configuration_file.parts[-3][:-1])
         package_public_id = get_public_id_from_yaml(configuration_file)
         package_id = PackageId(package_type, package_public_id)
