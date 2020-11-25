@@ -108,6 +108,8 @@ def test_get_raw_transaction_serialization():
         message=msg,
     )
     envelope_bytes = envelope.encode()
+    print("Envelope: ", envelope)
+    print("Envelope Serialized: ", envelope_bytes)
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
@@ -121,6 +123,7 @@ def test_get_raw_transaction_serialization():
     actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
+    print("Envelope Deserialized: ", actual_envelope, actual_msg)
 
 
 def test_get_raw_message_serialization():
@@ -233,7 +236,7 @@ def test_state_serialization():
 def test_raw_transaction_serialization():
     """Test the serialization for 'raw_transaction' speech-act works."""
     raw_transaction_arg = ContractApiMessage.RawTransaction(
-        "some_ledger_id", b"some_body"
+        "some_ledger_id", {"body": "some_body"}
     )
     msg = ContractApiMessage(
         message_id=2,

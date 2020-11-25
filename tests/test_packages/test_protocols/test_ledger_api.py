@@ -127,7 +127,7 @@ def test_send_signed_transaction_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         signed_transaction=LedgerApiMessage.SignedTransaction(
-            "some_ledger_id", b"some_body"
+            "some_ledger_id", {"body": "some_body"}
         ),
     )
     msg.to = "receiver"
@@ -224,7 +224,9 @@ def test_raw_transaction_serialization():
         message_id=2,
         target=1,
         performative=LedgerApiMessage.Performative.RAW_TRANSACTION,
-        raw_transaction=LedgerApiMessage.RawTransaction("some_ledger_id", b"some_body"),
+        raw_transaction=LedgerApiMessage.RawTransaction(
+            "some_ledger_id", {"body": "some_body"}
+        ),
     )
     msg.to = "receiver"
     envelope = Envelope(

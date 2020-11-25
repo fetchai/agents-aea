@@ -19,8 +19,9 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
-import pickle  # nosec
 from typing import Any, Dict
+
+from google.protobuf.struct_pb2 import Struct
 
 from aea.exceptions import enforce
 from aea.helpers.transaction.base import RawMessage as BaseRawMessage
@@ -69,8 +70,9 @@ class Kwargs:
         :param kwargs_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        kwargs_bytes = pickle.dumps(kwargs_object)  # nosec
-        kwargs_protobuf_object.kwargs = kwargs_bytes
+        kwarg_json = Struct()
+        kwarg_json.update(kwargs_object.body)  # pylint: disable=no-member
+        kwargs_protobuf_object.kwargs.CopyFrom(kwarg_json)
 
     @classmethod
     def decode(cls, kwargs_protobuf_object) -> "Kwargs":
@@ -82,8 +84,9 @@ class Kwargs:
         :param kwargs_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'kwargs_protobuf_object' argument.
         """
-        kwargs = pickle.loads(kwargs_protobuf_object.kwargs)  # nosec
-        return kwargs
+
+        print("Dict: ", dict(kwargs_protobuf_object.kwargs))
+        return cls(dict(kwargs_protobuf_object.kwargs))
 
     def __eq__(self, other):
         """Check equality."""
