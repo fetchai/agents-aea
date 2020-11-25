@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the CoinPrice skill."""
+
+from aea.configurations.base import PublicId
+
+
+PUBLIC_ID = PublicId.from_str("fetchai/coin_price:0.1.0")
