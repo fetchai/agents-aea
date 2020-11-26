@@ -141,4 +141,5 @@ setup(
         "Bug Reports": "https://github.com/fetchai/agents-aea/issues",
         "Source": "https://github.com/fetchai/agents-aea",
     },
+    packages_data={"aea": ["helpers/storage/backends/binaries/*.*"]},
 )

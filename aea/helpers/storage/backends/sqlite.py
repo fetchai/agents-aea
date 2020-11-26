@@ -19,7 +19,10 @@
 """This module contains sqlite storage backend implementation."""
 import asyncio
 import json
+import os
+import platform
 import sqlite3
+import sys
 import threading
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List, Optional, Tuple
@@ -80,8 +83,22 @@ class SqliteStorageBackend(AbstractStorageBackend):
         """Connect to backend."""
         self._loop = asyncio.get_event_loop()
         self._connection = await self._loop.run_in_executor(
-            self._executor, sqlite3.connect, self._fname
+            self._executor, self._do_connect, self._fname
         )
+
+    @staticmethod
+    def _do_connect(fname: str) -> sqlite3.Connection:
+        con = sqlite3.connect(fname)
+        if (
+            platform.system() == "Windows"
+            and sys.version_info.major == 3
+            and sys.version_info.minor < 9
+        ):  # pragma: nocover
+            con.enable_load_extension(True)
+            con.load_extension(
+                os.path.join(os.path.dirname(__file__), "binaries", "json1.dll")
+            )
+        return con
 
     async def disconnect(self) -> None:
         """Disconnect the backend."""
