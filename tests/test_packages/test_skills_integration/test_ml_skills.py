@@ -391,7 +391,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             "found agents=",
             "sending CFT to agent=",
             "received terms message from",
-            "requesting transfer transaction from ledger api...",
+            "requesting transfer transaction from ledger api for message=",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "transaction signing was successful.",

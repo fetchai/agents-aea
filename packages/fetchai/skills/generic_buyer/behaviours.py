@@ -102,7 +102,9 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def __init__(self, **kwargs):
         """Initialize the transaction behaviour."""
-        tx_interval = cast(float, kwargs.pop("tx_interval", DEFAULT_TX_INTERVAL))
+        tx_interval = cast(
+            float, kwargs.pop("transaction_interval", DEFAULT_TX_INTERVAL)
+        )
         self.max_processing = cast(
             float, kwargs.pop("max_processing", DEFAULT_MAX_PROCESSING)
         )
@@ -128,9 +130,9 @@ class GenericTransactionBehaviour(TickerBehaviour):
         if len(self.waiting) == 0:
             # nothing to process
             return
-        self.start_processing()
+        self._start_processing()
 
-    def start_processing(self) -> None:
+    def _start_processing(self) -> None:
         """Process the next transaction."""
         dialogue, message = self.waiting.pop(0)
         self.processing_time = 0.0
