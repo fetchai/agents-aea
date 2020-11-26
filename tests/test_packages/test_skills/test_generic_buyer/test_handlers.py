@@ -346,14 +346,22 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
+        with patch.object(
+            self.fipa_handler.context.logger, "log"
+        ) as mock_logger_handler:
             self.fipa_handler.handle(incoming_message)
 
         # after
-        mock_logger.assert_any_call(
+        mock_logger_handler.assert_any_call(
             logging.INFO,
             f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_ADDRESS[-5:]} with info={incoming_message.info}",
         )
+
+        # operation
+        with patch.object(
+            self.fipa_handler.context.behaviours.transaction.context.logger, "log"
+        ) as _:
+            self.fipa_handler.context.behaviours.transaction.act()
 
         self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
@@ -365,10 +373,6 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             terms=fipa_dialogue.terms,
         )
         assert has_attributes, error_str
-
-        mock_logger.assert_any_call(
-            logging.INFO, "requesting transfer transaction from ledger api..."
-        )
 
     def test_handle_match_accept_not_is_ledger_tx(self):
         """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is False."""
