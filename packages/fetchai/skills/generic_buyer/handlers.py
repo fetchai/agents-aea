@@ -23,6 +23,7 @@ import pprint
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
+from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -648,30 +649,75 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
         self.context.logger.info(
             "transaction was successfully submitted. Transaction digest={}".format(
                 ledger_api_msg.transaction_digest
             )
         )
+        ledger_api_msg_ = ledger_api_dialogue.reply(
+            counterparty=LEDGER_API_ADDRESS,
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            transaction_digest=ledger_api_msg.transaction_digest,
+        )
+        self.context.outbox.put_message(message=ledger_api_msg_)
+
+    def _handle_transaction_receipt(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of balance performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
+        is_settled = LedgerApis.is_transaction_settled(
+            fipa_dialogue.terms.ledger_id, ledger_api_msg.transaction_receipt.receipt
+        )
+        is_valid = LedgerApis.is_transaction_valid(
+            fipa_dialogue.terms.ledger_id,
+            ledger_api_msg.transaction_receipt.transaction,
+            fipa_dialogue.terms.sender_address,
+            fipa_dialogue.terms.counterparty_address,
+            fipa_dialogue.terms.nonce,
+            fipa_dialogue.terms.counterparty_payable_amount,
+        )
         tx_behaviour = cast(
             GenericTransactionBehaviour, self.context.behaviours.transaction
         )
-        tx_behaviour.finish_processing(ledger_api_dialogue)
-        fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
-        if fipa_msg is None:
-            raise ValueError("Could not retrieve fipa message")
-        inform_msg = fipa_dialogue.reply(
-            performative=FipaMessage.Performative.INFORM,
-            target_message=fipa_msg,
-            info={"transaction_digest": ledger_api_msg.transaction_digest.body},
-        )
-        self.context.outbox.put_message(message=inform_msg)
-        self.context.logger.info(
-            "informing counterparty={} of transaction digest.".format(
-                fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+        if is_settled and is_valid:
+            tx_behaviour.finish_processing(ledger_api_dialogue)
+            ledger_api_msg_ = cast(
+                Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
-        )
+            if ledger_api_msg_ is None:
+                raise ValueError("Could not retrieve last ledger_api message")
+            fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
+            if fipa_msg is None:
+                raise ValueError("Could not retrieve last fipa message")
+            inform_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.INFORM,
+                target_message=fipa_msg,
+                info={"transaction_digest": ledger_api_msg_.transaction_digest.body},
+            )
+            self.context.outbox.put_message(message=inform_msg)
+            self.context.logger.info(
+                "transaction confirmed, informing counterparty={} of transaction digest.".format(
+                    fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+                )
+            )
+            fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
+                FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
+            )
+        else:
+            tx_behaviour.processing = None
+            tx_behaviour.processing_time = 0.0
+            self.context.logger.info(
+                "transaction_receipt={} not settled or not valid, aborting".format(
+                    ledger_api_msg.transaction_receipt
+                )
+            )
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
