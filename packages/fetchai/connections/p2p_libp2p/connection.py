@@ -30,7 +30,7 @@ from ipaddress import ip_address
 from pathlib import Path
 from random import randint
 from socket import gethostbyname
-from typing import IO, List, Optional, Sequence, cast
+from typing import IO, List, Optional, Sequence, Tuple, cast
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -206,6 +206,8 @@ class Uri:
 class Libp2pNode:
     """Libp2p p2p node as a subprocess with named pipes interface."""
 
+    CACHE_DIR = os.path.join(os.path.expanduser("~"), ".aea", "cache")
+
     def __init__(
         self,
         agent_addr: Address,
@@ -285,20 +287,11 @@ class Libp2pNode:
         self.logger = logger
         self._connection_timeout = PIPE_CONN_TIMEOUT
 
-    async def start(self) -> None:
-        """
-        Start the node.
-
-        :return: None
-        """
-        if self._loop is None:
-            self._loop = asyncio.get_event_loop()
-
-        # open log file
-        self._log_file_desc = open(self.log_file, "a", 1)
-
-        # build the node
+    async def _build(self) -> Tuple[str, str]:
+        """Build go lang module."""
         self.logger.info("Downloading golang dependencies. This may take a while...")
+        if not self._log_file_desc:  # pragma: nocover
+            raise ValueError("_log_file_desc is not set!")
         returncode = await _golang_module_build_async(
             self.source, self._log_file_desc, logger=self.logger
         )
@@ -312,6 +305,36 @@ class Libp2pNode:
                 )
             )
         self.logger.info("Finished downloading golang dependencies.")
+        return self.source, LIBP2P_NODE_MODULE_NAME
+
+    async def _build_cached(self) -> Tuple[str, str]:
+        """Build go lang module if not cached version exists."""
+        module_path = self.CACHE_DIR
+        module_name = f"{LIBP2P_NODE_MODULE_NAME}_{PUBLIC_ID.version}"
+        os.makedirs(module_path, exist_ok=True)
+        if not os.path.exists(
+            os.path.join(module_path, module_name)
+        ):  # pragma: nocover
+            path, name = await self._build()
+            shutil.copy(
+                os.path.join(path, name), os.path.join(module_path, module_name)
+            )
+        return module_path, module_name
+
+    async def start(self) -> None:
+        """
+        Start the node.
+
+        :return: None
+        """
+        if self._loop is None:
+            self._loop = asyncio.get_event_loop()
+
+        # open log file
+        self._log_file_desc = open(self.log_file, "a", 1)
+
+        # build the node
+        module_path, module_name = await self._build_cached()
 
         # setup fifos
         self.pipe = make_ipc_channel(logger=self.logger)
@@ -349,7 +372,7 @@ class Libp2pNode:
         # run node
         self.logger.info("Starting libp2p node...")
         self.proc = _golang_module_run(
-            self.source, LIBP2P_NODE_MODULE_NAME, [self.env_file], self._log_file_desc
+            module_path, module_name, [self.env_file], self._log_file_desc
         )
 
         self.logger.info("Connecting to libp2p node...")

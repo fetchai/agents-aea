@@ -19,6 +19,7 @@
 """This module contains the tests for the Multiplexer."""
 
 import asyncio
+import glob
 import logging
 import os
 import shutil
@@ -46,6 +47,10 @@ from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.test_tools.click_testing import CliRunner
 
 from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    LIBP2P_NODE_MODULE_NAME,
+    Libp2pNode,
+)
 from packages.fetchai.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_PUBLIC_ID,
 )
@@ -761,6 +766,9 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
         assert result.exit_code == 0, result.stdout_bytes
 
+        fpath = os.path.join(Libp2pNode.CACHE_DIR, LIBP2P_NODE_MODULE_NAME)
+        for fname in glob.glob(f"{fpath}*"):
+            os.remove(fname)
         self.proc = PexpectWrapper(  # nosec
             [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
             env=os.environ,

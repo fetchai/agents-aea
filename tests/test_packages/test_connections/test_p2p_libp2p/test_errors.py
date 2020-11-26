@@ -16,13 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains Negative tests for Libp2p connection."""
-
 import asyncio
 import os
 import shutil
 import tempfile
+from unittest.mock import patch
 
 import pytest
 
@@ -73,9 +72,10 @@ class TestP2PLibp2pConnectionFailureGolangBuild:
     @pytest.mark.asyncio
     async def test_wrong_path(self):
         """Test the wrong path."""
-        self.connection.node.source = self.wrong_path
-        with pytest.raises(Exception):
-            await self.connection.connect()
+        with patch("os.path.exists", return_value=False):
+            self.connection.node.source = self.wrong_path
+            with pytest.raises(Exception):
+                await self.connection.connect()
 
     @classmethod
     def teardown_class(cls):
