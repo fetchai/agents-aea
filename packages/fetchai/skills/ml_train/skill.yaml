@@ -9,7 +9,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmeHcYRhDJi6gqAHpK29UJz3doiyaicoqeTrPddqM3gh64
   __init__.py: QmNXBTCRubUf8cPXz3hcthWgwPSYpmtU3No3VcLXRKAvBc
-  behaviours.py: QmQiBzKV5rEFpMQbSjfjzAJ7SqwwGmso6TozWkjdytucLR
+  behaviours.py: QmXTG79nbRCELAJao6zasPDNxoDX4YYqVbJh6aRc5FXdyZ
   dialogues.py: QmVLXHVwXXLnK4zJzPBVhxzgu7ZmohRZ7oj3yG1LPFrmhx
   handlers.py: QmZkTRL3YCGLTJ9mYUonr19rWMiyD2WCAEypTXM7tbP2aY
   ml_model.py: QmTfshn6dFnz9gKXZt7aJJczRH14bN7nk6TybwFpzkEPnk
@@ -33,6 +33,11 @@ behaviours:
     args:
       search_interval: 10
     class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 120
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   ledger_api:
     args: {}
