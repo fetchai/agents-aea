@@ -23,7 +23,7 @@ This module contains the classes required for dialogue management.
 - Dialogue: The dialogue class maintains state of a dialogue and manages it.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
-
+import inspect
 import itertools
 import secrets
 import sys
@@ -34,7 +34,9 @@ from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, 
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
+from aea.helpers.storage.generic_storage import SyncCollection
 from aea.protocols.base import Message
+from aea.skills.base import SkillComponent
 
 
 if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
@@ -337,6 +339,17 @@ class Dialogue(metaclass=_DialogueMeta):
         )
         self._message_class = message_class
 
+    def __eq__(self, other) -> bool:
+        """Compare two dialogues."""
+        return (
+            type(self) == type(other)  # pylint: disable=unidiomatic-typecheck
+            and self.dialogue_label == other.dialogue_label
+            and self.message_class == other.message_class
+            and self._incoming_messages == other._incoming_messages
+            and self._outgoing_messages == other._outgoing_messages
+            and self.role == other.role
+        )
+
     def json(self) -> dict:
         """Get json representation of the dialogue."""
         data = {
@@ -359,10 +372,10 @@ class Dialogue(metaclass=_DialogueMeta):
         :return: Dialogue instance
         """
         obj = cls(
-            DialogueLabel.from_json(data["dialogue_label"]),
-            message_class,
-            Address(data["self_address"]),
-            cls.Role(data["role"]),
+            dialogue_label=DialogueLabel.from_json(data["dialogue_label"]),
+            message_class=message_class,
+            self_address=Address(data["self_address"]),
+            role=cls.Role(data["role"]),
         )
         obj._incoming_messages = [  # pylint: disable=protected-access
             message_class.from_json(i) for i in data["incoming_messages"]
@@ -982,10 +995,24 @@ class DialogueStats:
             self._other_initiated[end_state] += 1
 
 
-class DialoguesStorage:
+def find_caller_object(object_type: Type):
+    """Find caller object of certain type in the call stack."""
+    caller_object = None
+    for frame_info in inspect.stack():
+        frame_self = frame_info.frame.f_locals.get("self", None)
+        if not frame_self:
+            continue
+
+        if not isinstance(frame_self, object_type):
+            continue
+        caller_object = frame_self
+    return caller_object
+
+
+class BasicDialoguesStorage:
     """Dialogues state storage."""
 
-    def __init__(self) -> None:
+    def __init__(self, dialogues: "Dialogues") -> None:
         """Init dialogues storage."""
         self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
         self._dialogue_by_address = defaultdict(
@@ -994,6 +1021,13 @@ class DialoguesStorage:
         self._incomplete_to_complete_dialogue_labels = (
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
+        self._dialogues = dialogues
+
+    def setup(self) -> None:
+        """Set up dialogue storage."""
+
+    def teardown(self) -> None:
+        """Tear down dialogue storage."""
 
     def add(self, dialogue: Dialogue) -> None:
         """
@@ -1066,6 +1100,115 @@ class DialoguesStorage:
         )
 
 
+class PersistDialoguesStorage(BasicDialoguesStorage):
+    """
+    Persist dialogues storage.
+
+    Uses generic storage to load/save dialogues data on setup/teardown.
+    """
+
+    INCOMPLETE_DIALOGUES_OBJECT_NAME = "incomplete_dialogues"
+
+    def __init__(self, dialogues: "Dialogues") -> None:
+        """Init dialogues storage."""
+        super().__init__(dialogues)
+
+        self._skill_component: Optional[SkillComponent] = self.get_skill_component()
+
+    @staticmethod
+    def get_skill_component() -> Optional[SkillComponent]:
+        """Get skill component dialogues storage constructed for."""
+        caller_object = find_caller_object(SkillComponent)
+        if not caller_object:  # pragma: nocover
+            return None
+        return caller_object
+
+    def _get_collection_name(self) -> Optional[str]:
+        """Generate collection name based on the dialogues class name and skill component."""
+        if not self._skill_component:  # pragma: nocover
+            return None
+        return "_".join(
+            [
+                self._skill_component.skill_id.author,
+                self._skill_component.skill_id.name,
+                self._skill_component.name,
+                self._dialogues.__class__.__name__,
+            ]
+        )
+
+    def _get_collection(self) -> Optional[SyncCollection]:
+        """Get sync collection if generic storage available."""
+        if (
+            not self._skill_component or not self._skill_component.context.storage
+        ):  # pragma: nocover
+            return None
+        col_name = self._get_collection_name()
+        if not col_name:  # pragma: nocover
+            return None
+        return self._skill_component.context.storage.get_sync_collection(col_name)
+
+    def _dump(self) -> None:
+        """Dump dialogues storage to the generic storage."""
+        collection = self._get_collection()
+        if not collection:  # pragma: nocover
+            return
+        collection.put(
+            self.INCOMPLETE_DIALOGUES_OBJECT_NAME,
+            self._incomplete_dialogues_labels_to_json(),
+        )
+
+        for label, dialogue in self._dialogues_by_dialogue_label.items():
+            collection.put(str(label), dialogue.json())
+
+    def _load(self) -> None:
+        """Dump dialogues from the generic storage."""
+        collection = self._get_collection()
+        if not collection:  # pragma: nocover
+            return
+
+        incomplete_dialogues_data = collection.get(
+            self.INCOMPLETE_DIALOGUES_OBJECT_NAME
+        )
+        if incomplete_dialogues_data is not None:
+            incomplete_dialogues_data = cast(List, incomplete_dialogues_data)
+            self._set_incomplete_dialogues_labels_from_json(incomplete_dialogues_data)
+
+        for label, dialogue_data in collection.list():
+            if label == self.INCOMPLETE_DIALOGUES_OBJECT_NAME:
+                continue
+            dialogue_data = cast(Dict, dialogue_data)
+            self.add(
+                self._dialogues.dialogue_class.from_json(
+                    self._dialogues.message_class, dialogue_data
+                )
+            )
+
+    def _incomplete_dialogues_labels_to_json(self) -> List:
+        """Dump incomplete_to_complete_dialogue_labels to json friendly dict."""
+        return [
+            [k.json, v.json]
+            for k, v in self._incomplete_to_complete_dialogue_labels.items()
+        ]
+
+    def _set_incomplete_dialogues_labels_from_json(self, data: List) -> None:
+        """Set incomplete_to_complete_dialogue_labels from json friendly dict."""
+        self._incomplete_to_complete_dialogue_labels = {
+            DialogueLabel.from_json(k): DialogueLabel.from_json(v) for k, v in data
+        }
+
+    def setup(self) -> None:
+        """Set up dialogue storage."""
+        if not self._skill_component:  # pragma: nocover
+            return
+        self._load()
+
+    def teardown(self) -> None:
+        """Tear down dialogue storage."""
+        if not self._skill_component:  # pragma: nocover
+            return
+        self._dump()
+
+
 class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
@@ -1085,7 +1228,7 @@ class Dialogues:
         :return: None
         """
 
-        self._dialogues_storage = DialoguesStorage()
+        self._dialogues_storage = PersistDialoguesStorage(self)
         self._self_address = self_address
         self._dialogue_stats = DialogueStats(end_states)
 
@@ -1394,7 +1537,7 @@ class Dialogues:
             incomplete_dialogue_label
         ) and not self._dialogues_storage.is_in_incomplete(incomplete_dialogue_label):
             dialogue = self._dialogues_storage.get(incomplete_dialogue_label)
-            if not dialogue:
+            if not dialogue:  # pragma: nocover
                 raise ValueError("no dialogue found")
             self._dialogues_storage.remove(incomplete_dialogue_label)
             final_dialogue_label = DialogueLabel(
@@ -1572,3 +1715,17 @@ class Dialogues:
         :return: the next nonce
         """
         return secrets.token_hex(DialogueLabel.NONCE_BYTES_NB)
+
+    def setup(self) -> None:
+        """Set  up."""
+        self._dialogues_storage.setup()
+        super_obj = super()
+        if hasattr(super_obj, "setup"):  # pragma: nocover
+            super_obj.setup()  # type: ignore  # pylint: disable=no-member
+
+    def teardown(self) -> None:
+        """Tear down."""
+        self._dialogues_storage.teardown()
+        super_obj = super()
+        if hasattr(super_obj, "teardown"):  # pragma: nocover
+            super_obj.teardown()  # type: ignore  # pylint: disable=no-member

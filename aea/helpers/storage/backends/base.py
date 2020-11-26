@@ -20,10 +20,11 @@
 
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 
 EQUALS_TYPE = Union[int, float, str, bool]
+JSON_TYPES = Union[Dict, str, List, None, int, float]
 
 
 class AbstractStorageBackend(ABC):
@@ -65,7 +66,7 @@ class AbstractStorageBackend(ABC):
 
     @abstractmethod
     async def put(
-        self, collection_name: str, object_id: str, object_body: Dict
+        self, collection_name: str, object_id: str, object_body: JSON_TYPES
     ) -> None:
         """
         Put object into collection.
@@ -77,7 +78,7 @@ class AbstractStorageBackend(ABC):
         """
 
     @abstractmethod
-    async def get(self, collection_name: str, object_id: str) -> Optional[Dict]:
+    async def get(self, collection_name: str, object_id: str) -> Optional[JSON_TYPES]:
         """
         Get object from the collection.
 
@@ -101,7 +102,7 @@ class AbstractStorageBackend(ABC):
     @abstractmethod
     async def find(
         self, collection_name: str, field: str, equals: EQUALS_TYPE
-    ) -> List[Dict]:
+    ) -> List[JSON_TYPES]:
         """
         Get objects from the collection by filtering by field value.
 
@@ -109,5 +110,14 @@ class AbstractStorageBackend(ABC):
         :param field: field name to search: example "parent.field"
         :param equals: value field should be equal to
 
-        :return: None
+        :return:  list of objects bodies
+        """
+
+    @abstractmethod
+    async def list(self, collection_name: str) -> List[Tuple[str, JSON_TYPES]]:
+        """
+        List all objects with keys from the collection.
+
+        :param collection_name: str.
+        :return: Tuple of objects keys, bodies.
         """

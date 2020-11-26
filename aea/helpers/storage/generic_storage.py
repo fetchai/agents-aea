@@ -18,11 +18,15 @@
 # ------------------------------------------------------------------------------
 """This module contains the storage implementation."""
 import asyncio
-from typing import Dict, List, Optional
+from typing import List, Optional, Tuple
 from urllib.parse import urlparse
 
-from aea.helpers.async_utils import Runnable
-from aea.helpers.storage.backends.base import AbstractStorageBackend, EQUALS_TYPE
+from aea.helpers.async_utils import AsyncState, Runnable
+from aea.helpers.storage.backends.base import (
+    AbstractStorageBackend,
+    EQUALS_TYPE,
+    JSON_TYPES,
+)
 from aea.helpers.storage.backends.sqlite import SqliteStorageBackend
 
 
@@ -42,7 +46,7 @@ class AsyncCollection:
         self._storage_backend = storage_backend
         self._collection_name = collection_name
 
-    async def put(self, object_id: str, object_body: Dict) -> None:
+    async def put(self, object_id: str, object_body: JSON_TYPES) -> None:
         """
         Put object into collection.
 
@@ -55,7 +59,7 @@ class AsyncCollection:
             self._collection_name, object_id, object_body
         )
 
-    async def get(self, object_id: str) -> Optional[Dict]:
+    async def get(self, object_id: str) -> Optional[JSON_TYPES]:
         """
         Get object from the collection.
 
@@ -75,7 +79,7 @@ class AsyncCollection:
         """
         return await self._storage_backend.remove(self._collection_name, object_id)
 
-    async def find(self, field: str, equals: EQUALS_TYPE) -> List[Dict]:
+    async def find(self, field: str, equals: EQUALS_TYPE) -> List[JSON_TYPES]:
         """
         Get objects from the collection by filtering by field value.
 
@@ -85,6 +89,14 @@ class AsyncCollection:
         :return: None
         """
         return await self._storage_backend.find(self._collection_name, field, equals)
+
+    async def list(self) -> List[Tuple[str, JSON_TYPES]]:
+        """
+        List all objects with keys from the collection.
+
+        :return: Tuple of objects keys, bodies.
+        """
+        return await self._storage_backend.list(self._collection_name)
 
 
 class SyncCollection:
@@ -103,7 +115,7 @@ class SyncCollection:
     def _run_sync(self, coro):
         return asyncio.run_coroutine_threadsafe(coro, self._loop).result()
 
-    def put(self, object_id: str, object_body: Dict) -> None:
+    def put(self, object_id: str, object_body: JSON_TYPES) -> None:
         """
         Put object into collection.
 
@@ -113,7 +125,7 @@ class SyncCollection:
         """
         return self._run_sync(self._async_collection.put(object_id, object_body))
 
-    def get(self, object_id: str) -> Optional[Dict]:
+    def get(self, object_id: str) -> Optional[JSON_TYPES]:
         """
         Get object from the collection.
 
@@ -133,16 +145,24 @@ class SyncCollection:
         """
         return self._run_sync(self._async_collection.remove(object_id))
 
-    def find(self, field: str, equals: EQUALS_TYPE) -> List[Dict]:
+    def find(self, field: str, equals: EQUALS_TYPE) -> List[JSON_TYPES]:
         """
         Get objects from the collection by filtering by field value.
 
         :param field: field name to search: example "parent.field"
         :param equals: value field should be equal to
 
-        :return: None
+        :return: List of object bodies
         """
         return self._run_sync(self._async_collection.find(field, equals))
+
+    def list(self) -> List[Tuple[str, JSON_TYPES]]:
+        """
+        List all objects with keys from the collection.
+
+        :return: Tuple of objects keys, bodies.
+        """
+        return self._run_sync(self._async_collection.list())
 
 
 class Storage(Runnable):
@@ -167,6 +187,11 @@ class Storage(Runnable):
         self._storage_uri = storage_uri
         self._backend: AbstractStorageBackend = self._get_backend_instance(storage_uri)
         self._is_connected = False
+        self._connected_state = AsyncState(False)
+
+    async def wait_connected(self) -> None:
+        """Wait generic storage is connected."""
+        await self._connected_state.wait(True)
 
     @property
     def is_connected(self) -> bool:
@@ -177,6 +202,7 @@ class Storage(Runnable):
         """Connect storage."""
         await self._backend.connect()
         self._is_connected = True
+        self._connected_state.set(True)
         try:
             while True:
                 await asyncio.sleep(1)
@@ -207,3 +233,7 @@ class Storage(Runnable):
         if not self._loop:  # pragma: nocover
             raise ValueError("Storage not started!")
         return SyncCollection(self.get_collection(collection_name), self._loop)
+
+    def __repr__(self) -> str:
+        """Get string representation of the storage."""
+        return f"[GenericStorage({self._storage_uri}){'Connected' if self.is_connected else 'Not connected'}]"

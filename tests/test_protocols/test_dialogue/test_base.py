@@ -16,26 +16,34 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the dialogue/base.py module."""
-
 import sys
 from typing import FrozenSet, Tuple, Type, cast
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
 import aea
 from aea.common import Address
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError
+from aea.helpers.storage.generic_storage import Storage
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel, DialogueMessage, DialogueStats
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
-from aea.protocols.dialogue.base import InvalidDialogueMessage
+from aea.protocols.dialogue.base import (
+    InvalidDialogueMessage,
+    PersistDialoguesStorage,
+    find_caller_object,
+)
+from aea.skills.base import SkillComponent
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
+
+from tests.common.utils import wait_for_condition
 
 
 class Dialogue(BaseDialogue):
@@ -1646,18 +1654,109 @@ class TestDialoguesBase:
             self.opponent_address
         ) == [dialogue]
 
-    def test_json_from_json(self):
+    def test_setup(self):
+        """Test dialogues.setup()."""
+        self.own_dialogues.setup()
+
+    def test_teardown(self):
+        """Test dialogues.teardown()."""
+        self.own_dialogues.teardown()
+
+
+class TestPersistDialoguesStorage:
+    """Test PersistDialoguesStorage."""
+
+    def setup(self):
+        """Initialise the environment to test PersistDialogueStorage."""
+        self.agent_address = "agent 1"
+        self.opponent_address = "agent 2"
+        self.dialogues = Dialogues(self.agent_address)
+        self.skill_component = Mock()
+        self.skill_component.name = "test_component"
+        self.skill_component.skill_id = PublicId("test", "test", "0.1.0")
+
+        self.dialogue_label = DialogueLabel(
+            dialogue_reference=(str(1), ""),
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.agent_address,
+        )
+        self.generic_storage = Storage("sqlite://:memory:", threaded=True)
+        self.generic_storage.start()
+        wait_for_condition(lambda: self.generic_storage.is_connected, timeout=10)
+        self.skill_component.context.storage = self.generic_storage
+
+    def teardown(self):
+        """Tear down the environment to test PersistDialogueStorage."""
+        self.generic_storage.stop()
+        self.generic_storage.wait_completed(sync=True, timeout=10)
+
+    def test_dialogue_serialize_deserialize(self):
         """Test dialogue dumped and restored."""
         msg = DefaultMessage(
-            dialogue_reference=self.own_dialogues.new_self_initiated_dialogue_reference(),
+            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        dialogue = self.own_dialogues.create_with_message("opponent", msg)
+        dialogue = self.dialogues.create_with_message("opponent", msg)
         data = dialogue.json()
         dialogue_restored = dialogue.__class__.from_json(dialogue.message_class, data)
-        assert dialogue.dialogue_label == dialogue_restored.dialogue_label
-        assert dialogue.message_class == dialogue_restored.message_class
-        assert dialogue._incoming_messages == dialogue_restored._incoming_messages
-        assert dialogue._outgoing_messages == dialogue_restored._outgoing_messages
-        assert dialogue.role == dialogue_restored.role
+        assert dialogue == dialogue_restored
+
+    def test_dump_restore(self):
+        """Test dump and load methods of the persists storage."""
+        dialogues_storage = PersistDialoguesStorage(self.dialogues)
+        dialogues_storage._skill_component = self.skill_component
+        self.dialogues._dialogues_storage = dialogues_storage
+        dialogues_storage._incomplete_to_complete_dialogue_labels[
+            self.dialogue_label
+        ] = self.dialogue_label
+        self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+        assert dialogues_storage.dialogues
+        assert dialogues_storage._dialogue_by_address
+        assert dialogues_storage._incomplete_to_complete_dialogue_labels
+        dialogues_storage.teardown()
+
+        dialogues_storage_restored = PersistDialoguesStorage(self.dialogues)
+        dialogues_storage_restored._skill_component = self.skill_component
+        dialogues_storage_restored.setup()
+
+        assert dialogues_storage.dialogues == dialogues_storage_restored.dialogues
+        assert (
+            dialogues_storage._dialogue_by_address
+            == dialogues_storage_restored._dialogue_by_address
+        )
+        assert (
+            dialogues_storage._incomplete_to_complete_dialogue_labels
+            == dialogues_storage_restored._incomplete_to_complete_dialogue_labels
+        )
+
+
+def test_find_caller_object():
+    """Test find_caller_object."""
+
+    class CustomSkillComponent(SkillComponent):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.storage = PersistDialoguesStorage(self)
+
+        def setup(self):
+            pass
+
+        def teardown(self):
+            pass
+
+        @classmethod
+        def parse_module(cls, *args, **kwargs):
+            pass
+
+    skill_component = CustomSkillComponent(Mock(), Mock(), Mock())
+    assert skill_component.storage._skill_component == skill_component
+
+    class CustomObject:
+        def __init__(self, *args, **kwargs):
+            self.component = find_caller_object(SkillComponent)
+
+    custom_object = CustomObject()
+    assert custom_object.component is None

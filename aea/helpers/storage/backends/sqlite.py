@@ -21,10 +21,15 @@ import asyncio
 import json
 import sqlite3
 import threading
-from typing import Dict, List, Optional, Tuple
+from concurrent.futures.thread import ThreadPoolExecutor
+from typing import List, Optional, Tuple
 from urllib.parse import urlparse
 
-from aea.helpers.storage.backends.base import AbstractStorageBackend, EQUALS_TYPE
+from aea.helpers.storage.backends.base import (
+    AbstractStorageBackend,
+    EQUALS_TYPE,
+    JSON_TYPES,
+)
 
 
 class SqliteStorageBackend(AbstractStorageBackend):
@@ -33,11 +38,12 @@ class SqliteStorageBackend(AbstractStorageBackend):
     def __init__(self, uri: str) -> None:
         """Init backend."""
         super().__init__(uri)
-        parsed = urlparse(uri)
+        parsed = urlparse(self._uri)
         self._fname = parsed.netloc or parsed.path
         self._connection: Optional[sqlite3.Connection] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._lock = threading.Lock()
+        self._executor = ThreadPoolExecutor(max_workers=1)
 
     def _execute_sql_sync(self, query: str, args: Optional[List] = None) -> List[Tuple]:
         """
@@ -51,7 +57,9 @@ class SqliteStorageBackend(AbstractStorageBackend):
         if not self._connection:  # pragma: nocover
             raise ValueError("Not connected")
         with self._lock:
-            return self._connection.execute(query, args or []).fetchall()
+            result = self._connection.execute(query, args or []).fetchall()
+            self._connection.commit()
+            return result
 
     async def _executute_sql(self, query: str, args: Optional[List] = None):
         """
@@ -65,21 +73,21 @@ class SqliteStorageBackend(AbstractStorageBackend):
         if not self._loop:  # pragma: nocover
             raise ValueError("Not connected")
         return await self._loop.run_in_executor(
-            None, self._execute_sql_sync, query, args
+            self._executor, self._execute_sql_sync, query, args
         )
 
     async def connect(self) -> None:
         """Connect to backend."""
         self._loop = asyncio.get_event_loop()
         self._connection = await self._loop.run_in_executor(
-            None, sqlite3.connect, self._fname
+            self._executor, sqlite3.connect, self._fname
         )
 
     async def disconnect(self) -> None:
         """Disconnect the backend."""
         if not self._loop or not self._connection:  # pragma: nocover
             raise ValueError("Not connected")
-        await self._loop.run_in_executor(None, self._connection.close)
+        await self._loop.run_in_executor(self._executor, self._connection.close)
         self._connection = None
         self._loop = None
 
@@ -94,11 +102,11 @@ class SqliteStorageBackend(AbstractStorageBackend):
         sql = f"""CREATE TABLE IF NOT EXISTS {collection_name} (
             object_id TEXT PRIMARY KEY,
             object_body JSON1 NOT NULL)
-        """
+        """  # nosec
         await self._executute_sql(sql)
 
     async def put(
-        self, collection_name: str, object_id: str, object_body: Dict
+        self, collection_name: str, object_id: str, object_body: JSON_TYPES
     ) -> None:
         """
         Put object into collection.
@@ -109,12 +117,12 @@ class SqliteStorageBackend(AbstractStorageBackend):
         :return: None
         """
         self._check_collection_name(collection_name)
-        sql = f"""INSERT INTO {collection_name} (object_id, object_body)
+        sql = f"""INSERT OR REPLACE INTO {collection_name} (object_id, object_body)
             VALUES (?, ?);
-        """
+        """  # nosec
         await self._executute_sql(sql, [object_id, json.dumps(object_body)])
 
-    async def get(self, collection_name: str, object_id: str) -> Optional[Dict]:
+    async def get(self, collection_name: str, object_id: str) -> Optional[JSON_TYPES]:
         """
         Get object from the collection.
 
@@ -124,7 +132,7 @@ class SqliteStorageBackend(AbstractStorageBackend):
         :return: dict if object exists in collection otherwise None
         """
         self._check_collection_name(collection_name)
-        sql = f"""SELECT object_body FROM {collection_name} WHERE object_id = ? LIMIT 1;"""
+        sql = f"""SELECT object_body FROM {collection_name} WHERE object_id = ? LIMIT 1;"""  # nosec
         result = await self._executute_sql(sql, [object_id])
         if result:
             return json.loads(result[0][0])
@@ -140,12 +148,12 @@ class SqliteStorageBackend(AbstractStorageBackend):
         :return: None
         """
         self._check_collection_name(collection_name)
-        sql = f"""DELETE FROM {collection_name} WHERE object_id = ?;"""
+        sql = f"""DELETE FROM {collection_name} WHERE object_id = ?;"""  # nosec
         await self._executute_sql(sql, [object_id])
 
     async def find(
         self, collection_name: str, field: str, equals: EQUALS_TYPE
-    ) -> List[Dict]:
+    ) -> List[JSON_TYPES]:
         """
         Get objects from the collection by filtering by field value.
 
@@ -156,9 +164,20 @@ class SqliteStorageBackend(AbstractStorageBackend):
         :return: None
         """
         self._check_collection_name(collection_name)
-        sql = f"""SELECT object_body FROM {collection_name} WHERE json_extract(object_body, ?) = ?;"""
+        sql = f"""SELECT object_body FROM {collection_name} WHERE json_extract(object_body, ?) = ?;"""  # nosec
         if not field.startswith("$."):
             field = f"$.{field}"
         return [
             json.loads(i[0]) for i in await self._executute_sql(sql, [field, equals])
         ]
+
+    async def list(self, collection_name: str) -> List[Tuple[str, JSON_TYPES]]:
+        """
+        List all objects with keys from the collection.
+
+        :param collection_name: str.
+        :return: Tuple of objects keys, bodies.
+        """
+        self._check_collection_name(collection_name)
+        sql = f"""SELECT object_id, object_body FROM {collection_name};"""  # nosec
+        return [(i[0], json.loads(i[1])) for i in await self._executute_sql(sql)]

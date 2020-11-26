@@ -319,6 +319,9 @@ class SkillComponent(ABC):
 
         :return: None
         """
+        super_obj = super()
+        if hasattr(super_obj, "setup"):
+            super_obj.setup()  # type: ignore  # pylint: disable=no-member
 
     @abstractmethod
     def teardown(self) -> None:
@@ -327,6 +330,9 @@ class SkillComponent(ABC):
 
         :return: None
         """
+        super_obj = super()
+        if hasattr(super_obj, "teardown"):
+            super_obj.teardown()  # type: ignore  # pylint: disable=no-member
 
     @classmethod
     @abstractmethod
@@ -573,9 +579,15 @@ class Model(SkillComponent, ABC):
 
     def setup(self) -> None:
         """Set the class up."""
+        super_obj = super()
+        if hasattr(super_obj, "setup"):
+            super_obj.setup()  # type: ignore  # pylint: disable=no-member
 
     def teardown(self) -> None:
         """Tear the class down."""
+        super_obj = super()
+        if hasattr(super_obj, "teardown"):
+            super_obj.teardown()  # type: ignore  # pylint: disable=no-member
 
     @classmethod
     def parse_module(  # pylint: disable=arguments-differ

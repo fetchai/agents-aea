@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea helpers storage code."""
-import asyncio
 import os
 import time
 
@@ -35,18 +34,20 @@ class TestAsyncCollection:
         s = Storage("sqlite://:memory:")
         s.start()
 
-        while not s.is_connected:
-            await asyncio.sleep(0.01)
+        await s.wait_connected()
 
         col = await s.get_collection("test_col")
         col2 = await s.get_collection("another_collection")
         obj_id = "1"
         obj_body = {"a": 12}
+        await col.put(obj_id, {"x": 13})
         await col.put(obj_id, obj_body)
         assert await col.find("a", 12) == [obj_body]
         assert await col.get(obj_id) == obj_body
         assert await col2.get(obj_id) is None
         assert await col.get("not exists") is None
+
+        assert await col.list() == [(obj_id, obj_body)]
 
         await col.remove(obj_id)
         assert await col.get(obj_id) is None
@@ -71,11 +72,13 @@ class TestSyncCollection:
 
         col = s.get_sync_collection("test_col")
         col2 = s.get_sync_collection("another_collection")
+        col.put(obj_id, {"x": 13})
         col.put(obj_id, obj_body)
         assert col.find("a", 12) == [obj_body]
         assert col.get(obj_id) == obj_body
         assert col2.get(obj_id) is None
         assert col.get("not exists") is None
+        assert col.list() == [(obj_id, obj_body)]
 
         col.remove(obj_id)
         assert col.get(obj_id) is None

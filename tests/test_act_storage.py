@@ -16,18 +16,30 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+
 """This module contains tests behaviour storage access."""
 import os
 
 import pytest
 
+from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.mail.base import Envelope
+from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import Dialogue
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.skills.behaviours import TickerBehaviour
-from failing.vendor.fetchai.protocols.default.message import DefaultMessage
+from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue,
+    DefaultDialogues,
+)
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.skills.echo import PUBLIC_ID
 
 from tests.common.utils import wait_for_condition
 
@@ -157,6 +169,89 @@ def test_storage_access_from_handler():
     finally:
         aea.runtime.stop()
         aea.runtime.wait_completed(sync=True, timeout=10)
+
+
+class TestDialogueModelSaveLoad(AEATestCaseEmpty):
+    """Test dialogues sved and loaded on agent restart."""
+
+    def setup(self):
+        """Set up the test case."""
+        self.add_item("skill", "fetchai/echo:latest", local=True)
+        pkey_file = os.path.join(self._get_cwd(), "privkey")
+        self.generate_private_key("fetchai", pkey_file)
+        self.add_private_key("fetchai", pkey_file, False)
+        self.add_private_key("fetchai", pkey_file, True)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return DefaultDialogue.Role.AGENT
+
+        self.dialogues = DefaultDialogues(
+            self_address="another_agent",
+            role_from_first_message=role_from_first_message,
+        )
+
+    def _build_aea(self) -> AEA:
+        """Build an AEA."""
+        builder = AEABuilder.from_aea_project(self._get_cwd())
+        builder.set_storage_uri("sqlite://some_file.db")
+        aea = builder.build()
+        aea.runtime._threaded = True
+        return aea
+
+    def test_dialogues_dumped_and_restored_properly(self):
+        """Test dialogues restored during restart of agent."""
+        aea = self._build_aea()
+        aea.runtime.start()
+        try:
+            wait_for_condition(lambda: aea.is_running, timeout=10)
+            echo_skill = aea.resources.get_skill(PUBLIC_ID)
+            assert (
+                not echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues
+            )
+            msg, dialogue = self.dialogues.create(
+                aea.name,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            envelope = Envelope(
+                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            )
+            aea.runtime.multiplexer.in_queue.put(envelope)
+            wait_for_condition(
+                lambda: echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues,
+                timeout=3,
+            )
+            dialogues_for_check = (
+                echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues
+            )
+        finally:
+            aea.runtime.stop()
+            aea.runtime.wait_completed(sync=True, timeout=10)
+
+        aea = self._build_aea()
+        aea.runtime.start()
+        try:
+            wait_for_condition(lambda: aea.is_running, timeout=10)
+            echo_skill = aea.resources.get_skill(PUBLIC_ID)
+            wait_for_condition(
+                lambda: echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues,
+                timeout=3,
+            )
+            assert (
+                echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues
+                == dialogues_for_check
+            )
+        finally:
+            aea.runtime.stop()
+            aea.runtime.wait_completed(sync=True, timeout=10)
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ import inspect
 import logging
 import re
 from abc import ABC, abstractmethod
+from base64 import b64decode, b64encode
 from copy import copy
 from enum import Enum
 from pathlib import Path
@@ -84,21 +85,23 @@ class Message:
             _default_logger.error(e)
 
     def json(self) -> dict:
-        """Get json representation of the message."""
-        return {"to": self._to, "sender": self._sender, "body": self._body}
+        """Get json friendly str representation of the message."""
+        return {
+            "to": self._to,
+            "sender": self._sender,
+            "body": b64encode(self.encode()).decode("utf-8"),
+        }
 
     @classmethod
-    def from_json(cls, data) -> "Message":
+    def from_json(cls, data: dict) -> "Message":
         """Construct message instance from json data."""
-        instance = cls(**data["body"])
+        instance = cls.decode(b64decode(data["body"]))
         sender = data["sender"]
         if sender:
             instance.sender = sender
-
         to = data["to"]
         if to:
             instance.to = to
-
         return instance
 
     @property
@@ -263,6 +266,11 @@ class Message:
     def encode(self) -> bytes:
         """Encode the message."""
         return self.serializer.encode(self)
+
+    @classmethod
+    def decode(cls, data: bytes) -> "Message":
+        """Decode the message."""
+        return cls.serializer.decode(data)
 
     @property
     def has_dialogue_info(self) -> bool:
