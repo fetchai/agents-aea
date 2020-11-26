@@ -44,12 +44,14 @@ _default_logger = logging.getLogger(__name__)
 
 _ETHEREUM = "ethereum"
 GAS_ID = "gwei"
-ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
-TESTNET_NAME = "ropsten"
-DEFAULT_ADDRESS = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe"
-DEFAULT_CHAIN_ID = 3
+ETHEREUM_TESTNET_FAUCET_URL = "TBD"
+TESTNET_NAME = "ganache"
+DEFAULT_ADDRESS = "http://127.0.0.1:8545"
+DEFAULT_CHAIN_ID = 1337
 DEFAULT_GAS_PRICE = "50"
 DEFAULT_CURRENCY_DENOM = "wei"
+_ABI = "abi"
+_BYTECODE = "bytecode"
 
 
 class EthereumCrypto(Crypto[Account]):
