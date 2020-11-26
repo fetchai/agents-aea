@@ -22,6 +22,7 @@
 import hashlib
 import logging
 import time
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import eth_account
@@ -134,7 +135,6 @@ def test_get_balance(ethereum_testnet_config, ganache):
     balance = ethereum_api.get_balance(ec.address)
     assert balance > 0, "Existing account has no balance."
 
-
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
@@ -147,11 +147,12 @@ def test_get_state(ethereum_testnet_config, ganache):
     assert block is not None, "response to getBlock is empty."
     assert "number" in dict(block), "response to getBlock() does not contain 'number'"
 
-
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_construct_sign_and_submit_transfer_transaction():
+def test_construct_sign_and_submit_transfer_transaction(
+    ethereum_testnet_config, ganache
+):
     """Test the construction, signing and submitting of a transfer transaction."""
     account = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     ec2 = EthereumCrypto()
@@ -249,3 +250,11 @@ def test_get_deploy_transaction(ethereum_testnet_config, ganache):
         key in ["from", "value", "gas", "gasPrice", "nonce", "data"]
         for key in deploy_tx.keys()
     )
+
+
+def test_load_contract_interface():
+    """Test the load_contract_interface method."""
+    path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
+    result = EthereumApi.load_contract_interface(path)
+    assert "abi" in result
+    assert "bytecode" in result
