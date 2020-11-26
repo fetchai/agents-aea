@@ -135,6 +135,7 @@ def test_get_balance(ethereum_testnet_config, ganache):
     balance = ethereum_api.get_balance(ec.address)
     assert balance > 0, "Existing account has no balance."
 
+
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
@@ -146,6 +147,7 @@ def test_get_state(ethereum_testnet_config, ganache):
     block = ethereum_api.get_state(callable_name, *args)
     assert block is not None, "response to getBlock is empty."
     assert "number" in dict(block), "response to getBlock() does not contain 'number'"
+
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
