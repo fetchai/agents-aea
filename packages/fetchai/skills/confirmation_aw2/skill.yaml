@@ -31,6 +31,11 @@ behaviours:
     args:
       search_interval: 5
     class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 120
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   default_handler:
     args: {}
