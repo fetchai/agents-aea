@@ -34,6 +34,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.generic_buyer.behaviours import GenericTransactionBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -215,9 +216,11 @@ class GenericFipaHandler(Handler):
             ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-            self.context.outbox.put_message(message=ledger_api_msg)
-            self.context.logger.info(
-                "requesting transfer transaction from ledger api..."
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.waiting.append(
+                (ledger_api_dialogue, cast(LedgerApiMessage, ledger_api_msg))
             )
         else:
             inform_msg = fipa_dialogue.reply(
@@ -651,6 +654,10 @@ class GenericLedgerApiHandler(Handler):
                 ledger_api_msg.transaction_digest
             )
         )
+        tx_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        tx_behaviour.finish_processing(ledger_api_dialogue)
         fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
         if fipa_msg is None:
             raise ValueError("Could not retrieve fipa message")
