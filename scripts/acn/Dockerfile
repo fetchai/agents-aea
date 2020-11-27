@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 USER root
 
@@ -30,6 +30,10 @@ RUN svn export https://github.com/fetchai/agents-aea/trunk/scripts/acn/run_acn_n
 
 # build node
 RUN cd /acn/node && go build
+
+EXPOSE 9000
+EXPOSE 11000
+EXPOSE 8080
 
 ENTRYPOINT [ "python3", "-u", "/acn/run_acn_node_standalone.py", "/acn/node/libp2p_node"]
 
