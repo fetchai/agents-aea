@@ -157,10 +157,20 @@ async def test_get_balance(
 @pytest.mark.asyncio
 @ledger_ids
 async def test_get_state(
-    ledger_id, address, config, ledger_apis_connection: Connection
+    ledger_id,
+    address,
+    ledger_apis_connection: Connection,
+    update_default_ethereum_ledger_api,
+    ethereum_testnet_config,
+    ganache,
 ):
     """Test get state."""
     import aea  # noqa # to load registries
+
+    if ledger_id == FETCHAI:
+        config = FETCHAI_TESTNET_CONFIG
+    else:
+        config = ethereum_testnet_config
 
     if "ethereum" in ledger_id:
         callable_name = "getBlock"
