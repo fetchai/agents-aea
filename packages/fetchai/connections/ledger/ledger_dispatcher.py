@@ -146,7 +146,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :return: None
         """
         result = api.get_state(message.callable, *message.args, **message.kwargs.body)
-        if result is None:
+        if result is None:  # pragma: nocover
             response = self.get_error_message(
                 ValueError("Failed to get state"), api, message, dialogue
             )
