@@ -2282,7 +2282,9 @@ class GenericLedgerApiHandler(Handler):
                 Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
             if ledger_api_msg_ is None:
-                raise ValueError("Could not retrieve last ledger_api message")
+                raise ValueError(  # pragma: nocover
+                    "Could not retrieve last ledger_api message"
+                )
             fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
             if fipa_msg is None:
                 raise ValueError("Could not retrieve last fipa message")
@@ -2296,10 +2298,6 @@ class GenericLedgerApiHandler(Handler):
                 "transaction confirmed, informing counterparty={} of transaction digest.".format(
                     fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                 )
-            )
-            fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
-                FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
         else:
             tx_behaviour.processing = None
