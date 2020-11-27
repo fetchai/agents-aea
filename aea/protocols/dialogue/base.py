@@ -386,7 +386,7 @@ class Dialogue(metaclass=_DialogueMeta):
                 message_class.from_json(i) for i in data["outgoing_messages"]
             ]
             return obj
-        except KeyError:
+        except KeyError:  # pragma: nocover
             raise ValueError(f"Dialogue representation is invalid: {data}")
 
     @property

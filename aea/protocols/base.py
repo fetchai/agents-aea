@@ -104,7 +104,7 @@ class Message:
             if to:
                 instance.to = to
             return instance
-        except KeyError:
+        except KeyError:  # pragma: nocover
             raise ValueError(f"Message representation is invalid: {data}")
 
     @property
