@@ -84,7 +84,19 @@ def test_get_state_serialization():
     """Test the serialization for 'get_state' speech-act works."""
 
     args = ("arg1", "arg2")
-    kwargs = Kwargs({})
+    kwargs = Kwargs({"key": "value"})
+
+    # ensure Kwargs is not created with body = None
+    try:
+        _ = Kwargs(None)
+        raise AssertionError()  # to ensure exception was raised
+    except ValueError:
+        pass
+    except Exception:
+        raise AssertionError()  # wrong exception
+
+    assert str(kwargs) == "Kwargs: body={'key': 'value'}"
+
     msg = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_STATE,
         ledger_id="some_ledger_id",
