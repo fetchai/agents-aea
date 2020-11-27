@@ -150,7 +150,7 @@ class TestTransactionBehaviour(BaseSkillTestCase):
 
     def test_setup(self):
         """Test the setup method of the transaction behaviour."""
-        assert self.transaction_behaviour.teardown() is None
+        assert self.transaction_behaviour.setup() is None
         self.assert_quantity_in_outbox(0)
 
     def test_act_i(self):
