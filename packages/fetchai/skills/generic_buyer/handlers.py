@@ -689,7 +689,9 @@ class GenericLedgerApiHandler(Handler):
                 Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
             if ledger_api_msg_ is None:
-                raise ValueError("Could not retrieve last ledger_api message")
+                raise ValueError(  # pragma: nocover
+                    "Could not retrieve last ledger_api message"
+                )
             fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
             if fipa_msg is None:
                 raise ValueError("Could not retrieve last fipa message")
