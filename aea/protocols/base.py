@@ -95,14 +95,17 @@ class Message:
     @classmethod
     def from_json(cls, data: dict) -> "Message":
         """Construct message instance from json data."""
-        instance = cls.decode(b64decode(data["body"]))
-        sender = data["sender"]
-        if sender:
-            instance.sender = sender
-        to = data["to"]
-        if to:
-            instance.to = to
-        return instance
+        try:
+            instance = cls.decode(b64decode(data["body"]))
+            sender = data["sender"]
+            if sender:
+                instance.sender = sender
+            to = data["to"]
+            if to:
+                instance.to = to
+            return instance
+        except KeyError:
+            raise ValueError(f"Message representation is invalid: {data}")
 
     @property
     def valid_performatives(self) -> Set[str]:

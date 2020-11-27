@@ -90,7 +90,9 @@ class BaseRuntime(Runnable, WithLogger):
 
     @staticmethod
     def _get_storage(agent) -> Optional[Storage]:
+        """Get storage instance if storage_uri provided."""
         if agent.storage_uri:
+            # threaded has to be always True, cause syncrhonous operations are supported
             return Storage(agent.storage_uri, threaded=True)
         return None
 

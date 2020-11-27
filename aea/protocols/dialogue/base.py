@@ -348,6 +348,7 @@ class Dialogue(metaclass=_DialogueMeta):
             and self._incoming_messages == other._incoming_messages
             and self._outgoing_messages == other._outgoing_messages
             and self.role == other.role
+            and self.self_address == other.self_address
         )
 
     def json(self) -> dict:
@@ -371,19 +372,22 @@ class Dialogue(metaclass=_DialogueMeta):
 
         :return: Dialogue instance
         """
-        obj = cls(
-            dialogue_label=DialogueLabel.from_json(data["dialogue_label"]),
-            message_class=message_class,
-            self_address=Address(data["self_address"]),
-            role=cls.Role(data["role"]),
-        )
-        obj._incoming_messages = [  # pylint: disable=protected-access
-            message_class.from_json(i) for i in data["incoming_messages"]
-        ]
-        obj._outgoing_messages = [  # pylint: disable=protected-access
-            message_class.from_json(i) for i in data["outgoing_messages"]
-        ]
-        return obj
+        try:
+            obj = cls(
+                dialogue_label=DialogueLabel.from_json(data["dialogue_label"]),
+                message_class=message_class,
+                self_address=Address(data["self_address"]),
+                role=cls.Role(data["role"]),
+            )
+            obj._incoming_messages = [  # pylint: disable=protected-access
+                message_class.from_json(i) for i in data["incoming_messages"]
+            ]
+            obj._outgoing_messages = [  # pylint: disable=protected-access
+                message_class.from_json(i) for i in data["outgoing_messages"]
+            ]
+            return obj
+        except KeyError:
+            raise ValueError(f"Dialogue representation is invalid: {data}")
 
     @property
     def dialogue_label(self) -> DialogueLabel:
@@ -1061,12 +1065,7 @@ class BasicDialoguesStorage:
         :param dialogue_label: label of the dialogue
         :return: dialogue if presents or None
         """
-        return self.dialogues.get(dialogue_label, None)
-
-    @property
-    def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
-        """Get dictionary of dialogues in which the agent engages."""
-        return self._dialogues_by_dialogue_label
+        return self._dialogues_by_dialogue_label.get(dialogue_label, None)
 
     def get_dialogues_with_counterparty(self, counterparty: Address) -> List[Dialogue]:
         """
@@ -1132,6 +1131,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
                 self._skill_component.skill_id.author,
                 self._skill_component.skill_id.name,
                 self._skill_component.name,
+                self._skill_component.__class__.__name__,
                 self._dialogues.__class__.__name__,
             ]
         )

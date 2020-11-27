@@ -214,7 +214,7 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
             wait_for_condition(lambda: aea.is_running, timeout=10)
             echo_skill = aea.resources.get_skill(PUBLIC_ID)
             assert (
-                not echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues
+                not echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label
             )
             msg, dialogue = self.dialogues.create(
                 aea.name,
@@ -226,11 +226,11 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
             )
             aea.runtime.multiplexer.in_queue.put(envelope)
             wait_for_condition(
-                lambda: echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues,
+                lambda: echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label,
                 timeout=3,
             )
             dialogues_for_check = (
-                echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues
+                echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label
             )
         finally:
             aea.runtime.stop()
@@ -242,11 +242,11 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
             wait_for_condition(lambda: aea.is_running, timeout=10)
             echo_skill = aea.resources.get_skill(PUBLIC_ID)
             wait_for_condition(
-                lambda: echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues,
+                lambda: echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label,
                 timeout=3,
             )
             assert (
-                echo_skill.skill_context.default_dialogues._dialogues_storage.dialogues
+                echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label
                 == dialogues_for_check
             )
         finally:
