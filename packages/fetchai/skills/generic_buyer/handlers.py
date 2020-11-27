@@ -706,10 +706,6 @@ class GenericLedgerApiHandler(Handler):
                     fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                 )
             )
-            fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
-                FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
-            )
         else:
             tx_behaviour.processing = None
             tx_behaviour.processing_time = 0.0
