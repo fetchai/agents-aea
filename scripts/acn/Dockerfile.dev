@@ -31,5 +31,9 @@ COPY ./scripts/acn/run_acn_node_standalone.py /acn/
 # build node
 RUN cd /acn/node && go build
 
+EXPOSE 9000
+EXPOSE 11000
+EXPOSE 8080
+
 ENTRYPOINT [ "python3", "-u", "/acn/run_acn_node_standalone.py", "/acn/node/libp2p_node"]
 
