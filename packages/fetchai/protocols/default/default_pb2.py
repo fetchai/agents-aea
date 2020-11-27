@@ -8,7 +8,6 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-from google.protobuf import descriptor_pb2
 
 # @@protoc_insertion_point(imports)
 
@@ -19,11 +18,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="default.proto",
     package="aea.fetchai.default",
     syntax="proto3",
+    serialized_options=None,
     serialized_pb=_b(
         '\n\rdefault.proto\x12\x13\x61\x65\x61.fetchai.default"\xb3\x05\n\x0e\x44\x65\x66\x61ultMessage\x12G\n\x05\x62ytes\x18\x05 \x01(\x0b\x32\x36.aea.fetchai.default.DefaultMessage.Bytes_PerformativeH\x00\x12G\n\x05\x65rror\x18\x06 \x01(\x0b\x32\x36.aea.fetchai.default.DefaultMessage.Error_PerformativeH\x00\x1a\xdd\x01\n\tErrorCode\x12O\n\nerror_code\x18\x01 \x01(\x0e\x32;.aea.fetchai.default.DefaultMessage.ErrorCode.ErrorCodeEnum"\x7f\n\rErrorCodeEnum\x12\x18\n\x14UNSUPPORTED_PROTOCOL\x10\x00\x12\x12\n\x0e\x44\x45\x43ODING_ERROR\x10\x01\x12\x13\n\x0fINVALID_MESSAGE\x10\x02\x12\x15\n\x11UNSUPPORTED_SKILL\x10\x03\x12\x14\n\x10INVALID_DIALOGUE\x10\x04\x1a%\n\x12\x42ytes_Performative\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\x0c\x1a\xf7\x01\n\x12\x45rror_Performative\x12\x41\n\nerror_code\x18\x01 \x01(\x0b\x32-.aea.fetchai.default.DefaultMessage.ErrorCode\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12Y\n\nerror_data\x18\x03 \x03(\x0b\x32\x45.aea.fetchai.default.DefaultMessage.Error_Performative.ErrorDataEntry\x1a\x30\n\x0e\x45rrorDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 _DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM = _descriptor.EnumDescriptor(
@@ -33,23 +32,39 @@ _DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM = _descriptor.EnumDescriptor(
     file=DESCRIPTOR,
     values=[
         _descriptor.EnumValueDescriptor(
-            name="UNSUPPORTED_PROTOCOL", index=0, number=0, options=None, type=None
+            name="UNSUPPORTED_PROTOCOL",
+            index=0,
+            number=0,
+            serialized_options=None,
+            type=None,
         ),
         _descriptor.EnumValueDescriptor(
-            name="DECODING_ERROR", index=1, number=1, options=None, type=None
+            name="DECODING_ERROR", index=1, number=1, serialized_options=None, type=None
         ),
         _descriptor.EnumValueDescriptor(
-            name="INVALID_MESSAGE", index=2, number=2, options=None, type=None
+            name="INVALID_MESSAGE",
+            index=2,
+            number=2,
+            serialized_options=None,
+            type=None,
         ),
         _descriptor.EnumValueDescriptor(
-            name="UNSUPPORTED_SKILL", index=3, number=3, options=None, type=None
+            name="UNSUPPORTED_SKILL",
+            index=3,
+            number=3,
+            serialized_options=None,
+            type=None,
         ),
         _descriptor.EnumValueDescriptor(
-            name="INVALID_DIALOGUE", index=4, number=4, options=None, type=None
+            name="INVALID_DIALOGUE",
+            index=4,
+            number=4,
+            serialized_options=None,
+            type=None,
         ),
     ],
     containing_type=None,
-    options=None,
+    serialized_options=None,
     serialized_start=298,
     serialized_end=425,
 )
@@ -78,13 +93,14 @@ _DEFAULTMESSAGE_ERRORCODE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[_DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM,],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -115,13 +131,14 @@ _DEFAULTMESSAGE_BYTES_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -152,7 +169,8 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -169,13 +187,14 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -206,7 +225,8 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="error_msg",
@@ -223,7 +243,8 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="error_data",
@@ -240,13 +261,14 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[_DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY,],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -277,7 +299,8 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="error",
@@ -294,7 +317,8 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -304,7 +328,7 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
         _DEFAULTMESSAGE_ERROR_PERFORMATIVE,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -356,6 +380,7 @@ _DEFAULTMESSAGE.fields_by_name[
     "error"
 ].containing_oneof = _DEFAULTMESSAGE.oneofs_by_name["performative"]
 DESCRIPTOR.message_types_by_name["DefaultMessage"] = _DEFAULTMESSAGE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 DefaultMessage = _reflection.GeneratedProtocolMessageType(
     "DefaultMessage",
@@ -409,8 +434,5 @@ _sym_db.RegisterMessage(DefaultMessage.Error_Performative)
 _sym_db.RegisterMessage(DefaultMessage.Error_Performative.ErrorDataEntry)
 
 
-_DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY.has_options = True
-_DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
+_DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY._options = None
 # @@protoc_insertion_point(module_scope)

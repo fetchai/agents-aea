@@ -8,7 +8,6 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-from google.protobuf import descriptor_pb2
 
 # @@protoc_insertion_point(imports)
 
@@ -19,11 +18,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="register.proto",
     package="aea.fetchai.register",
     syntax="proto3",
+    serialized_options=None,
     serialized_pb=_b(
         '\n\x0eregister.proto\x12\x14\x61\x65\x61.fetchai.register"\xff\x05\n\x0fRegisterMessage\x12I\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x38.aea.fetchai.register.RegisterMessage.Error_PerformativeH\x00\x12O\n\x08register\x18\x06 \x01(\x0b\x32;.aea.fetchai.register.RegisterMessage.Register_PerformativeH\x00\x12M\n\x07success\x18\x07 \x01(\x0b\x32:.aea.fetchai.register.RegisterMessage.Success_PerformativeH\x00\x1a\x99\x01\n\x15Register_Performative\x12S\n\x04info\x18\x01 \x03(\x0b\x32\x45.aea.fetchai.register.RegisterMessage.Register_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x97\x01\n\x14Success_Performative\x12R\n\x04info\x18\x01 \x03(\x0b\x32\x44.aea.fetchai.register.RegisterMessage.Success_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xba\x01\n\x12\x45rror_Performative\x12\x12\n\nerror_code\x18\x01 \x01(\x05\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12P\n\x04info\x18\x03 \x03(\x0b\x32\x42.aea.fetchai.register.RegisterMessage.Error_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 _REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
@@ -48,7 +47,8 @@ _REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -65,13 +65,14 @@ _REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -102,13 +103,14 @@ _REGISTERMESSAGE_REGISTER_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[_REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -139,7 +141,8 @@ _REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -156,13 +159,14 @@ _REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -193,13 +197,14 @@ _REGISTERMESSAGE_SUCCESS_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[_REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -230,7 +235,8 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -247,13 +253,14 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -284,7 +291,8 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="error_msg",
@@ -301,7 +309,8 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="info",
@@ -318,13 +327,14 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[_REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -355,7 +365,8 @@ _REGISTERMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="register",
@@ -372,7 +383,8 @@ _REGISTERMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="success",
@@ -389,7 +401,8 @@ _REGISTERMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -399,7 +412,7 @@ _REGISTERMESSAGE = _descriptor.Descriptor(
         _REGISTERMESSAGE_ERROR_PERFORMATIVE,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -465,6 +478,7 @@ _REGISTERMESSAGE.fields_by_name[
     "success"
 ].containing_oneof = _REGISTERMESSAGE.oneofs_by_name["performative"]
 DESCRIPTOR.message_types_by_name["RegisterMessage"] = _REGISTERMESSAGE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 RegisterMessage = _reflection.GeneratedProtocolMessageType(
     "RegisterMessage",
@@ -538,16 +552,7 @@ _sym_db.RegisterMessage(RegisterMessage.Error_Performative)
 _sym_db.RegisterMessage(RegisterMessage.Error_Performative.InfoEntry)
 
 
-_REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY.has_options = True
-_REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY.has_options = True
-_REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY.has_options = True
-_REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
+_REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY._options = None
+_REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY._options = None
+_REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY._options = None
 # @@protoc_insertion_point(module_scope)

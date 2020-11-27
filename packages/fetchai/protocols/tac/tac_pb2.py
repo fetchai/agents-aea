@@ -8,7 +8,6 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-from google.protobuf import descriptor_pb2
 
 # @@protoc_insertion_point(imports)
 
@@ -19,11 +18,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="tac.proto",
     package="aea.fetchai.tac",
     syntax="proto3",
+    serialized_options=None,
     serialized_pb=_b(
         '\n\ttac.proto\x12\x0f\x61\x65\x61.fetchai.tac"\xd0\x1e\n\nTacMessage\x12G\n\tcancelled\x18\x05 \x01(\x0b\x32\x32.aea.fetchai.tac.TacMessage.Cancelled_PerformativeH\x00\x12G\n\tgame_data\x18\x06 \x01(\x0b\x32\x32.aea.fetchai.tac.TacMessage.Game_Data_PerformativeH\x00\x12\x45\n\x08register\x18\x07 \x01(\x0b\x32\x31.aea.fetchai.tac.TacMessage.Register_PerformativeH\x00\x12G\n\ttac_error\x18\x08 \x01(\x0b\x32\x32.aea.fetchai.tac.TacMessage.Tac_Error_PerformativeH\x00\x12K\n\x0btransaction\x18\t \x01(\x0b\x32\x34.aea.fetchai.tac.TacMessage.Transaction_PerformativeH\x00\x12\x65\n\x18transaction_confirmation\x18\n \x01(\x0b\x32\x41.aea.fetchai.tac.TacMessage.Transaction_Confirmation_PerformativeH\x00\x12I\n\nunregister\x18\x0b \x01(\x0b\x32\x33.aea.fetchai.tac.TacMessage.Unregister_PerformativeH\x00\x1a\x82\x03\n\tErrorCode\x12G\n\nerror_code\x18\x01 \x01(\x0e\x32\x33.aea.fetchai.tac.TacMessage.ErrorCode.ErrorCodeEnum"\xab\x02\n\rErrorCodeEnum\x12\x11\n\rGENERIC_ERROR\x10\x00\x12\x15\n\x11REQUEST_NOT_VALID\x10\x01\x12!\n\x1d\x41GENT_ADDR_ALREADY_REGISTERED\x10\x02\x12!\n\x1d\x41GENT_NAME_ALREADY_REGISTERED\x10\x03\x12\x18\n\x14\x41GENT_NOT_REGISTERED\x10\x04\x12\x19\n\x15TRANSACTION_NOT_VALID\x10\x05\x12\x1c\n\x18TRANSACTION_NOT_MATCHING\x10\x06\x12\x1f\n\x1b\x41GENT_NAME_NOT_IN_WHITELIST\x10\x07\x12\x1b\n\x17\x43OMPETITION_NOT_RUNNING\x10\x08\x12\x19\n\x15\x44IALOGUE_INCONSISTENT\x10\t\x1a+\n\x15Register_Performative\x12\x12\n\nagent_name\x18\x01 \x01(\t\x1a\x19\n\x17Unregister_Performative\x1a\xb3\x05\n\x18Transaction_Performative\x12\x16\n\x0etransaction_id\x18\x01 \x01(\t\x12\x11\n\tledger_id\x18\x02 \x01(\t\x12\x16\n\x0esender_address\x18\x03 \x01(\t\x12\x1c\n\x14\x63ounterparty_address\x18\x04 \x01(\t\x12k\n\x15\x61mount_by_currency_id\x18\x05 \x03(\x0b\x32L.aea.fetchai.tac.TacMessage.Transaction_Performative.AmountByCurrencyIdEntry\x12\x65\n\x12\x66\x65\x65_by_currency_id\x18\x06 \x03(\x0b\x32I.aea.fetchai.tac.TacMessage.Transaction_Performative.FeeByCurrencyIdEntry\x12k\n\x15quantities_by_good_id\x18\x07 \x03(\x0b\x32L.aea.fetchai.tac.TacMessage.Transaction_Performative.QuantitiesByGoodIdEntry\x12\r\n\x05nonce\x18\x08 \x01(\t\x12\x18\n\x10sender_signature\x18\t \x01(\t\x12\x1e\n\x16\x63ounterparty_signature\x18\n \x01(\t\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x36\n\x14\x46\x65\x65\x42yCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x18\n\x16\x43\x61ncelled_Performative\x1a\xe3\x0b\n\x16Game_Data_Performative\x12i\n\x15\x61mount_by_currency_id\x18\x01 \x03(\x0b\x32J.aea.fetchai.tac.TacMessage.Game_Data_Performative.AmountByCurrencyIdEntry\x12z\n\x1e\x65xchange_params_by_currency_id\x18\x02 \x03(\x0b\x32R.aea.fetchai.tac.TacMessage.Game_Data_Performative.ExchangeParamsByCurrencyIdEntry\x12i\n\x15quantities_by_good_id\x18\x03 \x03(\x0b\x32J.aea.fetchai.tac.TacMessage.Game_Data_Performative.QuantitiesByGoodIdEntry\x12p\n\x19utility_params_by_good_id\x18\x04 \x03(\x0b\x32M.aea.fetchai.tac.TacMessage.Game_Data_Performative.UtilityParamsByGoodIdEntry\x12\x63\n\x12\x66\x65\x65_by_currency_id\x18\x05 \x03(\x0b\x32G.aea.fetchai.tac.TacMessage.Game_Data_Performative.FeeByCurrencyIdEntry\x12\x63\n\x12\x61gent_addr_to_name\x18\x06 \x03(\x0b\x32G.aea.fetchai.tac.TacMessage.Game_Data_Performative.AgentAddrToNameEntry\x12\x65\n\x13\x63urrency_id_to_name\x18\x07 \x03(\x0b\x32H.aea.fetchai.tac.TacMessage.Game_Data_Performative.CurrencyIdToNameEntry\x12]\n\x0fgood_id_to_name\x18\x08 \x03(\x0b\x32\x44.aea.fetchai.tac.TacMessage.Game_Data_Performative.GoodIdToNameEntry\x12\x12\n\nversion_id\x18\t \x01(\t\x12J\n\x04info\x18\n \x03(\x0b\x32<.aea.fetchai.tac.TacMessage.Game_Data_Performative.InfoEntry\x12\x13\n\x0binfo_is_set\x18\x0b \x01(\x08\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x41\n\x1f\x45xchangeParamsByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a<\n\x1aUtilityParamsByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x36\n\x14\x46\x65\x65\x42yCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x36\n\x14\x41gentAddrToNameEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x37\n\x15\x43urrencyIdToNameEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11GoodIdToNameEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xa9\x03\n%Transaction_Confirmation_Performative\x12\x16\n\x0etransaction_id\x18\x01 \x01(\t\x12x\n\x15\x61mount_by_currency_id\x18\x02 \x03(\x0b\x32Y.aea.fetchai.tac.TacMessage.Transaction_Confirmation_Performative.AmountByCurrencyIdEntry\x12x\n\x15quantities_by_good_id\x18\x03 \x03(\x0b\x32Y.aea.fetchai.tac.TacMessage.Transaction_Confirmation_Performative.QuantitiesByGoodIdEntry\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\xe1\x01\n\x16Tac_Error_Performative\x12\x39\n\nerror_code\x18\x01 \x01(\x0b\x32%.aea.fetchai.tac.TacMessage.ErrorCode\x12J\n\x04info\x18\x02 \x03(\x0b\x32<.aea.fetchai.tac.TacMessage.Tac_Error_Performative.InfoEntry\x12\x13\n\x0binfo_is_set\x18\x03 \x01(\x08\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 _TACMESSAGE_ERRORCODE_ERRORCODEENUM = _descriptor.EnumDescriptor(
@@ -33,50 +32,74 @@ _TACMESSAGE_ERRORCODE_ERRORCODEENUM = _descriptor.EnumDescriptor(
     file=DESCRIPTOR,
     values=[
         _descriptor.EnumValueDescriptor(
-            name="GENERIC_ERROR", index=0, number=0, options=None, type=None
+            name="GENERIC_ERROR", index=0, number=0, serialized_options=None, type=None
         ),
         _descriptor.EnumValueDescriptor(
-            name="REQUEST_NOT_VALID", index=1, number=1, options=None, type=None
+            name="REQUEST_NOT_VALID",
+            index=1,
+            number=1,
+            serialized_options=None,
+            type=None,
         ),
         _descriptor.EnumValueDescriptor(
             name="AGENT_ADDR_ALREADY_REGISTERED",
             index=2,
             number=2,
-            options=None,
+            serialized_options=None,
             type=None,
         ),
         _descriptor.EnumValueDescriptor(
             name="AGENT_NAME_ALREADY_REGISTERED",
             index=3,
             number=3,
-            options=None,
+            serialized_options=None,
             type=None,
         ),
         _descriptor.EnumValueDescriptor(
-            name="AGENT_NOT_REGISTERED", index=4, number=4, options=None, type=None
+            name="AGENT_NOT_REGISTERED",
+            index=4,
+            number=4,
+            serialized_options=None,
+            type=None,
         ),
         _descriptor.EnumValueDescriptor(
-            name="TRANSACTION_NOT_VALID", index=5, number=5, options=None, type=None
+            name="TRANSACTION_NOT_VALID",
+            index=5,
+            number=5,
+            serialized_options=None,
+            type=None,
         ),
         _descriptor.EnumValueDescriptor(
-            name="TRANSACTION_NOT_MATCHING", index=6, number=6, options=None, type=None
+            name="TRANSACTION_NOT_MATCHING",
+            index=6,
+            number=6,
+            serialized_options=None,
+            type=None,
         ),
         _descriptor.EnumValueDescriptor(
             name="AGENT_NAME_NOT_IN_WHITELIST",
             index=7,
             number=7,
-            options=None,
+            serialized_options=None,
             type=None,
         ),
         _descriptor.EnumValueDescriptor(
-            name="COMPETITION_NOT_RUNNING", index=8, number=8, options=None, type=None
+            name="COMPETITION_NOT_RUNNING",
+            index=8,
+            number=8,
+            serialized_options=None,
+            type=None,
         ),
         _descriptor.EnumValueDescriptor(
-            name="DIALOGUE_INCONSISTENT", index=9, number=9, options=None, type=None
+            name="DIALOGUE_INCONSISTENT",
+            index=9,
+            number=9,
+            serialized_options=None,
+            type=None,
         ),
     ],
     containing_type=None,
-    options=None,
+    serialized_options=None,
     serialized_start=678,
     serialized_end=977,
 )
@@ -105,13 +128,14 @@ _TACMESSAGE_ERRORCODE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[_TACMESSAGE_ERRORCODE_ERRORCODEENUM,],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -142,13 +166,14 @@ _TACMESSAGE_REGISTER_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -167,7 +192,7 @@ _TACMESSAGE_UNREGISTER_PERFORMATIVE = _descriptor.Descriptor(
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -198,7 +223,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -215,13 +241,14 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -252,7 +279,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE_FEEBYCURRENCYIDENTRY = _descriptor.Descript
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -269,13 +297,14 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE_FEEBYCURRENCYIDENTRY = _descriptor.Descript
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -306,7 +335,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -323,13 +353,14 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -360,7 +391,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="ledger_id",
@@ -377,7 +409,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="sender_address",
@@ -394,7 +427,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="counterparty_address",
@@ -411,7 +445,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="amount_by_currency_id",
@@ -428,7 +463,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="fee_by_currency_id",
@@ -445,7 +481,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="quantities_by_good_id",
@@ -462,7 +499,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="nonce",
@@ -479,7 +517,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="sender_signature",
@@ -496,7 +535,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="counterparty_signature",
@@ -513,7 +553,8 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -523,7 +564,7 @@ _TACMESSAGE_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
         _TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -542,7 +583,7 @@ _TACMESSAGE_CANCELLED_PERFORMATIVE = _descriptor.Descriptor(
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -573,7 +614,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descrip
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -590,13 +632,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descrip
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -627,7 +670,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY = _descriptor
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -644,13 +688,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY = _descriptor
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -681,7 +726,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Descrip
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -698,13 +744,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Descrip
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -735,7 +782,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY = _descriptor.Desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -752,13 +800,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY = _descriptor.Desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -789,7 +838,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_FEEBYCURRENCYIDENTRY = _descriptor.Descriptor
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -806,13 +856,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_FEEBYCURRENCYIDENTRY = _descriptor.Descriptor
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -843,7 +894,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_AGENTADDRTONAMEENTRY = _descriptor.Descriptor
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -860,13 +912,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_AGENTADDRTONAMEENTRY = _descriptor.Descriptor
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -897,7 +950,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_CURRENCYIDTONAMEENTRY = _descriptor.Descripto
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -914,13 +968,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_CURRENCYIDTONAMEENTRY = _descriptor.Descripto
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -951,7 +1006,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_GOODIDTONAMEENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -968,13 +1024,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_GOODIDTONAMEENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1005,7 +1062,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1022,13 +1080,14 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1059,7 +1118,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="exchange_params_by_currency_id",
@@ -1076,7 +1136,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="quantities_by_good_id",
@@ -1093,7 +1154,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="utility_params_by_good_id",
@@ -1110,7 +1172,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="fee_by_currency_id",
@@ -1127,7 +1190,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="agent_addr_to_name",
@@ -1144,7 +1208,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="currency_id_to_name",
@@ -1161,7 +1226,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="good_id_to_name",
@@ -1178,7 +1244,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="version_id",
@@ -1195,7 +1262,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="info",
@@ -1212,7 +1280,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="info_is_set",
@@ -1229,7 +1298,8 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -1245,7 +1315,7 @@ _TACMESSAGE_GAME_DATA_PERFORMATIVE = _descriptor.Descriptor(
         _TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1276,7 +1346,8 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1293,13 +1364,14 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1330,7 +1402,8 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1347,13 +1420,14 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1384,7 +1458,8 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="amount_by_currency_id",
@@ -1401,7 +1476,8 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="quantities_by_good_id",
@@ -1418,7 +1494,8 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -1427,7 +1504,7 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE = _descriptor.Descriptor(
         _TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1458,7 +1535,8 @@ _TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1475,13 +1553,14 @@ _TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1512,7 +1591,8 @@ _TACMESSAGE_TAC_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="info",
@@ -1529,7 +1609,8 @@ _TACMESSAGE_TAC_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="info_is_set",
@@ -1546,13 +1627,14 @@ _TACMESSAGE_TAC_ERROR_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[_TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1583,7 +1665,8 @@ _TACMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="game_data",
@@ -1600,7 +1683,8 @@ _TACMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="register",
@@ -1617,7 +1701,8 @@ _TACMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="tac_error",
@@ -1634,7 +1719,8 @@ _TACMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -1651,7 +1737,8 @@ _TACMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="transaction_confirmation",
@@ -1668,7 +1755,8 @@ _TACMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="unregister",
@@ -1685,7 +1773,8 @@ _TACMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -1700,7 +1789,7 @@ _TACMESSAGE = _descriptor.Descriptor(
         _TACMESSAGE_TAC_ERROR_PERFORMATIVE,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1888,6 +1977,7 @@ _TACMESSAGE.fields_by_name["unregister"].containing_oneof = _TACMESSAGE.oneofs_b
     "performative"
 ]
 DESCRIPTOR.message_types_by_name["TacMessage"] = _TACMESSAGE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TacMessage = _reflection.GeneratedProtocolMessageType(
     "TacMessage",
@@ -2137,68 +2227,23 @@ _sym_db.RegisterMessage(TacMessage.Tac_Error_Performative)
 _sym_db.RegisterMessage(TacMessage.Tac_Error_Performative.InfoEntry)
 
 
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
+_TACMESSAGE_TRANSACTION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = None
+_TACMESSAGE_TRANSACTION_PERFORMATIVE_FEEBYCURRENCYIDENTRY._options = None
+_TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_FEEBYCURRENCYIDENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_AGENTADDRTONAMEENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_CURRENCYIDTONAMEENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_GOODIDTONAMEENTRY._options = None
+_TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY._options = None
+_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = (
+    None
 )
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_FEEBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_FEEBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
+_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = (
+    None
 )
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY.has_options = True
-_TACMESSAGE_TRANSACTION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_QUANTITIESBYGOODIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_FEEBYCURRENCYIDENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_FEEBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_AGENTADDRTONAMEENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_AGENTADDRTONAMEENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_CURRENCYIDTONAMEENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_CURRENCYIDTONAMEENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_GOODIDTONAMEENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_GOODIDTONAMEENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY.has_options = True
-_TACMESSAGE_GAME_DATA_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY.has_options = (
-    True
-)
-_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY.has_options = (
-    True
-)
-_TACMESSAGE_TRANSACTION_CONFIRMATION_PERFORMATIVE_QUANTITIESBYGOODIDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY.has_options = True
-_TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
+_TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY._options = None
 # @@protoc_insertion_point(module_scope)

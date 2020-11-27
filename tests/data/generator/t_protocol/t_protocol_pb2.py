@@ -8,7 +8,6 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-from google.protobuf import descriptor_pb2
 
 # @@protoc_insertion_point(imports)
 
@@ -19,11 +18,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="t_protocol.proto",
     package="aea.fetchai.t_protocol",
     syntax="proto3",
+    serialized_options=None,
     serialized_pb=_b(
         '\n\x10t_protocol.proto\x12\x16\x61\x65\x61.fetchai.t_protocol"\x9c\x33\n\x10TProtocolMessage\x12`\n\x0fperformative_ct\x18\x05 \x01(\x0b\x32\x45.aea.fetchai.t_protocol.TProtocolMessage.Performative_Ct_PerformativeH\x00\x12x\n\x1bperformative_empty_contents\x18\x06 \x01(\x0b\x32Q.aea.fetchai.t_protocol.TProtocolMessage.Performative_Empty_Contents_PerformativeH\x00\x12`\n\x0fperformative_mt\x18\x07 \x01(\x0b\x32\x45.aea.fetchai.t_protocol.TProtocolMessage.Performative_Mt_PerformativeH\x00\x12^\n\x0eperformative_o\x18\x08 \x01(\x0b\x32\x44.aea.fetchai.t_protocol.TProtocolMessage.Performative_O_PerformativeH\x00\x12\x62\n\x10performative_pct\x18\t \x01(\x0b\x32\x46.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pct_PerformativeH\x00\x12\x62\n\x10performative_pmt\x18\n \x01(\x0b\x32\x46.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_PerformativeH\x00\x12`\n\x0fperformative_pt\x18\x0b \x01(\x0b\x32\x45.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pt_PerformativeH\x00\x1a\x9f\x02\n\tDataModel\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x05\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x05\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12U\n\ndict_field\x18\x08 \x03(\x0b\x32\x41.aea.fetchai.t_protocol.TProtocolMessage.DataModel.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x66\n\x1cPerformative_Ct_Performative\x12\x46\n\ncontent_ct\x18\x01 \x01(\x0b\x32\x32.aea.fetchai.t_protocol.TProtocolMessage.DataModel\x1a\x8c\x01\n\x1cPerformative_Pt_Performative\x12\x15\n\rcontent_bytes\x18\x01 \x01(\x0c\x12\x13\n\x0b\x63ontent_int\x18\x02 \x01(\x05\x12\x15\n\rcontent_float\x18\x03 \x01(\x02\x12\x14\n\x0c\x63ontent_bool\x18\x04 \x01(\x08\x12\x13\n\x0b\x63ontent_str\x18\x05 \x01(\t\x1a\xa8\x02\n\x1dPerformative_Pct_Performative\x12\x19\n\x11\x63ontent_set_bytes\x18\x01 \x03(\x0c\x12\x17\n\x0f\x63ontent_set_int\x18\x02 \x03(\x05\x12\x19\n\x11\x63ontent_set_float\x18\x03 \x03(\x02\x12\x18\n\x10\x63ontent_set_bool\x18\x04 \x03(\x08\x12\x17\n\x0f\x63ontent_set_str\x18\x05 \x03(\t\x12\x1a\n\x12\x63ontent_list_bytes\x18\x06 \x03(\x0c\x12\x18\n\x10\x63ontent_list_int\x18\x07 \x03(\x05\x12\x1a\n\x12\x63ontent_list_float\x18\x08 \x03(\x02\x12\x19\n\x11\x63ontent_list_bool\x18\t \x03(\x08\x12\x18\n\x10\x63ontent_list_str\x18\n \x03(\t\x1a\x96\x16\n\x1dPerformative_Pmt_Performative\x12\x7f\n\x16\x63ontent_dict_int_bytes\x18\x01 \x03(\x0b\x32_.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry\x12{\n\x14\x63ontent_dict_int_int\x18\x02 \x03(\x0b\x32].aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntIntEntry\x12\x7f\n\x16\x63ontent_dict_int_float\x18\x03 \x03(\x0b\x32_.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry\x12}\n\x15\x63ontent_dict_int_bool\x18\x04 \x03(\x0b\x32^.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry\x12{\n\x14\x63ontent_dict_int_str\x18\x05 \x03(\x0b\x32].aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntStrEntry\x12\x81\x01\n\x17\x63ontent_dict_bool_bytes\x18\x06 \x03(\x0b\x32`.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry\x12}\n\x15\x63ontent_dict_bool_int\x18\x07 \x03(\x0b\x32^.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry\x12\x81\x01\n\x17\x63ontent_dict_bool_float\x18\x08 \x03(\x0b\x32`.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry\x12\x7f\n\x16\x63ontent_dict_bool_bool\x18\t \x03(\x0b\x32_.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry\x12}\n\x15\x63ontent_dict_bool_str\x18\n \x03(\x0b\x32^.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry\x12\x7f\n\x16\x63ontent_dict_str_bytes\x18\x0b \x03(\x0b\x32_.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry\x12{\n\x14\x63ontent_dict_str_int\x18\x0c \x03(\x0b\x32].aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrIntEntry\x12\x7f\n\x16\x63ontent_dict_str_float\x18\r \x03(\x0b\x32_.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry\x12}\n\x15\x63ontent_dict_str_bool\x18\x0e \x03(\x0b\x32^.aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry\x12{\n\x14\x63ontent_dict_str_str\x18\x0f \x03(\x0b\x32].aea.fetchai.t_protocol.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrStrEntry\x1a:\n\x18\x43ontentDictIntBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictIntBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a:\n\x18\x43ontentDictBoolBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictStrBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x88\x0c\n\x1cPerformative_Mt_Performative\x12Z\n\x1e\x63ontent_union_1_type_DataModel\x18\x01 \x01(\x0b\x32\x32.aea.fetchai.t_protocol.TProtocolMessage.DataModel\x12"\n\x1a\x63ontent_union_1_type_bytes\x18\x02 \x01(\x0c\x12 \n\x18\x63ontent_union_1_type_int\x18\x03 \x01(\x05\x12"\n\x1a\x63ontent_union_1_type_float\x18\x04 \x01(\x02\x12!\n\x19\x63ontent_union_1_type_bool\x18\x05 \x01(\x08\x12 \n\x18\x63ontent_union_1_type_str\x18\x06 \x01(\t\x12\'\n\x1f\x63ontent_union_1_type_set_of_int\x18\x07 \x03(\x05\x12)\n!content_union_1_type_list_of_bool\x18\x08 \x03(\x08\x12\x96\x01\n$content_union_1_type_dict_of_str_int\x18\t \x03(\x0b\x32h.aea.fetchai.t_protocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry\x12)\n!content_union_2_type_set_of_bytes\x18\n \x03(\x0c\x12\'\n\x1f\x63ontent_union_2_type_set_of_int\x18\x0b \x03(\x05\x12\'\n\x1f\x63ontent_union_2_type_set_of_str\x18\x0c \x03(\t\x12*\n"content_union_2_type_list_of_float\x18\r \x03(\x02\x12)\n!content_union_2_type_list_of_bool\x18\x0e \x03(\x08\x12*\n"content_union_2_type_list_of_bytes\x18\x0f \x03(\x0c\x12\x96\x01\n$content_union_2_type_dict_of_str_int\x18\x10 \x03(\x0b\x32h.aea.fetchai.t_protocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry\x12\x9a\x01\n&content_union_2_type_dict_of_int_float\x18\x11 \x03(\x0b\x32j.aea.fetchai.t_protocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry\x12\x9c\x01\n\'content_union_2_type_dict_of_bool_bytes\x18\x12 \x03(\x0b\x32k.aea.fetchai.t_protocol.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry\x1a\x44\n"ContentUnion1TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x44\n"ContentUnion2TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x46\n$ContentUnion2TypeDictOfIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1aG\n%ContentUnion2TypeDictOfBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x9b\x04\n\x1bPerformative_O_Performative\x12H\n\x0c\x63ontent_o_ct\x18\x01 \x01(\x0b\x32\x32.aea.fetchai.t_protocol.TProtocolMessage.DataModel\x12\x1b\n\x13\x63ontent_o_ct_is_set\x18\x02 \x01(\x08\x12\x16\n\x0e\x63ontent_o_bool\x18\x03 \x01(\x08\x12\x1d\n\x15\x63ontent_o_bool_is_set\x18\x04 \x01(\x08\x12\x19\n\x11\x63ontent_o_set_int\x18\x05 \x03(\x05\x12 \n\x18\x63ontent_o_set_int_is_set\x18\x06 \x01(\x08\x12\x1c\n\x14\x63ontent_o_list_bytes\x18\x07 \x03(\x0c\x12#\n\x1b\x63ontent_o_list_bytes_is_set\x18\x08 \x01(\x08\x12|\n\x16\x63ontent_o_dict_str_int\x18\t \x03(\x0b\x32\\.aea.fetchai.t_protocol.TProtocolMessage.Performative_O_Performative.ContentODictStrIntEntry\x12%\n\x1d\x63ontent_o_dict_str_int_is_set\x18\n \x01(\x08\x1a\x39\n\x17\x43ontentODictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a*\n(Performative_Empty_Contents_PerformativeB\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 _TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY = _descriptor.Descriptor(
@@ -48,7 +47,8 @@ _TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -65,13 +65,14 @@ _TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -102,7 +103,8 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="int_field",
@@ -119,7 +121,8 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="float_field",
@@ -136,7 +139,8 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="bool_field",
@@ -153,7 +157,8 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="str_field",
@@ -170,7 +175,8 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="set_field",
@@ -187,7 +193,8 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="list_field",
@@ -204,7 +211,8 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="dict_field",
@@ -221,13 +229,14 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[_TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY,],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -258,13 +267,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_CT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -295,7 +305,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_int",
@@ -312,7 +323,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_float",
@@ -329,7 +341,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_bool",
@@ -346,7 +359,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_str",
@@ -363,13 +377,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -400,7 +415,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_set_int",
@@ -417,7 +433,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_set_float",
@@ -434,7 +451,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_set_bool",
@@ -451,7 +469,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_set_str",
@@ -468,7 +487,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_list_bytes",
@@ -485,7 +505,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_list_int",
@@ -502,7 +523,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_list_float",
@@ -519,7 +541,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_list_bool",
@@ -536,7 +559,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_list_str",
@@ -553,13 +577,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -590,7 +615,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -607,13 +633,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -644,7 +671,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -661,13 +689,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -698,7 +727,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -715,13 +745,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -752,7 +783,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY = _descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -769,13 +801,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY = _descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -806,7 +839,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -823,13 +857,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -860,7 +895,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY = _des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -877,13 +913,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY = _des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -914,7 +951,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY = _descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -931,13 +969,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY = _descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -968,7 +1007,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY = _des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -985,13 +1025,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY = _des
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1022,7 +1063,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1039,13 +1081,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1076,7 +1119,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY = _descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1093,13 +1137,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY = _descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1130,7 +1175,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1147,13 +1193,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1184,7 +1231,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1201,13 +1249,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1238,7 +1287,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1255,13 +1305,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY = _desc
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1292,7 +1343,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY = _descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1309,13 +1361,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY = _descr
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1346,7 +1399,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1363,13 +1417,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY = _descri
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1400,7 +1455,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_int_int",
@@ -1417,7 +1473,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_int_float",
@@ -1434,7 +1491,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_int_bool",
@@ -1451,7 +1509,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_int_str",
@@ -1468,7 +1527,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_bytes",
@@ -1485,7 +1545,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_int",
@@ -1502,7 +1563,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_float",
@@ -1519,7 +1581,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_bool",
@@ -1536,7 +1599,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_bool_str",
@@ -1553,7 +1617,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_bytes",
@@ -1570,7 +1635,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_int",
@@ -1587,7 +1653,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_float",
@@ -1604,7 +1671,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_bool",
@@ -1621,7 +1689,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_dict_str_str",
@@ -1638,7 +1707,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -1660,7 +1730,7 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _descriptor.Descriptor(
         _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1691,7 +1761,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTR
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1708,13 +1779,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTR
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1745,7 +1817,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTR
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1762,13 +1835,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTR
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1799,7 +1873,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATEN
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1816,13 +1891,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATEN
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1853,7 +1929,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESE
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1870,13 +1947,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESE
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -1907,7 +1985,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_bytes",
@@ -1924,7 +2003,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_int",
@@ -1941,7 +2021,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_float",
@@ -1958,7 +2039,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_bool",
@@ -1975,7 +2057,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_str",
@@ -1992,7 +2075,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_set_of_int",
@@ -2009,7 +2093,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_list_of_bool",
@@ -2026,7 +2111,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_1_type_dict_of_str_int",
@@ -2043,7 +2129,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_set_of_bytes",
@@ -2060,7 +2147,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_set_of_int",
@@ -2077,7 +2165,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_set_of_str",
@@ -2094,7 +2183,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_list_of_float",
@@ -2111,7 +2201,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_list_of_bool",
@@ -2128,7 +2219,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_list_of_bytes",
@@ -2145,7 +2237,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_dict_of_str_int",
@@ -2162,7 +2255,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_dict_of_int_float",
@@ -2179,7 +2273,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_union_2_type_dict_of_bool_bytes",
@@ -2196,7 +2291,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -2207,7 +2303,7 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE = _descriptor.Descriptor(
         _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESENTRY,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -2238,7 +2334,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY = _descrip
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -2255,13 +2352,14 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY = _descrip
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b("8\001")),
+    serialized_options=_b("8\001"),
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -2292,7 +2390,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_ct_is_set",
@@ -2309,7 +2408,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_bool",
@@ -2326,7 +2426,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_bool_is_set",
@@ -2343,7 +2444,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_set_int",
@@ -2360,7 +2462,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_set_int_is_set",
@@ -2377,7 +2480,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_list_bytes",
@@ -2394,7 +2498,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_list_bytes_is_set",
@@ -2411,7 +2516,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_dict_str_int",
@@ -2428,7 +2534,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="content_o_dict_str_int_is_set",
@@ -2445,7 +2552,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -2453,7 +2561,7 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE = _descriptor.Descriptor(
         _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -2472,7 +2580,7 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE = _descriptor.Descrip
     extensions=[],
     nested_types=[],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -2503,7 +2611,8 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="performative_empty_contents",
@@ -2520,7 +2629,8 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="performative_mt",
@@ -2537,7 +2647,8 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="performative_o",
@@ -2554,7 +2665,8 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="performative_pct",
@@ -2571,7 +2683,8 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="performative_pmt",
@@ -2588,7 +2701,8 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
             name="performative_pt",
@@ -2605,7 +2719,8 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
             containing_type=None,
             is_extension=False,
             extension_scope=None,
-            options=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
         ),
     ],
     extensions=[],
@@ -2620,7 +2735,7 @@ _TPROTOCOLMESSAGE = _descriptor.Descriptor(
         _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE,
     ],
     enum_types=[],
-    options=None,
+    serialized_options=None,
     is_extendable=False,
     syntax="proto3",
     extension_ranges=[],
@@ -2866,6 +2981,7 @@ _TPROTOCOLMESSAGE.fields_by_name[
     "performative_pt"
 ].containing_oneof = _TPROTOCOLMESSAGE.oneofs_by_name["performative"]
 DESCRIPTOR.message_types_by_name["TProtocolMessage"] = _TPROTOCOLMESSAGE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TProtocolMessage = _reflection.GeneratedProtocolMessageType(
     "TProtocolMessage",
@@ -3209,126 +3325,37 @@ _sym_db.RegisterMessage(
 _sym_db.RegisterMessage(TProtocolMessage.Performative_Empty_Contents_Performative)
 
 
-_TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY.has_options = True
-_TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
+_TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY._options = (
+    None
 )
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY.has_options = (
-    True
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY._options = (
+    None
 )
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY._options = None
+_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTRY._options = (
+    None
 )
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY.has_options = (
-    True
+_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTRY._options = (
+    None
 )
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
+_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATENTRY._options = (
+    None
 )
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY.has_options = (
-    True
+_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESENTRY._options = (
+    None
 )
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESENTRY.has_options = (
-    True
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY.has_options = True
-_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b("8\001")
-)
+_TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY._options = None
 # @@protoc_insertion_point(module_scope)
