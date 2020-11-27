@@ -23,12 +23,12 @@ that can be used by setting `--k8s-fetchai-defaults`, `--docker-fetchai-defaults
 
 - deploy a node using cli options
   ```bash
-  python3 scripts/acn/k8s_deploy_acn_node.py --acn-key-file fet_key_test_1.txt --acn-port 9009 --acn-port-delegate 11009 --acn-port-monitoring 8080 --k8s-fetchai-defaults --docker-fetchai-defaults-dev
+  python3 scripts/acn/k8s_deploy_acn_node.py --acn-key-file fet_key_test_1.txt --acn-port 9009 --acn-port-delegate 11009 --k8s-fetchai-defaults --docker-fetchai-defaults-dev
   ```
 
 - delete deployment using cli options
   ```bash
-  python3 scripts/acn/k8s_deploy_acn_node.py --acn-key-file fet_key_test_1.txt --acn-port 9009 --acn-port-delegate 11009 --acn-port-monitoring 8080 --k8s-fetchai-defaults --docker-fetchai-defaults-dev --delete
+  python3 scripts/acn/k8s_deploy_acn_node.py --acn-key-file fet_key_test_1.txt --acn-port 9009 --acn-port-delegate 11009 --k8s-fetchai-defaults --docker-fetchai-defaults-dev --delete
   ```
 
 - redeploy using the generated deployment file

@@ -15,6 +15,10 @@ spec:
       protocol: TCP
       port: ph-node-delegate-port-number-here
       targetPort: 11000
+    - name: tcp-monitoring
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: StatefulSet
