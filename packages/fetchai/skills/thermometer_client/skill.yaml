@@ -9,7 +9,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmSn1bh9J7RT241DGT4812rTNGe2S2YLpEvy8ApNqNNqjf
   __init__.py: Qmb6rjhPWeQCGDHH9upThBQH3FKovn2Kq1b7ZiwznJRPbF
-  behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
+  behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
   strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
@@ -29,6 +29,11 @@ behaviours:
     args:
       search_interval: 5
     class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 120
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   fipa:
     args: {}

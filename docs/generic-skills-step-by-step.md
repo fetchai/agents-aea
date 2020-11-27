@@ -1431,7 +1431,7 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
-from typing import cast
+from typing import List, Optional, Tuple, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -1441,12 +1441,15 @@ from packages.fetchai.connections.ledger.base import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
+    LedgerApiDialogue,
     LedgerApiDialogues,
     OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
+DEFAULT_MAX_PROCESSING = 120
+DEFAULT_TX_INTERVAL = 2.0
 DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
@@ -1504,6 +1507,69 @@ class GenericSearchBehaviour(TickerBehaviour):
         :return: None
         """
         pass
+
+
+class GenericTransactionBehaviour(TickerBehaviour):
+    """A behaviour to sequentially submit transactions to the blockchain."""
+
+    def __init__(self, **kwargs):
+        """Initialize the transaction behaviour."""
+        tx_interval = cast(
+            float, kwargs.pop("transaction_interval", DEFAULT_TX_INTERVAL)
+        )
+        self.max_processing = cast(
+            float, kwargs.pop("max_processing", DEFAULT_MAX_PROCESSING)
+        )
+        self.processing_time = 0.0
+        self.waiting: List[Tuple[LedgerApiDialogue, LedgerApiMessage]] = []
+        self.processing: Optional[LedgerApiDialogue] = None
+        super().__init__(tick_interval=tx_interval, **kwargs)
+
+    def setup(self) -> None:
+        """Setup behaviour."""
+        pass
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        if self.processing is not None and self.processing_time <= self.max_processing:
+            # already processing
+            self.processing_time += self.tick_interval
+            return
+        if len(self.waiting) == 0:
+            # nothing to process
+            return
+        self._start_processing()
+
+    def _start_processing(self) -> None:
+        """Process the next transaction."""
+        dialogue, message = self.waiting.pop(0)
+        self.processing_time = 0.0
+        self.processing = dialogue
+        self.context.logger.info(
+            f"requesting transfer transaction from ledger api for message={message}..."
+        )
+        self.context.outbox.put_message(message=message)
+
+    def teardown(self) -> None:
+        """Teardown behaviour."""
+        pass
+
+    def finish_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
+        """
+        Finish processing.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        if self.processing != ledger_api_dialogue:
+            self.context.logger.warning(
+                f"Non-matching dialogues in transaction behaviour: {self.processing} and {ledger_api_dialogue}"
+            )
+        self.processing_time = 0.0
+        self.processing = None
 ```
 
 This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> will search on  the <a href="../simple-oef">SOEF search node</a> with a specific query at regular tick intervals.
@@ -1519,6 +1585,7 @@ import pprint
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
+from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -1530,6 +1597,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.generic_buyer.behaviours import GenericTransactionBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -1727,9 +1795,11 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
             ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
             fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-            self.context.outbox.put_message(message=ledger_api_msg)
-            self.context.logger.info(
-                "requesting transfer transaction from ledger api..."
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.waiting.append(
+                (ledger_api_dialogue, cast(LedgerApiMessage, ledger_api_msg))
             )
         else:
             inform_msg = fipa_dialogue.reply(
@@ -2091,6 +2161,11 @@ class GenericLedgerApiHandler(Handler):
             == LedgerApiMessage.Performative.TRANSACTION_DIGEST
         ):
             self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+        elif (
+            ledger_api_msg.performative
+            == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
+        ):
+            self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -2172,26 +2247,68 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
         self.context.logger.info(
             "transaction was successfully submitted. Transaction digest={}".format(
                 ledger_api_msg.transaction_digest
             )
         )
-        fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
-        if fipa_msg is None:
-            raise ValueError("Could not retrieve fipa message")
-        inform_msg = fipa_dialogue.reply(
-            performative=FipaMessage.Performative.INFORM,
-            target_message=fipa_msg,
-            info={"transaction_digest": ledger_api_msg.transaction_digest.body},
+        ledger_api_msg_ = ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target_message=ledger_api_msg,
+            transaction_digest=ledger_api_msg.transaction_digest,
         )
-        self.context.outbox.put_message(message=inform_msg)
-        self.context.logger.info(
-            "informing counterparty={} of transaction digest.".format(
-                fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+        self.context.logger.info("checking transaction is settled.")
+        self.context.outbox.put_message(message=ledger_api_msg_)
+
+    def _handle_transaction_receipt(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of balance performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
+        is_settled = LedgerApis.is_transaction_settled(
+            fipa_dialogue.terms.ledger_id, ledger_api_msg.transaction_receipt.receipt
+        )
+        tx_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        if is_settled:
+            tx_behaviour.finish_processing(ledger_api_dialogue)
+            ledger_api_msg_ = cast(
+                Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
-        )
+            if ledger_api_msg_ is None:
+                raise ValueError("Could not retrieve last ledger_api message")
+            fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
+            if fipa_msg is None:
+                raise ValueError("Could not retrieve last fipa message")
+            inform_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.INFORM,
+                target_message=fipa_msg,
+                info={"transaction_digest": ledger_api_msg_.transaction_digest.body},
+            )
+            self.context.outbox.put_message(message=inform_msg)
+            self.context.logger.info(
+                "transaction confirmed, informing counterparty={} of transaction digest.".format(
+                    fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+                )
+            )
+            fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+            fipa_dialogues.dialogue_stats.add_dialogue_endstate(
+                FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
+            )
+        else:
+            tx_behaviour.processing = None
+            tx_behaviour.processing_time = 0.0
+            self.context.logger.info(
+                "transaction_receipt={} not settled or not valid, aborting".format(
+                    ledger_api_msg.transaction_receipt
+                )
+            )
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
