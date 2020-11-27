@@ -25,12 +25,14 @@ from unittest.mock import patch
 
 import pytest
 
+from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import (
     RawTransaction,
     SignedTransaction,
     Terms,
     TransactionDigest,
+    TransactionReceipt,
 )
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
@@ -1060,6 +1062,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         cls.raw_transaction = RawTransaction("some_ledger_id", "some_body")
         cls.signed_transaction = SignedTransaction("some_ledger_id", "some_body")
         cls.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
+        cls.transaction_receipt = TransactionReceipt(
+            "some_ledger_id", "receipt", "transaction"
+        )
         cls.list_of_ledger_api_messages = (
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_RAW_TRANSACTION, {"terms": cls.terms}
@@ -1075,6 +1080,14 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             DialogueMessage(
                 LedgerApiMessage.Performative.TRANSACTION_DIGEST,
                 {"transaction_digest": cls.transaction_digest},
+            ),
+            DialogueMessage(
+                LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+                {"transaction_digest": cls.transaction_digest},
+            ),
+            DialogueMessage(
+                LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+                {"transaction_receipt": cls.transaction_receipt},
             ),
         )
 
@@ -1238,49 +1251,6 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
         )
 
-    def test_ledger_api_handler_handle_transaction_digest_last_fipa_message_is_none(
-        self,
-    ):
-        """Test the _handle_transaction_digest method of the ledger_api handler where the last incoming fipa message os None."""
-        # setup
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:3],
-                counterparty=LEDGER_API_ADDRESS,
-            ),
-        )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        ledger_api_dialogue.associated_fipa_dialogue._incoming_messages = []
-        incoming_message = cast(
-            LedgerApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
-                transaction_digest=self.transaction_digest,
-            ),
-        )
-
-        # operation
-        with pytest.raises(ValueError, match="Could not retrieve fipa message"):
-            with patch.object(
-                self.ledger_api_handler.context.logger, "log"
-            ) as mock_logger:
-                self.ledger_api_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(
-            logging.INFO,
-            f"transaction was successfully submitted. Transaction digest={incoming_message.transaction_digest}",
-        )
-
     def test_ledger_api_handler_handle_transaction_digest(self):
         """Test the _handle_transaction_digest method of the ledger_api handler."""
         # setup
@@ -1292,14 +1262,6 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        fipa_dialogue.terms = self.terms
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -1322,18 +1284,69 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
-            message_type=FipaMessage,
-            performative=FipaMessage.Performative.INFORM,
-            to=COUNTERPARTY_ADDRESS,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            to=incoming_message.sender,
             sender=self.skill.skill_context.agent_address,
-            info={"transaction_digest": incoming_message.transaction_digest.body},
+            transaction_digest=self.transaction_digest,
         )
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO,
-            f"informing counterparty={COUNTERPARTY_ADDRESS[-5:]} of transaction digest.",
+            logging.INFO, "checking transaction is settled.",
         )
+
+    def test_ledger_api_handler_handle_handle_transaction_receipt(self):
+        """Test the _handle_transaction_receipt method of the ledger_api handler."""
+        # setup
+        ledger_api_dialogue = cast(
+            LedgerApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.ledger_api_dialogues,
+                messages=self.list_of_ledger_api_messages[:5],
+                counterparty=LEDGER_API_ADDRESS,
+            ),
+        )
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+            ),
+        )
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        fipa_dialogue.terms = self.terms
+        incoming_message = cast(
+            LedgerApiMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=ledger_api_dialogue,
+                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+                transaction_receipt=self.transaction_receipt,
+            ),
+        )
+
+        # operation
+        with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
+            with patch.object(
+                self.ledger_api_handler.context.logger, "log"
+            ) as mock_logger:
+                self.ledger_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction confirmed, informing counterparty={fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:]} of transaction digest.",
+        )
+
+        self.assert_quantity_in_outbox(1)
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=FipaMessage,
+            performative=FipaMessage.Performative.INFORM,
+            to=COUNTERPARTY_ADDRESS,
+            sender=self.skill.skill_context.agent_address,
+            info={"transaction_digest": self.transaction_digest.body},
+        )
+        assert has_attributes, error_str
 
     def test_ledger_api_handler_handle_error(self):
         """Test the _handle_error method of the ledger_api handler."""

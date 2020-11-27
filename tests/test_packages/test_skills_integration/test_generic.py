@@ -396,7 +396,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "transaction signing was successful.",
             "sending transaction to ledger.",
             "transaction was successfully submitted. Transaction digest=",
-            "informing counterparty=",
+            "transaction confirmed, informing counterparty=",
             "received INFORM from sender=",
             "received the following data=",
         )

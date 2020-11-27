@@ -568,6 +568,11 @@ class GenericLedgerApiHandler(Handler):
             == LedgerApiMessage.Performative.TRANSACTION_DIGEST
         ):
             self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+        elif (
+            ledger_api_msg.performative
+            == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
+        ):
+            self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -655,10 +660,11 @@ class GenericLedgerApiHandler(Handler):
             )
         )
         ledger_api_msg_ = ledger_api_dialogue.reply(
-            counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target_message=ledger_api_msg,
             transaction_digest=ledger_api_msg.transaction_digest,
         )
+        self.context.logger.info("checking transaction is settled.")
         self.context.outbox.put_message(message=ledger_api_msg_)
 
     def _handle_transaction_receipt(
@@ -674,18 +680,10 @@ class GenericLedgerApiHandler(Handler):
         is_settled = LedgerApis.is_transaction_settled(
             fipa_dialogue.terms.ledger_id, ledger_api_msg.transaction_receipt.receipt
         )
-        is_valid = LedgerApis.is_transaction_valid(
-            fipa_dialogue.terms.ledger_id,
-            ledger_api_msg.transaction_receipt.transaction,
-            fipa_dialogue.terms.sender_address,
-            fipa_dialogue.terms.counterparty_address,
-            fipa_dialogue.terms.nonce,
-            fipa_dialogue.terms.counterparty_payable_amount,
-        )
         tx_behaviour = cast(
             GenericTransactionBehaviour, self.context.behaviours.transaction
         )
-        if is_settled and is_valid:
+        if is_settled:
             tx_behaviour.finish_processing(ledger_api_dialogue)
             ledger_api_msg_ = cast(
                 Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
