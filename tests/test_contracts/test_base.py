@@ -138,6 +138,8 @@ def test_get_instance_no_address_ethereum(dummy_contract):
     assert type(instance) == web3._utils.datatypes.PropertyCheckingFactory
 
 
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_get_deploy_transaction_ethereum(
     dummy_contract, ganache_addr, ganache_port, ganache
 ):
