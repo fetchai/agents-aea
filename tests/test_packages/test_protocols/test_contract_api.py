@@ -108,8 +108,6 @@ def test_get_raw_transaction_serialization():
         message=msg,
     )
     envelope_bytes = envelope.encode()
-    print("Envelope: ", envelope)
-    print("Envelope Serialized: ", envelope_bytes)
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
@@ -123,7 +121,6 @@ def test_get_raw_transaction_serialization():
     actual_msg.sender = actual_envelope.sender
     expected_msg = msg
     assert expected_msg == actual_msg
-    print("Envelope Deserialized: ", actual_envelope, actual_msg)
 
 
 def test_get_raw_message_serialization():

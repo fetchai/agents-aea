@@ -27,6 +27,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.helpers.serializers import DictProtobufStructSerializer
 
+
 Address = str
 
 
@@ -37,6 +38,14 @@ class RawTransaction:
         self, ledger_id: str, body: Any,
     ):
         """Initialise an instance of RawTransaction."""
+        # body is expected to be of type Dict[str, Union[bool, int, float, str, bytes, Dict[str, *], List[Dict[str, *]]]]
+        if not isinstance(body, dict):
+            raise NotImplementedError(
+                "RawTransaction encoding doesn't support body type {}: expected Dict[str, Any]".format(
+                    type(body)
+                )
+            )
+
         self._ledger_id = ledger_id
         self._body = body
         self._check_consistency()
@@ -69,13 +78,6 @@ class RawTransaction:
         :param raw_transaction_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        # raw_transaction_object.body is expected to be of type Dict[str, Union[bool, int, float, str, Dict[*]]]
-        if not isinstance(raw_transaction_object.body, dict):
-            raise NotImplementedError(
-                "RawTransaction encoding doesn't support body type {}".format(
-                    type(raw_transaction_object.body)
-                )
-            )
 
         raw_transaction_dict = {
             "ledger_id": raw_transaction_object.ledger_id,
@@ -99,9 +101,7 @@ class RawTransaction:
         raw_transaction_dict = DictProtobufStructSerializer.decode(
             raw_transaction_protobuf_object.raw_transaction
         )
-        return cls(
-            raw_transaction_dict["ledger_id"], dict(raw_transaction_dict["body"])
-        )
+        return cls(raw_transaction_dict["ledger_id"], raw_transaction_dict["body"])
 
     def __eq__(self, other):
         """Check equality."""
@@ -125,6 +125,14 @@ class RawMessage:
         self, ledger_id: str, body: bytes, is_deprecated_mode: bool = False,
     ):
         """Initialise an instance of RawMessage."""
+        # body is expected to be of type bytes (or str)
+        if not isinstance(body, bytes) and not isinstance(body, str):
+            raise NotImplementedError(
+                "RawMessage encoding doesn't support body type {}: expected Union[bytes, str]".format(
+                    type(body)
+                )
+            )
+
         self._ledger_id = ledger_id
         self._body = body
         self._is_deprecated_mode = is_deprecated_mode
@@ -165,16 +173,6 @@ class RawMessage:
         :param raw_message_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        # raw_message_object.body is expected to be of type bytes
-        if not isinstance(raw_message_object.body, bytes) and not isinstance(
-            raw_message_object.body, str
-        ):
-            raise NotImplementedError(
-                "RawMessage encoding doesn't support body type {}".format(
-                    type(raw_message_object.body)
-                )
-            )
-
         raw_message_dict = {
             "ledger_id": raw_message_object.ledger_id,
             "body": raw_message_object.body,
@@ -227,6 +225,14 @@ class SignedTransaction:
         self, ledger_id: str, body: Any,
     ):
         """Initialise an instance of SignedTransaction."""
+        # body is expected to be of type Dict[str, Union[bool, int, float, str, bytes, Dict[str, *], List[Dict[str, *]]]]
+        if not isinstance(body, dict):
+            raise NotImplementedError(
+                "SignedTransaction encoding doesn't support body type {}: expected Dict[str, Any]".format(
+                    type(body)
+                )
+            )
+
         self._ledger_id = ledger_id
         self._body = body
         self._check_consistency()
@@ -260,14 +266,6 @@ class SignedTransaction:
         :param signed_transaction_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        # signed_transaction_object.body is expected to be of type Dict[str, Union[bool, int, float, str, Dict[*]]]
-        if not isinstance(signed_transaction_object.body, dict):
-            raise NotImplementedError(
-                "SignedTransaction encoding doesn't support body type {}".format(
-                    type(signed_transaction_object.body)
-                )
-            )
-
         signed_transaction_dict = {
             "ledger_id": signed_transaction_object.ledger_id,
             "body": signed_transaction_object.body,
@@ -316,6 +314,14 @@ class SignedMessage:
         self, ledger_id: str, body: str, is_deprecated_mode: bool = False,
     ):
         """Initialise an instance of SignedMessage."""
+        # body is expected to be of type str (or bytes)
+        if not isinstance(body, str) and not isinstance(body, bytes):
+            raise NotImplementedError(
+                "SignedMessage encoding doesn't support body type {}: expected Union[str, bytes]".format(
+                    type(body)
+                )
+            )
+
         self._ledger_id = ledger_id
         self._body = body
         self._is_deprecated_mode = is_deprecated_mode
@@ -358,16 +364,6 @@ class SignedMessage:
         :param signed_message_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        # singed_message_object.body is expected to be of type str
-        if not isinstance(signed_message_object.body, str) and not isinstance(
-            signed_message_object.body, bytes
-        ):
-            raise NotImplementedError(
-                "SignedMessage encoding doesn't support body type {}".format(
-                    type(signed_message_object.body)
-                )
-            )
-
         signed_message_dict = {
             "ledger_id": signed_message_object.ledger_id,
             "body": signed_message_object.body,
@@ -418,6 +414,14 @@ class State:
 
     def __init__(self, ledger_id: str, body: bytes):
         """Initialise an instance of State."""
+        # body is expected to be of type bytes (or str)
+        if not isinstance(body, bytes) and not isinstance(body, str):
+            raise NotImplementedError(
+                "State encoding doesn't support body type {}: expected Union[bytes, str]".format(
+                    type(body)
+                )
+            )
+
         self._ledger_id = ledger_id
         self._body = body
         self._check_consistency()
@@ -448,16 +452,6 @@ class State:
         :param state_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        # state_object.body is expected to be of type bytes
-        if not isinstance(state_object.body, bytes) and not isinstance(
-            state_object.body, str
-        ):
-            raise NotImplementedError(
-                "State encoding doesn't support body type {}".format(
-                    type(state_object.body)
-                )
-            )
-
         state_dict = {
             "ledger_id": state_object.ledger_id,
             "body": state_object.body,
@@ -935,14 +929,6 @@ class Terms:
         :return: A new instance of this class that matches the protocol buffer object in the 'terms_protobuf_object' argument.
         """
         terms_dict = DictProtobufStructSerializer.decode(terms_protobuf_object.terms)
-        # aea.exceptions.AEAEnforceError: * must be a dictionary with str keys and int values
-        # amount_by_currency_id_dict =  dict(terms_dict["amount_by_currency_id"])
-        # for key, value in amount_by_currency_id_dict.items():
-        #    amount_by_currency_id_dict[key] = int(value)
-        #
-        # quantities_by_good_id_dict =  dict(terms_dict["quantities_by_good_id"])
-        # for key, value in quantities_by_good_id_dict.items():
-        #    quantities_by_good_id_dict[key] = int(value)
 
         return cls(
             terms_dict["ledger_id"],
@@ -994,6 +980,14 @@ class TransactionDigest:
 
     def __init__(self, ledger_id: str, body: Any):
         """Initialise an instance of TransactionDigest."""
+        # body is expected to be of type str (or bytes)
+        if not isinstance(body, str) and not isinstance(body, bytes):
+            raise NotImplementedError(
+                "TransactionDigest encoding doesn't support body type {}: expected Union[str, bytes]".format(
+                    type(body)
+                )
+            )
+
         self._ledger_id = ledger_id
         self._body = body
         self._check_consistency()
@@ -1027,16 +1021,6 @@ class TransactionDigest:
         :param transaction_digest_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        # transaction_digest_object.body is expected to be of str type
-        if not isinstance(transaction_digest_object.body, str) and not isinstance(
-            transaction_digest_object.body, bytes
-        ):
-            raise NotImplementedError(
-                "TransactionDigest encoding doesn't support body type {}".format(
-                    type(transaction_digest_object.body)
-                )
-            )
-
         transaction_digest_dict = {
             "ledger_id": transaction_digest_object.ledger_id,
             "body": transaction_digest_object.body,
@@ -1084,6 +1068,21 @@ class TransactionReceipt:
 
     def __init__(self, ledger_id: str, receipt: Any, transaction: Any):
         """Initialise an instance of TransactionReceipt."""
+        # [receipt|transaction] are expected to be of type str (or bytes)
+        if not isinstance(receipt, str) and not isinstance(receipt, bytes):
+            raise NotImplementedError(
+                "TransactionReceipt encoding doesn't support receipt type {}: expected Union[str, bytes]".format(
+                    type(receipt)
+                )
+            )
+
+        if not isinstance(transaction, str) and not isinstance(transaction, bytes):
+            raise NotImplementedError(
+                "TransactionReceipt encoding doesn't support transaction type {}: expected Union[str, bytes]".format(
+                    type(transaction),
+                )
+            )
+
         self._ledger_id = ledger_id
         self._receipt = receipt
         self._transaction = transaction
@@ -1124,25 +1123,6 @@ class TransactionReceipt:
         :param transaction_receipt_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        # transaction_receipt_object.[receipt|transaction] are expected to be of type str
-        if not isinstance(transaction_receipt_object.receipt, str) and not isinstance(
-            transaction_receipt_object.receipt, bytes
-        ):
-            raise NotImplementedError(
-                "TransactionReceipt encoding doesn't support receipt type {}".format(
-                    type(transaction_receipt_object.receipt)
-                )
-            )
-
-        if not isinstance(
-            transaction_receipt_object.transaction, str
-        ) and not isinstance(transaction_receipt_object.transaction, bytes):
-            raise NotImplementedError(
-                "TransactionReceipt encoding doesn't support transaction type {}".format(
-                    type(transaction_receipt_object.transaction),
-                )
-            )
-
         transaction_receipt_dict = {
             "ledger_id": transaction_receipt_object.ledger_id,
             "receipt": transaction_receipt_object.receipt,

@@ -173,7 +173,7 @@ def test_dialogues():
             is_sender_payable_tx_fee=True,
             nonce="transaction nonce",
         ),
-        raw_transaction=RawTransaction("ledger_id", "transaction"),
+        raw_transaction=RawTransaction("ledger_id", {"tx": "transaction"}),
     )
     assert dialogue is not None
 
