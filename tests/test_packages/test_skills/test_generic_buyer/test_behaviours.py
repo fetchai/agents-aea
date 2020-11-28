@@ -23,22 +23,18 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
-from aea.helpers.transaction.base import RawTransaction
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_PUBLIC_ID
+from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.behaviours import (
     GenericSearchBehaviour,
     GenericTransactionBehaviour,
 )
-from packages.fetchai.skills.generic_buyer.dialogues import (
-    LedgerApiDialogue,
-    LedgerApiDialogues,
-)
-from packages.fetchai.skills.generic_buyer.handlers import LEDGER_API_ADDRESS
+from packages.fetchai.skills.generic_buyer.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 from tests.conftest import ROOT_DIR
@@ -143,8 +139,19 @@ class TestTransactionBehaviour(BaseSkillTestCase):
             GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
         )
         cls.logger = cls._skill.skill_context.logger
-        cls.ledger_api_dialogues = cast(
-            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
+        )
+        cls.list_of_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                {"info": {"address": "some_term_sender_address"}},
+            ),
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
@@ -162,28 +169,14 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         self.transaction_behaviour.max_processing = max_processing
         self.transaction_behaviour.processing_time = processing_time
 
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue,
+        fipa_dialogue = cast(
+            FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.ledger_api_dialogues,
-                messages=(
-                    DialogueMessage(
-                        LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                        {"terms": "some_terms"},
-                    ),
-                ),
-                counterparty=LEDGER_API_ADDRESS,
+                dialogues=self.fipa_dialogues, messages=self.list_of_messages,
             ),
         )
-        ledger_api_message = cast(
-            LedgerApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.RAW_TRANSACTION,
-                raw_transaction=RawTransaction("some_ledger_id", "some_body"),
-            ),
-        )
-        self.transaction_behaviour.waiting = [(ledger_api_dialogue, ledger_api_message)]
+        fipa_dialogue.terms = "terms"
+        self.transaction_behaviour.waiting = [fipa_dialogue]
 
         # before
         assert self.transaction_behaviour.processing_time == processing_time
@@ -197,14 +190,13 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         assert self.transaction_behaviour.processing_time == 0.0
-        assert self.transaction_behaviour.processing is ledger_api_dialogue
+        assert self.transaction_behaviour.processing is not None
 
+        message = self.get_message_from_outbox()
         mock_logger.assert_any_call(
             logging.INFO,
-            f"requesting transfer transaction from ledger api for message={ledger_api_message}...",
+            f"requesting transfer transaction from ledger api for message={message}...",
         )
-        message = self.get_message_from_outbox()
-        assert message == ledger_api_message
 
     def test_act_ii(self):
         """Test the act method of the transaction behaviour where processing is not None and processing_time < max_processing."""

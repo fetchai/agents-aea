@@ -1431,7 +1431,7 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -1441,6 +1441,7 @@ from packages.fetchai.connections.ledger.base import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
+    FipaDialogue,
     LedgerApiDialogue,
     LedgerApiDialogues,
     OefSearchDialogues,
@@ -1521,7 +1522,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
             float, kwargs.pop("max_processing", DEFAULT_MAX_PROCESSING)
         )
         self.processing_time = 0.0
-        self.waiting: List[Tuple[LedgerApiDialogue, LedgerApiMessage]] = []
+        self.waiting: List[FipaDialogue] = []
         self.processing: Optional[LedgerApiDialogue] = None
         super().__init__(tick_interval=tx_interval, **kwargs)
 
@@ -1535,10 +1536,13 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self.processing is not None and self.processing_time <= self.max_processing:
-            # already processing
-            self.processing_time += self.tick_interval
-            return
+        if self.processing is not None:
+            if self.processing_time <= self.max_processing:
+                # already processing
+                self.processing_time += self.tick_interval
+                return
+            # processing timed out
+            self.failed_processing(self.processing)
         if len(self.waiting) == 0:
             # nothing to process
             return
@@ -1546,13 +1550,26 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def _start_processing(self) -> None:
         """Process the next transaction."""
-        dialogue, message = self.waiting.pop(0)
-        self.processing_time = 0.0
-        self.processing = dialogue
+        fipa_dialogue = self.waiting.pop(0)
         self.context.logger.info(
-            f"requesting transfer transaction from ledger api for message={message}..."
+            f"Processing transaction, {len(self.waiting)} transactions remaining"
         )
-        self.context.outbox.put_message(message=message)
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
+            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+            terms=fipa_dialogue.terms,
+        )
+        ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        self.processing_time = 0.0
+        self.processing = ledger_api_dialogue
+        self.context.logger.info(
+            f"requesting transfer transaction from ledger api for message={ledger_api_msg}..."
+        )
+        self.context.outbox.put_message(message=ledger_api_msg)
 
     def teardown(self) -> None:
         """Teardown behaviour."""
@@ -1570,6 +1587,17 @@ class GenericTransactionBehaviour(TickerBehaviour):
             )
         self.processing_time = 0.0
         self.processing = None
+
+    def failed_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
+        """
+        Failed processing.
+
+        Currently, we retry processing indefinitely.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.finish_processing(ledger_api_dialogue)
+        self.waiting.append(ledger_api_dialogue.associated_fipa_dialogue)
 ```
 
 This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> will search on  the <a href="../simple-oef">SOEF search node</a> with a specific query at regular tick intervals.
@@ -1784,23 +1812,11 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
                 fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
                     transfer_address
                 )
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
-            )
-            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=fipa_dialogue.terms,
-            )
-            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-            ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-            fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+
             tx_behaviour = cast(
                 GenericTransactionBehaviour, self.context.behaviours.transaction
             )
-            tx_behaviour.waiting.append(
-                (ledger_api_dialogue, cast(LedgerApiMessage, ledger_api_msg))
-            )
+            tx_behaviour.waiting.append(fipa_dialogue)
         else:
             inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
@@ -2074,8 +2090,7 @@ class GenericSigningHandler(Handler):
         :return: None
         """
         self.context.logger.info("transaction signing was successful.")
-        fipa_dialogue = signing_dialogue.associated_fipa_dialogue
-        ledger_api_dialogue = fipa_dialogue.associated_ledger_api_dialogue
+        ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
         last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")
@@ -2102,6 +2117,12 @@ class GenericSigningHandler(Handler):
                 signing_msg.error_code, signing_dialogue
             )
         )
+        if signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -2230,9 +2251,7 @@ class GenericLedgerApiHandler(Handler):
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)
-        signing_dialogue.associated_fipa_dialogue = (
-            ledger_api_dialogue.associated_fipa_dialogue
-        )
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
             "proposing the transaction to the decision maker. Waiting for confirmation ..."
@@ -2276,8 +2295,8 @@ class GenericLedgerApiHandler(Handler):
         tx_behaviour = cast(
             GenericTransactionBehaviour, self.context.behaviours.transaction
         )
+        tx_behaviour.finish_processing(ledger_api_dialogue)
         if is_settled:
-            tx_behaviour.finish_processing(ledger_api_dialogue)
             ledger_api_msg_ = cast(
                 Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
@@ -2300,8 +2319,6 @@ class GenericLedgerApiHandler(Handler):
                 )
             )
         else:
-            tx_behaviour.processing = None
-            tx_behaviour.processing_time = 0.0
             self.context.logger.info(
                 "transaction_receipt={} not settled or not valid, aborting".format(
                     ledger_api_msg.transaction_receipt
@@ -2322,6 +2339,18 @@ class GenericLedgerApiHandler(Handler):
                 ledger_api_msg, ledger_api_dialogue
             )
         )
+        ledger_api_msg_ = cast(
+            Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
+        )
+        if (
+            ledger_api_msg_ is not None
+            and ledger_api_msg_.performative
+            != LedgerApiMessage.Performative.GET_BALANCE
+        ):
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -2363,6 +2392,7 @@ DEFAULT_IS_LEDGER_TX = True
 DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
+DEFAULT_MIN_QUANTITY = 1
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
@@ -2389,6 +2419,7 @@ class GenericStrategy(Model):
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
 
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_UNIT_PRICE)
+        self._min_quantity = kwargs.pop("min_quantity", DEFAULT_MIN_QUANTITY)
         self._max_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
@@ -2523,6 +2554,8 @@ The following code block checks if the proposal that we received is acceptable b
                 ]
             )
             and proposal.values["ledger_id"] == self.ledger_id
+            and proposal.values["price"] > 0
+            and proposal.values["quantity"] >= self._min_quantity
             and proposal.values["price"]
             <= proposal.values["quantity"] * self._max_unit_price
             and proposal.values["currency_id"] == self._currency_id
@@ -2707,7 +2740,6 @@ class FipaDialogue(BaseFipaDialogue):
             message_class=message_class,
         )
         self._terms = None  # type: Optional[Terms]
-        self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
 
     @property
     def terms(self) -> Terms:
@@ -2721,24 +2753,6 @@ class FipaDialogue(BaseFipaDialogue):
         """Set terms."""
         enforce(self._terms is None, "Terms already set!")
         self._terms = terms
-
-    @property
-    def associated_ledger_api_dialogue(self) -> "LedgerApiDialogue":
-        """Get associated_ledger_api_dialogue."""
-        if self._associated_ledger_api_dialogue is None:
-            raise AEAEnforceError("LedgerApiDialogue not set!")
-        return self._associated_ledger_api_dialogue
-
-    @associated_ledger_api_dialogue.setter
-    def associated_ledger_api_dialogue(
-        self, ledger_api_dialogue: "LedgerApiDialogue"
-    ) -> None:
-        """Set associated_ledger_api_dialogue"""
-        enforce(
-            self._associated_ledger_api_dialogue is None,
-            "LedgerApiDialogue already set!",
-        )
-        self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
 class FipaDialogues(Model, BaseFipaDialogues):
@@ -2902,20 +2916,25 @@ class SigningDialogue(BaseSigningDialogue):
             role=role,
             message_class=message_class,
         )
-        self._associated_fipa_dialogue = None  # type: Optional[FipaDialogue]
+        self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
 
     @property
-    def associated_fipa_dialogue(self) -> FipaDialogue:
-        """Get associated_fipa_dialogue."""
-        if self._associated_fipa_dialogue is None:
-            raise AEAEnforceError("FipaDialogue not set!")
-        return self._associated_fipa_dialogue
+    def associated_ledger_api_dialogue(self) -> LedgerApiDialogue:
+        """Get associated_ledger_api_dialogue."""
+        if self._associated_ledger_api_dialogue is None:
+            raise AEAEnforceError("LedgerApiDialogue not set!")
+        return self._associated_ledger_api_dialogue
 
-    @associated_fipa_dialogue.setter
-    def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
-        """Set associated_fipa_dialogue"""
-        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
-        self._associated_fipa_dialogue = fipa_dialogue
+    @associated_ledger_api_dialogue.setter
+    def associated_ledger_api_dialogue(
+        self, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """Set associated_ledger_api_dialogue"""
+        enforce(
+            self._associated_ledger_api_dialogue is None,
+            "LedgerApiDialogue already set!",
+        )
+        self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
 class SigningDialogues(Model, BaseSigningDialogues):

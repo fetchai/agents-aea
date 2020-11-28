@@ -869,12 +869,6 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 messages=self.list_of_signing_messages[:1],
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
@@ -882,11 +876,8 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 messages=self.list_of_ledger_api_messages[:2],
             ),
         )
-        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
-        fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-        signing_dialogue.associated_fipa_dialogue.associated_ledger_api_dialogue._incoming_messages = (
-            []
-        )
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+        signing_dialogue.associated_ledger_api_dialogue._incoming_messages = []
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=signing_dialogue,
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
@@ -919,12 +910,6 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 counterparty=signing_counterparty,
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
@@ -933,8 +918,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
-        fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
         incoming_message = cast(
             SigningMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -1459,7 +1443,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 code=1,
             ),
         )
-
+        ledger_api_dialogue.associated_fipa_dialogue = "mock"
         # operation
         with patch.object(self.logger, "log") as mock_logger:
             self.ledger_api_handler.handle(incoming_message)
