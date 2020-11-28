@@ -25,12 +25,14 @@ from unittest.mock import patch
 
 import pytest
 
+from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import (
     RawTransaction,
     SignedTransaction,
     Terms,
     TransactionDigest,
+    TransactionReceipt,
 )
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
@@ -40,6 +42,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.generic_buyer.behaviours import GenericTransactionBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import (
     FipaDialogue,
     FipaDialogues,
@@ -339,21 +342,32 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             {"good_id": -10},
             "some_nonce",
         )
-        incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue,
-            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            info={"info": {"address": "some_term_sender_address"}},
+        incoming_message = cast(
+            FipaMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=fipa_dialogue,
+                performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                info={"info": {"address": "some_term_sender_address"}},
+            ),
         )
 
         # operation
-        with patch.object(self.fipa_handler.context.logger, "log") as mock_logger:
+        with patch.object(
+            self.fipa_handler.context.logger, "log"
+        ) as mock_logger_handler:
             self.fipa_handler.handle(incoming_message)
 
         # after
-        mock_logger.assert_any_call(
+        mock_logger_handler.assert_any_call(
             logging.INFO,
             f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_ADDRESS[-5:]} with info={incoming_message.info}",
         )
+
+        # operation
+        with patch.object(
+            self.fipa_handler.context.behaviours.transaction.context.logger, "log"
+        ) as _:
+            self.fipa_handler.context.behaviours.transaction.act()
 
         self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
@@ -366,10 +380,6 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        mock_logger.assert_any_call(
-            logging.INFO, "requesting transfer transaction from ledger api..."
-        )
-
     def test_handle_match_accept_not_is_ledger_tx(self):
         """Test the _handle_match_accept method of the fipa handler where is_ledger_tx is False."""
         # setup
@@ -378,10 +388,13 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         fipa_dialogue = self.prepare_skill_dialogue(
             dialogues=self.fipa_dialogues, messages=self.list_of_messages[:3],
         )
-        incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue,
-            performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            info={"info": {"address": "some_term_sender_address"}},
+        incoming_message = cast(
+            FipaMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=fipa_dialogue,
+                performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                info={"info": {"address": "some_term_sender_address"}},
+            ),
         )
 
         # operation
@@ -856,12 +869,6 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 messages=self.list_of_signing_messages[:1],
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
@@ -869,11 +876,8 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 messages=self.list_of_ledger_api_messages[:2],
             ),
         )
-        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
-        fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-        signing_dialogue.associated_fipa_dialogue.associated_ledger_api_dialogue._incoming_messages = (
-            []
-        )
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+        signing_dialogue.associated_ledger_api_dialogue._incoming_messages = []
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=signing_dialogue,
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
@@ -906,12 +910,6 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 counterparty=signing_counterparty,
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
@@ -920,8 +918,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
-        fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
         incoming_message = cast(
             SigningMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -1023,13 +1020,19 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         cls.ledger_api_handler = cast(
             GenericLedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
         )
+        cls.transaction_behaviour = cast(
+            GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
+        )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.logger = cls._skill.skill_context.logger
+
         cls.fipa_dialogues = cast(
             FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
         cls.ledger_api_dialogues = cast(
             LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
+
         cls.terms = Terms(
             "some_ledger_id",
             cls._skill.skill_context.agent_address,
@@ -1056,6 +1059,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         cls.raw_transaction = RawTransaction("some_ledger_id", "some_body")
         cls.signed_transaction = SignedTransaction("some_ledger_id", "some_body")
         cls.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
+        cls.transaction_receipt = TransactionReceipt(
+            "some_ledger_id", "receipt", "transaction"
+        )
         cls.list_of_ledger_api_messages = (
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_RAW_TRANSACTION, {"terms": cls.terms}
@@ -1072,6 +1078,14 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 LedgerApiMessage.Performative.TRANSACTION_DIGEST,
                 {"transaction_digest": cls.transaction_digest},
             ),
+            DialogueMessage(
+                LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+                {"transaction_digest": cls.transaction_digest},
+            ),
+            DialogueMessage(
+                LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+                {"transaction_receipt": cls.transaction_receipt},
+            ),
         )
 
     def test_setup(self):
@@ -1079,7 +1093,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         assert self.ledger_api_handler.setup() is None
         self.assert_quantity_in_outbox(0)
 
-    def test_ledger_api_handler_handle_unidentified_dialogue(self):
+    def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the ledger_api handler."""
         # setup
         incorrect_dialogue_reference = ("", "")
@@ -1092,7 +1106,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+        with patch.object(self.logger, "log") as mock_logger:
             self.ledger_api_handler.handle(incoming_message)
 
         # after
@@ -1101,7 +1115,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"received invalid ledger_api message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_ledger_api_handler_handle_balance_positive_balance(self):
+    def test_handle_balance_positive_balance(self):
         """Test the _handle_balance method of the ledger_api handler where balance is positive."""
         # setup
         balance = 10
@@ -1129,7 +1143,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+        with patch.object(self.logger, "log") as mock_logger:
             self.ledger_api_handler.handle(incoming_message)
 
         # after
@@ -1140,7 +1154,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         assert self.strategy.balance == balance
         assert self.strategy.is_searching
 
-    def test_ledger_api_handler_handle_balance_zero_balance(self):
+    def test_handle_balance_zero_balance(self):
         """Test the _handle_balance method of the ledger_api handler where balance is zero."""
         # setup
         balance = 0
@@ -1168,7 +1182,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+        with patch.object(self.logger, "log") as mock_logger:
             self.ledger_api_handler.handle(incoming_message)
 
         # after
@@ -1178,7 +1192,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
         assert not self.skill.skill_context.is_active
 
-    def test_ledger_api_handler_handle_raw_transaction(self):
+    def test_handle_raw_transaction(self):
         """Test the _handle_raw_transaction method of the ledger_api handler."""
         # setup
         ledger_api_dialogue = cast(
@@ -1207,7 +1221,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+        with patch.object(self.logger, "log") as mock_logger:
             self.ledger_api_handler.handle(incoming_message)
 
         # after
@@ -1234,10 +1248,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
         )
 
-    def test_ledger_api_handler_handle_transaction_digest_last_fipa_message_is_none(
-        self,
-    ):
-        """Test the _handle_transaction_digest method of the ledger_api handler where the last incoming fipa message os None."""
+    def test_handle_transaction_digest(self):
+        """Test the _handle_transaction_digest method of the ledger_api handler."""
         # setup
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
@@ -1247,14 +1259,6 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        ledger_api_dialogue.associated_fipa_dialogue._incoming_messages = []
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -1265,11 +1269,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with pytest.raises(ValueError, match="Could not retrieve fipa message"):
-            with patch.object(
-                self.ledger_api_handler.context.logger, "log"
-            ) as mock_logger:
-                self.ledger_api_handler.handle(incoming_message)
+        with patch.object(self.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
@@ -1277,14 +1278,29 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully submitted. Transaction digest={incoming_message.transaction_digest}",
         )
 
-    def test_ledger_api_handler_handle_transaction_digest(self):
-        """Test the _handle_transaction_digest method of the ledger_api handler."""
+        self.assert_quantity_in_outbox(1)
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            to=incoming_message.sender,
+            sender=self.skill.skill_context.agent_address,
+            transaction_digest=self.transaction_digest,
+        )
+        assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO, "checking transaction is settled.",
+        )
+
+    def test_handle_transaction_receipt_i(self):
+        """Test the _handle_transaction_receipt method of the ledger_api handler."""
         # setup
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
                 dialogues=self.ledger_api_dialogues,
-                messages=self.list_of_ledger_api_messages[:3],
+                messages=self.list_of_ledger_api_messages[:5],
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
@@ -1300,19 +1316,20 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
-                transaction_digest=self.transaction_digest,
+                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+                transaction_receipt=self.transaction_receipt,
             ),
         )
 
         # operation
-        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
-            self.ledger_api_handler.handle(incoming_message)
+        with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.ledger_api_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"transaction was successfully submitted. Transaction digest={incoming_message.transaction_digest}",
+            f"transaction confirmed, informing counterparty={fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:]} of transaction digest.",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -1322,16 +1339,96 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             performative=FipaMessage.Performative.INFORM,
             to=COUNTERPARTY_ADDRESS,
             sender=self.skill.skill_context.agent_address,
-            info={"transaction_digest": incoming_message.transaction_digest.body},
+            info={"transaction_digest": self.transaction_digest.body},
         )
         assert has_attributes, error_str
 
-        mock_logger.assert_any_call(
-            logging.INFO,
-            f"informing counterparty={COUNTERPARTY_ADDRESS[-5:]} of transaction digest.",
+    def test_handle_transaction_receipt_ii(self):
+        """Test the _handle_transaction_receipt method of the ledger_api handler where fipa dialogue's last_incoming_message is None."""
+        # setup
+        ledger_api_dialogue = cast(
+            LedgerApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.ledger_api_dialogues,
+                messages=self.list_of_ledger_api_messages[:5],
+                counterparty=LEDGER_API_ADDRESS,
+            ),
+        )
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+            ),
+        )
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        fipa_dialogue._incoming_messages = []
+
+        fipa_dialogue.terms = self.terms
+        incoming_message = cast(
+            LedgerApiMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=ledger_api_dialogue,
+                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+                transaction_receipt=self.transaction_receipt,
+            ),
         )
 
-    def test_ledger_api_handler_handle_error(self):
+        # operation
+        with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
+            with patch.object(self.logger, "log"):
+                with pytest.raises(
+                    ValueError, match="Could not retrieve last fipa message"
+                ):
+                    self.ledger_api_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+    def test_handle_transaction_receipt_iii(self):
+        """Test the _handle_transaction_receipt method of the ledger_api handler where tx is NOT settled."""
+        # setup
+        ledger_api_dialogue = cast(
+            LedgerApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.ledger_api_dialogues,
+                messages=self.list_of_ledger_api_messages[:5],
+                counterparty=LEDGER_API_ADDRESS,
+            ),
+        )
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+            ),
+        )
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        fipa_dialogue.terms = self.terms
+        incoming_message = cast(
+            LedgerApiMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=ledger_api_dialogue,
+                performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+                transaction_receipt=self.transaction_receipt,
+            ),
+        )
+
+        # operation
+        with patch.object(LedgerApis, "is_transaction_settled", return_value=False):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.ledger_api_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(0)
+        assert self.transaction_behaviour.processing is None
+        assert self.transaction_behaviour.processing_time == 0.0
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction_receipt={self.transaction_receipt} not settled or not valid, aborting",
+        )
+
+    def test_handle_error(self):
         """Test the _handle_error method of the ledger_api handler."""
         # setup
         ledger_api_dialogue = self.prepare_skill_dialogue(
@@ -1346,9 +1443,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 code=1,
             ),
         )
-
+        ledger_api_dialogue.associated_fipa_dialogue = "mock"
         # operation
-        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+        with patch.object(self.logger, "log") as mock_logger:
             self.ledger_api_handler.handle(incoming_message)
 
         # after
@@ -1357,7 +1454,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"received ledger_api error message={incoming_message} in dialogue={ledger_api_dialogue}.",
         )
 
-    def test_ledger_api_handler_handle_invalid(self):
+    def test_handle_invalid(self):
         """Test the _handle_invalid method of the ledger_api handler."""
         # setup
         invalid_performative = LedgerApiMessage.Performative.GET_BALANCE
@@ -1371,7 +1468,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+        with patch.object(self.logger, "log") as mock_logger:
             self.ledger_api_handler.handle(incoming_message)
 
         # after
