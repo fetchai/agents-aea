@@ -146,7 +146,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             data = self._get_data(ledger_api, message, contract)
             response = response_builder(data, dialogue)
         except AEAException as e:
-            self.logger.error(str(e))
+            self.logger.error(f"Exception during contract request: {str(e)}")
             response = self.get_error_message(e, ledger_api, message, dialogue)
         except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
             self.logger.error(

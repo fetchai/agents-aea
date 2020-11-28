@@ -104,12 +104,12 @@ def test_dump_positive():
     account.dump(MagicMock())
 
 
-def test_api_creation(ethereum_testnet_config, ganache):
+def test_api_creation(ethereum_testnet_config):
     """Test api instantiation."""
     assert EthereumApi(**ethereum_testnet_config), "Failed to initialise the api"
 
 
-def test_api_none(ethereum_testnet_config, ganache):
+def test_api_none(ethereum_testnet_config):
     """Test the "api" of the cryptoApi is none."""
     eth_api = EthereumApi(**ethereum_testnet_config)
     assert eth_api.api is not None, "The api property is None."
@@ -134,6 +134,19 @@ def test_get_balance(ethereum_testnet_config, ganache):
     ec = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     balance = ethereum_api.get_balance(ec.address)
     assert balance > 0, "Existing account has no balance."
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_get_state(ethereum_testnet_config, ganache):
+    """Test that get_state() with 'getBlock' function returns something containing the block number."""
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+    callable_name = "getBlock"
+    args = ("latest",)
+    block = ethereum_api.get_state(callable_name, *args)
+    assert block is not None, "response to getBlock is empty."
+    assert "number" in dict(block), "response to getBlock() does not contain 'number'"
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)

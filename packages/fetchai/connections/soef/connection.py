@@ -978,10 +978,8 @@ class SOEFChannel:
                 response = await asyncio.shield(task)
             finally:
                 response = await task
-                enforce(
-                    "<response><message>Goodbye!</message></response>" in response,
-                    "No Goodbye response.",
-                )
+                if "<response><message>Goodbye!</message></response>" not in response:
+                    self.logger.debug(f"No Goodbye response. Response={response}")
                 self.unique_page_address = None
 
     async def _stop_periodic_ping_task(self) -> None:

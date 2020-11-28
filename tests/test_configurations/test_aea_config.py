@@ -252,6 +252,18 @@ class TestSkillExceptionPolicyConfigVariable(BaseConfigTestVariable):
     AEA_DEFAULT_VALUE = ExceptionPolicyEnum.propagate
 
 
+class TestStorageUriConfigVariable(BaseConfigTestVariable):
+    """Test `storage_uri` aea config option."""
+
+    OPTION_NAME = "storage_uri"
+    CONFIG_ATTR_NAME = "storage_uri"
+    GOOD_VALUES = ["sqlite://test"]  # type: ignore
+    INCORRECT_VALUES = [None, -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_storage_uri"
+    AEA_DEFAULT_VALUE = None
+
+
 class TestConnectionExceptionPolicyConfigVariable(BaseConfigTestVariable):
     """Test `skill_exception_policy` aea config option."""
 

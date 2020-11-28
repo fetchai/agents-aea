@@ -27,8 +27,10 @@ from aea.protocols.base import Message, Serializer
 
 from packages.fetchai.protocols.ledger_api import ledger_api_pb2
 from packages.fetchai.protocols.ledger_api.custom_types import (
+    Kwargs,
     RawTransaction,
     SignedTransaction,
+    State,
     Terms,
     TransactionDigest,
     TransactionReceipt,
@@ -111,6 +113,24 @@ class LedgerApiSerializer(Serializer):
                 performative.transaction_receipt, transaction_receipt
             )
             ledger_api_msg.transaction_receipt.CopyFrom(performative)
+        elif performative_id == LedgerApiMessage.Performative.GET_STATE:
+            performative = ledger_api_pb2.LedgerApiMessage.Get_State_Performative()  # type: ignore
+            ledger_id = msg.ledger_id
+            performative.ledger_id = ledger_id
+            callable = msg.callable
+            performative.callable = callable
+            args = msg.args
+            performative.args.extend(args)
+            kwargs = msg.kwargs
+            Kwargs.encode(performative.kwargs, kwargs)
+            ledger_api_msg.get_state.CopyFrom(performative)
+        elif performative_id == LedgerApiMessage.Performative.STATE:
+            performative = ledger_api_pb2.LedgerApiMessage.State_Performative()  # type: ignore
+            ledger_id = msg.ledger_id
+            performative.ledger_id = ledger_id
+            state = msg.state
+            State.encode(performative.state, state)
+            ledger_api_msg.state.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.ERROR:
             performative = ledger_api_pb2.LedgerApiMessage.Error_Performative()  # type: ignore
             code = msg.code
@@ -195,6 +215,23 @@ class LedgerApiSerializer(Serializer):
             )
             transaction_receipt = TransactionReceipt.decode(pb2_transaction_receipt)
             performative_content["transaction_receipt"] = transaction_receipt
+        elif performative_id == LedgerApiMessage.Performative.GET_STATE:
+            ledger_id = ledger_api_pb.get_state.ledger_id
+            performative_content["ledger_id"] = ledger_id
+            callable = ledger_api_pb.get_state.callable
+            performative_content["callable"] = callable
+            args = ledger_api_pb.get_state.args
+            args_tuple = tuple(args)
+            performative_content["args"] = args_tuple
+            pb2_kwargs = ledger_api_pb.get_state.kwargs
+            kwargs = Kwargs.decode(pb2_kwargs)
+            performative_content["kwargs"] = kwargs
+        elif performative_id == LedgerApiMessage.Performative.STATE:
+            ledger_id = ledger_api_pb.state.ledger_id
+            performative_content["ledger_id"] = ledger_id
+            pb2_state = ledger_api_pb.state.state
+            state = State.decode(pb2_state)
+            performative_content["state"] = state
         elif performative_id == LedgerApiMessage.Performative.ERROR:
             code = ledger_api_pb.error.code
             performative_content["code"] = code

@@ -371,6 +371,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
+        self._storage_uri: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         if self._with_default_packages:
@@ -507,6 +508,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: self
         """
         self._runtime_mode = runtime_mode
+        return self
+
+    def set_storage_uri(
+        self, storage_uri: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the storage uri.
+
+        :param storage uri:  storage uri
+        :return: self
+        """
+        self._storage_uri = storage_uri
         return self
 
     def set_search_service_address(
@@ -954,6 +967,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             runtime_mode=self._get_runtime_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
+            storage_uri=self._get_storage_uri(),
             **deepcopy(self._context_namespace),
         )
         self._load_and_add_components(
@@ -1085,6 +1099,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             if self._runtime_mode is not None
             else self.DEFAULT_RUNTIME_MODE
         )
+
+    def _get_storage_uri(self) -> Optional[str]:
+        """
+        Return the storage uri.
+
+        :return: the storage uri
+        """
+        return self._storage_uri
 
     def _get_search_service_address(self) -> str:
         """
@@ -1246,6 +1268,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.set_default_routing(agent_configuration.default_routing)
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
+        self.set_storage_uri(agent_configuration.storage_uri)
 
         # load private keys
         for (

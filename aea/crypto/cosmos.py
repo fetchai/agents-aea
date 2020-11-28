@@ -417,6 +417,34 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
+    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
+        """
+        Call a specified function on the ledger API.
+
+        Based on the cosmos REST
+        API specification, which takes a path (strings separated by '/'). The
+        convention here is to define the root of the path (txs, blocks, etc.)
+        as the callable_name and the rest of the path as args.
+        """
+        response = self._try_get_state(callable_name, *args, **kwargs)
+        return response
+
+    @try_decorator(
+        "Encountered exception when trying get state: {}",
+        logger_method=_default_logger.warning,
+    )
+    def _try_get_state(  # pylint: disable=unused-argument
+        self, callable_name: str, *args, **kwargs
+    ) -> Optional[Any]:
+        """Try to call a function on the ledger API."""
+        result = None  # type: Optional[Any]
+        query = "/".join(args)
+        url = self.network_address + f"/{callable_name}/{query}"
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            result = response.json()
+        return result
+
     def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],

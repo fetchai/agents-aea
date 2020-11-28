@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """HTTP client connection and channel."""
 import asyncio
+import email
 import json
 import logging
 import ssl
@@ -48,7 +49,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.13.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.14.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -259,11 +260,17 @@ class HTTPClientAsyncChannel:
         :return: aiohttp.ClientResponse
         """
         try:
+            if request_http_message.is_set("headers") and request_http_message.headers:
+                headers: Optional[dict] = dict(
+                    email.message_from_string(request_http_message.headers).items()
+                )
+            else:
+                headers = None
             async with aiohttp.ClientSession() as session:
                 async with session.request(
                     method=request_http_message.method,
                     url=request_http_message.url,
-                    headers=request_http_message.headers,
+                    headers=headers,
                     data=request_http_message.body,
                     ssl=ssl_context,
                 ) as resp:

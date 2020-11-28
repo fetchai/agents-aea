@@ -53,7 +53,7 @@ class TestThermometerSkill(AEATestCaseMany):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.9.0",
+            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
             "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
@@ -69,8 +69,8 @@ class TestThermometerSkill(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/thermometer:0.16.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer.models.strategy.args.is_ledger_tx"
         )
@@ -102,8 +102,8 @@ class TestThermometerSkill(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.16.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer_client.models.strategy.args.is_ledger_tx"
         )
@@ -229,7 +229,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.9.0",
+            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
             "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
@@ -245,14 +245,14 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/thermometer:0.16.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_aea:0.15.0", thermometer_aea_name
+            "fetchai/thermometer_aea:0.16.0", thermometer_aea_name
         )
         assert (
             diff == []
@@ -281,14 +281,14 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.16.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.16.0", thermometer_client_aea_name
+            "fetchai/thermometer_client:0.17.0", thermometer_client_aea_name
         )
         assert (
             diff == []
@@ -381,7 +381,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             "received proposal=",
             "accepting the proposal from sender=",
             "received MATCH_ACCEPT_W_INFORM from sender=",
-            "requesting transfer transaction from ledger api...",
+            "requesting transfer transaction from ledger api for message=",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "transaction signing was successful.",

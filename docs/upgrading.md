@@ -1,4 +1,8 @@
-This page provides some tipps of how to upgrade between versions.
+This page provides some tips of how to upgrade between versions.
+
+## v0.7.4 to v0.7.5
+
+No backwards incompatible changes for skill and connection development.
 
 ## v0.7.3 to v0.7.4
 
@@ -19,15 +23,21 @@ To improve performance, in particular optimize memory usage, we refactored the `
 ## v0.6.3 to v0.7.0
 
 Multiple breaking changes require action in this order:
+
 - Custom configuration overrides in `aea-config.yaml` are now identified via `public_id` rather than `author`, `name` and `version` individually. Please replace the three fields with the equivalent `public_id`.
+
 - Run `aea upgrade` command to upgrade your project's dependencies. Note, you still do have to manually update the public ids under `default_routing` and `default_connection` in `aea-config.yaml` as well as the public ids in the non-vendor packages.
+
 - Previously, connection `fetchai/stub`, skill `fetchai/error` and protocols `fetchai/default`, `fetchai/signing` and `fetchai/state_update` where part of the AEA distribution. Now they need to be fetched from registry. If you create a new project with `aea create` then this happens automatically. For existing projects, add the dependencies explicitly if not already present. You also must update the import paths as follows:
+
     - `aea.connections.stub` > `packages.fetchai.connections.stub`
     - `aea.protocols.default` > `packages.fetchai.protocols.default`
     - `aea.protocols.signing` > `packages.fetchai.protocols.signing`
     - `aea.protocols.state_update` > `packages.fetchai.protocols.state_update`
     - `aea.skills.error` > `packages.fetchai.skills.error`
+
 - If you use custom protocols, regenerate them.
+
 - In your own skills' `__init__.py` files add the public id (updating the string as appropriate):
 
 ``` python
@@ -37,6 +47,8 @@ from aea.configurations.base import PublicId
 PUBLIC_ID = PublicId.from_str("author/name:0.1.0")
 ```
 - The `fetchai/http` protocol's `bodyy` field has been renamed to `body`.
+
+- Skills can now specify `connections` as dependencies in the config yaml.
 
 
 ## v0.6.2 to v0.6.3

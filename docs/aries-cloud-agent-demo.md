@@ -180,7 +180,7 @@ Now you can create **Alice_AEA** and **Faber_AEA** in terminals 3 and 4 respecti
 In the third terminal, fetch **Alice_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_alice:0.16.0
+aea fetch fetchai/aries_alice:0.17.0
 cd aries_alice
 ```
 
@@ -193,9 +193,9 @@ aea create aries_alice
 cd aries_alice
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/http_client:0.13.0
+aea add connection fetchai/http_client:0.14.0
 aea add connection fetchai/webhook:0.10.0
-aea add skill fetchai/aries_alice:0.12.0
+aea add skill fetchai/aries_alice:0.13.0
 ```
 </p>
 </details>
@@ -265,7 +265,7 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 In the fourth terminal, fetch **Faber_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_faber:0.16.0
+aea fetch fetchai/aries_faber:0.17.0
 cd aries_faber
 ```
 
@@ -278,9 +278,9 @@ aea create aries_faber
 cd aries_faber
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/http_client:0.13.0
+aea add connection fetchai/http_client:0.14.0
 aea add connection fetchai/webhook:0.10.0
-aea add skill fetchai/aries_faber:0.11.0
+aea add skill fetchai/aries_faber:0.12.0
 ```
 </p>
 </details>

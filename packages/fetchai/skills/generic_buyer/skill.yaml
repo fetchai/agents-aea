@@ -1,20 +1,20 @@
 name: generic_buyer
 author: fetchai
-version: 0.16.0
+version: 0.17.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
-  __init__.py: QmQYSnjUXeR5Xor1LoYDAkwsJZXT9Gkz7U65GCvrUjj3jk
-  behaviours.py: QmahzTqjJjHBzVucyGCece62enLiuaVsYMnQqknHH4smsz
-  dialogues.py: QmQEx6kqdAEjq8zmTBxmQsoXhNejdvCVoucyNArkoaP8VT
-  handlers.py: QmdpmxJGTZQFzfPb1vdYjwQYRHKypyEbm2VU2MPJxpjWSv
-  strategy.py: QmRDqoyAsLK4SUWMZ9J6x1XyLmHQLoYbVB94g4VAvYmDVp
+  __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
+  behaviours.py: QmNwvSjEz4kzM3gWtnKbZVFJc2Z85Nb748CWAK4C4Sa4nT
+  dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU
+  handlers.py: QmTDecEP7GRH31bLFofa5wNfe6L7moFqhp55c4J7yNZ31h
+  strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.9.0
+- fetchai/ledger:0.10.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -28,6 +28,11 @@ behaviours:
     args:
       search_interval: 5
     class_name: GenericSearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: GenericTransactionBehaviour
 handlers:
   fipa:
     args: {}
@@ -66,6 +71,7 @@ models:
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: seller_service

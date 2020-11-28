@@ -1,6 +1,6 @@
 name: ml_train
 author: fetchai
-version: 0.16.0
+version: 0.17.0
 type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
@@ -8,17 +8,17 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmeHcYRhDJi6gqAHpK29UJz3doiyaicoqeTrPddqM3gh64
-  __init__.py: QmXDYdBbDbTeSmtAFEjS6JgpAg8AhpKkrX2d2xAaM3Uz6y
-  behaviours.py: QmQiBzKV5rEFpMQbSjfjzAJ7SqwwGmso6TozWkjdytucLR
+  __init__.py: QmNXBTCRubUf8cPXz3hcthWgwPSYpmtU3No3VcLXRKAvBc
+  behaviours.py: QmXTG79nbRCELAJao6zasPDNxoDX4YYqVbJh6aRc5FXdyZ
   dialogues.py: QmVLXHVwXXLnK4zJzPBVhxzgu7ZmohRZ7oj3yG1LPFrmhx
-  handlers.py: QmZkTRL3YCGLTJ9mYUonr19rWMiyD2WCAEypTXM7tbP2aY
+  handlers.py: QmaSUgDzw2ype25JQf9jNvgJ4uPxzmn58Ue6Atcs4w6DoH
   ml_model.py: QmTfshn6dFnz9gKXZt7aJJczRH14bN7nk6TybwFpzkEPnk
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
   strategy.py: QmPiuoPn8nUBnsx7FVuDjXbHB71TQEeezqW6HZanvAkszb
   tasks.py: QmahJRCf6V61FsqrKgMMUyJ8F7PRd6C2bjunZg2XtM9fpF
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.9.0
+- fetchai/ledger:0.10.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -27,12 +27,17 @@ protocols:
 - fetchai/oef_search:0.10.0
 - fetchai/signing:0.7.0
 skills:
-- fetchai/generic_buyer:0.16.0
+- fetchai/generic_buyer:0.17.0
 behaviours:
   search:
     args:
       search_interval: 10
     class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   ledger_api:
     args: {}
@@ -75,6 +80,7 @@ models:
       max_buyer_tx_fee: 20
       max_negotiations: 1
       max_unit_price: 70
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: dataset_id
