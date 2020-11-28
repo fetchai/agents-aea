@@ -16,26 +16,34 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the dialogue/base.py module."""
-
 import sys
 from typing import FrozenSet, Tuple, Type, cast
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
 import aea
 from aea.common import Address
+from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError
+from aea.helpers.storage.generic_storage import Storage
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel, DialogueMessage, DialogueStats
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
-from aea.protocols.dialogue.base import InvalidDialogueMessage
+from aea.protocols.dialogue.base import (
+    InvalidDialogueMessage,
+    PersistDialoguesStorage,
+    find_caller_object,
+)
+from aea.skills.base import SkillComponent
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
+
+from tests.common.utils import wait_for_condition
 
 
 class Dialogue(BaseDialogue):
@@ -1048,42 +1056,43 @@ class TestDialogueStats:
 class TestDialoguesBase:
     """Test for Dialogues."""
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Initialise the environment to test Dialogue."""
-        cls.agent_address = "agent 1"
-        cls.opponent_address = "agent 2"
-        cls.dialogue_label = DialogueLabel(
+        self.agent_address = "agent 1"
+        self.opponent_address = "agent 2"
+        self.dialogue_label = DialogueLabel(
             dialogue_reference=(str(1), ""),
-            dialogue_opponent_addr=cls.opponent_address,
-            dialogue_starter_addr=cls.agent_address,
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.agent_address,
         )
-        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
-        cls.own_dialogues = Dialogues(cls.agent_address)
-        cls.opponent_dialogues = Dialogues(cls.opponent_address)
+        self.dialogue = Dialogue(dialogue_label=self.dialogue_label)
+        self.own_dialogues = Dialogues(self.agent_address)
+        self.opponent_dialogues = Dialogues(self.opponent_address)
 
         # convenient messages to reuse across tests
-        cls.valid_message_1_by_self = DefaultMessage(
+        self.valid_message_1_by_self = DefaultMessage(
             dialogue_reference=(str(1), ""),
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
         )
-        cls.valid_message_1_by_self.sender = cls.agent_address
-        cls.valid_message_1_by_self.to = cls.opponent_address
+        self.valid_message_1_by_self.sender = self.agent_address
+        self.valid_message_1_by_self.to = self.opponent_address
 
-        cls.valid_message_2_by_other = DefaultMessage(
+        self.valid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
             message_id=2,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
         )
-        cls.valid_message_2_by_other.sender = cls.opponent_address
-        cls.valid_message_2_by_other.to = cls.agent_address
+        self.valid_message_2_by_other.sender = self.opponent_address
+        self.valid_message_2_by_other.to = self.agent_address
 
     def test_dialogues_properties(self):
         """Test dialogue properties."""
-        assert self.own_dialogues.dialogues == dict()
+        assert (
+            self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label == dict()
+        )
         assert self.own_dialogues.self_address == self.agent_address
         assert self.own_dialogues.dialogue_stats.other_initiated == {
             Dialogue.EndState.SUCCESSFUL: 0,
@@ -1133,15 +1142,21 @@ class TestDialoguesBase:
 
     def test_create_positive(self):
         """Positive test for the 'create' method."""
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
         self.own_dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
         )
-        assert len(self.own_dialogues.dialogues) == 1
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 1
+        )
 
     def test_create_negative_incorrect_performative_content_combination(self):
         """Negative test for the 'create' method: invalid performative and content combination (i.e. invalid message)."""
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
         with pytest.raises(SyntaxError) as cm:
             self.own_dialogues.create(
                 self.opponent_address,
@@ -1152,7 +1167,9 @@ class TestDialoguesBase:
             str(cm.value)
             == "Cannot create a dialogue with the specified performative and contents."
         )
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
     def test_update_positive_new_dialogue_by_other(self):
         """Positive test for the 'update' method: the input message is for a new dialogue dialogue by other."""
@@ -1164,11 +1181,15 @@ class TestDialoguesBase:
         valid_message_1_by_other.sender = self.opponent_address
         valid_message_1_by_other.to = self.agent_address
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         dialogue = self.own_dialogues.update(valid_message_1_by_other)
 
-        assert len(self.own_dialogues.dialogues) == 1
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 1
+        )
         assert dialogue is not None
         assert dialogue.last_message.dialogue_reference == (str(1), "")
         assert dialogue.last_message.message_id == 1
@@ -1196,11 +1217,15 @@ class TestDialoguesBase:
         valid_message_2_by_other.sender = self.opponent_address
         valid_message_2_by_other.to = self.agent_address
 
-        assert len(self.own_dialogues.dialogues) == 1
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 1
+        )
 
         dialogue = self.own_dialogues.update(valid_message_2_by_other)
 
-        assert len(self.own_dialogues.dialogues) == 1
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 1
+        )
         assert dialogue is not None
         assert dialogue.last_message.dialogue_reference == dialogue_reference
         assert dialogue.last_message.message_id == valid_message_2_by_other.message_id
@@ -1240,7 +1265,9 @@ class TestDialoguesBase:
 
     def test_update_negative_new_dialogue_by_self(self):
         """Negative test for the 'update' method: the message is not by the counterparty."""
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(self.valid_message_1_by_self)
@@ -1249,7 +1276,9 @@ class TestDialoguesBase:
             == "Invalid 'update' usage. Update must only be used with a message by another agent."
         )
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
     def test_update_negative_no_to(self):
         """Negative test for the 'update' method: the 'to' field of the input message is not set."""
@@ -1260,7 +1289,9 @@ class TestDialoguesBase:
         )
         invalid_message_1_by_other.sender = self.opponent_address
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(invalid_message_1_by_other)
@@ -1268,7 +1299,9 @@ class TestDialoguesBase:
             invalid_message_1_by_other
         )
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
     def test_update_negative_no_sender(self):
         """Negative test for the 'update' method: the 'sender' field of the input message is not set."""
@@ -1279,7 +1312,9 @@ class TestDialoguesBase:
         )
         invalid_message_1_by_other.to = self.agent_address
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(invalid_message_1_by_other)
@@ -1288,7 +1323,9 @@ class TestDialoguesBase:
             == "Invalid 'update' usage. Update must only be used with a message by another agent."
         )
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
     def test_update_negative_no_matching_to(self):
         """Negative test for the 'update' method: the 'to' field of the input message does not match self address."""
@@ -1300,7 +1337,9 @@ class TestDialoguesBase:
         invalid_message_1_by_other.to = self.agent_address + "wrong_stuff"
         invalid_message_1_by_other.sender = self.opponent_address
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         with pytest.raises(AEAEnforceError) as cm:
             self.own_dialogues.update(invalid_message_1_by_other)
@@ -1309,7 +1348,9 @@ class TestDialoguesBase:
             == "Message to and dialogue self address do not match. Got 'to=agent 1wrong_stuff' expected 'to=agent 1'."
         )
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
     def test_update_negative_invalid_message(self):
         """Negative test for the 'update' method: the message is invalid."""
@@ -1323,13 +1364,17 @@ class TestDialoguesBase:
         invalid_message_1_by_other.sender = self.opponent_address
         invalid_message_1_by_other.to = self.agent_address
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         dialogue = self.own_dialogues.update(invalid_message_1_by_other)
 
         assert dialogue is None
 
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
     def test_update_negative_existing_dialogue_non_nonexistent(self):
         """Negative test for the 'update' method: the dialogue referred by the input message does not exist."""
@@ -1350,31 +1395,35 @@ class TestDialoguesBase:
         updated_dialogue = self.own_dialogues.update(invalid_message_2_by_other)
 
         assert updated_dialogue is None
-        last_message = self.own_dialogues.dialogues[
+        last_message = self.own_dialogues._dialogues_storage.get(
             dialogue.dialogue_label
-        ].last_message
+        ).last_message
         assert (
             last_message.dialogue_reference[0] != ""
             and last_message.dialogue_reference[1] == ""
         )
         assert (
-            self.own_dialogues.dialogues[
+            self.own_dialogues._dialogues_storage.get(
                 dialogue.dialogue_label
-            ].last_message.message_id
+            ).last_message.message_id
             == 1
         )
         assert (
-            self.own_dialogues.dialogues[dialogue.dialogue_label].last_message.target
+            self.own_dialogues._dialogues_storage.get(
+                dialogue.dialogue_label
+            ).last_message.target
             == 0
         )
         assert (
-            self.own_dialogues.dialogues[
+            self.own_dialogues._dialogues_storage.get(
                 dialogue.dialogue_label
-            ].last_message.performative
+            ).last_message.performative
             == DefaultMessage.Performative.BYTES
         )
         assert (
-            self.own_dialogues.dialogues[dialogue.dialogue_label].last_message.content
+            self.own_dialogues._dialogues_storage.get(
+                dialogue.dialogue_label
+            ).last_message.content
             == b"Hello"
         )
 
@@ -1400,9 +1449,9 @@ class TestDialoguesBase:
         self.own_dialogues._complete_dialogue_reference(valid_message_2_by_other)
 
         assert (
-            self.own_dialogues.dialogues[
+            self.own_dialogues._dialogues_storage.get(
                 dialogue.dialogue_label
-            ].dialogue_label.dialogue_reference
+            ).dialogue_label.dialogue_reference
             == valid_message_2_by_other.dialogue_reference
         )
 
@@ -1430,9 +1479,9 @@ class TestDialoguesBase:
 
         self.own_dialogues._complete_dialogue_reference(valid_message_2_by_other)
         assert (
-            self.own_dialogues.dialogues[
+            self.own_dialogues._dialogues_storage.get(
                 dialogue.dialogue_label
-            ].dialogue_label.dialogue_reference
+            ).dialogue_label.dialogue_reference
             == msg.dialogue_reference
         )
 
@@ -1458,9 +1507,9 @@ class TestDialoguesBase:
         self.own_dialogues._complete_dialogue_reference(valid_message_2_by_other)
 
         assert (
-            self.own_dialogues.dialogues[
+            self.own_dialogues._dialogues_storage.get(
                 dialogue.dialogue_label
-            ].dialogue_label.dialogue_reference
+            ).dialogue_label.dialogue_reference
             == valid_message_2_by_other.dialogue_reference
         )
 
@@ -1563,12 +1612,16 @@ class TestDialoguesBase:
 
     def test_create_self_initiated_positive(self):
         """Positive test for the '_create_self_initiated' method."""
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         self.own_dialogues._create_self_initiated(
             self.opponent_address, (str(1), ""), Dialogue.Role.ROLE1
         )
-        assert len(self.own_dialogues.dialogues) == 1
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 1
+        )
 
     def test_create_self_initiated_negative_invalid_dialogue_reference(self):
         """Negative test for the '_create_self_initiated' method: invalid dialogue reference"""
@@ -1576,16 +1629,22 @@ class TestDialoguesBase:
 
     def test_create_opponent_initiated_positive(self):
         """Positive test for the '_create_opponent_initiated' method."""
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         self.own_dialogues._create_opponent_initiated(
             self.opponent_address, (str(1), ""), Dialogue.Role.ROLE2
         )
-        assert len(self.own_dialogues.dialogues) == 1
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 1
+        )
 
     def test_create_opponent_initiated_negative_invalid_input_dialogue_reference(self):
         """Negative test for the '_create_opponent_initiated' method: input dialogue label has invalid dialogue reference."""
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
         try:
             self.own_dialogues._create_opponent_initiated(
@@ -1596,7 +1655,9 @@ class TestDialoguesBase:
             result = False
 
         assert not result
-        assert len(self.own_dialogues.dialogues) == 0
+        assert (
+            len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
+        )
 
     def test_create_with_message(self):
         """Positive test for create with message."""
@@ -1642,3 +1703,113 @@ class TestDialoguesBase:
         assert self.own_dialogues.get_dialogues_with_counterparty(
             self.opponent_address
         ) == [dialogue]
+
+    def test_setup(self):
+        """Test dialogues.setup()."""
+        self.own_dialogues.setup()
+
+    def test_teardown(self):
+        """Test dialogues.teardown()."""
+        self.own_dialogues.teardown()
+
+
+class TestPersistDialoguesStorage:
+    """Test PersistDialoguesStorage."""
+
+    def setup(self):
+        """Initialise the environment to test PersistDialogueStorage."""
+        self.agent_address = "agent 1"
+        self.opponent_address = "agent 2"
+        self.dialogues = Dialogues(self.agent_address)
+        self.skill_component = Mock()
+        self.skill_component.name = "test_component"
+        self.skill_component.skill_id = PublicId("test", "test", "0.1.0")
+
+        self.dialogue_label = DialogueLabel(
+            dialogue_reference=(str(1), ""),
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.agent_address,
+        )
+        self.generic_storage = Storage("sqlite://:memory:", threaded=True)
+        self.generic_storage.start()
+        wait_for_condition(lambda: self.generic_storage.is_connected, timeout=10)
+        self.skill_component.context.storage = self.generic_storage
+
+    def teardown(self):
+        """Tear down the environment to test PersistDialogueStorage."""
+        self.generic_storage.stop()
+        self.generic_storage.wait_completed(sync=True, timeout=10)
+
+    def test_dialogue_serialize_deserialize(self):
+        """Test dialogue dumped and restored."""
+        msg = DefaultMessage(
+            dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        dialogue = self.dialogues.create_with_message("opponent", msg)
+        data = dialogue.json()
+        dialogue_restored = dialogue.__class__.from_json(dialogue.message_class, data)
+        assert dialogue == dialogue_restored
+
+    def test_dump_restore(self):
+        """Test dump and load methods of the persists storage."""
+        dialogues_storage = PersistDialoguesStorage(self.dialogues)
+        dialogues_storage._skill_component = self.skill_component
+        self.dialogues._dialogues_storage = dialogues_storage
+        dialogues_storage._incomplete_to_complete_dialogue_labels[
+            self.dialogue_label
+        ] = self.dialogue_label
+        self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+        assert dialogues_storage._dialogues_by_dialogue_label
+        assert dialogues_storage._dialogue_by_address
+        assert dialogues_storage._incomplete_to_complete_dialogue_labels
+        dialogues_storage.teardown()
+
+        dialogues_storage_restored = PersistDialoguesStorage(self.dialogues)
+        dialogues_storage_restored._skill_component = self.skill_component
+        dialogues_storage_restored.setup()
+
+        assert (
+            dialogues_storage._dialogues_by_dialogue_label
+            == dialogues_storage_restored._dialogues_by_dialogue_label
+        )
+        assert (
+            dialogues_storage._dialogue_by_address
+            == dialogues_storage_restored._dialogue_by_address
+        )
+        assert (
+            dialogues_storage._incomplete_to_complete_dialogue_labels
+            == dialogues_storage_restored._incomplete_to_complete_dialogue_labels
+        )
+
+
+def test_find_caller_object():
+    """Test find_caller_object."""
+
+    class CustomSkillComponent(SkillComponent):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.storage = PersistDialoguesStorage(self)
+
+        def setup(self):
+            pass
+
+        def teardown(self):
+            pass
+
+        @classmethod
+        def parse_module(cls, *args, **kwargs):
+            pass
+
+    skill_component = CustomSkillComponent(Mock(), Mock(), Mock())
+    assert skill_component.storage._skill_component == skill_component
+
+    class CustomObject:
+        def __init__(self, *args, **kwargs):
+            self.component = find_caller_object(SkillComponent)
+
+    custom_object = CustomObject()
+    assert custom_object.component is None

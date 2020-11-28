@@ -136,6 +136,9 @@
     },
     "runtime_mode": {
       "$ref": "definitions.json#/definitions/runtime_mode"
+    },
+    "storage_uri": {
+      "$ref": "definitions.json#/definitions/storage_uri"
     }
   }
 }
