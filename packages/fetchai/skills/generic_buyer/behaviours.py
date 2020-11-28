@@ -130,8 +130,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
                 self.processing_time += self.tick_interval
                 return
             # processing timed out
-            self.processing = None
-            self.processing_time = 0.0
+            self.failed_processing(self.processing)
         if len(self.waiting) == 0:
             # nothing to process
             return
@@ -177,15 +176,13 @@ class GenericTransactionBehaviour(TickerBehaviour):
         self.processing_time = 0.0
         self.processing = None
 
-    def failed_processing(
-        self, ledger_api_dialogue: LedgerApiDialogue, is_retry: bool = True
-    ) -> None:
+    def failed_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
         """
         Failed processing.
 
+        Currently, we retry processing indefinitely.
+
         :param ledger_api_dialogue: the ledger api dialogue
-        :param is_retry: whether to retry or not
         """
         self.finish_processing(ledger_api_dialogue)
-        if is_retry:
-            self.waiting.append(ledger_api_dialogue.associated_fipa_dialogue)
+        self.waiting.append(ledger_api_dialogue.associated_fipa_dialogue)

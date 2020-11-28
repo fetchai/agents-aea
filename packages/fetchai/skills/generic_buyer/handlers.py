@@ -674,8 +674,8 @@ class GenericLedgerApiHandler(Handler):
         tx_behaviour = cast(
             GenericTransactionBehaviour, self.context.behaviours.transaction
         )
+        tx_behaviour.finish_processing(ledger_api_dialogue)
         if is_settled:
-            tx_behaviour.finish_processing(ledger_api_dialogue)
             ledger_api_msg_ = cast(
                 Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
@@ -698,10 +698,6 @@ class GenericLedgerApiHandler(Handler):
                 )
             )
         else:
-            tx_behaviour = cast(
-                GenericTransactionBehaviour, self.context.behaviours.transaction
-            )
-            tx_behaviour.failed_processing(ledger_api_dialogue, is_retry=False)
             self.context.logger.info(
                 "transaction_receipt={} not settled or not valid, aborting".format(
                     ledger_api_msg.transaction_receipt
@@ -728,7 +724,7 @@ class GenericLedgerApiHandler(Handler):
         if (
             ledger_api_msg_ is not None
             and ledger_api_msg_.performative
-            == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
+            != LedgerApiMessage.Performative.GET_BALANCE
         ):
             tx_behaviour = cast(
                 GenericTransactionBehaviour, self.context.behaviours.transaction

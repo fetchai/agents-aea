@@ -30,7 +30,7 @@ behaviours:
     class_name: SearchBehaviour
   transaction:
     args:
-      max_processing: 120
+      max_processing: 420
       transaction_interval: 2
     class_name: TransactionBehaviour
 handlers:

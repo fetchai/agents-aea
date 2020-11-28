@@ -8,9 +8,9 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
   __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
-  behaviours.py: QmVkJe9ZmdPNsZJuY4HuRjvCvBaw8ey2gTs1xNwfZcxBPD
+  behaviours.py: QmNwvSjEz4kzM3gWtnKbZVFJc2Z85Nb748CWAK4C4Sa4nT
   dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU
-  handlers.py: QmTGjPDKTWZwPbaKrSRMhX7SzJzocSmuNz1SCZLN9ueT1h
+  handlers.py: QmTDecEP7GRH31bLFofa5wNfe6L7moFqhp55c4J7yNZ31h
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
@@ -30,7 +30,7 @@ behaviours:
     class_name: GenericSearchBehaviour
   transaction:
     args:
-      max_processing: 120
+      max_processing: 420
       transaction_interval: 2
     class_name: GenericTransactionBehaviour
 handlers:

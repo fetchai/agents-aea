@@ -979,7 +979,7 @@ class SOEFChannel:
             finally:
                 response = await task
                 if "<response><message>Goodbye!</message></response>" not in response:
-                    self.logger.debug(f"No Goodbye response. Response= {response}")
+                    self.logger.debug(f"No Goodbye response. Response={response}")
                 self.unique_page_address = None
 
     async def _stop_periodic_ping_task(self) -> None:
