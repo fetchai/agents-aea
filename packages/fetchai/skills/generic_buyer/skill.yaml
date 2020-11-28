@@ -8,10 +8,10 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
   __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
-  behaviours.py: QmUS291ku12R6UtMa9yFhi1qxdAQBkdyJMnhSUgcK7JeFK
-  dialogues.py: QmQEx6kqdAEjq8zmTBxmQsoXhNejdvCVoucyNArkoaP8VT
-  handlers.py: Qmbz5doAYGCJknefpKAt5bmy6T1XGqgcosgJ6eXEAerKyh
-  strategy.py: QmRDqoyAsLK4SUWMZ9J6x1XyLmHQLoYbVB94g4VAvYmDVp
+  behaviours.py: QmVkJe9ZmdPNsZJuY4HuRjvCvBaw8ey2gTs1xNwfZcxBPD
+  dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU
+  handlers.py: QmTGjPDKTWZwPbaKrSRMhX7SzJzocSmuNz1SCZLN9ueT1h
+  strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.10.0
@@ -71,6 +71,7 @@ models:
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: seller_service

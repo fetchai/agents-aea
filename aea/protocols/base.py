@@ -35,8 +35,8 @@ from aea.exceptions import AEAComponentLoadException, enforce
 
 _default_logger = logging.getLogger(__name__)
 
-MAX_PRINT_INNER = 200
-MAX_PRINT_OUTER = 2000
+MAX_PRINT_INNER = 600
+MAX_PRINT_OUTER = 6000
 Address = str
 
 

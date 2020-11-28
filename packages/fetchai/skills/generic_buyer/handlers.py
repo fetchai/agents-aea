@@ -206,23 +206,11 @@ class GenericFipaHandler(Handler):
                 fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
                     transfer_address
                 )
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
-            )
-            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=fipa_dialogue.terms,
-            )
-            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-            ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-            fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+
             tx_behaviour = cast(
                 GenericTransactionBehaviour, self.context.behaviours.transaction
             )
-            tx_behaviour.waiting.append(
-                (ledger_api_dialogue, cast(LedgerApiMessage, ledger_api_msg))
-            )
+            tx_behaviour.waiting.append(fipa_dialogue)
         else:
             inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
@@ -481,8 +469,7 @@ class GenericSigningHandler(Handler):
         :return: None
         """
         self.context.logger.info("transaction signing was successful.")
-        fipa_dialogue = signing_dialogue.associated_fipa_dialogue
-        ledger_api_dialogue = fipa_dialogue.associated_ledger_api_dialogue
+        ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
         last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")
@@ -509,6 +496,12 @@ class GenericSigningHandler(Handler):
                 signing_msg.error_code, signing_dialogue
             )
         )
+        if signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -637,9 +630,7 @@ class GenericLedgerApiHandler(Handler):
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)
-        signing_dialogue.associated_fipa_dialogue = (
-            ledger_api_dialogue.associated_fipa_dialogue
-        )
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
             "proposing the transaction to the decision maker. Waiting for confirmation ..."
@@ -707,8 +698,10 @@ class GenericLedgerApiHandler(Handler):
                 )
             )
         else:
-            tx_behaviour.processing = None
-            tx_behaviour.processing_time = 0.0
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.failed_processing(ledger_api_dialogue, is_retry=False)
             self.context.logger.info(
                 "transaction_receipt={} not settled or not valid, aborting".format(
                     ledger_api_msg.transaction_receipt
@@ -729,6 +722,18 @@ class GenericLedgerApiHandler(Handler):
                 ledger_api_msg, ledger_api_dialogue
             )
         )
+        ledger_api_msg_ = cast(
+            Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
+        )
+        if (
+            ledger_api_msg_ is not None
+            and ledger_api_msg_.performative
+            == LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT
+        ):
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue

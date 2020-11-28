@@ -19,7 +19,7 @@
 
 """This package contains the behaviour for the generic buyer skill."""
 
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -29,6 +29,7 @@ from packages.fetchai.connections.ledger.base import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
+    FipaDialogue,
     LedgerApiDialogue,
     LedgerApiDialogues,
     OefSearchDialogues,
@@ -109,7 +110,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
             float, kwargs.pop("max_processing", DEFAULT_MAX_PROCESSING)
         )
         self.processing_time = 0.0
-        self.waiting: List[Tuple[LedgerApiDialogue, LedgerApiMessage]] = []
+        self.waiting: List[FipaDialogue] = []
         self.processing: Optional[LedgerApiDialogue] = None
         super().__init__(tick_interval=tx_interval, **kwargs)
 
@@ -123,10 +124,14 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self.processing is not None and self.processing_time <= self.max_processing:
-            # already processing
-            self.processing_time += self.tick_interval
-            return
+        if self.processing is not None:
+            if self.processing_time <= self.max_processing:
+                # already processing
+                self.processing_time += self.tick_interval
+                return
+            # processing timed out
+            self.processing = None
+            self.processing_time = 0.0
         if len(self.waiting) == 0:
             # nothing to process
             return
@@ -134,13 +139,26 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def _start_processing(self) -> None:
         """Process the next transaction."""
-        dialogue, message = self.waiting.pop(0)
-        self.processing_time = 0.0
-        self.processing = dialogue
+        fipa_dialogue = self.waiting.pop(0)
         self.context.logger.info(
-            f"requesting transfer transaction from ledger api for message={message}..."
+            f"Processing transaction, {len(self.waiting)} transactions remaining"
         )
-        self.context.outbox.put_message(message=message)
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
+            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+            terms=fipa_dialogue.terms,
+        )
+        ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        self.processing_time = 0.0
+        self.processing = ledger_api_dialogue
+        self.context.logger.info(
+            f"requesting transfer transaction from ledger api for message={ledger_api_msg}..."
+        )
+        self.context.outbox.put_message(message=ledger_api_msg)
 
     def teardown(self) -> None:
         """Teardown behaviour."""
@@ -158,3 +176,16 @@ class GenericTransactionBehaviour(TickerBehaviour):
             )
         self.processing_time = 0.0
         self.processing = None
+
+    def failed_processing(
+        self, ledger_api_dialogue: LedgerApiDialogue, is_retry: bool = True
+    ) -> None:
+        """
+        Failed processing.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        :param is_retry: whether to retry or not
+        """
+        self.finish_processing(ledger_api_dialogue)
+        if is_retry:
+            self.waiting.append(ledger_api_dialogue.associated_fipa_dialogue)

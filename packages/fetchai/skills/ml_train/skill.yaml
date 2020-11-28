@@ -80,6 +80,7 @@ models:
       max_buyer_tx_fee: 20
       max_negotiations: 1
       max_unit_price: 70
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: dataset_id
