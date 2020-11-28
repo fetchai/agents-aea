@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
 
-from random import uniform
-
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
@@ -64,12 +62,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
             "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
-        # generate random location
-        location = {
-            "latitude": round(uniform(-90, 90), 2),  # nosec
-            "longitude": round(uniform(-180, 180), 2),  # nosec
-        }
-
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
@@ -109,12 +101,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.set_config(setting_path, COSMOS)
         self.run_install()
 
-        # replace location
-        setting_path = (
-            "vendor.fetchai.skills.erc1155_deploy.models.strategy.args.location"
-        )
-        self.nested_set_config(setting_path, location)
-
         # add packages for agent two
         self.set_agent_context(client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
@@ -150,12 +136,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
         self.run_install()
-
-        # replace location
-        setting_path = (
-            "vendor.fetchai.skills.erc1155_client.models.strategy.args.location"
-        )
-        self.nested_set_config(setting_path, location)
 
         # run agents
         self.set_agent_context(deploy_aea_name)
