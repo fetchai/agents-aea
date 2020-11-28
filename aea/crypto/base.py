@@ -260,6 +260,19 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
+    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
+        """
+        Call a specified function on the underlying ledger API.
+
+        This usually takes the form of a web request to be waited synchronously.
+
+        :param callable_name: the name of the API function to be called.
+        :param args: the positional arguments for the API function.
+        :param kwargs: the keyword arguments for the API function.
+        :return: the ledger API response.
+        """
+
+    @abstractmethod
     def get_transfer_transaction(
         self,
         sender_address: Address,
