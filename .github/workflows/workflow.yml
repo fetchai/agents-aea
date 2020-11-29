@@ -171,9 +171,6 @@ jobs:
           pip install tox
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
-        continue-on-error: true
-      - name: Force green exit
-        run: exit 0
 
   platform_checks:
     continue-on-error: True
