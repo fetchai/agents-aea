@@ -204,6 +204,7 @@ def test_construct_sign_and_submit_transfer_transaction(
     assert tx != transaction_receipt, "Should not be same!"
 
 
+@pytest.mark.skip
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
