@@ -19,10 +19,10 @@
 
 """This test module contains the integration test for the fetch beacon skill."""
 
-import time
 from pathlib import Path
 
 import requests
+import time
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -44,22 +44,15 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
         is_running = self.is_running(process)
         assert is_running, "AEA not running within timeout!"
 
-        time.sleep(5)
-
-        print(self.context.shared_state["oracle_data"])
-
-        assert False, "Uh oh"
-
-        # check_strings = (
-        #     "Echo Handler: setup method called.",
-        #     "Echo Behaviour: setup method called.",
-        #     "Echo Behaviour: act method called.",
-        #     "content={}".format(message_content),
-        # )
-        # missing_strings = self.missing_from_output(process, check_strings)
-        # assert (
-        #     missing_strings == []
-        # ), "Strings {} didn't appear in agent output.".format(missing_strings)
+        check_strings = (
+            "setting up FetchBeaconBehaviour",
+            "Fetching random beacon from https://rpc-beaconworld.fetch.ai/block...",
+            "Beacon info:"
+        )
+        missing_strings = self.missing_from_output(process, check_strings)
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in agent output.".format(missing_strings)
 
         self.terminate_agents()
         assert (
