@@ -73,6 +73,14 @@ config:
   local_uri: 127.0.0.1:9001
   log_file: libp2p_node.log
 ```
+Note, this configuration change must be made for all of the agents which are attempting to communicate via the Agent Communication Network.
+
+I.e. BOTH Agent_A and Agent_B will require the above modifications to the configuration file located at;
+
+$AGENT_NAME/vendor/fetchai/connections/p2p_libp2p/connection.yaml
+
+This will allow both of these agents to default to this communication network, without the added overhead of opening/specifying ports/hosts on the individual host machines running the agents.
+
 
 ## Configuring the `connection.yaml` entries:
 
