@@ -64,13 +64,16 @@ def _remove_private_key(
 
 
 def _try_remove_key(ctx: Context, type_: str, connection: bool = False):
-    try:
-        if connection:
-            ctx.agent_config.connection_private_key_paths.delete(type_)
-        else:
-            ctx.agent_config.private_key_paths.delete(type_)
-    except ValueError as e:  # pragma: no cover
-        raise click.ClickException(str(e))
+    private_keys = (
+        ctx.agent_config.connection_private_key_paths
+        if connection
+        else ctx.agent_config.private_key_paths
+    )
+    existing_keys = private_keys._items_by_id.keys()
+    if type_ not in existing_keys:
+        raise click.ClickException(
+            f"There is no {'connection ' if connection else ''}key registered with id {type_}."
+        )
     ctx.agent_loader.dump(
         ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
     )
