@@ -12,7 +12,7 @@ istio:
 
 acnnodes:
   enabled: true
-  image: gcr.io/fetch-ai-sandbox/acn_node:432adbf11
+  image: gcr.io/fetch-ai-images/acn_node:c2f152e46
   resources:
     limits:
       cpu: 500m
