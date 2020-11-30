@@ -562,6 +562,10 @@ class CRUDCollection(Generic[T]):
             (k, v) for k, v in self._items_by_id.items()
         ]
 
+    def keys(self) -> Set[str]:
+        """Get the set of keys."""
+        return set(self._items_by_id.keys())
+
 
 class PublicId(JSONSerializable):
     """This class implement a public identifier.

@@ -577,6 +577,23 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         )
 
     @classmethod
+    def remove_private_key(
+        cls, ledger_api_id: str = DEFAULT_LEDGER, connection: bool = False,
+    ) -> Result:
+        """
+        Remove private key with CLI command.
+
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+        :param connection: whether or not the private key filepath is for a connection.
+
+        :return: Result
+        """
+        args = ["remove-key", ledger_api_id] + (["--connection"] if connection else [])
+        return cls.run_cli_command(*args, cwd=cls._get_cwd())
+
+    @classmethod
     def replace_private_key_in_file(
         cls, private_key: str, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE
     ) -> None:
