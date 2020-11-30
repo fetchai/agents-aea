@@ -69,7 +69,7 @@ def _try_remove_key(ctx: Context, type_: str, connection: bool = False):
         if connection
         else ctx.agent_config.private_key_paths
     )
-    existing_keys = private_keys._items_by_id.keys()
+    existing_keys = private_keys.keys()
     if type_ not in existing_keys:
         raise click.ClickException(
             f"There is no {'connection ' if connection else ''}key registered with id {type_}."
