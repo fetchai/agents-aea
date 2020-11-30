@@ -1,0 +1,32 @@
+# The values here are only for testing. These are not deployed in the production environment
+# DON'T add enything secret here and upload to the git repo
+dns:
+  enabled: true
+  dnsname: agent-dht-net.sandbox.fetch-ai.com
+  publicdnsname: acn.fetch-ai.com 
+  targetgw: fetchpub.sandbox.fetch-ai.com
+
+istio:
+  enabled: true
+
+
+acnnodes:
+  enabled: true
+  image: gcr.io/fetch-ai-sandbox/acn_node:432adbf11
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 150m
+      memory: 64Mi
+  config:
+    - p2pport: 9003
+      delegateport: 11003
+      privkey: ODE5MzM0MWZhYTFiMjZmZWNmNGJlM2E3ZTdmYzJkZTc0MGE0MzA5OWIxNWMyZjQwNWI2OTBmOWM4NmJjMjAwNA==
+    - p2pport: 9004
+      delegateport: 11004
+      privkey: ZDg5MWU4ZjAyMjAzYzk3YWE5YjlmODg4Nzk0MjM3NDU4YzRhODA3M2ViYTFlYzI1MzEzOGIxNDRjNDMyZGFkNg==
+    - p2pport: 9005
+      delegateport: 11005
+      privkey: MmM0MjE1MWRmNzQzNzFkZTJmZDQ1MzUyMGY4NzIzYzI1OWFiMTlhZjUxMTkxNDRiNmVhYjcwZjhmYTQzYTE1Zg==
