@@ -6,10 +6,6 @@ dns:
   publicdnsname: acn.fetch-ai.com 
   targetgw: fetch.prod.fetch-ai.com
 
-istio:
-  enabled: true
-
-
 acnnodes:
   enabled: true
   image: gcr.io/fetch-ai-images/acn_node:c2f152e46
