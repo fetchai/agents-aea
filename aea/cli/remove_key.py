@@ -43,7 +43,7 @@ from aea.crypto.registries import crypto_registry
 @click.pass_context
 @check_aea_project
 def remove_key(click_context, type_, connection):
-    """Remove a private key to the wallet of the agent."""
+    """Remove a private key from the wallet of the agent."""
     _remove_private_key(click_context, type_, connection)
 
 
