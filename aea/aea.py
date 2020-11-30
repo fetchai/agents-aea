@@ -44,10 +44,10 @@ from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
+from aea.error_handler.base import AbstractErrorHandler
 from aea.exceptions import AEAException, _StopRuntime
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
-from aea.helpers.temp_error_handler import ErrorHandler
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
@@ -74,7 +74,7 @@ class AEA(Agent):
         period: float = 0.05,
         execution_timeout: float = 0,
         max_reactions: int = 20,
-        error_handler_class: Optional[Type] = None,
+        error_handler_class: Optional[Type[AbstractErrorHandler]] = None,
         decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
@@ -145,10 +145,13 @@ class AEA(Agent):
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 
-        self._error_handler_class = (
-            error_handler_class if error_handler_class is not None else ErrorHandler
-        )
+        if error_handler_class is None:
+            from aea.error_handler.default import (  # isort:skip  # pylint: disable=import-outside-toplevel
+                ErrorHandler as DefaultErrorHandler,
+            )
 
+            error_handler_class = DefaultErrorHandler
+        self._error_handler_class = error_handler_class
         default_ledger_id = (
             default_ledger
             if default_ledger is not None
@@ -254,7 +257,7 @@ class AEA(Agent):
             default_connection=self.context.default_connection,
         )
 
-    def _get_error_handler(self) -> Type[ErrorHandler]:
+    def _get_error_handler(self) -> Type[AbstractErrorHandler]:
         """Get error handler."""
         return self._error_handler_class
 

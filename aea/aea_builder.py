@@ -76,6 +76,7 @@ from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
+from aea.error_handler.base import AbstractErrorHandler
 from aea.exceptions import AEAException, AEAValidationError
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
@@ -365,7 +366,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
-        self._error_handler_class: Optional[Type] = None
+        self._error_handler_class: Optional[Type[AbstractErrorHandler]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}

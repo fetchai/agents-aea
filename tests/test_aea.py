@@ -42,6 +42,7 @@ from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.runtime import RuntimeStates
 from aea.skills.base import Skill, SkillContext
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.default.message import DefaultMessage
