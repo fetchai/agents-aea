@@ -49,6 +49,7 @@ from aea.cli.publish import publish
 from aea.cli.push import push
 from aea.cli.register import register
 from aea.cli.remove import remove
+from aea.cli.remove_key import remove_key
 from aea.cli.reset_password import reset_password
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
@@ -117,6 +118,7 @@ def _init_gui() -> None:
 
 cli.add_command(_list)
 cli.add_command(add_key)
+cli.add_command(remove_key)
 cli.add_command(add)
 cli.add_command(create)
 cli.add_command(config)
