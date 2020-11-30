@@ -2,9 +2,9 @@
 # DON'T add enything secret here and upload to the git repo
 dns:
   enabled: true
-  dnsname: agent-dht-net.sandbox.fetch-ai.com
+  dnsname: agent-dht-net.prod.fetch-ai.com
   publicdnsname: acn.fetch-ai.com 
-  targetgw: fetchpub.sandbox.fetch-ai.com
+  targetgw: fetch.prod.fetch-ai.com
 
 istio:
   enabled: true
