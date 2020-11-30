@@ -497,7 +497,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         ), "Strings {} didn't appear in tac_controller output.".format(missing_strings)
 
         check_strings = (
-            "received start event from the controller. Starting to compete..."
+            "received start event from the controller. Starting to compete...",
             "received a contract address:",
             "registering agent on SOEF.",
             "searching for sellers, search_id=",
@@ -530,7 +530,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
 
         check_strings = (
-            "received start event from the controller. Starting to compete..."
+            "received start event from the controller. Starting to compete...",
             "received a contract address:",
             "registering agent on SOEF.",
             "searching for sellers, search_id=",
