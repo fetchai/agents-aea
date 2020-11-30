@@ -44,7 +44,6 @@ _default_logger = logging.getLogger(__name__)
 
 _ETHEREUM = "ethereum"
 GAS_ID = "gwei"
-ETHEREUM_TESTNET_FAUCET_URL = "TBD"
 TESTNET_NAME = "ganache"
 DEFAULT_ADDRESS = "http://127.0.0.1:8545"
 DEFAULT_CHAIN_ID = 1337
@@ -556,28 +555,34 @@ class EthereumFaucetApi(FaucetApi):
     identifier = _ETHEREUM
     testnet_name = TESTNET_NAME
 
-    def get_wealth(self, address: Address) -> None:
+    def get_wealth(self, address: Address, url: Optional[str] = None) -> None:
         """
         Get wealth from the faucet for the provided address.
 
         :param address: the address.
+        :param url: the url
         :return: None
         """
-        self._try_get_wealth(address)
+        self._try_get_wealth(address, url)
 
     @staticmethod
     @try_decorator(
         "An error occured while attempting to generate wealth:\n{}",
         logger_method="error",
     )
-    def _try_get_wealth(address: Address) -> None:
+    def _try_get_wealth(address: Address, url: Optional[str] = None) -> None:
         """
         Get wealth from the faucet for the provided address.
 
         :param address: the address.
+        :param url: the url
         :return: None
         """
-        response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
+        if url is None:
+            raise ValueError(
+                "Url is none, no default url provided. Please provide a faucet url."
+            )
+        response = requests.get(url + address)
         if response.status_code // 100 == 5:
             _default_logger.error("Response: {}".format(response.status_code))
         elif response.status_code // 100 in [3, 4]:  # pragma: nocover
