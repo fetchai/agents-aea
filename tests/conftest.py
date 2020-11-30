@@ -1068,3 +1068,12 @@ def random_string(length: int = 8) -> str:
 def make_uri(addr: str, port: int):
     """Make uri from address and port."""
     return f"{addr}:{port}"
+
+
+@pytest.mark.integration
+class UseGanache:
+    """Inherit from this class to use Ganache."""
+
+    @pytest.fixture(autouse=True)
+    def _start_ganache(self, ganache):
+        """Start a Ganache image."""

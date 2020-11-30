@@ -52,7 +52,7 @@ def _try_generate_wealth(ctx: Context, type_: str, sync: bool) -> None:
     """
     Try generate wealth for the provided network identifier.
 
-    :param click_context: the click context
+    :param ctx: the click context
     :param type_: the network type
     :param sync: whether to sync or not
     :return: None

@@ -131,7 +131,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
             contract_id=self.parameters.contract_id,
             callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(
-                {"deployer_address": self.skill.skill_context.agent_address}
+                {
+                    "deployer_address": self.skill.skill_context.agent_address,
+                    "gas": 5000000,
+                }
             ),
         )
         assert has_attributes, error_str
@@ -298,6 +301,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                 {
                     "deployer_address": self.skill.skill_context.agent_address,
                     "token_ids": [2, 3, 1],
+                    "gas": 5000000,
                 }
             ),
         )
@@ -367,6 +371,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     "recipient_address": self.skill.skill_context.agent_address,
                     "token_ids": [2, 3, 1],
                     "mint_quantities": [1, 2, 10],
+                    "gas": 5000000,
                 }
             ),
         )
@@ -465,6 +470,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     "recipient_address": self.skill.skill_context.agent_address,
                     "token_ids": [2, 3, 1],
                     "mint_quantities": [1, 2, 10],
+                    "gas": 5000000,
                 }
             ),
         )

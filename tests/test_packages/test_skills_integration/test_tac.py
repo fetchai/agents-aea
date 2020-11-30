@@ -41,6 +41,7 @@ from tests.conftest import (
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     NON_GENESIS_CONFIG_TWO,
+    UseGanache,
 )
 
 
@@ -265,7 +266,7 @@ class TestTacSkills(AEATestCaseMany):
         ), "Agents weren't successfully terminated."
 
 
-class TestTacSkillsContract(AEATestCaseMany):
+class TestTacSkillsContract(AEATestCaseMany, UseGanache):
     """Test that tac skills work."""
 
     @pytest.mark.integration
