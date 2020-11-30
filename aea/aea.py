@@ -74,6 +74,7 @@ class AEA(Agent):
         period: float = 0.05,
         execution_timeout: float = 0,
         max_reactions: int = 20,
+        error_handler_class: Optional[Type] = None,
         decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
@@ -143,6 +144,10 @@ class AEA(Agent):
             identity=identity, wallet=wallet
         )
         self.runtime.set_decision_maker(decision_maker_handler)
+
+        self._error_handler_class = (
+            error_handler_class if error_handler_class is not None else ErrorHandler
+        )
 
         default_ledger_id = (
             default_ledger
@@ -249,11 +254,9 @@ class AEA(Agent):
             default_connection=self.context.default_connection,
         )
 
-    @staticmethod
-    def _get_error_handler() -> Type[ErrorHandler]:
+    def _get_error_handler(self) -> Type[ErrorHandler]:
         """Get error handler."""
-        handler = ErrorHandler
-        return handler
+        return self._error_handler_class
 
     def _get_msg_and_handlers_for_envelope(
         self, envelope: Envelope

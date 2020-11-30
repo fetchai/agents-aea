@@ -1692,6 +1692,7 @@ class AgentConfig(PackageConfiguration):
         period: Optional[float] = None,
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
+        error_handler: Optional[Dict] = None,
         decision_maker_handler: Optional[Dict] = None,
         skill_exception_policy: Optional[str] = None,
         connection_exception_policy: Optional[str] = None,
@@ -1746,6 +1747,7 @@ class AgentConfig(PackageConfiguration):
         self.skill_exception_policy: Optional[str] = skill_exception_policy
         self.connection_exception_policy: Optional[str] = connection_exception_policy
 
+        self.error_handler = error_handler if error_handler is not None else {}
         self.decision_maker_handler = (
             decision_maker_handler if decision_maker_handler is not None else {}
         )
@@ -1884,6 +1886,8 @@ class AgentConfig(PackageConfiguration):
             config["execution_timeout"] = self.execution_timeout
         if self.max_reactions is not None:
             config["max_reactions"] = self.max_reactions
+        if self.error_handler != {}:
+            config["error_handler"] = self.error_handler
         if self.decision_maker_handler != {}:
             config["decision_maker_handler"] = self.decision_maker_handler
         if self.skill_exception_policy is not None:
@@ -1920,6 +1924,7 @@ class AgentConfig(PackageConfiguration):
             period=cast(float, obj.get("period")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
+            error_handler=cast(Dict, obj.get("error_handler", {})),
             decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),
             skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
             connection_exception_policy=cast(

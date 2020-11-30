@@ -365,6 +365,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
+        self._error_handler_class: Optional[Type] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
@@ -438,6 +439,33 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         except Exception as e:  # pragma: nocover
             self.logger.error(
                 "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, class_name, file_path, e
+                )
+            )
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+
+        return self
+
+    def set_error_handler(
+        self, error_handler_dotted_path: str, file_path: Path
+    ) -> "AEABuilder":
+        """
+        Set error handler class.
+
+        :param error_handler_dotted_path: the dotted path to the error handler
+        :param file_path: the file path to the file which contains the error handler
+
+        :return: self
+        """
+        dotted_path, class_name = error_handler_dotted_path.split(":")
+        module = load_module(dotted_path, file_path)
+
+        try:
+            _class = getattr(module, class_name)
+            self._error_handler_class = _class
+        except Exception as e:  # pragma: nocover
+            self.logger.error(
+                "Could not locate error handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
                     dotted_path, class_name, file_path, e
                 )
             )
@@ -957,6 +985,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
             max_reactions=self._get_max_reactions(),
+            error_handler_class=self._get_error_handler_class(),
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             connection_exception_policy=self._get_connection_exception_policy(),
@@ -1015,6 +1044,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             if self._max_reactions is not None
             else self.DEFAULT_MAX_REACTIONS
         )
+
+    def _get_error_handler_class(self,) -> Optional[Type]:
+        """
+        Return the error handler class.
+
+        :return: error handler class
+        """
+        return self._error_handler_class
 
     def _get_decision_maker_handler_class(
         self,
@@ -1257,6 +1294,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
             self.set_decision_maker_handler(dotted_path, file_path)
+        if agent_configuration.error_handler != {}:
+            dotted_path = agent_configuration.error_handler["dotted_path"]
+            file_path = agent_configuration.error_handler["file_path"]
+            self.set_error_handler(dotted_path, file_path)
         if agent_configuration.skill_exception_policy is not None:
             self.set_skill_exception_policy(
                 ExceptionPolicyEnum(agent_configuration.skill_exception_policy)
