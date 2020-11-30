@@ -1,6 +1,5 @@
 
 #!/usr/bin/env bash
-DOCKERFILE="Dockerfile.dev"
 VERSION=$(git describe --always --dirty=-WIP)
 
 #Check For WIP
@@ -16,11 +15,13 @@ case "$envvar" in
  "prod" ) 
    echo "Production config selected"
    REGISTRY="gcr.io/fetch-ai-images"
+   DOCKERFILE="Dockerfile.dev"
    echo "Registry to upload is $REGISTRY"
    ;;
  "sandbox" ) 
    echo "Sandbox config selected"
    REGISTRY="gcr.io/fetch-ai-sandbox"
+   DOCKERFILE="Dockerfile.dev"
    echo "Registry to upload is $REGISTRY"
    ;;
  *) 
