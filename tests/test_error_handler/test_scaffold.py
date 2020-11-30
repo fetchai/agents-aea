@@ -21,22 +21,22 @@
 
 import pytest
 
-from aea.error_handler.scaffold import ScaffoldErrorHandler
+from aea.error_handler.scaffold import ErrorHandler
 
 
 def test_scaffold_send_unsupported_protocol_raises_not_implemented_error():
     """Test 'send_unsupported_protocol' raises not implemented error."""
     with pytest.raises(NotImplementedError):
-        ScaffoldErrorHandler.send_unsupported_protocol(None, None)
+        ErrorHandler.send_unsupported_protocol(None, None)
 
 
 def test_scaffold_send_decoding_error_raises_not_implemented_error():
     """Test 'send_decoding_error' raises not implemented error."""
     with pytest.raises(NotImplementedError):
-        ScaffoldErrorHandler.send_decoding_error(None, None)
+        ErrorHandler.send_decoding_error(None, None)
 
 
 def test_scaffold_send_unsupported_skill_raises_not_implemented_error():
     """Test 'send_unsupported_skill' raises not implemented error."""
     with pytest.raises(NotImplementedError):
-        ScaffoldErrorHandler.send_unsupported_skill(None, None)
+        ErrorHandler.send_unsupported_skill(None, None)

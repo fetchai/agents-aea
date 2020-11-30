@@ -24,8 +24,8 @@ from aea.error_handler.base import AbstractErrorHandler
 from aea.mail.base import Envelope
 
 
-class ScaffoldErrorHandler(AbstractErrorHandler):
-    """This class implements the decision maker."""
+class ErrorHandler(AbstractErrorHandler):
+    """This class implements the error handler."""
 
     @classmethod
     def send_unsupported_protocol(cls, envelope: Envelope, logger: Logger) -> None:

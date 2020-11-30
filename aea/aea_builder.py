@@ -431,7 +431,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: self
         """
-        dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
+        dotted_path, class_name = decision_maker_handler_dotted_path.split("::")
         module = load_module(dotted_path, file_path)
 
         try:
@@ -458,7 +458,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: self
         """
-        dotted_path, class_name = error_handler_dotted_path.split(":")
+        dotted_path, class_name = error_handler_dotted_path.split("::")
         module = load_module(dotted_path, file_path)
 
         try:
