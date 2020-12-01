@@ -957,22 +957,23 @@ class CosmosFaucetApi(FaucetApi):
         """Initialize CosmosFaucetApi."""
         self._poll_interval = float(poll_interval or 1)
 
-    def get_wealth(self, address: Address) -> None:
+    def get_wealth(self, address: Address, url: Optional[str] = None) -> None:
         """
         Get wealth from the faucet for the provided address.
 
         :param address: the address.
+        :param url: the url
         :return: None
         :raises: RuntimeError of explicit faucet failures
         """
-        uid = self._try_create_faucet_claim(address)
+        uid = self._try_create_faucet_claim(address, url)
         if uid is None:  # pragma: nocover
             raise RuntimeError("Unable to create faucet claim")
 
         while True:
 
             # lookup status form the claim uid
-            status = self._try_check_faucet_claim(uid)
+            status = self._try_check_faucet_claim(uid, url)
             if status is None:  # pragma: nocover
                 raise RuntimeError("Failed to check faucet claim status")
 
@@ -992,16 +993,18 @@ class CosmosFaucetApi(FaucetApi):
         "An error occured while attempting to request a faucet request:\n{}",
         logger_method=_default_logger.error,
     )
-    def _try_create_faucet_claim(cls, address: Address) -> Optional[str]:
+    def _try_create_faucet_claim(
+        cls, address: Address, url: Optional[str] = None
+    ) -> Optional[str]:
         """
         Create a token faucet claim request
 
         :param address: the address to request funds
+        :param url: the url
         :return: None on failure, otherwise the request uid
         """
-        response = requests.post(
-            url=cls._faucet_request_uri(), data={"Address": address}
-        )
+        uri = cls._faucet_request_uri(url)
+        response = requests.post(url=uri, data={"Address": address})
 
         uid = None
         if response.status_code == 200:
@@ -1021,14 +1024,17 @@ class CosmosFaucetApi(FaucetApi):
         "An error occured while attempting to request a faucet request:\n{}",
         logger_method=_default_logger.error,
     )
-    def _try_check_faucet_claim(cls, uid: str) -> Optional[CosmosFaucetStatus]:
+    def _try_check_faucet_claim(
+        cls, uid: str, url: Optional[str] = None
+    ) -> Optional[CosmosFaucetStatus]:
         """
         Check the status of a faucet request
 
         :param uid: The request uid to be checked
+        :param url: the url
         :return: None on failure otherwise a CosmosFaucetStatus for the specified uid
         """
-        response = requests.get(cls._faucet_status_uri(uid))
+        response = requests.get(cls._faucet_status_uri(uid, url))
         if response.status_code != 200:  # pragma: nocover
             _default_logger.warning(
                 "Response: {}, Text: {}".format(response.status_code, response.text)
@@ -1044,13 +1050,18 @@ class CosmosFaucetApi(FaucetApi):
         )
 
     @classmethod
-    def _faucet_request_uri(cls) -> str:
-        """Generates the request URI derived from `cls.faucet_base_url`."""
+    def _faucet_request_uri(cls, url: Optional[str] = None) -> str:
+        """
+        Generates the request URI derived from `cls.faucet_base_url` or provided url.
+
+        :param url: the url
+        """
         if cls.testnet_faucet_url is None:  # pragma: nocover
             raise ValueError("Testnet faucet url not set.")
-        return f"{cls.testnet_faucet_url}/claim/requests"
+        url = cls.testnet_faucet_url if url is None else url
+        return f"{url}/claim/requests"
 
     @classmethod
-    def _faucet_status_uri(cls, uid: str) -> str:
+    def _faucet_status_uri(cls, uid: str, url: Optional[str] = None) -> str:
         """Generates the status URI derived from `cls.faucet_base_url`."""
-        return f"{cls._faucet_request_uri()}/{uid}"
+        return f"{cls._faucet_request_uri(url)}/{uid}"
