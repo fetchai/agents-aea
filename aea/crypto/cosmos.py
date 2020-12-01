@@ -791,7 +791,7 @@ class _CosmosApi(LedgerApi):
         try:
             _type = cast(dict, tx_signed.get("value", {})).get("msg", [])[0]["type"]
             result = _type in ["wasm/store-code", "wasm/instantiate", "wasm/execute"]
-        except KeyError:  # pragma: nocover
+        except (KeyError, IndexError):  # pragma: nocover
             result = False
         return result
 
@@ -801,7 +801,7 @@ class _CosmosApi(LedgerApi):
         try:
             _type = cast(dict, tx_signed.get("tx", {})).get("msg", [])[0]["type"]
             result = _type in ["cosmos-sdk/MsgSend"]
-        except KeyError:  # pragma: nocover
+        except (KeyError, IndexError):  # pragma: nocover
             result = False
         return result
 

@@ -111,7 +111,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             message_type=ContractApiMessage,
             dialogue_reference=incorrect_dialogue_reference,
             performative=ContractApiMessage.Performative.STATE,
-            state=State("some_ledger_id", b"some_body"),
+            state=State("some_ledger_id", {"some_key": "some_value"}),
         )
 
         # operation
@@ -146,7 +146,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             dialogue=contract_api_dialogue,
             performative=ContractApiMessage.Performative.RAW_TRANSACTION,
             raw_transaction=ContractApiMessage.RawTransaction(
-                "some_ledger_id", "some_body"
+                "some_ledger_id", {"some_key": "some_value"}
             ),
         )
 
@@ -275,7 +275,7 @@ class TestSigningHandler(BaseSkillTestCase):
                 {
                     "terms": cls.terms,
                     "raw_transaction": SigningMessage.RawTransaction(
-                        "some_ledger_id", "some_body"
+                        "some_ledger_id", {"some_key": "some_value"}
                     ),
                 },
             ),
@@ -326,7 +326,7 @@ class TestSigningHandler(BaseSkillTestCase):
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_TRANSACTION,
                 signed_transaction=SigningMessage.SignedTransaction(
-                    "some_ledger_id", "some_body"
+                    "some_ledger_id", {"some_key": "some_value"}
                 ),
             ),
         )
@@ -397,7 +397,7 @@ class TestSigningHandler(BaseSkillTestCase):
             performative=invalid_performative,
             terms=self.terms,
             raw_transaction=SigningMessage.RawTransaction(
-                "some_ledger_id", "some_body"
+                "some_ledger_id", {"some_key": "some_value"}
             ),
             to=str(self.skill.skill_context.skill_id),
         )
@@ -451,15 +451,16 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         cls.callable = "some_callable"
         cls.kwargs = Kwargs({"some_key": "some_value"})
 
-        cls.body = "some_body"
+        cls.body = {"some_key": "some_value"}
+        cls.body_str = "some_body"
         cls.contract_address = "some_contract_address"
 
         cls.raw_transaction = RawTransaction(cls.ledger_id, cls.body)
         cls.signed_transaction = SignedTransaction(cls.ledger_id, cls.body)
-        cls.transaction_digest = TransactionDigest(cls.ledger_id, cls.body)
+        cls.transaction_digest = TransactionDigest(cls.ledger_id, cls.body_str)
         cls.receipt = {"contractAddress": cls.contract_address}
         cls.transaction_receipt = TransactionReceipt(
-            cls.ledger_id, cls.receipt, "some_transaction"
+            cls.ledger_id, cls.receipt, {"transaction_key": "transaction_value"}
         )
 
         cls.terms = Terms(
