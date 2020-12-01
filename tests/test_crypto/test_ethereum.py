@@ -207,7 +207,6 @@ def test_construct_sign_and_submit_transfer_transaction(
     assert tx != transaction_receipt, "Should not be same!"
 
 
-@pytest.mark.skip
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
@@ -216,9 +215,9 @@ def test_get_wealth_positive(caplog):
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
         ethereum_faucet_api = EthereumFaucetApi()
         ec = EthereumCrypto()
-        ethereum_faucet_api.get_wealth(ec.address)
+        ethereum_faucet_api.get_wealth(ec.address, "some_url")
         assert (
-            "Response: " in caplog.text
+            "Invalid URL" in caplog.text
         ), f"Cannot find message in output: {caplog.text}"
 
 

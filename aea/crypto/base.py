@@ -353,10 +353,11 @@ class FaucetApi(ABC):
     network_name = "testnet"  # type: str
 
     @abstractmethod
-    def get_wealth(self, address: Address) -> None:
+    def get_wealth(self, address: Address, url: Optional[str] = None) -> None:
         """
         Get wealth from the faucet for the provided address.
 
         :param address: the address.
+        :param url: the url
         :return: None
         """

@@ -65,8 +65,6 @@ from aea.test_tools.generic import (
     write_envelope_to_file,
 )
 
-from tests.conftest import ROOT_DIR
-
 
 _default_logger = logging.getLogger(__name__)
 
@@ -87,7 +85,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     threads: List[Thread] = []  # list of started threads
     packages_dir_path: Path = Path(DEFAULT_REGISTRY_NAME)
     use_packages_dir: bool = True
-    package_registry_src: Path = Path(ROOT_DIR, DEFAULT_REGISTRY_NAME)
+    package_registry_src_rel: Path = Path(os.getcwd(), packages_dir_path)
     old_cwd: Path  # current working directory path
     t: Path  # temporary directory path
     current_agent_context: str = ""  # the name of the current agent
@@ -322,7 +320,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         fetched_agent_name = agent_name
         path_to_fetched_aea = os.path.join(new_cwd, fetched_agent_name)
         registry_tmp_dir = os.path.join(new_cwd, cls.packages_dir_path)
-        shutil.copytree(str(cls.package_registry_src), str(registry_tmp_dir))
+        shutil.copytree(str(cls.package_registry_src_rel), str(registry_tmp_dir))
         with cd(new_cwd):
             cls.run_cli_command(
                 "fetch", "--local", public_id, "--alias", fetched_agent_name
@@ -844,9 +842,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls.t = Path(tempfile.mkdtemp())
         cls.change_directory(cls.t)
 
+        cls.package_registry_src = cls.old_cwd / cls.package_registry_src_rel
         if cls.use_packages_dir:
             registry_tmp_dir = cls.t / cls.packages_dir_path
-            cls.package_registry_src = cls.old_cwd / cls.packages_dir_path
             shutil.copytree(str(cls.package_registry_src), str(registry_tmp_dir))
 
         cls.initialize_aea(cls.author)
@@ -866,7 +864,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls.use_packages_dir = True
         cls.agents = set()
         cls.current_agent_context = ""
-        cls.package_registry_src = Path(ROOT_DIR, DEFAULT_REGISTRY_NAME)
         cls.stdout = {}
         cls.stderr = {}
 

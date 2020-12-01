@@ -48,6 +48,7 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
+    DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
     PROTOCOL,
     SCAFFOLD_PUBLIC_ID,
     SKILL,
@@ -107,6 +108,13 @@ def skill(ctx: Context, skill_name: str):
 def decision_maker_handler(ctx: Context):
     """Add a decision maker scaffolding to the configuration file and agent."""
     _scaffold_dm_handler(ctx)
+
+
+@scaffold.command()
+@pass_ctx
+def error_handler(ctx: Context):
+    """Add an error scaffolding to the configuration file and agent."""
+    _scaffold_error_handler(ctx)
 
 
 @clean_after
@@ -198,35 +206,63 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
 
 def _scaffold_dm_handler(ctx: Context):
-    """Add a scaffolded decision maker handler to the project and configuration."""
-    existing_dm_handler = ctx.agent_config.decision_maker_handler
+    """Scaffold the decision maker handler."""
+    _scaffold_non_package_item(
+        ctx,
+        "decision_maker_handler",
+        "decision maker handler",
+        "DecisionMakerHandler",
+        "decision_maker",
+    )
 
-    # check if we already have a decision maker in the project
-    if existing_dm_handler != {}:
+
+def _scaffold_error_handler(ctx):
+    """Scaffold the error handler."""
+    _scaffold_non_package_item(
+        ctx, "error_handler", "error handler", "ErrorHandler", "error_handler"
+    )
+
+
+def _scaffold_non_package_item(
+    ctx: Context, item_type: str, type_name: str, class_name: str, aea_dir: str
+):
+    """
+    Scaffold a non-package item (e.g. decision maker handler, or error handler).
+
+    :param ctx: the CLI context.
+    :param item_type: the item type (e.g. 'decision_maker_handler')
+    :param type_name: the type name (e.g. "decision maker")
+    :param class_name: the class name (e.g. "DecisionMakerHandler")
+    :param aea_dir: the AEA directory that contains the scaffold module
+    :return: None
+    """
+    existing_item = getattr(ctx.agent_config, item_type)
+    if existing_item != {}:
         raise click.ClickException(
-            "A decision maker handler specification already exists. Aborting..."
+            f"A {type_name} specification already exists. Aborting..."
         )
 
-    dest = Path("decision_maker.py")
+    dest = Path(f"{item_type}.py")
     agent_name = ctx.agent_config.agent_name
-    click.echo("Adding decision maker scaffold to the agent '{}'...".format(agent_name))
-
+    click.echo(f"Adding {type_name} scaffold to the agent '{agent_name}'...")
     # create the file name
-    dotted_path = ".decision_maker::DecisionMakerHandler"
+    dotted_path = f".{item_type}{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}{class_name}"
     try:
         # copy the item package into the agent project.
-        src = Path(os.path.join(AEA_DIR, "decision_maker", "scaffold.py"))
-        logger.debug("Copying decision maker. src={} dst={}".format(src, dest))
+        src = Path(os.path.join(AEA_DIR, aea_dir, "scaffold.py"))
+        logger.debug(f"Copying error handler. src={src} dst={dest}")
         shutil.copyfile(src, dest)
 
         # add the item to the configurations.
-        logger.debug(
-            "Registering the decision_maker into {}".format(DEFAULT_AEA_CONFIG_FILE)
+        logger.debug(f"Registering the {type_name} into {DEFAULT_AEA_CONFIG_FILE}")
+        setattr(
+            ctx.agent_config,
+            item_type,
+            {
+                "dotted_path": str(dotted_path),
+                "file_path": str(os.path.join(".", dest)),
+            },
         )
-        ctx.agent_config.decision_maker_handler = {
-            "dotted_path": str(dotted_path),
-            "file_path": str(os.path.join(".", dest)),
-        }
         ctx.agent_loader.dump(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
         )

@@ -73,7 +73,6 @@ models:
       good_ids: []
       inactivity_timeout: 60
       item_setup_timeout: 120
-      ledger_id: ethereum
       location:
         latitude: 51.5194
         longitude: 0.127

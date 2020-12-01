@@ -41,6 +41,7 @@ skill_exception_policy: propagate               # The exception policy applied t
 connection_exception_policy: propagate          # The exception policy applied to connections (must be one of "propagate", "just_log", or "stop_and_exit")
 loop_mode: async                                # The agent loop mode (must be one of "sync" or "async")
 runtime_mode: threaded                          # The runtime mode (must be one of "threaded" or "async") and determines how agent loop and multiplexer are run
+error_handler: None                             # The error handler to be used.
 decision_maker_handler: None                    # The decision maker handler to be used.
 ```
 ``` yaml
