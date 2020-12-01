@@ -22,11 +22,11 @@
 import json
 import logging
 import random
-from typing import Any, Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast
 
 from vyper.utils import keccak256
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
@@ -86,7 +86,7 @@ class ERC1155Contract(Contract):
         token_ids: List[int],
         data: Optional[bytes] = b"",
         gas: int = 300000,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to create a batch of tokens.
 
@@ -136,7 +136,7 @@ class ERC1155Contract(Contract):
         token_id: int,
         data: Optional[bytes] = b"",
         gas: int = 300000,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to create a single token.
 
@@ -188,7 +188,7 @@ class ERC1155Contract(Contract):
         mint_quantities: List[int],
         data: Optional[bytes] = b"",
         gas: int = 500000,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to mint a batch of tokens.
 
@@ -282,7 +282,7 @@ class ERC1155Contract(Contract):
         mint_quantity: int,
         data: Optional[bytes] = b"",
         gas: int = 300000,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to mint a single token.
 
@@ -333,7 +333,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_id: int,
-    ) -> Dict[str, Dict[int, int]]:
+    ) -> JSONLike:
         """
         Get the balance for a specific token id.
 
@@ -373,7 +373,7 @@ class ERC1155Contract(Contract):
         signature: str,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a single token.
 
@@ -425,7 +425,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_ids: List[int],
-    ) -> Dict[str, Dict[int, int]]:
+    ) -> JSONLike:
         """
         Get the balances for a batch of specific token ids.
 
@@ -475,7 +475,7 @@ class ERC1155Contract(Contract):
         signature: str,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
-    ) -> str:
+    ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a batch of tokens.
 
@@ -746,7 +746,7 @@ class ERC1155Contract(Contract):
         raise NotImplementedError
 
     @staticmethod
-    def _try_estimate_gas(ledger_api: LedgerApi, tx: Dict[str, Any]) -> Dict[str, Any]:
+    def _try_estimate_gas(ledger_api: LedgerApi, tx: JSONLike) -> JSONLike:
         """
         Attempts to update the transaction with a gas estimate.
 

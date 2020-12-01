@@ -39,7 +39,7 @@ class DictProtobufStructSerializer:
     def encode(cls, dictionary: Dict[str, Any]) -> bytes:
         """Serialize compatible dictionary to bytes"""
         if not isinstance(dictionary, dict):
-            raise TypeError(
+            raise TypeError(  # pragma: nocover
                 "dictionary must be of dict type, got type {}".format(type(dictionary))
             )
         # TOFIX(LR) problematic as it'll copy every message
@@ -90,7 +90,7 @@ class DictProtobufStructSerializer:
                 and not isinstance(value, float)
                 and not isinstance(value, str)
                 and not isinstance(value, Struct)
-            ):
+            ):  # pragma: nocover
                 raise NotImplementedError(
                     "DictProtobufStructSerializer doesn't support dict value type {}".format(
                         type(value)
@@ -112,7 +112,8 @@ class DictProtobufStructSerializer:
 
             # protobuf struct doesn't recursively convert Struct to dict
             if isinstance(value, Struct):
-                value = dict(value)
+                if value != Struct():
+                    value = dict(value)
                 dictionary[key] = value
 
             if isinstance(value, dict):

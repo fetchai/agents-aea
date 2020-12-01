@@ -28,10 +28,11 @@ from typing import Any, BinaryIO, Dict, Optional, Tuple, Union, cast
 
 import requests
 from eth_account import Account
-from eth_account.datastructures import SignedTransaction
+from eth_account.datastructures import HexBytes, SignedTransaction
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 from web3 import HTTPProvider, Web3
+from web3.datastructures import AttributeDict
 from web3.types import TxParams
 
 from aea.common import Address
@@ -52,6 +53,67 @@ DEFAULT_GAS_PRICE = "50"
 DEFAULT_CURRENCY_DENOM = "wei"
 _ABI = "abi"
 _BYTECODE = "bytecode"
+
+
+class SignedTransactionSerializer:
+    """Serializer for SignedTransaction."""
+
+    @staticmethod
+    def to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]:
+        """Write SignedTransaction to dict."""
+        signed_transaction_dict = {
+            "raw_transaction": signed_transaction.rawTransaction.hex(),
+            "hash": signed_transaction.hash.hex(),
+            "r": signed_transaction.r,
+            "s": signed_transaction.s,
+            "v": signed_transaction.v,
+        }
+        return signed_transaction_dict
+
+    @staticmethod
+    def from_dict(
+        signed_transaction_dict: Dict[str, Union[str, int]]
+    ) -> SignedTransaction:
+        """Get SignedTransaction from dict."""
+        signed_transaction = SignedTransaction(
+            rawTransaction=HexBytes(signed_transaction_dict["raw_transaction"]),
+            hash=HexBytes(signed_transaction_dict["hash"]),
+            r=signed_transaction_dict["r"],
+            s=signed_transaction_dict["s"],
+            v=signed_transaction_dict["v"],
+        )
+        return signed_transaction
+
+
+def _process_value(value):
+    """Process value."""
+    if value is None:
+        return value
+    if isinstance(value, HexBytes):
+        return value.hex()
+    if isinstance(value, list):
+        return _simplify_list(value)
+    if isinstance(value, dict):
+        return _simplify_dict(value)  # pragma: nocover
+    if type(value) in (bool, int, float, str):
+        return value
+    raise NotImplementedError("Unknown type conversion.")  # pragma: nocover
+
+
+def _simplify_list(li: list):
+    """Simplify a list with process value."""
+    return [_process_value(el) for el in li]
+
+
+def _simplify_dict(di: dict):
+    """Simplify a dict with process value."""
+    return {k: _process_value(v) for k, v in di}  # pragma: nocover
+
+
+def simplify_attr_dict(attr_dict: AttributeDict) -> dict:
+    """Simplify to dict."""
+    result = {key: _process_value(value) for key, value in attr_dict.items()}
+    return result
 
 
 class EthereumCrypto(Crypto[Account]):
@@ -132,7 +194,7 @@ class EthereumCrypto(Crypto[Account]):
             signed_msg = signature["signature"].hex()
         return signed_msg
 
-    def sign_transaction(self, transaction: Any) -> Any:
+    def sign_transaction(self, transaction: dict) -> Dict[str, Union[str, int]]:
         """
         Sign a transaction in bytes string form.
 
@@ -141,7 +203,10 @@ class EthereumCrypto(Crypto[Account]):
         """
         signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
         #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction # noqa: E800
-        return signed_transaction
+        signed_transaction_dict = SignedTransactionSerializer.to_dict(
+            signed_transaction
+        )
+        return signed_transaction_dict
 
     @classmethod
     def generate_private_key(cls) -> Account:
@@ -163,7 +228,7 @@ class EthereumHelper(Helper):
     """Helper class usable as Mixin for EthereumApi or as standalone class."""
 
     @staticmethod
-    def is_transaction_settled(tx_receipt: Any) -> bool:
+    def is_transaction_settled(tx_receipt: dict) -> bool:
         """
         Check whether a transaction is settled or not.
 
@@ -172,12 +237,12 @@ class EthereumHelper(Helper):
         """
         is_successful = False
         if tx_receipt is not None:
-            is_successful = tx_receipt.status == 1
+            is_successful = tx_receipt.get("status", 0) == 1
         return is_successful
 
     @staticmethod
     def is_transaction_valid(
-        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -337,7 +402,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         chain_id: Optional[int] = None,
         gas_price: Optional[str] = None,
         **kwargs,
-    ) -> Optional[Any]:
+    ) -> Optional[dict]:
         """
         Submit a transfer transaction to the ledger.
 
@@ -393,7 +458,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return gas_estimate
 
-    def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+    def send_signed_transaction(self, tx_signed: dict) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
@@ -404,16 +469,18 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return tx_digest
 
     @try_decorator("Unable to send transaction: {}", logger_method="warning")
-    def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+    def _try_send_signed_transaction(
+        self, tx_signed: Dict[str, Union[str, int]]
+    ) -> Optional[str]:
         """
         Try send a signed transaction.
 
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        tx_signed = cast(SignedTransaction, tx_signed)
+        signed_transaction = SignedTransactionSerializer.from_dict(tx_signed)
         hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
-            tx_signed.rawTransaction
+            signed_transaction.rawTransaction
         )
         tx_digest = hex_value.hex()
         _default_logger.debug(
@@ -421,7 +488,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return tx_digest
 
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[dict]:
         """
         Get the transaction receipt for a transaction digest.
 
@@ -434,7 +501,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     @try_decorator(
         "Error when attempting getting tx receipt: {}", logger_method="debug"
     )
-    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[dict]:
         """
         Try get the transaction receipt.
 
@@ -444,9 +511,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
             tx_digest
         )
-        return tx_receipt
+        return simplify_attr_dict(tx_receipt)
 
-    def get_transaction(self, tx_digest: str) -> Optional[Any]:
+    def get_transaction(self, tx_digest: str) -> Optional[dict]:
         """
         Get the transaction for a transaction digest.
 
@@ -457,7 +524,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return tx
 
     @try_decorator("Error when attempting getting tx: {}", logger_method="debug")
-    def _try_get_transaction(self, tx_digest: str) -> Optional[Any]:
+    def _try_get_transaction(self, tx_digest: str) -> Optional[dict]:
         """
         Get the transaction.
 
@@ -465,7 +532,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx, if found
         """
         tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
-        return tx
+        return simplify_attr_dict(tx)
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None

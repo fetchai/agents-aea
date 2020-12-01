@@ -21,8 +21,9 @@
 
 import collections
 import copy
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
+from aea.common import JSONLike
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.helpers.serializers import DictProtobufStructSerializer
@@ -35,17 +36,9 @@ class RawTransaction:
     """This class represents an instance of RawTransaction."""
 
     def __init__(
-        self, ledger_id: str, body: Any,
+        self, ledger_id: str, body: JSONLike,
     ):
         """Initialise an instance of RawTransaction."""
-        # body is expected to be of type Dict[str, Union[bool, int, float, str, bytes, Dict[str, *], List[Dict[str, *]]]]
-        if not isinstance(body, dict):
-            raise NotImplementedError(
-                "RawTransaction encoding doesn't support body type {}: expected Dict[str, Any]".format(
-                    type(body)
-                )
-            )
-
         self._ledger_id = ledger_id
         self._body = body
         self._check_consistency()
@@ -53,7 +46,7 @@ class RawTransaction:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, dict), "body must not be JSONLike")
 
     @property
     def ledger_id(self) -> str:
@@ -127,7 +120,7 @@ class RawMessage:
         """Initialise an instance of RawMessage."""
         # body is expected to be of type bytes (or str)
         if not isinstance(body, bytes) and not isinstance(body, str):
-            raise NotImplementedError(
+            raise NotImplementedError(  # pragma: nocover
                 "RawMessage encoding doesn't support body type {}: expected Union[bytes, str]".format(
                     type(body)
                 )
@@ -141,7 +134,7 @@ class RawMessage:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, bytes), "body must not be bytes")
         enforce(
             isinstance(self._is_deprecated_mode, bool),
             "is_deprecated_mode must be bool",
@@ -222,17 +215,9 @@ class SignedTransaction:
     """This class represents an instance of SignedTransaction."""
 
     def __init__(
-        self, ledger_id: str, body: Any,
+        self, ledger_id: str, body: JSONLike,
     ):
         """Initialise an instance of SignedTransaction."""
-        # body is expected to be of type Dict[str, Union[bool, int, float, str, bytes, Dict[str, *], List[Dict[str, *]]]]
-        if not isinstance(body, dict):
-            raise NotImplementedError(
-                "SignedTransaction encoding doesn't support body type {}: expected Dict[str, Any]".format(
-                    type(body)
-                )
-            )
-
         self._ledger_id = ledger_id
         self._body = body
         self._check_consistency()
@@ -240,7 +225,7 @@ class SignedTransaction:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, dict), "body must not JSONLike")
 
     @property
     def ledger_id(self) -> str:
@@ -289,7 +274,7 @@ class SignedTransaction:
             signed_transaction_protobuf_object.signed_transaction
         )
         return cls(
-            signed_transaction_dict["ledger_id"], dict(signed_transaction_dict["body"])
+            signed_transaction_dict["ledger_id"], signed_transaction_dict["body"]
         )
 
     def __eq__(self, other):
@@ -314,14 +299,6 @@ class SignedMessage:
         self, ledger_id: str, body: str, is_deprecated_mode: bool = False,
     ):
         """Initialise an instance of SignedMessage."""
-        # body is expected to be of type str (or bytes)
-        if not isinstance(body, str) and not isinstance(body, bytes):
-            raise NotImplementedError(
-                "SignedMessage encoding doesn't support body type {}: expected Union[str, bytes]".format(
-                    type(body)
-                )
-            )
-
         self._ledger_id = ledger_id
         self._body = body
         self._is_deprecated_mode = is_deprecated_mode
@@ -412,16 +389,8 @@ class SignedMessage:
 class State:
     """This class represents an instance of State."""
 
-    def __init__(self, ledger_id: str, body: bytes):
+    def __init__(self, ledger_id: str, body: JSONLike):
         """Initialise an instance of State."""
-        # body is expected to be of type bytes (or str)
-        if not isinstance(body, bytes) and not isinstance(body, str):
-            raise NotImplementedError(
-                "State encoding doesn't support body type {}: expected Union[bytes, str]".format(
-                    type(body)
-                )
-            )
-
         self._ledger_id = ledger_id
         self._body = body
         self._check_consistency()
@@ -429,7 +398,7 @@ class State:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, dict), "body must be dict")
 
     @property
     def ledger_id(self) -> str:
@@ -437,7 +406,7 @@ class State:
         return self._ledger_id
 
     @property
-    def body(self):
+    def body(self) -> JSONLike:
         """Get the body."""
         return self._body
 
@@ -811,9 +780,14 @@ class Terms:
         return copy.copy(self._fee_by_currency_id)
 
     @property
-    def kwargs(self) -> Dict[str, Any]:
+    def kwargs(self) -> JSONLike:
         """Get the kwargs."""
         return self._kwargs
+
+    @property
+    def is_strict(self) -> bool:
+        """Get is_strict."""
+        return self._is_strict
 
     def _get_lists(self) -> Tuple[List[str], List[int], List[int]]:
         ordered = collections.OrderedDict(sorted(self.quantities_by_good_id.items()))
@@ -913,7 +887,7 @@ class Terms:
             "nonce": terms_object.nonce,
             "is_sender_payable_tx_fee": terms_object.is_sender_payable_tx_fee,
             "fee_by_currency_id": terms_object.fee_by_currency_id,
-            "is_strict": terms_object._is_strict,  # pylint: disable=protected-access
+            "is_strict": terms_object.is_strict,
             "kwargs": terms_object.kwargs,
         }
         terms_protobuf_object.terms = DictProtobufStructSerializer.encode(terms_dict)
@@ -978,16 +952,8 @@ class Terms:
 class TransactionDigest:
     """This class represents an instance of TransactionDigest."""
 
-    def __init__(self, ledger_id: str, body: Any):
+    def __init__(self, ledger_id: str, body: str):
         """Initialise an instance of TransactionDigest."""
-        # body is expected to be of type str (or bytes)
-        if not isinstance(body, str) and not isinstance(body, bytes):
-            raise NotImplementedError(
-                "TransactionDigest encoding doesn't support body type {}: expected Union[str, bytes]".format(
-                    type(body)
-                )
-            )
-
         self._ledger_id = ledger_id
         self._body = body
         self._check_consistency()
@@ -995,7 +961,7 @@ class TransactionDigest:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, str), "body must not be None")
 
     @property
     def ledger_id(self) -> str:
@@ -1003,7 +969,7 @@ class TransactionDigest:
         return self._ledger_id
 
     @property
-    def body(self) -> Any:
+    def body(self) -> str:
         """Get the receipt."""
         return self._body
 
@@ -1066,23 +1032,8 @@ class TransactionDigest:
 class TransactionReceipt:
     """This class represents an instance of TransactionReceipt."""
 
-    def __init__(self, ledger_id: str, receipt: Any, transaction: Any):
+    def __init__(self, ledger_id: str, receipt: JSONLike, transaction: JSONLike):
         """Initialise an instance of TransactionReceipt."""
-        # [receipt|transaction] are expected to be of type str (or bytes)
-        if not isinstance(receipt, str) and not isinstance(receipt, bytes):
-            raise NotImplementedError(
-                "TransactionReceipt encoding doesn't support receipt type {}: expected Union[str, bytes]".format(
-                    type(receipt)
-                )
-            )
-
-        if not isinstance(transaction, str) and not isinstance(transaction, bytes):
-            raise NotImplementedError(
-                "TransactionReceipt encoding doesn't support transaction type {}: expected Union[str, bytes]".format(
-                    type(transaction),
-                )
-            )
-
         self._ledger_id = ledger_id
         self._receipt = receipt
         self._transaction = transaction
@@ -1091,8 +1042,8 @@ class TransactionReceipt:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._receipt is not None, "receipt must not be None")
-        enforce(self._transaction is not None, "transaction must not be None")
+        enforce(isinstance(self._receipt, dict), "receipt must be dict")
+        enforce(isinstance(self._transaction, dict), "transaction must be dict")
 
     @property
     def ledger_id(self) -> str:
@@ -1100,12 +1051,12 @@ class TransactionReceipt:
         return self._ledger_id
 
     @property
-    def receipt(self) -> Any:
+    def receipt(self) -> JSONLike:
         """Get the receipt."""
         return self._receipt
 
     @property
-    def transaction(self) -> Any:
+    def transaction(self) -> JSONLike:
         """Get the transaction."""
         return self._transaction
 

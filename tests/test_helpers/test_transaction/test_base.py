@@ -338,11 +338,11 @@ def test_raw_message_encode_decode():
 def test_init_signed_transaction():
     """Test the signed_transaction object initialization."""
     ledger_id = "some_ledger"
-    body = "body"
+    body = {"key": "value"}
     st = SignedTransaction(ledger_id, body)
     assert st.ledger_id == ledger_id
     assert st.body == body
-    assert str(st) == "SignedTransaction: ledger_id=some_ledger, body=body"
+    assert str(st) == "SignedTransaction: ledger_id=some_ledger, body={'key': 'value'}"
     assert st == st
 
 
@@ -353,7 +353,7 @@ def test_signed_transaction_encode_decode():
         signed_transaction_bytes = b""
 
     ledger_id = "some_ledger"
-    body = {"body": "value"}
+    body = {"key": "value"}
     st = SignedTransaction(ledger_id, body)
     SignedTransaction.encode(SignedTransactionProtobufObject, st)
     recovered_st = SignedTransaction.decode(SignedTransactionProtobufObject)

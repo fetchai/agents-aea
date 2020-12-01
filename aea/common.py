@@ -18,4 +18,9 @@
 # ------------------------------------------------------------------------------
 """This module contains the common types and interfaces used in the aea framework."""
 
+from typing import Any, Dict
+
+
 Address = str
+
+JSONLike = Dict[str, Any]  # temporary placeholder

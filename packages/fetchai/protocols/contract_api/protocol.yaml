@@ -8,8 +8,8 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmaEbBmb81sjYWic1wHTh5KMvXefxsnrMumXsvFKecVnGM
   __init__.py: QmcZFuqoBkEx1fYytpLr7142vtXf9qh8cpeRYVZcaWdmrD
-  contract_api.proto: QmWSmEbw7oDNdEPVJXeqg9Sh7thyTtKtKU2HrLoSe2juFJ
-  contract_api_pb2.py: QmTQBmxiVqgsgUxNzHX5gQARVNL95Du6vXHYUecmE4Q1Xq
+  contract_api.proto: QmSZpXyFMf2MNgVud8iPinaaerx1CManffgHNMx8FcD8jY
+  contract_api_pb2.py: QmYEVg28AVRiLDkbddDto51bumh38gRuouagn6wspDtZVN
   custom_types.py: QmZ3SKFbsxnuagAzq8rCD29PekCYr1egg4vchbAvx2RpgK
   dialogues.py: QmTjXH8JUtziUFDawKsSTYE5dxn1n1FmMPeWexyxiPYd6k
   message.py: Qma3qrueyYSQPWV2Uxj3Aude4hyS4YwtjQ6V1RpmYKtB5f

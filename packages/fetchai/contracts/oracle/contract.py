@@ -24,7 +24,7 @@ from typing import Any, Dict
 
 from vyper.utils import keccak256
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
@@ -47,7 +47,7 @@ class FetchOracleContract(Contract):
         contract_address: Address,
         oracle_address: Address,
         gas: int = 0,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get transaction to grant oracle role to recipient_address
 
@@ -82,7 +82,7 @@ class FetchOracleContract(Contract):
         update_function: str,
         update_args: Dict[str, Any],
         gas: int = 0,
-    ) -> None:
+    ) -> JSONLike:
         """
         Update oracle value in contract
 
@@ -110,7 +110,7 @@ class FetchOracleContract(Contract):
         raise NotImplementedError
 
     @staticmethod
-    def _try_estimate_gas(ledger_api: LedgerApi, tx: Dict[str, Any]) -> Dict[str, Any]:
+    def _try_estimate_gas(ledger_api: LedgerApi, tx: JSONLike) -> JSONLike:
         """
         Attempts to update the transaction with a gas estimate.
 

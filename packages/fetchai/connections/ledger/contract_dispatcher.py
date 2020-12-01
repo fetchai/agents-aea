@@ -20,8 +20,9 @@
 """This module contains the implementation of the contract API request dispatcher."""
 import inspect
 import logging
-from typing import Callable, Optional, cast
+from typing import Callable, Optional, Union, cast
 
+from aea.common import JSONLike
 from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
@@ -130,7 +131,9 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         ledger_api: LedgerApi,
         message: ContractApiMessage,
         dialogue: ContractApiDialogue,
-        response_builder: Callable[[bytes, ContractApiDialogue], ContractApiMessage],
+        response_builder: Callable[
+            [Union[bytes, JSONLike], ContractApiDialogue], ContractApiMessage
+        ],
     ) -> ContractApiMessage:
         """
         Dispatch a request to a user-defined contract method.
@@ -171,8 +174,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         """
 
         def build_response(
-            data: bytes, dialogue: ContractApiDialogue
+            data: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
+            if isinstance(data, bytes):
+                raise ValueError("Invalid transaction type.")
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
@@ -199,8 +204,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         """
 
         def build_response(
-            tx: bytes, dialogue: ContractApiDialogue
+            tx: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
+            if isinstance(tx, bytes):
+                raise ValueError("Invalid transaction type.")
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
@@ -227,8 +234,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         """
 
         def build_response(
-            tx: bytes, dialogue: ContractApiDialogue
+            tx: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
+            if isinstance(tx, bytes):
+                raise ValueError("Invalid transaction type.")
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
@@ -255,8 +264,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         """
 
         def build_response(
-            rm: bytes, dialogue: ContractApiDialogue
+            rm: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
+            if isinstance(rm, dict):
+                raise ValueError("Invalid transaction type.")
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
@@ -269,7 +280,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 
     def _get_data(
         self, api: LedgerApi, message: ContractApiMessage, contract: Contract,
-    ) -> bytes:
+    ) -> Union[bytes, JSONLike]:
         """Get the data from the contract method, either from the stub or from the callable specified by the message."""
         # first, check if the custom handler for this type of request has been implemented.
         data = self._call_stub(api, message, contract)
@@ -283,7 +294,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
     @staticmethod
     def _call_stub(
         ledger_api: LedgerApi, message: ContractApiMessage, contract: Contract
-    ) -> Optional[bytes]:
+    ) -> Optional[Union[bytes, JSONLike]]:
         """Try to call stub methods associated to the contract API request performative."""
         try:
             method: Callable = getattr(contract, message.performative.value)
@@ -310,7 +321,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
     @staticmethod
     def _validate_and_call_callable(
         api: LedgerApi, message: ContractApiMessage, contract: Contract
-    ):
+    ) -> Union[bytes, JSONLike]:
         """
         Validate a Contract callable, given the performative.
 

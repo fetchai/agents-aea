@@ -60,7 +60,7 @@ class CosmosHelper(Helper):
     address_prefix = _COSMOS
 
     @staticmethod
-    def is_transaction_settled(tx_receipt: Any) -> bool:
+    def is_transaction_settled(tx_receipt: dict) -> bool:
         """
         Check whether a transaction is settled or not.
 
@@ -74,7 +74,7 @@ class CosmosHelper(Helper):
 
     @staticmethod
     def is_transaction_valid(
-        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -90,7 +90,7 @@ class CosmosHelper(Helper):
             return False  # pragma: no cover
 
         try:
-            _tx = tx.get("tx").get("value").get("msg")[0]
+            _tx = tx.get("tx", {}).get("value", {}).get("msg", [])[0]
             recovered_amount = int(_tx.get("value").get("amount")[0].get("amount"))
             sender = _tx.get("value").get("from_address")
             recipient = _tx.get("value").get("to_address")
@@ -273,8 +273,8 @@ class CosmosCrypto(Crypto[SigningKey]):
 
     @staticmethod
     def format_default_transaction(
-        transaction: Any, signature: str, base64_pbk: str
-    ) -> Any:
+        transaction: dict, signature: str, base64_pbk: str
+    ) -> dict:
         """
         Format default CosmosSDK transaction and add signature.
 
@@ -307,8 +307,8 @@ class CosmosCrypto(Crypto[SigningKey]):
 
     @staticmethod
     def format_wasm_transaction(
-        transaction: Any, signature: str, base64_pbk: str
-    ) -> Any:
+        transaction: dict, signature: str, base64_pbk: str
+    ) -> dict:
         """
         Format CosmWasm transaction and add signature.
 
@@ -337,7 +337,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         }
         return pushable_tx
 
-    def sign_transaction(self, transaction: Any) -> Any:
+    def sign_transaction(self, transaction: dict) -> dict:
         """
         Sign a transaction in bytes string form.
 
@@ -417,7 +417,7 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
+    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[dict]:
         """
         Call a specified function on the ledger API.
 
@@ -435,9 +435,9 @@ class _CosmosApi(LedgerApi):
     )
     def _try_get_state(  # pylint: disable=unused-argument
         self, callable_name: str, *args, **kwargs
-    ) -> Optional[Any]:
+    ) -> Optional[dict]:
         """Try to call a function on the ledger API."""
-        result = None  # type: Optional[Any]
+        result: Optional[dict] = None
         query = "/".join(args)
         url = self.network_address + f"/{callable_name}/{query}"
         response = requests.get(url=url)
@@ -557,7 +557,7 @@ class _CosmosApi(LedgerApi):
         gas: int = 80000,
         memo: str = "",
         chain_id: Optional[str] = None,
-    ) -> Optional[Any]:
+    ) -> Optional[dict]:
         """
         Create a CosmWasm HandleMsg transaction.
 
@@ -669,7 +669,7 @@ class _CosmosApi(LedgerApi):
         memo: str = "",
         chain_id: Optional[str] = None,
         **kwargs,
-    ) -> Optional[Any]:
+    ) -> Optional[dict]:
         """
         Submit a transfer transaction to the ledger.
 
@@ -769,7 +769,7 @@ class _CosmosApi(LedgerApi):
             )
         return result
 
-    def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+    def send_signed_transaction(self, tx_signed: dict) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
@@ -790,7 +790,7 @@ class _CosmosApi(LedgerApi):
         return tx_digest
 
     @staticmethod
-    def is_cosmwasm_transaction(tx_signed: Any) -> bool:
+    def is_cosmwasm_transaction(tx_signed: dict) -> bool:
         """Check whether it is a cosmwasm tx."""
         try:
             _type = tx_signed["value"]["msg"][0]["type"]
@@ -800,7 +800,7 @@ class _CosmosApi(LedgerApi):
         return result
 
     @staticmethod
-    def is_transfer_transaction(tx_signed: Any) -> bool:
+    def is_transfer_transaction(tx_signed: dict) -> bool:
         """Check whether it is a transfer tx."""
         try:
             _type = tx_signed["tx"]["msg"][0]["type"]
@@ -813,7 +813,7 @@ class _CosmosApi(LedgerApi):
         "Encountered exception when trying to send tx: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+    def _try_send_signed_transaction(self, tx_signed: dict) -> Optional[str]:
         """
         Try send the signed transaction.
 
@@ -829,7 +829,7 @@ class _CosmosApi(LedgerApi):
             _default_logger.error("Cannot send transaction: {}".format(response.json()))
         return tx_digest
 
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[dict]:
         """
         Get the transaction receipt for a transaction digest.
 
@@ -843,21 +843,21 @@ class _CosmosApi(LedgerApi):
         "Encountered exception when trying to get transaction receipt: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[dict]:
         """
         Try get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
-        result = None  # type: Optional[Any]
+        result: Optional[dict] = None
         url = self.network_address + f"/txs/{tx_digest}"
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()
         return result
 
-    def get_transaction(self, tx_digest: str) -> Optional[Any]:
+    def get_transaction(self, tx_digest: str) -> Optional[dict]:
         """
         Get the transaction for a transaction digest.
 
