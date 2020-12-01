@@ -1,0 +1,19 @@
+name: oracle_client
+author: fetchai
+version: 0.1.0
+type: contract
+description: Fetch oracle client contract
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
+  contract.py: QmfP9VEdB6Waif59ny7JTojzvT4tZTLs9XqzS5RMgaphVq
+  contracts/FetchOracleTestClient.sol: QmWpUJ4aBrNreiyuXe6EgfSfE7T7hWz3xHDdT7fFye3WCG
+fingerprint_ignore_patterns:
+- build/*
+class_name: FetchOracleClientContract
+contract_interface_paths:
+  ethereum: build/FetchOracleTestClient.json
+dependencies:
+  vyper:
+    version: <1.0.0,>=0.2.7

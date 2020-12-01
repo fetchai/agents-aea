@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,9 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the simple oracle skill."""
-
-from aea.configurations.base import PublicId
-
-
-PUBLIC_ID = PublicId.from_str("fetchai/simple_oracle:0.1.0")
+"""This module contains the support resources for the fet_erc20 contract."""

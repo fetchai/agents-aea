@@ -1,0 +1,17 @@
+name: fet_erc20
+author: fetchai
+version: 0.1.0
+type: contract
+description: The fet_erc20 contract contains the main staking contract of Fetch.ai
+  for Ethereum mainnet.
+license: Apache-2.0
+aea_version: '>=0.7.0, <0.8.0'
+fingerprint:
+  __init__.py: QmeJ8x6NiZjVLFbUTgpPPCMzQscqjHNBDExapiezpakksR
+  contract.py: QmeAkvKYsmJG8u9C6G1oedZxT78hrye7R7FrB6PfV9HUiD
+fingerprint_ignore_patterns:
+- build/*
+class_name: FetERC20
+contract_interface_paths:
+  ethereum: build/FetERC20Mock.json
+dependencies: {}
