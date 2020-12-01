@@ -481,11 +481,11 @@ def test_set_from_config():
     agent_configuration = Mock()
     agent_configuration.default_connection = "test/test:0.1.0"
     agent_configuration.decision_maker_handler = {
-        "dotted_path": "aea.decision_maker.default:DecisionMakerHandler",
+        "dotted_path": "aea.decision_maker.default::DecisionMakerHandler",
         "file_path": ROOT_DIR + "/aea/decision_maker/default.py",
     }
     agent_configuration.error_handler = {
-        "dotted_path": "aea.error_handler.default:ErrorHandler",
+        "dotted_path": "aea.error_handler.default::ErrorHandler",
         "file_path": ROOT_DIR + "/aea/error_handler/default.py",
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
