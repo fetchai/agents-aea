@@ -338,6 +338,16 @@ class Dialogue(metaclass=_DialogueMeta):
             "Message class provided not a subclass of `Message`.",
         )
         self._message_class = message_class
+        self._terminal_state_callbacks: Set[Callable[["Dialogue"], None]] = set()
+
+    def add_terminal_state_callback(self, fn: Callable[["Dialogue"], None]) -> None:
+        """
+        Add callback to be called on dialogue reach terminal state.
+
+        :param fn: callable to be called with one argument: Dialogue
+        :return: None
+        """
+        self._terminal_state_callbacks.add(fn)
 
     def __eq__(self, other) -> bool:
         """Compare two dialogues."""
@@ -628,6 +638,10 @@ class Dialogue(metaclass=_DialogueMeta):
             self._outgoing_messages.append(message)
         else:
             self._incoming_messages.append(message)
+
+        if message.performative in self.rules.terminal_performatives:
+            for fn in self._terminal_state_callbacks:
+                fn(self)
 
     def _is_belonging_to_dialogue(self, message: Message) -> bool:
         """
@@ -1026,6 +1040,46 @@ class BasicDialoguesStorage:
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
         self._dialogues = dialogues
+        self._terminal_state_dialogues_labels: Set[DialogueLabel] = set()
+
+    @property
+    def dialogues_in_terminal_state(self) -> List["Dialogue"]:
+        """Get all dialogues in terminal state."""
+        return list(
+            filter(
+                None,
+                [
+                    self._dialogues_by_dialogue_label.get(i)
+                    for i in self._terminal_state_dialogues_labels
+                ],
+            )
+        )
+
+    @property
+    def dialogues_in_active_state(self) -> List["Dialogue"]:
+        """Get all dialogues in active state."""
+        active_dialogues = (
+            set(self._dialogues_by_dialogue_label.keys())
+            - self._terminal_state_dialogues_labels
+        )
+        return list(
+            filter(
+                None,
+                [self._dialogues_by_dialogue_label.get(i) for i in active_dialogues],
+            )
+        )
+
+    @property
+    def is_terminal_dialogues_kept(self) -> bool:
+        """Return True if dialogues should stay after terminal state."""
+        return self._dialogues.is_keep_dialogues_in_terminal_state
+
+    def dialogue_terminal_state_callback(self, dialogue: "Dialogue") -> None:
+        """Method to be called on dialogue terminal state reached."""
+        if self.is_terminal_dialogues_kept:
+            self._terminal_state_dialogues_labels.add(dialogue.dialogue_label)
+        else:
+            self.remove(dialogue.dialogue_label)
 
     def setup(self) -> None:
         """Set up dialogue storage."""
@@ -1040,6 +1094,7 @@ class BasicDialoguesStorage:
         :param dialogue: dialogue to add.
         :return: None
         """
+        dialogue.add_terminal_state_callback(self.dialogue_terminal_state_callback)
         self._dialogues_by_dialogue_label[dialogue.dialogue_label] = dialogue
         self._dialogue_by_address[
             dialogue.dialogue_label.dialogue_opponent_addr
@@ -1219,6 +1274,7 @@ class Dialogues:
         message_class: Type[Message],
         dialogue_class: Type[Dialogue],
         role_from_first_message: Callable[[Message, Address], Dialogue.Role],
+        keep_dialogues_in_terminal_state: bool = True,
     ) -> None:
         """
         Initialize dialogues.
@@ -1231,6 +1287,7 @@ class Dialogues:
         self._dialogues_storage = PersistDialoguesStorage(self)
         self._self_address = self_address
         self._dialogue_stats = DialogueStats(end_states)
+        self._keep_dialogues_in_terminal_state = keep_dialogues_in_terminal_state
 
         enforce(
             issubclass(message_class, Message),
@@ -1277,6 +1334,11 @@ class Dialogues:
             ),
         )
         self._role_from_first_message = role_from_first_message
+
+    @property
+    def is_keep_dialogues_in_terminal_state(self) -> bool:
+        """Is requrired to keep dialogues in terminal state."""
+        return self._keep_dialogues_in_terminal_state  # pragma: nocover
 
     @property
     def self_address(self) -> Address:
