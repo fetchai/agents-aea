@@ -16,18 +16,16 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Temporary error handler."""
+
+"""This module contains a scaffold of the error handler class."""
 from logging import Logger
 
+from aea.error_handler.base import AbstractErrorHandler
 from aea.mail.base import Envelope
 
 
-class ErrorHandler:
-    """Error handler class for handling problematic envelopes."""
-
-    unsupported_protocol_count = 0
-    unsupported_skill_count = 0
-    decoding_error_count = 0
+class ErrorHandler(AbstractErrorHandler):
+    """This class implements the error handler."""
 
     @classmethod
     def send_unsupported_protocol(cls, envelope: Envelope, logger: Logger) -> None:
@@ -35,12 +33,10 @@ class ErrorHandler:
         Handle the received envelope in case the protocol is not supported.
 
         :param envelope: the envelope
+        :param logger: the logger
         :return: None
         """
-        cls.unsupported_protocol_count += 1
-        logger.warning(
-            f"Unsupported protocol: {envelope.protocol_id}. You might want to add a handler for this protocol. Sender={envelope.sender}, to={envelope.sender}."
-        )
+        raise NotImplementedError
 
     @classmethod
     def send_decoding_error(cls, envelope: Envelope, logger: Logger) -> None:
@@ -50,10 +46,7 @@ class ErrorHandler:
         :param envelope: the envelope
         :return: None
         """
-        cls.decoding_error_count += 1
-        logger.warning(
-            f"Decoding error for envelope: {envelope}. Protocol_id='{envelope.protocol_id}' and message are inconsistent. Sender={envelope.sender}, to={envelope.sender}."
-        )
+        raise NotImplementedError
 
     @classmethod
     def send_unsupported_skill(cls, envelope: Envelope, logger: Logger) -> None:
@@ -63,12 +56,4 @@ class ErrorHandler:
         :param envelope: the envelope
         :return: None
         """
-        cls.unsupported_skill_count += 1
-        if envelope.skill_id is None:
-            logger.warning(
-                f"Cannot handle envelope: no active handler registered for the protocol_id='{envelope.protocol_id}'. Sender={envelope.sender}, to={envelope.sender}."
-            )
-        else:
-            logger.warning(
-                f"Cannot handle envelope: no active handler registered for the protocol_id='{envelope.protocol_id}' and skill_id='{envelope.skill_id}'. Sender={envelope.sender}, to={envelope.sender}."
-            )
+        raise NotImplementedError
