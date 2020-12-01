@@ -18,14 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """Common utils for scripts."""
-import subprocess
+import subprocess  # nosec
 import sys
 
 
 def check_working_tree_is_dirty() -> None:
     """Check if the current Git working tree is dirty."""
     print("Checking whether the Git working tree is dirty...")
-    result = subprocess.check_output(["git", "diff", "--stat"])
+    result = subprocess.check_output(["git", "diff", "--stat"])  # nosec
     if len(result) > 0:
         print("Git working tree is dirty:")
         print(result.decode("utf-8"))

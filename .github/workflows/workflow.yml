@@ -117,6 +117,7 @@ jobs:
       - name: Check package dependencies
         run: tox -e package_dependencies_checks
       - name: Check generate protocols
+        if: github.event_name == 'pull_request' && github.head_ref == 'master'
         run: tox -e check_generate_all_protocols
       - name: Generate Documentation
         run: tox -e docs
