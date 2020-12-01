@@ -304,7 +304,10 @@ func ReadBytes(s network.Stream) ([]byte, error) {
 	}
 
 	size := binary.BigEndian.Uint32(buf)
-	logger.Debug().Msgf("expecting %d", size)
+	if size > maxMessageSizeDelegateConnection {
+		return nil, errors.New("Expected message size larger than maximum allowed")
+	}
+	//logger.Debug().Msgf("expecting %d", size)
 
 	buf = make([]byte, size)
 	_, err = io.ReadFull(rstream, buf)
@@ -328,7 +331,7 @@ func WriteBytes(s network.Stream, data []byte) error {
 		return err
 	}
 
-	logger.Debug().Msgf("writing %d", len(data))
+	//logger.Debug().Msgf("writing %d", len(data))
 	_, err = wstream.Write(data)
 	wstream.Flush()
 	return err
@@ -383,7 +386,10 @@ func ReadEnvelope(s network.Stream) (*aea.Envelope, error) {
 	}
 
 	size := binary.BigEndian.Uint32(buf)
-	logger.Debug().Msgf("received size: %d %x", size, buf)
+	if size > maxMessageSizeDelegateConnection {
+		return nil, errors.New("Expected message size larger than maximum allowed")
+	}
+	//logger.Debug().Msgf("received size: %d %x", size, buf)
 	buf = make([]byte, size)
 	_, err = io.ReadFull(rstream, buf)
 	if err != nil {
