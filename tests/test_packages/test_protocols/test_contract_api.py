@@ -199,7 +199,7 @@ def test_get_state_serialization():
 
 def test_state_serialization():
     """Test the serialization for 'state' speech-act works."""
-    state_arg = ContractApiMessage.State("some_ledger_id", b"some_body")
+    state_arg = ContractApiMessage.State("some_ledger_id", {"key": "some_body"})
     msg = ContractApiMessage(
         message_id=1,
         dialogue_reference=(str(0), ""),
@@ -414,9 +414,6 @@ def test_kwargs():
     body = {"key_1": 1, "key_2": 2}
     kwargs = ContractApiMessage.Kwargs(body)
     assert str(kwargs) == "Kwargs: body={}".format(body)
-
-    with pytest.raises(ValueError, match="body must not be None"):
-        ContractApiMessage.Kwargs(None)
 
 
 class TestDialogues:

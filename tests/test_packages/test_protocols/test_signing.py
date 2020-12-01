@@ -80,7 +80,7 @@ class TestSigningMessage:
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             terms=self.terms,
-            raw_message=RawMessage(self.ledger_id, "message"),
+            raw_message=RawMessage(self.ledger_id, b"message"),
         )
         assert tx_msg._is_consistent()
         encoded_tx_msg = tx_msg.encode()

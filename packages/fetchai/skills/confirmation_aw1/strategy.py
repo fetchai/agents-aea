@@ -228,7 +228,7 @@ class Strategy(Model):
         return terms
 
     @staticmethod
-    def get_kwargs(info: Dict[str, str]) -> Dict[str, str]:
+    def get_kwargs(info: Dict[str, str]) -> JSONLike:
         """
         Get the kwargs for the contract state call.
 
