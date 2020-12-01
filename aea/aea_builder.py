@@ -63,6 +63,7 @@ from aea.configurations.constants import (
 )
 from aea.configurations.constants import (
     DEFAULT_SKILL,
+    DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
     FETCHAI,
     PROTOCOLS,
     SIGNING_PROTOCOL,
@@ -431,7 +432,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: self
         """
-        dotted_path, class_name = decision_maker_handler_dotted_path.split("::")
+        dotted_path, class_name = decision_maker_handler_dotted_path.split(
+            DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
+        )
         module = load_module(dotted_path, file_path)
 
         try:
@@ -458,7 +461,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: self
         """
-        dotted_path, class_name = error_handler_dotted_path.split("::")
+        dotted_path, class_name = error_handler_dotted_path.split(
+            DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
+        )
         module = load_module(dotted_path, file_path)
 
         try:

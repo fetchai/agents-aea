@@ -36,7 +36,7 @@ class ErrorHandler(AbstractErrorHandler):
         :param logger: the logger
         :return: None
         """
-        raise NotImplementedError  # pragma: nocov
+        raise NotImplementedError
 
     @classmethod
     def send_decoding_error(cls, envelope: Envelope, logger: Logger) -> None:
@@ -46,7 +46,7 @@ class ErrorHandler(AbstractErrorHandler):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError  # pragma: nocov
+        raise NotImplementedError
 
     @classmethod
     def send_unsupported_skill(cls, envelope: Envelope, logger: Logger) -> None:
@@ -56,4 +56,4 @@ class ErrorHandler(AbstractErrorHandler):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError  # pragma: nocov
+        raise NotImplementedError

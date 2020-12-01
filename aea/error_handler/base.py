@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the decision maker class."""
+"""This module contains the abstract error handler class."""
 from abc import ABC, abstractmethod
 from logging import Logger
 
@@ -36,7 +36,6 @@ class AbstractErrorHandler(ABC):
         :param logger: the logger
         :return: None
         """
-        raise NotImplementedError  # pragma: nocov
 
     @classmethod
     @abstractmethod
@@ -47,7 +46,6 @@ class AbstractErrorHandler(ABC):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError  # pragma: nocov
 
     @classmethod
     @abstractmethod
@@ -58,4 +56,3 @@ class AbstractErrorHandler(ABC):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError  # pragma: nocov

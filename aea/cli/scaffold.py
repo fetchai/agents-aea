@@ -48,6 +48,7 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
+    DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
     PROTOCOL,
     SCAFFOLD_PUBLIC_ID,
     SKILL,
@@ -245,7 +246,7 @@ def _scaffold_non_package_item(
     agent_name = ctx.agent_config.agent_name
     click.echo(f"Adding {type_name} scaffold to the agent '{agent_name}'...")
     # create the file name
-    dotted_path = f".{item_type}::{class_name}"
+    dotted_path = f".{item_type}{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}{class_name}"
     try:
         # copy the item package into the agent project.
         src = Path(os.path.join(AEA_DIR, aea_dir, "scaffold.py"))

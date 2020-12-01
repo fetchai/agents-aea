@@ -45,6 +45,7 @@ from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
+from aea.error_handler.default import ErrorHandler as DefaultErrorHandler
 from aea.exceptions import AEAException, _StopRuntime
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
@@ -146,10 +147,6 @@ class AEA(Agent):
         self.runtime.set_decision_maker(decision_maker_handler)
 
         if error_handler_class is None:
-            from aea.error_handler.default import (  # isort:skip  # pylint: disable=import-outside-toplevel
-                ErrorHandler as DefaultErrorHandler,
-            )
-
             error_handler_class = DefaultErrorHandler
         self._error_handler_class = error_handler_class
         default_ledger_id = (

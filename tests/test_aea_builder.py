@@ -42,7 +42,11 @@ from aea.configurations.base import (
     ProtocolConfig,
     SkillConfig,
 )
-from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
+from aea.configurations.constants import (
+    DEFAULT_LEDGER,
+    DEFAULT_PRIVATE_KEY_FILE,
+    DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
+)
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
@@ -481,11 +485,11 @@ def test_set_from_config():
     agent_configuration = Mock()
     agent_configuration.default_connection = "test/test:0.1.0"
     agent_configuration.decision_maker_handler = {
-        "dotted_path": "aea.decision_maker.default::DecisionMakerHandler",
+        "dotted_path": f"aea.decision_maker.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}DecisionMakerHandler",
         "file_path": ROOT_DIR + "/aea/decision_maker/default.py",
     }
     agent_configuration.error_handler = {
-        "dotted_path": "aea.error_handler.default::ErrorHandler",
+        "dotted_path": f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler",
         "file_path": ROOT_DIR + "/aea/error_handler/default.py",
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log

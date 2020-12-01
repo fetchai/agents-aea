@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the decision maker class."""
+"""This module contains the default error handler class."""
 
 from logging import Logger
 
