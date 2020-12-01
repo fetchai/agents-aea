@@ -30,7 +30,7 @@ import tempfile
 import time
 from collections import namedtuple
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, List, Optional, Tuple
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple, cast
 
 import requests
 from bech32 import bech32_decode, bech32_encode, convertbits
@@ -90,7 +90,7 @@ class CosmosHelper(Helper):
             return False  # pragma: no cover
 
         try:
-            _tx = tx.get("tx", {}).get("value", {}).get("msg", [])[0]
+            _tx = cast(dict, tx.get("tx", {})).get("value", {}).get("msg", [])[0]
             recovered_amount = int(_tx.get("value").get("amount")[0].get("amount"))
             sender = _tx.get("value").get("from_address")
             recipient = _tx.get("value").get("to_address")
@@ -284,7 +284,7 @@ class CosmosCrypto(Crypto[SigningKey]):
 
         :return: formatted transaction with signature
         """
-        pushable_tx = {
+        pushable_tx: JSONLike = {
             "tx": {
                 "msg": transaction["msgs"],
                 "fee": transaction["fee"],
@@ -318,7 +318,7 @@ class CosmosCrypto(Crypto[SigningKey]):
 
         :return: formatted transaction with signature
         """
-        pushable_tx = {
+        pushable_tx: JSONLike = {
             "type": "cosmos-sdk/StdTx",
             "value": {
                 "msg": transaction["msgs"],
@@ -349,12 +349,8 @@ class CosmosCrypto(Crypto[SigningKey]):
         signed_transaction = self.sign_message(transaction_bytes)
         base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
 
-        if (
-            "msgs" in transaction
-            and len(transaction["msgs"]) == 1
-            and "type" in transaction["msgs"][0]
-            and "wasm" in transaction["msgs"][0]["type"]
-        ):
+        msgs = cast(list, transaction.get("msgs", []))
+        if len(msgs) == 1 and "type" in msgs[0] and "wasm" in msgs[0]["type"]:
             return self.format_wasm_transaction(
                 transaction, signed_transaction, base64_pbk
             )
@@ -793,7 +789,7 @@ class _CosmosApi(LedgerApi):
     def is_cosmwasm_transaction(tx_signed: JSONLike) -> bool:
         """Check whether it is a cosmwasm tx."""
         try:
-            _type = tx_signed["value"]["msg"][0]["type"]
+            _type = cast(dict, tx_signed.get("value", {})).get("msg", [])[0]["type"]
             result = _type in ["wasm/store-code", "wasm/instantiate", "wasm/execute"]
         except KeyError:  # pragma: nocover
             result = False
@@ -803,7 +799,7 @@ class _CosmosApi(LedgerApi):
     def is_transfer_transaction(tx_signed: JSONLike) -> bool:
         """Check whether it is a transfer tx."""
         try:
-            _type = tx_signed["tx"]["msg"][0]["type"]
+            _type = cast(dict, tx_signed.get("tx", {})).get("msg", [])[0]["type"]
             result = _type in ["cosmos-sdk/MsgSend"]
         except KeyError:  # pragma: nocover
             result = False

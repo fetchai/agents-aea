@@ -21,6 +21,7 @@
 
 from typing import Dict, List, Optional, Tuple, cast
 
+from aea.common import JSONLike
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
@@ -236,7 +237,7 @@ class Strategy(Model):
         counterparty = info["ethereum_address"]
         return {"address": counterparty}
 
-    def has_staked(self, state: Dict[str, str]) -> bool:
+    def has_staked(self, state: JSONLike) -> bool:
         """
         Check if the agent has staked.
 
@@ -244,5 +245,5 @@ class Strategy(Model):
         """
         if self._override_staking_check:
             return True
-        result = int(state.get("stake", "0")) > 0
+        result = int(cast(str, state.get("stake", "0"))) > 0
         return result

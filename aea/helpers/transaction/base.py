@@ -118,14 +118,6 @@ class RawMessage:
         self, ledger_id: str, body: bytes, is_deprecated_mode: bool = False,
     ):
         """Initialise an instance of RawMessage."""
-        # body is expected to be of type bytes (or str)
-        if not isinstance(body, bytes) and not isinstance(body, str):
-            raise NotImplementedError(  # pragma: nocover
-                "RawMessage encoding doesn't support body type {}: expected Union[bytes, str]".format(
-                    type(body)
-                )
-            )
-
         self._ledger_id = ledger_id
         self._body = body
         self._is_deprecated_mode = is_deprecated_mode

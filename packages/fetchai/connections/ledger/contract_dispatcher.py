@@ -177,7 +177,9 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             data: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
             if isinstance(data, bytes):
-                raise ValueError("Invalid transaction type.")
+                raise ValueError(
+                    f"Invalid state type, got={type(data)}, expected={JSONLike}."
+                )
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
@@ -207,7 +209,9 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             tx: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
             if isinstance(tx, bytes):
-                raise ValueError("Invalid transaction type.")
+                raise ValueError(
+                    f"Invalid transaction type, got={type(tx)}, expected={JSONLike}."
+                )
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
@@ -237,7 +241,9 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             tx: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
             if isinstance(tx, bytes):
-                raise ValueError("Invalid transaction type.")
+                raise ValueError(
+                    f"Invalid transaction type, got={type(tx)}, expected={JSONLike}."
+                )
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
@@ -267,7 +273,9 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             rm: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
             if isinstance(rm, dict):
-                raise ValueError("Invalid transaction type.")
+                raise ValueError(
+                    f"Invalid message type, got={type(rm)}, expected=bytes."
+                )
             return cast(
                 ContractApiMessage,
                 dialogue.reply(

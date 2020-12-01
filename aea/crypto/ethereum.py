@@ -55,8 +55,8 @@ _ABI = "abi"
 _BYTECODE = "bytecode"
 
 
-class SignedTransactionSerializer:
-    """Serializer for SignedTransaction."""
+class SignedTransactionTranslator:
+    """Translator for SignedTransaction."""
 
     @staticmethod
     def to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]:
@@ -85,35 +85,39 @@ class SignedTransactionSerializer:
         return signed_transaction
 
 
-def _process_value(value):
-    """Process value."""
-    if value is None:
-        return value
-    if isinstance(value, HexBytes):
-        return value.hex()
-    if isinstance(value, list):
-        return _simplify_list(value)
-    if isinstance(value, dict):
-        return _simplify_dict(value)  # pragma: nocover
-    if type(value) in (bool, int, float, str):
-        return value
-    raise NotImplementedError("Unknown type conversion.")  # pragma: nocover
+class AttributeDictTranslator:
+    """Translator for AttributeDict."""
 
+    @classmethod
+    def _process_value(cls, value):
+        """Process value."""
+        if value is None:
+            return value
+        if isinstance(value, HexBytes):
+            return value.hex()
+        if isinstance(value, list):
+            return cls._simplify_list(value)
+        if isinstance(value, dict):
+            return cls._simplify_dict(value)  # pragma: nocover
+        if type(value) in (bool, int, float, str):
+            return value
+        raise NotImplementedError("Unknown type conversion.")  # pragma: nocover
 
-def _simplify_list(li: list):
-    """Simplify a list with process value."""
-    return [_process_value(el) for el in li]
+    @classmethod
+    def _simplify_list(cls, li: list):
+        """Simplify a list with process value."""
+        return [cls._process_value(el) for el in li]
 
+    @classmethod
+    def _simplify_dict(cls, di: dict):
+        """Simplify a dict with process value."""
+        return {k: cls._process_value(v) for k, v in di}  # pragma: nocover
 
-def _simplify_dict(di: dict):
-    """Simplify a dict with process value."""
-    return {k: _process_value(v) for k, v in di}  # pragma: nocover
-
-
-def simplify_attr_dict(attr_dict: AttributeDict) -> JSONLike:
-    """Simplify to dict."""
-    result = {key: _process_value(value) for key, value in attr_dict.items()}
-    return result
+    @classmethod
+    def to_dict(cls, attr_dict: AttributeDict) -> JSONLike:
+        """Simplify to dict."""
+        result = {key: cls._process_value(value) for key, value in attr_dict.items()}
+        return result
 
 
 class EthereumCrypto(Crypto[Account]):
@@ -194,7 +198,7 @@ class EthereumCrypto(Crypto[Account]):
             signed_msg = signature["signature"].hex()
         return signed_msg
 
-    def sign_transaction(self, transaction: JSONLike) -> Dict[str, Union[str, int]]:
+    def sign_transaction(self, transaction: JSONLike) -> JSONLike:
         """
         Sign a transaction in bytes string form.
 
@@ -203,10 +207,10 @@ class EthereumCrypto(Crypto[Account]):
         """
         signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
         #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction # noqa: E800
-        signed_transaction_dict = SignedTransactionSerializer.to_dict(
+        signed_transaction_dict = SignedTransactionTranslator.to_dict(
             signed_transaction
         )
-        return signed_transaction_dict
+        return cast(JSONLike, signed_transaction_dict)
 
     @classmethod
     def generate_private_key(cls) -> Account:
@@ -478,7 +482,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        signed_transaction = SignedTransactionSerializer.from_dict(tx_signed)
+        signed_transaction = SignedTransactionTranslator.from_dict(tx_signed)
         hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
             signed_transaction.rawTransaction
         )
@@ -511,7 +515,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
             tx_digest
         )
-        return simplify_attr_dict(tx_receipt)
+        return AttributeDictTranslator.to_dict(tx_receipt)
 
     def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
         """
@@ -532,7 +536,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx, if found
         """
         tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
-        return simplify_attr_dict(tx)
+        return AttributeDictTranslator.to_dict(tx)
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
