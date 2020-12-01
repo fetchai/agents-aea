@@ -35,7 +35,7 @@ from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
 from web3.types import TxParams
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import enforce
 from aea.helpers.base import try_decorator
@@ -110,7 +110,7 @@ def _simplify_dict(di: dict):
     return {k: _process_value(v) for k, v in di}  # pragma: nocover
 
 
-def simplify_attr_dict(attr_dict: AttributeDict) -> dict:
+def simplify_attr_dict(attr_dict: AttributeDict) -> JSONLike:
     """Simplify to dict."""
     result = {key: _process_value(value) for key, value in attr_dict.items()}
     return result
@@ -194,7 +194,7 @@ class EthereumCrypto(Crypto[Account]):
             signed_msg = signature["signature"].hex()
         return signed_msg
 
-    def sign_transaction(self, transaction: dict) -> Dict[str, Union[str, int]]:
+    def sign_transaction(self, transaction: JSONLike) -> Dict[str, Union[str, int]]:
         """
         Sign a transaction in bytes string form.
 
@@ -228,7 +228,7 @@ class EthereumHelper(Helper):
     """Helper class usable as Mixin for EthereumApi or as standalone class."""
 
     @staticmethod
-    def is_transaction_settled(tx_receipt: dict) -> bool:
+    def is_transaction_settled(tx_receipt: JSONLike) -> bool:
         """
         Check whether a transaction is settled or not.
 
@@ -402,7 +402,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         chain_id: Optional[int] = None,
         gas_price: Optional[str] = None,
         **kwargs,
-    ) -> Optional[dict]:
+    ) -> Optional[JSONLike]:
         """
         Submit a transfer transaction to the ledger.
 
@@ -458,7 +458,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return gas_estimate
 
-    def send_signed_transaction(self, tx_signed: dict) -> Optional[str]:
+    def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
@@ -488,7 +488,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return tx_digest
 
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[dict]:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Get the transaction receipt for a transaction digest.
 
@@ -501,7 +501,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     @try_decorator(
         "Error when attempting getting tx receipt: {}", logger_method="debug"
     )
-    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[dict]:
+    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Try get the transaction receipt.
 
@@ -513,7 +513,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return simplify_attr_dict(tx_receipt)
 
-    def get_transaction(self, tx_digest: str) -> Optional[dict]:
+    def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Get the transaction for a transaction digest.
 
@@ -524,7 +524,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return tx
 
     @try_decorator("Error when attempting getting tx: {}", logger_method="debug")
-    def _try_get_transaction(self, tx_digest: str) -> Optional[dict]:
+    def _try_get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Get the transaction.
 
