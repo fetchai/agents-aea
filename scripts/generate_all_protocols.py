@@ -386,5 +386,5 @@ if __name__ == "__main__":
 
     main()
 
-    if arguments.check:
+    if arguments.check_clean:
         check_working_tree_is_dirty()
