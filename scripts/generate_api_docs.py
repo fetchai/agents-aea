@@ -58,7 +58,9 @@ IGNORE_PREFIXES = {
     Path("aea", "contracts", "scaffold"),
     Path("aea", "protocols", "scaffold"),
     Path("aea", "skills", "scaffold"),
-    Path("aea", "decision_maker", "scaffold"),
+    Path("aea", "decision_maker", "scaffold.py"),
+    Path("aea", "error_handler", "scaffold.py"),
+    Path("aea", "test_tools", "click_testing.py"),
 }
 
 
@@ -85,11 +87,7 @@ def replace_underscores(text: str) -> str:
 
 def is_relative_to(p1: Path, p2: Path) -> bool:
     """Check if a path is relative to another path."""
-    try:
-        p1.relative_to(p2)
-    except ValueError:
-        return False
-    return True
+    return str(p1).startswith(str(p2))
 
 
 def is_not_dir(p: Path) -> bool:
@@ -100,13 +98,13 @@ def is_not_dir(p: Path) -> bool:
 def should_skip(module_path: Path):
     """Return true if the file should be skipped."""
     if any(re.search(pattern, module_path.name) for pattern in IGNORE_NAMES):
-        print("skipping, it's in ignore patterns")
+        print("Skipping, it's in ignore patterns")
         return True
     if module_path.suffix != ".py":
-        print("skipping, it's not a Python module.")
+        print("Skipping, it's not a Python module.")
         return True
     if any(is_relative_to(module_path, prefix) for prefix in IGNORE_PREFIXES):
-        print(f"ignoring prefix {module_path}")
+        print(f"Ignoring prefix {module_path}")
         return True
     return False
 
@@ -114,7 +112,7 @@ def should_skip(module_path: Path):
 def _generate_apidocs_aea_modules():
     """Generate API docs for aea.* modules."""
     for module_path in filter(is_not_dir, Path(AEA_DIR).rglob("*")):
-        print(f"processing {module_path}... ", end="")
+        print(f"Processing {module_path}... ", end="")
         if should_skip(module_path):
             continue
         parents = module_path.parts[:-1]
