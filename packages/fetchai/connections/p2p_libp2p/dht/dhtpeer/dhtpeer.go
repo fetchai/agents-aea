@@ -72,7 +72,7 @@ const (
 	routingTableConnectionUpdateTimeout  = 5 * time.Second
 	newStreamTimeout                     = 5 * time.Second
 	addressRegisterTimeout               = 3 * time.Second
-	addressRegistrationDelay             = 5 * time.Millisecond
+	addressRegistrationDelay             = 5 * time.Second
 	monitoringNamespace                  = "acn"
 	metricDHTOpLatencyStore              = "dht_op_latency_store"
 	metricDHTOpLatencyLookup             = "dht_op_latency_lookup"
