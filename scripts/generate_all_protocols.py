@@ -30,7 +30,7 @@ the desired outcomes.
 
 It requires the `aea` package, `black` and `isort` tools.
 """
-
+import argparse
 import logging
 import os
 import pprint
@@ -47,6 +47,7 @@ from typing import Iterator, List, Match, Optional, Tuple, cast
 
 from aea.configurations.base import ComponentType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader, load_component_configuration
+from scripts.common import check_working_tree_is_dirty
 
 
 SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
@@ -377,4 +378,13 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser("generate_all_protocols")
+    parser.add_argument(
+        "--check-clean", action="store_true", help="Check if the working tree is clean."
+    )
+    arguments = parser.parse_args()
+
     main()
+
+    if arguments.check:
+        check_working_tree_is_dirty()

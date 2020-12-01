@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This tool generates the API docs."""
+import argparse
 import re
 import shutil
 import subprocess  # nosec
@@ -35,6 +36,7 @@ from aea.configurations.constants import (
     SIGNING_PROTOCOL,
     STATE_UPDATE_PROTOCOL,
 )
+from scripts.common import check_working_tree_is_dirty
 
 
 DOCS_DIR = Path("docs/")
@@ -194,9 +196,18 @@ def install(package: str) -> int:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser("generate_api_docs")
+    parser.add_argument(
+        "--check-clean", action="store_true", help="Check if the working tree is clean."
+    )
+    arguments = parser.parse_args()
+
     res = shutil.which("pydoc-markdown")
     if res is None:
         install("pydoc-markdown==3.3.0")
         sys.exit(1)
 
     generate_api_docs()
+
+    if arguments.check:
+        check_working_tree_is_dirty()
