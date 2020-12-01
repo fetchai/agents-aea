@@ -284,11 +284,11 @@ def test_terms_encode_decode():
 def test_init_raw_transaction():
     """Test the raw_transaction object initialization."""
     ledger_id = "some_ledger"
-    body = "body"
+    body = {"body": "value"}
     rt = RawTransaction(ledger_id, body)
     assert rt.ledger_id == ledger_id
     assert rt.body == body
-    assert str(rt) == "RawTransaction: ledger_id=some_ledger, body=body"
+    assert str(rt) == "RawTransaction: ledger_id=some_ledger, body={'body': 'value'}"
     assert rt == rt
 
 
@@ -299,7 +299,7 @@ def test_raw_transaction_encode_decode():
         raw_transaction_bytes = b""
 
     ledger_id = "some_ledger"
-    body = "body"
+    body = {"body": "value"}
     rt = RawTransaction(ledger_id, body)
     RawTransaction.encode(RawTransactionProtobufObject, rt)
     recovered_rt = RawTransaction.decode(RawTransactionProtobufObject)
@@ -353,7 +353,7 @@ def test_signed_transaction_encode_decode():
         signed_transaction_bytes = b""
 
     ledger_id = "some_ledger"
-    body = "body"
+    body = {"body": "value"}
     st = SignedTransaction(ledger_id, body)
     SignedTransaction.encode(SignedTransactionProtobufObject, st)
     recovered_st = SignedTransaction.decode(SignedTransactionProtobufObject)

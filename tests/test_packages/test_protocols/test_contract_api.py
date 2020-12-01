@@ -233,7 +233,7 @@ def test_state_serialization():
 def test_raw_transaction_serialization():
     """Test the serialization for 'raw_transaction' speech-act works."""
     raw_transaction_arg = ContractApiMessage.RawTransaction(
-        "some_ledger_id", b"some_body"
+        "some_ledger_id", {"body": "some_body"}
     )
     msg = ContractApiMessage(
         message_id=2,
