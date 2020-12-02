@@ -117,7 +117,7 @@ class AttributeDictTranslator:
             try:
                 int(value, 16)
                 return HexBytes(value)
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 return value
         if isinstance(value, list):
             return cls._process_list(value, cls._add_hexbytes)
