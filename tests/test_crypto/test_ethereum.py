@@ -27,7 +27,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from aea.crypto.ethereum import EthereumApi, EthereumCrypto, EthereumFaucetApi
+from aea.crypto.ethereum import (
+    AttributeDictTranslator,
+    EthereumApi,
+    EthereumCrypto,
+    EthereumFaucetApi,
+)
 
 from tests.conftest import (
     DEFAULT_GANACHE_CHAIN_ID,
@@ -35,6 +40,20 @@ from tests.conftest import (
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
 )
+
+
+def test_attribute_dict_translator():
+    """Test the AttributeDictTranslator."""
+    di = {
+        "1": None,
+        "2": True,
+        "3": b"some",
+        "4": 0.1,
+        "5": [1, None, True, {}],
+        "6": {"hex": "0x01"},
+    }
+    res = AttributeDictTranslator.from_dict(di)
+    assert AttributeDictTranslator.to_dict(res) == di
 
 
 def test_creation():

@@ -30,7 +30,7 @@ import tempfile
 import time
 from collections import namedtuple
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, List, Optional, Tuple, cast
+from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
 
 import requests
 from bech32 import bech32_decode, bech32_encode, convertbits
@@ -451,14 +451,14 @@ class _CosmosApi(LedgerApi):
         memo: str = "",
         chain_id: Optional[str] = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Create a CosmWasm bytecode deployment transaction.
 
         :param sender_address: the sender address of the message initiator.
         :param filename: the path to wasm bytecode file.
         :param gas: Maximum amount of gas to be used on executing command.
-        :param memo: Any string comment.
+        :param memo: any string comment.
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm contract deploy message
         """
@@ -500,7 +500,7 @@ class _CosmosApi(LedgerApi):
         label: str = "",
         memo: str = "",
         chain_id: Optional[str] = None,
-    ) -> Optional[Any]:
+    ) -> JSONLike:
         """
         Create a CosmWasm InitMsg transaction.
 
@@ -511,7 +511,7 @@ class _CosmosApi(LedgerApi):
         :param gas: Maximum amount of gas to be used on executing command.
         :param denom: the name of the denomination of the contract funds
         :param label: the label name of the contract
-        :param memo: Any string comment.
+        :param memo: any string comment.
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm InitMsg
         """
@@ -553,7 +553,7 @@ class _CosmosApi(LedgerApi):
         gas: int = 80000,
         memo: str = "",
         chain_id: Optional[str] = None,
-    ) -> Optional[JSONLike]:
+    ) -> JSONLike:
         """
         Create a CosmWasm HandleMsg transaction.
 
@@ -561,7 +561,7 @@ class _CosmosApi(LedgerApi):
         :param contract_address: the address of the smart contract.
         :param handle_msg: HandleMsg in JSON format.
         :param gas: Maximum amount of gas to be used on executing command.
-        :param memo: Any string comment.
+        :param memo: any string comment.
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm HandleMsg
         """
@@ -597,7 +597,7 @@ class _CosmosApi(LedgerApi):
         logger_method=_default_logger.warning,
     )
     def try_execute_wasm_transaction(
-        tx_signed: Any, signed_tx_filename: str = "tx.signed"
+        tx_signed: JSONLike, signed_tx_filename: str = "tx.signed"
     ) -> Optional[str]:
         """
         Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
@@ -628,7 +628,7 @@ class _CosmosApi(LedgerApi):
         logger_method=_default_logger.warning,
     )
     def try_execute_wasm_query(
-        contract_address: Address, query_msg: Any
+        contract_address: Address, query_msg: JSONLike
     ) -> Optional[str]:
         """
         Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
@@ -714,8 +714,8 @@ class _CosmosApi(LedgerApi):
         gas: int,
         memo: str,
         sequence: int,
-        msg: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        msg: Dict[str, Collection[str]],
+    ) -> JSONLike:
         """
         Get a transaction.
 
@@ -729,7 +729,7 @@ class _CosmosApi(LedgerApi):
         :param sequence: the sequence.
         :return: the transaction
         """
-        tx = {
+        tx: JSONLike = {
             "account_number": str(account_number),
             "chain_id": chain_id,
             "fee": {
@@ -915,6 +915,17 @@ class _CosmosApi(LedgerApi):
         res = self._execute_shell_command(command)
 
         return res[-1]["address"]
+
+    def update_with_gas_estimate(self, transaction: JSONLike) -> JSONLike:
+        """
+        Attempts to update the transaction with a gas estimate
+
+        :param transaction: the transaction
+        :return: the updated transaction
+        """
+        raise NotImplementedError(  # pragma: nocover
+            "No gas estimation has been implemented."
+        )
 
 
 class CosmosApi(_CosmosApi, CosmosHelper):

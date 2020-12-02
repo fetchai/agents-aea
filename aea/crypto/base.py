@@ -345,6 +345,15 @@ class LedgerApi(Helper, ABC):
         :returns tx: the transaction dictionary.
         """
 
+    @abstractmethod
+    def update_with_gas_estimate(self, transaction: JSONLike) -> JSONLike:
+        """
+        Attempts to update the transaction with a gas estimate
+
+        :param transaction: the transaction
+        :return: the updated transaction
+        """
+
 
 class FaucetApi(ABC):
     """Interface for testnet faucet APIs."""
