@@ -158,6 +158,16 @@ To update the SOEF config, run in each AEA project:
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```
 
+## Run Ganache
+
+Run the following command
+```
+docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account='PRIVATE_KEY_DEPLOYER,1000000000000000000000'
+--account='PRIVATE_KEY_CLIENT,1000000000000000000000'
+```
+where you replace `PRIVATE_KEY_DEPLOYER` and `PRIVATE_KEY_CLIENT` with the respective private keys.
+
+
 ## Run the AEAs
 
 First, run the deployer AEA.

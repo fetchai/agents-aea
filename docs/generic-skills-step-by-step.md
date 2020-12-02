@@ -1315,7 +1315,7 @@ The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from
 
 ### Step 6: Update the YAML files
 
-Since we made so many changes to our AEA we have to update the `skill.yaml` (at `my_generic_seller/skills/generic_seller/skill.yaml`). Make sure that your `skill.yaml` matches with the following code
+Since we made so many changes to our AEA we have to update the `skill.yaml` (at `my_generic_seller/skills/generic_seller/skill.yaml`). Make sure you update your `skill.yaml` with the following configuration:
 
 ``` yaml
 name: generic_seller
@@ -1327,12 +1327,15 @@ description: The weather station skill implements the functionality to sell weat
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmcFahpL4DZ1rsTNEK1BT3e5T8TEJJg2hP4ytkzdqKuJnZ
-  dialogues.py: QmRmoFp9xi1p1THVBYym9xEwW88KgkBHgz45LgrYbBecQw
-  handlers.py: QmT4nvKikWXfGAEdRS8Qn8w89Gbh5zPb4EDB6EwPVP2YDJ
-  strategy.py: QmP69kCtcovLD2Z7quESuNxVEyNuiZgqqbwozp6wAbvBCd
+  README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
+  __init__.py: QmTSEedzQySy2nzRCY3F66CBSX52f8s3pWHZTejX4hKC9h
+  behaviours.py: QmS9sPCv2yBnhWsmHeaCptpApMtYZipbR39TXixeGK64Ks
+  dialogues.py: QmdTW8q1xQ7ajFVsWmuV62ypoT5J2b6Hkyz52LFaWuMEtd
+  handlers.py: QmQnQhSaHPUYaJut8bMe2LHEqiZqokMSVfCthVaqrvPbdi
+  strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.10.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -1370,12 +1373,10 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
-      currency_id: FET
       data_for_sale:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127
@@ -2981,7 +2982,7 @@ The dialogues class stores dialogue with each AEA and other AEA components so we
 
 Since we made so many changes to our AEA we have to update the `skill.yaml` to contain our newly created scripts and the details that will be used from the strategy.
 
-First, we update the `skill.yaml`. Make sure that your `skill.yaml` matches with the following code:
+First, we update the `skill.yaml`. Make sure you update your `skill.yaml` with the following configuration:
 
 ``` yaml
 name: generic_buyer
@@ -2992,12 +2993,15 @@ description: The weather client skill implements the skill to purchase weather d
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmUBQvZkoCcik71vqRZGP4JJBgFP2kj8o7C24dfkAphitP
-  dialogues.py: Qmf3McwyT5wMv3BzoN1L3ssqZzEq19LShEjQueiKqvADcX
-  handlers.py: QmQVmi3GnuYJ5VM4trYjUeJyFHVfrUeMGDsRmtNCuntKA8
-  strategy.py: QmQHQsjAsPiox5zMtMHhdhhhHt4rKq3cs3bqnwjgGSFp6n
+  README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
+  __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
+  behaviours.py: QmNwvSjEz4kzM3gWtnKbZVFJc2Z85Nb748CWAK4C4Sa4nT
+  dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU
+  handlers.py: QmZfudXXbdiREiViuwPZDXoQQyXT2ySQHdF7psQsohZXQy
+  strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.10.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -3011,6 +3015,11 @@ behaviours:
     args:
       search_interval: 5
     class_name: GenericSearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: GenericTransactionBehaviour
 handlers:
   fipa:
     args: {}
@@ -3042,21 +3051,21 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
-      currency_id: FET
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: seller_service
         search_value: generic_service
       search_radius: 5.0
       service_id: generic_service
+      stop_searching_on_result: true
     class_name: GenericStrategy
 dependencies: {}
 ```
