@@ -820,7 +820,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 {
                     "terms": cls.terms,
                     "raw_transaction": SigningMessage.RawTransaction(
-                        "some_ledger_id", "some_body"
+                        "some_ledger_id", {"some_key": "some_value"}
                     ),
                 },
             ),
@@ -882,7 +882,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             dialogue=signing_dialogue,
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
             signed_transaction=SigningMessage.SignedTransaction(
-                "some_ledger_id", "some_body"
+                "some_ledger_id", {"some_key": "some_value"}
             ),
         )
 
@@ -925,7 +925,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_TRANSACTION,
                 signed_transaction=SigningMessage.SignedTransaction(
-                    "some_ledger_id", "some_body"
+                    "some_ledger_id", {"some_key": "some_value"}
                 ),
             ),
         )
@@ -1022,7 +1022,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             performative=invalid_performative,
             terms=self.terms,
             raw_transaction=SigningMessage.RawTransaction(
-                "some_ledger_id", "some_body"
+                "some_ledger_id", {"some_key": "some_value"}
             ),
             to=str(self.skill.skill_context.skill_id),
         )
@@ -1091,11 +1091,17 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 {"info": {"transaction_digest": "some_transaction_digest_body"}},
             ),
         )
-        cls.raw_transaction = RawTransaction("some_ledger_id", "some_body")
-        cls.signed_transaction = SignedTransaction("some_ledger_id", "some_body")
+        cls.raw_transaction = RawTransaction(
+            "some_ledger_id", {"some_key": "some_value"}
+        )
+        cls.signed_transaction = SignedTransaction(
+            "some_ledger_id", {"some_key": "some_value"}
+        )
         cls.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
         cls.transaction_receipt = TransactionReceipt(
-            "some_ledger_id", "receipt", "transaction"
+            "some_ledger_id",
+            {"receipt_key": "receipt_value"},
+            {"transaction_key": "transaction_value"},
         )
         cls.list_of_ledger_api_messages = (
             DialogueMessage(

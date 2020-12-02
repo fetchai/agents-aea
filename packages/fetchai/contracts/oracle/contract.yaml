@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
-  contract.py: QmWEkUCqykR4hVjR79oCdsXxAViYJ2vQ2uJ2j7d3GiUCtG
+  contract.py: QmRrferYHBbWFYNzULZWyAZhratV6RhSc7qbb62T7foB52
   contracts/FetchOracle.sol: QmadnUCtsVobBGMxiWAkqMptC9acSMBGj5x4Z4V2UhnFx8
 fingerprint_ignore_patterns:
 - build/*

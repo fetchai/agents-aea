@@ -25,12 +25,35 @@ import time
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import eth_account
 import pytest
 
-from aea.crypto.ethereum import EthereumApi, EthereumCrypto, EthereumFaucetApi
+from aea.crypto.ethereum import (
+    AttributeDictTranslator,
+    EthereumApi,
+    EthereumCrypto,
+    EthereumFaucetApi,
+)
 
-from tests.conftest import ETHEREUM_PRIVATE_KEY_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
+from tests.conftest import (
+    DEFAULT_GANACHE_CHAIN_ID,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    MAX_FLAKY_RERUNS,
+    ROOT_DIR,
+)
+
+
+def test_attribute_dict_translator():
+    """Test the AttributeDictTranslator."""
+    di = {
+        "1": None,
+        "2": True,
+        "3": b"some",
+        "4": 0.1,
+        "5": [1, None, True, {}],
+        "6": {"hex": "0x01"},
+    }
+    res = AttributeDictTranslator.from_dict(di)
+    assert AttributeDictTranslator.to_dict(res) == di
 
 
 def test_creation():
@@ -146,7 +169,7 @@ def test_get_state(ethereum_testnet_config, ganache):
     args = ("latest",)
     block = ethereum_api.get_state(callable_name, *args)
     assert block is not None, "response to getBlock is empty."
-    assert "number" in dict(block), "response to getBlock() does not contain 'number'"
+    assert "number" in block, "response to getBlock() does not contain 'number'"
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -168,7 +191,7 @@ def test_construct_sign_and_submit_transfer_transaction(
         amount=amount,
         tx_fee=30000,
         tx_nonce=tx_nonce,
-        chain_id=3,
+        chain_id=DEFAULT_GANACHE_CHAIN_ID,
     )
     assert (
         isinstance(transfer_transaction, dict) and len(transfer_transaction) == 7
@@ -176,8 +199,7 @@ def test_construct_sign_and_submit_transfer_transaction(
 
     signed_transaction = account.sign_transaction(transfer_transaction)
     assert (
-        isinstance(signed_transaction, eth_account.datastructures.SignedTransaction)
-        and len(signed_transaction) == 5
+        isinstance(signed_transaction, dict) and len(signed_transaction) == 5
     ), "Incorrect signed_transaction constructed."
 
     transaction_digest = ethereum_api.send_signed_transaction(signed_transaction)

@@ -24,6 +24,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
+from aea.common import JSONLike
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ContractConfig, PublicId
 from aea.configurations.constants import CONTRACTS
@@ -129,7 +130,7 @@ class Contract(Component):
     @classmethod
     def get_deploy_transaction(
         cls, ledger_api: LedgerApi, deployer_address: str, **kwargs
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
 
@@ -150,7 +151,7 @@ class Contract(Component):
     @classmethod
     def get_raw_transaction(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
 
@@ -166,7 +167,7 @@ class Contract(Component):
     @classmethod
     def get_raw_message(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+    ) -> bytes:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
 
@@ -182,7 +183,7 @@ class Contract(Component):
     @classmethod
     def get_state(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Handler method for the 'GET_STATE' requests.
 

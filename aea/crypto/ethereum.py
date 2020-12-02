@@ -24,17 +24,17 @@ import logging
 import time
 import warnings
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Tuple, Union, cast
+from typing import Any, BinaryIO, Callable, Dict, Optional, Tuple, Union, cast
 
 import requests
 from eth_account import Account
-from eth_account.datastructures import SignedTransaction
+from eth_account.datastructures import HexBytes, SignedTransaction
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 from web3 import HTTPProvider, Web3
-from web3.types import TxParams
+from web3.datastructures import AttributeDict
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import enforce
 from aea.helpers.base import try_decorator
@@ -51,6 +51,116 @@ DEFAULT_GAS_PRICE = "50"
 DEFAULT_CURRENCY_DENOM = "wei"
 _ABI = "abi"
 _BYTECODE = "bytecode"
+
+
+class SignedTransactionTranslator:
+    """Translator for SignedTransaction."""
+
+    @staticmethod
+    def to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]:
+        """Write SignedTransaction to dict."""
+        signed_transaction_dict = {
+            "raw_transaction": signed_transaction.rawTransaction.hex(),
+            "hash": signed_transaction.hash.hex(),
+            "r": signed_transaction.r,
+            "s": signed_transaction.s,
+            "v": signed_transaction.v,
+        }
+        return signed_transaction_dict
+
+    @staticmethod
+    def from_dict(signed_transaction_dict: JSONLike) -> SignedTransaction:
+        """Get SignedTransaction from dict."""
+        if (
+            not isinstance(signed_transaction_dict, dict)
+            and len(signed_transaction_dict) == 5
+        ):
+            raise ValueError(  # pragma: nocover
+                f"Invalid for conversion. Found object: {signed_transaction_dict}."
+            )
+        signed_transaction = SignedTransaction(
+            rawTransaction=HexBytes(signed_transaction_dict["raw_transaction"]),
+            hash=HexBytes(signed_transaction_dict["hash"]),
+            r=signed_transaction_dict["r"],
+            s=signed_transaction_dict["s"],
+            v=signed_transaction_dict["v"],
+        )
+        return signed_transaction
+
+
+class AttributeDictTranslator:
+    """Translator for AttributeDict."""
+
+    @classmethod
+    def _remove_hexbytes(cls, value):
+        """Process value to remove hexbytes."""
+        if value is None:
+            return value
+        if isinstance(value, HexBytes):
+            return value.hex()
+        if isinstance(value, list):
+            return cls._process_list(value, cls._remove_hexbytes)
+        if type(value) in (bool, int, float, str, bytes):
+            return value
+        if isinstance(value, AttributeDict):
+            return cls.to_dict(value)
+        raise NotImplementedError(  # pragma: nocover
+            f"Unknown type conversion. Found type: {type(value)}"
+        )
+
+    @classmethod
+    def _add_hexbytes(cls, value):
+        """Process value to add hexbytes."""
+        if value is None:
+            return value
+        if isinstance(value, str):
+            try:
+                int(value, 16)
+                return HexBytes(value)
+            except Exception:  # pylint: disable=broad-except
+                return value
+        if isinstance(value, list):
+            return cls._process_list(value, cls._add_hexbytes)
+        if isinstance(value, dict):
+            return cls.from_dict(value)
+        if type(value) in (bool, int, float, bytes):
+            return value
+        raise NotImplementedError(  # pragma: nocover
+            f"Unknown type conversion. Found type: {type(value)}"
+        )
+
+    @classmethod
+    def _process_list(cls, li: list, callable_name: Callable):
+        """Simplify a list with process value."""
+        return [callable_name(el) for el in li]
+
+    @classmethod
+    def _valid_key(cls, key: Any) -> str:
+        """Check validity of key."""
+        if isinstance(key, str):
+            return key
+        raise ValueError("Key must be string.")  # pragma: nocover
+
+    @classmethod
+    def to_dict(cls, attr_dict: AttributeDict) -> JSONLike:
+        """Simplify to dict."""
+        if not isinstance(attr_dict, AttributeDict):
+            raise ValueError("No AttributeDict provided.")  # pragma: nocover
+        result = {
+            cls._valid_key(key): cls._remove_hexbytes(value)
+            for key, value in attr_dict.items()
+        }
+        return result
+
+    @classmethod
+    def from_dict(cls, di: JSONLike) -> AttributeDict:
+        """Get back attribute dict."""
+        if not isinstance(di, dict):
+            raise ValueError("No dict provided.")  # pragma: nocover
+        processed_dict = {
+            cls._valid_key(key): cls._add_hexbytes(value) for key, value in di.items()
+        }
+        return AttributeDict(processed_dict)
 
 
 class EthereumCrypto(Crypto[Account]):
@@ -131,7 +241,7 @@ class EthereumCrypto(Crypto[Account]):
             signed_msg = signature["signature"].hex()
         return signed_msg
 
-    def sign_transaction(self, transaction: Any) -> Any:
+    def sign_transaction(self, transaction: JSONLike) -> JSONLike:
         """
         Sign a transaction in bytes string form.
 
@@ -140,7 +250,10 @@ class EthereumCrypto(Crypto[Account]):
         """
         signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
         #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction # noqa: E800
-        return signed_transaction
+        signed_transaction_dict = SignedTransactionTranslator.to_dict(
+            signed_transaction
+        )
+        return cast(JSONLike, signed_transaction_dict)
 
     @classmethod
     def generate_private_key(cls) -> Account:
@@ -162,7 +275,7 @@ class EthereumHelper(Helper):
     """Helper class usable as Mixin for EthereumApi or as standalone class."""
 
     @staticmethod
-    def is_transaction_settled(tx_receipt: Any) -> bool:
+    def is_transaction_settled(tx_receipt: JSONLike) -> bool:
         """
         Check whether a transaction is settled or not.
 
@@ -171,12 +284,12 @@ class EthereumHelper(Helper):
         """
         is_successful = False
         if tx_receipt is not None:
-            is_successful = tx_receipt.status == 1
+            is_successful = tx_receipt.get("status", 0) == 1
         return is_successful
 
     @staticmethod
     def is_transaction_valid(
-        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -310,7 +423,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Get the balance of a given account."""
         return self._api.eth.getBalance(address)  # pylint: disable=no-member
 
-    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[Any]:
+    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[JSONLike]:
         """Call a specified function on the ledger API."""
         response = self._try_get_state(callable_name, *args, **kwargs)
         return response
@@ -318,13 +431,22 @@ class EthereumApi(LedgerApi, EthereumHelper):
     @try_decorator("Unable to get state: {}", logger_method="warning")
     def _try_get_state(  # pylint: disable=unused-argument
         self, callable_name: str, *args, **kwargs
-    ) -> Optional[Any]:
+    ) -> Optional[JSONLike]:
         """Try to call a function on the ledger API."""
 
         function = getattr(self._api.eth, callable_name)
         response = function(*args, **kwargs)
 
-        return response  # pylint: disable=no-member
+        if isinstance(response, AttributeDict):
+            result = AttributeDictTranslator.to_dict(response)
+            return result
+
+        if type(response) in (int, float, bytes, str, list, dict):  # pragma: nocover
+            # missing full checks for nested objects
+            return {f"{callable_name}_result": response}
+        raise NotImplementedError(  # pragma: nocover
+            f"Response must be of types=int, float, bytes, str, list, dict. Found={type(response)}."
+        )
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -336,7 +458,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         chain_id: Optional[int] = None,
         gas_price: Optional[str] = None,
         **kwargs,
-    ) -> Optional[Any]:
+    ) -> Optional[JSONLike]:
         """
         Submit a transfer transaction to the ledger.
 
@@ -352,7 +474,6 @@ class EthereumApi(LedgerApi, EthereumHelper):
         chain_id = chain_id if chain_id is not None else self._chain_id
         gas_price = gas_price if gas_price is not None else self._gas_price
         nonce = self._try_get_transaction_count(sender_address)
-
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,
@@ -362,16 +483,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "gasPrice": self._api.toWei(gas_price, GAS_ID),
             "data": tx_nonce,
         }
-
-        gas_estimate = self._try_get_gas_estimate(transaction)
-        if gas_estimate is not None and tx_fee <= gas_estimate:  # pragma: no cover
-            _default_logger.warning(
-                "Needed to increase tx_fee to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
-                    gas_estimate
-                )
-            )
-            transaction["gas"] = gas_estimate
-
+        transaction = self.update_with_gas_estimate(transaction)
         return transaction
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
@@ -382,17 +494,33 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return nonce
 
+    def update_with_gas_estimate(self, transaction: JSONLike) -> JSONLike:
+        """
+        Attempts to update the transaction with a gas estimate
+
+        :param transaction: the transaction
+        :return: the updated transaction
+        """
+        gas_estimate = self._try_get_gas_estimate(transaction)
+        if gas_estimate is not None:
+            specified_gas = transaction["gas"]
+            if specified_gas < gas_estimate:
+                # eventually; there should be some specifiable strategy
+                _default_logger.warning(  # pragma: nocover
+                    f"Needed to increase gas to cover the gas consumption of the transaction. Estimated gas consumption is: {gas_estimate}. Specified gas was: {specified_gas}."
+                )
+            transaction["gas"] = gas_estimate
+        return transaction
+
     @try_decorator("Unable to retrieve gas estimate: {}", logger_method="warning")
-    def _try_get_gas_estimate(
-        self, transaction: Dict[str, Union[str, int, None]]
-    ) -> Optional[int]:
+    def _try_get_gas_estimate(self, transaction: JSONLike) -> Optional[int]:
         """Try get the gas estimate."""
         gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
-            transaction=transaction
+            transaction=AttributeDictTranslator.from_dict(transaction)
         )
         return gas_estimate
 
-    def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+    def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
@@ -403,16 +531,16 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return tx_digest
 
     @try_decorator("Unable to send transaction: {}", logger_method="warning")
-    def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+    def _try_send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
         """
         Try send a signed transaction.
 
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        tx_signed = cast(SignedTransaction, tx_signed)
+        signed_transaction = SignedTransactionTranslator.from_dict(tx_signed)
         hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
-            tx_signed.rawTransaction
+            signed_transaction.rawTransaction
         )
         tx_digest = hex_value.hex()
         _default_logger.debug(
@@ -420,7 +548,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return tx_digest
 
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Get the transaction receipt for a transaction digest.
 
@@ -433,7 +561,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     @try_decorator(
         "Error when attempting getting tx receipt: {}", logger_method="debug"
     )
-    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Try get the transaction receipt.
 
@@ -443,9 +571,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
             tx_digest
         )
-        return tx_receipt
+        return AttributeDictTranslator.to_dict(tx_receipt)
 
-    def get_transaction(self, tx_digest: str) -> Optional[Any]:
+    def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Get the transaction for a transaction digest.
 
@@ -456,7 +584,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return tx
 
     @try_decorator("Error when attempting getting tx: {}", logger_method="debug")
-    def _try_get_transaction(self, tx_digest: str) -> Optional[Any]:
+    def _try_get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Get the transaction.
 
@@ -464,7 +592,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx, if found
         """
         tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
-        return tx
+        return AttributeDictTranslator.to_dict(tx)
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
@@ -496,7 +624,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         value: int = 0,
         gas: int = 0,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to deploy the smart contract.
 
@@ -519,24 +647,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "nonce": nonce,
             "data": data,
         }
-        tx = self.try_estimate_gas(tx)
-        return tx
-
-    def try_estimate_gas(self, tx: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Attempts to update the transaction with a gas estimate.
-
-        :param tx: the transaction
-        :return: the transaction (potentially updated)
-        """
-        try:
-            # try estimate the gas and update the transaction dict
-            _tx = cast(TxParams, tx)
-            gas_estimate = self.api.eth.estimateGas(transaction=_tx)
-            _default_logger.debug("gas estimate: {}".format(gas_estimate))
-            tx["gas"] = gas_estimate
-        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
-            _default_logger.debug("Error when trying to estimate gas: {}".format(e))
+        tx = self.update_with_gas_estimate(tx)
         return tx
 
     @classmethod
