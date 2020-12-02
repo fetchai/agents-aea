@@ -1786,6 +1786,17 @@ class TestPersistDialoguesStorage:
         self.dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
         )
+        msg, dialogue = self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello2"
+        )
+        dialogue.reply(
+            target_message=msg,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+        assert dialogues_storage._terminal_state_dialogues_labels
         assert dialogues_storage._dialogues_by_dialogue_label
         assert dialogues_storage._dialogue_by_address
         assert dialogues_storage._incomplete_to_complete_dialogue_labels
@@ -1806,6 +1817,10 @@ class TestPersistDialoguesStorage:
         assert (
             dialogues_storage._incomplete_to_complete_dialogue_labels
             == dialogues_storage_restored._incomplete_to_complete_dialogue_labels
+        )
+        assert (
+            dialogues_storage._terminal_state_dialogues_labels
+            == dialogues_storage_restored._terminal_state_dialogues_labels
         )
 
 
