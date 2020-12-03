@@ -23,10 +23,10 @@ protocols:
 - fetchai/signing:0.7.0
 skills: []
 behaviours:
-  fetch_oracle_client:
+  simple_oracle_client_behaviour:
     args:
       query_interval: 15
-    class_name: FetchOracleClient
+    class_name: SimpleOracleClientBehaviour
 handlers:
   contract_api:
     args: {}

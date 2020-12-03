@@ -40,7 +40,7 @@ DEFAULT_UPDATE_INTERVAL = 5
 EXPIRATION_BLOCK = 1000000000000000
 
 
-class FetchOracleDeployer(TickerBehaviour):
+class FetchOracle(TickerBehaviour):
     """This class implements a behaviour that deploys a Fetch oracle contract."""
 
     def __init__(self, **kwargs):

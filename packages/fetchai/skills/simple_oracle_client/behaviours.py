@@ -44,7 +44,7 @@ from packages.fetchai.skills.simple_oracle_client.strategy import Strategy
 DEFAULT_QUERY_INTERVAL = 5
 
 
-class FetchOracleClient(TickerBehaviour):
+class SimpleOracleClientBehaviour(TickerBehaviour):
     """This class implements a behaviour that deploys a Fetch oracle client contract."""
 
     def __init__(self, **kwargs):

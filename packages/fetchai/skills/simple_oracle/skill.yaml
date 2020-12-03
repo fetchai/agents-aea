@@ -21,10 +21,10 @@ protocols:
 - fetchai/signing:0.7.0
 skills: []
 behaviours:
-  fetch_oracle:
+  simple_oracle_behaviour:
     args:
       update_interval: 15
-    class_name: FetchOracleDeployer
+    class_name: SimpleOracleBehaviour
 handlers:
   contract_api:
     args: {}
