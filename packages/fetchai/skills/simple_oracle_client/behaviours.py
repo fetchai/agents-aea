@@ -19,14 +19,18 @@
 
 """This package contains a simple Fetch oracle client behaviour."""
 
-from typing import Any, Dict, cast
+from typing import cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
-from packages.fetchai.contracts.oracle_client.contract import PUBLIC_ID as CLIENT_CONTRACT_PUBLIC_ID
-from packages.fetchai.contracts.fet_erc20.contract import PUBLIC_ID as FET_ERC20_PUBLIC_ID
+from packages.fetchai.contracts.fet_erc20.contract import (
+    PUBLIC_ID as FET_ERC20_PUBLIC_ID,
+)
+from packages.fetchai.contracts.oracle_client.contract import (
+    PUBLIC_ID as CLIENT_CONTRACT_PUBLIC_ID,
+)
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.skills.simple_oracle_client.dialogues import (
@@ -37,16 +41,16 @@ from packages.fetchai.skills.simple_oracle_client.dialogues import (
 from packages.fetchai.skills.simple_oracle_client.strategy import Strategy
 
 
-DEFAULT_UPDATE_INTERVAL = 5
+DEFAULT_QUERY_INTERVAL = 5
 
 
 class FetchOracleClient(TickerBehaviour):
-    """This class implements a behaviour that deploys a Fetch oracle contract."""
+    """This class implements a behaviour that deploys a Fetch oracle client contract."""
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
         query_interval = kwargs.pop(
-            "query_interval", DEFAULT_UPDATE_INTERVAL
+            "query_interval", DEFAULT_QUERY_INTERVAL
         )  # type: int
         super().__init__(tick_interval=query_interval, **kwargs)
 
@@ -57,14 +61,15 @@ class FetchOracleClient(TickerBehaviour):
         :return: None
         """
 
-        self.context.logger.info("Setting up Fetch oracle contract...")
+        self.context.logger.info("Setting up Fetch oracle client contract...")
         strategy = cast(Strategy, self.context.strategy)
 
         if not strategy.is_client_contract_deployed:
             self._request_contract_deploy_transaction()
         else:
-            self.context.logger.info("Fetch oracle client contract address already added")
-
+            self.context.logger.info(
+                "Fetch oracle client contract address already added"
+            )
 
     def act(self) -> None:
         """
@@ -79,7 +84,9 @@ class FetchOracleClient(TickerBehaviour):
             self.context.logger.info("Oracle client contract not yet deployed")
             return
         if not strategy.is_oracle_transaction_approved:
-            self.context.logger.info("Oracle client contract not yet approved to spend tokens")
+            self.context.logger.info(
+                "Oracle client contract not yet approved to spend tokens"
+            )
             self._request_approve_transaction()
             return
 
@@ -145,7 +152,7 @@ class FetchOracleClient(TickerBehaviour):
                     "from_address": self.context.agent_address,
                     "spender": strategy.client_contract_address,
                     "amount": strategy.approve_amount,
-                    "gas": strategy.default_gas_query,
+                    "gas": strategy.default_gas_approve,
                 }
             ),
         )

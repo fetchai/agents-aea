@@ -8,10 +8,10 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: Qmes1Qfp7HzkqRasYLCqoMYi5wrhPHvnCtoFeLSpqAeUGH
-  behaviours.py: QmbbXAdnxXFiodYtG5DyyuBgxuXQMED9YJY4D2cGKaA5aD
+  behaviours.py: Qmdj6C1GvQYNEz3WUauwzk8veAE5Ej4owVnsANU91h24fH
   dialogues.py: QmZjvjbQk2m4mB2ExDGgM5kGzMi58zk3QvWxmSzRL56i9o
-  handlers.py: QmbTowJQSEFAApPgDntpodth3VugiyQKaJQwoRHdz3VfBr
-  strategy.py: QmWmn5kcdE3h1P52zTKV4hzFCcj3EJ2B5D6yMwLnGVXSmV
+  handlers.py: QmWi3ef7Joi4yzTUZY9x1unAy8LbmQmpZVBGUCSxpy9ipJ
+  strategy.py: QmVeeiJye8skheC1vv3WKjNrHTkM4HtKA56RQU6eHrTw7E
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/fet_erc20:0.1.0
@@ -23,7 +23,7 @@ protocols:
 - fetchai/signing:0.7.0
 skills: []
 behaviours:
-  oracleer:
+  fetch_oracle_client:
     args:
       query_interval: 15
     class_name: FetchOracleClient
@@ -51,8 +51,9 @@ models:
     args:
       approve_amount: 1000000000000000000
       client_contract_address: null
-      default_gas_deploy: 1000000
-      default_gas_query: 1000000
+      default_gas_approve: 200000
+      default_gas_deploy: 10000000
+      default_gas_query: 250000
       erc20_address: null
       ledger_id: ethereum
       oracle_contract_address: null

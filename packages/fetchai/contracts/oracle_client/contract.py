@@ -22,8 +22,6 @@
 import logging
 from typing import Any, Dict
 
-from vyper.utils import keccak256
-
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
@@ -33,7 +31,9 @@ from aea.crypto.ethereum import EthereumApi
 
 PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.1.0")
 
-_default_logger = logging.getLogger("aea.packages.fetchai.contracts.oracle_client.contract")
+_default_logger = logging.getLogger(
+    "aea.packages.fetchai.contracts.oracle_client.contract"
+)
 
 
 class FetchOracleClientContract(Contract):
@@ -90,7 +90,9 @@ class FetchOracleClientContract(Contract):
             tx["gas"] = gas_estimate
         except Exception as e:  # pylint: disable=broad-except
             _default_logger.debug(
-                "[OracleClientContract]: Error when trying to estimate gas: {}".format(e)
+                "[OracleClientContract]: Error when trying to estimate gas: {}".format(
+                    e
+                )
             )
 
         return tx

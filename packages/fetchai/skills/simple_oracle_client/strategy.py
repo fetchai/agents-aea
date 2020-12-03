@@ -41,6 +41,7 @@ class Strategy(Model):
         self._query_function = kwargs.pop("query_function", None)
         self._default_gas_deploy = kwargs.pop("default_gas_deploy", 0)
         self._default_gas_query = kwargs.pop("default_gas_query", 0)
+        self._default_gas_approve = kwargs.pop("default_gas_approve", 0)
         self._approve_amount = kwargs.pop("approve_amount", 0)
 
         super().__init__(**kwargs)
@@ -71,6 +72,11 @@ class Strategy(Model):
         return self._default_gas_query
 
     @property
+    def default_gas_approve(self) -> str:
+        """Get the default gas for querying oracle value."""
+        return self._default_gas_query
+
+    @property
     def approve_amount(self) -> str:
         """Get the amount of tokens to approve for spending by the client contract."""
         return self._approve_amount
@@ -85,7 +91,10 @@ class Strategy(Model):
     @oracle_contract_address.setter
     def oracle_contract_address(self, oracle_contract_address: str) -> None:
         """Set the oracle contract address."""
-        enforce(self._oracle_contract_address is None, "Oracle contract address already set!")
+        enforce(
+            self._oracle_contract_address is None,
+            "Oracle contract address already set!",
+        )
         self._oracle_contract_address = oracle_contract_address
 
     @property
@@ -98,7 +107,10 @@ class Strategy(Model):
     @client_contract_address.setter
     def client_contract_address(self, client_contract_address: str) -> None:
         """Set the oracle client contract address."""
-        enforce(self._client_contract_address is None, "Oracle client contract address already set!")
+        enforce(
+            self._client_contract_address is None,
+            "Oracle client contract address already set!",
+        )
         self._client_contract_address = client_contract_address
 
     @property
@@ -134,7 +146,9 @@ class Strategy(Model):
         return self._is_oracle_transaction_approved
 
     @is_oracle_transaction_approved.setter
-    def is_oracle_transaction_approved(self, is_oracle_transaction_approved: bool) -> None:
+    def is_oracle_transaction_approved(
+        self, is_oracle_transaction_approved: bool
+    ) -> None:
         """Set oracle transaction approval status."""
         enforce(
             not self._is_oracle_transaction_approved and is_oracle_transaction_approved,
@@ -155,7 +169,6 @@ class Strategy(Model):
             "Only allowed to switch to true.",
         )
         self._is_client_contract_deployed = is_client_contract_deployed
-
 
     def get_deploy_terms(self) -> Terms:
         """

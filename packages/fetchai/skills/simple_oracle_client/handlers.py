@@ -175,14 +175,19 @@ class LedgerApiHandler(Handler):
 
             transaction_label = contract_api_dialogue.terms.kwargs.get("label", "None")
 
-            if not strategy.is_client_contract_deployed and transaction_label == "deploy":
+            if (
+                not strategy.is_client_contract_deployed
+                and transaction_label == "deploy"
+            ):
                 client_contract_address = ledger_api_msg.transaction_receipt.receipt.get(
                     "contractAddress", None
                 )
                 strategy.client_contract_address = client_contract_address
                 strategy.is_client_contract_deployed = is_transaction_successful
                 strategy.is_behaviour_active = is_transaction_successful
-                self.context.logger.info("Oracle client contract successfully deployed!")
+                self.context.logger.info(
+                    "Oracle client contract successfully deployed!"
+                )
             elif (
                 not strategy.is_oracle_transaction_approved
                 and transaction_label == "approve"
@@ -191,7 +196,9 @@ class LedgerApiHandler(Handler):
                 if is_transaction_successful:
                     self.context.logger.info("Oracle client transactions approved!")
                 else:
-                    self.context.logger.info("Failed to approve oracle client transactions")
+                    self.context.logger.info(
+                        "Failed to approve oracle client transactions"
+                    )
             elif transaction_label == "query":
                 self.context.logger.info("Oracle value successfully requested!")
             else:
