@@ -181,7 +181,7 @@ class LedgerApiHandler(Handler):
             ):
                 client_contract_address = ledger_api_msg.transaction_receipt.receipt.get(
                     "contractAddress", None
-                )
+                ) # type: Optional[str]
                 strategy.client_contract_address = client_contract_address
                 strategy.is_client_contract_deployed = is_transaction_successful
                 strategy.is_behaviour_active = is_transaction_successful
