@@ -18,9 +18,10 @@
 # ------------------------------------------------------------------------------
 """Tests for the HTTP Client and Server connections together."""
 import asyncio
+import email
 import logging
 import urllib
-from typing import cast
+from typing import Dict, Optional, cast
 
 import pytest
 
@@ -31,7 +32,10 @@ from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
-from packages.fetchai.connections.http_server.connection import HTTPServerConnection
+from packages.fetchai.connections.http_server.connection import (
+    HTTPServerConnection,
+    headers_to_string,
+)
 from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
@@ -122,7 +126,11 @@ class TestClientServer:
         self.setup_client()
 
     def _make_request(
-        self, path: str, method: str = "get", headers: str = "", body: bytes = b""
+        self,
+        path: str,
+        method: str = "get",
+        headers: Optional[Dict] = None,
+        body: bytes = b"",
     ) -> Envelope:
         """Make request envelope."""
         request_http_message, _ = self._client_dialogues.create(
@@ -130,7 +138,7 @@ class TestClientServer:
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=f"http://{self.host}:{self.port}{path}",
-            headers="",
+            headers=headers_to_string(headers) if headers else "",
             version="",
             body=b"",
         )
@@ -206,6 +214,37 @@ class TestClientServer:
         await self.server.send(initial_response)
         response = await asyncio.wait_for(self.client.receive(), timeout=5)
 
+        assert (
+            initial_request.message.dialogue_reference[0]
+            == response.message.dialogue_reference[0]
+        )
+
+    @pytest.mark.asyncio
+    async def test_headers(self):
+        """Test client and server with url query."""
+        headers = {"key1": "value1", "key2": "value2"}
+        path = "/test"
+        initial_request = self._make_request(path, "GET", headers=headers)
+        await self.client.send(initial_request)
+
+        request = await asyncio.wait_for(self.server.receive(), timeout=5)
+        parsed_headers = dict(
+            email.message_from_string(
+                cast(HttpMessage, request.message).headers
+            ).items()
+        )
+        assert parsed_headers.items() >= headers.items()
+
+        initial_response = self._make_response(request)
+        await self.server.send(initial_response)
+
+        response = await asyncio.wait_for(self.client.receive(), timeout=5)
+        parsed_headers = dict(
+            email.message_from_string(
+                cast(HttpMessage, response.message).headers
+            ).items()
+        )
+        assert parsed_headers.items() >= headers.items()
         assert (
             initial_request.message.dialogue_reference[0]
             == response.message.dialogue_reference[0]

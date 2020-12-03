@@ -103,6 +103,10 @@ class AbstractAgent(ABC):
     def connections(self) -> List[Connection]:
         """Return list of connections."""
 
+    @abstractproperty
+    def storage_uri(self) -> Optional[str]:
+        """Return storage uri."""
+
     @abstractmethod
     def exception_handler(
         self, exception: Exception, function: Callable

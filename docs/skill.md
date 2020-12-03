@@ -278,4 +278,17 @@ All AEAs have a default `error` skill that contains error handling code for a nu
 The error skill relies on the `fetchai/default:0.9.0` protocol which provides error codes for the above.
 
 
+## Custom Error handler
+
+The framework implements a default <a href="../api/error_handler/default#errorhandler-objects">`ErrorHandler`</a>. 
+You can implement your own and mount it. The easiest way to do this is to run the following command to scaffold a custom `ErrorHandler`:
+
+``` bash
+aea scaffold error-handler
+```
+
+Now you will see a file called `error_handler.py` in the AEA project root.
+You can then implement your own custom logic to process messages. 
+
+
 <br />

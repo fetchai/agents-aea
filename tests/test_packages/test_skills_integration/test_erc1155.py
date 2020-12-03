@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
-
 from random import uniform
 
 import pytest
@@ -38,12 +37,13 @@ from tests.conftest import (
     MAX_FLAKY_RERUNS_ETH,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
+    UseGanache,
     wait_for_localhost_ports_to_close,
 )
 
 
 @pytest.mark.integration
-class TestERCSkillsEthereumLedger(AEATestCaseMany):
+class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
     """Test that erc1155 skills work."""
 
     @pytest.mark.integration

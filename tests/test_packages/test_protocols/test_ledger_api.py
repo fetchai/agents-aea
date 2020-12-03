@@ -27,6 +27,7 @@ import pytest
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
+from aea.helpers.transaction.base import State
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -83,7 +84,10 @@ def test_get_state_serialization():
     """Test the serialization for 'get_state' speech-act works."""
 
     args = ("arg1", "arg2")
-    kwargs = Kwargs({})
+    kwargs = Kwargs({"key": "value"})
+
+    assert str(kwargs) == "Kwargs: body={'key': 'value'}"
+
     msg = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_STATE,
         ledger_id="some_ledger_id",
@@ -163,7 +167,7 @@ def test_send_signed_transaction_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         signed_transaction=LedgerApiMessage.SignedTransaction(
-            "some_ledger_id", b"some_body"
+            "some_ledger_id", {"body": "some_body"}
         ),
     )
     msg.to = "receiver"
@@ -196,7 +200,7 @@ def test_get_transaction_receipt_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
         transaction_digest=LedgerApiMessage.TransactionDigest(
-            "some_ledger_id", b"some_body"
+            "some_ledger_id", "some_body"
         ),
     )
     msg.to = "receiver"
@@ -254,13 +258,51 @@ def test_balance_serialization():
     assert expected_msg == actual_msg
 
 
+def test_state_serialization():
+    """Test the serialization for 'state' speech-act works."""
+
+    ledger_id = "some_ledger_id"
+    state = State(ledger_id, {"key": "some_state"})
+
+    msg = LedgerApiMessage(
+        message_id=2,
+        target=1,
+        performative=LedgerApiMessage.Performative.STATE,
+        ledger_id=ledger_id,
+        state=state,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        protocol_id=LedgerApiMessage.protocol_id,
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = LedgerApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
 def test_raw_transaction_serialization():
     """Test the serialization for 'raw_transaction' speech-act works."""
     msg = LedgerApiMessage(
         message_id=2,
         target=1,
         performative=LedgerApiMessage.Performative.RAW_TRANSACTION,
-        raw_transaction=LedgerApiMessage.RawTransaction("some_ledger_id", b"some_body"),
+        raw_transaction=LedgerApiMessage.RawTransaction(
+            "some_ledger_id", {"body": "some_body"}
+        ),
     )
     msg.to = "receiver"
     envelope = Envelope(
@@ -292,7 +334,7 @@ def test_transaction_digest_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
         transaction_digest=LedgerApiMessage.TransactionDigest(
-            "some_ledger_id", b"some_body"
+            "some_ledger_id", "some_body"
         ),
     )
     msg.to = "receiver"
@@ -325,7 +367,7 @@ def test_transaction_receipt_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
         transaction_receipt=LedgerApiMessage.TransactionReceipt(
-            "some_ledger_id", b"some_receit", b"some_transaction"
+            "some_ledger_id", {"key": "some_receipt"}, {"key": "some_transaction"}
         ),
     )
     msg.to = "receiver"

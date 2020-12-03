@@ -73,7 +73,7 @@ class TacBehaviour(BaseTacBehaviour):
             contract_id=parameters.contract_id,
             callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(
-                {"deployer_address": self.context.agent_address}
+                {"deployer_address": self.context.agent_address, "gas": parameters.gas}
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
@@ -169,7 +169,11 @@ class TacBehaviour(BaseTacBehaviour):
             contract_address=parameters.contract_address,
             callable=ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(
-                {"deployer_address": self.context.agent_address, "token_ids": token_ids}
+                {
+                    "deployer_address": self.context.agent_address,
+                    "token_ids": token_ids,
+                    "gas": parameters.gas,
+                }
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
@@ -221,6 +225,7 @@ class TacBehaviour(BaseTacBehaviour):
                     "recipient_address": self.context.agent_address,
                     "token_ids": token_ids,
                     "mint_quantities": mint_quantities,
+                    "gas": parameters.gas,
                 }
             ),
         )

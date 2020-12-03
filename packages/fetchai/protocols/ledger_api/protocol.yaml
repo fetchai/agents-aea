@@ -8,10 +8,10 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: Qmap7EXFDfhniz8yiLZA6xrhWysqEgZPT345UuZ4ys76CQ
   __init__.py: QmX6ta6j6ust7qhVk1kZygzZK3gTTg7hSCBbSMKUxJgWgG
-  custom_types.py: Qmf4vYqwQBV9TBJMZ19DBHZKH1WaX39cZE5KMbe1aEx5t2
+  custom_types.py: QmSsjSb6NzKgqExpG26TfdEyJALFSosLYU5NcLxNVeDjWc
   dialogues.py: QmQNreriyJXkjyj1wTGHfEVqKJmo2e6r2P1k5ofPQZLG1s
   ledger_api.proto: QmTZbaYwaY57uQyYEz6B5qNrCkAJMDnokAzfWBX8BrRBEi
-  ledger_api_pb2.py: QmRf6xyiuLAGnUZMAJ8BouxAWvoLexRY4eV89pPdtvnCQY
+  ledger_api_pb2.py: QmZ3s3Y9CDRA8AGJQKLG7aadwujjpChTTgCKfw44L8U4Es
   message.py: QmQvKh12WF5aT6zX1uUrx4e7TdT2C2bn4t9wniMn7SxQKh
   serialization.py: Qmbkyy4aNmAGAM7PReTMv9HbpwDQJmHnMsf4L46gWavBTd
 fingerprint_ignore_patterns: []

@@ -64,12 +64,6 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         is_running = self.is_running(process)
         assert is_running, "AEA not running within timeout!"
 
-        # add sending and receiving envelope from input/output files
-
-        # response = requests.get("http://127.0.0.1:8000")
-        # print(response.content)
-        # assert response.status_code == 404, "Failed to receive not found"
-
         response = requests.get("http://127.0.0.1:8000/price")
         assert response.status_code == 200, "Failed to get response code 200"
         coin_price = response.content.decode("utf-8")

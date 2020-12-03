@@ -342,7 +342,7 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
             await asyncio.sleep(0.01)
             response = await ledger_apis_connection.receive()
             mock_logger.assert_any_call(
-                "Expected two or more positional arguments, got 1"
+                "Exception during contract request: Expected two or more positional arguments, got 1"
             )
             assert (
                 response.message.performative == ContractApiMessage.Performative.ERROR
@@ -395,7 +395,7 @@ async def test_callable_wrong_number_of_arguments_apis(
                 await asyncio.sleep(0.01)
                 response = await ledger_apis_connection.receive()
                 mock_logger.assert_any_call(
-                    "Expected one or more positional arguments, got 0"
+                    "Exception during contract request: Expected one or more positional arguments, got 0"
                 )
                 assert (
                     response.message.performative

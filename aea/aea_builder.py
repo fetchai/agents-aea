@@ -63,6 +63,7 @@ from aea.configurations.constants import (
 )
 from aea.configurations.constants import (
     DEFAULT_SKILL,
+    DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
     FETCHAI,
     PROTOCOLS,
     SIGNING_PROTOCOL,
@@ -76,6 +77,7 @@ from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
+from aea.error_handler.base import AbstractErrorHandler
 from aea.exceptions import AEAException, AEAValidationError
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
@@ -365,12 +367,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
+        self._error_handler_class: Optional[Type[AbstractErrorHandler]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
+        self._storage_uri: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         if self._with_default_packages:
@@ -428,7 +432,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: self
         """
-        dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
+        dotted_path, class_name = decision_maker_handler_dotted_path.split(
+            DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
+        )
         module = load_module(dotted_path, file_path)
 
         try:
@@ -437,6 +443,35 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         except Exception as e:  # pragma: nocover
             self.logger.error(
                 "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, class_name, file_path, e
+                )
+            )
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+
+        return self
+
+    def set_error_handler(
+        self, error_handler_dotted_path: str, file_path: Path
+    ) -> "AEABuilder":
+        """
+        Set error handler class.
+
+        :param error_handler_dotted_path: the dotted path to the error handler
+        :param file_path: the file path to the file which contains the error handler
+
+        :return: self
+        """
+        dotted_path, class_name = error_handler_dotted_path.split(
+            DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
+        )
+        module = load_module(dotted_path, file_path)
+
+        try:
+            _class = getattr(module, class_name)
+            self._error_handler_class = _class
+        except Exception as e:  # pragma: nocover
+            self.logger.error(
+                "Could not locate error handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
                     dotted_path, class_name, file_path, e
                 )
             )
@@ -507,6 +542,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: self
         """
         self._runtime_mode = runtime_mode
+        return self
+
+    def set_storage_uri(
+        self, storage_uri: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the storage uri.
+
+        :param storage uri:  storage uri
+        :return: self
+        """
+        self._storage_uri = storage_uri
         return self
 
     def set_search_service_address(
@@ -944,6 +991,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
             max_reactions=self._get_max_reactions(),
+            error_handler_class=self._get_error_handler_class(),
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             connection_exception_policy=self._get_connection_exception_policy(),
@@ -954,6 +1002,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             runtime_mode=self._get_runtime_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
+            storage_uri=self._get_storage_uri(),
             **deepcopy(self._context_namespace),
         )
         self._load_and_add_components(
@@ -1001,6 +1050,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             if self._max_reactions is not None
             else self.DEFAULT_MAX_REACTIONS
         )
+
+    def _get_error_handler_class(self,) -> Optional[Type]:
+        """
+        Return the error handler class.
+
+        :return: error handler class
+        """
+        return self._error_handler_class
 
     def _get_decision_maker_handler_class(
         self,
@@ -1085,6 +1142,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             if self._runtime_mode is not None
             else self.DEFAULT_RUNTIME_MODE
         )
+
+    def _get_storage_uri(self) -> Optional[str]:
+        """
+        Return the storage uri.
+
+        :return: the storage uri
+        """
+        return self._storage_uri
 
     def _get_search_service_address(self) -> str:
         """
@@ -1235,6 +1300,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
             self.set_decision_maker_handler(dotted_path, file_path)
+        if agent_configuration.error_handler != {}:
+            dotted_path = agent_configuration.error_handler["dotted_path"]
+            file_path = agent_configuration.error_handler["file_path"]
+            self.set_error_handler(dotted_path, file_path)
         if agent_configuration.skill_exception_policy is not None:
             self.set_skill_exception_policy(
                 ExceptionPolicyEnum(agent_configuration.skill_exception_policy)
@@ -1246,6 +1315,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.set_default_routing(agent_configuration.default_routing)
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
+        self.set_storage_uri(agent_configuration.storage_uri)
 
         # load private keys
         for (

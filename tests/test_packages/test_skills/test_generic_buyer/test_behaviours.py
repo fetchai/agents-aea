@@ -18,15 +18,29 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour classes of the generic buyer skill."""
 
+import logging
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
 
+from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_PUBLIC_ID
+from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
+from packages.fetchai.skills.generic_buyer.behaviours import (
+    GenericSearchBehaviour,
+    GenericTransactionBehaviour,
+    LEDGER_API_ADDRESS,
+)
+from packages.fetchai.skills.generic_buyer.dialogues import (
+    FipaDialogue,
+    FipaDialogues,
+    LedgerApiDialogue,
+    LedgerApiDialogues,
+)
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 from tests.conftest import ROOT_DIR
@@ -35,8 +49,8 @@ from tests.conftest import ROOT_DIR
 FETCHAI = "fetchai"
 
 
-class TestSkillBehaviour(BaseSkillTestCase):
-    """Test behaviours of generic buyer."""
+class TestSearchBehaviour(BaseSkillTestCase):
+    """Test Search behaviour of generic buyer."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
 
@@ -115,4 +129,260 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test_teardown(self):
         """Test the teardown method of the search behaviour."""
         assert self.search_behaviour.teardown() is None
+        self.assert_quantity_in_outbox(0)
+
+
+class TestTransactionBehaviour(BaseSkillTestCase):
+    """Test transaction behaviour of generic buyer."""
+
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+
+    @classmethod
+    def setup(cls):
+        """Setup the test class."""
+        super().setup()
+        cls.transaction_behaviour = cast(
+            GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
+        )
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.logger = cls._skill.skill_context.logger
+
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
+        )
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
+        )
+
+        cls.list_of_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
+            DialogueMessage(
+                FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
+            ),
+            DialogueMessage(FipaMessage.Performative.ACCEPT),
+            DialogueMessage(
+                FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                {"info": {"address": "some_term_sender_address"}},
+            ),
+        )
+
+    def test_setup(self):
+        """Test the setup method of the transaction behaviour."""
+        assert self.transaction_behaviour.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_act_i(self):
+        """Test the act method of the transaction behaviour where processing IS None and len(self.waiting) is NOT 0."""
+        # setup
+        processing_time = 5.0
+        max_processing = 120
+        self.transaction_behaviour.processing = None
+        self.transaction_behaviour.max_processing = max_processing
+        self.transaction_behaviour.processing_time = processing_time
+
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues, messages=self.list_of_messages,
+            ),
+        )
+        fipa_dialogue.terms = "terms"
+
+        self.transaction_behaviour.waiting = [fipa_dialogue]
+
+        # before
+        assert self.transaction_behaviour.processing_time == processing_time
+        assert self.transaction_behaviour.processing is None
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.transaction_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        # _start_processing
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Processing transaction, {len(self.transaction_behaviour.waiting)} transactions remaining",
+        )
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+            to=LEDGER_API_ADDRESS,
+            sender=self.skill.skill_context.agent_address,
+            terms=fipa_dialogue.terms,
+        )
+        assert has_attributes, error_str
+
+        ledger_api_dialogue = cast(
+            LedgerApiDialogue, self.ledger_api_dialogues.get_dialogue(message)
+        )
+        assert ledger_api_dialogue.associated_fipa_dialogue == fipa_dialogue
+
+        assert self.transaction_behaviour.processing_time == 0.0
+
+        assert self.transaction_behaviour.processing == ledger_api_dialogue
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"requesting transfer transaction from ledger api for message={message}...",
+        )
+
+    def test_act_ii(self):
+        """Test the act method of the transaction behaviour where processing is NOT None and processing_time < max_processing."""
+        # setup
+        processing_time = 5.0
+        self.transaction_behaviour.processing = "some_dialogue"
+        self.transaction_behaviour.max_processing = 120
+        self.transaction_behaviour.processing_time = processing_time
+
+        # operation
+        self.transaction_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(0)
+        assert (
+            self.transaction_behaviour.processing_time
+            == processing_time + self.transaction_behaviour.tick_interval
+        )
+
+    def test_act_iii(self):
+        """Test the act method of the transaction behaviour where processing is NOT None and processing_time > max_processing."""
+        # setup
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues, messages=self.list_of_messages,
+            ),
+        )
+        fipa_dialogue.terms = "terms"
+
+        ledger_api_dialogue = cast(
+            LedgerApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.ledger_api_dialogues,
+                messages=(
+                    DialogueMessage(
+                        LedgerApiMessage.Performative.GET_BALANCE,
+                        {"ledger_id": "some_ledger_id", "address": "some_address"},
+                    ),
+                ),
+            ),
+        )
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        processing_time = 121.0
+        self.transaction_behaviour.processing = ledger_api_dialogue
+        self.transaction_behaviour.max_processing = 120
+        self.transaction_behaviour.processing_time = processing_time
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.transaction_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        # failed_processing
+        # nothing (self.waiting.append(...) is later undone in _start_processing
+        # when the appended element is popped)
+
+        # finish_processing
+        assert self.transaction_behaviour.processing_time == 0.0
+
+        # _start_processing
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Processing transaction, {len(self.transaction_behaviour.waiting)} transactions remaining",
+        )
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+            to=LEDGER_API_ADDRESS,
+            sender=self.skill.skill_context.agent_address,
+            terms=fipa_dialogue.terms,
+        )
+        assert has_attributes, error_str
+
+        ledger_api_dialogue = cast(
+            LedgerApiDialogue, self.ledger_api_dialogues.get_dialogue(message)
+        )
+        assert ledger_api_dialogue.associated_fipa_dialogue == fipa_dialogue
+
+        assert self.transaction_behaviour.processing_time == 0.0
+
+        assert self.transaction_behaviour.processing == ledger_api_dialogue
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"requesting transfer transaction from ledger api for message={message}...",
+        )
+
+    def test_failed_processing(self):
+        """Test the failed_processing method of the transaction behaviour where self.processing == ledger_api_dialogue."""
+        # setup
+        ledger_api_dialogue_1 = cast(
+            LedgerApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.ledger_api_dialogues,
+                messages=(
+                    DialogueMessage(
+                        LedgerApiMessage.Performative.GET_BALANCE,
+                        {"ledger_id": "some_ledger_id", "address": "some_address"},
+                    ),
+                ),
+            ),
+        )
+        self.transaction_behaviour.processing_time = ledger_api_dialogue_1
+
+        ledger_api_dialogue_2 = cast(
+            LedgerApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.ledger_api_dialogues,
+                messages=(
+                    DialogueMessage(
+                        LedgerApiMessage.Performative.GET_BALANCE,
+                        {
+                            "ledger_id": "some_other_ledger_id",
+                            "address": "some_other_address",
+                        },
+                    ),
+                ),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.transaction_behaviour.finish_processing(ledger_api_dialogue_2)
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"Non-matching dialogues in transaction behaviour: {self.transaction_behaviour.processing} and {ledger_api_dialogue_2}",
+        )
+
+    def test_act_iv(self):
+        """Test the act method of the transaction behaviour where processing IS None and len(waiting) == 0."""
+        # setup
+        self.transaction_behaviour.processing = None
+        self.transaction_behaviour.waiting = []
+
+        # operation
+        self.transaction_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+    def test_teardown(self):
+        """Test the teardown method of the transaction behaviour."""
+        assert self.transaction_behaviour.teardown() is None
         self.assert_quantity_in_outbox(0)

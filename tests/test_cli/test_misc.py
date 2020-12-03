@@ -85,6 +85,7 @@ Commands:
   push              Push a non-vendor package of the agent to the registry.
   register          Create a new registry account.
   remove            Remove a package from the agent.
+  remove-key        Remove a private key from the wallet of the agent.
   reset_password    Reset the password of the registry account.
   run               Run the agent.
   scaffold          Scaffold a package for the agent.

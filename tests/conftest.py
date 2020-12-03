@@ -624,6 +624,8 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
     DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = old_config
 
 
+@pytest.mark.integration
+@pytest.mark.ledger
 @pytest.fixture(scope="session")
 @action_for_platform("Linux", skip=False)
 def ganache(
@@ -1153,3 +1155,12 @@ def random_string(length: int = 8) -> str:
 def make_uri(addr: str, port: int):
     """Make uri from address and port."""
     return f"{addr}:{port}"
+
+
+@pytest.mark.integration
+class UseGanache:
+    """Inherit from this class to use Ganache."""
+
+    @pytest.fixture(autouse=True)
+    def _start_ganache(self, ganache):
+        """Start a Ganache image."""

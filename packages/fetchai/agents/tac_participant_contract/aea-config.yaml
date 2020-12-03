@@ -55,4 +55,3 @@ models:
   strategy:
     args:
       is_contract_tx: true
-      ledger_id: ethereum

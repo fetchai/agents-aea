@@ -96,7 +96,7 @@ type: skill
 behaviours:
   search:
     args:
-      search_interval: 1800
+      search_interval: 900
 models:
   registration_db:
     args:
