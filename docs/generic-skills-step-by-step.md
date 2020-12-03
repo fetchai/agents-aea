@@ -140,7 +140,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             )
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_agent()
-        self._register_service()
+        self._register_service_personality_classification()
 
     def act(self) -> None:
         """
@@ -178,23 +178,28 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
-    def _register_service(self) -> None:
+    def _register_service_personality_classification(self) -> None:
         """
-        Register the agent's service.
+        Register the agent's service, personality and classification.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_register_service_description()
+        descriptions = [
+            strategy.get_register_service_description(),
+            strategy.get_register_personality_description(),
+            strategy.get_register_classification_description(),
+        ]
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
+        for description in descriptions:
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+                service_description=description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
 
     def _unregister_service(self) -> None:
@@ -850,6 +855,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
     SIMPLE_SERVICE_MODEL,
@@ -866,6 +872,8 @@ DEFAULT_SERVICE_ID = "generic_service"
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
+DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
 
 DEFAULT_HAS_DATA_SOURCE = False
 DEFAULT_DATA_FOR_SALE = {
@@ -898,6 +906,22 @@ class GenericStrategy(Model):
                 latitude=location["latitude"], longitude=location["longitude"]
             )
         }
+        self._set_personality_data = kwargs.pop(
+            "personality_data", DEFAULT_PERSONALITY_DATA
+        )
+        enforce(
+            len(self._set_personality_data) == 2
+            and "piece" in self._set_personality_data
+            and "value" in self._set_personality_data,
+            "personality_data must contain keys `key` and `value`",
+        )
+        self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
+        enforce(
+            len(self._set_classification) == 2
+            and "piece" in self._set_classification
+            and "value" in self._set_classification,
+            "classification must contain keys `key` and `value`",
+        )
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         enforce(
             len(self._set_service_data) == 2
@@ -975,6 +999,28 @@ The following properties and methods deal with different aspects of the strategy
         """
         description = Description(
             self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_register_personality_description(self) -> Description:
+        """
+        Get the register personality description.
+
+        :return: a description of the personality
+        """
+        description = Description(
+            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+        )
+        return description
+
+    def get_register_classification_description(self) -> Description:
+        """
+        Get the register classification description.
+
+        :return: a description of the classification
+        """
+        description = Description(
+            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -1432,8 +1478,9 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
-from typing import List, Optional, cast
+from typing import List, Optional, Set, cast
 
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -1525,6 +1572,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
         self.processing_time = 0.0
         self.waiting: List[FipaDialogue] = []
         self.processing: Optional[LedgerApiDialogue] = None
+        self.timedout: Set[DialogueLabel] = set()
         super().__init__(tick_interval=tx_interval, **kwargs)
 
     def setup(self) -> None:
@@ -1542,8 +1590,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
                 # already processing
                 self.processing_time += self.tick_interval
                 return
-            # processing timed out
-            self.failed_processing(self.processing)
+            self._timeout_processing()
         if len(self.waiting) == 0:
             # nothing to process
             return
@@ -1576,18 +1623,38 @@ class GenericTransactionBehaviour(TickerBehaviour):
         """Teardown behaviour."""
         pass
 
+    def _timeout_processing(self) -> None:
+        """
+        Timeout processing.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        if self.processing is None:
+            return
+        self.timedout.add(self.processing.dialogue_label)
+        self.waiting.append(self.processing.associated_fipa_dialogue)
+        self.processing_time = 0.0
+        self.processing = None
+
     def finish_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
         """
         Finish processing.
 
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        if self.processing != ledger_api_dialogue:
-            self.context.logger.warning(
+        if self.processing == ledger_api_dialogue:
+            self.processing_time = 0.0
+            self.processing = None
+            return
+        if ledger_api_dialogue.dialogue_label not in self.timedout:
+            raise ValueError(
                 f"Non-matching dialogues in transaction behaviour: {self.processing} and {ledger_api_dialogue}"
             )
-        self.processing_time = 0.0
-        self.processing = None
+        self.timedout.remove(ledger_api_dialogue.dialogue_label)
+        self.context.logger.debug(
+            f"Timeout dialogue in transaction processing: {ledger_api_dialogue}"
+        )
+        # don't reset, as another might be processing
 
     def failed_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
         """
@@ -2303,8 +2370,8 @@ class GenericLedgerApiHandler(Handler):
         tx_behaviour = cast(
             GenericTransactionBehaviour, self.context.behaviours.transaction
         )
-        tx_behaviour.finish_processing(ledger_api_dialogue)
         if is_settled:
+            tx_behaviour.finish_processing(ledger_api_dialogue)
             ledger_api_msg_ = cast(
                 Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
@@ -2327,6 +2394,7 @@ class GenericLedgerApiHandler(Handler):
                 )
             )
         else:
+            tx_behaviour.failed_processing(ledger_api_dialogue)
             self.context.logger.info(
                 "transaction_receipt={} not settled or not valid, aborting".format(
                     ledger_api_msg.transaction_receipt
@@ -2401,6 +2469,7 @@ DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
 DEFAULT_MIN_QUANTITY = 1
+DEFAULT_MAX_QUANTITY = 100
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
@@ -2428,6 +2497,7 @@ class GenericStrategy(Model):
 
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_UNIT_PRICE)
         self._min_quantity = kwargs.pop("min_quantity", DEFAULT_MIN_QUANTITY)
+        self._max_quantity = kwargs.pop("max_quantity", DEFAULT_MAX_QUANTITY)
         self._max_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
@@ -2564,6 +2634,7 @@ The following code block checks if the proposal that we received is acceptable b
             and proposal.values["ledger_id"] == self.ledger_id
             and proposal.values["price"] > 0
             and proposal.values["quantity"] >= self._min_quantity
+            and proposal.values["quantity"] <= self._max_quantity
             and proposal.values["price"]
             <= proposal.values["quantity"] * self._max_unit_price
             and proposal.values["currency_id"] == self._currency_id

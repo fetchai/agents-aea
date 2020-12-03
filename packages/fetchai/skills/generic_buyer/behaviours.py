@@ -21,6 +21,7 @@
 
 from typing import List, Optional, Set, cast
 
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -112,7 +113,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
         self.processing_time = 0.0
         self.waiting: List[FipaDialogue] = []
         self.processing: Optional[LedgerApiDialogue] = None
-        self.timedout: Set[LedgerApiDialogue] = set()
+        self.timedout: Set[DialogueLabel] = set()
         super().__init__(tick_interval=tx_interval, **kwargs)
 
     def setup(self) -> None:
@@ -171,7 +172,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
         """
         if self.processing is None:
             return
-        self.timedout.add(self.processing)
+        self.timedout.add(self.processing.dialogue_label)
         self.waiting.append(self.processing.associated_fipa_dialogue)
         self.processing_time = 0.0
         self.processing = None
@@ -186,11 +187,11 @@ class GenericTransactionBehaviour(TickerBehaviour):
             self.processing_time = 0.0
             self.processing = None
             return
-        if ledger_api_dialogue not in self.timedout:
+        if ledger_api_dialogue.dialogue_label not in self.timedout:
             raise ValueError(
                 f"Non-matching dialogues in transaction behaviour: {self.processing} and {ledger_api_dialogue}"
             )
-        self.timedout.remove(ledger_api_dialogue)
+        self.timedout.remove(ledger_api_dialogue.dialogue_label)
         self.context.logger.debug(
             f"Timeout dialogue in transaction processing: {ledger_api_dialogue}"
         )

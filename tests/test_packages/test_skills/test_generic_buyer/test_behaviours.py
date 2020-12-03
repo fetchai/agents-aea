@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
+import pytest
+
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -359,16 +361,16 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
+        with pytest.raises(ValueError) as ex:
             self.transaction_behaviour.finish_processing(ledger_api_dialogue_2)
+
+        assert (
+            f"Non-matching dialogues in transaction behaviour: {self.transaction_behaviour.processing} and {ledger_api_dialogue_2}"
+            in str(ex.value)
+        )
 
         # after
         self.assert_quantity_in_outbox(0)
-
-        mock_logger.assert_any_call(
-            logging.WARNING,
-            f"Non-matching dialogues in transaction behaviour: {self.transaction_behaviour.processing} and {ledger_api_dialogue_2}",
-        )
 
     def test_act_iv(self):
         """Test the act method of the transaction behaviour where processing IS None and len(waiting) == 0."""

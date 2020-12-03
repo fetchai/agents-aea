@@ -69,6 +69,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
+      max_quantity: 100
       max_tx_fee: 1
       max_unit_price: 20
       min_quantity: 1
