@@ -30,7 +30,7 @@ behaviours:
     args:
       max_processing: 420
       transaction_interval: 2
-    class_name: GenericTransactionBehaviour
+    class_name: TransactionBehaviour
 handlers:
   contract_api:
     args: {}

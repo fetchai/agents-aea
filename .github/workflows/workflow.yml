@@ -225,14 +225,18 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        sudo apt-get install -y protobuf-compiler
+        # install Protobuf compiler
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
+    # sudo apt-get install -y protobuf-compiler
     # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
     # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
     - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
       run: |
         pip install tox
-        brew install protobuf
+        brew install protobuf@3.11.4
     - if: matrix.os == 'windows-latest'
       name: Install dependencies (windows-latest)
       env:
@@ -240,7 +244,7 @@ jobs:
       run: |
         pip install tox
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-        choco install protoc
+        choco install protoc --version 3.11.4
         python scripts/update_symlinks_cross_platform.py
     - if: matrix.os == 'ubuntu-latest' || matrix.python_version != '3.9'
       name: Unit tests
@@ -324,7 +328,11 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        sudo apt-get install -y protobuf-compiler
+        # install Protobuf compiler
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
+    # sudo apt-get install -y protobuf-compiler
     - name: Run all tests
       run: tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
       continue-on-error: true
