@@ -100,6 +100,10 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+          unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
           # install IPFS
           sudo apt-get install -y wget
           wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
@@ -116,8 +120,26 @@ jobs:
         run: tox -e package_version_checks
       - name: Check package dependencies
         run: tox -e package_dependencies_checks
+      - name: Check generate protocols
+        run: tox -e check_generate_all_protocols
       - name: Generate Documentation
         run: tox -e docs
+
+  common_checks_5:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request' && github.head_ref == 'master'
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Check Docs links
+        run: tox -e check_doc_links
+      - name: Check API Docs updated
+        run: tox -e check_api_docs
+
 
   integration_checks:
     continue-on-error: True
@@ -142,7 +164,10 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        sudo apt-get install -y protobuf-compiler
+        # install Protobuf compiler
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
     - name: Sync AEA loop integration tests
       run: |
         tox -e py3.8 -- -m 'sync'  # --aea-loop sync

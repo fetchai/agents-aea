@@ -25,6 +25,7 @@ import sqlite3
 import sys
 import threading
 from concurrent.futures.thread import ThreadPoolExecutor
+from pathlib import Path
 from typing import List, Optional, Tuple
 from urllib.parse import urlparse
 
@@ -95,9 +96,10 @@ class SqliteStorageBackend(AbstractStorageBackend):
             and sys.version_info.minor < 9
         ):  # pragma: nocover
             con.enable_load_extension(True)
-            con.load_extension(
+            path_ext = Path(
                 os.path.join(os.path.dirname(__file__), "binaries", "json1.dll")
-            )
+            ).as_posix()
+            con.load_extension(path_ext)
         return con
 
     async def disconnect(self) -> None:

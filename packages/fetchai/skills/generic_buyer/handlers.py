@@ -496,7 +496,14 @@ class GenericSigningHandler(Handler):
                 signing_msg.error_code, signing_dialogue
             )
         )
-        if signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
+        signing_msg_ = cast(
+            Optional[SigningMessage], signing_dialogue.last_outgoing_message
+        )
+        if (
+            signing_msg_ is not None
+            and signing_msg_.performative
+            == SigningMessage.Performative.SIGN_TRANSACTION
+        ):
             tx_behaviour = cast(
                 GenericTransactionBehaviour, self.context.behaviours.transaction
             )

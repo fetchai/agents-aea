@@ -19,14 +19,13 @@
 """HTTP client connection and channel."""
 import asyncio
 import email
-import json
 import logging
 import ssl
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Set, Tuple, Type, Union, cast
 
 import aiohttp
 import certifi  # pylint: disable=wrong-import-order
@@ -56,6 +55,20 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_clien
 RequestId = str
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
+
+
+def headers_to_string(headers: Dict):
+    """
+    Convert headers to string.
+
+    :param headers: dict
+
+    :return: str
+    """
+    msg = email.message.Message()
+    for name, value in headers.items():
+        msg.add_header(name, value)
+    return msg.as_string()
 
 
 class HttpDialogue(BaseHttpDialogue):
@@ -380,7 +393,7 @@ class HTTPClientAsyncChannel:
             performative=HttpMessage.Performative.RESPONSE,
             target_message=http_request_message,
             status_code=status_code,
-            headers=json.dumps(dict(headers.items())),
+            headers=headers_to_string(headers),
             status_text=status_text,
             body=body,
             version="",

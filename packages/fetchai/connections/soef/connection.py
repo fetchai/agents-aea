@@ -621,7 +621,7 @@ class SOEFChannel:
                     await self._ping_command()
                 except asyncio.CancelledError:  # pylint: disable=try-except-raise
                     raise
-                except Exception:  # pylint: disable=broad-except
+                except Exception:  # pylint: disable=broad-except  # pragma: nocover
                     self.logger.exception("Error on periodic ping command!")
                 await asyncio.sleep(period)
 
@@ -978,7 +978,9 @@ class SOEFChannel:
                 response = await asyncio.shield(task)
             finally:
                 response = await task
-                if "<response><message>Goodbye!</message></response>" not in response:
+                if (
+                    "<response><message>Goodbye!</message></response>" not in response
+                ):  # pragma: nocover
                     self.logger.debug(f"No Goodbye response. Response={response}")
                 self.unique_page_address = None
 

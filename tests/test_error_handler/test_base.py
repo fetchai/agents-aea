@@ -21,7 +21,7 @@
 import logging
 from unittest.mock import Mock, patch
 
-from aea.helpers.temp_error_handler import ErrorHandler
+from aea.error_handler.default import ErrorHandler
 
 
 _default_logger = logging.getLogger(__name__)

@@ -18,3 +18,6 @@ dependencies: {}
 protocols:
 - fetchai/default:0.9.0
 ```
+```
+aea scaffold error-handler
+```

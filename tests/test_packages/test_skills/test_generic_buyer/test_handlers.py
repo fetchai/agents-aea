@@ -820,7 +820,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 {
                     "terms": cls.terms,
                     "raw_transaction": SigningMessage.RawTransaction(
-                        "some_ledger_id", "some_body"
+                        "some_ledger_id", {"some_key": "some_value"}
                     ),
                 },
             ),
@@ -882,7 +882,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             dialogue=signing_dialogue,
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
             signed_transaction=SigningMessage.SignedTransaction(
-                "some_ledger_id", "some_body"
+                "some_ledger_id", {"some_key": "some_value"}
             ),
         )
 
@@ -925,7 +925,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_TRANSACTION,
                 signed_transaction=SigningMessage.SignedTransaction(
-                    "some_ledger_id", "some_body"
+                    "some_ledger_id", {"some_key": "some_value"}
                 ),
             ),
         )
@@ -952,12 +952,36 @@ class TestGenericSigningHandler(BaseSkillTestCase):
     def test_handle_error(self):
         """Test the _handle_error method of the signing handler."""
         # setup
-        signing_counterparty = self.skill.skill_context.decision_maker_address
-        signing_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.signing_dialogues,
-            messages=self.list_of_signing_messages[:1],
-            counterparty=signing_counterparty,
+        fipa_dialogue = cast(
+            FipaDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                counterparty=COUNTERPARTY_ADDRESS,
+            ),
         )
+
+        ledger_api_dialogue = cast(
+            LedgerApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.ledger_api_dialogues,
+                messages=self.list_of_ledger_api_messages[:4],
+                counterparty=LEDGER_API_ADDRESS,
+            ),
+        )
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+
+        signing_counterparty = self.skill.skill_context.decision_maker_address
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_messages[:1],
+                counterparty=signing_counterparty,
+            ),
+        )
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+
         incoming_message = cast(
             SigningMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -977,6 +1001,17 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             f"transaction signing was not successful. Error_code={incoming_message.error_code} in dialogue={signing_dialogue}",
         )
 
+        behaviour = cast(
+            GenericTransactionBehaviour, self.skill.skill_context.behaviours.transaction
+        )
+
+        # finish_processing
+        assert behaviour.processing_time == 0.0
+        assert behaviour.processing is None
+
+        # failed_processing
+        assert fipa_dialogue in behaviour.waiting
+
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the signing handler."""
         # setup
@@ -987,7 +1022,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             performative=invalid_performative,
             terms=self.terms,
             raw_transaction=SigningMessage.RawTransaction(
-                "some_ledger_id", "some_body"
+                "some_ledger_id", {"some_key": "some_value"}
             ),
             to=str(self.skill.skill_context.skill_id),
         )
@@ -1056,11 +1091,17 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 {"info": {"transaction_digest": "some_transaction_digest_body"}},
             ),
         )
-        cls.raw_transaction = RawTransaction("some_ledger_id", "some_body")
-        cls.signed_transaction = SignedTransaction("some_ledger_id", "some_body")
+        cls.raw_transaction = RawTransaction(
+            "some_ledger_id", {"some_key": "some_value"}
+        )
+        cls.signed_transaction = SignedTransaction(
+            "some_ledger_id", {"some_key": "some_value"}
+        )
         cls.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
         cls.transaction_receipt = TransactionReceipt(
-            "some_ledger_id", "receipt", "transaction"
+            "some_ledger_id",
+            {"receipt_key": "receipt_value"},
+            {"transaction_key": "transaction_value"},
         )
         cls.list_of_ledger_api_messages = (
             DialogueMessage(
