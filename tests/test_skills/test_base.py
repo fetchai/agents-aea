@@ -22,7 +22,7 @@ from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
 from unittest import TestCase, mock
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -117,6 +117,10 @@ class TestSkillContext:
             self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
             GoalPursuitReadiness,
         )
+
+    def test_storage(self):
+        """Test the agent's storage."""
+        assert self.skill_context.storage is None
 
     def test_message_in_queue(self):
         """Test the 'message_in_queue' property."""
@@ -640,3 +644,38 @@ def test_model_dialogues_keep_terminal_dialogues_option():
         DefaultDialogues._keep_terminal_state_dialogues
         == Dialogues._keep_terminal_state_dialogues
     )
+
+
+def test_setup_teardown_methods():
+    """Test skill etup/teardown methods with proper super() calls."""
+
+    def role_from_first_message(  # pylint: disable=unused-argument
+        message: Message, receiver_address: Address
+    ) -> Dialogue.Role:
+        return None  # type: ignore
+
+    class Test(Model, Dialogues):
+        def __init__(self, name, skill_context):
+            Model.__init__(self, name, skill_context)
+            Dialogues.__init__(
+                self, "addr", MagicMock(), Message, Dialogue, role_from_first_message
+            )
+
+        def setup(self) -> None:
+            super().setup()
+
+        def teardown(self) -> None:
+            super().teardown()
+
+    skill_context = MagicMock()
+    skill_context.skill_id = PublicId("test", "test", "1.0.1")
+    t = Test(name="test", skill_context=skill_context)
+
+    with patch.object(t._dialogues_storage, "setup") as mock_setup, patch.object(
+        t._dialogues_storage, "teardown"
+    ) as mock_teardown:
+        t.setup()
+        t.teardown()
+
+    mock_setup.assert_called_once()
+    mock_teardown.assert_called_once()

@@ -1313,7 +1313,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
 class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
-    _keep_terminal_state_dialogues = True
+    _keep_terminal_state_dialogues = False
 
     def __init__(
         self,

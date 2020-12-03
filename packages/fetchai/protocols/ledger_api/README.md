@@ -19,7 +19,7 @@ speech_acts:
     ledger_id: pt:str
     address: pt:str
   get_raw_transaction:
-    terms: ct:Terms 
+    terms: ct:Terms
   send_signed_transaction:
     signed_transaction: ct:SignedTransaction
   get_transaction_receipt:
@@ -79,6 +79,7 @@ reply:
 termination: [balance, state, transaction_receipt]
 roles: {agent, ledger}
 end_states: [successful]
+keep_terminal_state_dialogues: false
 ...
 ```
 

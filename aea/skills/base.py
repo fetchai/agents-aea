@@ -183,7 +183,7 @@ class SkillContext:
     @property
     def storage(self) -> Optional[Storage]:
         """Get optional storage for agent."""
-        return self._get_agent_context().storage  # pragma: nocover
+        return self._get_agent_context().storage
 
     @property
     def message_in_queue(self) -> Queue:
@@ -313,7 +313,7 @@ class SkillComponent(ABC):
         return self.configuration.args
 
     @abstractmethod
-    def setup(self) -> None:  # pragma: nocover
+    def setup(self) -> None:
         """
         Implement the setup.
 
@@ -324,7 +324,7 @@ class SkillComponent(ABC):
             super_obj.setup()  # type: ignore  # pylint: disable=no-member
 
     @abstractmethod
-    def teardown(self) -> None:  # pragma: nocover
+    def teardown(self) -> None:
         """
         Implement the teardown.
 

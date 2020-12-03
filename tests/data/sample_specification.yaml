@@ -5,7 +5,6 @@ version: 0.1.0
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 description: 'A protocol for testing purposes.'
-keep_terminal_state_dialogues: true
 speech_acts:
   performative_ct:
     content_ct: ct:DataModel
@@ -96,4 +95,5 @@ reply:
 termination: [performative_mt, performative_o, performative_empty_contents]
 roles: {role_1, role_2}
 end_states: [end_state_1, end_state_2, end_state_3]
+keep_terminal_state_dialogues: true
 ...

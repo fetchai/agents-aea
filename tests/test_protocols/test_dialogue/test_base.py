@@ -1745,7 +1745,9 @@ class TestPersistDialoguesStorage:
         """Initialise the environment to test PersistDialogueStorage."""
         self.agent_address = "agent 1"
         self.opponent_address = "agent 2"
-        self.dialogues = Dialogues(self.agent_address)
+        self.dialogues = Dialogues(
+            self.agent_address, keep_terminal_state_dialogues=True
+        )
         self.skill_component = Mock()
         self.skill_component.name = "test_component"
         self.skill_component.skill_id = PublicId("test", "test", "0.1.0")

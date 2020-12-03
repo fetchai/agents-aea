@@ -1114,11 +1114,10 @@ class ProtocolGenerator:
         cls_str += self.indent + "{" + end_states_str + "}"
         cls_str += self.indent + ")\n\n"
 
-        if self.protocol_specification.keep_terminal_state_dialogues is not None:
-            cls_str += (
-                self.indent
-                + f"_keep_terminal_state_dialogues = {repr(self.protocol_specification.keep_terminal_state_dialogues)}\n\n"
-            )
+        cls_str += (
+            self.indent
+            + f"_keep_terminal_state_dialogues = {repr(self.spec.keep_terminal_state_dialogues)}\n\n"
+        )
 
         cls_str += self.indent + "def __init__(\n"
         self._change_indent(1)

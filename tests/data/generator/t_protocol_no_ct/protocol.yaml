@@ -7,11 +7,11 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   __init__.py: QmaaZ7Je2PRTkcnqy8oLR58yBDVpcRQ4BcaRe3sd3fug3Z
-  dialogues.py: QmPHhh9wkKDG7Fiy9E2WkkggYULFhLrySihJpoBw3mRn2o
+  dialogues.py: QmXtHWWrysdd3s25kb1ypV1WJL64bnX4j63LhMdMmX7rLv
   message.py: QmTVfQQG8fjXi28qUQgVW3aaaMeam4mJthbjNDT54Jnctc
   serialization.py: QmPX4KzaEfK9JwbbHAmmB1rZp1guJTW5PgPan7ZGAp36DH
   t_protocol_no_ct.proto: Qmc8KkKnWZ9utBxrbEyWhVDRdut87DkFvmHP3SYUg4J3EU
-  t_protocol_no_ct_pb2.py: QmYshP7yu6rTWy28DuRRVskv18XVrmvi29fuPdEHnRWHTb
+  t_protocol_no_ct_pb2.py: QmdCYBHYVZ49fdZ5CHkL72Zt5xQ9H1b3KFyTx9MvnPDnFw
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

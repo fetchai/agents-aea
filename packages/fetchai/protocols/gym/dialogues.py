@@ -99,6 +99,8 @@ class GymDialogues(Dialogues, ABC):
 
     END_STATES = frozenset({GymDialogue.EndState.SUCCESSFUL})
 
+    _keep_terminal_state_dialogues = False
+
     def __init__(
         self,
         self_address: Address,

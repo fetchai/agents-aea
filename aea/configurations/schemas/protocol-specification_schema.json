@@ -42,9 +42,6 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
-    },
-    "keep_terminal_state_dialogues": {
-      "$ref": "definitions.json#/definitions/keep_terminal_state_dialogues"
     }
   },
   "definitions": {
