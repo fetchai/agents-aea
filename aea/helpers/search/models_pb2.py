@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="aea.helpers.search.models",
     syntax="proto3",
     serialized_options=b"H\001",
-    serialized_pb=b'\n\x0cmodels.proto\x12\x19\x61\x65\x61.helpers.search.models"\xaf\x18\n\x05Query\x1a\xc0\x01\n\tAttribute\x12\x0c\n\x04name\x18\x01 \x01(\t\x12=\n\x04type\x18\x02 \x01(\x0e\x32/.aea.helpers.search.models.Query.Attribute.Type\x12\x10\n\x08required\x18\x03 \x01(\x08\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t"?\n\x04Type\x12\n\n\x06\x44OUBLE\x10\x00\x12\x07\n\x03INT\x10\x01\x12\x08\n\x04\x42OOL\x10\x02\x12\n\n\x06STRING\x10\x03\x12\x0c\n\x08LOCATION\x10\x04\x1an\n\tDataModel\x12\x0c\n\x04name\x18\x01 \x01(\t\x12>\n\nattributes\x18\x02 \x03(\x0b\x32*.aea.helpers.search.models.Query.Attribute\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x1a$\n\x08Location\x12\x0b\n\x03lon\x18\x01 \x01(\x01\x12\x0b\n\x03lat\x18\x02 \x01(\x01\x1a|\n\x05Value\x12\x0b\n\x01s\x18\x01 \x01(\tH\x00\x12\x0b\n\x01\x64\x18\x02 \x01(\x01H\x00\x12\x0b\n\x01\x62\x18\x03 \x01(\x08H\x00\x12\x0b\n\x01i\x18\x04 \x01(\x03H\x00\x12\x36\n\x01l\x18\x05 \x01(\x0b\x32).aea.helpers.search.models.Query.LocationH\x00\x42\x07\n\x05value\x1aN\n\x08KeyValue\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x35\n\x05value\x18\x02 \x01(\x0b\x32&.aea.helpers.search.models.Query.Value\x1a\x80\x01\n\x08Instance\x12\x39\n\x05model\x18\x01 \x01(\x0b\x32*.aea.helpers.search.models.Query.DataModel\x12\x39\n\x06values\x18\x02 \x03(\x0b\x32).aea.helpers.search.models.Query.KeyValue\x1a+\n\nStringPair\x12\r\n\x05\x66irst\x18\x01 \x01(\t\x12\x0e\n\x06second\x18\x02 \x01(\t\x1a(\n\x07IntPair\x12\r\n\x05\x66irst\x18\x01 \x01(\x03\x12\x0e\n\x06second\x18\x02 \x01(\x03\x1a+\n\nDoublePair\x12\r\n\x05\x66irst\x18\x01 \x01(\x01\x12\x0e\n\x06second\x18\x02 \x01(\x01\x1a\x83\x01\n\x0cLocationPair\x12\x38\n\x05\x66irst\x18\x01 \x01(\x0b\x32).aea.helpers.search.models.Query.Location\x12\x39\n\x06second\x18\x02 \x01(\x0b\x32).aea.helpers.search.models.Query.Location\x1a\xf6\x01\n\x05Range\x12\x38\n\x01s\x18\x01 \x01(\x0b\x32+.aea.helpers.search.models.Query.StringPairH\x00\x12\x35\n\x01i\x18\x02 \x01(\x0b\x32(.aea.helpers.search.models.Query.IntPairH\x00\x12\x38\n\x01\x64\x18\x03 \x01(\x0b\x32+.aea.helpers.search.models.Query.DoublePairH\x00\x12:\n\x01l\x18\x04 \x01(\x0b\x32-.aea.helpers.search.models.Query.LocationPairH\x00\x42\x06\n\x04pair\x1aW\n\x08\x44istance\x12\x39\n\x06\x63\x65nter\x18\x01 \x01(\x0b\x32).aea.helpers.search.models.Query.Location\x12\x10\n\x08\x64istance\x18\x02 \x01(\x01\x1a\xc2\x01\n\x08Relation\x12>\n\x02op\x18\x01 \x01(\x0e\x32\x32.aea.helpers.search.models.Query.Relation.Operator\x12\x33\n\x03val\x18\x02 \x01(\x0b\x32&.aea.helpers.search.models.Query.Value"A\n\x08Operator\x12\x06\n\x02\x45Q\x10\x00\x12\x06\n\x02LT\x10\x01\x12\x08\n\x04LTEQ\x10\x02\x12\x06\n\x02GT\x10\x03\x12\x08\n\x04GTEQ\x10\x04\x12\t\n\x05NOTEQ\x10\x05\x1a\x9b\x05\n\x03Set\x12\x39\n\x02op\x18\x01 \x01(\x0e\x32-.aea.helpers.search.models.Query.Set.Operator\x12\x39\n\x04vals\x18\x02 \x01(\x0b\x32+.aea.helpers.search.models.Query.Set.Values\x1a\xfe\x03\n\x06Values\x12@\n\x01s\x18\x01 \x01(\x0b\x32\x33.aea.helpers.search.models.Query.Set.Values.StringsH\x00\x12@\n\x01\x64\x18\x02 \x01(\x0b\x32\x33.aea.helpers.search.models.Query.Set.Values.DoublesH\x00\x12>\n\x01\x62\x18\x03 \x01(\x0b\x32\x31.aea.helpers.search.models.Query.Set.Values.BoolsH\x00\x12=\n\x01i\x18\x04 \x01(\x0b\x32\x30.aea.helpers.search.models.Query.Set.Values.IntsH\x00\x12\x42\n\x01l\x18\x05 \x01(\x0b\x32\x35.aea.helpers.search.models.Query.Set.Values.LocationsH\x00\x1a\x14\n\x04Ints\x12\x0c\n\x04vals\x18\x01 \x03(\x03\x1a\x17\n\x07\x44oubles\x12\x0c\n\x04vals\x18\x01 \x03(\x01\x1a\x17\n\x07Strings\x12\x0c\n\x04vals\x18\x01 \x03(\t\x1a\x15\n\x05\x42ools\x12\x0c\n\x04vals\x18\x01 \x03(\x08\x1a\x44\n\tLocations\x12\x37\n\x04vals\x18\x01 \x03(\x0b\x32).aea.helpers.search.models.Query.LocationB\x08\n\x06values"\x1d\n\x08Operator\x12\x06\n\x02IN\x10\x00\x12\t\n\x05NOTIN\x10\x01\x1a\xb1\x06\n\x0e\x43onstraintExpr\x12\x41\n\x03or_\x18\x01 \x01(\x0b\x32\x32.aea.helpers.search.models.Query.ConstraintExpr.OrH\x00\x12\x43\n\x04\x61nd_\x18\x02 \x01(\x0b\x32\x33.aea.helpers.search.models.Query.ConstraintExpr.AndH\x00\x12\x43\n\x04not_\x18\x03 \x01(\x0b\x32\x33.aea.helpers.search.models.Query.ConstraintExpr.NotH\x00\x12P\n\nconstraint\x18\x04 \x01(\x0b\x32:.aea.helpers.search.models.Query.ConstraintExpr.ConstraintH\x00\x1a\x43\n\x02Or\x12=\n\x04\x65xpr\x18\x01 \x03(\x0b\x32/.aea.helpers.search.models.Query.ConstraintExpr\x1a\x44\n\x03\x41nd\x12=\n\x04\x65xpr\x18\x01 \x03(\x0b\x32/.aea.helpers.search.models.Query.ConstraintExpr\x1a\x44\n\x03Not\x12=\n\x04\x65xpr\x18\x01 \x01(\x0b\x32/.aea.helpers.search.models.Query.ConstraintExpr\x1a\xa0\x02\n\nConstraint\x12\x16\n\x0e\x61ttribute_name\x18\x01 \x01(\t\x12\x34\n\x04set_\x18\x02 \x01(\x0b\x32$.aea.helpers.search.models.Query.SetH\x00\x12\x38\n\x06range_\x18\x03 \x01(\x0b\x32&.aea.helpers.search.models.Query.RangeH\x00\x12=\n\x08relation\x18\x04 \x01(\x0b\x32).aea.helpers.search.models.Query.RelationH\x00\x12=\n\x08\x64istance\x18\x05 \x01(\x0b\x32).aea.helpers.search.models.Query.DistanceH\x00\x42\x0c\n\nconstraintB\x0c\n\nexpression\x1a\x88\x01\n\x05Model\x12\x44\n\x0b\x63onstraints\x18\x01 \x03(\x0b\x32/.aea.helpers.search.models.Query.ConstraintExpr\x12\x39\n\x05model\x18\x02 \x01(\x0b\x32*.aea.helpers.search.models.Query.DataModelB\x02H\x01\x62\x06proto3',
+    serialized_pb=b'\n\x0cmodels.proto\x12\x19\x61\x65\x61.helpers.search.models"\xc1\x19\n\x05Query\x1a\xc0\x01\n\tAttribute\x12\x0c\n\x04name\x18\x01 \x01(\t\x12=\n\x04type\x18\x02 \x01(\x0e\x32/.aea.helpers.search.models.Query.Attribute.Type\x12\x10\n\x08required\x18\x03 \x01(\x08\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t"?\n\x04Type\x12\n\n\x06\x44OUBLE\x10\x00\x12\x07\n\x03INT\x10\x01\x12\x08\n\x04\x42OOL\x10\x02\x12\n\n\x06STRING\x10\x03\x12\x0c\n\x08LOCATION\x10\x04\x1an\n\tDataModel\x12\x0c\n\x04name\x18\x01 \x01(\t\x12>\n\nattributes\x18\x02 \x03(\x0b\x32*.aea.helpers.search.models.Query.Attribute\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x1a$\n\x08Location\x12\x0b\n\x03lon\x18\x01 \x01(\x01\x12\x0b\n\x03lat\x18\x02 \x01(\x01\x1a\x99\x01\n\x05Value\x12\x10\n\x06string\x18\x01 \x01(\tH\x00\x12\x10\n\x06\x64ouble\x18\x02 \x01(\x01H\x00\x12\x11\n\x07\x62oolean\x18\x03 \x01(\x08H\x00\x12\x11\n\x07integer\x18\x04 \x01(\x03H\x00\x12=\n\x08location\x18\x05 \x01(\x0b\x32).aea.helpers.search.models.Query.LocationH\x00\x42\x07\n\x05value\x1aN\n\x08KeyValue\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x35\n\x05value\x18\x02 \x01(\x0b\x32&.aea.helpers.search.models.Query.Value\x1a\x80\x01\n\x08Instance\x12\x39\n\x05model\x18\x01 \x01(\x0b\x32*.aea.helpers.search.models.Query.DataModel\x12\x39\n\x06values\x18\x02 \x03(\x0b\x32).aea.helpers.search.models.Query.KeyValue\x1a+\n\nStringPair\x12\r\n\x05\x66irst\x18\x01 \x01(\t\x12\x0e\n\x06second\x18\x02 \x01(\t\x1a(\n\x07IntPair\x12\r\n\x05\x66irst\x18\x01 \x01(\x03\x12\x0e\n\x06second\x18\x02 \x01(\x03\x1a+\n\nDoublePair\x12\r\n\x05\x66irst\x18\x01 \x01(\x01\x12\x0e\n\x06second\x18\x02 \x01(\x01\x1a\x83\x01\n\x0cLocationPair\x12\x38\n\x05\x66irst\x18\x01 \x01(\x0b\x32).aea.helpers.search.models.Query.Location\x12\x39\n\x06second\x18\x02 \x01(\x0b\x32).aea.helpers.search.models.Query.Location\x1a\xa1\x02\n\x05Range\x12\x42\n\x0bstring_pair\x18\x01 \x01(\x0b\x32+.aea.helpers.search.models.Query.StringPairH\x00\x12@\n\x0cinteger_pair\x18\x02 \x01(\x0b\x32(.aea.helpers.search.models.Query.IntPairH\x00\x12\x42\n\x0b\x64ouble_pair\x18\x03 \x01(\x0b\x32+.aea.helpers.search.models.Query.DoublePairH\x00\x12\x46\n\rlocation_pair\x18\x04 \x01(\x0b\x32-.aea.helpers.search.models.Query.LocationPairH\x00\x42\x06\n\x04pair\x1aW\n\x08\x44istance\x12\x39\n\x06\x63\x65nter\x18\x01 \x01(\x0b\x32).aea.helpers.search.models.Query.Location\x12\x10\n\x08\x64istance\x18\x02 \x01(\x01\x1a\xca\x01\n\x08Relation\x12\x44\n\x08operator\x18\x01 \x01(\x0e\x32\x32.aea.helpers.search.models.Query.Relation.Operator\x12\x35\n\x05value\x18\x02 \x01(\x0b\x32&.aea.helpers.search.models.Query.Value"A\n\x08Operator\x12\x06\n\x02\x45Q\x10\x00\x12\x06\n\x02LT\x10\x01\x12\x08\n\x04LTEQ\x10\x02\x12\x06\n\x02GT\x10\x03\x12\x08\n\x04GTEQ\x10\x04\x12\t\n\x05NOTEQ\x10\x05\x1a\xca\x05\n\x03Set\x12?\n\x08operator\x18\x01 \x01(\x0e\x32-.aea.helpers.search.models.Query.Set.Operator\x12;\n\x06values\x18\x02 \x01(\x0b\x32+.aea.helpers.search.models.Query.Set.Values\x1a\xa5\x04\n\x06Values\x12\x45\n\x06string\x18\x01 \x01(\x0b\x32\x33.aea.helpers.search.models.Query.Set.Values.StringsH\x00\x12\x45\n\x06\x64ouble\x18\x02 \x01(\x0b\x32\x33.aea.helpers.search.models.Query.Set.Values.DoublesH\x00\x12\x44\n\x07\x62oolean\x18\x03 \x01(\x0b\x32\x31.aea.helpers.search.models.Query.Set.Values.BoolsH\x00\x12\x43\n\x07integer\x18\x04 \x01(\x0b\x32\x30.aea.helpers.search.models.Query.Set.Values.IntsH\x00\x12I\n\x08location\x18\x05 \x01(\x0b\x32\x35.aea.helpers.search.models.Query.Set.Values.LocationsH\x00\x1a\x16\n\x04Ints\x12\x0e\n\x06values\x18\x01 \x03(\x03\x1a\x19\n\x07\x44oubles\x12\x0e\n\x06values\x18\x01 \x03(\x01\x1a\x19\n\x07Strings\x12\x0e\n\x06values\x18\x01 \x03(\t\x1a\x17\n\x05\x42ools\x12\x0e\n\x06values\x18\x01 \x03(\x08\x1a\x46\n\tLocations\x12\x39\n\x06values\x18\x01 \x03(\x0b\x32).aea.helpers.search.models.Query.LocationB\x08\n\x06values"\x1d\n\x08Operator\x12\x06\n\x02IN\x10\x00\x12\t\n\x05NOTIN\x10\x01\x1a\xc3\x06\n\x0e\x43onstraintExpr\x12\x41\n\x03or_\x18\x01 \x01(\x0b\x32\x32.aea.helpers.search.models.Query.ConstraintExpr.OrH\x00\x12\x43\n\x04\x61nd_\x18\x02 \x01(\x0b\x32\x33.aea.helpers.search.models.Query.ConstraintExpr.AndH\x00\x12\x43\n\x04not_\x18\x03 \x01(\x0b\x32\x33.aea.helpers.search.models.Query.ConstraintExpr.NotH\x00\x12P\n\nconstraint\x18\x04 \x01(\x0b\x32:.aea.helpers.search.models.Query.ConstraintExpr.ConstraintH\x00\x1aI\n\x02Or\x12\x43\n\nexpression\x18\x01 \x03(\x0b\x32/.aea.helpers.search.models.Query.ConstraintExpr\x1aJ\n\x03\x41nd\x12\x43\n\nexpression\x18\x01 \x03(\x0b\x32/.aea.helpers.search.models.Query.ConstraintExpr\x1aJ\n\x03Not\x12\x43\n\nexpression\x18\x01 \x01(\x0b\x32/.aea.helpers.search.models.Query.ConstraintExpr\x1a\xa0\x02\n\nConstraint\x12\x16\n\x0e\x61ttribute_name\x18\x01 \x01(\t\x12\x34\n\x04set_\x18\x02 \x01(\x0b\x32$.aea.helpers.search.models.Query.SetH\x00\x12\x38\n\x06range_\x18\x03 \x01(\x0b\x32&.aea.helpers.search.models.Query.RangeH\x00\x12=\n\x08relation\x18\x04 \x01(\x0b\x32).aea.helpers.search.models.Query.RelationH\x00\x12=\n\x08\x64istance\x18\x05 \x01(\x0b\x32).aea.helpers.search.models.Query.DistanceH\x00\x42\x0c\n\nconstraintB\x0c\n\nexpression\x1a\x88\x01\n\x05Model\x12\x44\n\x0b\x63onstraints\x18\x01 \x03(\x0b\x32/.aea.helpers.search.models.Query.ConstraintExpr\x12\x39\n\x05model\x18\x02 \x01(\x0b\x32*.aea.helpers.search.models.Query.DataModelB\x02H\x01\x62\x06proto3',
 )
 
 
@@ -77,8 +77,8 @@ _QUERY_RELATION_OPERATOR = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     serialized_options=None,
-    serialized_start=1469,
-    serialized_end=1534,
+    serialized_start=1550,
+    serialized_end=1615,
 )
 _sym_db.RegisterEnumDescriptor(_QUERY_RELATION_OPERATOR)
 
@@ -97,8 +97,8 @@ _QUERY_SET_OPERATOR = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     serialized_options=None,
-    serialized_start=2175,
-    serialized_end=2204,
+    serialized_start=2303,
+    serialized_end=2332,
 )
 _sym_db.RegisterEnumDescriptor(_QUERY_SET_OPERATOR)
 
@@ -333,8 +333,8 @@ _QUERY_VALUE = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="s",
-            full_name="aea.helpers.search.models.Query.Value.s",
+            name="string",
+            full_name="aea.helpers.search.models.Query.Value.string",
             index=0,
             number=1,
             type=9,
@@ -351,8 +351,8 @@ _QUERY_VALUE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="d",
-            full_name="aea.helpers.search.models.Query.Value.d",
+            name="double",
+            full_name="aea.helpers.search.models.Query.Value.double",
             index=1,
             number=2,
             type=1,
@@ -369,8 +369,8 @@ _QUERY_VALUE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="b",
-            full_name="aea.helpers.search.models.Query.Value.b",
+            name="boolean",
+            full_name="aea.helpers.search.models.Query.Value.boolean",
             index=2,
             number=3,
             type=8,
@@ -387,8 +387,8 @@ _QUERY_VALUE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="i",
-            full_name="aea.helpers.search.models.Query.Value.i",
+            name="integer",
+            full_name="aea.helpers.search.models.Query.Value.integer",
             index=3,
             number=4,
             type=3,
@@ -405,8 +405,8 @@ _QUERY_VALUE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="l",
-            full_name="aea.helpers.search.models.Query.Value.l",
+            name="location",
+            full_name="aea.helpers.search.models.Query.Value.location",
             index=4,
             number=5,
             type=11,
@@ -439,8 +439,8 @@ _QUERY_VALUE = _descriptor.Descriptor(
             fields=[],
         ),
     ],
-    serialized_start=398,
-    serialized_end=522,
+    serialized_start=399,
+    serialized_end=552,
 )
 
 _QUERY_KEYVALUE = _descriptor.Descriptor(
@@ -495,8 +495,8 @@ _QUERY_KEYVALUE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=524,
-    serialized_end=602,
+    serialized_start=554,
+    serialized_end=632,
 )
 
 _QUERY_INSTANCE = _descriptor.Descriptor(
@@ -551,8 +551,8 @@ _QUERY_INSTANCE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=605,
-    serialized_end=733,
+    serialized_start=635,
+    serialized_end=763,
 )
 
 _QUERY_STRINGPAIR = _descriptor.Descriptor(
@@ -607,8 +607,8 @@ _QUERY_STRINGPAIR = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=735,
-    serialized_end=778,
+    serialized_start=765,
+    serialized_end=808,
 )
 
 _QUERY_INTPAIR = _descriptor.Descriptor(
@@ -663,8 +663,8 @@ _QUERY_INTPAIR = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=780,
-    serialized_end=820,
+    serialized_start=810,
+    serialized_end=850,
 )
 
 _QUERY_DOUBLEPAIR = _descriptor.Descriptor(
@@ -719,8 +719,8 @@ _QUERY_DOUBLEPAIR = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=822,
-    serialized_end=865,
+    serialized_start=852,
+    serialized_end=895,
 )
 
 _QUERY_LOCATIONPAIR = _descriptor.Descriptor(
@@ -775,8 +775,8 @@ _QUERY_LOCATIONPAIR = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=868,
-    serialized_end=999,
+    serialized_start=898,
+    serialized_end=1029,
 )
 
 _QUERY_RANGE = _descriptor.Descriptor(
@@ -787,8 +787,8 @@ _QUERY_RANGE = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="s",
-            full_name="aea.helpers.search.models.Query.Range.s",
+            name="string_pair",
+            full_name="aea.helpers.search.models.Query.Range.string_pair",
             index=0,
             number=1,
             type=11,
@@ -805,8 +805,8 @@ _QUERY_RANGE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="i",
-            full_name="aea.helpers.search.models.Query.Range.i",
+            name="integer_pair",
+            full_name="aea.helpers.search.models.Query.Range.integer_pair",
             index=1,
             number=2,
             type=11,
@@ -823,8 +823,8 @@ _QUERY_RANGE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="d",
-            full_name="aea.helpers.search.models.Query.Range.d",
+            name="double_pair",
+            full_name="aea.helpers.search.models.Query.Range.double_pair",
             index=2,
             number=3,
             type=11,
@@ -841,8 +841,8 @@ _QUERY_RANGE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="l",
-            full_name="aea.helpers.search.models.Query.Range.l",
+            name="location_pair",
+            full_name="aea.helpers.search.models.Query.Range.location_pair",
             index=3,
             number=4,
             type=11,
@@ -875,8 +875,8 @@ _QUERY_RANGE = _descriptor.Descriptor(
             fields=[],
         ),
     ],
-    serialized_start=1002,
-    serialized_end=1248,
+    serialized_start=1032,
+    serialized_end=1321,
 )
 
 _QUERY_DISTANCE = _descriptor.Descriptor(
@@ -931,8 +931,8 @@ _QUERY_DISTANCE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1250,
-    serialized_end=1337,
+    serialized_start=1323,
+    serialized_end=1410,
 )
 
 _QUERY_RELATION = _descriptor.Descriptor(
@@ -943,8 +943,8 @@ _QUERY_RELATION = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="op",
-            full_name="aea.helpers.search.models.Query.Relation.op",
+            name="operator",
+            full_name="aea.helpers.search.models.Query.Relation.operator",
             index=0,
             number=1,
             type=14,
@@ -961,8 +961,8 @@ _QUERY_RELATION = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="val",
-            full_name="aea.helpers.search.models.Query.Relation.val",
+            name="value",
+            full_name="aea.helpers.search.models.Query.Relation.value",
             index=1,
             number=2,
             type=11,
@@ -987,8 +987,8 @@ _QUERY_RELATION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1340,
-    serialized_end=1534,
+    serialized_start=1413,
+    serialized_end=1615,
 )
 
 _QUERY_SET_VALUES_INTS = _descriptor.Descriptor(
@@ -999,8 +999,8 @@ _QUERY_SET_VALUES_INTS = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="vals",
-            full_name="aea.helpers.search.models.Query.Set.Values.Ints.vals",
+            name="values",
+            full_name="aea.helpers.search.models.Query.Set.Values.Ints.values",
             index=0,
             number=1,
             type=3,
@@ -1025,8 +1025,8 @@ _QUERY_SET_VALUES_INTS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2000,
-    serialized_end=2020,
+    serialized_start=2118,
+    serialized_end=2140,
 )
 
 _QUERY_SET_VALUES_DOUBLES = _descriptor.Descriptor(
@@ -1037,8 +1037,8 @@ _QUERY_SET_VALUES_DOUBLES = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="vals",
-            full_name="aea.helpers.search.models.Query.Set.Values.Doubles.vals",
+            name="values",
+            full_name="aea.helpers.search.models.Query.Set.Values.Doubles.values",
             index=0,
             number=1,
             type=1,
@@ -1063,8 +1063,8 @@ _QUERY_SET_VALUES_DOUBLES = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2022,
-    serialized_end=2045,
+    serialized_start=2142,
+    serialized_end=2167,
 )
 
 _QUERY_SET_VALUES_STRINGS = _descriptor.Descriptor(
@@ -1075,8 +1075,8 @@ _QUERY_SET_VALUES_STRINGS = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="vals",
-            full_name="aea.helpers.search.models.Query.Set.Values.Strings.vals",
+            name="values",
+            full_name="aea.helpers.search.models.Query.Set.Values.Strings.values",
             index=0,
             number=1,
             type=9,
@@ -1101,8 +1101,8 @@ _QUERY_SET_VALUES_STRINGS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2047,
-    serialized_end=2070,
+    serialized_start=2169,
+    serialized_end=2194,
 )
 
 _QUERY_SET_VALUES_BOOLS = _descriptor.Descriptor(
@@ -1113,8 +1113,8 @@ _QUERY_SET_VALUES_BOOLS = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="vals",
-            full_name="aea.helpers.search.models.Query.Set.Values.Bools.vals",
+            name="values",
+            full_name="aea.helpers.search.models.Query.Set.Values.Bools.values",
             index=0,
             number=1,
             type=8,
@@ -1139,8 +1139,8 @@ _QUERY_SET_VALUES_BOOLS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2072,
-    serialized_end=2093,
+    serialized_start=2196,
+    serialized_end=2219,
 )
 
 _QUERY_SET_VALUES_LOCATIONS = _descriptor.Descriptor(
@@ -1151,8 +1151,8 @@ _QUERY_SET_VALUES_LOCATIONS = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="vals",
-            full_name="aea.helpers.search.models.Query.Set.Values.Locations.vals",
+            name="values",
+            full_name="aea.helpers.search.models.Query.Set.Values.Locations.values",
             index=0,
             number=1,
             type=11,
@@ -1177,8 +1177,8 @@ _QUERY_SET_VALUES_LOCATIONS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2095,
-    serialized_end=2163,
+    serialized_start=2221,
+    serialized_end=2291,
 )
 
 _QUERY_SET_VALUES = _descriptor.Descriptor(
@@ -1189,8 +1189,8 @@ _QUERY_SET_VALUES = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="s",
-            full_name="aea.helpers.search.models.Query.Set.Values.s",
+            name="string",
+            full_name="aea.helpers.search.models.Query.Set.Values.string",
             index=0,
             number=1,
             type=11,
@@ -1207,8 +1207,8 @@ _QUERY_SET_VALUES = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="d",
-            full_name="aea.helpers.search.models.Query.Set.Values.d",
+            name="double",
+            full_name="aea.helpers.search.models.Query.Set.Values.double",
             index=1,
             number=2,
             type=11,
@@ -1225,8 +1225,8 @@ _QUERY_SET_VALUES = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="b",
-            full_name="aea.helpers.search.models.Query.Set.Values.b",
+            name="boolean",
+            full_name="aea.helpers.search.models.Query.Set.Values.boolean",
             index=2,
             number=3,
             type=11,
@@ -1243,8 +1243,8 @@ _QUERY_SET_VALUES = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="i",
-            full_name="aea.helpers.search.models.Query.Set.Values.i",
+            name="integer",
+            full_name="aea.helpers.search.models.Query.Set.Values.integer",
             index=3,
             number=4,
             type=11,
@@ -1261,8 +1261,8 @@ _QUERY_SET_VALUES = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="l",
-            full_name="aea.helpers.search.models.Query.Set.Values.l",
+            name="location",
+            full_name="aea.helpers.search.models.Query.Set.Values.location",
             index=4,
             number=5,
             type=11,
@@ -1301,8 +1301,8 @@ _QUERY_SET_VALUES = _descriptor.Descriptor(
             fields=[],
         ),
     ],
-    serialized_start=1663,
-    serialized_end=2173,
+    serialized_start=1752,
+    serialized_end=2301,
 )
 
 _QUERY_SET = _descriptor.Descriptor(
@@ -1313,8 +1313,8 @@ _QUERY_SET = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="op",
-            full_name="aea.helpers.search.models.Query.Set.op",
+            name="operator",
+            full_name="aea.helpers.search.models.Query.Set.operator",
             index=0,
             number=1,
             type=14,
@@ -1331,8 +1331,8 @@ _QUERY_SET = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="vals",
-            full_name="aea.helpers.search.models.Query.Set.vals",
+            name="values",
+            full_name="aea.helpers.search.models.Query.Set.values",
             index=1,
             number=2,
             type=11,
@@ -1357,8 +1357,8 @@ _QUERY_SET = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1537,
-    serialized_end=2204,
+    serialized_start=1618,
+    serialized_end=2332,
 )
 
 _QUERY_CONSTRAINTEXPR_OR = _descriptor.Descriptor(
@@ -1369,8 +1369,8 @@ _QUERY_CONSTRAINTEXPR_OR = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="expr",
-            full_name="aea.helpers.search.models.Query.ConstraintExpr.Or.expr",
+            name="expression",
+            full_name="aea.helpers.search.models.Query.ConstraintExpr.Or.expression",
             index=0,
             number=1,
             type=11,
@@ -1395,8 +1395,8 @@ _QUERY_CONSTRAINTEXPR_OR = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2512,
-    serialized_end=2579,
+    serialized_start=2640,
+    serialized_end=2713,
 )
 
 _QUERY_CONSTRAINTEXPR_AND = _descriptor.Descriptor(
@@ -1407,8 +1407,8 @@ _QUERY_CONSTRAINTEXPR_AND = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="expr",
-            full_name="aea.helpers.search.models.Query.ConstraintExpr.And.expr",
+            name="expression",
+            full_name="aea.helpers.search.models.Query.ConstraintExpr.And.expression",
             index=0,
             number=1,
             type=11,
@@ -1433,8 +1433,8 @@ _QUERY_CONSTRAINTEXPR_AND = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2581,
-    serialized_end=2649,
+    serialized_start=2715,
+    serialized_end=2789,
 )
 
 _QUERY_CONSTRAINTEXPR_NOT = _descriptor.Descriptor(
@@ -1445,8 +1445,8 @@ _QUERY_CONSTRAINTEXPR_NOT = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name="expr",
-            full_name="aea.helpers.search.models.Query.ConstraintExpr.Not.expr",
+            name="expression",
+            full_name="aea.helpers.search.models.Query.ConstraintExpr.Not.expression",
             index=0,
             number=1,
             type=11,
@@ -1471,8 +1471,8 @@ _QUERY_CONSTRAINTEXPR_NOT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2651,
-    serialized_end=2719,
+    serialized_start=2791,
+    serialized_end=2865,
 )
 
 _QUERY_CONSTRAINTEXPR_CONSTRAINT = _descriptor.Descriptor(
@@ -1589,8 +1589,8 @@ _QUERY_CONSTRAINTEXPR_CONSTRAINT = _descriptor.Descriptor(
             fields=[],
         ),
     ],
-    serialized_start=2722,
-    serialized_end=3010,
+    serialized_start=2868,
+    serialized_end=3156,
 )
 
 _QUERY_CONSTRAINTEXPR = _descriptor.Descriptor(
@@ -1694,8 +1694,8 @@ _QUERY_CONSTRAINTEXPR = _descriptor.Descriptor(
             fields=[],
         ),
     ],
-    serialized_start=2207,
-    serialized_end=3024,
+    serialized_start=2335,
+    serialized_end=3170,
 )
 
 _QUERY_MODEL = _descriptor.Descriptor(
@@ -1750,8 +1750,8 @@ _QUERY_MODEL = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3027,
-    serialized_end=3163,
+    serialized_start=3173,
+    serialized_end=3309,
 )
 
 _QUERY = _descriptor.Descriptor(
@@ -1787,7 +1787,7 @@ _QUERY = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=44,
-    serialized_end=3163,
+    serialized_end=3309,
 )
 
 _QUERY_ATTRIBUTE.fields_by_name["type"].enum_type = _QUERY_ATTRIBUTE_TYPE
@@ -1796,18 +1796,38 @@ _QUERY_ATTRIBUTE_TYPE.containing_type = _QUERY_ATTRIBUTE
 _QUERY_DATAMODEL.fields_by_name["attributes"].message_type = _QUERY_ATTRIBUTE
 _QUERY_DATAMODEL.containing_type = _QUERY
 _QUERY_LOCATION.containing_type = _QUERY
-_QUERY_VALUE.fields_by_name["l"].message_type = _QUERY_LOCATION
+_QUERY_VALUE.fields_by_name["location"].message_type = _QUERY_LOCATION
 _QUERY_VALUE.containing_type = _QUERY
-_QUERY_VALUE.oneofs_by_name["value"].fields.append(_QUERY_VALUE.fields_by_name["s"])
-_QUERY_VALUE.fields_by_name["s"].containing_oneof = _QUERY_VALUE.oneofs_by_name["value"]
-_QUERY_VALUE.oneofs_by_name["value"].fields.append(_QUERY_VALUE.fields_by_name["d"])
-_QUERY_VALUE.fields_by_name["d"].containing_oneof = _QUERY_VALUE.oneofs_by_name["value"]
-_QUERY_VALUE.oneofs_by_name["value"].fields.append(_QUERY_VALUE.fields_by_name["b"])
-_QUERY_VALUE.fields_by_name["b"].containing_oneof = _QUERY_VALUE.oneofs_by_name["value"]
-_QUERY_VALUE.oneofs_by_name["value"].fields.append(_QUERY_VALUE.fields_by_name["i"])
-_QUERY_VALUE.fields_by_name["i"].containing_oneof = _QUERY_VALUE.oneofs_by_name["value"]
-_QUERY_VALUE.oneofs_by_name["value"].fields.append(_QUERY_VALUE.fields_by_name["l"])
-_QUERY_VALUE.fields_by_name["l"].containing_oneof = _QUERY_VALUE.oneofs_by_name["value"]
+_QUERY_VALUE.oneofs_by_name["value"].fields.append(
+    _QUERY_VALUE.fields_by_name["string"]
+)
+_QUERY_VALUE.fields_by_name["string"].containing_oneof = _QUERY_VALUE.oneofs_by_name[
+    "value"
+]
+_QUERY_VALUE.oneofs_by_name["value"].fields.append(
+    _QUERY_VALUE.fields_by_name["double"]
+)
+_QUERY_VALUE.fields_by_name["double"].containing_oneof = _QUERY_VALUE.oneofs_by_name[
+    "value"
+]
+_QUERY_VALUE.oneofs_by_name["value"].fields.append(
+    _QUERY_VALUE.fields_by_name["boolean"]
+)
+_QUERY_VALUE.fields_by_name["boolean"].containing_oneof = _QUERY_VALUE.oneofs_by_name[
+    "value"
+]
+_QUERY_VALUE.oneofs_by_name["value"].fields.append(
+    _QUERY_VALUE.fields_by_name["integer"]
+)
+_QUERY_VALUE.fields_by_name["integer"].containing_oneof = _QUERY_VALUE.oneofs_by_name[
+    "value"
+]
+_QUERY_VALUE.oneofs_by_name["value"].fields.append(
+    _QUERY_VALUE.fields_by_name["location"]
+)
+_QUERY_VALUE.fields_by_name["location"].containing_oneof = _QUERY_VALUE.oneofs_by_name[
+    "value"
+]
 _QUERY_KEYVALUE.fields_by_name["value"].message_type = _QUERY_VALUE
 _QUERY_KEYVALUE.containing_type = _QUERY
 _QUERY_INSTANCE.fields_by_name["model"].message_type = _QUERY_DATAMODEL
@@ -1819,76 +1839,98 @@ _QUERY_DOUBLEPAIR.containing_type = _QUERY
 _QUERY_LOCATIONPAIR.fields_by_name["first"].message_type = _QUERY_LOCATION
 _QUERY_LOCATIONPAIR.fields_by_name["second"].message_type = _QUERY_LOCATION
 _QUERY_LOCATIONPAIR.containing_type = _QUERY
-_QUERY_RANGE.fields_by_name["s"].message_type = _QUERY_STRINGPAIR
-_QUERY_RANGE.fields_by_name["i"].message_type = _QUERY_INTPAIR
-_QUERY_RANGE.fields_by_name["d"].message_type = _QUERY_DOUBLEPAIR
-_QUERY_RANGE.fields_by_name["l"].message_type = _QUERY_LOCATIONPAIR
+_QUERY_RANGE.fields_by_name["string_pair"].message_type = _QUERY_STRINGPAIR
+_QUERY_RANGE.fields_by_name["integer_pair"].message_type = _QUERY_INTPAIR
+_QUERY_RANGE.fields_by_name["double_pair"].message_type = _QUERY_DOUBLEPAIR
+_QUERY_RANGE.fields_by_name["location_pair"].message_type = _QUERY_LOCATIONPAIR
 _QUERY_RANGE.containing_type = _QUERY
-_QUERY_RANGE.oneofs_by_name["pair"].fields.append(_QUERY_RANGE.fields_by_name["s"])
-_QUERY_RANGE.fields_by_name["s"].containing_oneof = _QUERY_RANGE.oneofs_by_name["pair"]
-_QUERY_RANGE.oneofs_by_name["pair"].fields.append(_QUERY_RANGE.fields_by_name["i"])
-_QUERY_RANGE.fields_by_name["i"].containing_oneof = _QUERY_RANGE.oneofs_by_name["pair"]
-_QUERY_RANGE.oneofs_by_name["pair"].fields.append(_QUERY_RANGE.fields_by_name["d"])
-_QUERY_RANGE.fields_by_name["d"].containing_oneof = _QUERY_RANGE.oneofs_by_name["pair"]
-_QUERY_RANGE.oneofs_by_name["pair"].fields.append(_QUERY_RANGE.fields_by_name["l"])
-_QUERY_RANGE.fields_by_name["l"].containing_oneof = _QUERY_RANGE.oneofs_by_name["pair"]
+_QUERY_RANGE.oneofs_by_name["pair"].fields.append(
+    _QUERY_RANGE.fields_by_name["string_pair"]
+)
+_QUERY_RANGE.fields_by_name[
+    "string_pair"
+].containing_oneof = _QUERY_RANGE.oneofs_by_name["pair"]
+_QUERY_RANGE.oneofs_by_name["pair"].fields.append(
+    _QUERY_RANGE.fields_by_name["integer_pair"]
+)
+_QUERY_RANGE.fields_by_name[
+    "integer_pair"
+].containing_oneof = _QUERY_RANGE.oneofs_by_name["pair"]
+_QUERY_RANGE.oneofs_by_name["pair"].fields.append(
+    _QUERY_RANGE.fields_by_name["double_pair"]
+)
+_QUERY_RANGE.fields_by_name[
+    "double_pair"
+].containing_oneof = _QUERY_RANGE.oneofs_by_name["pair"]
+_QUERY_RANGE.oneofs_by_name["pair"].fields.append(
+    _QUERY_RANGE.fields_by_name["location_pair"]
+)
+_QUERY_RANGE.fields_by_name[
+    "location_pair"
+].containing_oneof = _QUERY_RANGE.oneofs_by_name["pair"]
 _QUERY_DISTANCE.fields_by_name["center"].message_type = _QUERY_LOCATION
 _QUERY_DISTANCE.containing_type = _QUERY
-_QUERY_RELATION.fields_by_name["op"].enum_type = _QUERY_RELATION_OPERATOR
-_QUERY_RELATION.fields_by_name["val"].message_type = _QUERY_VALUE
+_QUERY_RELATION.fields_by_name["operator"].enum_type = _QUERY_RELATION_OPERATOR
+_QUERY_RELATION.fields_by_name["value"].message_type = _QUERY_VALUE
 _QUERY_RELATION.containing_type = _QUERY
 _QUERY_RELATION_OPERATOR.containing_type = _QUERY_RELATION
 _QUERY_SET_VALUES_INTS.containing_type = _QUERY_SET_VALUES
 _QUERY_SET_VALUES_DOUBLES.containing_type = _QUERY_SET_VALUES
 _QUERY_SET_VALUES_STRINGS.containing_type = _QUERY_SET_VALUES
 _QUERY_SET_VALUES_BOOLS.containing_type = _QUERY_SET_VALUES
-_QUERY_SET_VALUES_LOCATIONS.fields_by_name["vals"].message_type = _QUERY_LOCATION
+_QUERY_SET_VALUES_LOCATIONS.fields_by_name["values"].message_type = _QUERY_LOCATION
 _QUERY_SET_VALUES_LOCATIONS.containing_type = _QUERY_SET_VALUES
-_QUERY_SET_VALUES.fields_by_name["s"].message_type = _QUERY_SET_VALUES_STRINGS
-_QUERY_SET_VALUES.fields_by_name["d"].message_type = _QUERY_SET_VALUES_DOUBLES
-_QUERY_SET_VALUES.fields_by_name["b"].message_type = _QUERY_SET_VALUES_BOOLS
-_QUERY_SET_VALUES.fields_by_name["i"].message_type = _QUERY_SET_VALUES_INTS
-_QUERY_SET_VALUES.fields_by_name["l"].message_type = _QUERY_SET_VALUES_LOCATIONS
+_QUERY_SET_VALUES.fields_by_name["string"].message_type = _QUERY_SET_VALUES_STRINGS
+_QUERY_SET_VALUES.fields_by_name["double"].message_type = _QUERY_SET_VALUES_DOUBLES
+_QUERY_SET_VALUES.fields_by_name["boolean"].message_type = _QUERY_SET_VALUES_BOOLS
+_QUERY_SET_VALUES.fields_by_name["integer"].message_type = _QUERY_SET_VALUES_INTS
+_QUERY_SET_VALUES.fields_by_name["location"].message_type = _QUERY_SET_VALUES_LOCATIONS
 _QUERY_SET_VALUES.containing_type = _QUERY_SET
 _QUERY_SET_VALUES.oneofs_by_name["values"].fields.append(
-    _QUERY_SET_VALUES.fields_by_name["s"]
+    _QUERY_SET_VALUES.fields_by_name["string"]
 )
 _QUERY_SET_VALUES.fields_by_name[
-    "s"
+    "string"
 ].containing_oneof = _QUERY_SET_VALUES.oneofs_by_name["values"]
 _QUERY_SET_VALUES.oneofs_by_name["values"].fields.append(
-    _QUERY_SET_VALUES.fields_by_name["d"]
+    _QUERY_SET_VALUES.fields_by_name["double"]
 )
 _QUERY_SET_VALUES.fields_by_name[
-    "d"
+    "double"
 ].containing_oneof = _QUERY_SET_VALUES.oneofs_by_name["values"]
 _QUERY_SET_VALUES.oneofs_by_name["values"].fields.append(
-    _QUERY_SET_VALUES.fields_by_name["b"]
+    _QUERY_SET_VALUES.fields_by_name["boolean"]
 )
 _QUERY_SET_VALUES.fields_by_name[
-    "b"
+    "boolean"
 ].containing_oneof = _QUERY_SET_VALUES.oneofs_by_name["values"]
 _QUERY_SET_VALUES.oneofs_by_name["values"].fields.append(
-    _QUERY_SET_VALUES.fields_by_name["i"]
+    _QUERY_SET_VALUES.fields_by_name["integer"]
 )
 _QUERY_SET_VALUES.fields_by_name[
-    "i"
+    "integer"
 ].containing_oneof = _QUERY_SET_VALUES.oneofs_by_name["values"]
 _QUERY_SET_VALUES.oneofs_by_name["values"].fields.append(
-    _QUERY_SET_VALUES.fields_by_name["l"]
+    _QUERY_SET_VALUES.fields_by_name["location"]
 )
 _QUERY_SET_VALUES.fields_by_name[
-    "l"
+    "location"
 ].containing_oneof = _QUERY_SET_VALUES.oneofs_by_name["values"]
-_QUERY_SET.fields_by_name["op"].enum_type = _QUERY_SET_OPERATOR
-_QUERY_SET.fields_by_name["vals"].message_type = _QUERY_SET_VALUES
+_QUERY_SET.fields_by_name["operator"].enum_type = _QUERY_SET_OPERATOR
+_QUERY_SET.fields_by_name["values"].message_type = _QUERY_SET_VALUES
 _QUERY_SET.containing_type = _QUERY
 _QUERY_SET_OPERATOR.containing_type = _QUERY_SET
-_QUERY_CONSTRAINTEXPR_OR.fields_by_name["expr"].message_type = _QUERY_CONSTRAINTEXPR
+_QUERY_CONSTRAINTEXPR_OR.fields_by_name[
+    "expression"
+].message_type = _QUERY_CONSTRAINTEXPR
 _QUERY_CONSTRAINTEXPR_OR.containing_type = _QUERY_CONSTRAINTEXPR
-_QUERY_CONSTRAINTEXPR_AND.fields_by_name["expr"].message_type = _QUERY_CONSTRAINTEXPR
+_QUERY_CONSTRAINTEXPR_AND.fields_by_name[
+    "expression"
+].message_type = _QUERY_CONSTRAINTEXPR
 _QUERY_CONSTRAINTEXPR_AND.containing_type = _QUERY_CONSTRAINTEXPR
-_QUERY_CONSTRAINTEXPR_NOT.fields_by_name["expr"].message_type = _QUERY_CONSTRAINTEXPR
+_QUERY_CONSTRAINTEXPR_NOT.fields_by_name[
+    "expression"
+].message_type = _QUERY_CONSTRAINTEXPR
 _QUERY_CONSTRAINTEXPR_NOT.containing_type = _QUERY_CONSTRAINTEXPR
 _QUERY_CONSTRAINTEXPR_CONSTRAINT.fields_by_name["set_"].message_type = _QUERY_SET
 _QUERY_CONSTRAINTEXPR_CONSTRAINT.fields_by_name["range_"].message_type = _QUERY_RANGE

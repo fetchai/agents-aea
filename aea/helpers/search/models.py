@@ -398,15 +398,15 @@ class Description:
         kv = models_pb2.Query.KeyValue()
         kv.key = key
         if type(value) == bool:
-            kv.value.b = value
+            kv.value.boolean = value
         elif type(value) == int:
-            kv.value.i = value
+            kv.value.integer = value
         elif type(value) == float:
-            kv.value.d = value
+            kv.value.double = value
         elif type(value) == str:
-            kv.value.s = value
+            kv.value.string = value
         elif type(value) == Location:
-            kv.value.l.CopyFrom(value.encode())  # type: ignore
+            kv.value.location.CopyFrom(value.encode())  # type: ignore
 
         return kv
 
@@ -433,19 +433,19 @@ class Description:
         """
         value_case = value.WhichOneof("value")
 
-        if value_case == "s":
-            result = value.s
-        elif value_case == "b":
-            result = bool(value.b)
-        elif value_case == "i":
-            result = value.i
-        elif value_case == "d":
-            result = value.d
-        elif value_case == "l":
-            result = Location.decode(value.l)
+        if value_case == "string":
+            result = value.string
+        elif value_case == "boolean":
+            result = bool(value.boolean)
+        elif value_case == "integer":
+            result = value.integer
+        elif value_case == "double":
+            result = value.double
+        elif value_case == "location":
+            result = Location.decode(value.location)
         else:
             raise ValueError(
-                f"Incorrect value. Expected either of ['s', 'b', 'i', 'd', 'l']. Found {value_case}."
+                f"Incorrect value. Expected either of ['string', 'boolean', 'integer', 'double', 'location']. Found {value_case}."
             )
 
         return result
@@ -731,31 +731,31 @@ class ConstraintType:
             relation = models_pb2.Query.Relation()
 
             if self.type == ConstraintTypes.EQUAL:
-                relation.op = models_pb2.Query.Relation.EQ
+                relation.operator = models_pb2.Query.Relation.EQ
             elif self.type == ConstraintTypes.NOT_EQUAL:
-                relation.op = models_pb2.Query.Relation.NOTEQ
+                relation.operator = models_pb2.Query.Relation.NOTEQ
             elif self.type == ConstraintTypes.LESS_THAN:
-                relation.op = models_pb2.Query.Relation.LT
+                relation.operator = models_pb2.Query.Relation.LT
             elif self.type == ConstraintTypes.LESS_THAN_EQ:
-                relation.op = models_pb2.Query.Relation.LTEQ
+                relation.operator = models_pb2.Query.Relation.LTEQ
             elif self.type == ConstraintTypes.GREATER_THAN:
-                relation.op = models_pb2.Query.Relation.GT
+                relation.operator = models_pb2.Query.Relation.GT
             elif self.type == ConstraintTypes.GREATER_THAN_EQ:
-                relation.op = models_pb2.Query.Relation.GTEQ
+                relation.operator = models_pb2.Query.Relation.GTEQ
 
             query_value = models_pb2.Query.Value()
 
             if isinstance(self.value, bool):
-                query_value.b = self.value
+                query_value.boolean = self.value
             elif isinstance(self.value, int):
-                query_value.i = self.value
+                query_value.integer = self.value
             elif isinstance(self.value, float):
-                query_value.d = self.value
+                query_value.double = self.value
             elif isinstance(self.value, str):
-                query_value.s = self.value
+                query_value.string = self.value
             elif isinstance(self.value, Location):
-                query_value.l.CopyFrom(self.value.encode())
-            relation.val.CopyFrom(query_value)
+                query_value.location.CopyFrom(self.value.encode())
+            relation.value.CopyFrom(query_value)
 
             encoding = relation
 
@@ -766,54 +766,54 @@ class ConstraintType:
                 values = models_pb2.Query.StringPair()
                 values.first = self.value[0]
                 values.second = self.value[1]
-                range_.s.CopyFrom(values)
+                range_.string_pair.CopyFrom(values)
             elif type(self.value[0]) == int:
                 values = models_pb2.Query.IntPair()
                 values.first = self.value[0]
                 values.second = self.value[1]
-                range_.i.CopyFrom(values)
+                range_.integer_pair.CopyFrom(values)
             elif type(self.value[0]) == float:
                 values = models_pb2.Query.DoublePair()
                 values.first = self.value[0]
                 values.second = self.value[1]
-                range_.d.CopyFrom(values)
+                range_.double_pair.CopyFrom(values)
             elif type(self.value[0]) == Location:
                 values = models_pb2.Query.LocationPair()
                 values.first.CopyFrom(self.value[0].encode())
                 values.second.CopyFrom(self.value[1].encode())
-                range_.l.CopyFrom(values)
+                range_.location_pair.CopyFrom(values)
             encoding = range_
 
         elif self.type == ConstraintTypes.IN or self.type == ConstraintTypes.NOT_IN:
             set_ = models_pb2.Query.Set()
 
             if self.type == ConstraintTypes.IN:
-                set_.op = models_pb2.Query.Set.IN
+                set_.operator = models_pb2.Query.Set.IN
             elif self.type == ConstraintTypes.NOT_IN:
-                set_.op = models_pb2.Query.Set.NOTIN
+                set_.operator = models_pb2.Query.Set.NOTIN
 
             value_type = type(self.value[0]) if len(self.value) > 0 else str
 
             if value_type == str:
                 values = models_pb2.Query.Set.Values.Strings()
-                values.vals.extend(self.value)
-                set_.vals.s.CopyFrom(values)
+                values.values.extend(self.value)
+                set_.values.string.CopyFrom(values)
             elif value_type == bool:
                 values = models_pb2.Query.Set.Values.Bools()
-                values.vals.extend(self.value)
-                set_.vals.b.CopyFrom(values)
+                values.values.extend(self.value)
+                set_.values.boolean.CopyFrom(values)
             elif value_type == int:
                 values = models_pb2.Query.Set.Values.Ints()
-                values.vals.extend(self.value)
-                set_.vals.i.CopyFrom(values)
+                values.values.extend(self.value)
+                set_.values.integer.CopyFrom(values)
             elif value_type == float:
                 values = models_pb2.Query.Set.Values.Doubles()
-                values.vals.extend(self.value)
-                set_.vals.d.CopyFrom(values)
+                values.values.extend(self.value)
+                set_.values.double.CopyFrom(values)
             elif value_type == Location:
                 values = models_pb2.Query.Set.Values.Locations()
-                values.vals.extend([value.encode() for value in self.value])
-                set_.vals.l.CopyFrom(values)
+                values.values.extend([value.encode() for value in self.value])
+                set_.values.location.CopyFrom(values)
 
             encoding = set_
 
@@ -852,87 +852,97 @@ class ConstraintType:
         }
 
         if category == "relation":
-            relation_enum = relation_type_from_pb[constraint_type_protobuf_object.op]
-            value_case = constraint_type_protobuf_object.val.WhichOneof("value")
-            if value_case == "s":
+            relation_enum = relation_type_from_pb[
+                constraint_type_protobuf_object.operator
+            ]
+            value_case = constraint_type_protobuf_object.value.WhichOneof("value")
+            if value_case == "string":
                 decoding = ConstraintType(
-                    relation_enum, constraint_type_protobuf_object.val.s
+                    relation_enum, constraint_type_protobuf_object.value.string
                 )
-            elif value_case == "b":
+            elif value_case == "boolean":
                 decoding = ConstraintType(
-                    relation_enum, constraint_type_protobuf_object.val.b
+                    relation_enum, constraint_type_protobuf_object.value.boolean
                 )
-            elif value_case == "i":
+            elif value_case == "integer":
                 decoding = ConstraintType(
-                    relation_enum, constraint_type_protobuf_object.val.i
+                    relation_enum, constraint_type_protobuf_object.value.integer
                 )
-            elif value_case == "d":
+            elif value_case == "double":
                 decoding = ConstraintType(
-                    relation_enum, constraint_type_protobuf_object.val.d
+                    relation_enum, constraint_type_protobuf_object.value.double
                 )
-            elif value_case == "l":
+            elif value_case == "location":
                 decoding = ConstraintType(
                     relation_enum,
-                    Location.decode(constraint_type_protobuf_object.val.l),
+                    Location.decode(constraint_type_protobuf_object.value.location),
                 )
         elif category == "range":
             range_enum = ConstraintTypes.WITHIN
             range_case = constraint_type_protobuf_object.WhichOneof("pair")
-            if range_case == "s":
+            if range_case == "string_pair":
                 decoding = ConstraintType(
                     range_enum,
                     (
-                        constraint_type_protobuf_object.s.first,
-                        constraint_type_protobuf_object.s.second,
+                        constraint_type_protobuf_object.string_pair.first,
+                        constraint_type_protobuf_object.string_pair.second,
                     ),
                 )
-            elif range_case == "i":
+            elif range_case == "integer_pair":
                 decoding = ConstraintType(
                     range_enum,
                     (
-                        constraint_type_protobuf_object.i.first,
-                        constraint_type_protobuf_object.i.second,
+                        constraint_type_protobuf_object.integer_pair.first,
+                        constraint_type_protobuf_object.integer_pair.second,
                     ),
                 )
-            elif range_case == "d":
+            elif range_case == "double_pair":
                 decoding = ConstraintType(
                     range_enum,
                     (
-                        constraint_type_protobuf_object.d.first,
-                        constraint_type_protobuf_object.d.second,
+                        constraint_type_protobuf_object.double_pair.first,
+                        constraint_type_protobuf_object.double_pair.second,
                     ),
                 )
-            elif range_case == "l":
+            elif range_case == "location_pair":
                 decoding = ConstraintType(
                     range_enum,
                     (
-                        Location.decode(constraint_type_protobuf_object.l.first),
-                        Location.decode(constraint_type_protobuf_object.l.second),
+                        Location.decode(
+                            constraint_type_protobuf_object.location_pair.first
+                        ),
+                        Location.decode(
+                            constraint_type_protobuf_object.location_pair.second
+                        ),
                     ),
                 )
         elif category == "set":
-            set_enum = set_type_from_pb[constraint_type_protobuf_object.op]
-            value_case = constraint_type_protobuf_object.vals.WhichOneof("values")
-            if value_case == "s":
+            set_enum = set_type_from_pb[constraint_type_protobuf_object.operator]
+            value_case = constraint_type_protobuf_object.values.WhichOneof("values")
+            if value_case == "string":
                 decoding = ConstraintType(
-                    set_enum, tuple(constraint_type_protobuf_object.vals.s.vals)
+                    set_enum,
+                    tuple(constraint_type_protobuf_object.values.string.values),
                 )
-            elif value_case == "b":
+            elif value_case == "boolean":
                 decoding = ConstraintType(
-                    set_enum, tuple(constraint_type_protobuf_object.vals.b.vals)
+                    set_enum,
+                    tuple(constraint_type_protobuf_object.values.boolean.values),
                 )
-            elif value_case == "i":
+            elif value_case == "integer":
                 decoding = ConstraintType(
-                    set_enum, tuple(constraint_type_protobuf_object.vals.i.vals)
+                    set_enum,
+                    tuple(constraint_type_protobuf_object.values.integer.values),
                 )
-            elif value_case == "d":
+            elif value_case == "double":
                 decoding = ConstraintType(
-                    set_enum, tuple(constraint_type_protobuf_object.vals.d.vals)
+                    set_enum,
+                    tuple(constraint_type_protobuf_object.values.double.values),
                 )
-            elif value_case == "l":
+            elif value_case == "location":
                 locations = [
                     Location.decode(loc)
-                    for loc in constraint_type_protobuf_object.vals.l.vals
+                    for loc in constraint_type_protobuf_object.values.location.values
                 ]
                 decoding = ConstraintType(set_enum, locations)
         elif category == "distance":
@@ -987,18 +997,22 @@ class ConstraintExpr(ABC):
 
         :return: the matching protocol buffer object
         """
-        constraint_expr_pb = models_pb2.Query.ConstraintExpr()
+        constraint_expression_pb = models_pb2.Query.ConstraintExpr()
         expression_pb = expression.encode()
         if isinstance(expression, And):
-            constraint_expr_pb.and_.CopyFrom(expression_pb)
+            constraint_expression_pb.and_.CopyFrom(expression_pb)
         elif isinstance(expression, Or):
-            constraint_expr_pb.or_.CopyFrom(expression_pb)
+            constraint_expression_pb.or_.CopyFrom(expression_pb)
         elif isinstance(expression, Not):
-            constraint_expr_pb.not_.CopyFrom(expression_pb)
+            constraint_expression_pb.not_.CopyFrom(expression_pb)
         elif isinstance(expression, Constraint):
-            constraint_expr_pb.constraint.CopyFrom(expression_pb)
+            constraint_expression_pb.constraint.CopyFrom(expression_pb)
+        else:
+            raise ValueError(
+                f"Invalid expression type. Expected either of 'And', 'Or', 'Not', 'Constraint'. Found {type(expression)}."
+            )
 
-        return constraint_expr_pb
+        return constraint_expression_pb
 
     @staticmethod
     def _decode(constraint_expression_protobuf_object) -> "ConstraintExpr":
@@ -1047,7 +1061,7 @@ class And(ConstraintExpr):
         :param description: the description to check.
         :return: True if the description satisfy the constraint expression, False otherwise.
         """
-        return all(expr.check(description) for expr in self.constraints)
+        return all(expression.check(description) for expression in self.constraints)
 
     def is_valid(self, data_model: DataModel) -> bool:
         """
@@ -1084,10 +1098,10 @@ class And(ConstraintExpr):
         :return: the matching protocol buffer object
         """
         and_pb = models_pb2.Query.ConstraintExpr.And()
-        constraint_expr_pbs = [
+        constraint_expression_pbs = [
             ConstraintExpr._encode(constraint) for constraint in self.constraints
         ]
-        and_pb.expr.extend(constraint_expr_pbs)
+        and_pb.expression.extend(constraint_expression_pbs)
         return and_pb
 
     @classmethod
@@ -1098,8 +1112,8 @@ class And(ConstraintExpr):
         :param and_protobuf_object: the protocol buffer object corresponding with this class.
         :return: A new instance of this class matching the protocol buffer object
         """
-        expr = [ConstraintExpr._decode(c) for c in and_protobuf_object.expr]
-        return cls(expr)
+        expression = [cls._decode(c) for c in and_protobuf_object.expression]
+        return cls(expression)
 
 
 class Or(ConstraintExpr):
@@ -1121,7 +1135,7 @@ class Or(ConstraintExpr):
         :param description: the description to check.
         :return: True if the description satisfy the constraint expression, False otherwise.
         """
-        return any(expr.check(description) for expr in self.constraints)
+        return any(expression.check(description) for expression in self.constraints)
 
     def is_valid(self, data_model: DataModel) -> bool:
         """
@@ -1158,10 +1172,10 @@ class Or(ConstraintExpr):
         :return: the matching protocol buffer object
         """
         or_pb = models_pb2.Query.ConstraintExpr.Or()
-        constraint_expr_pbs = [
+        constraint_expression_pbs = [
             ConstraintExpr._encode(constraint) for constraint in self.constraints
         ]
-        or_pb.expr.extend(constraint_expr_pbs)
+        or_pb.expression.extend(constraint_expression_pbs)
         return or_pb
 
     @classmethod
@@ -1172,8 +1186,8 @@ class Or(ConstraintExpr):
         :param or_protobuf_object: the protocol buffer object corresponding with this class.
         :return: A new instance of this class matching the protocol buffer object
         """
-        expr = [ConstraintExpr._decode(c) for c in or_protobuf_object.expr]
-        return cls(expr)
+        expression = [ConstraintExpr._decode(c) for c in or_protobuf_object.expression]
+        return cls(expression)
 
 
 class Not(ConstraintExpr):
@@ -1216,8 +1230,8 @@ class Not(ConstraintExpr):
         :return: the matching protocol buffer object
         """
         not_pb = models_pb2.Query.ConstraintExpr.Not()
-        constraint_expr_pb = ConstraintExpr._encode(self.constraint)
-        not_pb.expr.CopyFrom(constraint_expr_pb)
+        constraint_expression_pb = ConstraintExpr._encode(self.constraint)
+        not_pb.expression.CopyFrom(constraint_expression_pb)
         return not_pb
 
     @classmethod
@@ -1228,7 +1242,7 @@ class Not(ConstraintExpr):
         :param not_protobuf_object: the protocol buffer object corresponding with this class.
         :return: A new instance of this class matching the protocol buffer object
         """
-        expression = ConstraintExpr._decode(not_protobuf_object.expr)
+        expression = ConstraintExpr._decode(not_protobuf_object.expression)
         return cls(expression)
 
 
@@ -1366,7 +1380,7 @@ class Constraint(ConstraintExpr):
             constraint.distance.CopyFrom(self.constraint_type.encode())
         else:
             raise ValueError(
-                "The constraint type is not valid: {}".format(self.constraint_type)
+                f"Incorrect constraint type. Expected a ConstraintTypes. Found {self.constraint_type.type}."
             )
         return constraint
 
@@ -1487,10 +1501,10 @@ class Query:
         :return: the matching protocol buffer object
         """
         query = models_pb2.Query.Model()
-        constraint_expr_pbs = [
+        constraint_expression_pbs = [
             ConstraintExpr._encode(constraint) for constraint in self.constraints
         ]
-        query.constraints.extend(constraint_expr_pbs)
+        query.constraints.extend(constraint_expression_pbs)
 
         if self.model is not None:
             query.model.CopyFrom(self.model.encode())
