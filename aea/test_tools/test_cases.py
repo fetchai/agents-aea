@@ -93,7 +93,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     stdout: Dict[int, str]  # dict of process.pid: string stdout
     stderr: Dict[int, str]  # dict of process.pid: string stderr
     _is_teardown_class_called: bool = False
-    capture_log: bool = True
+    capture_log: bool = False
     cli_log_options: List[str] = []
 
     @classmethod
