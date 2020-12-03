@@ -441,8 +441,8 @@ class LedgerApiHandler(Handler):
             ledger_api_msg.transaction_receipt.receipt,
         )
         tx_behaviour = cast(TransactionBehaviour, self.context.behaviours.transaction)
-        tx_behaviour.finish_processing(ledger_api_dialogue)
         if is_settled:
+            tx_behaviour.finish_processing(ledger_api_dialogue)
             ledger_api_msg_ = cast(
                 Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
@@ -466,6 +466,7 @@ class LedgerApiHandler(Handler):
             )
             self._send_confirmation_details_to_awx_aeas(response.to)
         else:
+            tx_behaviour.failed_processing(ledger_api_dialogue)
             self.context.logger.info(
                 "transaction_receipt={} not settled or not valid, aborting".format(
                     ledger_api_msg.transaction_receipt

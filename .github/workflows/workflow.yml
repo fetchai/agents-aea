@@ -237,7 +237,8 @@ jobs:
       run: |
         pip install tox
         # brew install protobuf
-        brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
+        brew install protobuf --version 3.11.4
+        # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
     - if: matrix.os == 'windows-latest'
       name: Install dependencies (windows-latest)
       env:
