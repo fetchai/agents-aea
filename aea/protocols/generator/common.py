@@ -26,7 +26,11 @@ import sys
 from typing import Tuple
 
 from aea.configurations.base import ProtocolSpecification
-from aea.configurations.constants import DEFAULT_PROTOCOL_CONFIG_FILE, PACKAGES
+from aea.configurations.constants import (
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    LIBPROTOC_VERSION,
+    PACKAGES,
+)
 from aea.configurations.loader import ConfigLoader
 
 
@@ -320,6 +324,13 @@ def check_prerequisites() -> None:
     if not is_installed("protoc"):
         raise FileNotFoundError(
             "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
+        )
+
+    result = subprocess.run(["protoc", "--version"], stdout=subprocess.PIPE, check=True)
+    result_str = result.stdout.decode("utf-8")
+    if LIBPROTOC_VERSION not in result_str:
+        raise FileNotFoundError(
+            f"Invalid version for protoc. Found: {result_str}. Required: {LIBPROTOC_VERSION}."
         )
 
 

@@ -46,6 +46,7 @@ from pathlib import Path
 from typing import Iterator, List, Match, Optional, Tuple, cast
 
 from aea.configurations.base import ComponentType, ProtocolSpecification
+from aea.configurations.constants import LIBPROTOC_VERSION
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from scripts.common import check_working_tree_is_dirty
 
@@ -328,6 +329,13 @@ def _check_preliminaries():
         enforce(False, "'aea' package not installed.")
     enforce(shutil.which("black") is not None, "black command line tool not found.")
     enforce(shutil.which("isort") is not None, "isort command line tool not found.")
+    enforce(shutil.which("protoc") is not None, "protoc command line tool not found.")
+    result = subprocess.run(["protoc", "--version"], stdout=subprocess.PIPE, check=True)
+    result_str = result.stdout.decode("utf-8")
+    enforce(
+        LIBPROTOC_VERSION in result_str,
+        f"Invalid version for protoc. Found: {result_str}. Required: {LIBPROTOC_VERSION}.",
+    )
 
 
 def _process_test_protocol(specification: Path, package_path: Path) -> None:
