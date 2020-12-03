@@ -11,7 +11,7 @@ fingerprint:
   behaviours.py: QmTun3m4oHdfkCvFpjECC93hsgRwDXPB9zdyVaVe4GM1ZF
   dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU
   handlers.py: QmV2QqxrGyLMzDV2DBRuWYXJxTfq5DsprmyazEEiN4CXWX
-  strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
+  strategy.py: QmbVVMspbjA5umJhw33vyCC6vkrgpfZ5qybbrs4H7na2W7
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.10.0
@@ -69,6 +69,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
+      max_quantity: 100
       max_tx_fee: 1
       max_unit_price: 20
       min_quantity: 1
