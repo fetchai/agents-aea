@@ -26,8 +26,8 @@ from enum import Enum
 from math import asin, cos, radians, sin, sqrt
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
 
-from aea.exceptions import enforce
 import aea.helpers.search.models_pb2 as models_pb2
+from aea.exceptions import enforce
 
 
 _default_logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ class Location:
             self.latitude, self.longitude
         )
 
-    def encode(self) -> models_pb2.Query.Location():
+    def encode(self) -> models_pb2.Query.Location:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -122,7 +122,7 @@ class Attribute:
         int: models_pb2.Query.Attribute.INT,
         float: models_pb2.Query.Attribute.DOUBLE,
         str: models_pb2.Query.Attribute.STRING,
-        Location: models_pb2.Query.Attribute.LOCATION
+        Location: models_pb2.Query.Attribute.LOCATION,
     }
 
     def __init__(
@@ -160,7 +160,7 @@ class Attribute:
             self.name, self.type, self.is_required
         )
 
-    def encode(self) -> models_pb2.Query.Attribute():
+    def encode(self) -> models_pb2.Query.Attribute:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -182,10 +182,15 @@ class Attribute:
         :param attribute_protobuf_object: the protocol buffer object corresponding with this class.
         :return: A new instance of this class matching the protocol buffer object
         """
-        return cls(attribute_protobuf_object.name,
-                   dict(map(reversed, cls._attribute_type_to_pb.items()))[attribute_protobuf_object.type],
-                   attribute_protobuf_object.required,
-                   attribute_protobuf_object.description if attribute_protobuf_object.description else None)
+        _pb_to_attribute_type = {v: k for k, v in cls._attribute_type_to_pb.items()}
+        return cls(
+            attribute_protobuf_object.name,
+            _pb_to_attribute_type[attribute_protobuf_object.type],
+            attribute_protobuf_object.required,
+            attribute_protobuf_object.description
+            if attribute_protobuf_object.description
+            else None,
+        )
 
 
 class DataModel:
@@ -230,7 +235,7 @@ class DataModel:
             self.name, {a.name: str(a) for a in self.attributes}, self.description
         )
 
-    def encode(self) -> models_pb2.Query.DataModel():
+    def encode(self) -> models_pb2.Query.DataModel:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -252,7 +257,10 @@ class DataModel:
         :return: A new instance of this class matching the protocol buffer object
         """
         name = data_model_protobuf_object.name
-        attributes = [Attribute.decode(attr_pb) for attr_pb in data_model_protobuf_object.attributes]
+        attributes = [
+            Attribute.decode(attr_pb)
+            for attr_pb in data_model_protobuf_object.attributes
+        ]
         description = data_model_protobuf_object.description
         return cls(name, attributes, description)
 
@@ -398,11 +406,11 @@ class Description:
         elif type(value) == str:
             kv.value.s = value
         elif type(value) == Location:
-            kv.value.l.CopyFrom(value.encode())
+            kv.value.l.CopyFrom(value.encode())  # type: ignore
 
         return kv
 
-    def encode(self) -> models_pb2.Query.Instance():
+    def encode(self) -> models_pb2.Query.Instance:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -410,27 +418,37 @@ class Description:
         """
         instance = models_pb2.Query.Instance()
         instance.model.CopyFrom(self.data_model.encode())
-        instance.values.extend([self._to_key_value_pb(key, value) for key, value in self.values.items()])
+        instance.values.extend(
+            [self._to_key_value_pb(key, value) for key, value in self.values.items()]
+        )
         return instance
 
     @staticmethod
     def _extract_value(value: models_pb2.Query.Value) -> ATTRIBUTE_TYPES:
         """
         From a Protobuf query value object to attribute type.
+
         :param value: an instance of models_pb2.Query.Value.
         :return: the associated attribute type.
         """
         value_case = value.WhichOneof("value")
+
         if value_case == "s":
-            return value.s
+            result = value.s
         elif value_case == "b":
-            return bool(value.b)
+            result = bool(value.b)
         elif value_case == "i":
-            return value.i
+            result = value.i
         elif value_case == "d":
-            return value.d
+            result = value.d
         elif value_case == "l":
-            return Location.decode(value.l)
+            result = Location.decode(value.l)
+        else:
+            raise ValueError(
+                f"Incorrect value. Expected either of ['s', 'b', 'i', 'd', 'l']. Found {value_case}."
+            )
+
+        return result
 
     @classmethod
     def decode(cls, description_protobuf_object) -> "Description":
@@ -441,7 +459,12 @@ class Description:
         :return: A new instance of this class matching the protocol buffer object
         """
         model = DataModel.decode(description_protobuf_object.model)
-        values = dict([(attr.key, cls._extract_value(attr.value)) for attr in description_protobuf_object.values])
+        values = dict(
+            [
+                (attr.key, cls._extract_value(attr.value))
+                for attr in description_protobuf_object.values
+            ]
+        )
         return cls(values, model)
 
 
@@ -538,8 +561,8 @@ class ConstraintType:
                 )
             elif self.type == ConstraintTypes.WITHIN:
                 enforce(
-                    isinstance(self.value, (list, tuple)),
-                    f"Expected one of type in (list, tuple), got {self.value}",
+                    isinstance(self.value, tuple),
+                    f"Expected tuple, got {type(self.value)}",
                 )
                 enforce(
                     len(self.value) == 2, f"Expected length=2, got {len(self.value)}"
@@ -552,8 +575,8 @@ class ConstraintType:
                 )
             elif self.type == ConstraintTypes.IN:
                 enforce(
-                    isinstance(self.value, (list, tuple, set)),
-                    f"Expected one of type in (list, tuple, set), got {self.value}",
+                    isinstance(self.value, tuple),
+                    f"Expected tuple, got {type(self.value)}",
                 )
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
@@ -563,8 +586,8 @@ class ConstraintType:
                     )
             elif self.type == ConstraintTypes.NOT_IN:
                 enforce(
-                    isinstance(self.value, (list, tuple, set)),
-                    f"Expected one of type in (list, tuple, set), got {self.value}",
+                    isinstance(self.value, tuple),
+                    f"Expected tuple, got {type(self.value)}",
                 )
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
@@ -574,8 +597,8 @@ class ConstraintType:
                     )
             elif self.type == ConstraintTypes.DISTANCE:
                 enforce(
-                    isinstance(self.value, (list, tuple)),
-                    f"Expected one of type in (list, tuple), got {self.value}",
+                    isinstance(self.value, tuple),
+                    f"Expected tuple, got {type(self.value)}",
                 )
                 enforce(
                     len(self.value) == 2, f"Expected length=2, got {len(self.value)}"
@@ -804,7 +827,7 @@ class ConstraintType:
         return encoding
 
     @classmethod
-    def decode(cls, constraint_type_protobuf_object, category: str) -> Optional["ConstraintType"]:
+    def decode(cls, constraint_type_protobuf_object, category: str) -> "ConstraintType":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -813,56 +836,104 @@ class ConstraintType:
 
         :return: A new instance of this class matching the protocol buffer object
         """
-        decoding = None
+        decoding: ConstraintType
 
-        type_from_pb = {
-            models_pb2.Query.Relation.GTEQ: ConstraintTypes.GREATER_THAN_EQ,
-            models_pb2.Query.Relation.GT: ConstraintTypes.GREATER_THAN,
-            models_pb2.Query.Relation.LTEQ: ConstraintTypes.LESS_THAN_EQ,
-            models_pb2.Query.Relation.LT: ConstraintTypes.LESS_THAN,
-            models_pb2.Query.Relation.NOTEQ: ConstraintTypes.NOT_EQUAL,
-            models_pb2.Query.Relation.EQ: ConstraintTypes.EQUAL,
-            models_pb2.Query.Set.IN: ConstraintTypes.IN,
-            models_pb2.Query.Set.NOTIN: ConstraintTypes.NOT_IN
+        relation_type_from_pb = {
+            models_pb2.Query.Relation.Operator.GTEQ: ConstraintTypes.GREATER_THAN_EQ,
+            models_pb2.Query.Relation.Operator.GT: ConstraintTypes.GREATER_THAN,
+            models_pb2.Query.Relation.Operator.LTEQ: ConstraintTypes.LESS_THAN_EQ,
+            models_pb2.Query.Relation.Operator.LT: ConstraintTypes.LESS_THAN,
+            models_pb2.Query.Relation.Operator.NOTEQ: ConstraintTypes.NOT_EQUAL,
+            models_pb2.Query.Relation.Operator.EQ: ConstraintTypes.EQUAL,
+        }
+        set_type_from_pb = {
+            models_pb2.Query.Set.Operator.IN: ConstraintTypes.IN,
+            models_pb2.Query.Set.Operator.NOTIN: ConstraintTypes.NOT_IN,
         }
 
         if category == "relation":
-            relation_enum = type_from_pb[constraint_type_protobuf_object.op]
+            relation_enum = relation_type_from_pb[constraint_type_protobuf_object.op]
             value_case = constraint_type_protobuf_object.val.WhichOneof("value")
             if value_case == "s":
-                decoding = ConstraintType(relation_enum, constraint_type_protobuf_object.val.s)
+                decoding = ConstraintType(
+                    relation_enum, constraint_type_protobuf_object.val.s
+                )
             elif value_case == "b":
-                decoding = ConstraintType(relation_enum, constraint_type_protobuf_object.val.b)
+                decoding = ConstraintType(
+                    relation_enum, constraint_type_protobuf_object.val.b
+                )
             elif value_case == "i":
-                decoding = ConstraintType(relation_enum, constraint_type_protobuf_object.val.i)
+                decoding = ConstraintType(
+                    relation_enum, constraint_type_protobuf_object.val.i
+                )
             elif value_case == "d":
-                decoding = ConstraintType(relation_enum, constraint_type_protobuf_object.val.d)
+                decoding = ConstraintType(
+                    relation_enum, constraint_type_protobuf_object.val.d
+                )
             elif value_case == "l":
-                decoding = ConstraintType(relation_enum, Location.decode(constraint_type_protobuf_object.val.l))
+                decoding = ConstraintType(
+                    relation_enum,
+                    Location.decode(constraint_type_protobuf_object.val.l),
+                )
         elif category == "range":
             range_enum = ConstraintTypes.WITHIN
             range_case = constraint_type_protobuf_object.WhichOneof("pair")
             if range_case == "s":
-                decoding = ConstraintType(range_enum, (constraint_type_protobuf_object.s.first, constraint_type_protobuf_object.s.second))
+                decoding = ConstraintType(
+                    range_enum,
+                    (
+                        constraint_type_protobuf_object.s.first,
+                        constraint_type_protobuf_object.s.second,
+                    ),
+                )
             elif range_case == "i":
-                decoding = ConstraintType(range_enum, (constraint_type_protobuf_object.i.first, constraint_type_protobuf_object.i.second))
+                decoding = ConstraintType(
+                    range_enum,
+                    (
+                        constraint_type_protobuf_object.i.first,
+                        constraint_type_protobuf_object.i.second,
+                    ),
+                )
             elif range_case == "d":
-                decoding = ConstraintType(range_enum, (constraint_type_protobuf_object.d.first, constraint_type_protobuf_object.d.second))
+                decoding = ConstraintType(
+                    range_enum,
+                    (
+                        constraint_type_protobuf_object.d.first,
+                        constraint_type_protobuf_object.d.second,
+                    ),
+                )
             elif range_case == "l":
-                decoding = ConstraintType(range_enum, (Location.decode(constraint_type_protobuf_object.l.first), Location.decode(constraint_type_protobuf_object.l.second)))
+                decoding = ConstraintType(
+                    range_enum,
+                    (
+                        Location.decode(constraint_type_protobuf_object.l.first),
+                        Location.decode(constraint_type_protobuf_object.l.second),
+                    ),
+                )
         elif category == "set":
-            set_enum = type_from_pb[constraint_type_protobuf_object.op]
+            set_enum = set_type_from_pb[constraint_type_protobuf_object.op]
             value_case = constraint_type_protobuf_object.vals.WhichOneof("values")
             if value_case == "s":
-                decoding = ConstraintType(set_enum, constraint_type_protobuf_object.vals.s.vals)
+                decoding = ConstraintType(
+                    set_enum, tuple(constraint_type_protobuf_object.vals.s.vals)
+                )
             elif value_case == "b":
-                decoding = ConstraintType(set_enum, constraint_type_protobuf_object.vals.b.vals)
+                decoding = ConstraintType(
+                    set_enum, tuple(constraint_type_protobuf_object.vals.b.vals)
+                )
             elif value_case == "i":
-                decoding = ConstraintType(set_enum, constraint_type_protobuf_object.vals.i.vals)
+                decoding = ConstraintType(
+                    set_enum, tuple(constraint_type_protobuf_object.vals.i.vals)
+                )
             elif value_case == "d":
-                decoding = ConstraintType(set_enum, constraint_type_protobuf_object.vals.d.vals)
+                decoding = ConstraintType(
+                    set_enum, tuple(constraint_type_protobuf_object.vals.d.vals)
+                )
             elif value_case == "l":
-                locations = [Location.decode(loc) for loc in constraint_type_protobuf_object.vals.l.vals]
+                locations = [
+                    Location.decode(loc)
+                    for loc in constraint_type_protobuf_object.vals.l.vals
+                ]
                 decoding = ConstraintType(set_enum, locations)
         elif category == "distance":
             distance_enum = ConstraintTypes.DISTANCE
@@ -870,7 +941,9 @@ class ConstraintType:
             distance = constraint_type_protobuf_object.distance
             decoding = ConstraintType(distance_enum, (center, distance))
         else:
-            raise ValueError(f"Incorrect category. Expected either 'relation', 'range', 'set', or 'distance'. Found {category}.")
+            raise ValueError(
+                f"Incorrect category. Expected either 'relation', 'range', 'set', or 'distance'. Found {category}."
+            )
         return decoding
 
 
@@ -908,7 +981,7 @@ class ConstraintExpr(ABC):
         return None
 
     @staticmethod
-    def _encode(expression) -> models_pb2.Query.ConstraintExpr():
+    def _encode(expression) -> models_pb2.Query.ConstraintExpr:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -936,14 +1009,23 @@ class ConstraintExpr(ABC):
         :return: A new instance of this class matching the protocol buffer object
         """
         expression = constraint_expression_protobuf_object.WhichOneof("expression")
+
+        result: Optional[Union[And, Or, Not, Constraint]] = None
+
         if expression == "and_":
-            return And.decode(constraint_expression_protobuf_object.and_)
+            result = And.decode(constraint_expression_protobuf_object.and_)
         elif expression == "or_":
-            return Or.decode(constraint_expression_protobuf_object.or_)
+            result = Or.decode(constraint_expression_protobuf_object.or_)
         elif expression == "not_":
-            return Not.decode(constraint_expression_protobuf_object.not_)
+            result = Not.decode(constraint_expression_protobuf_object.not_)
         elif expression == "constraint":
-            return Constraint.decode(constraint_expression_protobuf_object.constraint)
+            result = Constraint.decode(constraint_expression_protobuf_object.constraint)
+        else:
+            raise ValueError(
+                f"Incorrect argument. Expected either of ['and_', 'or_', 'not_', 'constraint']. Found {expression}."
+            )
+
+        return result
 
 
 class And(ConstraintExpr):
@@ -956,6 +1038,7 @@ class And(ConstraintExpr):
         :param constraints: the list of constraints expression (in conjunction).
         """
         self.constraints = constraints
+        self.check_validity()
 
     def check(self, description: Description) -> bool:
         """
@@ -994,14 +1077,16 @@ class And(ConstraintExpr):
         """Compare with another object."""
         return isinstance(other, And) and self.constraints == other.constraints
 
-    def encode(self) -> models_pb2.Query.ConstraintExpr.And():
+    def encode(self) -> models_pb2.Query.ConstraintExpr.And:
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
         and_pb = models_pb2.Query.ConstraintExpr.And()
-        constraint_expr_pbs = [ConstraintExpr._encode(constraint) for constraint in self.constraints]
+        constraint_expr_pbs = [
+            ConstraintExpr._encode(constraint) for constraint in self.constraints
+        ]
         and_pb.expr.extend(constraint_expr_pbs)
         return and_pb
 
@@ -1027,6 +1112,7 @@ class Or(ConstraintExpr):
         :param constraints: the list of constraints expressions (in disjunction).
         """
         self.constraints = constraints
+        self.check_validity()
 
     def check(self, description: Description) -> bool:
         """
@@ -1065,14 +1151,16 @@ class Or(ConstraintExpr):
         """Compare with another object."""
         return isinstance(other, Or) and self.constraints == other.constraints
 
-    def encode(self) -> models_pb2.Query.ConstraintExpr.Or():
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Or:
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
         or_pb = models_pb2.Query.ConstraintExpr.Or()
-        constraint_expr_pbs = [ConstraintExpr._encode(constraint) for constraint in self.constraints]
+        constraint_expr_pbs = [
+            ConstraintExpr._encode(constraint) for constraint in self.constraints
+        ]
         or_pb.expr.extend(constraint_expr_pbs)
         return or_pb
 
@@ -1121,7 +1209,7 @@ class Not(ConstraintExpr):
         """Compare with another object."""
         return isinstance(other, Not) and self.constraint == other.constraint
 
-    def encode(self) -> models_pb2.Query.ConstraintExpr.Not():
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Not:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -1249,7 +1337,7 @@ class Constraint(ConstraintExpr):
             self.attribute_name, self.constraint_type
         )
 
-    def encode(self) -> models_pb2.Query.ConstraintExpr.Constraint():
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Constraint:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -1277,7 +1365,9 @@ class Constraint(ConstraintExpr):
         elif self.constraint_type.type == ConstraintTypes.DISTANCE:
             constraint.distance.CopyFrom(self.constraint_type.encode())
         else:
-            raise ValueError("The constraint type is not valid: {}".format(self.constraint_type))
+            raise ValueError(
+                "The constraint type is not valid: {}".format(self.constraint_type)
+            )
         return constraint
 
     @classmethod
@@ -1289,15 +1379,26 @@ class Constraint(ConstraintExpr):
         :return: A new instance of this class matching the protocol buffer object
         """
         constraint_case = constraint_protobuf_object.WhichOneof("constraint")
-        constraint_type = None
         if constraint_case == "relation":
-            constraint_type = ConstraintType.decode(constraint_protobuf_object.relation, "relation")
+            constraint_type = ConstraintType.decode(
+                constraint_protobuf_object.relation, "relation"
+            )
         elif constraint_case == "set_":
-            constraint_type = ConstraintType.decode(constraint_protobuf_object.set_, "set")
+            constraint_type = ConstraintType.decode(
+                constraint_protobuf_object.set_, "set"
+            )
         elif constraint_case == "range_":
-            constraint_type = ConstraintType.decode(constraint_protobuf_object.range_, "range")
+            constraint_type = ConstraintType.decode(
+                constraint_protobuf_object.range_, "range"
+            )
         elif constraint_case == "distance":
-            constraint_type = ConstraintType.decode(constraint_protobuf_object.distance, "distance")
+            constraint_type = ConstraintType.decode(
+                constraint_protobuf_object.distance, "distance"
+            )
+        else:
+            raise ValueError(
+                f"Incorrect argument. Expected either of ['relation', 'set_', 'range_', 'distance']. Found {constraint_case}."
+            )
 
         return cls(constraint_protobuf_object.attribute_name, constraint_type)
 
@@ -1379,14 +1480,16 @@ class Query:
             [str(c) for c in self.constraints], self.model
         )
 
-    def encode(self) -> models_pb2.Query.Model():
+    def encode(self) -> models_pb2.Query.Model:
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
         query = models_pb2.Query.Model()
-        constraint_expr_pbs = [ConstraintExpr._encode(constraint) for constraint in self.constraints]
+        constraint_expr_pbs = [
+            ConstraintExpr._encode(constraint) for constraint in self.constraints
+        ]
         query.constraints.extend(constraint_expr_pbs)
 
         if self.model is not None:
@@ -1401,8 +1504,15 @@ class Query:
         :param query_protobuf_object: the protocol buffer object corresponding with this class.
         :return: A new instance of this class matching the protocol buffer object
         """
-        constraints = [ConstraintExpr._decode(c) for c in query_protobuf_object.constraints]
-        return cls(constraints, DataModel.decode(query_protobuf_object.model) if query_protobuf_object.HasField("model") else None)
+        constraints = [
+            ConstraintExpr._decode(c) for c in query_protobuf_object.constraints
+        ]
+        return cls(
+            constraints,
+            DataModel.decode(query_protobuf_object.model)
+            if query_protobuf_object.HasField("model")
+            else None,
+        )
 
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
