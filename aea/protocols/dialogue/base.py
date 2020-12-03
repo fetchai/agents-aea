@@ -1313,6 +1313,8 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
 class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
+    _keep_terminal_state_dialogues = True
+
     def __init__(
         self,
         self_address: Address,
@@ -1320,20 +1322,24 @@ class Dialogues:
         message_class: Type[Message],
         dialogue_class: Type[Dialogue],
         role_from_first_message: Callable[[Message, Address], Dialogue.Role],
-        keep_dialogues_in_terminal_state: bool = True,
+        keep_terminal_state_dialogues: Optional[bool] = None,
     ) -> None:
         """
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
         :param end_states: the list of dialogue endstates
+        :param keep_terminal_state_dialogues: specify do dialogues in terminal state should stay or not
+
         :return: None
         """
 
         self._dialogues_storage = PersistDialoguesStorage(self)
         self._self_address = self_address
         self._dialogue_stats = DialogueStats(end_states)
-        self._keep_dialogues_in_terminal_state = keep_dialogues_in_terminal_state
+
+        if keep_terminal_state_dialogues is not None:
+            self._keep_terminal_state_dialogues = keep_terminal_state_dialogues
 
         enforce(
             issubclass(message_class, Message),
@@ -1384,7 +1390,7 @@ class Dialogues:
     @property
     def is_keep_dialogues_in_terminal_state(self) -> bool:
         """Is requrired to keep dialogues in terminal state."""
-        return self._keep_dialogues_in_terminal_state  # pragma: nocover
+        return self._keep_terminal_state_dialogues  # pragma: nocover
 
     @property
     def self_address(self) -> Address:

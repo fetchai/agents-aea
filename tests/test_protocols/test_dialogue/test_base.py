@@ -108,6 +108,7 @@ class Dialogues(BaseDialogues):
         self_address: Address,
         message_class=DefaultMessage,
         dialogue_class=Dialogue,
+        keep_terminal_state_dialogues=None,
     ) -> None:
         """
         Initialize dialogues.
@@ -134,6 +135,7 @@ class Dialogues(BaseDialogues):
             message_class=message_class,
             dialogue_class=dialogue_class,
             role_from_first_message=role_from_first_message,
+            keep_terminal_state_dialogues=keep_terminal_state_dialogues,
         )
 
 
@@ -1930,3 +1932,15 @@ def test_find_caller_object():
 
     custom_object = CustomObject()
     assert custom_object.component is None
+
+
+def test_dialogues_keep_terminal_state_dialogues():
+    """Test Dialogues keep_terminal_state_dialogues option."""
+    initial = Dialogues._keep_terminal_state_dialogues
+    dialogues = Dialogues(Mock(), keep_terminal_state_dialogues=True)
+    assert dialogues.is_keep_dialogues_in_terminal_state is True
+    assert Dialogues._keep_terminal_state_dialogues == initial
+
+    dialogues = Dialogues(Mock(), keep_terminal_state_dialogues=False)
+    assert dialogues.is_keep_dialogues_in_terminal_state is False
+    assert Dialogues._keep_terminal_state_dialogues == initial

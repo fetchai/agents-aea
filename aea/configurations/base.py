@@ -2048,6 +2048,7 @@ class ProtocolSpecification(ProtocolConfig):
         license_: str = "",
         aea_version: str = "",
         description: str = "",
+        keep_terminal_state_dialogues: Optional[bool] = None,
     ):
         """Initialize a protocol specification configuration object."""
         super().__init__(
@@ -2061,6 +2062,7 @@ class ProtocolSpecification(ProtocolConfig):
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
         self._protobuf_snippets = {}  # type: Dict
         self._dialogue_config = {}  # type: Dict
+        self.keep_terminal_state_dialogues = keep_terminal_state_dialogues
 
     @property
     def protobuf_snippets(self) -> Dict:
@@ -2085,7 +2087,7 @@ class ProtocolSpecification(ProtocolConfig):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result: Dict[str, Any] = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -2099,10 +2101,22 @@ class ProtocolSpecification(ProtocolConfig):
                 },
             }
         )
+        if self.keep_terminal_state_dialogues is not None:
+            result["keep_terminal_state_dialogues"] = self.keep_terminal_state_dialogues
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
+        kwargs = {}
+
+        if obj.get("keep_terminal_state_dialogues") is not None:
+            kwargs = {
+                "keep_terminal_state_dialogues": cast(
+                    bool, obj.get("keep_terminal_state_dialogues")
+                )
+            }
+
         protocol_specification = ProtocolSpecification(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -2110,6 +2124,7 @@ class ProtocolSpecification(ProtocolConfig):
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             description=cast(str, obj.get("description", "")),
+            **kwargs,
         )
         for speech_act, speech_act_content in obj.get("speech_acts", {}).items():
             speech_act_content_config = SpeechActContentConfig.from_json(

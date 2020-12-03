@@ -183,7 +183,7 @@ class SkillContext:
     @property
     def storage(self) -> Optional[Storage]:
         """Get optional storage for agent."""
-        return self._get_agent_context().storage
+        return self._get_agent_context().storage  # pragma: nocover
 
     @property
     def message_in_queue(self) -> Queue:
@@ -313,7 +313,7 @@ class SkillComponent(ABC):
         return self.configuration.args
 
     @abstractmethod
-    def setup(self) -> None:
+    def setup(self) -> None:  # pragma: nocover
         """
         Implement the setup.
 
@@ -324,7 +324,7 @@ class SkillComponent(ABC):
             super_obj.setup()  # type: ignore  # pylint: disable=no-member
 
     @abstractmethod
-    def teardown(self) -> None:
+    def teardown(self) -> None:  # pragma: nocover
         """
         Implement the teardown.
 
@@ -577,13 +577,37 @@ class Handler(SkillComponent, ABC):
 class Model(SkillComponent, ABC):
     """This class implements an abstract model."""
 
-    def setup(self) -> None:
+    def __init__(
+        self,
+        name: str,
+        skill_context: SkillContext,
+        configuration: Optional[SkillComponentConfiguration] = None,
+        keep_terminal_state_dialogues: Optional[bool] = None,
+        **kwargs,
+    ) -> None:
+        """
+        Initialize a model.
+
+        :param name: the name of the component.
+        :param configuration: the configuration for the component.
+        :param skill_context: the skill context.
+        :param keep_terminal_state_dialogues: specify do dialogues in terminal state should stay or not
+
+        :return: None
+        """
+        super().__init__(name, skill_context, configuration=configuration, **kwargs)
+
+        # used by dialogues if mixed with the Model
+        if keep_terminal_state_dialogues is not None:
+            self._keep_terminal_state_dialogues = keep_terminal_state_dialogues
+
+    def setup(self) -> None:  # pragma: nocover
         """Set the class up."""
         super_obj = super()
         if hasattr(super_obj, "setup"):
             super_obj.setup()  # type: ignore  # pylint: disable=no-member
 
-    def teardown(self) -> None:
+    def teardown(self) -> None:  # pragma: nocover
         """Tear the class down."""
         super_obj = super()
         if hasattr(super_obj, "teardown"):

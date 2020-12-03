@@ -144,6 +144,9 @@
     },
     "storage_uri": {
       "type": "string"
+    },
+    "keep_terminal_state_dialogues": {
+      "type": "boolean"
     }
   }
 }

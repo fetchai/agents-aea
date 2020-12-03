@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the tests for the base classes for the skills."""
 import unittest.mock
 from pathlib import Path
@@ -30,6 +28,7 @@ import pytest
 
 import aea
 from aea.aea import AEA
+from aea.common import Address
 from aea.configurations.base import PublicId, SkillComponentConfiguration, SkillConfig
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
@@ -37,6 +36,7 @@ from aea.exceptions import AEAException, AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue, Dialogues
 from aea.registries.resources import Resources
 from aea.skills.base import (
     Behaviour,
@@ -581,3 +581,62 @@ class TestHandlerHandleExceptions:
         with pytest.raises(_StopRuntime):
             with mock.patch.object(self.handler, "handle", side_effect=_StopRuntime()):
                 self.handler.handle_wrapper("msg")
+
+
+class DefaultDialogues(Model, Dialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return 1  # type: ignore
+
+        Dialogues.__init__(
+            self,
+            self_address=self.context.agent_name,
+            end_states=[Mock()],  # type: ignore
+            message_class=Message,
+            dialogue_class=Dialogue,
+            role_from_first_message=role_from_first_message,
+        )
+
+
+def test_model_dialogues_keep_terminal_dialogues_option():
+    """Test Model Dialogues class."""
+    dialogues = DefaultDialogues(name="test", skill_context=Mock())
+    assert (
+        DefaultDialogues._keep_terminal_state_dialogues
+        == dialogues.is_keep_dialogues_in_terminal_state
+    )
+
+    dialogues = DefaultDialogues(
+        name="test", skill_context=Mock(), keep_terminal_state_dialogues=True
+    )
+    assert dialogues.is_keep_dialogues_in_terminal_state is True
+    assert (
+        DefaultDialogues._keep_terminal_state_dialogues
+        == Dialogues._keep_terminal_state_dialogues
+    )
+
+    dialogues = DefaultDialogues(
+        name="test", skill_context=Mock(), keep_terminal_state_dialogues=False
+    )
+    assert dialogues.is_keep_dialogues_in_terminal_state is False
+    assert (
+        DefaultDialogues._keep_terminal_state_dialogues
+        == Dialogues._keep_terminal_state_dialogues
+    )
