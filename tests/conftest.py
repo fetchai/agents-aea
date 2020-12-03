@@ -141,6 +141,8 @@ COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
 ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
 FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
 
+ETHEREUM_PRIVATE_KEY_TWO_FILE = "ethereum_private_key_two.txt"
+
 DEFAULT_AMOUNT = 1000000000000000000000
 
 # private keys with value on testnet
@@ -149,6 +151,9 @@ COSMOS_PRIVATE_KEY_PATH = os.path.join(
 )
 ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
+)
+ETHEREUM_PRIVATE_KEY_TWO_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_TWO_FILE
 )
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
@@ -1032,6 +1037,88 @@ def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
     )
     gas = ledger_api.api.eth.estimateGas(transaction=tx)
     tx["gas"] = gas
+    tx_signed = crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    contract_address = cast(Dict, receipt)["contractAddress"]
+    yield contract, contract_address
+
+
+@pytest.fixture()
+def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port):
+    """Instantiate an ERC20 contract."""
+    directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "fet_erc20")
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
+    configuration._directory = directory
+    configuration = cast(ContractConfig, configuration)
+
+    if str(configuration.public_id) not in contract_registry.specs:
+        # load contract into sys modules
+        Contract.from_config(configuration)
+
+    contract = contract_registry.make(str(configuration.public_id))
+
+    # get two accounts
+    account1 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    account2 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_TWO_PATH)
+
+    tx = contract.get_deploy_transaction(
+        ledger_api=ledger_api,
+        deployer_address=account1.address,
+        gas=5000000,
+        name="FetERC20Mock",
+        symbol="MFET",
+        initialSupply=int(1e23),
+        decimals_=18,
+    )
+    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    tx["gas"] = gas
+    tx_signed = account1.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    contract_address = cast(Dict, receipt)["contractAddress"]
+
+    # Transfer some MFET to another default account
+    tx = contract.get_transfer_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        from_address=account1.address,
+        gas=200000,
+        receiver=account2.address,
+        amount=int(1e20),
+    )
+    tx_signed = account1.sign_transaction(tx)
+    ledger_api.send_signed_transaction(tx_signed)
+
+    yield contract, contract_address
+
+
+@pytest.fixture()
+def oracle_contract(ledger_api, ganache, ganache_addr, ganache_port, erc20_contract):
+    """Instantiate a Fetch Oracle contract."""
+    directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "oracle")
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
+    configuration._directory = directory
+    configuration = cast(ContractConfig, configuration)
+
+    if str(configuration.public_id) not in contract_registry.specs:
+        # load contract into sys modules
+        Contract.from_config(configuration)
+
+    contract = contract_registry.make(str(configuration.public_id))
+
+    _, erc20_address = erc20_contract
+
+    # deploy contract
+    crypto = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+
+    tx = contract.get_deploy_transaction(
+        ledger_api=ledger_api,
+        deployer_address=crypto.address,
+        gas=5000000,
+        ERC20Address=erc20_address,
+        initialFee=10000000000,
+    )
     tx_signed = crypto.sign_transaction(tx)
     tx_receipt = ledger_api.send_signed_transaction(tx_signed)
     receipt = ledger_api.get_transaction_receipt(tx_receipt)

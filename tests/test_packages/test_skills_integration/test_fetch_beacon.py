@@ -19,14 +19,7 @@
 
 """This test module contains the integration test for the fetch beacon skill."""
 
-from pathlib import Path
-
-import requests
-import time
-
 from aea.test_tools.test_cases import AEATestCaseEmpty
-
-from tests.conftest import ROOT_DIR
 
 
 class TestFetchBeaconSkill(AEATestCaseEmpty):
@@ -47,7 +40,7 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
         check_strings = (
             "setting up FetchBeaconBehaviour",
             "Fetching random beacon from https://rpc-beaconworld.fetch.ai/block...",
-            "Beacon info:"
+            "Beacon info:",
         )
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
