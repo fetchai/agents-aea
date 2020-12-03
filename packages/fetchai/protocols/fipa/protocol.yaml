@@ -11,7 +11,7 @@ fingerprint:
   custom_types.py: Qmf72KRbkNsxxAHwMtkmJc5TRL23fU7AuzJAdSTftckwJQ
   dialogues.py: QmWaciW35ZTVeTeLWeyp3hjehKkWB5ZY7Di8N8cDH8Mjwb
   fipa.proto: Qmb19ojU7i5jUaRbURtnRSWQ6ENGniYuM3WtpRm6UYfpkU
-  fipa_pb2.py: QmXssYHavFiFKg9LZ7meXfSvrWm3VyWcmyd1pMn1Tjf1wM
+  fipa_pb2.py: QmRp7fUA4C38MsnGMrd1NDc39qRL9iod1Zc5MB1TJypR4P
   message.py: Qmb44KHjWH4yZNcs52CLmAmWdVwaKnM5MH6HNuDPNsdcZD
   serialization.py: QmaFFxUczHpcoPosV3aKfUAwnr9347Cjnotqby4GMdiM2S
 fingerprint_ignore_patterns: []

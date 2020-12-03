@@ -11,7 +11,7 @@ fingerprint:
   custom_types.py: QmSsjSb6NzKgqExpG26TfdEyJALFSosLYU5NcLxNVeDjWc
   dialogues.py: QmQNreriyJXkjyj1wTGHfEVqKJmo2e6r2P1k5ofPQZLG1s
   ledger_api.proto: QmTZbaYwaY57uQyYEz6B5qNrCkAJMDnokAzfWBX8BrRBEi
-  ledger_api_pb2.py: QmZ3s3Y9CDRA8AGJQKLG7aadwujjpChTTgCKfw44L8U4Es
+  ledger_api_pb2.py: QmbSRQTh59Zjy1kT1Rhra5WhxqwVTe5Xv5E7n4QC6v9qcp
   message.py: QmQvKh12WF5aT6zX1uUrx4e7TdT2C2bn4t9wniMn7SxQKh
   serialization.py: Qmbkyy4aNmAGAM7PReTMv9HbpwDQJmHnMsf4L46gWavBTd
 fingerprint_ignore_patterns: []
