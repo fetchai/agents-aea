@@ -326,7 +326,9 @@ def check_prerequisites() -> None:
             "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
         )
 
-    result = subprocess.run(["protoc", "--version"], stdout=subprocess.PIPE, check=True)
+    result = subprocess.run(  # nosec
+        ["protoc", "--version"], stdout=subprocess.PIPE, check=True
+    )
     result_str = result.stdout.decode("utf-8")
     if LIBPROTOC_VERSION not in result_str:
         raise FileNotFoundError(

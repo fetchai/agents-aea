@@ -330,7 +330,9 @@ def _check_preliminaries():
     enforce(shutil.which("black") is not None, "black command line tool not found.")
     enforce(shutil.which("isort") is not None, "isort command line tool not found.")
     enforce(shutil.which("protoc") is not None, "protoc command line tool not found.")
-    result = subprocess.run(["protoc", "--version"], stdout=subprocess.PIPE, check=True)
+    result = subprocess.run(  # nosec
+        ["protoc", "--version"], stdout=subprocess.PIPE, check=True
+    )
     result_str = result.stdout.decode("utf-8")
     enforce(
         LIBPROTOC_VERSION in result_str,
