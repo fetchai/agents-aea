@@ -31,13 +31,7 @@ speech_acts:
 ...
 ---
 ct:Query: |
-  message Nothing {
-  }
-  oneof query{
-      bytes bytes = 1;
-      Nothing nothing = 2;
-      bytes query_bytes = 3;
-  }
+  bytes query = 1;
 ct:Description: |
   bytes description = 1;
 ...

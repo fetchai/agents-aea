@@ -410,7 +410,7 @@ class Description:
 
         return kv
 
-    def encode(self) -> models_pb2.Query.Instance:
+    def _encode(self) -> models_pb2.Query.Instance:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -422,6 +422,24 @@ class Description:
             [self._to_key_value_pb(key, value) for key, value in self.values.items()]
         )
         return instance
+
+    @classmethod
+    def encode(
+        cls, description_protobuf_object, description_object: "Description"
+    ) -> None:
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        The protocol buffer object in the description_protobuf_object argument must be matched
+        with the instance of this class in the 'description_object' argument.
+
+        :param description_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param description_object: an instance of this class to be encoded in the protocol buffer object.
+
+        :return: None
+        """
+        description_bytes = description_object._encode()
+        description_protobuf_object.description = description_bytes
 
     @staticmethod
     def _extract_value(value: models_pb2.Query.Value) -> ATTRIBUTE_TYPES:
@@ -451,7 +469,7 @@ class Description:
         return result
 
     @classmethod
-    def decode(cls, description_protobuf_object) -> "Description":
+    def _decode(cls, description_protobuf_object) -> "Description":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -466,6 +484,20 @@ class Description:
             ]
         )
         return cls(values, model)
+
+    @classmethod
+    def decode(cls, description_protobuf_object) -> "Description":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the protocol
+        buffer object in the 'description_protobuf_object' argument.
+
+        :param description_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'description_protobuf_object' argument.
+        """
+        description_object = cls._decode(description_protobuf_object.description)
+        return description_object
 
 
 class ConstraintTypes(Enum):
@@ -1494,7 +1526,7 @@ class Query:
             [str(c) for c in self.constraints], self.model
         )
 
-    def encode(self) -> models_pb2.Query.Model:
+    def _encode(self) -> models_pb2.Query.Model:
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -1511,7 +1543,23 @@ class Query:
         return query
 
     @classmethod
-    def decode(cls, query_protobuf_object) -> "Query":
+    def encode(cls, query_protobuf_object, query_object: "Query") -> None:
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        The protocol buffer object in the query_protobuf_object argument must be matched
+        with the instance of this class in the 'query_object' argument.
+
+        :param query_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param query_object: an instance of this class to be encoded in the protocol buffer object.
+
+        :return: None
+        """
+        query_bytes = query_object._encode()
+        query_protobuf_object.query = query_bytes
+
+    @classmethod
+    def _decode(cls, query_protobuf_object) -> "Query":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1527,6 +1575,20 @@ class Query:
             if query_protobuf_object.HasField("model")
             else None,
         )
+
+    @classmethod
+    def decode(cls, query_protobuf_object) -> "Query":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the protocol
+        buffer object in the 'query_protobuf_object' argument.
+
+        :param query_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'query_protobuf_object' argument.
+        """
+        query = cls._decode(query_protobuf_object.query)
+        return query
 
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
