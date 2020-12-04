@@ -265,7 +265,7 @@ class GanacheDockerImage(DockerImage):
     @property
     def tag(self) -> str:
         """Get the image tag."""
-        return "trufflesuite/ganache-cli:v6.12.1"
+        return "trufflesuite/ganache-cli:latest"
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""

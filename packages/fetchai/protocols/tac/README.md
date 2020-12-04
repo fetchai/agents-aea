@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a protocol for participating in a Trading Agent Competition (TAC). 
+This is a protocol for participating in a Trading Agent Competition (TAC).
 
 ## Specification
 
@@ -79,6 +79,7 @@ reply:
 termination: [cancelled, tac_error]
 roles: {participant, controller}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: true
 ...
 ```
 

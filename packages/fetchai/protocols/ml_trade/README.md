@@ -48,6 +48,7 @@ reply:
 termination: [data]
 roles: {seller, buyer}
 end_states: [successful]
+keep_terminal_state_dialogues: true
 ...
 ```
 

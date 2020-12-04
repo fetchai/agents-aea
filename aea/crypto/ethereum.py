@@ -471,9 +471,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param gas_price: the gas price
         :return: the transfer transaction
         """
+        transaction: Optional[JSONLike] = None
         chain_id = chain_id if chain_id is not None else self._chain_id
         gas_price = gas_price if gas_price is not None else self._gas_price
         nonce = self._try_get_transaction_count(sender_address)
+        if nonce is None:
+            return transaction
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,
@@ -624,7 +627,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         value: int = 0,
         gas: int = 0,
         **kwargs,
-    ) -> JSONLike:
+    ) -> Optional[JSONLike]:
         """
         Get the transaction to deploy the smart contract.
 
@@ -635,20 +638,23 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :returns tx: the transaction dictionary.
         """
         # create the transaction dict
+        transaction: Optional[JSONLike] = None
         _deployer_address = self.api.toChecksumAddress(deployer_address)
         nonce = self.api.eth.getTransactionCount(_deployer_address)
+        if nonce is None:
+            return transaction
         instance = self.get_contract_instance(contract_interface)
         data = instance.constructor(**kwargs).buildTransaction().get("data", "0x")
-        tx = {
-            "from": deployer_address,  # only 'from' address, don't insert 'to' address!
+        transaction = {
+            "from": _deployer_address,  # only 'from' address, don't insert 'to' address!
             "value": value,  # transfer as part of deployment
             "gas": gas,
             "gasPrice": self.api.eth.gasPrice,
             "nonce": nonce,
             "data": data,
         }
-        tx = self.update_with_gas_estimate(tx)
-        return tx
+        transaction = self.update_with_gas_estimate(transaction)
+        return transaction
 
     @classmethod
     def is_valid_address(cls, address: Address) -> bool:

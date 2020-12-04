@@ -20,6 +20,7 @@
 """This test module contains the tests for the aea.cli.generate sub-module."""
 from unittest import TestCase, mock
 
+import pytest
 from click import ClickException
 
 from aea.cli.generate import _generate_item
@@ -89,6 +90,7 @@ class GenerateItemTestCase(TestCase):
         )
         self.assertEqual(cm.exception.message, expected_msg)
 
+    @pytest.mark.skip
     @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
     @mock.patch("aea.protocols.generator.base.shutil.which", return_value="some")
     @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_psperror)

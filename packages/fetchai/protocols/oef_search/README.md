@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a protocol for interacting with an OEF search service. 
+This is a protocol for interacting with an OEF search service.
 It allows for registering of agents and services, and searching of agents and services using a query language.
 
 ## Specification
@@ -64,6 +64,7 @@ reply:
 termination: [oef_error, search_result, success]
 roles: {agent, oef_node}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: false
 ...
 ```
 

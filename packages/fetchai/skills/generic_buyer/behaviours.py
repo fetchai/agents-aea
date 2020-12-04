@@ -19,8 +19,9 @@
 
 """This package contains the behaviour for the generic buyer skill."""
 
-from typing import List, Optional, cast
+from typing import List, Optional, Set, cast
 
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -112,6 +113,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
         self.processing_time = 0.0
         self.waiting: List[FipaDialogue] = []
         self.processing: Optional[LedgerApiDialogue] = None
+        self.timedout: Set[DialogueLabel] = set()
         super().__init__(tick_interval=tx_interval, **kwargs)
 
     def setup(self) -> None:
@@ -129,8 +131,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
                 # already processing
                 self.processing_time += self.tick_interval
                 return
-            # processing timed out
-            self.failed_processing(self.processing)
+            self._timeout_processing()
         if len(self.waiting) == 0:
             # nothing to process
             return
@@ -163,18 +164,38 @@ class GenericTransactionBehaviour(TickerBehaviour):
         """Teardown behaviour."""
         pass
 
+    def _timeout_processing(self) -> None:
+        """
+        Timeout processing.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        if self.processing is None:
+            return
+        self.timedout.add(self.processing.dialogue_label)
+        self.waiting.append(self.processing.associated_fipa_dialogue)
+        self.processing_time = 0.0
+        self.processing = None
+
     def finish_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
         """
         Finish processing.
 
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        if self.processing != ledger_api_dialogue:
-            self.context.logger.warning(
+        if self.processing == ledger_api_dialogue:
+            self.processing_time = 0.0
+            self.processing = None
+            return
+        if ledger_api_dialogue.dialogue_label not in self.timedout:
+            raise ValueError(
                 f"Non-matching dialogues in transaction behaviour: {self.processing} and {ledger_api_dialogue}"
             )
-        self.processing_time = 0.0
-        self.processing = None
+        self.timedout.remove(ledger_api_dialogue.dialogue_label)
+        self.context.logger.debug(
+            f"Timeout dialogue in transaction processing: {ledger_api_dialogue}"
+        )
+        # don't reset, as another might be processing
 
     def failed_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
         """

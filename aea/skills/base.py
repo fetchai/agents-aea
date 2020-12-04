@@ -577,6 +577,30 @@ class Handler(SkillComponent, ABC):
 class Model(SkillComponent, ABC):
     """This class implements an abstract model."""
 
+    def __init__(
+        self,
+        name: str,
+        skill_context: SkillContext,
+        configuration: Optional[SkillComponentConfiguration] = None,
+        keep_terminal_state_dialogues: Optional[bool] = None,
+        **kwargs,
+    ) -> None:
+        """
+        Initialize a model.
+
+        :param name: the name of the component.
+        :param configuration: the configuration for the component.
+        :param skill_context: the skill context.
+        :param keep_terminal_state_dialogues: specify do dialogues in terminal state should stay or not
+
+        :return: None
+        """
+        super().__init__(name, skill_context, configuration=configuration, **kwargs)
+
+        # used by dialogues if mixed with the Model
+        if keep_terminal_state_dialogues is not None:
+            self._keep_terminal_state_dialogues = keep_terminal_state_dialogues
+
     def setup(self) -> None:
         """Set the class up."""
         super_obj = super()

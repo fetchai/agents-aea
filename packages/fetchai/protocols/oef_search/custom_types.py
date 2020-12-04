@@ -19,13 +19,13 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
-import pickle  # nosec
 from enum import Enum
 from typing import Any, Dict
 
 from aea.exceptions import enforce
 from aea.helpers.search.models import Description as BaseDescription
 from aea.helpers.search.models import Query as BaseQuery
+from aea.helpers.serializers import DictProtobufStructSerializer
 
 
 Description = BaseDescription
@@ -70,8 +70,9 @@ class AgentsInfo:
         :param agents_info_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        agents_info_bytes = pickle.dumps(agents_info_object)  # nosec
-        agents_info_protobuf_object.agents_info = agents_info_bytes
+        agents_info_protobuf_object.agents_info = DictProtobufStructSerializer.encode(
+            agents_info_object.body
+        )
 
     @classmethod
     def decode(cls, agents_info_protobuf_object) -> "AgentsInfo":
@@ -83,10 +84,10 @@ class AgentsInfo:
         :param agents_info_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'agents_info_protobuf_object' argument.
         """
-        agents_info_object = pickle.loads(  # nosec
+        body = DictProtobufStructSerializer.decode(
             agents_info_protobuf_object.agents_info
         )
-        return agents_info_object
+        return cls(body)
 
     def __eq__(self, other):
         """Compare with another object."""
