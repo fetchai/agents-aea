@@ -56,6 +56,9 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: seller
       data_for_sale:
         pressure: 20
         temperature: 26
@@ -65,6 +68,9 @@ models:
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: seller_service
         value: weather_data

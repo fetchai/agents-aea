@@ -8,10 +8,10 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
   __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
-  behaviours.py: QmNwvSjEz4kzM3gWtnKbZVFJc2Z85Nb748CWAK4C4Sa4nT
+  behaviours.py: QmZNDB9Np6TikTdsKWWx8VgFcxwcRNK4PnYhryw6CVCTK2
   dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU
-  handlers.py: QmZfudXXbdiREiViuwPZDXoQQyXT2ySQHdF7psQsohZXQy
-  strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
+  handlers.py: QmV2QqxrGyLMzDV2DBRuWYXJxTfq5DsprmyazEEiN4CXWX
+  strategy.py: QmbVVMspbjA5umJhw33vyCC6vkrgpfZ5qybbrs4H7na2W7
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.10.0
@@ -69,6 +69,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
+      max_quantity: 100
       max_tx_fee: 1
       max_unit_price: 20
       min_quantity: 1
