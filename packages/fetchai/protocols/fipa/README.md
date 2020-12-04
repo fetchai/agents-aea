@@ -55,6 +55,7 @@ reply:
 termination: [decline, match_accept, match_accept_w_inform, inform]
 roles: {seller, buyer}
 end_states: [successful, declined_cfp, declined_propose, declined_accept]
+keep_terminal_state_dialogues: true
 ...
 ```
 

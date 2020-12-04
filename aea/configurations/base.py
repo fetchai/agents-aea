@@ -2090,7 +2090,7 @@ class ProtocolSpecification(ProtocolConfig):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result: Dict[str, Any] = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -2104,6 +2104,7 @@ class ProtocolSpecification(ProtocolConfig):
                 },
             }
         )
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):

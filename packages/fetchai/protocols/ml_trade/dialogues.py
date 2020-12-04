@@ -90,6 +90,8 @@ class MlTradeDialogues(Dialogues, ABC):
 
     END_STATES = frozenset({MlTradeDialogue.EndState.SUCCESSFUL})
 
+    _keep_terminal_state_dialogues = True
+
     def __init__(
         self,
         self_address: Address,
