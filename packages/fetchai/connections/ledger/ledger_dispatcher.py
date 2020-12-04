@@ -218,7 +218,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             transaction_receipt = api.get_transaction_receipt(
                 message.transaction_digest.body
             )
-            is_settled = api.is_transaction_settled(transaction_receipt)
+            if transaction_receipt is not None:
+                is_settled = api.is_transaction_settled(transaction_receipt)
             attempts += 1
         attempts = 0
         transaction = api.get_transaction(message.transaction_digest.body)

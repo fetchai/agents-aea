@@ -54,7 +54,7 @@ def test_init_terms():
         quantities_by_good_id=quantities_by_good_id,
         is_sender_payable_tx_fee=is_sender_payable_tx_fee,
         nonce=nonce,
-        **kwargs
+        **kwargs,
     )
     sender_hash = "9af02c24bdb18b73aad129291dc9eee008f9bcf62f5a6e91b5cb7427f146ca3b"
     counterparty_hash = (
@@ -284,11 +284,11 @@ def test_terms_encode_decode():
 def test_init_raw_transaction():
     """Test the raw_transaction object initialization."""
     ledger_id = "some_ledger"
-    body = "body"
+    body = {"body": "value"}
     rt = RawTransaction(ledger_id, body)
     assert rt.ledger_id == ledger_id
     assert rt.body == body
-    assert str(rt) == "RawTransaction: ledger_id=some_ledger, body=body"
+    assert str(rt) == "RawTransaction: ledger_id=some_ledger, body={'body': 'value'}"
     assert rt == rt
 
 
@@ -299,7 +299,7 @@ def test_raw_transaction_encode_decode():
         raw_transaction_bytes = b""
 
     ledger_id = "some_ledger"
-    body = "body"
+    body = {"body": "value"}
     rt = RawTransaction(ledger_id, body)
     RawTransaction.encode(RawTransactionProtobufObject, rt)
     recovered_rt = RawTransaction.decode(RawTransactionProtobufObject)
@@ -309,14 +309,14 @@ def test_raw_transaction_encode_decode():
 def test_init_raw_message():
     """Test the raw_message object initialization."""
     ledger_id = "some_ledger"
-    body = "body"
+    body = b"body"
     rm = RawMessage(ledger_id, body)
     assert rm.ledger_id == ledger_id
     assert rm.body == body
     assert not rm.is_deprecated_mode
     assert (
         str(rm)
-        == "RawMessage: ledger_id=some_ledger, body=body, is_deprecated_mode=False"
+        == f"RawMessage: ledger_id=some_ledger, body={body}, is_deprecated_mode=False"
     )
     assert rm == rm
 
@@ -328,7 +328,7 @@ def test_raw_message_encode_decode():
         raw_message_bytes = b""
 
     ledger_id = "some_ledger"
-    body = "body"
+    body = b"body"
     rm = RawMessage(ledger_id, body)
     RawMessage.encode(RawMessageProtobufObject, rm)
     recovered_rm = RawMessage.decode(RawMessageProtobufObject)
@@ -338,11 +338,11 @@ def test_raw_message_encode_decode():
 def test_init_signed_transaction():
     """Test the signed_transaction object initialization."""
     ledger_id = "some_ledger"
-    body = "body"
+    body = {"key": "value"}
     st = SignedTransaction(ledger_id, body)
     assert st.ledger_id == ledger_id
     assert st.body == body
-    assert str(st) == "SignedTransaction: ledger_id=some_ledger, body=body"
+    assert str(st) == "SignedTransaction: ledger_id=some_ledger, body={'key': 'value'}"
     assert st == st
 
 
@@ -353,7 +353,7 @@ def test_signed_transaction_encode_decode():
         signed_transaction_bytes = b""
 
     ledger_id = "some_ledger"
-    body = "body"
+    body = {"key": "value"}
     st = SignedTransaction(ledger_id, body)
     SignedTransaction.encode(SignedTransactionProtobufObject, st)
     recovered_st = SignedTransaction.decode(SignedTransactionProtobufObject)
@@ -392,15 +392,15 @@ def test_signed_message_encode_decode():
 def test_init_transaction_receipt():
     """Test the transaction_receipt object initialization."""
     ledger_id = "some_ledger"
-    receipt = "receipt"
-    transaction = "transaction"
+    receipt = {"receipt": "v"}
+    transaction = {"transaction": "v"}
     tr = TransactionReceipt(ledger_id, receipt, transaction)
     assert tr.ledger_id == ledger_id
     assert tr.receipt == receipt
     assert tr.transaction == transaction
     assert (
         str(tr)
-        == "TransactionReceipt: ledger_id=some_ledger, receipt=receipt, transaction=transaction"
+        == f"TransactionReceipt: ledger_id={ledger_id}, receipt={receipt}, transaction={transaction}"
     )
     assert tr == tr
 
@@ -412,8 +412,8 @@ def test_transaction_receipt_encode_decode():
         transaction_receipt_bytes = b""
 
     ledger_id = "some_ledger"
-    receipt = "receipt"
-    transaction = "transaction"
+    receipt = {"receipt": "v"}
+    transaction = {"transaction": "v"}
     tr = TransactionReceipt(ledger_id, receipt, transaction)
     TransactionReceipt.encode(TransactionReceiptProtobufObject, tr)
     recovered_tr = TransactionReceipt.decode(TransactionReceiptProtobufObject)
@@ -423,11 +423,11 @@ def test_transaction_receipt_encode_decode():
 def test_init_state():
     """Test the state object initialization."""
     ledger_id = "some_ledger"
-    body = "state"
+    body = {"state": "v"}
     state = State(ledger_id, body)
     assert state.ledger_id == ledger_id
     assert state.body == body
-    assert str(state) == "State: ledger_id=some_ledger, body=state"
+    assert str(state) == f"State: ledger_id={ledger_id}, body={body}"
     assert state == state
 
 
@@ -438,7 +438,7 @@ def test_state_encode_decode():
         state_bytes = b""
 
     ledger_id = "some_ledger"
-    body = "state"
+    body = {"state": "v"}
     state = State(ledger_id, body)
     State.encode(StateProtobufObject, state)
     recovered_state = State.decode(StateProtobufObject)

@@ -19,6 +19,7 @@
 """This test module contains the integration test for the tac skills."""
 
 import datetime
+from random import uniform
 
 import pytest
 
@@ -70,6 +71,12 @@ class TestTacSkills(AEATestCaseMany):
             "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
+        }
+
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
@@ -101,6 +108,12 @@ class TestTacSkills(AEATestCaseMany):
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
         self.set_config(setting_path, COSMOS)
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.tac_control.models.parameters.args.location"
+        )
+        self.nested_set_config(setting_path, location)
 
         default_routing = {
             "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
@@ -144,6 +157,12 @@ class TestTacSkills(AEATestCaseMany):
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
             self.nested_set_config(setting_path, config)
+
+            # replace location
+            setting_path = (
+                "vendor.fetchai.skills.tac_participation.models.game.args.location"
+            )
+            self.nested_set_config(setting_path, location)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -289,6 +308,12 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
+        # generate random location
+        location = {
+            "latitude": round(uniform(-90, 90), 2),  # nosec
+            "longitude": round(uniform(-180, 180), 2),  # nosec
+        }
+
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
@@ -328,6 +353,12 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         self.set_config(setting_path, ETHEREUM)
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
+
+        # replace location
+        setting_path = (
+            "vendor.fetchai.skills.tac_control_contract.models.parameters.args.location"
+        )
+        self.nested_set_config(setting_path, location)
 
         default_routing = {
             "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
@@ -387,6 +418,12 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             self.set_config(setting_path, COSMOS)
             setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
             self.set_config(setting_path, ETHEREUM)
+
+            # replace location
+            setting_path = (
+                "vendor.fetchai.skills.tac_participation.models.game.args.location"
+            )
+            self.nested_set_config(setting_path, location)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -497,7 +534,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         ), "Strings {} didn't appear in tac_controller output.".format(missing_strings)
 
         check_strings = (
-            "received start event from the controller. Starting to compete..."
+            "received start event from the controller. Starting to compete...",
             "received a contract address:",
             "registering agent on SOEF.",
             "searching for sellers, search_id=",
@@ -530,7 +567,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
 
         check_strings = (
-            "received start event from the controller. Starting to compete..."
+            "received start event from the controller. Starting to compete...",
             "received a contract address:",
             "registering agent on SOEF.",
             "searching for sellers, search_id=",

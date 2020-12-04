@@ -46,7 +46,7 @@ class GenerateWealthTestCase(TestCase):
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
         ctx = ContextMock()
-        _try_generate_wealth(ctx, "cosmos", True)
+        _try_generate_wealth(ctx, "cosmos", None, True)
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")

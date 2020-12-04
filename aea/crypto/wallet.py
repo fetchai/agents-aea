@@ -22,6 +22,7 @@
 import logging
 from typing import Any, Dict, Optional, cast
 
+from aea.common import JSONLike
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 
@@ -157,7 +158,7 @@ class Wallet:
             signature = crypto_object.sign_message(message, is_deprecated_mode)
         return signature
 
-    def sign_transaction(self, crypto_id: str, transaction: Any) -> Optional[Any]:
+    def sign_transaction(self, crypto_id: str, transaction: Any) -> Optional[JSONLike]:
         """
         Sign a tx.
 
