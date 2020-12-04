@@ -11,7 +11,7 @@ fingerprint:
   base.py: QmcthxPnqcpzUG5wU2RVgsGpNzDfEehfWGqSCaAVeesQaa
   connection.py: Qmc9XVMhHh3DDsWAWRt7TVgqRe1utQChMUWW8zZUehTKU7
   contract_dispatcher.py: QmeadjVzHwLQFabaSR7RNHBFCoRz2unqaX2hYEaDtJ9r3N
-  ledger_dispatcher.py: QmaEDu6gDFnkPpSMveu7Z3MEqsRcvS99a6FtofzrQFDfXx
+  ledger_dispatcher.py: QmSVrfAv7ScRUzuRmjYsde23xPG11tBoDLXsZKe8eE6eNv
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

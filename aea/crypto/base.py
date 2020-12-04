@@ -336,7 +336,7 @@ class LedgerApi(Helper, ABC):
     @abstractmethod
     def get_deploy_transaction(
         self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs,
-    ) -> JSONLike:
+    ) -> Optional[JSONLike]:
         """
         Get the transaction to deploy the smart contract.
 

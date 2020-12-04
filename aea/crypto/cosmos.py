@@ -69,7 +69,12 @@ class CosmosHelper(Helper):
         """
         is_successful = False
         if tx_receipt is not None:
-            is_successful = True
+            code = tx_receipt.get("code", None)
+            is_successful = code is None
+            if not is_successful:
+                _default_logger.warning(
+                    f"Transaction not settled. Raw log: {tx_receipt.get('raw_log')}"
+                )
         return is_successful
 
     @staticmethod
@@ -451,7 +456,7 @@ class _CosmosApi(LedgerApi):
         memo: str = "",
         chain_id: Optional[str] = None,
         **kwargs,
-    ) -> JSONLike:
+    ) -> Optional[JSONLike]:
         """
         Create a CosmWasm bytecode deployment transaction.
 
@@ -467,6 +472,8 @@ class _CosmosApi(LedgerApi):
         account_number, sequence = self._try_get_account_number_and_sequence(
             deployer_address
         )
+        if account_number is None or sequence is None:
+            return None
         deploy_msg = {
             "type": "wasm/store-code",
             "value": {
@@ -500,7 +507,7 @@ class _CosmosApi(LedgerApi):
         label: str = "",
         memo: str = "",
         chain_id: Optional[str] = None,
-    ) -> JSONLike:
+    ) -> Optional[JSONLike]:
         """
         Create a CosmWasm InitMsg transaction.
 
@@ -520,6 +527,8 @@ class _CosmosApi(LedgerApi):
         account_number, sequence = self._try_get_account_number_and_sequence(
             deployer_address
         )
+        if account_number is None or sequence is None:
+            return None
         instantiate_msg = {
             "type": "wasm/instantiate",
             "value": {
@@ -553,7 +562,7 @@ class _CosmosApi(LedgerApi):
         gas: int = 80000,
         memo: str = "",
         chain_id: Optional[str] = None,
-    ) -> JSONLike:
+    ) -> Optional[JSONLike]:
         """
         Create a CosmWasm HandleMsg transaction.
 
@@ -570,6 +579,8 @@ class _CosmosApi(LedgerApi):
         account_number, sequence = self._try_get_account_number_and_sequence(
             sender_address
         )
+        if account_number is None or sequence is None:
+            return None
         execute_msg = {
             "type": "wasm/execute",
             "value": {
@@ -685,6 +696,8 @@ class _CosmosApi(LedgerApi):
         account_number, sequence = self._try_get_account_number_and_sequence(
             sender_address
         )
+        if account_number is None or sequence is None:
+            return None
         transfer_msg = {
             "type": "cosmos-sdk/MsgSend",
             "value": {
