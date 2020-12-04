@@ -1270,7 +1270,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
             collection.put(str(dialogue.dialogue_label), dialogue.json())
 
     def _load(self) -> None:
-        """Dump dialogues and incomplete dialogues from the generic storage."""
+        """Load dialogues and incomplete dialogues from the generic storage."""
         active_collection, terminal_collection = self._get_collections()
         if not active_collection or not terminal_collection:
             return  # pragma: nocover
