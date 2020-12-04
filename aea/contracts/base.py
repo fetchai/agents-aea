@@ -130,7 +130,7 @@ class Contract(Component):
     @classmethod
     def get_deploy_transaction(
         cls, ledger_api: LedgerApi, deployer_address: str, **kwargs
-    ) -> JSONLike:
+    ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
 
@@ -151,7 +151,7 @@ class Contract(Component):
     @classmethod
     def get_raw_transaction(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> JSONLike:
+    ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
 
@@ -167,7 +167,7 @@ class Contract(Component):
     @classmethod
     def get_raw_message(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> bytes:
+    ) -> Optional[bytes]:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
 
@@ -183,7 +183,7 @@ class Contract(Component):
     @classmethod
     def get_state(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> JSONLike:
+    ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_STATE' requests.
 
