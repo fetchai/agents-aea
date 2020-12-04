@@ -52,6 +52,9 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: seller
       data_for_sale:
         temperature: 26
       has_data_source: false
@@ -59,6 +62,9 @@ models:
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: seller_service
         value: thermometer_data

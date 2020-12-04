@@ -244,7 +244,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             )
         elif transaction is None:  # pragma: nocover
             response = self.get_error_message(
-                ValueError("No tx returned"), api, message, dialogue
+                ValueError("No transaction returned"), api, message, dialogue
             )
         else:
             response = cast(

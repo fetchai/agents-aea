@@ -59,6 +59,7 @@ from packages.fetchai.protocols.register.dialogues import (
 from packages.fetchai.protocols.register.dialogues import (
     RegisterDialogues as BaseRegisterDialogues,
 )
+from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.protocols.signing.dialogues import (
     SigningDialogue as BaseSigningDialogue,
 )
@@ -100,7 +101,46 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         )
 
 
-RegisterDialogue = BaseRegisterDialogue
+class RegisterDialogue(BaseRegisterDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[RegisterMessage] = RegisterMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseRegisterDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+        self._terms = None  # type: Optional[Terms]
+
+    @property
+    def terms(self) -> Terms:
+        """Get terms."""
+        if self._terms is None:
+            raise AEAEnforceError("Terms not set!")
+        return self._terms
+
+    @terms.setter
+    def terms(self, terms: Terms) -> None:
+        """Set terms."""
+        enforce(self._terms is None, "Terms already set!")
+        self._terms = terms
 
 
 class RegisterDialogues(Model, BaseRegisterDialogues):
@@ -267,19 +307,6 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
             self._associated_register_dialogue is None, "RegisterDialogue already set!"
         )
         self._associated_register_dialogue = register_dialogue
-
-    @property
-    def terms(self) -> Terms:
-        """Get terms."""
-        if self._terms is None:
-            raise AEAEnforceError("Terms not set!")
-        return self._terms
-
-    @terms.setter
-    def terms(self, terms: Terms) -> None:
-        """Set terms."""
-        enforce(self._terms is None, "Terms already set!")
-        self._terms = terms
 
 
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):

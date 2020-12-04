@@ -100,7 +100,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     self.service_registration.setup()
 
         # after
-        self.assert_quantity_in_outbox(3)
+        self.assert_quantity_in_outbox(5)
 
         # message 1
         has_attributes, error_str = self.message_has_attributes(
@@ -148,7 +148,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     self.service_registration.setup()
 
         # after
-        self.assert_quantity_in_outbox(2)
+        self.assert_quantity_in_outbox(4)
 
         # message 1
         self._assert_oef_message_and_logging_output(

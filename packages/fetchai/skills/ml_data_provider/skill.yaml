@@ -55,10 +55,16 @@ models:
     args:
       batch_size: 2
       buyer_tx_fee: 10
+      classification:
+        piece: classification
+        value: seller
       is_ledger_tx: true
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       price_per_data_batch: 100
       seller_tx_fee: 0
       service_data:

@@ -1,7 +1,7 @@
 
 The Open Economic Framework (OEF) and Decentralized Ledger Technologies (DLTs) allow AEAs to create value through their interaction with other AEAs. The following diagram illustrates the relation of AEAs to the OEF and DLTs.
 
-<img src="../assets/oef-ledger.png" alt="The AEA, OEF, and Ledger systems" class="center">
+<img src="../assets/oef-ledger.jpg" alt="The AEA, OEF, and Ledger systems" class="center">
 
 ## Open Economic Framework (OEF)
 
