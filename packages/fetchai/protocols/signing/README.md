@@ -57,6 +57,7 @@ reply:
 termination: [signed_transaction, signed_message, error]
 roles: {skill, decision_maker}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: false
 ...
 ```
 

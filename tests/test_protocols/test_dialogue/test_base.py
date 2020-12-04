@@ -30,6 +30,7 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError
 from aea.helpers.storage.generic_storage import Storage
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import BasicDialoguesStorage
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel, DialogueMessage, DialogueStats
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
@@ -40,6 +41,7 @@ from aea.protocols.dialogue.base import (
 )
 from aea.skills.base import SkillComponent
 
+from packages.fetchai.protocols.default.custom_types import ErrorCode
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
@@ -106,6 +108,7 @@ class Dialogues(BaseDialogues):
         self_address: Address,
         message_class=DefaultMessage,
         dialogue_class=Dialogue,
+        keep_terminal_state_dialogues=None,
     ) -> None:
         """
         Initialize dialogues.
@@ -132,6 +135,7 @@ class Dialogues(BaseDialogues):
             message_class=message_class,
             dialogue_class=dialogue_class,
             role_from_first_message=role_from_first_message,
+            keep_terminal_state_dialogues=keep_terminal_state_dialogues,
         )
 
 
@@ -419,6 +423,27 @@ class TestDialogueBase:
         self.dialogue._update(valid_message_2_by_self)
 
         assert self.dialogue.last_message.message_id == 2
+
+    def test_terminal_state_callback(self):
+        """Test dialogue terminal state callback works."""
+        called = False
+
+        def callback(dialogue):
+            nonlocal called
+            called = True
+
+        self.dialogue.add_terminal_state_callback(callback)
+        self.dialogue._update(self.valid_message_1_by_self)
+
+        self.dialogue.reply(
+            target_message=self.valid_message_1_by_self,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+
+        assert called
 
     def test_update_negative_is_valid_next_message_fails(self):
         """Negative test for the 'update' method: input message is invalid with respect to the dialogue."""
@@ -1720,7 +1745,9 @@ class TestPersistDialoguesStorage:
         """Initialise the environment to test PersistDialogueStorage."""
         self.agent_address = "agent 1"
         self.opponent_address = "agent 2"
-        self.dialogues = Dialogues(self.agent_address)
+        self.dialogues = Dialogues(
+            self.agent_address, keep_terminal_state_dialogues=True
+        )
         self.skill_component = Mock()
         self.skill_component.name = "test_component"
         self.skill_component.skill_id = PublicId("test", "test", "0.1.0")
@@ -1763,6 +1790,17 @@ class TestPersistDialoguesStorage:
         self.dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
         )
+        msg, dialogue = self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello2"
+        )
+        dialogue.reply(
+            target_message=msg,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+        assert dialogues_storage._terminal_state_dialogues_labels
         assert dialogues_storage._dialogues_by_dialogue_label
         assert dialogues_storage._dialogue_by_address
         assert dialogues_storage._incomplete_to_complete_dialogue_labels
@@ -1784,6 +1822,89 @@ class TestPersistDialoguesStorage:
             dialogues_storage._incomplete_to_complete_dialogue_labels
             == dialogues_storage_restored._incomplete_to_complete_dialogue_labels
         )
+        assert (
+            dialogues_storage._terminal_state_dialogues_labels
+            == dialogues_storage_restored._terminal_state_dialogues_labels
+        )
+
+
+class TestBaseDialoguesStorage:
+    """Test PersistDialoguesStorage."""
+
+    @classmethod
+    def setup(cls):
+        """Initialise the environment to test Dialogue."""
+        cls.incomplete_reference = (str(1), "")
+        cls.complete_reference = (str(1), str(1))
+        cls.opponent_address = "agent 2"
+        cls.agent_address = "agent 1"
+
+        cls.dialogue_label = DialogueLabel(
+            dialogue_reference=cls.incomplete_reference,
+            dialogue_opponent_addr=cls.opponent_address,
+            dialogue_starter_addr=cls.agent_address,
+        )
+        cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
+
+        cls.dialogue_label_opponent_started = DialogueLabel(
+            dialogue_reference=cls.complete_reference,
+            dialogue_opponent_addr=cls.opponent_address,
+            dialogue_starter_addr=cls.opponent_address,
+        )
+        cls.dialogue_opponent_started = Dialogue(
+            dialogue_label=cls.dialogue_label_opponent_started
+        )
+
+        # convenient messages to reuse across tests
+        cls.valid_message_1_by_self = DefaultMessage(
+            dialogue_reference=(str(1), ""),
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
+        cls.valid_message_1_by_self.sender = cls.agent_address
+        cls.valid_message_1_by_self.to = cls.opponent_address
+
+        cls.storage = BasicDialoguesStorage(Mock())
+
+    def test_dialogues_in_terminal_state_kept(self):
+        """Test dialogues in terminal state handled properly."""
+        self.storage.add(self.dialogue)
+        assert self.storage.dialogues_in_active_state
+        assert not self.storage.dialogues_in_terminal_state
+
+        self.dialogue._update(self.valid_message_1_by_self)
+        self.dialogue.reply(
+            target_message=self.valid_message_1_by_self,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+
+        assert not self.storage.dialogues_in_active_state
+        assert self.storage.dialogues_in_terminal_state
+
+    def test_dialogues_in_terminal_state_removed(self):
+        """Test dialogues in terminal state handled properly."""
+        self.storage._dialogues.is_keep_dialogues_in_terminal_state = False
+        self.storage.add(self.dialogue)
+        assert self.storage.dialogues_in_active_state
+        assert not self.storage.dialogues_in_terminal_state
+
+        self.dialogue._update(self.valid_message_1_by_self)
+        self.dialogue.reply(
+            target_message=self.valid_message_1_by_self,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+
+        assert not self.storage.dialogues_in_active_state
+        assert not self.storage.dialogues_in_terminal_state
+
+    def teardown(self):
+        """Tear down the environment to test BaseDialogueStorage."""
 
 
 def test_find_caller_object():
@@ -1813,3 +1934,15 @@ def test_find_caller_object():
 
     custom_object = CustomObject()
     assert custom_object.component is None
+
+
+def test_dialogues_keep_terminal_state_dialogues():
+    """Test Dialogues keep_terminal_state_dialogues option."""
+    initial = Dialogues._keep_terminal_state_dialogues
+    dialogues = Dialogues(Mock(), keep_terminal_state_dialogues=True)
+    assert dialogues.is_keep_dialogues_in_terminal_state is True
+    assert Dialogues._keep_terminal_state_dialogues == initial
+
+    dialogues = Dialogues(Mock(), keep_terminal_state_dialogues=False)
+    assert dialogues.is_keep_dialogues_in_terminal_state is False
+    assert Dialogues._keep_terminal_state_dialogues == initial

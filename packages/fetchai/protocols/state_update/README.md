@@ -32,6 +32,7 @@ reply:
 termination: [apply]
 roles: {skill, decision_maker}
 end_states: [successful]
+keep_terminal_state_dialogues: false
 ...
 ```
 

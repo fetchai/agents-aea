@@ -44,6 +44,7 @@ reply:
 termination: [close]
 roles: {agent, environment}
 end_states: [successful]
+keep_terminal_state_dialogues: false
 ...
 ```
 

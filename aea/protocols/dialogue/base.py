@@ -30,7 +30,18 @@ import sys
 from collections import defaultdict, namedtuple
 from enum import Enum
 from inspect import signature
-from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
+from typing import (
+    Callable,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    cast,
+)
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
@@ -338,6 +349,16 @@ class Dialogue(metaclass=_DialogueMeta):
             "Message class provided not a subclass of `Message`.",
         )
         self._message_class = message_class
+        self._terminal_state_callbacks: Set[Callable[["Dialogue"], None]] = set()
+
+    def add_terminal_state_callback(self, fn: Callable[["Dialogue"], None]) -> None:
+        """
+        Add callback to be called on dialogue reach terminal state.
+
+        :param fn: callable to be called with one argument: Dialogue
+        :return: None
+        """
+        self._terminal_state_callbacks.add(fn)
 
     def __eq__(self, other) -> bool:
         """Compare two dialogues."""
@@ -628,6 +649,10 @@ class Dialogue(metaclass=_DialogueMeta):
             self._outgoing_messages.append(message)
         else:
             self._incoming_messages.append(message)
+
+        if message.performative in self.rules.terminal_performatives:
+            for fn in self._terminal_state_callbacks:
+                fn(self)
 
     def _is_belonging_to_dialogue(self, message: Message) -> bool:
         """
@@ -1026,6 +1051,46 @@ class BasicDialoguesStorage:
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
         self._dialogues = dialogues
+        self._terminal_state_dialogues_labels: Set[DialogueLabel] = set()
+
+    @property
+    def dialogues_in_terminal_state(self) -> List["Dialogue"]:
+        """Get all dialogues in terminal state."""
+        return list(
+            filter(
+                None,
+                [
+                    self._dialogues_by_dialogue_label.get(i)
+                    for i in self._terminal_state_dialogues_labels
+                ],
+            )
+        )
+
+    @property
+    def dialogues_in_active_state(self) -> List["Dialogue"]:
+        """Get all dialogues in active state."""
+        active_dialogues = (
+            set(self._dialogues_by_dialogue_label.keys())
+            - self._terminal_state_dialogues_labels
+        )
+        return list(
+            filter(
+                None,
+                [self._dialogues_by_dialogue_label.get(i) for i in active_dialogues],
+            )
+        )
+
+    @property
+    def is_terminal_dialogues_kept(self) -> bool:
+        """Return True if dialogues should stay after terminal state."""
+        return self._dialogues.is_keep_dialogues_in_terminal_state
+
+    def dialogue_terminal_state_callback(self, dialogue: "Dialogue") -> None:
+        """Method to be called on dialogue terminal state reached."""
+        if self.is_terminal_dialogues_kept:
+            self._terminal_state_dialogues_labels.add(dialogue.dialogue_label)
+        else:
+            self.remove(dialogue.dialogue_label)
 
     def setup(self) -> None:
         """Set up dialogue storage."""
@@ -1040,6 +1105,7 @@ class BasicDialoguesStorage:
         :param dialogue: dialogue to add.
         :return: None
         """
+        dialogue.add_terminal_state_callback(self.dialogue_terminal_state_callback)
         self._dialogues_by_dialogue_label[dialogue.dialogue_label] = dialogue
         self._dialogue_by_address[
             dialogue.dialogue_label.dialogue_opponent_addr
@@ -1136,36 +1202,48 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
             ]
         )
 
-    def _get_collection(self) -> Optional[SyncCollection]:
+    def _get_collection_instance(self, col_name: str) -> Optional[SyncCollection]:
         """Get sync collection if generic storage available."""
         if (
             not self._skill_component or not self._skill_component.context.storage
         ):  # pragma: nocover
             return None
-        col_name = self._get_collection_name()
-        if not col_name:  # pragma: nocover
-            return None
         return self._skill_component.context.storage.get_sync_collection(col_name)
+
+    def _get_collections(
+        self,
+    ) -> Tuple[Optional[SyncCollection], Optional[SyncCollection]]:
+        """Get active state dialogue collection and terminal collection."""
+        col_name = self._get_collection_name()
+        if not col_name:
+            return (None, None)  # pragma: nocover
+        termina_col_name = f"{col_name}_terminal"
+
+        collection = self._get_collection_instance(col_name)
+        terminal_collection = self._get_collection_instance(termina_col_name)
+        if not collection or not terminal_collection:
+            return (None, None)  # pragma: nocover
+        return (collection, terminal_collection)
 
     def _dump(self) -> None:
         """Dump dialogues storage to the generic storage."""
-        collection = self._get_collection()
-        if not collection:  # pragma: nocover
-            return
+        active_collection, terminal_collection = self._get_collections()
+        if not active_collection or not terminal_collection:
+            return  # pragma: nocover
+
+        self._dump_incomplete_dialogues_labels(active_collection)
+        self._dump_dialogues(self.dialogues_in_active_state, active_collection)
+        self._dump_dialogues(self.dialogues_in_terminal_state, terminal_collection)
+
+    def _dump_incomplete_dialogues_labels(self, collection: SyncCollection) -> None:
+        """Dump incomplete labels."""
         collection.put(
             self.INCOMPLETE_DIALOGUES_OBJECT_NAME,
             self._incomplete_dialogues_labels_to_json(),
         )
 
-        for label, dialogue in self._dialogues_by_dialogue_label.items():
-            collection.put(str(label), dialogue.json())
-
-    def _load(self) -> None:
-        """Dump dialogues from the generic storage."""
-        collection = self._get_collection()
-        if not collection:  # pragma: nocover
-            return
-
+    def _load_incomplete_dialogues_labels(self, collection: SyncCollection) -> None:
+        """Load and set incomplete dialogue labels."""
         incomplete_dialogues_data = collection.get(
             self.INCOMPLETE_DIALOGUES_OBJECT_NAME
         )
@@ -1173,15 +1251,38 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
             incomplete_dialogues_data = cast(List, incomplete_dialogues_data)
             self._set_incomplete_dialogues_labels_from_json(incomplete_dialogues_data)
 
+    def _load_dialogues(self, collection: SyncCollection) -> Iterable[Dialogue]:
+        """Load dialogues from collection."""
         for label, dialogue_data in collection.list():
             if label == self.INCOMPLETE_DIALOGUES_OBJECT_NAME:
                 continue
             dialogue_data = cast(Dict, dialogue_data)
-            self.add(
-                self._dialogues.dialogue_class.from_json(
-                    self._dialogues.message_class, dialogue_data
-                )
+            yield self._dialogues.dialogue_class.from_json(
+                self._dialogues.message_class, dialogue_data
             )
+
+    @staticmethod
+    def _dump_dialogues(
+        dialogues: Iterable[Dialogue], collection: SyncCollection
+    ) -> None:
+        """Dump dialogues to collection."""
+        for dialogue in dialogues:
+            collection.put(str(dialogue.dialogue_label), dialogue.json())
+
+    def _load(self) -> None:
+        """Load dialogues and incomplete dialogues from the generic storage."""
+        active_collection, terminal_collection = self._get_collections()
+        if not active_collection or not terminal_collection:
+            return  # pragma: nocover
+
+        self._load_incomplete_dialogues_labels(active_collection)
+
+        for dialogue in self._load_dialogues(active_collection):
+            self.add(dialogue)
+
+        for dialogue in self._load_dialogues(terminal_collection):
+            self.add(dialogue)
+            self._terminal_state_dialogues_labels.add(dialogue.dialogue_label)
 
     def _incomplete_dialogues_labels_to_json(self) -> List:
         """Dump incomplete_to_complete_dialogue_labels to json friendly dict."""
@@ -1212,6 +1313,8 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
 class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
+    _keep_terminal_state_dialogues = False
+
     def __init__(
         self,
         self_address: Address,
@@ -1219,18 +1322,24 @@ class Dialogues:
         message_class: Type[Message],
         dialogue_class: Type[Dialogue],
         role_from_first_message: Callable[[Message, Address], Dialogue.Role],
+        keep_terminal_state_dialogues: Optional[bool] = None,
     ) -> None:
         """
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
         :param end_states: the list of dialogue endstates
+        :param keep_terminal_state_dialogues: specify do dialogues in terminal state should stay or not
+
         :return: None
         """
 
         self._dialogues_storage = PersistDialoguesStorage(self)
         self._self_address = self_address
         self._dialogue_stats = DialogueStats(end_states)
+
+        if keep_terminal_state_dialogues is not None:
+            self._keep_terminal_state_dialogues = keep_terminal_state_dialogues
 
         enforce(
             issubclass(message_class, Message),
@@ -1277,6 +1386,11 @@ class Dialogues:
             ),
         )
         self._role_from_first_message = role_from_first_message
+
+    @property
+    def is_keep_dialogues_in_terminal_state(self) -> bool:
+        """Is requrired to keep dialogues in terminal state."""
+        return self._keep_terminal_state_dialogues
 
     @property
     def self_address(self) -> Address:
