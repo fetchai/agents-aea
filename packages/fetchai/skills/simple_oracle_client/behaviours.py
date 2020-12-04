@@ -17,38 +17,42 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a simple Fetch oracle contract deployment behaviour."""
+"""This package contains a simple Fetch oracle client behaviour."""
 
-from typing import Any, Dict, cast
+from typing import cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
-from packages.fetchai.contracts.oracle.contract import PUBLIC_ID as CONTRACT_PUBLIC_ID
+from packages.fetchai.contracts.fet_erc20.contract import (
+    PUBLIC_ID as FET_ERC20_PUBLIC_ID,
+)
+from packages.fetchai.contracts.oracle_client.contract import (
+    PUBLIC_ID as CLIENT_CONTRACT_PUBLIC_ID,
+)
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.skills.simple_oracle.dialogues import (
+from packages.fetchai.skills.simple_oracle_client.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
     LedgerApiDialogues,
 )
-from packages.fetchai.skills.simple_oracle.strategy import Strategy
+from packages.fetchai.skills.simple_oracle_client.strategy import Strategy
 
 
-DEFAULT_UPDATE_INTERVAL = 5
-EXPIRATION_BLOCK = 1000000000000000
+DEFAULT_QUERY_INTERVAL = 5
 
 
-class SimpleOracleBehaviour(TickerBehaviour):
-    """This class implements a behaviour that deploys a Fetch oracle contract."""
+class SimpleOracleClientBehaviour(TickerBehaviour):
+    """This class implements a behaviour that deploys a Fetch oracle client contract."""
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
-        update_interval = kwargs.pop(
-            "update_interval", DEFAULT_UPDATE_INTERVAL
+        query_interval = kwargs.pop(
+            "query_interval", DEFAULT_QUERY_INTERVAL
         )  # type: int
-        super().__init__(tick_interval=update_interval, **kwargs)
+        super().__init__(tick_interval=query_interval, **kwargs)
 
     def setup(self) -> None:
         """
@@ -57,16 +61,15 @@ class SimpleOracleBehaviour(TickerBehaviour):
         :return: None
         """
 
-        self.context.logger.info("Setting up Fetch oracle contract...")
+        self.context.logger.info("Setting up Fetch oracle client contract...")
         strategy = cast(Strategy, self.context.strategy)
 
-        if not strategy.is_contract_deployed:
+        if not strategy.is_client_contract_deployed:
             self._request_contract_deploy_transaction()
         else:
-            self.context.logger.info("Fetch oracle contract address already added")
-
-        if strategy.is_oracle_role_granted:
-            self.context.logger.info("Oracle role already granted")
+            self.context.logger.info(
+                "Fetch oracle client contract address already added"
+            )
 
     def act(self) -> None:
         """
@@ -77,26 +80,19 @@ class SimpleOracleBehaviour(TickerBehaviour):
 
         strategy = cast(Strategy, self.context.strategy)
 
-        if not strategy.is_contract_deployed:
-            self.context.logger.info("Oracle contract not yet deployed")
+        if not strategy.is_client_contract_deployed:
+            self.context.logger.info("Oracle client contract not yet deployed")
+            return
+        if not strategy.is_oracle_transaction_approved:
+            self.context.logger.info(
+                "Oracle client contract not yet approved to spend tokens"
+            )
+            self._request_approve_transaction()
             return
 
-        if not strategy.is_oracle_role_granted:
-            self.context.logger.info("Oracle not yet created")
-            self._request_grant_role_transaction()
-            return
-
-        # Check for entropy value from fetch oracle skill
-        oracle_data = self.context.shared_state.get("oracle_data", None)
-        if oracle_data is None:
-            self.context.logger.info("No oracle value to publish")
-        else:
-            self.context.logger.info("Publishing oracle value")
-
-            # add expiration block
-            update_args = oracle_data.copy()
-            update_args["expiration_block"] = EXPIRATION_BLOCK
-            self._request_update_transaction(update_args)
+        # Call contract function that queries oracle value
+        self.context.logger.info("Calling contract to request oracle value...")
+        self._request_query_transaction()
 
     def _request_contract_deploy_transaction(self) -> None:
         """
@@ -113,13 +109,12 @@ class SimpleOracleBehaviour(TickerBehaviour):
             counterparty=str(LEDGER_API_ADDRESS),
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id=str(CONTRACT_PUBLIC_ID),
+            contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
             callable="get_deploy_transaction",
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "deployer_address": self.context.agent_address,
-                    "ERC20Address": strategy.erc20_address,
-                    "initialFee": strategy.initial_fee_deploy,
+                    "fetchOracleContractAddress": strategy.oracle_contract_address,
                     "gas": strategy.default_gas_deploy,
                 }
             ),
@@ -134,9 +129,9 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
         self.context.logger.info("requesting contract deployment transaction...")
 
-    def _request_grant_role_transaction(self) -> None:
+    def _request_approve_transaction(self) -> None:
         """
-        Request transaction that grants oracle role in a Fetch oracle contract
+        Request transaction that approves client contract to spend tokens on behalf of sender
 
         :return: None
         """
@@ -149,29 +144,31 @@ class SimpleOracleBehaviour(TickerBehaviour):
             counterparty=str(LEDGER_API_ADDRESS),
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id=str(CONTRACT_PUBLIC_ID),
-            contract_address=strategy.contract_address,
-            callable="get_grant_role_transaction",
+            contract_id=str(FET_ERC20_PUBLIC_ID),
+            contract_address=strategy.erc20_address,
+            callable="get_approve_transaction",
             kwargs=ContractApiMessage.Kwargs(
                 {
-                    "oracle_address": self.context.agent_address,
-                    "gas": strategy.default_gas_grant_role,
+                    "from_address": self.context.agent_address,
+                    "spender": strategy.client_contract_address,
+                    "amount": strategy.approve_amount,
+                    "gas": strategy.default_gas_approve,
                 }
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-        contract_api_dialogue.terms = strategy.get_grant_role_terms()
+        contract_api_dialogue.terms = strategy.get_approve_terms()
         envelope_context = EnvelopeContext(
             skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
         )
         self.context.outbox.put_message(
             message=contract_api_msg, context=envelope_context
         )
-        self.context.logger.info("requesting grant role transaction...")
+        self.context.logger.info("requesting query transaction...")
 
-    def _request_update_transaction(self, update_args: Dict[str, Any]) -> None:
+    def _request_query_transaction(self) -> None:
         """
-        Request transaction that updates value in Fetch oracle contract
+        Request transaction that requests value from Fetch oracle contract
 
         :return: None
         """
@@ -184,27 +181,26 @@ class SimpleOracleBehaviour(TickerBehaviour):
             counterparty=str(LEDGER_API_ADDRESS),
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             ledger_id=strategy.ledger_id,
-            contract_id=str(CONTRACT_PUBLIC_ID),
-            contract_address=strategy.contract_address,
-            callable="get_update_transaction",
+            contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
+            contract_address=strategy.client_contract_address,
+            callable="get_query_transaction",
             kwargs=ContractApiMessage.Kwargs(
                 {
-                    "oracle_address": self.context.agent_address,
-                    "update_function": strategy.update_function,
-                    "update_args": list(update_args.values()),
-                    "gas": strategy.default_gas_update,
+                    "from_address": self.context.agent_address,
+                    "query_function": strategy.query_function,
+                    "gas": strategy.default_gas_query,
                 }
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-        contract_api_dialogue.terms = strategy.get_update_terms()
+        contract_api_dialogue.terms = strategy.get_query_terms()
         envelope_context = EnvelopeContext(
             skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
         )
         self.context.outbox.put_message(
             message=contract_api_msg, context=envelope_context
         )
-        self.context.logger.info("requesting update transaction...")
+        self.context.logger.info("requesting query transaction...")
 
     def _get_balance(self):
         """
