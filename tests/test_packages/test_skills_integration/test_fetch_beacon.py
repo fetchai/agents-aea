@@ -19,9 +19,11 @@
 
 """This test module contains the integration test for the fetch beacon skill."""
 
+import pytest
+
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-
+@pytest.mark.integration
 class TestFetchBeaconSkill(AEATestCaseEmpty):
     """Test that fetch beacon skill works."""
 
