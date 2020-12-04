@@ -19,7 +19,7 @@
 
 """This package contians the handlers for the Fetch oracle client skill."""
 
-from typing import Optional, cast
+from typing import Optional, Any, cast
 
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
@@ -179,9 +179,9 @@ class LedgerApiHandler(Handler):
                 not strategy.is_client_contract_deployed
                 and transaction_label == "deploy"
             ):
-                client_contract_address = ledger_api_msg.transaction_receipt.receipt.get(
+                client_contract_address = cast(str, ledger_api_msg.transaction_receipt.receipt.get(
                     "contractAddress", None
-                ) # type: Optional[str]
+                ))
                 strategy.client_contract_address = client_contract_address
                 strategy.is_client_contract_deployed = is_transaction_successful
                 strategy.is_behaviour_active = is_transaction_successful

@@ -20,7 +20,6 @@
 """This module contains the class to connect to an oracle client contract."""
 
 import logging
-from typing import Any, Dict
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -71,28 +70,6 @@ class FetchOracleClientContract(Contract):
                     "nonce": nonce,
                 }
             )
-            tx = cls._try_estimate_gas(ledger_api, tx)
+            tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         raise NotImplementedError
-
-    @staticmethod
-    def _try_estimate_gas(ledger_api: LedgerApi, tx: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Attempts to update the transaction with a gas estimate.
-
-        :param ledger_api: the ledger API
-        :param tx: the transaction
-        :return: the transaction (potentially updated)
-        """
-        try:
-            # try estimate the gas and update the transaction dict
-            gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-            tx["gas"] = gas_estimate
-        except Exception as e:  # pylint: disable=broad-except
-            _default_logger.debug(
-                "[OracleClientContract]: Error when trying to estimate gas: {}".format(
-                    e
-                )
-            )
-
-        return tx

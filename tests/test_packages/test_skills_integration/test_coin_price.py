@@ -21,6 +21,7 @@
 
 from pathlib import Path
 
+import pytest
 import requests
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
@@ -35,6 +36,7 @@ API_SPEC_PATH = str(
 )
 
 
+@pytest.mark.integration
 class TestCoinPriceSkill(AEATestCaseEmpty):
     """Test that coin price skill works."""
 

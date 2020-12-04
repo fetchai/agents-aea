@@ -203,7 +203,11 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         self.context.logger.info("requesting query transaction...")
 
     def _get_balance(self):
+        """
+        Request balance of agent account by sending a message to the ledger API
 
+        :return: None
+        """
         strategy = cast(Strategy, self.context.strategy)
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
