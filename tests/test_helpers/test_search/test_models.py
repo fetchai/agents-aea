@@ -145,8 +145,8 @@ def test_description():
         == "Description(values={'test': 'test'},data_model=DataModel(name=test,attributes={'test': \"Attribute(name=test,type=<class 'str'>,is_required=True)\"},description=))"
     )
 
-    description_pb = description.encode()
-    actual_description = Description.decode(description_pb)
+    description_pb = description._encode()
+    actual_description = Description._decode(description_pb)
     assert actual_description == description
 
 
@@ -386,6 +386,6 @@ def test_query():
         == "Query(constraints=['Constraint(attribute_name=author,constraint_type=ConstraintType(value=Stephen King,type===))'],model=None)"
     )
 
-    query_pb = query.encode()
-    actual_query = Query.decode(query_pb)
+    query_pb = query._encode()
+    actual_query = Query._decode(query_pb)
     assert actual_query == query
