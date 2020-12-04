@@ -121,13 +121,13 @@ class Location:
             self.latitude, self.longitude
         )
 
-    def encode(self) -> models_pb2.Query.Location:
+    def encode(self) -> models_pb2.Query.Location:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        location_pb = models_pb2.Query.Location()
+        location_pb = models_pb2.Query.Location()  # type: ignore
         location_pb.lat = self.latitude
         location_pb.lon = self.longitude
         return location_pb
@@ -167,11 +167,11 @@ class Attribute:
     """Implements an attribute for an OEF data model."""
 
     _attribute_type_to_pb = {
-        bool: models_pb2.Query.Attribute.BOOL,
-        int: models_pb2.Query.Attribute.INT,
-        float: models_pb2.Query.Attribute.DOUBLE,
-        str: models_pb2.Query.Attribute.STRING,
-        Location: models_pb2.Query.Attribute.LOCATION,
+        bool: models_pb2.Query.Attribute.BOOL,  # type: ignore
+        int: models_pb2.Query.Attribute.INT,  # type: ignore
+        float: models_pb2.Query.Attribute.DOUBLE,  # type: ignore
+        str: models_pb2.Query.Attribute.STRING,  # type: ignore
+        Location: models_pb2.Query.Attribute.LOCATION,  # type: ignore
     }
 
     def __init__(
@@ -209,13 +209,13 @@ class Attribute:
             self.name, self.type, self.is_required
         )
 
-    def encode(self) -> models_pb2.Query.Attribute:
+    def encode(self) -> models_pb2.Query.Attribute:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        attribute = models_pb2.Query.Attribute()
+        attribute = models_pb2.Query.Attribute()  # type: ignore
         attribute.name = self.name
         attribute.type = self._attribute_type_to_pb[self.type]
         attribute.required = self.is_required
@@ -282,13 +282,13 @@ class DataModel:
             self.name, {a.name: str(a) for a in self.attributes}, self.description
         )
 
-    def encode(self) -> models_pb2.Query.DataModel:
+    def encode(self) -> models_pb2.Query.DataModel:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        model = models_pb2.Query.DataModel()
+        model = models_pb2.Query.DataModel()  # type: ignore
         model.name = self.name
         model.attributes.extend([attr.encode() for attr in self.attributes])
         if self.description is not None:
@@ -429,7 +429,7 @@ class Description:
         )
 
     @staticmethod
-    def _to_key_value_pb(key: str, value: ATTRIBUTE_TYPES) -> models_pb2.Query.KeyValue:
+    def _to_key_value_pb(key: str, value: ATTRIBUTE_TYPES) -> models_pb2.Query.KeyValue:  # type: ignore
         """
         From a (key, attribute value) pair to the associated Protobuf object.
 
@@ -439,28 +439,28 @@ class Description:
         :return: the associated Protobuf object.
         """
 
-        kv = models_pb2.Query.KeyValue()
+        kv = models_pb2.Query.KeyValue()  # type: ignore
         kv.key = key
-        if type(value) == bool:
+        if type(value) == bool:  # pylint: disable=unidiomatic-typecheck
             kv.value.boolean = value
-        elif type(value) == int:
+        elif type(value) == int:  # pylint: disable=unidiomatic-typecheck
             kv.value.integer = value
-        elif type(value) == float:
+        elif type(value) == float:  # pylint: disable=unidiomatic-typecheck
             kv.value.double = value
-        elif type(value) == str:
+        elif type(value) == str:  # pylint: disable=unidiomatic-typecheck
             kv.value.string = value
-        elif type(value) == Location:
+        elif type(value) == Location:  # pylint: disable=unidiomatic-typecheck
             kv.value.location.CopyFrom(value.encode())  # type: ignore
 
         return kv
 
-    def _encode(self) -> models_pb2.Query.Instance:
+    def _encode(self) -> models_pb2.Query.Instance:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        instance = models_pb2.Query.Instance()
+        instance = models_pb2.Query.Instance()  # type: ignore
         instance.model.CopyFrom(self.data_model.encode())
         instance.values.extend(
             [self._to_key_value_pb(key, value) for key, value in self.values.items()]
@@ -480,12 +480,12 @@ class Description:
 
         :return: None
         """
-        description_bytes_pb = description._encode()
+        description_bytes_pb = description._encode()  # pylint: disable=protected-access
         description_bytes_bytes = description_bytes_pb.SerializeToString()
         description_pb.description_bytes = description_bytes_bytes
 
     @staticmethod
-    def _extract_value(value: models_pb2.Query.Value) -> ATTRIBUTE_TYPES:
+    def _extract_value(value: models_pb2.Query.Value) -> ATTRIBUTE_TYPES:  # type: ignore
         """
         From a Protobuf query value object to attribute type.
 
@@ -520,12 +520,9 @@ class Description:
         :return: A new instance of this class matching the protocol buffer object
         """
         model = DataModel.decode(description_pb.model)
-        values = dict(
-            [
-                (attr.key, cls._extract_value(attr.value))
-                for attr in description_pb.values
-            ]
-        )
+        values = {
+            attr.key: cls._extract_value(attr.value) for attr in description_pb.values
+        }
         return cls(values, model)
 
     @classmethod
@@ -539,7 +536,7 @@ class Description:
         :param description_pb: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'description_protobuf_object' argument.
         """
-        description_bytes_pb = models_pb2.Query.Instance()
+        description_bytes_pb = models_pb2.Query.Instance()  # type: ignore
         description_bytes_pb.ParseFromString(description_pb.description_bytes)
         description = cls._decode(description_bytes_pb)
         return description
@@ -579,8 +576,8 @@ class ConstraintType:
         >>> not_equal_london = ConstraintType("!=", "London")
         >>> less_than_pi = ConstraintType("<", 3.14)
         >>> within_range = ConstraintType("within", (-10.0, 10.0))
-        >>> in_a_set = ConstraintType("in", [1, 2, 3])
-        >>> not_in_a_set = ConstraintType("not_in", {"C", "Java", "Python"})
+        >>> in_a_set = ConstraintType("in", (1, 2, 3))
+        >>> not_in_a_set = ConstraintType("not_in", ("C", "Java", "Python"))
 
     """
 
@@ -839,22 +836,24 @@ class ConstraintType:
         elif self.type == ConstraintTypes.WITHIN:
             range_ = models_pb2.Query.Range()
 
-            if type(self.value[0]) == str:
+            if type(self.value[0]) == str:  # pylint: disable=unidiomatic-typecheck
                 values = models_pb2.Query.StringPair()
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.string_pair.CopyFrom(values)
-            elif type(self.value[0]) == int:
+            elif type(self.value[0]) == int:  # pylint: disable=unidiomatic-typecheck
                 values = models_pb2.Query.IntPair()
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.integer_pair.CopyFrom(values)
-            elif type(self.value[0]) == float:
+            elif type(self.value[0]) == float:  # pylint: disable=unidiomatic-typecheck
                 values = models_pb2.Query.DoublePair()
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.double_pair.CopyFrom(values)
-            elif type(self.value[0]) == Location:
+            elif (
+                type(self.value[0]) == Location  # pylint: disable=unidiomatic-typecheck
+            ):
                 values = models_pb2.Query.LocationPair()
                 values.first.CopyFrom(self.value[0].encode())
                 values.second.CopyFrom(self.value[1].encode())
@@ -916,16 +915,16 @@ class ConstraintType:
         decoding: ConstraintType
 
         relation_type_from_pb = {
-            models_pb2.Query.Relation.Operator.GTEQ: ConstraintTypes.GREATER_THAN_EQ,
-            models_pb2.Query.Relation.Operator.GT: ConstraintTypes.GREATER_THAN,
-            models_pb2.Query.Relation.Operator.LTEQ: ConstraintTypes.LESS_THAN_EQ,
-            models_pb2.Query.Relation.Operator.LT: ConstraintTypes.LESS_THAN,
-            models_pb2.Query.Relation.Operator.NOTEQ: ConstraintTypes.NOT_EQUAL,
-            models_pb2.Query.Relation.Operator.EQ: ConstraintTypes.EQUAL,
+            models_pb2.Query.Relation.Operator.GTEQ: ConstraintTypes.GREATER_THAN_EQ,  # type: ignore
+            models_pb2.Query.Relation.Operator.GT: ConstraintTypes.GREATER_THAN,  # type: ignore
+            models_pb2.Query.Relation.Operator.LTEQ: ConstraintTypes.LESS_THAN_EQ,  # type: ignore
+            models_pb2.Query.Relation.Operator.LT: ConstraintTypes.LESS_THAN,  # type: ignore
+            models_pb2.Query.Relation.Operator.NOTEQ: ConstraintTypes.NOT_EQUAL,  # type: ignore
+            models_pb2.Query.Relation.Operator.EQ: ConstraintTypes.EQUAL,  # type: ignore
         }
         set_type_from_pb = {
-            models_pb2.Query.Set.Operator.IN: ConstraintTypes.IN,
-            models_pb2.Query.Set.Operator.NOTIN: ConstraintTypes.NOT_IN,
+            models_pb2.Query.Set.Operator.IN: ConstraintTypes.IN,  # type: ignore
+            models_pb2.Query.Set.Operator.NOTIN: ConstraintTypes.NOT_IN,  # type: ignore
         }
 
         if category == CONSTRAINT_CATEGORY_RELATION:
@@ -1057,13 +1056,13 @@ class ConstraintExpr(ABC):
         return None
 
     @staticmethod
-    def _encode(expression) -> models_pb2.Query.ConstraintExpr:
+    def _encode(expression) -> models_pb2.Query.ConstraintExpr:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        constraint_expression_pb = models_pb2.Query.ConstraintExpr()
+        constraint_expression_pb = models_pb2.Query.ConstraintExpr()  # type: ignore
         expression_pb = expression.encode()
         if isinstance(expression, And):
             constraint_expression_pb.and_.CopyFrom(expression_pb)
@@ -1157,13 +1156,13 @@ class And(ConstraintExpr):
         """Compare with another object."""
         return isinstance(other, And) and self.constraints == other.constraints
 
-    def encode(self) -> models_pb2.Query.ConstraintExpr.And:
+    def encode(self) -> models_pb2.Query.ConstraintExpr.And:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        and_pb = models_pb2.Query.ConstraintExpr.And()
+        and_pb = models_pb2.Query.ConstraintExpr.And()  # type: ignore
         constraint_expression_pbs = [
             ConstraintExpr._encode(constraint) for constraint in self.constraints
         ]
@@ -1231,13 +1230,13 @@ class Or(ConstraintExpr):
         """Compare with another object."""
         return isinstance(other, Or) and self.constraints == other.constraints
 
-    def encode(self) -> models_pb2.Query.ConstraintExpr.Or:
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Or:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        or_pb = models_pb2.Query.ConstraintExpr.Or()
+        or_pb = models_pb2.Query.ConstraintExpr.Or()  # type: ignore
         constraint_expression_pbs = [
             ConstraintExpr._encode(constraint) for constraint in self.constraints
         ]
@@ -1289,13 +1288,13 @@ class Not(ConstraintExpr):
         """Compare with another object."""
         return isinstance(other, Not) and self.constraint == other.constraint
 
-    def encode(self) -> models_pb2.Query.ConstraintExpr.Not:
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Not:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        not_pb = models_pb2.Query.ConstraintExpr.Not()
+        not_pb = models_pb2.Query.ConstraintExpr.Not()  # type: ignore
         constraint_expression_pb = ConstraintExpr._encode(self.constraint)
         not_pb.expression.CopyFrom(constraint_expression_pb)
         return not_pb
@@ -1338,7 +1337,7 @@ class Constraint(ConstraintExpr):
             >>> attr_genre   = Attribute("genre",  str, True, "The genre of the book.")
             >>> c1 = Constraint("author", ConstraintType("==", "Stephen King"))
             >>> c2 = Constraint("year", ConstraintType(">", 1990))
-            >>> c3 = Constraint("genre", ConstraintType("in", {"horror", "science_fiction"}))
+            >>> c3 = Constraint("genre", ConstraintType("in", ("horror", "science_fiction")))
             >>> book_1 = Description({"author": "Stephen King",  "year": 1991, "genre": "horror"})
             >>> book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
 
@@ -1417,13 +1416,13 @@ class Constraint(ConstraintExpr):
             self.attribute_name, self.constraint_type
         )
 
-    def encode(self) -> models_pb2.Query.ConstraintExpr.Constraint:
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Constraint:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        constraint = models_pb2.Query.ConstraintExpr.Constraint()
+        constraint = models_pb2.Query.ConstraintExpr.Constraint()  # type: ignore
         constraint.attribute_name = self.attribute_name
 
         if (
@@ -1552,15 +1551,16 @@ class Query:
             [str(c) for c in self.constraints], self.model
         )
 
-    def _encode(self) -> models_pb2.Query.Model:
+    def _encode(self) -> models_pb2.Query.Model:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        query = models_pb2.Query.Model()
+        query = models_pb2.Query.Model()  # type: ignore
         constraint_expression_pbs = [
-            ConstraintExpr._encode(constraint) for constraint in self.constraints
+            ConstraintExpr._encode(constraint)  # pylint: disable=protected-access
+            for constraint in self.constraints
         ]
         query.constraints.extend(constraint_expression_pbs)
 
@@ -1581,7 +1581,7 @@ class Query:
 
         :return: None
         """
-        query_bytes_pb = query._encode()
+        query_bytes_pb = query._encode()  # pylint: disable=protected-access
         query_bytes_bytes = query_bytes_pb.SerializeToString()
         query_pb.query_bytes = query_bytes_bytes
 
@@ -1593,7 +1593,10 @@ class Query:
         :param query_pb: the protocol buffer object corresponding with this class.
         :return: A new instance of this class matching the protocol buffer object
         """
-        constraints = [ConstraintExpr._decode(c) for c in query_pb.constraints]
+        constraints = [
+            ConstraintExpr._decode(c)  # pylint: disable=protected-access
+            for c in query_pb.constraints
+        ]
         data_model = DataModel.decode(query_pb.model)
 
         return cls(constraints, data_model if query_pb.HasField("model") else None,)
@@ -1609,7 +1612,7 @@ class Query:
         :param query_pb: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'query_protobuf_object' argument.
         """
-        query_bytes_pb = models_pb2.Query.Model()
+        query_bytes_pb = models_pb2.Query.Model()  # type: ignore
         query_bytes_pb.ParseFromString(query_pb.query_bytes)
         query = cls._decode(query_bytes_pb)
         return query
