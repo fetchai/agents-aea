@@ -32,6 +32,55 @@ from aea.exceptions import enforce
 
 _default_logger = logging.getLogger(__name__)
 
+proto_value = {
+    "string": "string",
+    "double": "double",
+    "boolean": "boolean",
+    "integer": "integer",
+    "location": "location",
+}
+
+proto_range_pairs = {
+    "string": "string_pair",
+    "integer": "integer_pair",
+    "double": "double_pair",
+    "location": "location_pair",
+}
+
+proto_set_values = {
+    "string": "string",
+    "double": "double",
+    "boolean": "boolean",
+    "integer": "integer",
+    "location": "location",
+}
+
+proto_constraint = {
+    "set": "set_",
+    "range": "range_",
+    "relation": "relation",
+    "distance": "distance",
+}
+
+proto_expression = {
+    "or": "or_",
+    "and": "and_",
+    "not": "not_",
+    "constraint": "constraint",
+}
+
+CONSTRAINT_CATEGORY_RELATION = "relation"
+CONSTRAINT_CATEGORY_RANGE = "range"
+CONSTRAINT_CATEGORY_SET = "set"
+CONSTRAINT_CATEGORY_DISTANCE = "distance"
+
+CONSTRAINT_CATEGORIES = [
+    CONSTRAINT_CATEGORY_RELATION,
+    CONSTRAINT_CATEGORY_RANGE,
+    CONSTRAINT_CATEGORY_SET,
+    CONSTRAINT_CATEGORY_DISTANCE,
+]
+
 
 class Location:
     """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
@@ -445,19 +494,19 @@ class Description:
         """
         value_case = value.WhichOneof("value")
 
-        if value_case == "string":
+        if value_case == proto_value["string"]:
             result = value.string
-        elif value_case == "boolean":
+        elif value_case == proto_value["boolean"]:
             result = bool(value.boolean)
-        elif value_case == "integer":
+        elif value_case == proto_value["integer"]:
             result = value.integer
-        elif value_case == "double":
+        elif value_case == proto_value["double"]:
             result = value.double
-        elif value_case == "location":
+        elif value_case == proto_value["location"]:
             result = Location.decode(value.location)
         else:
             raise ValueError(
-                f"Incorrect value. Expected either of ['string', 'boolean', 'integer', 'double', 'location']. Found {value_case}."
+                f"Incorrect value. Expected either of {list(proto_value.values())}. Found {value_case}."
             )
 
         return result
@@ -879,33 +928,33 @@ class ConstraintType:
             models_pb2.Query.Set.Operator.NOTIN: ConstraintTypes.NOT_IN,
         }
 
-        if category == "relation":
+        if category == CONSTRAINT_CATEGORY_RELATION:
             relation_enum = relation_type_from_pb[constraint_type_pb.operator]
             value_case = constraint_type_pb.value.WhichOneof("value")
-            if value_case == "string":
+            if value_case == proto_value["string"]:
                 decoding = ConstraintType(
                     relation_enum, constraint_type_pb.value.string
                 )
-            elif value_case == "boolean":
+            elif value_case == proto_value["boolean"]:
                 decoding = ConstraintType(
                     relation_enum, constraint_type_pb.value.boolean
                 )
-            elif value_case == "integer":
+            elif value_case == proto_value["integer"]:
                 decoding = ConstraintType(
                     relation_enum, constraint_type_pb.value.integer
                 )
-            elif value_case == "double":
+            elif value_case == proto_value["double"]:
                 decoding = ConstraintType(
                     relation_enum, constraint_type_pb.value.double
                 )
-            elif value_case == "location":
+            elif value_case == proto_value["location"]:
                 decoding = ConstraintType(
                     relation_enum, Location.decode(constraint_type_pb.value.location),
                 )
-        elif category == "range":
+        elif category == CONSTRAINT_CATEGORY_RANGE:
             range_enum = ConstraintTypes.WITHIN
             range_case = constraint_type_pb.WhichOneof("pair")
-            if range_case == "string_pair":
+            if range_case == proto_range_pairs["string"]:
                 decoding = ConstraintType(
                     range_enum,
                     (
@@ -913,7 +962,7 @@ class ConstraintType:
                         constraint_type_pb.string_pair.second,
                     ),
                 )
-            elif range_case == "integer_pair":
+            elif range_case == proto_range_pairs["integer"]:
                 decoding = ConstraintType(
                     range_enum,
                     (
@@ -921,7 +970,7 @@ class ConstraintType:
                         constraint_type_pb.integer_pair.second,
                     ),
                 )
-            elif range_case == "double_pair":
+            elif range_case == proto_range_pairs["double"]:
                 decoding = ConstraintType(
                     range_enum,
                     (
@@ -929,7 +978,7 @@ class ConstraintType:
                         constraint_type_pb.double_pair.second,
                     ),
                 )
-            elif range_case == "location_pair":
+            elif range_case == proto_range_pairs["location"]:
                 decoding = ConstraintType(
                     range_enum,
                     (
@@ -937,39 +986,39 @@ class ConstraintType:
                         Location.decode(constraint_type_pb.location_pair.second),
                     ),
                 )
-        elif category == "set":
+        elif category == CONSTRAINT_CATEGORY_SET:
             set_enum = set_type_from_pb[constraint_type_pb.operator]
             value_case = constraint_type_pb.values.WhichOneof("values")
-            if value_case == "string":
+            if value_case == proto_set_values["string"]:
                 decoding = ConstraintType(
                     set_enum, tuple(constraint_type_pb.values.string.values),
                 )
-            elif value_case == "boolean":
+            elif value_case == proto_set_values["boolean"]:
                 decoding = ConstraintType(
                     set_enum, tuple(constraint_type_pb.values.boolean.values),
                 )
-            elif value_case == "integer":
+            elif value_case == proto_set_values["integer"]:
                 decoding = ConstraintType(
                     set_enum, tuple(constraint_type_pb.values.integer.values),
                 )
-            elif value_case == "double":
+            elif value_case == proto_set_values["double"]:
                 decoding = ConstraintType(
                     set_enum, tuple(constraint_type_pb.values.double.values),
                 )
-            elif value_case == "location":
+            elif value_case == proto_set_values["location"]:
                 locations = [
                     Location.decode(loc)
                     for loc in constraint_type_pb.values.location.values
                 ]
                 decoding = ConstraintType(set_enum, locations)
-        elif category == "distance":
+        elif category == CONSTRAINT_CATEGORY_DISTANCE:
             distance_enum = ConstraintTypes.DISTANCE
             center = Location.decode(constraint_type_pb.center)
             distance = constraint_type_pb.distance
             decoding = ConstraintType(distance_enum, (center, distance))
         else:
             raise ValueError(
-                f"Incorrect category. Expected either 'relation', 'range', 'set', or 'distance'. Found {category}."
+                f"Incorrect category. Expected either of {CONSTRAINT_CATEGORIES}. Found {category}."
             )
         return decoding
 
@@ -1043,17 +1092,17 @@ class ConstraintExpr(ABC):
 
         result: Optional[Union[And, Or, Not, Constraint]] = None
 
-        if expression == "and_":
+        if expression == proto_expression["and"]:
             result = And.decode(constraint_expression_pb.and_)
-        elif expression == "or_":
+        elif expression == proto_expression["or"]:
             result = Or.decode(constraint_expression_pb.or_)
-        elif expression == "not_":
+        elif expression == proto_expression["not"]:
             result = Not.decode(constraint_expression_pb.not_)
-        elif expression == "constraint":
+        elif expression == proto_expression["constraint"]:
             result = Constraint.decode(constraint_expression_pb.constraint)
         else:
             raise ValueError(
-                f"Incorrect argument. Expected either of ['and_', 'or_', 'not_', 'constraint']. Found {expression}."
+                f"Incorrect argument. Expected either of {list(proto_expression.keys())}. Found {expression}."
             )
 
         return result
@@ -1410,13 +1459,13 @@ class Constraint(ConstraintExpr):
         :return: A new instance of this class matching the protocol buffer object
         """
         constraint_case = constraint_pb.WhichOneof("constraint")
-        if constraint_case == "relation":
+        if constraint_case == proto_constraint["relation"]:
             constraint_type = ConstraintType.decode(constraint_pb.relation, "relation")
-        elif constraint_case == "set_":
+        elif constraint_case == proto_constraint["set"]:
             constraint_type = ConstraintType.decode(constraint_pb.set_, "set")
-        elif constraint_case == "range_":
+        elif constraint_case == proto_constraint["range"]:
             constraint_type = ConstraintType.decode(constraint_pb.range_, "range")
-        elif constraint_case == "distance":
+        elif constraint_case == proto_constraint["distance"]:
             constraint_type = ConstraintType.decode(constraint_pb.distance, "distance")
         else:
             raise ValueError(
