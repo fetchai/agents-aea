@@ -992,8 +992,13 @@ class TestGenericSigningHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.signing_handler.context.logger, "log") as mock_logger:
-            self.signing_handler.handle(incoming_message)
+        with patch.object(
+            self.signing_handler.context.behaviours.transaction, "failed_processing"
+        ):
+            with patch.object(
+                self.signing_handler.context.logger, "log"
+            ) as mock_logger:
+                self.signing_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
@@ -1008,9 +1013,6 @@ class TestGenericSigningHandler(BaseSkillTestCase):
         # finish_processing
         assert behaviour.processing_time == 0.0
         assert behaviour.processing is None
-
-        # failed_processing
-        assert fipa_dialogue in behaviour.waiting
 
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the signing handler."""
@@ -1363,9 +1365,12 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
-            with patch.object(self.logger, "log") as mock_logger:
-                self.ledger_api_handler.handle(incoming_message)
+        with patch.object(
+            self.ledger_api_handler.context.behaviours.transaction, "finish_processing"
+        ):
+            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
+                with patch.object(self.logger, "log") as mock_logger:
+                    self.ledger_api_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
@@ -1416,12 +1421,15 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
-            with patch.object(self.logger, "log"):
-                with pytest.raises(
-                    ValueError, match="Could not retrieve last fipa message"
-                ):
-                    self.ledger_api_handler.handle(incoming_message)
+        with patch.object(
+            self.ledger_api_handler.context.behaviours.transaction, "finish_processing"
+        ):
+            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
+                with patch.object(self.logger, "log"):
+                    with pytest.raises(
+                        ValueError, match="Could not retrieve last fipa message"
+                    ):
+                        self.ledger_api_handler.handle(incoming_message)
 
         # after
         self.assert_quantity_in_outbox(0)
@@ -1455,9 +1463,12 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(LedgerApis, "is_transaction_settled", return_value=False):
-            with patch.object(self.logger, "log") as mock_logger:
-                self.ledger_api_handler.handle(incoming_message)
+        with patch.object(
+            self.ledger_api_handler.context.behaviours.transaction, "failed_processing"
+        ):
+            with patch.object(LedgerApis, "is_transaction_settled", return_value=False):
+                with patch.object(self.logger, "log") as mock_logger:
+                    self.ledger_api_handler.handle(incoming_message)
 
         # after
         self.assert_quantity_in_outbox(0)
@@ -1486,8 +1497,11 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
         ledger_api_dialogue.associated_fipa_dialogue = "mock"
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            self.ledger_api_handler.handle(incoming_message)
+        with patch.object(
+            self.ledger_api_handler.context.behaviours.transaction, "failed_processing"
+        ):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.ledger_api_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(

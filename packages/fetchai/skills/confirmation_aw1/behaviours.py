@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the behaviour for the generic buyer skill."""
+"""This package contains the behaviour for the confirmation aw1 skill."""
 
 from typing import List, Optional, Set, cast
 
@@ -28,78 +28,19 @@ from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.generic_buyer.dialogues import (
-    FipaDialogue,
+from packages.fetchai.skills.confirmation_aw1.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
-    OefSearchDialogues,
+    RegisterDialogue,
 )
-from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
 DEFAULT_MAX_PROCESSING = 120
 DEFAULT_TX_INTERVAL = 2.0
-DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
-class GenericSearchBehaviour(TickerBehaviour):
-    """This class implements a search behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialize the search behaviour."""
-        search_interval = cast(
-            float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
-        )
-        super().__init__(tick_interval=search_interval, **kwargs)
-
-    def setup(self) -> None:
-        """Implement the setup for the behaviour."""
-        strategy = cast(GenericStrategy, self.context.strategy)
-        if strategy.is_ledger_tx:
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
-            )
-            ledger_api_msg, _ = ledger_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.GET_BALANCE,
-                ledger_id=strategy.ledger_id,
-                address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
-            )
-            self.context.outbox.put_message(message=ledger_api_msg)
-        else:
-            strategy.is_searching = True
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        strategy = cast(GenericStrategy, self.context.strategy)
-        if strategy.is_searching:
-            query = strategy.get_location_and_service_query()
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
-            )
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                query=query,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        pass
-
-
-class GenericTransactionBehaviour(TickerBehaviour):
+class TransactionBehaviour(TickerBehaviour):
     """A behaviour to sequentially submit transactions to the blockchain."""
 
     def __init__(self, **kwargs):
@@ -111,7 +52,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
             float, kwargs.pop("max_processing", DEFAULT_MAX_PROCESSING)
         )
         self.processing_time = 0.0
-        self.waiting: List[FipaDialogue] = []
+        self.waiting: List[RegisterDialogue] = []
         self.processing: Optional[LedgerApiDialogue] = None
         self.timedout: Set[DialogueLabel] = set()
         super().__init__(tick_interval=tx_interval, **kwargs)
@@ -139,7 +80,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def _start_processing(self) -> None:
         """Process the next transaction."""
-        fipa_dialogue = self.waiting.pop(0)
+        register_dialogue = self.waiting.pop(0)
         self.context.logger.info(
             f"Processing transaction, {len(self.waiting)} transactions remaining"
         )
@@ -149,10 +90,10 @@ class GenericTransactionBehaviour(TickerBehaviour):
         ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
             counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-            terms=fipa_dialogue.terms,
+            terms=register_dialogue.terms,
         )
         ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        ledger_api_dialogue.associated_register_dialogue = register_dialogue
         self.processing_time = 0.0
         self.processing = ledger_api_dialogue
         self.context.logger.info(
@@ -173,7 +114,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
         if self.processing is None:
             return
         self.timedout.add(self.processing.dialogue_label)
-        self.waiting.append(self.processing.associated_fipa_dialogue)
+        self.waiting.append(self.processing.associated_register_dialogue)
         self.processing_time = 0.0
         self.processing = None
 
@@ -206,4 +147,4 @@ class GenericTransactionBehaviour(TickerBehaviour):
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.finish_processing(ledger_api_dialogue)
-        self.waiting.append(ledger_api_dialogue.associated_fipa_dialogue)
+        self.waiting.append(ledger_api_dialogue.associated_register_dialogue)

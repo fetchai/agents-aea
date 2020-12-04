@@ -41,6 +41,7 @@ DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
 DEFAULT_MIN_QUANTITY = 1
+DEFAULT_MAX_QUANTITY = 100
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
@@ -68,6 +69,7 @@ class GenericStrategy(Model):
 
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_UNIT_PRICE)
         self._min_quantity = kwargs.pop("min_quantity", DEFAULT_MIN_QUANTITY)
+        self._max_quantity = kwargs.pop("max_quantity", DEFAULT_MAX_QUANTITY)
         self._max_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
@@ -196,6 +198,7 @@ class GenericStrategy(Model):
             and proposal.values["ledger_id"] == self.ledger_id
             and proposal.values["price"] > 0
             and proposal.values["quantity"] >= self._min_quantity
+            and proposal.values["quantity"] <= self._max_quantity
             and proposal.values["price"]
             <= proposal.values["quantity"] * self._max_unit_price
             and proposal.values["currency_id"] == self._currency_id
