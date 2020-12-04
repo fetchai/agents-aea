@@ -66,7 +66,7 @@ class MyScaffoldConnection(Connection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    async def send(self, envelope: "Envelope") -> None:
+    async def send(self, envelope: Envelope) -> None:
         """
         Send an envelope.
 
@@ -75,7 +75,7 @@ class MyScaffoldConnection(Connection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args, **kwargs) -> Optional[Envelope]:
         """
         Receive an envelope. Blocking.
 
