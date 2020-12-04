@@ -6,12 +6,12 @@ description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmT7TUrTyF4ub9CsA8cXZ4QjTwZREUW81qAskCiZJy7egR
+  README.md: QmUaYoEziWM3BqytUvyvswQ88RmJ2hysXv1FJ9gpNTdmAV
   __init__.py: QmR6pcWX14FsQip4eYJRNeiQdrNMPj6y4m6Tsgd6hd7yU6
   custom_types.py: Qmf72KRbkNsxxAHwMtkmJc5TRL23fU7AuzJAdSTftckwJQ
   dialogues.py: QmUA4wAouqs1wWM4cbHZDpkKR5gsKKEZJCmPz3YEEzTcM1
-  fipa.proto: Qmb19ojU7i5jUaRbURtnRSWQ6ENGniYuM3WtpRm6UYfpkU
-  fipa_pb2.py: QmRp7fUA4C38MsnGMrd1NDc39qRL9iod1Zc5MB1TJypR4P
+  fipa.proto: QmNjrwZxui2r8tu5wURx3joZa6WAQibB4gZmPQfGeXEcE2
+  fipa_pb2.py: QmaAWiowBrpxVQbw3kFtqK5puqqNfxq3VvnFtdWQZBJuaH
   message.py: Qmb44KHjWH4yZNcs52CLmAmWdVwaKnM5MH6HNuDPNsdcZD
   serialization.py: QmaFFxUczHpcoPosV3aKfUAwnr9347Cjnotqby4GMdiM2S
 fingerprint_ignore_patterns: []
