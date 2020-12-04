@@ -601,13 +601,13 @@ class Model(SkillComponent, ABC):
         if keep_terminal_state_dialogues is not None:
             self._keep_terminal_state_dialogues = keep_terminal_state_dialogues
 
-    def setup(self) -> None:  # pragma: nocover
+    def setup(self) -> None:
         """Set the class up."""
         super_obj = super()
         if hasattr(super_obj, "setup"):
             super_obj.setup()  # type: ignore  # pylint: disable=no-member
 
-    def teardown(self) -> None:  # pragma: nocover
+    def teardown(self) -> None:
         """Tear the class down."""
         super_obj = super()
         if hasattr(super_obj, "teardown"):

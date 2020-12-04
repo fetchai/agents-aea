@@ -1390,7 +1390,7 @@ class Dialogues:
     @property
     def is_keep_dialogues_in_terminal_state(self) -> bool:
         """Is requrired to keep dialogues in terminal state."""
-        return self._keep_terminal_state_dialogues  # pragma: nocover
+        return self._keep_terminal_state_dialogues
 
     @property
     def self_address(self) -> Address:
