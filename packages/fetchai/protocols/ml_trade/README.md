@@ -28,9 +28,9 @@ speech_acts:
 ...
 ---
 ct:Query: |
-  bytes query = 1;
+  bytes query_bytes = 1;
 ct:Description: |
-  bytes description = 1;
+  bytes description_bytes = 1;
 ...
 ---
 initiation: [cfp]

@@ -10,7 +10,7 @@ message OefSearchMessage{
     }
 
     message Description{
-        bytes description = 1;
+        bytes description_bytes = 1;
     }
 
     message OefErrorOperation{
@@ -24,13 +24,7 @@ message OefSearchMessage{
     }
 
     message Query{
-        message Nothing {
-        }
-        oneof query{
-            bytes bytes = 1;
-            Nothing nothing = 2;
-            bytes query_bytes = 3;
-        }
+        bytes query_bytes = 1;
     }
 
 
