@@ -34,7 +34,9 @@ spec:
           ${LATEST_ENTRY_PEER_HOST}:${LATEST_ENTRY_PEER_PORT} ; sleep 2; done;
         env:
         - name: LATEST_ENTRY_PEER_HOST
-        - name: LATEST_ENTRY_PEER_PORT      
+          value: {{ $.Values.dns.publicdnsname }}
+        - name: LATEST_ENTRY_PEER_PORT
+          value: "{{ $.Values.acnnodes.bootstrap.p2pport }}"
       containers:
       - name: acn-node 
         image: {{ $.Values.acnnodes.image }}
@@ -55,6 +57,7 @@ spec:
           - name: AEA_P2P_URI_MONITORING
             value: 127.0.0.1:8080
           - name: AEA_P2P_ENTRY_URIS
+            value: /dns4/{{ $.Values.dns.publicdnsname }}/tcp/{{ $.Values.acnnodes.bootstrap.p2pport }}/p2p/{{ $.Values.acnnodes.bootstrap.peerid }}
           - name: ACN_LOG_FILE
             value: /acn_data/libp2p_node_{{ .p2pport }}.log
 

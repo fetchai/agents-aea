@@ -20,9 +20,14 @@ acnnodes:
     - p2pport: 9003
       delegateport: 11003
       privkey: ODE5MzM0MWZhYTFiMjZmZWNmNGJlM2E3ZTdmYzJkZTc0MGE0MzA5OWIxNWMyZjQwNWI2OTBmOWM4NmJjMjAwNA==
+      peerid: 16Uiu2HAkwRr8R4riKhxiCy2a5E4J6t4Cvxnkxasu9uRRyjJ9NGfS
     - p2pport: 9004
       delegateport: 11004
       privkey: ZDg5MWU4ZjAyMjAzYzk3YWE5YjlmODg4Nzk0MjM3NDU4YzRhODA3M2ViYTFlYzI1MzEzOGIxNDRjNDMyZGFkNg==
-    - p2pport: 9005
-      delegateport: 11005
-      privkey: MmM0MjE1MWRmNzQzNzFkZTJmZDQ1MzUyMGY4NzIzYzI1OWFiMTlhZjUxMTkxNDRiNmVhYjcwZjhmYTQzYTE1Zg==
+      peerid: 16Uiu2HAm1nE7eM1c3GJrbzKZCtBHkuTyoYU4vZo5i1Xo7HzziBYx
+
+  bootstrap:
+    p2pport: 9005
+    delegateport: 11005
+    privkey: MmM0MjE1MWRmNzQzNzFkZTJmZDQ1MzUyMGY4NzIzYzI1OWFiMTlhZjUxMTkxNDRiNmVhYjcwZjhmYTQzYTE1Zg==
+    peerid: 16Uiu2HAm5TasPqYqLSBwKw6MKUHLZUmSsnXrbisSGNcXNEqVTpqH
