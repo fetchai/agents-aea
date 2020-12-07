@@ -38,7 +38,7 @@ metadata:
   name: agents-dht-net
 spec:
   gateways:
-  - istio-fetchig
+  - agents-dht-net
   hosts:
   - {{ $.Values.dns.dnsname }}
   {{- if $.Values.dns.publicdnsname }}
