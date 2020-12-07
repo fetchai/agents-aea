@@ -39,6 +39,9 @@
     "fingerprint_ignore_patterns": {
       "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
     },
+    "entrypoint": {
+      "$ref": "definitions.json#/definitions/entrypoint"
+    },
     "connections": {
       "type": "array",
       "additionalProperties": false,
