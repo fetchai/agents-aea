@@ -8,7 +8,7 @@ metadata:
   name: agents-dht-net
 spec:
   selector:
-    app: istio-fetchig
+    app: {{ $.Values.dns.ingressgw }}
     istio: ingressgateway
   servers:
   {{- range $spec.config }}

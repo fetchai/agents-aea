@@ -2,13 +2,14 @@
 # DON'T add enything secret here and upload to the git repo
 dns:
   enabled: true
-  dnsname: agent-dht-net.prod.fetch-ai.com
-  publicdnsname: acn.fetch-ai.com 
-  targetgw: fetch.prod.fetch-ai.com
+  dnsname: agents-dht-testnet.colearn.fetch-ai.com
+  publicdnsname: acn.fetch-ai.com
+  ingressgw: istio-agentsig
+  targetgw: agentsig.colearn.fetch-ai.com
 
 acnnodes:
   enabled: true
-  image: gcr.io/fetch-ai-images/acn_node:c2f152e46
+  image: gcr.io/fetch-ai-colearn/acn_node:003d81c00
   resources:
     limits:
       cpu: 500m
@@ -31,7 +32,7 @@ acnnodes:
 
 bootstrap:
   enabled: true
-  image: gcr.io/fetch-ai-images/acn_node:c2f152e46
+  image: gcr.io/fetch-ai-colearn/acn_node:003d81c00
   resources:
     limits:
       cpu: 500m
