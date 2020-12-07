@@ -82,8 +82,8 @@ aea add-key ethereum ethereum_private_key.txt
 
 And one for the P2P connection:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ### Create the client AEA
@@ -147,8 +147,8 @@ aea add-key ethereum ethereum_private_key.txt
 
 And one for the P2P connection:
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 ## Run Ganache
@@ -216,7 +216,7 @@ config:
 ```
 
 where `SOME_ADDRESS` is the output
-of `aea get-multiaddress cosmos --connection` in the `erc1155_deployer` project.
+of `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)` in the `erc1155_deployer` project.
 The output will be something like `/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm2JPsUX1Su59YVDXJQizYkNSe8JCusqRpLeeTbvY76fE5`.
 
 
@@ -225,7 +225,7 @@ Or, run these commands:
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
   "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": ["'$(cd ../erc1155_deployer && aea get-multiaddress cosmos -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)'"],
+  "entry_peers": ["'$(cd ../erc1155_deployer && aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)'"],
   "local_uri": "127.0.0.1:9001",
   "log_file": "libp2p_node.log",
   "public_uri": "127.0.0.1:9001"

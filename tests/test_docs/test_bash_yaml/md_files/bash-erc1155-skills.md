@@ -21,8 +21,8 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
 aea fetch fetchai/erc1155_client:0.19.0
@@ -55,8 +55,8 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
-aea generate-key cosmos
-aea add-key cosmos cosmos_private_key.txt --connection
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat erc1155_deployer/ethereum_private_key.txt),1000000000000000000000" --account="$(cat erc1155_client/ethereum_private_key.txt),1000000000000000000000"
@@ -77,7 +77,7 @@ registering service on SOEF.
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
   "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": ["'$(cd ../erc1155_deployer && aea get-multiaddress cosmos -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)'"],
+  "entry_peers": ["'$(cd ../erc1155_deployer && aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)'"],
   "local_uri": "127.0.0.1:9001",
   "log_file": "libp2p_node.log",
   "public_uri": "127.0.0.1:9001"
