@@ -77,7 +77,7 @@ registering service on SOEF.
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
   "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": ["SOME_ADDRESS"],
+  "entry_peers": ["'$(cd ../erc1155_deployer && aea get-multiaddress cosmos -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)'"],
   "local_uri": "127.0.0.1:9001",
   "log_file": "libp2p_node.log",
   "public_uri": "127.0.0.1:9001"
