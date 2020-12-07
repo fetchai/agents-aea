@@ -1190,6 +1190,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
     """
 
     INCOMPLETE_DIALOGUES_OBJECT_NAME = "incomplete_dialogues"
+    TERMINAL_STATE_DIALOGUES_COLLECTTION_SUFFIX = "_terminal"
 
     def __init__(self, dialogues: "Dialogues") -> None:
         """Init dialogues storage."""
@@ -1232,7 +1233,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
         col_name = self._get_collection_name()
         if not col_name:
             return None
-        col_name += "_terminal"
+        col_name = f"{col_name}{self.TERMINAL_STATE_DIALOGUES_COLLECTTION_SUFFIX}"
         return self._get_collection_instance(col_name)
 
     @cached_property
@@ -1298,7 +1299,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
             collection.put(str(dialogue.dialogue_label), dialogue.json())
 
     def _load(self) -> None:
-        """Dump dialogues and incomplete dialogues from the generic storage."""
+        """Dump dialogues and incomplete dialogues labels from the generic storage."""
         if (
             not self._active_dialogues_collection
             or not self._terminal_dialogues_collection
@@ -1358,14 +1359,17 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
 
 
 class PersistDialoguesStorageWithOffloading(PersistDialoguesStorage):
-    """Dialogue Storage with dialogues offlosding."""
+    """Dialogue Storage with dialogues offloading."""
 
     def dialogue_terminal_state_callback(self, dialogue: "Dialogue") -> None:
         """Call on dialogue reaches terminal staste."""
-        if not self._terminal_dialogues_collection:  # pragma: nocover
-            # no storage available, fallback
+        if (
+            not self.is_terminal_dialogues_kept
+            or not self._terminal_dialogues_collection
+        ):  # pragma: nocover
             super().dialogue_terminal_state_callback(dialogue)
             return
+
         # do offloading
         # push to storage
         self._terminal_dialogues_collection.put(
@@ -1436,19 +1440,22 @@ class PersistDialoguesStorageWithOffloading(PersistDialoguesStorage):
         :param counterparty: the counterparty
         :return: The dialogues with the counterparty.
         """
+        dialogues = (
+            self._get_dialogues_by_address_from_collection(
+                counterparty, self._active_dialogues_collection
+            )
+            + self._get_dialogues_by_address_from_collection(
+                counterparty, self._terminal_dialogues_collection
+            )
+            + super().get_dialogues_with_counterparty(counterparty)
+        )
+        return self._unique_dialogues_by_label(dialogues)
+
+    @staticmethod
+    def _unique_dialogues_by_label(dialogues: List[Dialogue]) -> List[Dialogue]:
+        """Filter list of dialogues by unique dialogue label."""
         return list(
-            {
-                i.dialogue_label: i
-                for i in (
-                    super().get_dialogues_with_counterparty(counterparty)
-                    + self._get_dialogues_by_address_from_collection(
-                        counterparty, self._active_dialogues_collection
-                    )
-                    + self._get_dialogues_by_address_from_collection(
-                        counterparty, self._terminal_dialogues_collection
-                    )
-                )
-            }.values()
+            {dialogue.dialogue_label: dialogue for dialogue in dialogues}.values()
         )
 
     @property
@@ -1457,7 +1464,7 @@ class PersistDialoguesStorageWithOffloading(PersistDialoguesStorage):
         dialogues = super().dialogues_in_terminal_state + list(
             self._load_dialogues(self._terminal_dialogues_collection)
         )
-        return list({i.dialogue_label: i for i in dialogues}.values())
+        return self._unique_dialogues_by_label(dialogues)
 
 
 class Dialogues:

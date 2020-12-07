@@ -1961,13 +1961,16 @@ class TestPersistDialoguesStorageOffloading:
         )
         # check get and cache
         assert not dialogues_storage_restored._terminal_state_dialogues_labels
-        assert dialogues_storage_restored.get(dialogue_label)
+        assert dialogues_storage_restored.get(dialogue_label) is not None
         assert dialogues_storage_restored._terminal_state_dialogues_labels
 
         # test remove from storage on storeage.remove
         assert dialogues_storage_restored._terminal_dialogues_collection
-        assert dialogues_storage_restored._terminal_dialogues_collection.get(
-            str(dialogue_label)
+        assert (
+            dialogues_storage_restored._terminal_dialogues_collection.get(
+                str(dialogue_label)
+            )
+            is not None
         )
         dialogues_storage_restored.remove(dialogue_label)
         assert (
@@ -1976,7 +1979,7 @@ class TestPersistDialoguesStorageOffloading:
             )
             is None
         )
-        assert not dialogues_storage_restored.get(dialogue_label)
+        assert dialogues_storage_restored.get(dialogue_label) is None
 
 
 class TestBaseDialoguesStorage:
