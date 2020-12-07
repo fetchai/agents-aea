@@ -40,6 +40,14 @@ aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
 ``` bash
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
+  "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
+  "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0"
+}'
+```
+``` bash
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
@@ -51,7 +59,7 @@ aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt --connection
 ```
 ``` bash
-aea generate-wealth ethereum
+docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat erc1155_deployer/ethereum_private_key.txt),1000000000000000000000" --account="$(cat erc1155_client/ethereum_private_key.txt),1000000000000000000000"
 ```
 ``` bash
 aea get-wealth ethereum
@@ -64,6 +72,16 @@ aea run
 ```
 ``` bash
 registering service on SOEF.
+```
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
 ``` bash
 aea run
@@ -86,9 +104,13 @@ default_routing:
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 ``` yaml
+---
+public_id: fetchai/p2p_libp2p:0.12.0
+type: connection
 config:
   delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
+  entry_peers:
+  - SOME_ADDRESS
   local_uri: 127.0.0.1:9001
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:9001

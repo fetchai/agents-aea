@@ -49,6 +49,14 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 
 Then update the agent config (`aea-config.yaml`) with the default routing:
 ``` yaml
+default_routing:
+  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
+  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+```
+
+Or, run this command:
+``` bash
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
@@ -110,6 +118,16 @@ default_routing:
   fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
   fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+```
+
+Or, run this command:
+``` bash
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
+  "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
+  "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0"
+}'
 ```
 
 And change the default ledger:
@@ -181,15 +199,32 @@ At some point you should see the log output:
 registering service on SOEF.
 ```
 
-Then, update the configuration of the client AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+Then, update the configuration of the client AEA's p2p connection by appending the following
+YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml
+---
+public_id: fetchai/p2p_libp2p:0.12.0
+type: connection
 config:
   delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
+  entry_peers:
+  - SOME_ADDRESS
   local_uri: 127.0.0.1:9001
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:9001
+```
+
+Or, run this command:
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
 
 where `SOME_ADDRESS` is replaced accordingly.

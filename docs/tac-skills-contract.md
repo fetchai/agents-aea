@@ -166,13 +166,13 @@ aea add connection fetchai/soef:0.13.0
 aea add connection fetchai/ledger:0.10.0
 aea add skill fetchai/tac_participation:0.13.0
 aea add skill fetchai/tac_negotiation:0.15.0
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
-aea generate-key ethereum
-aea add-key ethereum ethereum_private_key.txt
 ```
 
 Then, build participant two:
@@ -183,13 +183,13 @@ aea add connection fetchai/soef:0.13.0
 aea add connection fetchai/ledger:0.10.0
 aea add skill fetchai/tac_participation:0.13.0
 aea add skill fetchai/tac_negotiation:0.15.0
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
-aea generate-key ethereum
-aea add-key ethereum ethereum_private_key.txt
 ```
 
 </p>
