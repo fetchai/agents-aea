@@ -49,10 +49,12 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 
 Then update the agent config (`aea-config.yaml`) with the default routing:
 ``` yaml
-default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
+  "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
+  "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0"
+}'
 ```
 
 And change the default ledger:
@@ -131,12 +133,11 @@ aea generate-key cosmos
 aea add-key cosmos cosmos_private_key.txt --connection
 ```
 
-### Fund the AEAs
+## Run Ganache
 
-To create some wealth for your AEAs for the Ethereum `ropsten` network. Note that this needs to be executed from each AEA folder:
-
+Run the following command
 ``` bash
-aea generate-wealth ethereum
+docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat erc1155_deployer/ethereum_private_key.txt),1000000000000000000000" --account="$(cat erc1155_client/ethereum_private_key.txt),1000000000000000000000"
 ```
 
 To check the wealth use (after some time for the wealth creation to be mined on Ropsten):
@@ -144,6 +145,8 @@ To check the wealth use (after some time for the wealth creation to be mined on 
 ``` bash
 aea get-wealth ethereum
 ```
+
+You should get `1000000000000000000000`.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
@@ -157,17 +160,6 @@ To update the SOEF config, run in each AEA project:
 ``` bash
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```
-
-## Run Ganache
-
-Run the following command
-```
-docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff
---account="$(cat erc1155_deployer/ethereum_private_key.txt),1000000000000000000000"
---account="$(cat erc1155_client/ethereum_private_key.txt),1000000000000000000000"
-```
-where you replace `PRIVATE_KEY_DEPLOYER` and `PRIVATE_KEY_CLIENT` with the respective private keys.
-
 
 ## Run the AEAs
 
