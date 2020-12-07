@@ -30,14 +30,14 @@ from tests.conftest import (
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS_ETH,
+    UseGanache,
 )
 
 
 @pytest.mark.integration
-class TestOracleSkills(AEATestCaseMany):
+class TestOracleSkills(AEATestCaseMany, UseGanache):
     """Test that oracle skills work."""
 
-    @pytest.mark.integration
     @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_oracle(self, erc20_contract, oracle_contract):
@@ -140,7 +140,7 @@ class TestOracleSkills(AEATestCaseMany):
             "setting up HttpHandler",
             "setting up CoinPriceBehaviour",
             "Setting up Fetch oracle contract...",
-            "Fetching price of fetch-ai in usd from CoinPrice",
+            "Fetching price of fetch-ai in usd from https://api.coingecko.com/api/v3/",
             "received raw transaction=",
             "fetch-ai price =",
             "transaction was successfully submitted. Transaction digest=",
