@@ -9,7 +9,7 @@ then
   exit 1
 fi
 
-read -p 'Where to upload the image (prod, or sandbox)?: ' envvar
+read -p 'Where to upload the image (prod, or colearn)?: ' envvar
 shopt -s nocasematch
 case "$envvar" in
  "prod" ) 
@@ -18,9 +18,9 @@ case "$envvar" in
    DOCKERFILE="Dockerfile.dev"
    echo "Registry to upload is $REGISTRY"
    ;;
- "sandbox" ) 
-   echo "Sandbox config selected"
-   REGISTRY="gcr.io/fetch-ai-sandbox"
+ "colearn" ) 
+   echo "colearn config selected"
+   REGISTRY="gcr.io/fetch-ai-colearn"
    DOCKERFILE="Dockerfile.dev"
    echo "Registry to upload is $REGISTRY"
    ;;
