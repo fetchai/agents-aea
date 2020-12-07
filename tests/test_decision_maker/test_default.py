@@ -23,7 +23,6 @@ from queue import Queue
 from typing import Optional, cast
 from unittest import mock
 
-import eth_account
 import pytest
 
 import aea
@@ -378,10 +377,7 @@ class TestDecisionMaker2:
             signing_msg_response.performative
             == SigningMessage.Performative.SIGNED_TRANSACTION
         )
-        assert (
-            type(signing_msg_response.signed_transaction.body)
-            == eth_account.datastructures.SignedTransaction
-        )
+        assert type(signing_msg_response.signed_transaction.body) == dict
 
     def test_handle_tx_signing_unknown(self):
         """Test tx signing for unknown."""

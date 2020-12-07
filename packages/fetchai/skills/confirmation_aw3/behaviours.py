@@ -22,7 +22,13 @@
 from typing import cast
 
 from packages.fetchai.skills.confirmation_aw3.strategy import Strategy
-from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
+from packages.fetchai.skills.generic_buyer.behaviours import (
+    GenericSearchBehaviour,
+    GenericTransactionBehaviour,
+)
+
+
+TransactionBehaviour = GenericTransactionBehaviour
 
 
 class SearchBehaviour(GenericSearchBehaviour):

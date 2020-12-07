@@ -31,15 +31,9 @@ speech_acts:
 ...
 ---
 ct:Query: |
-  message Nothing {
-  }
-  oneof query{
-      bytes bytes = 1;
-      Nothing nothing = 2;
-      bytes query_bytes = 3;
-  }
+  bytes query_bytes = 1;
 ct:Description: |
-  bytes description = 1;
+  bytes description_bytes = 1;
 ...
 ---
 initiation: [cfp]
@@ -55,6 +49,7 @@ reply:
 termination: [decline, match_accept, match_accept_w_inform, inform]
 roles: {seller, buyer}
 end_states: [successful, declined_cfp, declined_propose, declined_accept]
+keep_terminal_state_dialogues: true
 ...
 ```
 

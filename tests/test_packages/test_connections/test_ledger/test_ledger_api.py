@@ -47,6 +47,7 @@ from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
+from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
 from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
@@ -149,6 +150,69 @@ async def test_get_balance(
     actual_balance_amount = response_msg.balance
     expected_balance_amount = make_ledger_api(ledger_id, **config).get_balance(address)
     assert actual_balance_amount == expected_balance_amount
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+@ledger_ids
+async def test_get_state(
+    ledger_id,
+    address,
+    ledger_apis_connection: Connection,
+    update_default_ethereum_ledger_api,
+    ethereum_testnet_config,
+    ganache,
+):
+    """Test get state."""
+    import aea  # noqa # to load registries
+
+    if ledger_id == FETCHAI:
+        config = FETCHAI_TESTNET_CONFIG
+    else:
+        config = ethereum_testnet_config
+
+    if "ethereum" in ledger_id:
+        callable_name = "getBlock"
+    else:
+        callable_name = "blocks"
+    args = ("latest",)
+    kwargs = Kwargs({})
+
+    ledger_api_dialogues = LedgerApiDialogues(address)
+    request, ledger_api_dialogue = ledger_api_dialogues.create(
+        counterparty=str(ledger_apis_connection.connection_id),
+        performative=LedgerApiMessage.Performative.GET_STATE,
+        ledger_id=ledger_id,
+        callable=callable_name,
+        args=args,
+        kwargs=kwargs,
+    )
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        protocol_id=request.protocol_id,
+        message=request,
+    )
+
+    await ledger_apis_connection.send(envelope)
+    await asyncio.sleep(0.01)
+    response = await ledger_apis_connection.receive()
+
+    assert response is not None
+    assert type(response.message) == LedgerApiMessage
+    response_msg = cast(LedgerApiMessage, response.message)
+    response_dialogue = ledger_api_dialogues.update(response_msg)
+    assert response_dialogue == ledger_api_dialogue
+
+    assert (
+        response_msg.performative == LedgerApiMessage.Performative.STATE
+    ), response_msg
+    actual_block = response_msg.state.body
+    expected_block = make_ledger_api(ledger_id, **config).get_state(
+        callable_name, *args
+    )
+    assert actual_block == expected_block
 
 
 @pytest.mark.integration

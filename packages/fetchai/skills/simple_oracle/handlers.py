@@ -176,9 +176,14 @@ class LedgerApiHandler(Handler):
             transaction_label = contract_api_dialogue.terms.kwargs.get("label", "None")
 
             if not strategy.is_contract_deployed and transaction_label == "deploy":
-                contract_address = ledger_api_msg.transaction_receipt.receipt.get(
-                    "contractAddress", None
+                contract_address = cast(
+                    Optional[str],
+                    ledger_api_msg.transaction_receipt.receipt.get(
+                        "contractAddress", None
+                    ),
                 )
+                if contract_address is None:
+                    raise ValueError("No contract address found.")  # pragma: nocover
                 strategy.contract_address = contract_address
                 strategy.is_contract_deployed = is_transaction_successful
                 strategy.is_behaviour_active = is_transaction_successful

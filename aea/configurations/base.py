@@ -562,6 +562,10 @@ class CRUDCollection(Generic[T]):
             (k, v) for k, v in self._items_by_id.items()
         ]
 
+    def keys(self) -> Set[str]:
+        """Get the set of keys."""
+        return set(self._items_by_id.keys())
+
 
 class PublicId(JSONSerializable):
     """This class implement a public identifier.
@@ -1673,6 +1677,7 @@ class AgentConfig(PackageConfiguration):
             "default_connection",
             "default_ledger",
             "default_routing",
+            "storage_uri",
         ]
     )
 
@@ -1691,6 +1696,7 @@ class AgentConfig(PackageConfiguration):
         period: Optional[float] = None,
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
+        error_handler: Optional[Dict] = None,
         decision_maker_handler: Optional[Dict] = None,
         skill_exception_policy: Optional[str] = None,
         connection_exception_policy: Optional[str] = None,
@@ -1700,6 +1706,7 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict[str, str]] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        storage_uri: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
     ):
         """Instantiate the agent configuration object."""
@@ -1744,6 +1751,7 @@ class AgentConfig(PackageConfiguration):
         self.skill_exception_policy: Optional[str] = skill_exception_policy
         self.connection_exception_policy: Optional[str] = connection_exception_policy
 
+        self.error_handler = error_handler if error_handler is not None else {}
         self.decision_maker_handler = (
             decision_maker_handler if decision_maker_handler is not None else {}
         )
@@ -1758,6 +1766,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        self.storage_uri = storage_uri
         # this attribute will be set through the setter below
         self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
@@ -1881,6 +1890,8 @@ class AgentConfig(PackageConfiguration):
             config["execution_timeout"] = self.execution_timeout
         if self.max_reactions is not None:
             config["max_reactions"] = self.max_reactions
+        if self.error_handler != {}:
+            config["error_handler"] = self.error_handler
         if self.decision_maker_handler != {}:
             config["decision_maker_handler"] = self.decision_maker_handler
         if self.skill_exception_policy is not None:
@@ -1891,6 +1902,8 @@ class AgentConfig(PackageConfiguration):
             config["loop_mode"] = self.loop_mode
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
+        if self.storage_uri is not None:
+            config["storage_uri"] = self.storage_uri
         if self.currency_denominations != {}:
             config["currency_denominations"] = self.currency_denominations
 
@@ -1915,6 +1928,7 @@ class AgentConfig(PackageConfiguration):
             period=cast(float, obj.get("period")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
+            error_handler=cast(Dict, obj.get("error_handler", {})),
             decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),
             skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
             connection_exception_policy=cast(
@@ -1926,6 +1940,7 @@ class AgentConfig(PackageConfiguration):
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
+            storage_uri=cast(str, obj.get("storage_uri")),
             component_configurations=None,
         )
 
@@ -2075,7 +2090,7 @@ class ProtocolSpecification(ProtocolConfig):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result: Dict[str, Any] = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -2089,6 +2104,7 @@ class ProtocolSpecification(ProtocolConfig):
                 },
             }
         )
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):

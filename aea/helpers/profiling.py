@@ -128,7 +128,7 @@ class Profiling(Runnable):
             while True:
                 await asyncio.sleep(self._period)
                 self.output_profile_data()
-        except CancelledError:
+        except CancelledError:  # pragma: nocover
             pass
         except Exception:  # pragma: nocover
             _default_logger.exception("Exception in Profiling")

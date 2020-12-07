@@ -141,6 +141,12 @@
     "runtime_mode": {
       "type": "string",
       "enum": ["async", "threaded"]
+    },
+    "storage_uri": {
+      "type": "string"
+    },
+    "keep_terminal_state_dialogues": {
+      "type": "boolean"
     }
   }
 }

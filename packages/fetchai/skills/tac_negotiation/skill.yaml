@@ -76,7 +76,6 @@ models:
   strategy:
     args:
       is_contract_tx: false
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127

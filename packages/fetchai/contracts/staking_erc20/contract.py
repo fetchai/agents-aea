@@ -20,9 +20,8 @@
 """This module contains the erc1155 contract definition."""
 
 import logging
-from typing import Dict
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
@@ -44,7 +43,7 @@ class StakingERC20(Contract):
     @classmethod
     def get_stake(
         cls, ledger_api: LedgerApi, contract_address: Address, address: Address,
-    ) -> Dict[str, int]:
+    ) -> JSONLike:
         """
         Get the balance for a specific token id.
 

@@ -19,7 +19,7 @@ speech_acts:
     ledger_id: pt:str
     address: pt:str
   get_raw_transaction:
-    terms: ct:Terms 
+    terms: ct:Terms
   send_signed_transaction:
     signed_transaction: ct:SignedTransaction
   get_transaction_receipt:
@@ -33,6 +33,14 @@ speech_acts:
     transaction_digest: ct:TransactionDigest
   transaction_receipt:
     transaction_receipt: ct:TransactionReceipt
+  get_state:
+    ledger_id: pt:str
+    callable: pt:str
+    args: pt:list[pt:str]
+    kwargs: ct:Kwargs
+  state:
+    ledger_id: pt:str
+    state: ct:State
   error:
     code: pt:int
     message: pt:optional[pt:str]
@@ -41,6 +49,10 @@ speech_acts:
 ---
 ct:Terms: |
   bytes terms = 1;
+ct:Kwargs: |
+  bytes kwargs = 1;
+ct:State: |
+  bytes state = 1;
 ct:SignedTransaction: |
   bytes signed_transaction = 1;
 ct:RawTransaction: |
@@ -51,10 +63,12 @@ ct:TransactionReceipt: |
   bytes transaction_receipt = 1;
 ...
 ---
-initiation: [get_balance, get_raw_transaction, send_signed_transaction, get_transaction_receipt]
+initiation: [get_balance, get_state, get_raw_transaction, send_signed_transaction, get_transaction_receipt]
 reply:
   get_balance: [balance, error]
   balance: []
+  get_state: [state, error]
+  state: []
   get_raw_transaction: [raw_transaction, error]
   raw_transaction: [send_signed_transaction]
   send_signed_transaction: [transaction_digest, error]
@@ -62,9 +76,10 @@ reply:
   get_transaction_receipt: [transaction_receipt, error]
   transaction_receipt: []
   error: []
-termination: [balance, transaction_receipt]
+termination: [balance, state, transaction_receipt]
 roles: {agent, ledger}
 end_states: [successful]
+keep_terminal_state_dialogues: false
 ...
 ```
 

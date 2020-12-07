@@ -125,6 +125,15 @@ class TestCRUDCollection:
         keyvalue_pairs = collection.read_all()
         assert {("one", 1), ("two", 2)} == set(keyvalue_pairs)
 
+    def test_keys(self):
+        """Test the keys method."""
+        collection = CRUDCollection()
+        collection.create("one", 1)
+        collection.create("two", 2)
+
+        keyvalue_pairs = collection.keys()
+        assert {"one", "two"} == set(keyvalue_pairs)
+
 
 class TestContractConfig:
     """Test the contract configuration class."""

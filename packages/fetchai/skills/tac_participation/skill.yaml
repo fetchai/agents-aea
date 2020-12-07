@@ -43,7 +43,6 @@ models:
     args:
       expected_version_id: v1
       is_using_contract: false
-      ledger_id: ethereum
       location:
         latitude: 51.5194
         longitude: 0.127

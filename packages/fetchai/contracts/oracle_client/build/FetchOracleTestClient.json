@@ -1,0 +1,8466 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "fetchOracleContractAddress",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "_decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "_fetch_oracle",
+      "outputs": [
+        {
+          "internalType": "contract FetchOracle",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "_updatedAtEthBlockNumber",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "_value",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "queryOracleValue",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "allSourcePaths": {
+    "12": "interfaces/IFetchOracleClient.sol",
+    "9": "contracts/FetchOracleTestClient.sol"
+  },
+  "ast": {
+    "absolutePath": "contracts/FetchOracleTestClient.sol",
+    "exportedSymbols": {
+      "FetchOracleTestClient": [
+        188
+      ],
+      "FetchOracleTestClientETH": [
+        200
+      ]
+    },
+    "id": 201,
+    "license": "Apache-2.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 119,
+        "literals": [
+          "solidity",
+          "^",
+          "0.6",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "820:23:9"
+      },
+      {
+        "absolutePath": "contracts/FetchOracleMock.sol",
+        "file": "./FetchOracleMock.sol",
+        "id": 120,
+        "nodeType": "ImportDirective",
+        "scope": 201,
+        "sourceUnit": 118,
+        "src": "845:31:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "interfaces/IFetchOracleClient.sol",
+        "file": "../interfaces/IFetchOracleClient.sol",
+        "id": 121,
+        "nodeType": "ImportDirective",
+        "scope": 201,
+        "sourceUnit": 448,
+        "src": "877:46:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 122,
+              "name": "IFetchOracleClient",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 447,
+              "src": "959:18:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_IFetchOracleClient_$447",
+                "typeString": "contract IFetchOracleClient"
+              }
+            },
+            "id": 123,
+            "nodeType": "InheritanceSpecifier",
+            "src": "959:18:9"
+          }
+        ],
+        "contractDependencies": [
+          447
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 188,
+        "linearizedBaseContracts": [
+          188,
+          447
+        ],
+        "name": "FetchOracleTestClient",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "functionSelector": "19cc4b5a",
+            "id": 125,
+            "mutability": "mutable",
+            "name": "_fetch_oracle",
+            "nodeType": "VariableDeclaration",
+            "overrides": null,
+            "scope": 188,
+            "src": "983:32:9",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_FetchOracle_$441",
+              "typeString": "contract FetchOracle"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 124,
+              "name": "FetchOracle",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 441,
+              "src": "983:11:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_FetchOracle_$441",
+                "typeString": "contract FetchOracle"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "b895c74a",
+            "id": 127,
+            "mutability": "mutable",
+            "name": "_value",
+            "nodeType": "VariableDeclaration",
+            "overrides": null,
+            "scope": 188,
+            "src": "1022:21:9",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 126,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "1022:7:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "32424aa3",
+            "id": 129,
+            "mutability": "mutable",
+            "name": "_decimals",
+            "nodeType": "VariableDeclaration",
+            "overrides": null,
+            "scope": 188,
+            "src": "1049:22:9",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint8",
+              "typeString": "uint8"
+            },
+            "typeName": {
+              "id": 128,
+              "name": "uint8",
+              "nodeType": "ElementaryTypeName",
+              "src": "1049:5:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint8",
+                "typeString": "uint8"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "4e5551ce",
+            "id": 131,
+            "mutability": "mutable",
+            "name": "_updatedAtEthBlockNumber",
+            "nodeType": "VariableDeclaration",
+            "overrides": null,
+            "scope": 188,
+            "src": "1077:39:9",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 130,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "1077:7:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 142,
+              "nodeType": "Block",
+              "src": "1179:144:9",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 140,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 136,
+                      "name": "_fetch_oracle",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 125,
+                      "src": "1257:13:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_FetchOracle_$441",
+                        "typeString": "contract FetchOracle"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 138,
+                          "name": "fetchOracleContractAddress",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 133,
+                          "src": "1289:26:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 137,
+                        "name": "FetchOracleMock",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 101,
+                        "src": "1273:15:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_FetchOracleMock_$101_$",
+                          "typeString": "type(contract FetchOracleMock)"
+                        }
+                      },
+                      "id": 139,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1273:43:9",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_FetchOracleMock_$101",
+                        "typeString": "contract FetchOracleMock"
+                      }
+                    },
+                    "src": "1257:59:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_FetchOracle_$441",
+                      "typeString": "contract FetchOracle"
+                    }
+                  },
+                  "id": 141,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1257:59:9"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 143,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 134,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 133,
+                  "mutability": "mutable",
+                  "name": "fetchOracleContractAddress",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 143,
+                  "src": "1136:34:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 132,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1136:7:9",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1135:36:9"
+            },
+            "returnParameters": {
+              "id": 135,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1179:0:9"
+            },
+            "scope": 188,
+            "src": "1124:199:9",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "baseFunctions": [
+              446
+            ],
+            "body": {
+              "id": 186,
+              "nodeType": "Block",
+              "src": "1380:277:9",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 152,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": -15,
+                          "src": "1426:3:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 153,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "sender",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "1426:10:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address_payable",
+                          "typeString": "address payable"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 156,
+                            "name": "this",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": -28,
+                            "src": "1446:4:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_FetchOracleTestClient_$188",
+                              "typeString": "contract FetchOracleTestClient"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_FetchOracleTestClient_$188",
+                              "typeString": "contract FetchOracleTestClient"
+                            }
+                          ],
+                          "id": 155,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1438:7:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 154,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1438:7:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": null,
+                              "typeString": null
+                            }
+                          }
+                        },
+                        "id": 157,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1438:13:9",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 158,
+                            "name": "_fetch_oracle",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 125,
+                            "src": "1453:13:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_FetchOracle_$441",
+                              "typeString": "contract FetchOracle"
+                            }
+                          },
+                          "id": 159,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "_fee",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 491,
+                          "src": "1453:18:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
+                            "typeString": "function () view external returns (uint256)"
+                          }
+                        },
+                        "id": 160,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1453:20:9",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address_payable",
+                          "typeString": "address payable"
+                        },
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 147,
+                            "name": "_fetch_oracle",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 125,
+                            "src": "1390:13:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_FetchOracle_$441",
+                              "typeString": "contract FetchOracle"
+                            }
+                          },
+                          "id": 149,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "_token",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 485,
+                          "src": "1390:20:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_IERC20_$1542_$",
+                            "typeString": "function () view external returns (contract IERC20)"
+                          }
+                        },
+                        "id": 150,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1390:22:9",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_IERC20_$1542",
+                          "typeString": "contract IERC20"
+                        }
+                      },
+                      "id": 151,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "transferFrom",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 1523,
+                      "src": "1390:35:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$_t_bool_$",
+                        "typeString": "function (address,address,uint256) external returns (bool)"
+                      }
+                    },
+                    "id": 161,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1390:84:9",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 162,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1390:84:9"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 170,
+                            "name": "_fetch_oracle",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 125,
+                            "src": "1523:13:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_FetchOracle_$441",
+                              "typeString": "contract FetchOracle"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_FetchOracle_$441",
+                              "typeString": "contract FetchOracle"
+                            }
+                          ],
+                          "id": 169,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "1515:7:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 168,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1515:7:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": null,
+                              "typeString": null
+                            }
+                          }
+                        },
+                        "id": 171,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1515:22:9",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 172,
+                            "name": "_fetch_oracle",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 125,
+                            "src": "1539:13:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_FetchOracle_$441",
+                              "typeString": "contract FetchOracle"
+                            }
+                          },
+                          "id": 173,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "_fee",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 491,
+                          "src": "1539:18:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
+                            "typeString": "function () view external returns (uint256)"
+                          }
+                        },
+                        "id": 174,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1539:20:9",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 163,
+                            "name": "_fetch_oracle",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 125,
+                            "src": "1484:13:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_FetchOracle_$441",
+                              "typeString": "contract FetchOracle"
+                            }
+                          },
+                          "id": 165,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "_token",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 485,
+                          "src": "1484:20:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_external_view$__$returns$_t_contract$_IERC20_$1542_$",
+                            "typeString": "function () view external returns (contract IERC20)"
+                          }
+                        },
+                        "id": 166,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1484:22:9",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_IERC20_$1542",
+                          "typeString": "contract IERC20"
+                        }
+                      },
+                      "id": 167,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "approve",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 1511,
+                      "src": "1484:30:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
+                        "typeString": "function (address,uint256) external returns (bool)"
+                      }
+                    },
+                    "id": 175,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1484:76:9",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 176,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1484:76:9"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 184,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "components": [
+                        {
+                          "argumentTypes": null,
+                          "id": 177,
+                          "name": "_value",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 127,
+                          "src": "1571:6:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "id": 178,
+                          "name": "_decimals",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 129,
+                          "src": "1579:9:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint8",
+                            "typeString": "uint8"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "id": 179,
+                          "name": "_updatedAtEthBlockNumber",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 131,
+                          "src": "1590:24:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        }
+                      ],
+                      "id": 180,
+                      "isConstant": false,
+                      "isInlineArray": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "TupleExpression",
+                      "src": "1570:45:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_tuple$_t_uint256_$_t_uint8_$_t_uint256_$",
+                        "typeString": "tuple(uint256,uint8,uint256)"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 181,
+                          "name": "_fetch_oracle",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 125,
+                          "src": "1618:13:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_contract$_FetchOracle_$441",
+                            "typeString": "contract FetchOracle"
+                          }
+                        },
+                        "id": 182,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "queryOracleValue",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 431,
+                        "src": "1618:30:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_external_payable$__$returns$_t_uint256_$_t_uint8_$_t_uint256_$",
+                          "typeString": "function () payable external returns (uint256,uint8,uint256)"
+                        }
+                      },
+                      "id": 183,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1618:32:9",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_tuple$_t_uint256_$_t_uint8_$_t_uint256_$",
+                        "typeString": "tuple(uint256,uint8,uint256)"
+                      }
+                    },
+                    "src": "1570:80:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 185,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1570:80:9"
+                }
+              ]
+            },
+            "documentation": null,
+            "functionSelector": "f7e1c748",
+            "id": 187,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "queryOracleValue",
+            "nodeType": "FunctionDefinition",
+            "overrides": {
+              "id": 145,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1367:8:9"
+            },
+            "parameters": {
+              "id": 144,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1355:2:9"
+            },
+            "returnParameters": {
+              "id": 146,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1380:0:9"
+            },
+            "scope": 188,
+            "src": "1330:327:9",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 201,
+        "src": "925:734:9"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 189,
+              "name": "FetchOracleTestClient",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 188,
+              "src": "1769:21:9",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_FetchOracleTestClient_$188",
+                "typeString": "contract FetchOracleTestClient"
+              }
+            },
+            "id": 190,
+            "nodeType": "InheritanceSpecifier",
+            "src": "1769:21:9"
+          }
+        ],
+        "contractDependencies": [
+          188,
+          447
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 200,
+        "linearizedBaseContracts": [
+          200,
+          188,
+          447
+        ],
+        "name": "FetchOracleTestClientETH",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 198,
+              "nodeType": "Block",
+              "src": "1902:7:9",
+              "statements": []
+            },
+            "documentation": null,
+            "id": 199,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "argumentTypes": null,
+                    "id": 195,
+                    "name": "fetchOracleContractAddress",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 192,
+                    "src": "1874:26:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  }
+                ],
+                "id": 196,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 194,
+                  "name": "FetchOracleTestClient",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 188,
+                  "src": "1852:21:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_type$_t_contract$_FetchOracleTestClient_$188_$",
+                    "typeString": "type(contract FetchOracleTestClient)"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "1852:49:9"
+              }
+            ],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 193,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 192,
+                  "mutability": "mutable",
+                  "name": "fetchOracleContractAddress",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 199,
+                  "src": "1809:34:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 191,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1809:7:9",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1808:36:9"
+            },
+            "returnParameters": {
+              "id": 197,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1902:0:9"
+            },
+            "scope": 200,
+            "src": "1797:112:9",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 201,
+        "src": "1732:179:9"
+      }
+    ],
+    "src": "820:1092:9"
+  },
+  "bytecode": "608060405234801561001057600080fd5b506040516105053803806105058339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b03199092169190911790556104a0806100656000396000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806319cc4b5a1461005c57806332424aa3146100805780634e5551ce1461009e578063b895c74a146100b8578063f7e1c748146100c0575b600080fd5b6100646100ca565b604080516001600160a01b039092168252519081900360200190f35b6100886100d9565b6040805160ff9092168252519081900360200190f35b6100a66100e2565b60408051918252519081900360200190f35b6100a66100e8565b6100c86100ee565b005b6000546001600160a01b031681565b60025460ff1681565b60035481565b60015481565b60008054906101000a90046001600160a01b03166001600160a01b031663ecd0c0c36040518163ffffffff1660e01b815260040160206040518083038186803b15801561013a57600080fd5b505afa15801561014e573d6000803e3d6000fd5b505050506040513d602081101561016457600080fd5b5051600054604080516362d9be1160e11b815290516001600160a01b03938416936323b872dd9333933093919092169163c5b37c22916004808301926020929190829003018186803b1580156101b957600080fd5b505afa1580156101cd573d6000803e3d6000fd5b505050506040513d60208110156101e357600080fd5b5051604080516001600160e01b031960e087901b1681526001600160a01b0394851660048201529290931660248301526044820152905160648083019260209291908290030181600087803b15801561023b57600080fd5b505af115801561024f573d6000803e3d6000fd5b505050506040513d602081101561026557600080fd5b50506000546040805163ecd0c0c360e01b815290516001600160a01b039092169163ecd0c0c391600480820192602092909190829003018186803b1580156102ac57600080fd5b505afa1580156102c0573d6000803e3d6000fd5b505050506040513d60208110156102d657600080fd5b5051600054604080516362d9be1160e11b815290516001600160a01b039384169363095ea7b3931691829163c5b37c2291600480820192602092909190829003018186803b15801561032757600080fd5b505afa15801561033b573d6000803e3d6000fd5b505050506040513d602081101561035157600080fd5b5051604080516001600160e01b031960e086901b1681526001600160a01b03909316600484015260248301919091525160448083019260209291908290030181600087803b1580156103a257600080fd5b505af11580156103b6573d6000803e3d6000fd5b505050506040513d60208110156103cc57600080fd5b50506000805460408051631efc38e960e31b815290516001600160a01b039092169263f7e1c748926004808401936060939083900390910190829087803b15801561041657600080fd5b505af115801561042a573d6000803e3d6000fd5b505050506040513d606081101561044057600080fd5b50805160208201516040909201516003556002805460ff191660ff9093169290921790915560015556fea26469706673582212203ed415b0bf9e63200b9658ae26b80a450e549e9a0e9ad3934c5c1496ec57aa0e64736f6c634300060c0033",
+  "bytecodeSha1": "796e98fdfc59410c81344db30cddb2856d6dfd13",
+  "compiler": {
+    "evm_version": "istanbul",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "version": "0.6.12"
+  },
+  "contractName": "FetchOracleTestClient",
+  "coverageMap": {
+    "branches": {
+      "12": {},
+      "9": {}
+    },
+    "statements": {
+      "12": {},
+      "9": {
+        "FetchOracleTestClient.queryOracleValue": {
+          "0": [
+            1390,
+            1474
+          ],
+          "1": [
+            1484,
+            1560
+          ],
+          "2": [
+            1570,
+            1650
+          ]
+        }
+      }
+    }
+  },
+  "dependencies": [
+    "IFetchOracleClient"
+  ],
+  "deployedBytecode": "608060405234801561001057600080fd5b50600436106100575760003560e01c806319cc4b5a1461005c57806332424aa3146100805780634e5551ce1461009e578063b895c74a146100b8578063f7e1c748146100c0575b600080fd5b6100646100ca565b604080516001600160a01b039092168252519081900360200190f35b6100886100d9565b6040805160ff9092168252519081900360200190f35b6100a66100e2565b60408051918252519081900360200190f35b6100a66100e8565b6100c86100ee565b005b6000546001600160a01b031681565b60025460ff1681565b60035481565b60015481565b60008054906101000a90046001600160a01b03166001600160a01b031663ecd0c0c36040518163ffffffff1660e01b815260040160206040518083038186803b15801561013a57600080fd5b505afa15801561014e573d6000803e3d6000fd5b505050506040513d602081101561016457600080fd5b5051600054604080516362d9be1160e11b815290516001600160a01b03938416936323b872dd9333933093919092169163c5b37c22916004808301926020929190829003018186803b1580156101b957600080fd5b505afa1580156101cd573d6000803e3d6000fd5b505050506040513d60208110156101e357600080fd5b5051604080516001600160e01b031960e087901b1681526001600160a01b0394851660048201529290931660248301526044820152905160648083019260209291908290030181600087803b15801561023b57600080fd5b505af115801561024f573d6000803e3d6000fd5b505050506040513d602081101561026557600080fd5b50506000546040805163ecd0c0c360e01b815290516001600160a01b039092169163ecd0c0c391600480820192602092909190829003018186803b1580156102ac57600080fd5b505afa1580156102c0573d6000803e3d6000fd5b505050506040513d60208110156102d657600080fd5b5051600054604080516362d9be1160e11b815290516001600160a01b039384169363095ea7b3931691829163c5b37c2291600480820192602092909190829003018186803b15801561032757600080fd5b505afa15801561033b573d6000803e3d6000fd5b505050506040513d602081101561035157600080fd5b5051604080516001600160e01b031960e086901b1681526001600160a01b03909316600484015260248301919091525160448083019260209291908290030181600087803b1580156103a257600080fd5b505af11580156103b6573d6000803e3d6000fd5b505050506040513d60208110156103cc57600080fd5b50506000805460408051631efc38e960e31b815290516001600160a01b039092169263f7e1c748926004808401936060939083900390910190829087803b15801561041657600080fd5b505af115801561042a573d6000803e3d6000fd5b505050506040513d606081101561044057600080fd5b50805160208201516040909201516003556002805460ff191660ff9093169290921790915560015556fea26469706673582212203ed415b0bf9e63200b9658ae26b80a450e549e9a0e9ad3934c5c1496ec57aa0e64736f6c634300060c0033",
+  "deployedSourceMap": "925:734:9:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;983:32;;;:::i;:::-;;;;-1:-1:-1;;;;;983:32:9;;;;;;;;;;;;;;1049:22;;;:::i;:::-;;;;;;;;;;;;;;;;;;;1077:39;;;:::i;:::-;;;;;;;;;;;;;;;;1022:21;;;:::i;1330:327::-;;;:::i;:::-;;983:32;;;-1:-1:-1;;;;;983:32:9;;:::o;1049:22::-;;;;;;:::o;1077:39::-;;;;:::o;1022:21::-;;;;:::o;1330:327::-;1390:13;;;;;;;;-1:-1:-1;;;;;1390:13:9;-1:-1:-1;;;;;1390:20:9;;:22;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1390:22:9;1453:13;;:20;;;-1:-1:-1;;;1453:20:9;;;;-1:-1:-1;;;;;1390:35:9;;;;;;1426:10;;1446:4;;1453:13;;;;;:18;;:20;;;;;1390:22;;1453:20;;;;;;;:13;:20;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1453:20:9;1390:84;;;-1:-1:-1;;;;;;1390:84:9;;;;;;;-1:-1:-1;;;;;1390:84:9;;;;;;;;;;;;;;;;;;;;;;;;;;1453:20;;1390:84;;;;;;;-1:-1:-1;1390:84:9;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;1484:13:9;;:22;;;-1:-1:-1;;;1484:22:9;;;;-1:-1:-1;;;;;1484:13:9;;;;:20;;:22;;;;;1390:84;;1484:22;;;;;;;;:13;:22;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1484:22:9;1523:13;;1539:20;;;-1:-1:-1;;;1539:20:9;;;;-1:-1:-1;;;;;1484:30:9;;;;;;1523:13;;;;1539:18;;:20;;;;;1484:22;;1539:20;;;;;;;;1523:13;1539:20;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1539:20:9;1484:76;;;-1:-1:-1;;;;;;1484:76:9;;;;;;;-1:-1:-1;;;;;1484:76:9;;;;;;;;;;;;;;;;;;;;1539:20;;1484:76;;;;;;;-1:-1:-1;1484:76:9;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;1618:13:9;;;:32;;;-1:-1:-1;;;1618:32:9;;;;-1:-1:-1;;;;;1618:13:9;;;;:30;;:32;;;;;;;;;;;;;;;;;:13;:32;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1618:32:9;;;;;;;;;;;1590:24;1570:80;1579:9;1570:80;;-1:-1:-1;;1570:80:9;;;;;;;;;;;;-1:-1:-1;1570:80:9;1330:327::o",
+  "language": "Solidity",
+  "natspec": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "offset": [
+    925,
+    1659
+  ],
+  "opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH2 0x10 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x4 CALLDATASIZE LT PUSH2 0x57 JUMPI PUSH1 0x0 CALLDATALOAD PUSH1 0xE0 SHR DUP1 PUSH4 0x19CC4B5A EQ PUSH2 0x5C JUMPI DUP1 PUSH4 0x32424AA3 EQ PUSH2 0x80 JUMPI DUP1 PUSH4 0x4E5551CE EQ PUSH2 0x9E JUMPI DUP1 PUSH4 0xB895C74A EQ PUSH2 0xB8 JUMPI DUP1 PUSH4 0xF7E1C748 EQ PUSH2 0xC0 JUMPI JUMPDEST PUSH1 0x0 DUP1 REVERT JUMPDEST PUSH2 0x64 PUSH2 0xCA JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB SWAP1 SWAP3 AND DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH2 0x88 PUSH2 0xD9 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH1 0xFF SWAP1 SWAP3 AND DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH2 0xA6 PUSH2 0xE2 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD SWAP2 DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH2 0xA6 PUSH2 0xE8 JUMP JUMPDEST PUSH2 0xC8 PUSH2 0xEE JUMP JUMPDEST STOP JUMPDEST PUSH1 0x0 SLOAD PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB AND DUP2 JUMP JUMPDEST PUSH1 0x2 SLOAD PUSH1 0xFF AND DUP2 JUMP JUMPDEST PUSH1 0x3 SLOAD DUP2 JUMP JUMPDEST PUSH1 0x1 SLOAD DUP2 JUMP JUMPDEST PUSH1 0x0 DUP1 SLOAD SWAP1 PUSH2 0x100 EXP SWAP1 DIV PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB AND PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB AND PUSH4 0xECD0C0C3 PUSH1 0x40 MLOAD DUP2 PUSH4 0xFFFFFFFF AND PUSH1 0xE0 SHL DUP2 MSTORE PUSH1 0x4 ADD PUSH1 0x20 PUSH1 0x40 MLOAD DUP1 DUP4 SUB DUP2 DUP7 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x13A JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS STATICCALL ISZERO DUP1 ISZERO PUSH2 0x14E JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x164 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD PUSH1 0x0 SLOAD PUSH1 0x40 DUP1 MLOAD PUSH4 0x62D9BE11 PUSH1 0xE1 SHL DUP2 MSTORE SWAP1 MLOAD PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB SWAP4 DUP5 AND SWAP4 PUSH4 0x23B872DD SWAP4 CALLER SWAP4 ADDRESS SWAP4 SWAP2 SWAP1 SWAP3 AND SWAP2 PUSH4 0xC5B37C22 SWAP2 PUSH1 0x4 DUP1 DUP4 ADD SWAP3 PUSH1 0x20 SWAP3 SWAP2 SWAP1 DUP3 SWAP1 SUB ADD DUP2 DUP7 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x1B9 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS STATICCALL ISZERO DUP1 ISZERO PUSH2 0x1CD JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x1E3 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD PUSH1 0x40 DUP1 MLOAD PUSH1 0x1 PUSH1 0x1 PUSH1 0xE0 SHL SUB NOT PUSH1 0xE0 DUP8 SWAP1 SHL AND DUP2 MSTORE PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB SWAP5 DUP6 AND PUSH1 0x4 DUP3 ADD MSTORE SWAP3 SWAP1 SWAP4 AND PUSH1 0x24 DUP4 ADD MSTORE PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD PUSH1 0x64 DUP1 DUP4 ADD SWAP3 PUSH1 0x20 SWAP3 SWAP2 SWAP1 DUP3 SWAP1 SUB ADD DUP2 PUSH1 0x0 DUP8 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x23B JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS CALL ISZERO DUP1 ISZERO PUSH2 0x24F JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x265 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP POP PUSH1 0x0 SLOAD PUSH1 0x40 DUP1 MLOAD PUSH4 0xECD0C0C3 PUSH1 0xE0 SHL DUP2 MSTORE SWAP1 MLOAD PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB SWAP1 SWAP3 AND SWAP2 PUSH4 0xECD0C0C3 SWAP2 PUSH1 0x4 DUP1 DUP3 ADD SWAP3 PUSH1 0x20 SWAP3 SWAP1 SWAP2 SWAP1 DUP3 SWAP1 SUB ADD DUP2 DUP7 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x2AC JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS STATICCALL ISZERO DUP1 ISZERO PUSH2 0x2C0 JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x2D6 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD PUSH1 0x0 SLOAD PUSH1 0x40 DUP1 MLOAD PUSH4 0x62D9BE11 PUSH1 0xE1 SHL DUP2 MSTORE SWAP1 MLOAD PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB SWAP4 DUP5 AND SWAP4 PUSH4 0x95EA7B3 SWAP4 AND SWAP2 DUP3 SWAP2 PUSH4 0xC5B37C22 SWAP2 PUSH1 0x4 DUP1 DUP3 ADD SWAP3 PUSH1 0x20 SWAP3 SWAP1 SWAP2 SWAP1 DUP3 SWAP1 SUB ADD DUP2 DUP7 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x327 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS STATICCALL ISZERO DUP1 ISZERO PUSH2 0x33B JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x351 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD PUSH1 0x40 DUP1 MLOAD PUSH1 0x1 PUSH1 0x1 PUSH1 0xE0 SHL SUB NOT PUSH1 0xE0 DUP7 SWAP1 SHL AND DUP2 MSTORE PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB SWAP1 SWAP4 AND PUSH1 0x4 DUP5 ADD MSTORE PUSH1 0x24 DUP4 ADD SWAP2 SWAP1 SWAP2 MSTORE MLOAD PUSH1 0x44 DUP1 DUP4 ADD SWAP3 PUSH1 0x20 SWAP3 SWAP2 SWAP1 DUP3 SWAP1 SUB ADD DUP2 PUSH1 0x0 DUP8 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x3A2 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS CALL ISZERO DUP1 ISZERO PUSH2 0x3B6 JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x3CC JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP POP PUSH1 0x0 DUP1 SLOAD PUSH1 0x40 DUP1 MLOAD PUSH4 0x1EFC38E9 PUSH1 0xE3 SHL DUP2 MSTORE SWAP1 MLOAD PUSH1 0x1 PUSH1 0x1 PUSH1 0xA0 SHL SUB SWAP1 SWAP3 AND SWAP3 PUSH4 0xF7E1C748 SWAP3 PUSH1 0x4 DUP1 DUP5 ADD SWAP4 PUSH1 0x60 SWAP4 SWAP1 DUP4 SWAP1 SUB SWAP1 SWAP2 ADD SWAP1 DUP3 SWAP1 DUP8 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x416 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS CALL ISZERO DUP1 ISZERO PUSH2 0x42A JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x60 DUP2 LT ISZERO PUSH2 0x440 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP DUP1 MLOAD PUSH1 0x20 DUP3 ADD MLOAD PUSH1 0x40 SWAP1 SWAP3 ADD MLOAD PUSH1 0x3 SSTORE PUSH1 0x2 DUP1 SLOAD PUSH1 0xFF NOT AND PUSH1 0xFF SWAP1 SWAP4 AND SWAP3 SWAP1 SWAP3 OR SWAP1 SWAP2 SSTORE PUSH1 0x1 SSTORE JUMP INVALID LOG2 PUSH5 0x6970667358 0x22 SLT KECCAK256 RETURNDATACOPY 0xD4 ISZERO 0xB0 0xBF SWAP15 PUSH4 0x200B9658 0xAE 0x26 0xB8 EXP GASLIMIT 0xE SLOAD SWAP15 SWAP11 0xE SWAP11 0xD3 SWAP4 0x4C 0x5C EQ SWAP7 0xEC JUMPI 0xAA 0xE PUSH5 0x736F6C6343 STOP MOD 0xC STOP CALLER ",
+  "pcMap": {
+    "0": {
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x80"
+    },
+    "2": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "4": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "5": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "CALLVALUE",
+      "path": "9"
+    },
+    "6": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "7": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "8": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x10"
+    },
+    "11": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "12": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "14": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "15": {
+      "dev": "Cannot send ether to nonpayable function",
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "16": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "17": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "18": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x4"
+    },
+    "20": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "CALLDATASIZE",
+      "path": "9"
+    },
+    "21": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "LT",
+      "path": "9"
+    },
+    "22": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x57"
+    },
+    "25": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "26": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "28": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "CALLDATALOAD",
+      "path": "9"
+    },
+    "29": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0xE0"
+    },
+    "31": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "SHR",
+      "path": "9"
+    },
+    "32": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "33": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0x19CC4B5A"
+    },
+    "38": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "EQ",
+      "path": "9"
+    },
+    "39": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x5C"
+    },
+    "42": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "43": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "44": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0x32424AA3"
+    },
+    "49": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "EQ",
+      "path": "9"
+    },
+    "50": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x80"
+    },
+    "53": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "54": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "55": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0x4E5551CE"
+    },
+    "60": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "EQ",
+      "path": "9"
+    },
+    "61": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x9E"
+    },
+    "64": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "65": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "66": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0xB895C74A"
+    },
+    "71": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "EQ",
+      "path": "9"
+    },
+    "72": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xB8"
+    },
+    "75": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "76": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "77": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0xF7E1C748"
+    },
+    "82": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "EQ",
+      "path": "9"
+    },
+    "83": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xC0"
+    },
+    "86": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "87": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "88": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "90": {
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "91": {
+      "first_revert": true,
+      "fn": null,
+      "offset": [
+        925,
+        1659
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "92": {
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "93": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x64"
+    },
+    "96": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xCA"
+    },
+    "99": {
+      "fn": null,
+      "jump": "i",
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "100": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "101": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "103": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "104": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "105": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "107": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "109": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "111": {
+      "op": "SHL"
+    },
+    "112": {
+      "op": "SUB"
+    },
+    "113": {
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "114": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "115": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "116": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "117": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "118": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "119": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "120": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "121": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "122": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "123": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "125": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "126": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "127": {
+      "fn": null,
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "RETURN",
+      "path": "9"
+    },
+    "128": {
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "129": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x88"
+    },
+    "132": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xD9"
+    },
+    "135": {
+      "fn": null,
+      "jump": "i",
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "136": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "137": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "139": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "140": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "141": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0xFF"
+    },
+    "143": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "144": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "145": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "146": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "147": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "148": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "149": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "150": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "151": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "152": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "153": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "155": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "156": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "157": {
+      "fn": null,
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "RETURN",
+      "path": "9"
+    },
+    "158": {
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "159": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xA6"
+    },
+    "162": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xE2"
+    },
+    "165": {
+      "fn": null,
+      "jump": "i",
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "166": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "167": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "169": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "170": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "171": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "172": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "173": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "174": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "175": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "176": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "177": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "178": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "179": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "181": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "182": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "183": {
+      "fn": null,
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "RETURN",
+      "path": "9"
+    },
+    "184": {
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "185": {
+      "fn": null,
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xA6"
+    },
+    "188": {
+      "fn": null,
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xE8"
+    },
+    "191": {
+      "fn": null,
+      "jump": "i",
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "192": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1330,
+        1657
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "193": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1330,
+        1657
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xC8"
+    },
+    "196": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1330,
+        1657
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0xEE"
+    },
+    "199": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "jump": "i",
+      "offset": [
+        1330,
+        1657
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "200": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1330,
+        1657
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "201": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1330,
+        1657
+      ],
+      "op": "STOP",
+      "path": "9"
+    },
+    "202": {
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "203": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "205": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "206": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "208": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "210": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "212": {
+      "op": "SHL"
+    },
+    "213": {
+      "op": "SUB"
+    },
+    "214": {
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "215": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "216": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "jump": "o",
+      "offset": [
+        983,
+        1015
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "217": {
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "218": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x2"
+    },
+    "220": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "221": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0xFF"
+    },
+    "223": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "224": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "225": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "jump": "o",
+      "offset": [
+        1049,
+        1071
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "226": {
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "227": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x3"
+    },
+    "229": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "230": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "231": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "jump": "o",
+      "offset": [
+        1077,
+        1116
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "232": {
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "233": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x1"
+    },
+    "235": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "236": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "237": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "jump": "o",
+      "offset": [
+        1022,
+        1043
+      ],
+      "op": "JUMP",
+      "path": "9"
+    },
+    "238": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1330,
+        1657
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "239": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "statement": 0,
+      "value": "0x0"
+    },
+    "241": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "242": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "243": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "244": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x100"
+    },
+    "247": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "EXP",
+      "path": "9"
+    },
+    "248": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "249": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "DIV",
+      "path": "9"
+    },
+    "250": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "252": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "254": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "256": {
+      "op": "SHL"
+    },
+    "257": {
+      "op": "SUB"
+    },
+    "258": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1403
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "259": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "261": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "263": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "265": {
+      "op": "SHL"
+    },
+    "266": {
+      "op": "SUB"
+    },
+    "267": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1410
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "268": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1410
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0xECD0C0C3"
+    },
+    "273": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "275": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "276": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "277": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0xFFFFFFFF"
+    },
+    "282": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "283": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0xE0"
+    },
+    "285": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "SHL",
+      "path": "9"
+    },
+    "286": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "287": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "288": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x4"
+    },
+    "290": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "291": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "293": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "295": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "296": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "297": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP4",
+      "path": "9"
+    },
+    "298": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "299": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "300": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP7",
+      "path": "9"
+    },
+    "301": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "302": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "EXTCODESIZE",
+      "path": "9"
+    },
+    "303": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "304": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "305": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "306": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x13A"
+    },
+    "309": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "310": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "312": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "313": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "314": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "315": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "316": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "GAS",
+      "path": "9"
+    },
+    "317": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "STATICCALL",
+      "path": "9"
+    },
+    "318": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "319": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "320": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "321": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x14E"
+    },
+    "324": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "325": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "326": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "328": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "329": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "RETURNDATACOPY",
+      "path": "9"
+    },
+    "330": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "331": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "333": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "334": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "335": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "336": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "337": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "338": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "339": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "341": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "342": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "343": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "345": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "346": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "LT",
+      "path": "9"
+    },
+    "347": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "348": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x164"
+    },
+    "351": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "352": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "354": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "355": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "356": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "357": {
+      "op": "POP"
+    },
+    "358": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "359": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1466
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "361": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1466
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "362": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "364": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "365": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "366": {
+      "op": "PUSH4",
+      "value": "0x62D9BE11"
+    },
+    "371": {
+      "op": "PUSH1",
+      "value": "0xE1"
+    },
+    "373": {
+      "op": "SHL"
+    },
+    "374": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "375": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "376": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "377": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "378": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "380": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "382": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "384": {
+      "op": "SHL"
+    },
+    "385": {
+      "op": "SUB"
+    },
+    "386": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1425
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "387": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1425
+      ],
+      "op": "DUP5",
+      "path": "9"
+    },
+    "388": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1425
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "389": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1425
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "390": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1425
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0x23B872DD"
+    },
+    "395": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1425
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "396": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1426,
+        1436
+      ],
+      "op": "CALLER",
+      "path": "9"
+    },
+    "397": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1426,
+        1436
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "398": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1446,
+        1450
+      ],
+      "op": "ADDRESS",
+      "path": "9"
+    },
+    "399": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1446,
+        1450
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "400": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1466
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "401": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1466
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "402": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1466
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "403": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1466
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "404": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1466
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "405": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1471
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0xC5B37C22"
+    },
+    "410": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1471
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "411": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x4"
+    },
+    "413": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "414": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP4",
+      "path": "9"
+    },
+    "415": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "416": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "417": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "419": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1412
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "420": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "421": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "422": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "423": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "424": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "425": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "426": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "427": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1466
+      ],
+      "op": "DUP7",
+      "path": "9"
+    },
+    "428": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "429": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "EXTCODESIZE",
+      "path": "9"
+    },
+    "430": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "431": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "432": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "433": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x1B9"
+    },
+    "436": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "437": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "439": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "440": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "441": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "442": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "443": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "GAS",
+      "path": "9"
+    },
+    "444": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "STATICCALL",
+      "path": "9"
+    },
+    "445": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "446": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "447": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "448": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x1CD"
+    },
+    "451": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "452": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "453": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "455": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "456": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "RETURNDATACOPY",
+      "path": "9"
+    },
+    "457": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "458": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "460": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "461": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "462": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "463": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "464": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "465": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "466": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "468": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "469": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "470": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "472": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "473": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "LT",
+      "path": "9"
+    },
+    "474": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "475": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x1E3"
+    },
+    "478": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "479": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "481": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "482": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "483": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "484": {
+      "op": "POP"
+    },
+    "485": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "486": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "488": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "489": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "490": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "492": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "494": {
+      "op": "PUSH1",
+      "value": "0xE0"
+    },
+    "496": {
+      "op": "SHL"
+    },
+    "497": {
+      "op": "SUB"
+    },
+    "498": {
+      "op": "NOT"
+    },
+    "499": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0xE0"
+    },
+    "501": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP8",
+      "path": "9"
+    },
+    "502": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "503": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SHL",
+      "path": "9"
+    },
+    "504": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "505": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "506": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "507": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "509": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "511": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "513": {
+      "op": "SHL"
+    },
+    "514": {
+      "op": "SUB"
+    },
+    "515": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP5",
+      "path": "9"
+    },
+    "516": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP6",
+      "path": "9"
+    },
+    "517": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "518": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x4"
+    },
+    "520": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "521": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "522": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "523": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "524": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "525": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "526": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "527": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x24"
+    },
+    "529": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP4",
+      "path": "9"
+    },
+    "530": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "531": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "532": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x44"
+    },
+    "534": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "535": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "536": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "537": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "538": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "539": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x64"
+    },
+    "541": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "542": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP4",
+      "path": "9"
+    },
+    "543": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "544": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "545": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "547": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1453,
+        1473
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "548": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "549": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "550": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "551": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "552": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "553": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "554": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "555": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "557": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP8",
+      "path": "9"
+    },
+    "558": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "559": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "EXTCODESIZE",
+      "path": "9"
+    },
+    "560": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "561": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "562": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "563": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x23B"
+    },
+    "566": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "567": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "569": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "570": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "571": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "572": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "573": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "GAS",
+      "path": "9"
+    },
+    "574": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "CALL",
+      "path": "9"
+    },
+    "575": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "576": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "577": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "578": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x24F"
+    },
+    "581": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "582": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "583": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "585": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "586": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "RETURNDATACOPY",
+      "path": "9"
+    },
+    "587": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "588": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "590": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "591": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "592": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "593": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "594": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "595": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "596": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "598": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "599": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "600": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "602": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "603": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "LT",
+      "path": "9"
+    },
+    "604": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "605": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x265"
+    },
+    "608": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "609": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "611": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "612": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "613": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "614": {
+      "op": "POP"
+    },
+    "615": {
+      "op": "POP"
+    },
+    "616": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1497
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "statement": 1,
+      "value": "0x0"
+    },
+    "618": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1497
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "619": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "621": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "622": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "623": {
+      "op": "PUSH4",
+      "value": "0xECD0C0C3"
+    },
+    "628": {
+      "op": "PUSH1",
+      "value": "0xE0"
+    },
+    "630": {
+      "op": "SHL"
+    },
+    "631": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "632": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "633": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "634": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "635": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "637": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "639": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "641": {
+      "op": "SHL"
+    },
+    "642": {
+      "op": "SUB"
+    },
+    "643": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1497
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "644": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1497
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "645": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1497
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "646": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1497
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "647": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1504
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0xECD0C0C3"
+    },
+    "652": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1504
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "653": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x4"
+    },
+    "655": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "656": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "657": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "658": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "659": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "661": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1390,
+        1474
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "662": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "663": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "664": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "665": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "666": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "667": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "668": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "669": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "670": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1497
+      ],
+      "op": "DUP7",
+      "path": "9"
+    },
+    "671": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "672": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "EXTCODESIZE",
+      "path": "9"
+    },
+    "673": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "674": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "675": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "676": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x2AC"
+    },
+    "679": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "680": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "682": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "683": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "684": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "685": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "686": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "GAS",
+      "path": "9"
+    },
+    "687": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "STATICCALL",
+      "path": "9"
+    },
+    "688": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "689": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "690": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "691": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x2C0"
+    },
+    "694": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "695": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "696": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "698": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "699": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "RETURNDATACOPY",
+      "path": "9"
+    },
+    "700": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "701": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "703": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "704": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "705": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "706": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "707": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "708": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "709": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "711": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "712": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "713": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "715": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "716": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "LT",
+      "path": "9"
+    },
+    "717": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "718": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x2D6"
+    },
+    "721": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "722": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "724": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "725": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "726": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "727": {
+      "op": "POP"
+    },
+    "728": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "729": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1523,
+        1536
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "731": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1523,
+        1536
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "732": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "734": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "735": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "736": {
+      "op": "PUSH4",
+      "value": "0x62D9BE11"
+    },
+    "741": {
+      "op": "PUSH1",
+      "value": "0xE1"
+    },
+    "743": {
+      "op": "SHL"
+    },
+    "744": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "745": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "746": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "747": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "748": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "750": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "752": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "754": {
+      "op": "SHL"
+    },
+    "755": {
+      "op": "SUB"
+    },
+    "756": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1514
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "757": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1514
+      ],
+      "op": "DUP5",
+      "path": "9"
+    },
+    "758": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1514
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "759": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1514
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "760": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1514
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0x95EA7B3"
+    },
+    "765": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1514
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "766": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1523,
+        1536
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "767": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1523,
+        1536
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "768": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1523,
+        1536
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "769": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1523,
+        1536
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "770": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1557
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0xC5B37C22"
+    },
+    "775": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1557
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "776": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x4"
+    },
+    "778": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "779": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "780": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "781": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "782": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "784": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1506
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "785": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "786": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "787": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "788": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "789": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "790": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "791": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "792": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "793": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1523,
+        1536
+      ],
+      "op": "DUP7",
+      "path": "9"
+    },
+    "794": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "795": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "EXTCODESIZE",
+      "path": "9"
+    },
+    "796": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "797": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "798": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "799": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x327"
+    },
+    "802": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "803": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "805": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "806": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "807": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "808": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "809": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "GAS",
+      "path": "9"
+    },
+    "810": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "STATICCALL",
+      "path": "9"
+    },
+    "811": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "812": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "813": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "814": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x33B"
+    },
+    "817": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "818": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "819": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "821": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "822": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "RETURNDATACOPY",
+      "path": "9"
+    },
+    "823": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "824": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "826": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "827": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "828": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "829": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "830": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "831": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "832": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "834": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "835": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "836": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "838": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "839": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "LT",
+      "path": "9"
+    },
+    "840": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "841": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x351"
+    },
+    "844": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "845": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "847": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "848": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "849": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "850": {
+      "op": "POP"
+    },
+    "851": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "852": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "854": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "855": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "856": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "858": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "860": {
+      "op": "PUSH1",
+      "value": "0xE0"
+    },
+    "862": {
+      "op": "SHL"
+    },
+    "863": {
+      "op": "SUB"
+    },
+    "864": {
+      "op": "NOT"
+    },
+    "865": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0xE0"
+    },
+    "867": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP7",
+      "path": "9"
+    },
+    "868": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "869": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SHL",
+      "path": "9"
+    },
+    "870": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "871": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "872": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "873": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "875": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "877": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "879": {
+      "op": "SHL"
+    },
+    "880": {
+      "op": "SUB"
+    },
+    "881": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "882": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "883": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "884": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x4"
+    },
+    "886": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP5",
+      "path": "9"
+    },
+    "887": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "888": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "889": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x24"
+    },
+    "891": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP4",
+      "path": "9"
+    },
+    "892": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "893": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "894": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "895": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "896": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "897": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "898": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x44"
+    },
+    "900": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "901": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP4",
+      "path": "9"
+    },
+    "902": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "903": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "904": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "906": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1539,
+        1559
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "907": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "908": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "909": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "910": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "911": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "912": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "913": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "914": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "916": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP8",
+      "path": "9"
+    },
+    "917": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "918": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "EXTCODESIZE",
+      "path": "9"
+    },
+    "919": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "920": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "921": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "922": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x3A2"
+    },
+    "925": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "926": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "928": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "929": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "930": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "931": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "932": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "GAS",
+      "path": "9"
+    },
+    "933": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "CALL",
+      "path": "9"
+    },
+    "934": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "935": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "936": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "937": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x3B6"
+    },
+    "940": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "941": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "942": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "944": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "945": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "RETURNDATACOPY",
+      "path": "9"
+    },
+    "946": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "947": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "949": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "950": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "951": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "952": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "953": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "954": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "955": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "957": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "958": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "959": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "961": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "962": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "LT",
+      "path": "9"
+    },
+    "963": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "964": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x3CC"
+    },
+    "967": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "968": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "970": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "971": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "972": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1484,
+        1560
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "973": {
+      "op": "POP"
+    },
+    "974": {
+      "op": "POP"
+    },
+    "975": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1631
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "statement": 2,
+      "value": "0x0"
+    },
+    "977": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1631
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "978": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1631
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "979": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "981": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "982": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "983": {
+      "op": "PUSH4",
+      "value": "0x1EFC38E9"
+    },
+    "988": {
+      "op": "PUSH1",
+      "value": "0xE3"
+    },
+    "990": {
+      "op": "SHL"
+    },
+    "991": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "992": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "MSTORE",
+      "path": "9"
+    },
+    "993": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "994": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "995": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "997": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "999": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "1001": {
+      "op": "SHL"
+    },
+    "1002": {
+      "op": "SUB"
+    },
+    "1003": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1631
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1004": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1631
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "1005": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1631
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "1006": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1631
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "1007": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1648
+      ],
+      "op": "PUSH4",
+      "path": "9",
+      "value": "0xF7E1C748"
+    },
+    "1012": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1648
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "1013": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x4"
+    },
+    "1015": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1016": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP5",
+      "path": "9"
+    },
+    "1017": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "1018": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "1019": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x60"
+    },
+    "1021": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "1022": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1023": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP4",
+      "path": "9"
+    },
+    "1024": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1025": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SUB",
+      "path": "9"
+    },
+    "1026": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1027": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "1028": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "1029": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1030": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "1031": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1032": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1631
+      ],
+      "op": "DUP8",
+      "path": "9"
+    },
+    "1033": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1034": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "EXTCODESIZE",
+      "path": "9"
+    },
+    "1035": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "1036": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1037": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "1038": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x416"
+    },
+    "1041": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "1042": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "1044": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1045": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "1046": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "1047": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "1048": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "GAS",
+      "path": "9"
+    },
+    "1049": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "CALL",
+      "path": "9"
+    },
+    "1050": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "1051": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1052": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "1053": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x42A"
+    },
+    "1056": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "1057": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "1058": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "1060": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1061": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "RETURNDATACOPY",
+      "path": "9"
+    },
+    "1062": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "1063": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "1065": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "1066": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "1067": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "1068": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "1069": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "1070": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "POP",
+      "path": "9"
+    },
+    "1071": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "1073": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "1074": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "RETURNDATASIZE",
+      "path": "9"
+    },
+    "1075": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x60"
+    },
+    "1077": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP2",
+      "path": "9"
+    },
+    "1078": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "LT",
+      "path": "9"
+    },
+    "1079": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ISZERO",
+      "path": "9"
+    },
+    "1080": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH2",
+      "path": "9",
+      "value": "0x440"
+    },
+    "1083": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "JUMPI",
+      "path": "9"
+    },
+    "1084": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x0"
+    },
+    "1086": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1087": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "REVERT",
+      "path": "9"
+    },
+    "1088": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "JUMPDEST",
+      "path": "9"
+    },
+    "1089": {
+      "op": "POP"
+    },
+    "1090": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1091": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "1092": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x20"
+    },
+    "1094": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "DUP3",
+      "path": "9"
+    },
+    "1095": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "1096": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "1097": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x40"
+    },
+    "1099": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1100": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "1101": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "ADD",
+      "path": "9"
+    },
+    "1102": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1618,
+        1650
+      ],
+      "op": "MLOAD",
+      "path": "9"
+    },
+    "1103": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1590,
+        1614
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x3"
+    },
+    "1105": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SSTORE",
+      "path": "9"
+    },
+    "1106": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1579,
+        1588
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0x2"
+    },
+    "1108": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "DUP1",
+      "path": "9"
+    },
+    "1109": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SLOAD",
+      "path": "9"
+    },
+    "1110": {
+      "op": "PUSH1",
+      "value": "0xFF"
+    },
+    "1112": {
+      "op": "NOT"
+    },
+    "1113": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "1114": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "PUSH1",
+      "path": "9",
+      "value": "0xFF"
+    },
+    "1116": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1117": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SWAP4",
+      "path": "9"
+    },
+    "1118": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "AND",
+      "path": "9"
+    },
+    "1119": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "1120": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1121": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SWAP3",
+      "path": "9"
+    },
+    "1122": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "OR",
+      "path": "9"
+    },
+    "1123": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SWAP1",
+      "path": "9"
+    },
+    "1124": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SWAP2",
+      "path": "9"
+    },
+    "1125": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SSTORE",
+      "path": "9"
+    },
+    "1126": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "1128": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "offset": [
+        1570,
+        1650
+      ],
+      "op": "SSTORE",
+      "path": "9"
+    },
+    "1129": {
+      "fn": "FetchOracleTestClient.queryOracleValue",
+      "jump": "o",
+      "offset": [
+        1330,
+        1657
+      ],
+      "op": "JUMP",
+      "path": "9"
+    }
+  },
+  "sha1": "1e1432f308d186ca35fb73d8f7bc376195fdd503",
+  "source": "// SPDX-License-Identifier:Apache-2.0\n//------------------------------------------------------------------------------\n//\n//   Copyright 2020 Fetch.AI Limited\n//\n//   Licensed under the Apache License, Version 2.0 (the \"License\");\n//   you may not use this file except in compliance with the License.\n//   You may obtain a copy of the License at\n//\n//       http://www.apache.org/licenses/LICENSE-2.0\n//\n//   Unless required by applicable law or agreed to in writing, software\n//   distributed under the License is distributed on an \"AS IS\" BASIS,\n//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n//   See the License for the specific language governing permissions and\n//   limitations under the License.\n//\n//------------------------------------------------------------------------------\n\npragma solidity ^0.6.0;\n\nimport \"./FetchOracleMock.sol\";\nimport \"../interfaces/IFetchOracleClient.sol\";\n\ncontract FetchOracleTestClient is IFetchOracleClient{\n    FetchOracle public _fetch_oracle;\n\n    uint256 public _value;\n    uint8 public _decimals;\n    uint256 public _updatedAtEthBlockNumber;\n\n\n    constructor(address fetchOracleContractAddress) public {\n        // NOTE(pb): We expect this to de deployed on testnet only:\n        _fetch_oracle = FetchOracleMock(fetchOracleContractAddress);\n    }\n\n\n    function queryOracleValue() external override\n    {\n        _fetch_oracle._token().transferFrom(msg.sender, address(this), _fetch_oracle._fee());\n        _fetch_oracle._token().approve(address(_fetch_oracle), _fetch_oracle._fee());\n        (_value, _decimals, _updatedAtEthBlockNumber) = _fetch_oracle.queryOracleValue();\n    }\n}\n\n// Contract created exclusively for more comfortable usage in truffle:\ncontract FetchOracleTestClientETH is FetchOracleTestClient {\n    constructor(address fetchOracleContractAddress) public FetchOracleTestClient(fetchOracleContractAddress) {\n    }\n}\n",
+  "sourceMap": "925:734:9:-:0;;;1124:199;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1124:199:9;1257:13;:59;;-1:-1:-1;;;;;1257:59:9;;;-1:-1:-1;;;;;;1257:59:9;;;;;;;;;925:734;;;;;;",
+  "sourcePath": "contracts/FetchOracleTestClient.sol",
+  "type": "contract"
+}
