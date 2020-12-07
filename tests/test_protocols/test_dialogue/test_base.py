@@ -37,6 +37,7 @@ from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 from aea.protocols.dialogue.base import (
     InvalidDialogueMessage,
     PersistDialoguesStorage,
+    PersistDialoguesStorageWithOffloading,
     find_caller_object,
 )
 from aea.skills.base import SkillComponent
@@ -1748,6 +1749,7 @@ class TestPersistDialoguesStorage:
         self.dialogues = Dialogues(
             self.agent_address, keep_terminal_state_dialogues=True
         )
+        self.dialogues._dialogues_storage = PersistDialoguesStorage(self.dialogues)
         self.skill_component = Mock()
         self.skill_component.name = "test_component"
         self.skill_component.skill_id = PublicId("test", "test", "0.1.0")
@@ -1800,8 +1802,8 @@ class TestPersistDialoguesStorage:
             error_msg="oops",
             error_data={},
         )
-        assert dialogues_storage._terminal_state_dialogues_labels
-        assert dialogues_storage._dialogues_by_dialogue_label
+        assert dialogues_storage.dialogues_in_terminal_state
+        assert dialogues_storage.dialogues_in_active_state
         assert dialogues_storage._dialogue_by_address
         assert dialogues_storage._incomplete_to_complete_dialogue_labels
         dialogues_storage.teardown()
@@ -1810,22 +1812,171 @@ class TestPersistDialoguesStorage:
         dialogues_storage_restored._skill_component = self.skill_component
         dialogues_storage_restored.setup()
 
-        assert (
-            dialogues_storage._dialogues_by_dialogue_label
-            == dialogues_storage_restored._dialogues_by_dialogue_label
+        assert len(dialogues_storage._dialogue_by_address) == len(
+            dialogues_storage_restored._dialogue_by_address
         )
-        assert (
-            dialogues_storage._dialogue_by_address
-            == dialogues_storage_restored._dialogue_by_address
+
+        assert len(dialogues_storage._dialogue_by_address) == len(
+            dialogues_storage_restored._dialogue_by_address
         )
+
         assert (
             dialogues_storage._incomplete_to_complete_dialogue_labels
             == dialogues_storage_restored._incomplete_to_complete_dialogue_labels
         )
-        assert (
-            dialogues_storage._terminal_state_dialogues_labels
-            == dialogues_storage_restored._terminal_state_dialogues_labels
+        assert set(
+            [str(i.dialogue_label) for i in dialogues_storage.dialogues_in_active_state]
+        ) == set(
+            [
+                str(i.dialogue_label)
+                for i in dialogues_storage_restored.dialogues_in_active_state
+            ]
         )
+        assert set(
+            [
+                str(i.dialogue_label)
+                for i in dialogues_storage.dialogues_in_terminal_state
+            ]
+        ) == set(
+            [
+                str(i.dialogue_label)
+                for i in dialogues_storage_restored.dialogues_in_terminal_state
+            ]
+        )
+
+        # test remove from storage on storeage.remove
+        assert dialogues_storage_restored._terminal_dialogues_collection
+        dialogue_label = dialogues_storage.dialogues_in_terminal_state[0].dialogue_label
+        assert dialogues_storage_restored._terminal_dialogues_collection.get(
+            str(dialogue_label)
+        )
+        dialogues_storage_restored.remove(dialogue_label)
+        assert (
+            dialogues_storage_restored._terminal_dialogues_collection.get(
+                str(dialogue_label)
+            )
+            is None
+        )
+
+
+class TestPersistDialoguesStorageOffloading:
+    """Test PersistDialoguesStorage."""
+
+    def setup(self):
+        """Initialise the environment to test PersistDialogueStorage."""
+        self.agent_address = "agent 1"
+        self.opponent_address = "agent 2"
+        self.dialogues = Dialogues(
+            self.agent_address, keep_terminal_state_dialogues=True
+        )
+        self.skill_component = Mock()
+        self.skill_component.name = "test_component"
+        self.skill_component.skill_id = PublicId("test", "test", "0.1.0")
+
+        self.dialogue_label = DialogueLabel(
+            dialogue_reference=(str(1), ""),
+            dialogue_opponent_addr=self.opponent_address,
+            dialogue_starter_addr=self.agent_address,
+        )
+        self.generic_storage = Storage("sqlite://:memory:", threaded=True)
+        self.generic_storage.start()
+        wait_for_condition(lambda: self.generic_storage.is_connected, timeout=10)
+        self.skill_component.context.storage = self.generic_storage
+
+    def teardown(self):
+        """Tear down the environment to test PersistDialogueStorage."""
+        self.generic_storage.stop()
+        self.generic_storage.wait_completed(sync=True, timeout=10)
+
+    def test_dump_restore(self):
+        """Test dump and load methods of the persists storage."""
+        dialogues_storage = PersistDialoguesStorageWithOffloading(self.dialogues)
+        dialogues_storage._skill_component = self.skill_component
+        self.dialogues._dialogues_storage = dialogues_storage
+        dialogues_storage._incomplete_to_complete_dialogue_labels[
+            self.dialogue_label
+        ] = self.dialogue_label
+        self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+        msg, dialogue = self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello2"
+        )
+        dialogue.reply(
+            target_message=msg,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+        assert dialogues_storage.dialogues_in_terminal_state
+        assert dialogues_storage.dialogues_in_active_state
+        assert dialogues_storage._dialogue_by_address
+        assert dialogues_storage._incomplete_to_complete_dialogue_labels
+        dialogues_by_addr = dialogues_storage.get_dialogues_with_counterparty(
+            dialogue.dialogue_label.dialogue_opponent_addr
+        )
+        dialogues_storage.teardown()
+
+        dialogues_storage_restored = PersistDialoguesStorageWithOffloading(
+            self.dialogues
+        )
+        dialogues_storage_restored._skill_component = self.skill_component
+        dialogues_storage_restored.setup()
+
+        assert len(dialogues_storage._dialogue_by_address) == len(
+            dialogues_storage_restored._dialogue_by_address
+        )
+
+        assert (
+            dialogues_storage._incomplete_to_complete_dialogue_labels
+            == dialogues_storage_restored._incomplete_to_complete_dialogue_labels
+        )
+        assert set(
+            [str(i.dialogue_label) for i in dialogues_storage.dialogues_in_active_state]
+        ) == set(
+            [
+                str(i.dialogue_label)
+                for i in dialogues_storage_restored.dialogues_in_active_state
+            ]
+        )
+        assert set(
+            [
+                str(i.dialogue_label)
+                for i in dialogues_storage.dialogues_in_terminal_state
+            ]
+        ) == set(
+            [
+                str(i.dialogue_label)
+                for i in dialogues_storage_restored.dialogues_in_terminal_state
+            ]
+        )
+
+        dialogue_label = dialogues_storage.dialogues_in_terminal_state[0].dialogue_label
+
+        assert len(dialogues_by_addr) == len(
+            dialogues_storage_restored.get_dialogues_with_counterparty(
+                dialogue.dialogue_label.dialogue_opponent_addr
+            )
+        )
+        # check get and cache
+        assert not dialogues_storage_restored._terminal_state_dialogues_labels
+        assert dialogues_storage_restored.get(dialogue_label)
+        assert dialogues_storage_restored._terminal_state_dialogues_labels
+
+        # test remove from storage on storeage.remove
+        assert dialogues_storage_restored._terminal_dialogues_collection
+        assert dialogues_storage_restored._terminal_dialogues_collection.get(
+            str(dialogue_label)
+        )
+        dialogues_storage_restored.remove(dialogue_label)
+        assert (
+            dialogues_storage_restored._terminal_dialogues_collection.get(
+                str(dialogue_label)
+            )
+            is None
+        )
+        assert not dialogues_storage_restored.get(dialogue_label)
 
 
 class TestBaseDialoguesStorage:
@@ -1883,6 +2034,10 @@ class TestBaseDialoguesStorage:
 
         assert not self.storage.dialogues_in_active_state
         assert self.storage.dialogues_in_terminal_state
+
+        self.storage.remove(self.dialogue.dialogue_label)
+        assert not self.storage.dialogues_in_active_state
+        assert not self.storage.dialogues_in_terminal_state
 
     def test_dialogues_in_terminal_state_removed(self):
         """Test dialogues in terminal state handled properly."""

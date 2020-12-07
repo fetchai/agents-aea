@@ -25,6 +25,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 EQUALS_TYPE = Union[int, float, str, bool]
 JSON_TYPES = Union[Dict, str, List, None, int, float]
+OBJECT_ID_AND_BODY = Tuple[str, JSON_TYPES]
 
 
 class AbstractStorageBackend(ABC):
@@ -102,7 +103,7 @@ class AbstractStorageBackend(ABC):
     @abstractmethod
     async def find(
         self, collection_name: str, field: str, equals: EQUALS_TYPE
-    ) -> List[JSON_TYPES]:
+    ) -> List[OBJECT_ID_AND_BODY]:
         """
         Get objects from the collection by filtering by field value.
 
@@ -114,7 +115,7 @@ class AbstractStorageBackend(ABC):
         """
 
     @abstractmethod
-    async def list(self, collection_name: str) -> List[Tuple[str, JSON_TYPES]]:
+    async def list(self, collection_name: str) -> List[OBJECT_ID_AND_BODY]:
         """
         List all objects with keys from the collection.
 
