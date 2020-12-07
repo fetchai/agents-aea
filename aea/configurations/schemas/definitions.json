@@ -106,7 +106,7 @@
         "$ref": "definitions.json#/definitions/ignore_pattern"
       }
     },
-    "entrypoint": {
+    "build_entrypoint": {
       "type": "string"
     },
     "ledger_id": {

@@ -14,7 +14,7 @@ fingerprint:
   handlers.py: QmYchfGvDXD5CxDHt6kChNsNbRxTcqViQTn65R7p8VJ4fu
   tasks.py: Qmegg4QsYSqSZN3q2zuRiBAToQ2LEiWrAPtUo7rCMrxjGJ
 fingerprint_ignore_patterns: []
-entrypoint: path/to/script.py
+build_entrypoint: path/to/script.py
 contracts: []
 protocols:
 - fetchai/default:0.9.0

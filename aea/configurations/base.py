@@ -994,7 +994,7 @@ class PackageConfiguration(Configuration, ABC):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        entrypoint: Optional[str] = None,
+        build_entrypoint: Optional[str] = None,
     ):
         """
         Initialize a package configuration.
@@ -1009,7 +1009,7 @@ class PackageConfiguration(Configuration, ABC):
            The fixed version is interpreted with the specifier '=='.
         :param fingerprint: the fingerprint.
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
-        :param entrypoint: path to a script to execute at build time.
+        :param build_entrypoint: path to a script to execute at build time.
         """
         super().__init__()
         if name is None or author is None:  # pragma: nocover
@@ -1024,7 +1024,7 @@ class PackageConfiguration(Configuration, ABC):
             if fingerprint_ignore_patterns is not None
             else []
         )
-        self.entrypoint = entrypoint
+        self.build_entrypoint = build_entrypoint
         self.aea_version = aea_version if aea_version != "" else __aea_version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
@@ -1109,7 +1109,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        entrypoint: Optional[str] = None,
+        build_entrypoint: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
     ):
         """Set component configuration."""
@@ -1121,7 +1121,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
-            entrypoint,
+            build_entrypoint,
         )
         self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
 
@@ -1205,7 +1205,7 @@ class ConnectionConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        entrypoint: Optional[str] = None,
+        build_entrypoint: Optional[str] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
         connections: Optional[Set[PublicId]] = None,
@@ -1246,7 +1246,7 @@ class ConnectionConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
-            entrypoint,
+            build_entrypoint,
             dependencies,
         )
         self.class_name = class_name
@@ -1307,8 +1307,8 @@ class ConnectionConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
-        if self.entrypoint:
-            result["entrypoint"] = self.entrypoint
+        if self.build_entrypoint:
+            result["build_entrypoint"] = self.build_entrypoint
         return result
 
     @classmethod
@@ -1333,7 +1333,7 @@ class ConnectionConfig(ComponentConfiguration):
             fingerprint_ignore_patterns=cast(
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
-            entrypoint=cast(Optional[str], obj.get("entrypoint")),
+            build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
             connections=cast(Set[PublicId], connections),
@@ -1375,7 +1375,7 @@ class ProtocolConfig(ComponentConfiguration):
         license_: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        entrypoint: Optional[str] = None,
+        build_entrypoint: Optional[str] = None,
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
@@ -1389,7 +1389,7 @@ class ProtocolConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
-            entrypoint,
+            build_entrypoint,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -1412,8 +1412,8 @@ class ProtocolConfig(ComponentConfiguration):
                 "dependencies": dependencies_to_json(self.dependencies),
             }
         )
-        if self.entrypoint:
-            result["entrypoint"] = self.entrypoint
+        if self.build_entrypoint:
+            result["build_entrypoint"] = self.build_entrypoint
         return result
 
     @classmethod
@@ -1430,7 +1430,7 @@ class ProtocolConfig(ComponentConfiguration):
             fingerprint_ignore_patterns=cast(
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
-            entrypoint=cast(Optional[str], obj.get("entrypoint")),
+            build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
@@ -1485,7 +1485,7 @@ class SkillConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        entrypoint: Optional[str] = None,
+        build_entrypoint: Optional[str] = None,
         connections: Optional[Set[PublicId]] = None,
         protocols: Optional[Set[PublicId]] = None,
         contracts: Optional[Set[PublicId]] = None,
@@ -1503,7 +1503,7 @@ class SkillConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
-            entrypoint,
+            build_entrypoint,
             dependencies,
         )
         self.connections = connections if connections is not None else set()
@@ -1573,8 +1573,8 @@ class SkillConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
-        if self.entrypoint:
-            result["entrypoint"] = self.entrypoint
+        if self.build_entrypoint:
+            result["build_entrypoint"] = self.build_entrypoint
         return result
 
     @classmethod
@@ -1589,7 +1589,7 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns = cast(
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
-        entrypoint = cast(Optional[str], obj.get("entrypoint"))
+        build_entrypoint = cast(Optional[str], obj.get("build_entrypoint"))
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
         protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
         contracts = {PublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
@@ -1604,7 +1604,7 @@ class SkillConfig(ComponentConfiguration):
             aea_version=aea_version_specifiers,
             fingerprint=fingerprint,
             fingerprint_ignore_patterns=fingerprint_ignore_patterns,
-            entrypoint=entrypoint,
+            build_entrypoint=build_entrypoint,
             connections=connections,
             protocols=protocols,
             contracts=contracts,
@@ -1713,7 +1713,7 @@ class AgentConfig(PackageConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        entrypoint: Optional[str] = None,
+        build_entrypoint: Optional[str] = None,
         registry_path: str = DEFAULT_REGISTRY_NAME,
         description: str = "",
         logging_config: Optional[Dict] = None,
@@ -1742,7 +1742,7 @@ class AgentConfig(PackageConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
-            entrypoint,
+            build_entrypoint,
         )
         self.agent_name = self.name
         self.registry_path = registry_path
@@ -1908,8 +1908,8 @@ class AgentConfig(PackageConfiguration):
             }
         )  # type: Dict[str, Any]
 
-        if self.entrypoint:
-            config["entrypoint"] = self.entrypoint
+        if self.build_entrypoint:
+            config["build_entrypoint"] = self.build_entrypoint
 
         # framework optional configs are only printed if defined.
         if self.period is not None:
@@ -1952,7 +1952,7 @@ class AgentConfig(PackageConfiguration):
             fingerprint_ignore_patterns=cast(
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
-            entrypoint=cast(Optional[str], obj.get("entrypoint")),
+            build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
             period=cast(float, obj.get("period")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
@@ -2200,7 +2200,7 @@ class ContractConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        entrypoint: Optional[str] = None,
+        build_entrypoint: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
@@ -2215,7 +2215,7 @@ class ContractConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
-            entrypoint,
+            build_entrypoint,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -2244,8 +2244,8 @@ class ContractConfig(ComponentConfiguration):
                 "dependencies": dependencies_to_json(self.dependencies),
             }
         )
-        if self.entrypoint:
-            result["entrypoint"] = self.entrypoint
+        if self.build_entrypoint:
+            result["build_entrypoint"] = self.build_entrypoint
         return result
 
     @classmethod
@@ -2264,7 +2264,7 @@ class ContractConfig(ComponentConfiguration):
             fingerprint_ignore_patterns=cast(
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
-            entrypoint=cast(Optional[str], obj.get("entrypoint")),
+            build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
             contract_interface_paths=cast(

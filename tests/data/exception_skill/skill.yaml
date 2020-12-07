@@ -11,7 +11,7 @@ fingerprint:
   handlers.py: Qmf8XuXNDzqHNdo7Q18y9wCFujrtk6Tx1zaADsQ5MuzNRg
   tasks.py: QmfJznzp11PWpBzpEaftq3h2BYHfXbnoitdMcFQsLCqZnL
 fingerprint_ignore_patterns: []
-entrypoint: path/to/script.py
+build_entrypoint: path/to/script.py
 contracts: []
 protocols: []
 skills: []
