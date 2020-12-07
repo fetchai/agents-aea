@@ -73,7 +73,7 @@ from aea.helpers.win32 import enable_ctrl_c_support
     is_flag=True,
     required=False,
     default=False,
-    help="Skip consistency checks.",
+    help="Skip consistency checks of agent during command execution.",
 )
 @click.pass_context
 def cli(click_context, skip_consistency_check: bool) -> None:

@@ -331,7 +331,7 @@ def check_prerequisites() -> None:
     )
     result_str = result.stdout.decode("utf-8")
     if LIBPROTOC_VERSION not in result_str:
-        raise FileNotFoundError(
+        raise FileNotFoundError(  # pragma: nocover
             f"Invalid version for protoc. Found: {result_str}. Required: {LIBPROTOC_VERSION}."
         )
 

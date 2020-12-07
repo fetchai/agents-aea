@@ -54,7 +54,9 @@ Options:
   -v, --verbosity LVL           One of NOTSET, DEBUG, INFO, WARNING, ERROR,
                                 CRITICAL, OFF
 
-  -s, --skip-consistency-check  Skip consistency checks.
+  -s, --skip-consistency-check  Skip consistency checks of agent during command
+                                execution.
+
   --help                        Show this message and exit.
 
 Commands:
