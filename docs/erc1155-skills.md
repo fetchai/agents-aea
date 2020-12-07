@@ -220,12 +220,12 @@ of `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)`
 The output will be something like `/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm2JPsUX1Su59YVDXJQizYkNSe8JCusqRpLeeTbvY76fE5`.
 
 
-Or, run these commands:
+Or, run these commands (replace `SOME_ADDRESS` as above):
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
   "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": ["'$(cd ../erc1155_deployer && aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)'"],
+  "entry_peers": ["SOME_ADDRESS"],
   "local_uri": "127.0.0.1:9001",
   "log_file": "libp2p_node.log",
   "public_uri": "127.0.0.1:9001"
