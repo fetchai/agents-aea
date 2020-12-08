@@ -16,7 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests for the helpers.search.models."""
+import re
+from unittest.mock import MagicMock
+
 import pytest
 
 from aea.exceptions import AEAEnforceError
@@ -105,7 +109,13 @@ def test_generate_data_model():
 
 def test_description():
     """Test model description."""
-    values = {"test": "test"}
+    values = {
+        "test": "test_value",
+        "bool": True,
+        "float": 1.1,
+        "int": int(1),
+        "loc": Location(1, 1),
+    }
     description = Description(
         values=values, data_model=generate_data_model("test", values)
     )
@@ -114,7 +124,8 @@ def test_description():
     assert description == Description(
         values=values, data_model=generate_data_model("test", values)
     )
-    assert list(description) == list(values.values())
+    assert list(description.values.values()) == list(values.values())
+    assert list(description) == list(values)
 
     with pytest.raises(
         AttributeInconsistencyException, match=r"Missing required attribute."
@@ -130,7 +141,10 @@ def test_description():
     with pytest.raises(
         AttributeInconsistencyException, match=r".* has incorrect type:.*"
     ):
-        Description(values=values, data_model=generate_data_model("test", {"test": 12}))
+        Description(
+            values=values,
+            data_model=generate_data_model("test", {**values, "test": 12}),
+        )
 
     with pytest.raises(
         AttributeInconsistencyException, match=r".* has unallowed type:.*"
@@ -139,15 +153,16 @@ def test_description():
             values={"test": object()},
             data_model=generate_data_model("test", {"test": object()}),
         )
-
-    assert (
-        str(description)
-        == "Description(values={'test': 'test'},data_model=DataModel(name=test,attributes={'test': \"Attribute(name=test,type=<class 'str'>,is_required=True)\"},description=))"
-    )
+    assert re.match(r"Description\(values=.*data_model=.*", str(description))
 
     description_pb = description._encode()
     actual_description = Description._decode(description_pb)
     assert actual_description == description
+
+    mock = MagicMock()
+    mock.description_bytes = None
+    Description.encode(mock, description)
+    assert mock.description_bytes is not None
 
 
 def test_constraint_type():
