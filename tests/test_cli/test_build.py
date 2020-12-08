@@ -78,9 +78,9 @@ class TestAEABuildMainEntrypoint(BaseTestAEABuild):
         """Test build command."""
         result, stdout, stderr = self.run_aea_subprocess("-s", "build")
         assert result.returncode == 0
-        assert re.search("^Building AEA package...", stdout)
+        assert re.search(r"Building AEA package\.\.\.", stdout)
         assert re.search(r"Running command .*python script\.py", stdout)
-        assert "\nBuild completed!\n" in stdout
+        assert "Build completed!\n" in stdout
         assert self.expected_string in stdout
 
 
@@ -110,8 +110,8 @@ class TestAEABuildPackageEntrypoint(BaseTestAEABuild):
         result, stdout, stderr = self.run_aea_subprocess("-s", "build")
         assert result.returncode == 0
         assert re.search(
-            rf"^Building package \(protocol, {self.author}/{self.scaffold_package_name}:{DEFAULT_VERSION}\)...",
+            rf"Building package \(protocol, {self.author}/{self.scaffold_package_name}:{DEFAULT_VERSION}\)...",
             stdout,
         )
         assert re.search(r"Running command .*python script\.py", stdout)
-        assert "\nBuild completed!\n" in stdout
+        assert "Build completed!\n" in stdout
