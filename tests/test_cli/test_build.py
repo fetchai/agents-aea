@@ -20,6 +20,7 @@
 """This test module contains the tests for the `aea build` sub-command."""
 import re
 import subprocess  # nosec
+import sys
 from pathlib import Path
 from typing import Tuple
 
@@ -30,7 +31,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 class BaseTestAEABuild(AEATestCaseEmpty):
     """Base test class for AEA."""
 
-    def run_subprocess(self, *args) -> Tuple[subprocess.Popen, str, str]:
+    def run_aea_subprocess(self, *args) -> Tuple[subprocess.Popen, str, str]:
         """
         Run subprocess, bypassing ClickRunner.invoke.
 
@@ -38,7 +39,7 @@ class BaseTestAEABuild(AEATestCaseEmpty):
         well the stdout/stderr of nephew processes - childrne processes of children processes.
         """
         result = subprocess.Popen(  # type: ignore  # nosec
-            *args,
+            [sys.executable, "-m", "aea.cli", *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=self._get_cwd(),
@@ -75,7 +76,7 @@ class TestAEABuildMainEntrypoint(BaseTestAEABuild):
 
     def test_build(self):
         """Test build command."""
-        result, stdout, stderr = self.run_subprocess(["aea", "-s", "build"])
+        result, stdout, stderr = self.run_aea_subprocess("-s", "build")
         assert result.returncode == 0
         assert re.search("^Building AEA package...", stdout)
         assert re.search(r"Running command .*python script\.py", stdout)
@@ -106,7 +107,7 @@ class TestAEABuildPackageEntrypoint(BaseTestAEABuild):
 
     def test_build(self):
         """Test build command."""
-        result, stdout, stderr = self.run_subprocess(["aea", "-s", "build"])
+        result, stdout, stderr = self.run_aea_subprocess("-s", "build")
         assert result.returncode == 0
         assert re.search(
             rf"^Building package \(protocol, {self.author}/{self.scaffold_package_name}:{DEFAULT_VERSION}\)...",

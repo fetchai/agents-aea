@@ -53,8 +53,8 @@ def _check_valid_entrypoint(config: PackageConfiguration):
         config.directory is not None,
         "Configuration is not associated to any directory.",
     )
-    config.directory = cast(Path, config.directory)
-    script_path = Path(config.directory) / config.build_entrypoint
+    directory = cast(Path, config.directory)
+    script_path = Path(directory) / config.build_entrypoint
     enforce(
         script_path.exists(),
         f"File '{config.build_entrypoint}' does not exists.",
