@@ -16,11 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the aea.cli.generate sub-module."""
 from unittest import TestCase, mock
 
-import pytest
 from click import ClickException
 
 from aea.cli.generate import _generate_item
@@ -53,7 +51,6 @@ def _raise_psperror(*args, **kwargs):
 
 @mock.patch("builtins.open", mock.mock_open())
 @mock.patch("aea.protocols.generator.common.ConfigLoader")
-@mock.patch("aea.cli.generate.os.path.join", return_value="joined-path")
 @mock.patch("aea.cli.utils.decorators._cast_ctx")
 class GenerateItemTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
@@ -90,7 +87,7 @@ class GenerateItemTestCase(TestCase):
         )
         self.assertEqual(cm.exception.message, expected_msg)
 
-    @pytest.mark.skip
+    # @pytest.mark.skip
     @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
     @mock.patch("aea.protocols.generator.base.shutil.which", return_value="some")
     @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_psperror)
