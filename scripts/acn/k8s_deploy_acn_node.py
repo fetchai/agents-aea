@@ -269,9 +269,9 @@ class AcnK8sPodConfig:
         config[cls.NODE_LAST_ENTRY_PEER_HOST] = '"{}"'.format(peer_host)
         config[cls.NODE_LAST_ENTRY_PEER_PORT] = '"{}"'.format(peer_port)
 
-        config[cls.NODE_URI] = "0.0.0.0:{}".format(acn_port)
-        config[cls.NODE_URI_DELEGATE] = "0.0.0.0:{}".format(acn_delegate_port)
-        config[cls.NODE_URI_MONITORING] = "0.0.0.0:{}".format(acn_monitoring_port)
+        config[cls.NODE_URI] = "127.0.0.1:9000".format(acn_port)
+        config[cls.NODE_URI_DELEGATE] = "127.0.0.1:11000".format(acn_delegate_port)
+        config[cls.NODE_URI_MONITORING] = "127.0.0.1:8080".format(acn_monitoring_port)
         config[cls.NODE_URI_EXTERNAL] = "{}:{}".format(k8s_public_hostname, acn_port)
         config[cls.NODE_LOG_FILE] = '"{}_{}.log"'.format(
             cls.Defaults[cls.NODE_LOG_FILE], str(acn_port)
@@ -414,7 +414,7 @@ def parse_commandline():
         type=int,
         dest="port",
         required=False,
-        help="acn node's port number (both local and external)",
+        help="acn node's external port number. Internal is 9000",
     )
     parser.add_argument(
         "--acn-port-delegate",
@@ -422,7 +422,7 @@ def parse_commandline():
         type=int,
         dest="delegate_port",
         required=False,
-        help="acn node's delegate service port number (both local and external)",
+        help="acn node's delegate external service port number. Internal is 11000",
     )
     parser.add_argument(
         "--acn-port-monitoring",
@@ -430,6 +430,7 @@ def parse_commandline():
         type=int,
         dest="monitoring_port",
         required=False,
+        default=8080,
         help="acn node's monitoring service port number (local only)",
     )
     parser.add_argument(

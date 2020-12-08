@@ -1,0 +1,12 @@
+apiVersion: v1
+description: The agents p2p DHT network
+name: agents-dht
+version: 0.0.1
+appVersion: 0.0.1
+keywords:
+- fetch
+- agents
+home: https://fetch.ai
+sources:
+- https://github.com/fetchai
+icon: https://avatars3.githubusercontent.com/u/40889903
