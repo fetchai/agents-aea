@@ -58,7 +58,6 @@ class AgentRunAsyncTask:
 
     def create_run_loop(self) -> None:
         """Create run loop."""
-        pass
 
     def start(self) -> None:
         """Start task."""

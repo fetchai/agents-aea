@@ -137,6 +137,10 @@ def fetch_agent_locally(
         )
 
     # add dependencies
+    if not ctx.config.get("is_local") or not ctx.config.get("is_mixed"):
+        # used by add_item to download locally
+        ctx.config["is_local"] = True
+
     _fetch_agent_deps(ctx)
     click.echo("Agent {} successfully fetched.".format(public_id.name))
 
