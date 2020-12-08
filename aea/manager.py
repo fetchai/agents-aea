@@ -584,7 +584,8 @@ class MultiAgentManager:
 
         if not os.path.isdir(self.working_dir):  # pragma: nocover
             raise ValueError(f"{self.working_dir} is not a directory!")
-        os.makedirs(self._keys_dir)
+        if not os.path.exists(self._keys_dir):
+            os.makedirs(self._keys_dir)
 
     def _build_agent_alias(
         self,
