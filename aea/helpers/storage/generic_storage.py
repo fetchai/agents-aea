@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the storage implementation."""
 import asyncio
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from urllib.parse import urlparse
 
 from aea.helpers.async_utils import AsyncState, Runnable
@@ -26,6 +26,7 @@ from aea.helpers.storage.backends.base import (
     AbstractStorageBackend,
     EQUALS_TYPE,
     JSON_TYPES,
+    OBJECT_ID_AND_BODY,
 )
 from aea.helpers.storage.backends.sqlite import SqliteStorageBackend
 
@@ -79,7 +80,7 @@ class AsyncCollection:
         """
         return await self._storage_backend.remove(self._collection_name, object_id)
 
-    async def find(self, field: str, equals: EQUALS_TYPE) -> List[JSON_TYPES]:
+    async def find(self, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]:
         """
         Get objects from the collection by filtering by field value.
 
@@ -90,7 +91,7 @@ class AsyncCollection:
         """
         return await self._storage_backend.find(self._collection_name, field, equals)
 
-    async def list(self) -> List[Tuple[str, JSON_TYPES]]:
+    async def list(self) -> List[OBJECT_ID_AND_BODY]:
         """
         List all objects with keys from the collection.
 
@@ -145,7 +146,7 @@ class SyncCollection:
         """
         return self._run_sync(self._async_collection.remove(object_id))
 
-    def find(self, field: str, equals: EQUALS_TYPE) -> List[JSON_TYPES]:
+    def find(self, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]:
         """
         Get objects from the collection by filtering by field value.
 
@@ -156,7 +157,7 @@ class SyncCollection:
         """
         return self._run_sync(self._async_collection.find(field, equals))
 
-    def list(self) -> List[Tuple[str, JSON_TYPES]]:
+    def list(self) -> List[OBJECT_ID_AND_BODY]:
         """
         List all objects with keys from the collection.
 

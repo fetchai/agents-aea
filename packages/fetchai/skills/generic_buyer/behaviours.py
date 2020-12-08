@@ -165,11 +165,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
         pass
 
     def _timeout_processing(self) -> None:
-        """
-        Timeout processing.
-
-        :param ledger_api_dialogue: the ledger api dialogue
-        """
+        """Timeout processing."""
         if self.processing is None:
             return
         self.timedout.add(self.processing.dialogue_label)

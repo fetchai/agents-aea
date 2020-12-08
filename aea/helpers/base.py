@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Miscellaneous helpers."""
-
 import builtins
 import contextlib
 import importlib.util
@@ -35,6 +33,7 @@ from collections import OrderedDict, UserString, defaultdict, deque
 from copy import copy
 from functools import wraps
 from pathlib import Path
+from threading import RLock
 from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
 
 from dotenv import load_dotenv
@@ -499,3 +498,61 @@ def reachable_nodes(
         queue.extendleft(successors)
         visited.add(current)
     return result
+
+
+_NOT_FOUND = object()
+
+
+# copied from python3.8 functools
+class cached_property:  # pragma: nocover
+    """Cached property from python3.8 functools."""
+
+    def __init__(self, func):
+        """Init cached property."""
+        self.func = func
+        self.attrname = None
+        self.__doc__ = func.__doc__
+        self.lock = RLock()
+
+    def __set_name__(self, _, name):
+        """Set name."""
+        if self.attrname is None:
+            self.attrname = name
+        elif name != self.attrname:
+            raise TypeError(
+                "Cannot assign the same cached_property to two different names "
+                f"({self.attrname!r} and {name!r})."
+            )
+
+    def __get__(self, instance, _=None):
+        """Get instance."""
+        if instance is None:
+            return self
+        if self.attrname is None:
+            raise TypeError(
+                "Cannot use cached_property instance without calling __set_name__ on it."
+            )
+        try:
+            cache = instance.__dict__
+        except AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
+            msg = (
+                f"No '__dict__' attribute on {type(instance).__name__!r} "
+                f"instance to cache {self.attrname!r} property."
+            )
+            raise TypeError(msg) from None
+        val = cache.get(self.attrname, _NOT_FOUND)
+        if val is _NOT_FOUND:
+            with self.lock:
+                # check if another thread filled cache while we awaited lock
+                val = cache.get(self.attrname, _NOT_FOUND)
+                if val is _NOT_FOUND:
+                    val = self.func(instance)
+                    try:
+                        cache[self.attrname] = val
+                    except TypeError:
+                        msg = (
+                            f"The '__dict__' attribute on {type(instance).__name__!r} instance "
+                            f"does not support item assignment for caching {self.attrname!r} property."
+                        )
+                        raise TypeError(msg) from None
+        return val

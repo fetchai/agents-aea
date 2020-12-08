@@ -28,5 +28,6 @@
 
 13. Release packages into registry: `python scripts/deploy_to_registry.py`.
 
+14. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.

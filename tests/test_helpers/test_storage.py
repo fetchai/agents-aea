@@ -42,7 +42,7 @@ class TestAsyncCollection:
         obj_body = {"a": 12}
         await col.put(obj_id, {"x": 13})
         await col.put(obj_id, obj_body)
-        assert await col.find("a", 12) == [obj_body]
+        assert await col.find("a", 12) == [(obj_id, obj_body)]
         assert await col.get(obj_id) == obj_body
         assert await col2.get(obj_id) is None
         assert await col.get("not exists") is None
@@ -74,7 +74,7 @@ class TestSyncCollection:
         col2 = s.get_sync_collection("another_collection")
         col.put(obj_id, {"x": 13})
         col.put(obj_id, obj_body)
-        assert col.find("a", 12) == [obj_body]
+        assert col.find("a", 12) == [(obj_id, obj_body)]
         assert col.get(obj_id) == obj_body
         assert col2.get(obj_id) is None
         assert col.get("not exists") is None

@@ -16,10 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains tests behaviour storage access."""
 import os
+from typing import List, Set
 
 import pytest
 
@@ -29,7 +28,12 @@ from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.mail.base import Envelope
 from aea.protocols.base import Address, Message
-from aea.protocols.dialogue.base import Dialogue
+from aea.protocols.dialogue.base import (
+    BasicDialoguesStorage,
+    Dialogue,
+    DialogueLabel,
+    PersistDialoguesStorage,
+)
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.skills.behaviours import TickerBehaviour
 from aea.test_tools.test_cases import AEATestCaseEmpty
@@ -171,6 +175,16 @@ def test_storage_access_from_handler():
         aea.runtime.wait_completed(sync=True, timeout=10)
 
 
+def _get_labels(dialogues: List[Dialogue]) -> Set[DialogueLabel]:
+    return set([i.dialogue_label for i in dialogues])
+
+
+def _storage_all_dialogues_labels(storage: BasicDialoguesStorage) -> Set[DialogueLabel]:
+    return _get_labels(
+        storage.dialogues_in_active_state + storage.dialogues_in_terminal_state
+    )
+
+
 class TestDialogueModelSaveLoad(AEATestCaseEmpty):
     """Test dialogues sved and loaded on agent restart."""
 
@@ -225,13 +239,12 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
                 to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
             )
             aea.runtime.multiplexer.in_queue.put(envelope)
+
+            dialogue_storage: PersistDialoguesStorage = echo_skill.skill_context.default_dialogues._dialogues_storage
             wait_for_condition(
-                lambda: echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label,
-                timeout=3,
+                lambda: _storage_all_dialogues_labels(dialogue_storage), timeout=3,
             )
-            dialogues_for_check = (
-                echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label
-            )
+            dialogues_for_check = _storage_all_dialogues_labels(dialogue_storage)
         finally:
             aea.runtime.stop()
             aea.runtime.wait_completed(sync=True, timeout=10)
@@ -241,13 +254,13 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
         try:
             wait_for_condition(lambda: aea.is_running, timeout=10)
             echo_skill = aea.resources.get_skill(PUBLIC_ID)
+
+            dialogue_storage: PersistDialoguesStorage = echo_skill.skill_context.default_dialogues._dialogues_storage
             wait_for_condition(
-                lambda: echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label,
-                timeout=3,
+                lambda: _storage_all_dialogues_labels(dialogue_storage), timeout=3,
             )
             assert (
-                echo_skill.skill_context.default_dialogues._dialogues_storage._dialogues_by_dialogue_label
-                == dialogues_for_check
+                _storage_all_dialogues_labels(dialogue_storage) == dialogues_for_check
             )
         finally:
             aea.runtime.stop()
