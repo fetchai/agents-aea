@@ -910,7 +910,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         command_str = " ".join(command)
         self.logger.info(f"Running command '{command_str}'")
         try:
-            run_cli_command_subprocess(command)
+            return_code = run_cli_command_subprocess(command, cwd=directory)
+            enforce(return_code == 0, f"Return code {return_code} != 0")
         except Exception as e:
             raise AEAException(
                 f"An error occurred while running command '{command_str}': {str(e)}"
