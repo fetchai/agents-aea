@@ -44,7 +44,7 @@ DOCKER_FETCHAI_DEFAULT_IMG = "acn_node"
 DOCKER_FETCHAI_DEFAULT_REGISTRY = "gcr.io/fetch-ai-sandbox"
 
 # k8s defaults
-K8S_FETCHAI_DEFAULT_PUBLIC_HOST = "agents-p2p-dht.sandbox.fetch-ai.com"
+K8S_FETCHAI_DEFAULT_PUBLIC_HOST = "acn.fetch.ai"
 K8S_FETCHAI_DEFAULT_PUBLIC_TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "k8s")
 K8S_FETCHAI_DEFAULT_NAMESPACE = "agents-p2p-dht"
 
