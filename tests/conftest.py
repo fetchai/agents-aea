@@ -202,14 +202,10 @@ NON_GENESIS_CONFIG_TWO = {
     "public_uri": "127.0.0.1:9002",
     "ledger_id": "cosmos",
 }
-PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
-PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-PUBLIC_DHT_DELEGATE_URI_1 = "agents-p2p-dht.sandbox.fetch-ai.com:11000"
-PUBLIC_DHT_DELEGATE_URI_2 = "agents-p2p-dht.sandbox.fetch-ai.com:11001"
-PUBLIC_DHT_P2P_MADDR_1_PROD = "/dns4/agents-p2p-dht.prod.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
-PUBLIC_DHT_P2P_MADDR_2_PROD = "/dns4/agents-p2p-dht.prod.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-PUBLIC_DHT_DELEGATE_URI_1_PROD = "agents-p2p-dht.prod.fetch-ai.com:11000"
-PUBLIC_DHT_DELEGATE_URI_2_PROD = "agents-p2p-dht.prod.fetch-ai.com:11001"
+PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
+PUBLIC_DHT_P2P_MADDR_2 = "/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
+PUBLIC_DHT_DELEGATE_URI_1 = "acn.fetch.ai:11000"
+PUBLIC_DHT_DELEGATE_URI_2 = "acn.fetch.ai:11001"
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
