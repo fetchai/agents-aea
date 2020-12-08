@@ -20,7 +20,6 @@
 
 """This module contains utilities for building an AEA."""
 
-import itertools
 import logging
 import logging.config
 import os
@@ -1333,65 +1332,19 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 ledger_identifier, private_key_path, is_connection=True
             )
 
-        component_ids = itertools.chain(
-            [
-                ComponentId(ComponentType.PROTOCOL, p_id)
-                for p_id in agent_configuration.protocols
-            ],
-            [
-                ComponentId(ComponentType.CONTRACT, p_id)
-                for p_id in agent_configuration.contracts
-            ],
-        )
-        for component_id in component_ids:
-            component_path = self.find_component_directory_from_component_id(
-                aea_project_path, component_id
-            )
-            self.add_component(
-                component_id.component_type,
-                component_path,
-                skip_consistency_check=skip_consistency_check,
+        for component_type in [
+            ComponentType.PROTOCOL,
+            ComponentType.CONTRACT,
+            ComponentType.CONNECTION,
+            ComponentType.SKILL,
+        ]:
+            self._add_components_of_type(
+                component_type,
+                agent_configuration,
+                aea_project_path,
+                skip_consistency_check,
             )
 
-        connection_ids = [
-            ComponentId(ComponentType.CONNECTION, p_id)
-            for p_id in agent_configuration.connections
-        ]
-        if len(connection_ids) != 0:
-            connection_import_order = self._find_import_order(
-                connection_ids, aea_project_path, skip_consistency_check
-            )
-
-            for connection_id in connection_import_order:
-                component_path = self.find_component_directory_from_component_id(
-                    aea_project_path, connection_id
-                )
-                self.add_component(
-                    connection_id.component_type,
-                    component_path,
-                    skip_consistency_check=skip_consistency_check,
-                )
-
-        skill_ids = [
-            ComponentId(ComponentType.SKILL, p_id)
-            for p_id in agent_configuration.skills
-        ]
-
-        if len(skill_ids) == 0:
-            return
-
-        skill_import_order = self._find_import_order(
-            skill_ids, aea_project_path, skip_consistency_check
-        )
-        for skill_id in skill_import_order:
-            component_path = self.find_component_directory_from_component_id(
-                aea_project_path, skill_id
-            )
-            self.add_component(
-                skill_id.component_type,
-                component_path,
-                skip_consistency_check=skip_consistency_check,
-            )
         self._custom_component_configurations = (
             agent_configuration.component_configurations
         )
@@ -1566,7 +1519,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         It deep-copies the configuration, to avoid undesired side-effects.
 
         :param configuration: the configuration object.
-        :param custom_config: the configurations to apply.
         :return: the new configuration instance.
         """
         new_configuration = deepcopy(configuration)
@@ -1575,6 +1527,43 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         )
         new_configuration.update(custom_config)
         return new_configuration
+
+    def _add_components_of_type(
+        self,
+        component_type: ComponentType,
+        agent_configuration: AgentConfig,
+        aea_project_path: Path,
+        skip_consistency_check: bool,
+    ):
+        """
+        Add components of a given type.
+
+        :param component_type: the type of components to add.
+        :param agent_configuration: the agent configuration from where to retrieve the components.
+        :param aea_project_path: path to the AEA project.
+        :param skip_consistency_check: if true, skip consistency checks.
+        :return: None
+        """
+        public_ids = getattr(agent_configuration, component_type.to_plural())
+        component_ids = [
+            ComponentId(component_type, public_id) for public_id in public_ids
+        ]
+        if component_type in {ComponentType.PROTOCOL, ComponentType.CONTRACT}:
+            # if protocols or contracts, import order doesn't matter.
+            import_order = component_ids
+        else:
+            import_order = self._find_import_order(
+                component_ids, aea_project_path, skip_consistency_check
+            )
+        for component_id in import_order:
+            component_path = self.find_component_directory_from_component_id(
+                aea_project_path, component_id
+            )
+            self.add_component(
+                component_id.component_type,
+                component_path,
+                skip_consistency_check=skip_consistency_check,
+            )
 
 
 def make_component_logger(
