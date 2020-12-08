@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the ethereum module."""
 
 import hashlib
 import logging
 import time
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -282,3 +281,22 @@ def test_load_contract_interface():
     result = EthereumApi.load_contract_interface(path)
     assert "abi" in result
     assert "bytecode" in result
+
+
+@patch.object(EthereumApi, "_try_get_transaction_count", return_value=None)
+def test_ethereum_api_get_transfer_transaction(*args):
+    """Test EthereumApi.get_transfer_transaction."""
+    ethereum_api = EthereumApi()
+    assert ethereum_api.get_transfer_transaction(*[MagicMock()] * 7) is None
+
+
+def test_ethereum_api_get_deploy_transaction(*args):
+    """Test EthereumApi.get_deploy_transaction."""
+    ethereum_api = EthereumApi()
+    with patch.object(ethereum_api.api.eth, "getTransactionCount", return_value=None):
+        assert (
+            ethereum_api.get_deploy_transaction(
+                {"acc": "acc"}, "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+            )
+            is None
+        )
