@@ -26,9 +26,13 @@ from aea.skills.base import Model
 from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogue as BasePrometheusDialogue
+from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogues as BasePrometheusDialogues
+from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 
 
 HttpDialogue = BaseHttpDialogue
+PrometheusDialogue = BasePrometheusDialogue
 
 
 class HttpDialogues(Model, BaseHttpDialogues):
@@ -68,3 +72,37 @@ class HttpDialogues(Model, BaseHttpDialogues):
             self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
+
+
+class PrometheusDialogues(Model, BasePrometheusDialogues):
+    """The dialogues class keeps track of all prometheus dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+
+        self.enabled = kwargs.pop("enabled", False)
+        self.metrics = kwargs.pop("metrics", [])
+
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return PrometheusDialogue.Role.AGENT
+
+        BasePrometheusDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+        )
+
