@@ -888,15 +888,15 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             self.logger.info(f"Building package {config.component_id}...")
             directory = cast(str, config.directory)
             build_entrypoint = cast(str, config.build_entrypoint)
-            self.run_build_entrypoint(build_entrypoint, directory)
+            self._run_build_entrypoint(build_entrypoint, directory)
 
         if self._build_entrypoint:
             self.logger.info("Building AEA package...")
             directory = cast(str, ".")
             build_entrypoint = cast(str, self._build_entrypoint)
-            self.run_build_entrypoint(build_entrypoint, directory)
+            self._run_build_entrypoint(build_entrypoint, directory)
 
-    def run_build_entrypoint(self, build_entrypoint: str, directory: str) -> None:
+    def _run_build_entrypoint(self, build_entrypoint: str, directory: str) -> None:
         """
         Run a build entrypoint script.
 
@@ -1347,8 +1347,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         try:
             ast.parse(script_path.read_text())
         except SyntaxError as e:
+            message = f"{str(e)}: {e.text}"
             raise AEAException(
-                f"The Python script at '{build_entrypoint}' has a syntax error: {e}"
+                f"The Python script at '{build_entrypoint}' has a syntax error: {message}"
             ) from e
 
     def set_from_configuration(
@@ -1508,7 +1509,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # load agent configuration file
         configuration_file = cls.get_configuration_file_path(aea_project_path)
         agent_configuration = cls.loader.load(configuration_file.open())
-        agent_configuration.directory = configuration_file
 
         builder.set_from_configuration(
             agent_configuration, aea_project_path, skip_consistency_check

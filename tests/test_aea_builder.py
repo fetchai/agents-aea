@@ -25,7 +25,8 @@ from importlib import import_module
 from pathlib import Path
 from textwrap import dedent, indent
 from typing import Collection
-from unittest.mock import Mock, patch
+from unittest import mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import yaml
@@ -66,6 +67,7 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+from tests.common.mocks import RegexComparator
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,
@@ -781,3 +783,81 @@ class TestExtraDeps(AEATestCaseEmpty):
             raise Exception("should not be raised")
         except ModuleNotFoundError:
             pass
+
+
+class BaseTestBuildEntrypoint(AEATestCaseEmpty):
+    """Test build entrypoint."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        super().setup_class()
+        cls.builder = AEABuilder.from_aea_project(Path(cls._get_cwd()))
+        cls.component_id = "component_id"
+        # add project-wide build entrypoint
+        cls.script_path = Path("script.py")
+        cls.builder._build_entrypoint = str(cls.script_path)
+
+
+class TestBuildAEAEntrypointPositive(BaseTestBuildEntrypoint):
+    """Test build project-wide entrypoint, positive case."""
+
+    def test_build_positive_aea(self):
+        """Test build project-wide entrypoint, positive."""
+        with cd(self._get_cwd()):
+            self.script_path.write_text("")
+            with patch.object(self.builder.logger, "info") as info_mock:
+                self.builder.call_all_build_entrypoints()
+
+        info_mock.assert_any_call("Building AEA package...")
+        info_mock.assert_any_call(RegexComparator("Running command '.*script.py'"))
+
+
+class TestBuildPackageEntrypointPositive(BaseTestBuildEntrypoint):
+    """Test build package entrypoint, positive case."""
+
+    def test_build_positive_package(self):
+        """Test build package entrypoint, positive."""
+        with cd(self._get_cwd()):
+            self.script_path.write_text("")
+            # add mock configuration build entrypoint
+            with patch.object(self.builder, "_package_dependency_manager") as _mock_mgr:
+                mock_config = MagicMock(
+                    component_id=self.component_id,
+                    build_entrypoint=str(self.script_path),
+                    directory=".",
+                )
+                mock_values = MagicMock(return_value=[mock_config])
+                _mock_mgr._dependencies = MagicMock(values=mock_values)
+
+                with patch.object(self.builder.logger, "info") as info_mock:
+                    self.builder.call_all_build_entrypoints()
+
+        info_mock.assert_any_call(f"Building package {self.component_id}...")
+        info_mock.assert_any_call(RegexComparator("Running command '.*script.py'"))
+
+
+class TestBuildNegativeSyntaxError(BaseTestBuildEntrypoint):
+    """Test build, negative due to a syntax error in the script."""
+
+    def test_build_negative_syntax_error(self):
+        """Test build, negative due to a syntax error in the script."""
+        match = r"The Python script at 'script.py' has a syntax error: invalid syntax \(<unknown>, line 1\): syntax\+\.error\n"
+        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+            self.script_path.write_text("syntax+.error")
+            self.builder.call_all_build_entrypoints()
+
+
+class TestBuildNegativeSubprocessError(BaseTestBuildEntrypoint):
+    """Test build, negative due to script error at runtime."""
+
+    @mock.patch(
+        "aea.aea_builder.run_cli_command_subprocess",
+        side_effect=Exception("some error."),
+    )
+    def test_build_negative_subprocess(self, *_mocks):
+        """Test build, negative due to script error at runtime."""
+        match = f"An error occurred while running command '.*script.py': some error."
+        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+            self.script_path.write_text("")
+            self.builder.call_all_build_entrypoints()

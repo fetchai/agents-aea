@@ -19,35 +19,12 @@
 
 """This test module contains the tests for the `aea build` sub-command."""
 import re
-import subprocess  # nosec
-import sys
 from pathlib import Path
-from typing import Tuple
 
 from aea.configurations.constants import DEFAULT_VERSION
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-
-class BaseTestAEABuild(AEATestCaseEmpty):
-    """Base test class for AEA."""
-
-    def run_aea_subprocess(self, *args) -> Tuple[subprocess.Popen, str, str]:
-        """
-        Run subprocess, bypassing ClickRunner.invoke.
-
-        The reason is that for some reason ClickRunner.invoke doesn't capture
-        well the stdout/stderr of nephew processes - childrne processes of children processes.
-        """
-        result = subprocess.Popen(  # type: ignore  # nosec
-            [sys.executable, "-m", "aea.cli", *args],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=self._get_cwd(),
-            text=True,
-        )
-        result.wait()
-        stdout, stderr = result.communicate()
-        return result, stdout, stderr
+from tests.common.utils import run_aea_subprocess
 
 
 class TestAEABuildEmpty(AEATestCaseEmpty):
@@ -60,7 +37,7 @@ class TestAEABuildEmpty(AEATestCaseEmpty):
         assert "Build completed!\n" == result.stdout
 
 
-class TestAEABuildMainEntrypoint(BaseTestAEABuild):
+class TestAEABuildMainEntrypoint(AEATestCaseEmpty):
     """Test the command 'aea build', only main entrypoint."""
 
     @classmethod
@@ -76,7 +53,7 @@ class TestAEABuildMainEntrypoint(BaseTestAEABuild):
 
     def test_build(self):
         """Test build command."""
-        result, stdout, stderr = self.run_aea_subprocess("-s", "build")
+        result, stdout, stderr = run_aea_subprocess("-s", "build")
         assert result.returncode == 0
         assert re.search(r"Building AEA package\.\.\.", stdout)
         assert re.search(r"Running command .*python script\.py", stdout)
@@ -84,7 +61,7 @@ class TestAEABuildMainEntrypoint(BaseTestAEABuild):
         assert self.expected_string in stdout
 
 
-class TestAEABuildPackageEntrypoint(BaseTestAEABuild):
+class TestAEABuildPackageEntrypoint(AEATestCaseEmpty):
     """Test the command 'aea build', with a package entrypoint."""
 
     @classmethod
@@ -107,7 +84,7 @@ class TestAEABuildPackageEntrypoint(BaseTestAEABuild):
 
     def test_build(self):
         """Test build command."""
-        result, stdout, stderr = self.run_aea_subprocess("-s", "build")
+        result, stdout, stderr = run_aea_subprocess("-s", "build")
         assert result.returncode == 0
         assert re.search(
             rf"Building package \(protocol, {self.author}/{self.scaffold_package_name}:{DEFAULT_VERSION}\)...",

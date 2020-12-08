@@ -19,6 +19,8 @@
 """This module contains some utils for testing purposes."""
 import filecmp
 import os
+import subprocess  # nosec
+import sys
 import time
 from contextlib import contextmanager
 from functools import wraps
@@ -301,3 +303,22 @@ def are_dirs_equal(dir1: Path, dir2: Path) -> bool:
     """Compare the content of two directories, recursively."""
     comparison = filecmp.dircmp(str(dir1), str(dir2))
     return comparison.diff_files == []
+
+
+def run_aea_subprocess(*args, cwd: str = ".") -> Tuple[subprocess.Popen, str, str]:
+    """
+    Run subprocess, bypassing ClickRunner.invoke.
+
+    The reason is that for some reason ClickRunner.invoke doesn't capture
+    well the stdout/stderr of nephew processes - children processes of children processes.
+    """
+    result = subprocess.Popen(  # type: ignore  # nosec
+        [sys.executable, "-m", "aea.cli", *args],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=cwd,
+        text=True,
+    )
+    result.wait()
+    stdout, stderr = result.communicate()
+    return result, stdout, stderr
