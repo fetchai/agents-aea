@@ -33,6 +33,7 @@ from aea.helpers.storage.backends.base import (
     AbstractStorageBackend,
     EQUALS_TYPE,
     JSON_TYPES,
+    OBJECT_ID_AND_BODY,
 )
 
 
@@ -172,7 +173,7 @@ class SqliteStorageBackend(AbstractStorageBackend):
 
     async def find(
         self, collection_name: str, field: str, equals: EQUALS_TYPE
-    ) -> List[JSON_TYPES]:
+    ) -> List[OBJECT_ID_AND_BODY]:
         """
         Get objects from the collection by filtering by field value.
 
@@ -183,14 +184,15 @@ class SqliteStorageBackend(AbstractStorageBackend):
         :return: None
         """
         self._check_collection_name(collection_name)
-        sql = f"""SELECT object_body FROM {collection_name} WHERE json_extract(object_body, ?) = ?;"""  # nosec
+        sql = f"""SELECT object_id, object_body FROM {collection_name} WHERE json_extract(object_body, ?) = ?;"""  # nosec
         if not field.startswith("$."):
             field = f"$.{field}"
         return [
-            json.loads(i[0]) for i in await self._executute_sql(sql, [field, equals])
+            (i[0], json.loads(i[1]))
+            for i in await self._executute_sql(sql, [field, equals])
         ]
 
-    async def list(self, collection_name: str) -> List[Tuple[str, JSON_TYPES]]:
+    async def list(self, collection_name: str) -> List[OBJECT_ID_AND_BODY]:
         """
         List all objects with keys from the collection.
 
