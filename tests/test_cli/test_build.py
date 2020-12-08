@@ -20,8 +20,12 @@
 """This test module contains the tests for the `aea build` sub-command."""
 import re
 from pathlib import Path
+from unittest import mock
+
+import pytest
 
 from aea.configurations.constants import DEFAULT_VERSION
+from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.common.utils import run_aea_subprocess
@@ -53,7 +57,7 @@ class TestAEABuildMainEntrypoint(AEATestCaseEmpty):
 
     def test_build(self):
         """Test build command."""
-        result, stdout, stderr = run_aea_subprocess("-s", "build")
+        result, stdout, stderr = run_aea_subprocess("-s", "build", cwd=self._get_cwd())
         assert result.returncode == 0
         assert re.search(r"Building AEA package\.\.\.", stdout)
         assert re.search(r"Running command .*python script\.py", stdout)
@@ -84,7 +88,7 @@ class TestAEABuildPackageEntrypoint(AEATestCaseEmpty):
 
     def test_build(self):
         """Test build command."""
-        result, stdout, stderr = run_aea_subprocess("-s", "build")
+        result, stdout, stderr = run_aea_subprocess("-s", "build", cwd=self._get_cwd())
         assert result.returncode == 0
         assert re.search(
             rf"Building package \(protocol, {self.author}/{self.scaffold_package_name}:{DEFAULT_VERSION}\)...",
@@ -92,3 +96,16 @@ class TestAEABuildPackageEntrypoint(AEATestCaseEmpty):
         )
         assert re.search(r"Running command .*python script\.py", stdout)
         assert "Build completed!\n" in stdout
+
+
+class TestAEABuildEntrypointNegative(AEATestCaseEmpty):
+    """Test the command 'aea build', in case there is an exception."""
+
+    @mock.patch(
+        "aea.cli.build.AEABuilder.call_all_build_entrypoints",
+        side_effect=Exception("some error."),
+    )
+    def test_build_exception(self, *_mock):
+        """Test build exception."""
+        with pytest.raises(AEATestingException, match="some error."):
+            self.run_cli_command("build", cwd=self._get_cwd())
