@@ -139,7 +139,7 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
       pip install -e ".[all]"
 
-- To run tests: `tox -e py3.7` or `make test`. To only test specific modules try `make dir=PATH_TO_MODULE tdir=PATH_TO_TESTS test-sub`.
+- To run tests: `tox -e py3.7` or `make test`. To only test specific modules try `make dir=PATH_TO_MODULE tdir=PATH_TO_TESTS test-sub` where  (e.g. `make dir=cli tdir=cli test-sub`).
 
 - To run linters (code style checks) and code formatters: `tox -e flake8` and `tox -e black` and ` tox -e isort` or `make lint`
 
