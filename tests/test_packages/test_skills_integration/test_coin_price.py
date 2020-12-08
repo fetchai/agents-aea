@@ -23,6 +23,7 @@ from pathlib import Path
 
 import pytest
 import requests
+from prometheus_client.parser import text_string_to_metric_families
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -44,10 +45,14 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         """Run the coin price skill sequence."""
         self.add_item("connection", "fetchai/http_client:0.14.0")
         self.add_item("connection", "fetchai/http_server:0.13.0")
+        self.add_item("connection", "fetchai/prometheus:0.1.0")
         self.add_item("skill", "fetchai/coin_price:0.1.0")
         self.set_config("agent.default_connection", "fetchai/http_server:0.13.0")
 
-        default_routing = {"fetchai/http:0.13.0": "fetchai/http_client:0.14.0"}
+        default_routing = {
+            "fetchai/http:0.13.0": "fetchai/http_client:0.14.0",
+            "fetchai/prometheus:0.1.0": "fetchai/prometheus:0.1.0",
+        }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
@@ -72,9 +77,22 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         assert "value" in coin_price, "Response does not contain 'value'"
         assert "decimals" in coin_price, "Response does not contain 'decimals'"
 
+        response = requests.get("http://127.0.0.1:8000")
+        assert response.status_code == 404
+        assert response.content == b"", "Get request should not work without valid path"
+
         response = requests.post("http://127.0.0.1:8000/price")
-        assert response.status_code == 200
-        assert response.content == b"", "Wrong body on post"
+        assert response.status_code == 404
+        assert response.content == b"", "Post not allowed"
+
+        # test prometheus metrics
+        metrics = {}
+        prom_response = requests.get("http://127.0.0.1:8080")
+        for family in text_string_to_metric_families(prom_response.content.decode()):
+            for sample in family.samples:
+                metrics[sample.name] = sample.value
+        assert metrics["num_retrievals"] > 0, "num_retrievals metric not updated"
+        assert metrics["num_requests"] == 1, "num_requests metric not equal to 1"
 
         self.terminate_agents()
         assert (

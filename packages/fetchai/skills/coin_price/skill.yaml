@@ -6,16 +6,12 @@ description: Retrieve coin price from an API
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmcNJBNktp8Hhic4LXpWWyMbiaYVx2FXAimoFPywfuhbyV
+  README.md: QmaXEGuNr24DeoaDekzm3SpQXJxKfBmhudYTZ99qXSi7nz
   __init__.py: QmX5WhZZrXfasUVaWY8fUGUELNiEF7mBjRhHt6KB8vEknM
-<<<<<<< HEAD
-  behaviours.py: Qmf1nhpXqT5nNLsa1tr4yS6gGW28px1ppF6g7QK64X5Z9W
-=======
-  behaviours.py: Qmc6ZD4Nd1sKTe6M1Yq4WjerbdvHczPQjB583yMZSRDnCg
->>>>>>> 446ab76c68ad72b8e6dd29f9702d4c67237cbdcb
-  coin_api_spec.yaml: QmTBEFUiZcB8SRMBBvqfK6arTT7e64SsjdEvxW49pym2H4
-  dialogues.py: QmWhVtpJNH8Jhyg2kzKQnCouePVpLfnG2WTgiRLPLSPbDo
-  handlers.py: QmcMsx7pZLwx33s9qk6eiDJzB8dbPQJiwvcf2AFi8hNcid
+  behaviours.py: QmS8fgBxWkd3ZUSJ2gzQg7mc94Rc76bvHLeADqJEp4Q3SK
+  coin_api_spec.yaml: QmP9pN1roizqYWbhiQstntAQFBQdBuVq5mj9CYcA9nD3Q6
+  dialogues.py: QmRJgfoHqCbxJhf6bF86sRZ1JwFR1vDe4hH7gbKyWy31BP
+  handlers.py: QmTWTmK62wL28kaYBTCLbyLE7xyuqzg388Dkjgs866iBgr
   models.py: QmP878qJZGF4tJTrbxZez3puAZ8epECtmrhTB8RYKQUkri
 fingerprint_ignore_patterns: []
 contracts: []
@@ -53,7 +49,7 @@ models:
       metrics:
       - name: num_retrievals
         type: Gauge
-        description: Number of price quotes retrieved 
+        description: Number of price quotes retrieved
       - name: num_requests
         type: Gauge
         description: Number of price quote requests served

@@ -21,28 +21,29 @@
 
 import asyncio
 import logging
-import prometheus_client
-from typing import Optional, cast, Any, Dict, Union, Tuple
 from concurrent.futures.thread import ThreadPoolExecutor
+from typing import Any, Dict, Optional, Tuple, Union, cast
+
+import prometheus_client
 
 from aea.common import Address
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
-from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
-from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogue
-from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogues as BasePrometheusDialogues
-
-
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel
+
+from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogue
+from packages.fetchai.protocols.prometheus.dialogues import (
+    PrometheusDialogues as BasePrometheusDialogues,
+)
+from packages.fetchai.protocols.prometheus.message import PrometheusMessage
+
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.prometheus")
 
 PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.1.0")
+
 
 class PrometheusDialogues(BasePrometheusDialogues):
     """The dialogues class keeps track of all prometheus dialogues."""
@@ -79,7 +80,7 @@ class PrometheusChannel:
 
     THREAD_POOL_SIZE = 3
 
-    def __init__(self, address: Address, metrics: Dict[str,Any]):
+    def __init__(self, address: Address, metrics: Dict[str, Any]):
         """Initialize a prometheus channel."""
         self.address = address
         self.metrics = metrics
@@ -148,7 +149,8 @@ class PrometheusChannel:
         :return: None
         """
         enforce(
-            isinstance(envelope.message, PrometheusMessage), "Message not of type PrometheusMessage"
+            isinstance(envelope.message, PrometheusMessage),
+            "Message not of type PrometheusMessage",
         )
         message, dialogue = self._get_message_and_dialogue(envelope)
 
@@ -167,11 +169,17 @@ class PrometheusChannel:
                 metric_type = getattr(prometheus_client, message.type, None)
                 if metric_type is None:
                     response_code = 404
-                    response_msg = f"{message.type} is not a recognized prometheus metric."
+                    response_msg = (
+                        f"{message.type} is not a recognized prometheus metric."
+                    )
                 else:
-                    self.metrics[message.title] = metric_type(message.title, message.description)
+                    self.metrics[message.title] = metric_type(
+                        message.title, message.description
+                    )
                     response_code = 200
-                    response_msg = f"New {message.type} successfully added: {message.title}."
+                    response_msg = (
+                        f"New {message.type} successfully added: {message.title}."
+                    )
 
         elif message.performative == PrometheusMessage.Performative.UPDATE_METRIC:
 

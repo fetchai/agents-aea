@@ -26,9 +26,12 @@ from aea.skills.base import Model
 from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogue as BasePrometheusDialogue
-from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogues as BasePrometheusDialogues
-from packages.fetchai.protocols.prometheus.message import PrometheusMessage
+from packages.fetchai.protocols.prometheus.dialogues import (
+    PrometheusDialogue as BasePrometheusDialogue,
+)
+from packages.fetchai.protocols.prometheus.dialogues import (
+    PrometheusDialogues as BasePrometheusDialogues,
+)
 
 
 HttpDialogue = BaseHttpDialogue
@@ -105,4 +108,3 @@ class PrometheusDialogues(Model, BasePrometheusDialogues):
             self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
-

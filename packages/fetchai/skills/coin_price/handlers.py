@@ -28,9 +28,14 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.coin_price.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.dialogues import PrometheusDialogue, PrometheusDialogues
+from packages.fetchai.skills.coin_price.dialogues import (
+    HttpDialogue,
+    HttpDialogues,
+    PrometheusDialogue,
+    PrometheusDialogues,
+)
+
 
 class HttpHandler(Handler):
     """This class provides a simple http handler."""
@@ -119,7 +124,9 @@ class HttpHandler(Handler):
                     f"{model.coin_id} price = {price} {model.currency}"
                 )
                 if self.context.prometheus_dialogues.enabled:
-                    self.context.behaviours.coin_price_behaviour.update_prometheus_metric("num_retrievals", "inc", float(1))
+                    self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
+                        "num_retrievals", "inc", float(1)
+                    )
 
     def _handle_request(
         self, http_msg: HttpMessage, http_dialogue: HttpDialogue
@@ -169,7 +176,9 @@ class HttpHandler(Handler):
         self.context.outbox.put_message(message=http_response, context=envelope_context)
 
         if self.context.prometheus_dialogues.enabled:
-            self.context.behaviours.coin_price_behaviour.update_prometheus_metric("num_requests", "inc", float(1))
+            self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
+                "num_requests", "inc", float(1)
+            )
 
     def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
         """
@@ -239,19 +248,25 @@ class PrometheusHandler(Handler):
         message = cast(PrometheusMessage, message)
 
         # recover dialogue
-        prometheus_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
-        prometheus_dialogue = cast(PrometheusDialogue, prometheus_dialogues.update(message))
+        prometheus_dialogues = cast(
+            PrometheusDialogues, self.context.prometheus_dialogues
+        )
+        prometheus_dialogue = cast(
+            PrometheusDialogue, prometheus_dialogues.update(message)
+        )
         if prometheus_dialogue is None:
             self._handle_unidentified_dialogue(message)
             return
 
         self.handled_message = message
-        if (
-            message.performative == PrometheusMessage.Performative.RESPONSE
-        ):
-            self.context.logger.debug(f"Prometheus response ({message.code}): {message.message}")
+        if message.performative == PrometheusMessage.Performative.RESPONSE:
+            self.context.logger.debug(
+                f"Prometheus response ({message.code}): {message.message}"
+            )
         else:
-            self.context.logger.debug(f"got unexpected prometheus message: Performative = {PrometheusMessage.Performative}")
+            self.context.logger.debug(
+                f"got unexpected prometheus message: Performative = {PrometheusMessage.Performative}"
+            )
 
     def _handle_unidentified_dialogue(self, msg: Message) -> None:
         """

@@ -20,7 +20,7 @@
 """This package contains a behaviour for fetching a coin price from an API."""
 
 import json
-from typing import Dict, cast, Optional, Union
+from typing import Dict, Optional, Union, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -32,9 +32,11 @@ from packages.fetchai.connections.prometheus.connection import (
     PUBLIC_ID as PROM_CONNECTION_ID,
 )
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.coin_price.dialogues import HttpDialogues
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.dialogues import PrometheusDialogues
+from packages.fetchai.skills.coin_price.dialogues import (
+    HttpDialogues,
+    PrometheusDialogues,
+)
 from packages.fetchai.skills.coin_price.models import CoinPriceModel
 
 
@@ -81,7 +83,9 @@ class CoinPriceBehaviour(TickerBehaviour):
             message=request_http_message, context=envelope_context
         )
 
-    def add_prometheus_metric(self, metric_name: str, metric_type: str, description: str=None) -> None:
+    def add_prometheus_metric(
+        self, metric_name: str, metric_type: str, description: str = None
+    ) -> None:
         """
         Add a prometheus metric.
 
@@ -108,11 +112,14 @@ class CoinPriceBehaviour(TickerBehaviour):
         envelope_context = EnvelopeContext(
             skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
         )
-        self.context.outbox.put_message(
-            message=message, context=envelope_context
-        )
+        self.context.outbox.put_message(message=message, context=envelope_context)
 
-    def update_prometheus_metric(self, metric_name: str, update_func: str, value: Optional[Union[float,str]]=None) -> None:
+    def update_prometheus_metric(
+        self,
+        metric_name: str,
+        update_func: str,
+        value: Optional[Union[float, str]] = None,
+    ) -> None:
         """
         Update a prometheus metric.
 
@@ -138,9 +145,7 @@ class CoinPriceBehaviour(TickerBehaviour):
         envelope_context = EnvelopeContext(
             skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
         )
-        self.context.outbox.put_message(
-            message=message, context=envelope_context
-        )
+        self.context.outbox.put_message(message=message, context=envelope_context)
 
     def setup(self) -> None:
         """
@@ -154,7 +159,9 @@ class CoinPriceBehaviour(TickerBehaviour):
 
         if prom_dialogues.enabled:
             for metric in prom_dialogues.metrics:
-                self.add_prometheus_metric(metric['name'], metric['type'], metric['description'])
+                self.add_prometheus_metric(
+                    metric["name"], metric["type"], metric["description"]
+                )
 
     def act(self) -> None:
         """
