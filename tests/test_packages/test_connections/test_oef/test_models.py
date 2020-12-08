@@ -206,10 +206,10 @@ class TestCheckValidity:
         m_constraint = ConstraintType("within", (-10.0, 10.0))
         assert m_constraint.check(5)
         assert str(m_constraint.type) == "within"
-        m_constraint = ConstraintType("in", [1, 2, 3])
+        m_constraint = ConstraintType("in", (1, 2, 3))
         assert m_constraint.check(2)
         assert str(m_constraint.type) == "in"
-        m_constraint = ConstraintType("not_in", {"C", "Java", "Python"})
+        m_constraint = ConstraintType("not_in", ("C", "Java", "Python"))
         assert m_constraint.check("C++")
         assert str(m_constraint.type) == "not_in"
 

@@ -82,22 +82,48 @@ class TestHelperFile:
             )
             try_validate_private_key_path(EthereumCrypto.identifier, private_key_path)
 
-    @patch("aea.crypto.ethereum._default_logger")
-    def tests_generate_wealth_ethereum(self, mock_logging):
+    def tests_generate_wealth_ethereum_fail_no_url(self, caplog):
+        """Test generate wealth for ethereum."""
+        address = "my_address"
+        with caplog.at_level(
+            logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+        ):
+            try_generate_testnet_wealth(
+                identifier=EthereumCrypto.identifier, address=address
+            )
+            assert (
+                "Url is none, no default url provided. Please provide a faucet url."
+                in caplog.text
+            )
+
+    def tests_generate_wealth_ethereum_fail_invalid_url(self, caplog):
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=500)
         with patch.object(requests, "get", return_value=result):
-            try_generate_testnet_wealth(
-                identifier=EthereumCrypto.identifier, address=address
-            )
-            assert mock_logging.error.called
+            with caplog.at_level(
+                logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+            ):
+                try_generate_testnet_wealth(
+                    identifier=EthereumCrypto.identifier,
+                    address=address,
+                    url="wrong_url",
+                )
+                assert "Response: 500" in caplog.text
 
-        result.status_code = 200
+    def tests_generate_wealth_ethereum_fail_valid_url(self, caplog):
+        """Test generate wealth for ethereum."""
+        address = "my_address"
+        result = ResponseMock(status_code=200)
         with patch.object(requests, "get", return_value=result):
-            try_generate_testnet_wealth(
-                identifier=EthereumCrypto.identifier, address=address
-            )
+            with caplog.at_level(
+                logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+            ):
+                try_generate_testnet_wealth(
+                    identifier=EthereumCrypto.identifier,
+                    address=address,
+                    url="correct_url",
+                )
 
     @patch("aea.crypto.ethereum.requests.post", return_value=ResponseMock())
     @patch("aea.crypto.ethereum.json.loads", return_value={"error_message": ""})

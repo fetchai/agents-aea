@@ -9,7 +9,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmSgFDQ7YjDzts8JKfTbnJZhnYEFaDQ42j5b1vAQy764Xw
   __init__.py: QmRLuCVjfKcQZ4LHhs8uZ5r8cdzr87VffBqHjQ4hcgjbo7
-  behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
+  behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmYKoLkvxdpD1NFn5DUKrjQwPRUtm4jQxiywDhxPGqo7ff
   registration_db.py: QmP1eByz3BKqHpN3Fd5c2hNifpySopFG9EUJfiTdYVaJNh
@@ -31,6 +31,11 @@ behaviours:
     args:
       search_interval: 5
     class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   default_handler:
     args: {}
@@ -75,6 +80,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
+      max_quantity: 100
       max_tx_fee: 1
       max_unit_price: 20
       minimum_minutes_since_last_attempt: 2

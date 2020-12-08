@@ -48,10 +48,6 @@ class Strategy(GenericStrategy):
         if aw1_aea is None:
             raise ValueError("aw1_aea must be provided!")
         self.aw1_aea = aw1_aea
-        self.mininum_hours_between_txs = kwargs.pop("mininum_hours_between_txs", 4)
-        self.minimum_minutes_since_last_attempt = kwargs.pop(
-            "minimum_minutes_since_last_attempt", 2
-        )
         self._locations = kwargs.pop("locations", {})
         if len(self._locations) == 0:
             raise ValueError("locations must have at least one entry")

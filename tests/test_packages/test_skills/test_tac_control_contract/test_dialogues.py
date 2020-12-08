@@ -196,7 +196,9 @@ class TestTacDialogues(BaseSkillTestCase):
                 dict(),
                 "some_nonce",
             ),
-            raw_transaction=RawTransaction("some_ledger_id", "some_body"),
+            raw_transaction=RawTransaction(
+                "some_ledger_id", {"some_key": "some_value"}
+            ),
         )
         assert dialogue.role == SigningDialogue.Role.SKILL
         assert dialogue.self_address == str(self.skill.skill_context.skill_id)

@@ -6,8 +6,13 @@ description: Retrieve coin price from an API
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
+  README.md: QmcNJBNktp8Hhic4LXpWWyMbiaYVx2FXAimoFPywfuhbyV
   __init__.py: QmX5WhZZrXfasUVaWY8fUGUELNiEF7mBjRhHt6KB8vEknM
+<<<<<<< HEAD
   behaviours.py: Qmf1nhpXqT5nNLsa1tr4yS6gGW28px1ppF6g7QK64X5Z9W
+=======
+  behaviours.py: Qmc6ZD4Nd1sKTe6M1Yq4WjerbdvHczPQjB583yMZSRDnCg
+>>>>>>> 446ab76c68ad72b8e6dd29f9702d4c67237cbdcb
   coin_api_spec.yaml: QmTBEFUiZcB8SRMBBvqfK6arTT7e64SsjdEvxW49pym2H4
   dialogues.py: QmWhVtpJNH8Jhyg2kzKQnCouePVpLfnG2WTgiRLPLSPbDo
   handlers.py: QmcMsx7pZLwx33s9qk6eiDJzB8dbPQJiwvcf2AFi8hNcid

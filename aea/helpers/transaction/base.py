@@ -21,11 +21,12 @@
 
 import collections
 import copy
-import pickle  # nosec
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
+from aea.common import JSONLike
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
+from aea.helpers.serializers import DictProtobufStructSerializer
 
 
 Address = str
@@ -35,7 +36,7 @@ class RawTransaction:
     """This class represents an instance of RawTransaction."""
 
     def __init__(
-        self, ledger_id: str, body: Any,
+        self, ledger_id: str, body: JSONLike,
     ):
         """Initialise an instance of RawTransaction."""
         self._ledger_id = ledger_id
@@ -45,7 +46,7 @@ class RawTransaction:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, dict), "body must not be JSONLike")
 
     @property
     def ledger_id(self) -> str:
@@ -70,8 +71,15 @@ class RawTransaction:
         :param raw_transaction_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        raw_transaction_bytes = pickle.dumps(raw_transaction_object)  # nosec
-        raw_transaction_protobuf_object.raw_transaction = raw_transaction_bytes
+
+        raw_transaction_dict = {
+            "ledger_id": raw_transaction_object.ledger_id,
+            "body": raw_transaction_object.body,
+        }
+
+        raw_transaction_protobuf_object.raw_transaction = DictProtobufStructSerializer.encode(
+            raw_transaction_dict
+        )
 
     @classmethod
     def decode(cls, raw_transaction_protobuf_object) -> "RawTransaction":
@@ -83,10 +91,10 @@ class RawTransaction:
         :param raw_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
         """
-        raw_transaction = pickle.loads(  # nosec
+        raw_transaction_dict = DictProtobufStructSerializer.decode(
             raw_transaction_protobuf_object.raw_transaction
         )
-        return raw_transaction
+        return cls(raw_transaction_dict["ledger_id"], raw_transaction_dict["body"])
 
     def __eq__(self, other):
         """Check equality."""
@@ -118,7 +126,7 @@ class RawMessage:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, bytes), "body must not be bytes")
         enforce(
             isinstance(self._is_deprecated_mode, bool),
             "is_deprecated_mode must be bool",
@@ -150,8 +158,15 @@ class RawMessage:
         :param raw_message_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        raw_message_bytes = pickle.dumps(raw_message_object)  # nosec
-        raw_message_protobuf_object.raw_message = raw_message_bytes
+        raw_message_dict = {
+            "ledger_id": raw_message_object.ledger_id,
+            "body": raw_message_object.body,
+            "is_deprecated_mode": raw_message_object.is_deprecated_mode,
+        }
+
+        raw_message_protobuf_object.raw_message = DictProtobufStructSerializer.encode(
+            raw_message_dict
+        )
 
     @classmethod
     def decode(cls, raw_message_protobuf_object) -> "RawMessage":
@@ -163,8 +178,14 @@ class RawMessage:
         :param raw_message_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'raw_message_protobuf_object' argument.
         """
-        raw_message = pickle.loads(raw_message_protobuf_object.raw_message)  # nosec
-        return raw_message
+        raw_message_dict = DictProtobufStructSerializer.decode(
+            raw_message_protobuf_object.raw_message
+        )
+        return cls(
+            raw_message_dict["ledger_id"],
+            raw_message_dict["body"],
+            raw_message_dict["is_deprecated_mode"],
+        )
 
     def __eq__(self, other):
         """Check equality."""
@@ -186,7 +207,7 @@ class SignedTransaction:
     """This class represents an instance of SignedTransaction."""
 
     def __init__(
-        self, ledger_id: str, body: Any,
+        self, ledger_id: str, body: JSONLike,
     ):
         """Initialise an instance of SignedTransaction."""
         self._ledger_id = ledger_id
@@ -196,7 +217,7 @@ class SignedTransaction:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, dict), "body must not JSONLike")
 
     @property
     def ledger_id(self) -> str:
@@ -222,8 +243,14 @@ class SignedTransaction:
         :param signed_transaction_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        signed_transaction_bytes = pickle.dumps(signed_transaction_object)  # nosec
-        signed_transaction_protobuf_object.signed_transaction = signed_transaction_bytes
+        signed_transaction_dict = {
+            "ledger_id": signed_transaction_object.ledger_id,
+            "body": signed_transaction_object.body,
+        }
+
+        signed_transaction_protobuf_object.signed_transaction = DictProtobufStructSerializer.encode(
+            signed_transaction_dict
+        )
 
     @classmethod
     def decode(cls, signed_transaction_protobuf_object) -> "SignedTransaction":
@@ -235,10 +262,12 @@ class SignedTransaction:
         :param signed_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'signed_transaction_protobuf_object' argument.
         """
-        signed_transaction = pickle.loads(  # nosec
+        signed_transaction_dict = DictProtobufStructSerializer.decode(
             signed_transaction_protobuf_object.signed_transaction
         )
-        return signed_transaction
+        return cls(
+            signed_transaction_dict["ledger_id"], signed_transaction_dict["body"]
+        )
 
     def __eq__(self, other):
         """Check equality."""
@@ -304,8 +333,15 @@ class SignedMessage:
         :param signed_message_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        signed_message_bytes = pickle.dumps(signed_message_object)  # nosec
-        signed_message_protobuf_object.signed_message = signed_message_bytes
+        signed_message_dict = {
+            "ledger_id": signed_message_object.ledger_id,
+            "body": signed_message_object.body,
+            "is_deprecated_mode": signed_message_object.is_deprecated_mode,
+        }
+
+        signed_message_protobuf_object.signed_message = DictProtobufStructSerializer.encode(
+            signed_message_dict
+        )
 
     @classmethod
     def decode(cls, signed_message_protobuf_object) -> "SignedMessage":
@@ -317,10 +353,14 @@ class SignedMessage:
         :param signed_message_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'signed_message_protobuf_object' argument.
         """
-        signed_message = pickle.loads(  # nosec
+        signed_message_dict = DictProtobufStructSerializer.decode(
             signed_message_protobuf_object.signed_message
         )
-        return signed_message
+        return cls(
+            signed_message_dict["ledger_id"],
+            signed_message_dict["body"],
+            signed_message_dict["is_deprecated_mode"],
+        )
 
     def __eq__(self, other):
         """Check equality."""
@@ -341,7 +381,7 @@ class SignedMessage:
 class State:
     """This class represents an instance of State."""
 
-    def __init__(self, ledger_id: str, body: bytes):
+    def __init__(self, ledger_id: str, body: JSONLike):
         """Initialise an instance of State."""
         self._ledger_id = ledger_id
         self._body = body
@@ -350,7 +390,7 @@ class State:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, dict), "body must be dict")
 
     @property
     def ledger_id(self) -> str:
@@ -358,7 +398,7 @@ class State:
         return self._ledger_id
 
     @property
-    def body(self):
+    def body(self) -> JSONLike:
         """Get the body."""
         return self._body
 
@@ -373,8 +413,12 @@ class State:
         :param state_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        state_bytes = pickle.dumps(state_object)  # nosec
-        state_protobuf_object.state = state_bytes
+        state_dict = {
+            "ledger_id": state_object.ledger_id,
+            "body": state_object.body,
+        }
+
+        state_protobuf_object.state = DictProtobufStructSerializer.encode(state_dict)
 
     @classmethod
     def decode(cls, state_protobuf_object) -> "State":
@@ -386,8 +430,8 @@ class State:
         :param state_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'state_protobuf_object' argument.
         """
-        state = pickle.loads(state_protobuf_object.state)  # nosec
-        return state
+        state_dict = DictProtobufStructSerializer.decode(state_protobuf_object.state)
+        return cls(state_dict["ledger_id"], state_dict["body"])
 
     def __eq__(self, other):
         """Check equality."""
@@ -728,9 +772,14 @@ class Terms:
         return copy.copy(self._fee_by_currency_id)
 
     @property
-    def kwargs(self) -> Dict[str, Any]:
+    def kwargs(self) -> JSONLike:
         """Get the kwargs."""
         return self._kwargs
+
+    @property
+    def is_strict(self) -> bool:
+        """Get is_strict."""
+        return self._is_strict
 
     def _get_lists(self) -> Tuple[List[str], List[int], List[int]]:
         ordered = collections.OrderedDict(sorted(self.quantities_by_good_id.items()))
@@ -821,8 +870,19 @@ class Terms:
         :param terms_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        terms_bytes = pickle.dumps(terms_object)  # nosec
-        terms_protobuf_object.terms = terms_bytes
+        terms_dict = {
+            "ledger_id": terms_object.ledger_id,
+            "sender_address": terms_object.sender_address,
+            "counterparty_address": terms_object.counterparty_address,
+            "amount_by_currency_id": terms_object.amount_by_currency_id,
+            "quantities_by_good_id": terms_object.quantities_by_good_id,
+            "nonce": terms_object.nonce,
+            "is_sender_payable_tx_fee": terms_object.is_sender_payable_tx_fee,
+            "fee_by_currency_id": terms_object.fee_by_currency_id,
+            "is_strict": terms_object.is_strict,
+            "kwargs": terms_object.kwargs,
+        }
+        terms_protobuf_object.terms = DictProtobufStructSerializer.encode(terms_dict)
 
     @classmethod
     def decode(cls, terms_protobuf_object) -> "Terms":
@@ -834,8 +894,20 @@ class Terms:
         :param terms_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'terms_protobuf_object' argument.
         """
-        terms = pickle.loads(terms_protobuf_object.terms)  # nosec
-        return terms
+        terms_dict = DictProtobufStructSerializer.decode(terms_protobuf_object.terms)
+
+        return cls(
+            terms_dict["ledger_id"],
+            terms_dict["sender_address"],
+            terms_dict["counterparty_address"],
+            terms_dict["amount_by_currency_id"],
+            terms_dict["quantities_by_good_id"],
+            terms_dict["nonce"],
+            terms_dict["is_sender_payable_tx_fee"],
+            dict(terms_dict["fee_by_currency_id"]),
+            terms_dict["is_strict"],
+            **dict(terms_dict["kwargs"]),
+        )
 
     def __eq__(self, other):
         """Check equality."""
@@ -872,7 +944,7 @@ class Terms:
 class TransactionDigest:
     """This class represents an instance of TransactionDigest."""
 
-    def __init__(self, ledger_id: str, body: Any):
+    def __init__(self, ledger_id: str, body: str):
         """Initialise an instance of TransactionDigest."""
         self._ledger_id = ledger_id
         self._body = body
@@ -881,7 +953,7 @@ class TransactionDigest:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._body is not None, "body must not be None")
+        enforce(isinstance(self._body, str), "body must not be None")
 
     @property
     def ledger_id(self) -> str:
@@ -889,7 +961,7 @@ class TransactionDigest:
         return self._ledger_id
 
     @property
-    def body(self) -> Any:
+    def body(self) -> str:
         """Get the receipt."""
         return self._body
 
@@ -907,8 +979,14 @@ class TransactionDigest:
         :param transaction_digest_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        transaction_digest_bytes = pickle.dumps(transaction_digest_object)  # nosec
-        transaction_digest_protobuf_object.transaction_digest = transaction_digest_bytes
+        transaction_digest_dict = {
+            "ledger_id": transaction_digest_object.ledger_id,
+            "body": transaction_digest_object.body,
+        }
+
+        transaction_digest_protobuf_object.transaction_digest = DictProtobufStructSerializer.encode(
+            transaction_digest_dict
+        )
 
     @classmethod
     def decode(cls, transaction_digest_protobuf_object) -> "TransactionDigest":
@@ -920,10 +998,13 @@ class TransactionDigest:
         :param transaction_digest_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'transaction_digest_protobuf_object' argument.
         """
-        transaction_digest = pickle.loads(  # nosec
+        transaction_digest_dict = DictProtobufStructSerializer.decode(
             transaction_digest_protobuf_object.transaction_digest
         )
-        return transaction_digest
+
+        return cls(
+            transaction_digest_dict["ledger_id"], transaction_digest_dict["body"]
+        )
 
     def __eq__(self, other):
         """Check equality."""
@@ -943,7 +1024,7 @@ class TransactionDigest:
 class TransactionReceipt:
     """This class represents an instance of TransactionReceipt."""
 
-    def __init__(self, ledger_id: str, receipt: Any, transaction: Any):
+    def __init__(self, ledger_id: str, receipt: JSONLike, transaction: JSONLike):
         """Initialise an instance of TransactionReceipt."""
         self._ledger_id = ledger_id
         self._receipt = receipt
@@ -953,8 +1034,8 @@ class TransactionReceipt:
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
         enforce(isinstance(self._ledger_id, str), "ledger_id must be str")
-        enforce(self._receipt is not None, "receipt must not be None")
-        enforce(self._transaction is not None, "transaction must not be None")
+        enforce(isinstance(self._receipt, dict), "receipt must be dict")
+        enforce(isinstance(self._transaction, dict), "transaction must be dict")
 
     @property
     def ledger_id(self) -> str:
@@ -962,12 +1043,12 @@ class TransactionReceipt:
         return self._ledger_id
 
     @property
-    def receipt(self) -> Any:
+    def receipt(self) -> JSONLike:
         """Get the receipt."""
         return self._receipt
 
     @property
-    def transaction(self) -> Any:
+    def transaction(self) -> JSONLike:
         """Get the transaction."""
         return self._transaction
 
@@ -985,9 +1066,14 @@ class TransactionReceipt:
         :param transaction_receipt_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        transaction_receipt_bytes = pickle.dumps(transaction_receipt_object)  # nosec
-        transaction_receipt_protobuf_object.transaction_receipt = (
-            transaction_receipt_bytes
+        transaction_receipt_dict = {
+            "ledger_id": transaction_receipt_object.ledger_id,
+            "receipt": transaction_receipt_object.receipt,
+            "transaction": transaction_receipt_object.transaction,
+        }
+
+        transaction_receipt_protobuf_object.transaction_receipt = DictProtobufStructSerializer.encode(
+            transaction_receipt_dict
         )
 
     @classmethod
@@ -1000,10 +1086,14 @@ class TransactionReceipt:
         :param transaction_receipt_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'transaction_receipt_protobuf_object' argument.
         """
-        transaction_receipt = pickle.loads(  # nosec
+        transaction_receipt_dict = DictProtobufStructSerializer.decode(
             transaction_receipt_protobuf_object.transaction_receipt
         )
-        return transaction_receipt
+        return cls(
+            transaction_receipt_dict["ledger_id"],
+            transaction_receipt_dict["receipt"],
+            transaction_receipt_dict["transaction"],
+        )
 
     def __eq__(self, other):
         """Check equality."""

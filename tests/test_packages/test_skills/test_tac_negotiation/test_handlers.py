@@ -970,7 +970,9 @@ class TestSigningHandler(BaseSkillTestCase):
 
         cls.ledger_id = "some_ledger_id"
         cls.nonce = "some_nonce"
-        cls.body = "some_body"
+        cls.body = {"some_key": "some_value"}
+        cls.body_bytes = b"some_body"
+        cls.body_str = "some_body"
         cls.counterparty_signature = "some_counterparty_signature"
         cls.terms = Terms(
             "some_ledger_id",
@@ -985,7 +987,9 @@ class TestSigningHandler(BaseSkillTestCase):
                 SigningMessage.Performative.SIGN_MESSAGE,
                 {
                     "terms": cls.terms,
-                    "raw_message": SigningMessage.RawMessage(cls.ledger_id, cls.body),
+                    "raw_message": SigningMessage.RawMessage(
+                        cls.ledger_id, cls.body_bytes
+                    ),
                 },
             ),
         )
@@ -1107,7 +1111,9 @@ class TestSigningHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_MESSAGE,
-                signed_message=SigningMessage.SignedMessage(self.ledger_id, self.body),
+                signed_message=SigningMessage.SignedMessage(
+                    self.ledger_id, self.body_str
+                ),
             ),
         )
 
@@ -1146,7 +1152,7 @@ class TestSigningHandler(BaseSkillTestCase):
         # setup
         mocked_tx = {
             "terms": self.terms,
-            "sender_signature": self.body,
+            "sender_signature": self.body_str,
             "counterparty_signature": self.counterparty_signature,
         }
 
@@ -1175,7 +1181,9 @@ class TestSigningHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_MESSAGE,
-                signed_message=SigningMessage.SignedMessage(self.ledger_id, self.body),
+                signed_message=SigningMessage.SignedMessage(
+                    self.ledger_id, self.body_str
+                ),
             ),
         )
 
@@ -1226,7 +1234,9 @@ class TestSigningHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_MESSAGE,
-                signed_message=SigningMessage.SignedMessage(self.ledger_id, self.body),
+                signed_message=SigningMessage.SignedMessage(
+                    self.ledger_id, self.body_str
+                ),
             ),
         )
 
@@ -1272,7 +1282,9 @@ class TestSigningHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_MESSAGE,
-                signed_message=SigningMessage.SignedMessage(self.ledger_id, self.body),
+                signed_message=SigningMessage.SignedMessage(
+                    self.ledger_id, self.body_str
+                ),
             ),
         )
 
@@ -1597,7 +1609,7 @@ class TestSigningHandler(BaseSkillTestCase):
             performative=invalid_performative,
             terms=self.terms,
             raw_transaction=SigningMessage.RawTransaction(
-                "some_ledger_id", "some_body"
+                "some_ledger_id", {"some_key": "some_value"}
             ),
             to=str(self.skill.skill_context.skill_id),
         )
@@ -1646,15 +1658,16 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         cls.callable = "some_callable"
         cls.kwargs = Kwargs({"some_key": "some_value"})
 
-        cls.body = "some_body"
+        cls.body = {"some_key": "some_value"}
+        cls.body_str = "some_body"
         cls.contract_address = "some_contract_address"
 
         cls.raw_transaction = RawTransaction(cls.ledger_id, cls.body)
         cls.signed_transaction = SignedTransaction(cls.ledger_id, cls.body)
-        cls.transaction_digest = TransactionDigest(cls.ledger_id, cls.body)
+        cls.transaction_digest = TransactionDigest(cls.ledger_id, cls.body_str)
         cls.receipt = {"contractAddress": cls.contract_address}
         cls.transaction_receipt = TransactionReceipt(
-            cls.ledger_id, cls.receipt, "some_transaction"
+            cls.ledger_id, cls.receipt, {"transaction_key": "transaction_value"}
         )
         cls.address = "some_address"
 
@@ -2167,7 +2180,7 @@ class TestContractApiHandler(BaseSkillTestCase):
         cls.contract_address = "some_contract_address"
         cls.callable = "some_callable"
         cls.kwargs = Kwargs({"some_key": "some_value"})
-        cls.body = "some_body"
+        cls.body = {"some_key": "some_value"}
         cls.body_bytes = b"some_body"
         cls.nonce = "some_nonce"
         cls.counterprty_address = COUNTERPARTY_ADDRESS
@@ -2234,7 +2247,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             message_type=ContractApiMessage,
             dialogue_reference=incorrect_dialogue_reference,
             performative=ContractApiMessage.Performative.STATE,
-            state=State("some_ledger_id", b"some_body"),
+            state=State("some_ledger_id", {"some_key": "some_value"}),
         )
 
         # operation

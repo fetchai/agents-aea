@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """HTTP server connection, channel, server, and handler."""
 import asyncio
 import email

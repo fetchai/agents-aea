@@ -9,10 +9,10 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmUiw6Dt97mXLzSizbnMNTsfLy3edGXKdYTNR5bke6sFsm
   __init__.py: QmaU7tjqkUcFK4WLHxTP9f2DppiCH1HKnad9zPYmfTk3Cv
-  behaviours.py: QmV3Yxb1cNQNdZgCdY3JSg6A2RKLYJ4dSRmG4j7Q4NJm8U
+  behaviours.py: Qma7seTXY488dZmwUe61sYLTF1PrRzGYoJCgqNcDLsxZF7
   dialogues.py: QmYFyqgevKLuRfj4q8wdJkWmSNk7FFDTpzpDCvLdtc7dnG
   game.py: QmQwskD5DBVNv1ouRpqGNLb3zQ5krLUcR6XXHUcJ5EVc8L
-  handlers.py: QmQYGJfUL5a2xiJh7QDB4eNBTHwCtBhQ6VfohveRxXrHjb
+  handlers.py: QmUdccGkFSRcpj6bTpXgjDdBenR5uQCtc8owCAu8bnPXwB
   helpers.py: QmU8onH6hysHhM1g4wJKLsDKacq9kTnXem83rZQG6LFPVj
   parameters.py: QmVMNP52fPxkzEbXPhXtQXspnaj2f4ErZNcNdPAqv4cvwq
 fingerprint_ignore_patterns: []
@@ -73,7 +73,6 @@ models:
       good_ids: []
       inactivity_timeout: 60
       item_setup_timeout: 120
-      ledger_id: ethereum
       location:
         latitude: 51.5194
         longitude: 0.127

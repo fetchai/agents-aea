@@ -54,7 +54,9 @@ Options:
   -v, --verbosity LVL           One of NOTSET, DEBUG, INFO, WARNING, ERROR,
                                 CRITICAL, OFF
 
-  -s, --skip-consistency-check  Skip consistency checks.
+  -s, --skip-consistency-check  Skip consistency checks of agent during command
+                                execution.
+
   --help                        Show this message and exit.
 
 Commands:
@@ -85,6 +87,7 @@ Commands:
   push              Push a non-vendor package of the agent to the registry.
   register          Create a new registry account.
   remove            Remove a package from the agent.
+  remove-key        Remove a private key from the wallet of the agent.
   reset_password    Reset the password of the registry account.
   run               Run the agent.
   scaffold          Scaffold a package for the agent.

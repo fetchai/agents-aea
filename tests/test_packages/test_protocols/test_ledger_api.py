@@ -86,15 +86,6 @@ def test_get_state_serialization():
     args = ("arg1", "arg2")
     kwargs = Kwargs({"key": "value"})
 
-    # ensure Kwargs is not created with body = None
-    try:
-        _ = Kwargs(None)
-        raise AssertionError()  # to ensure exception was raised
-    except ValueError:
-        pass
-    except Exception:
-        raise AssertionError()  # wrong exception
-
     assert str(kwargs) == "Kwargs: body={'key': 'value'}"
 
     msg = LedgerApiMessage(
@@ -176,7 +167,7 @@ def test_send_signed_transaction_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
         signed_transaction=LedgerApiMessage.SignedTransaction(
-            "some_ledger_id", b"some_body"
+            "some_ledger_id", {"body": "some_body"}
         ),
     )
     msg.to = "receiver"
@@ -209,7 +200,7 @@ def test_get_transaction_receipt_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
         transaction_digest=LedgerApiMessage.TransactionDigest(
-            "some_ledger_id", b"some_body"
+            "some_ledger_id", "some_body"
         ),
     )
     msg.to = "receiver"
@@ -271,7 +262,7 @@ def test_state_serialization():
     """Test the serialization for 'state' speech-act works."""
 
     ledger_id = "some_ledger_id"
-    state = State(ledger_id, b"some_state")
+    state = State(ledger_id, {"key": "some_state"})
 
     msg = LedgerApiMessage(
         message_id=2,
@@ -309,7 +300,9 @@ def test_raw_transaction_serialization():
         message_id=2,
         target=1,
         performative=LedgerApiMessage.Performative.RAW_TRANSACTION,
-        raw_transaction=LedgerApiMessage.RawTransaction("some_ledger_id", b"some_body"),
+        raw_transaction=LedgerApiMessage.RawTransaction(
+            "some_ledger_id", {"body": "some_body"}
+        ),
     )
     msg.to = "receiver"
     envelope = Envelope(
@@ -341,7 +334,7 @@ def test_transaction_digest_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
         transaction_digest=LedgerApiMessage.TransactionDigest(
-            "some_ledger_id", b"some_body"
+            "some_ledger_id", "some_body"
         ),
     )
     msg.to = "receiver"
@@ -374,7 +367,7 @@ def test_transaction_receipt_serialization():
         target=1,
         performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
         transaction_receipt=LedgerApiMessage.TransactionReceipt(
-            "some_ledger_id", b"some_receit", b"some_transaction"
+            "some_ledger_id", {"key": "some_receipt"}, {"key": "some_transaction"}
         ),
     )
     msg.to = "receiver"

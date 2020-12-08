@@ -40,7 +40,7 @@ DEFAULT_UPDATE_INTERVAL = 5
 EXPIRATION_BLOCK = 1000000000000000
 
 
-class FetchOracleDeployer(TickerBehaviour):
+class SimpleOracleBehaviour(TickerBehaviour):
     """This class implements a behaviour that deploys a Fetch oracle contract."""
 
     def __init__(self, **kwargs):
@@ -207,7 +207,11 @@ class FetchOracleDeployer(TickerBehaviour):
         self.context.logger.info("requesting update transaction...")
 
     def _get_balance(self):
+        """
+        Request balance of agent account by sending a message to the ledger API
 
+        :return: None
+        """
         strategy = cast(Strategy, self.context.strategy)
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues

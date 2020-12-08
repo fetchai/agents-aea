@@ -14,7 +14,7 @@ fingerprint:
   game.py: QmeLsodbMjCzv6wot9YF4Ua86YtfVe79AmVj8Z2ubc7DKz
   handlers.py: Qmedq4uRwnFvp8qo9y2tiPAxqknQS7WC8nqy89LEvv2ARw
   helpers.py: QmZ2zknFsPyzsyJVUnP1DDuRDMyn62En3PpRgUSC9RSh3F
-  parameters.py: QmNQ93KGHGmZH5oRsryxsV73XDVUqKxiL4ZkQ9eFEmAyoD
+  parameters.py: QmUAg2bgciQu5FNQmXmVwwcxbpwdTN41rFF9GNjDvq3zz8
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
@@ -53,7 +53,6 @@ models:
       good_ids: []
       inactivity_timeout: 60
       item_setup_timeout: 0
-      ledger_id: ethereum
       location:
         latitude: 51.5194
         longitude: 0.127

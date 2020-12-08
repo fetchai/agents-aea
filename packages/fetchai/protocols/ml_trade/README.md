@@ -28,15 +28,9 @@ speech_acts:
 ...
 ---
 ct:Query: |
-  message Nothing {
-  }
-  oneof query{
-      bytes bytes = 1;
-      Nothing nothing = 2;
-      bytes query_bytes = 3;
-  }
+  bytes query_bytes = 1;
 ct:Description: |
-  bytes description = 1;
+  bytes description_bytes = 1;
 ...
 ---
 initiation: [cfp]
@@ -48,6 +42,7 @@ reply:
 termination: [data]
 roles: {seller, buyer}
 end_states: [successful]
+keep_terminal_state_dialogues: true
 ...
 ```
 
