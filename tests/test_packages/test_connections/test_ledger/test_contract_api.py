@@ -16,12 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
 import logging
 import unittest.mock
 from typing import cast
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -524,3 +524,39 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
         await ledger_apis_connection.send(envelope)
         await asyncio.sleep(0.01)
         assert f"Cannot find {request.callable} in contract" in caplog.text
+
+
+def test_build_response_fails_on_bad_data_type():
+    """Test internal build_response functions for data type check."""
+    dispatcher = ContractApiRequestDispatcher(MagicMock())
+    with patch.object(
+        dispatcher,
+        "dispatch_request",
+        lambda x, x1, x2, fn: fn(data=b"some_data", dialogue=MagicMock()),
+    ), pytest.raises(
+        ValueError, match=r"Invalid state type, got=<class '.+'>, expected=typing.Dict"
+    ):
+        dispatcher.get_state(MagicMock(), MagicMock(), MagicMock())
+
+    with patch.object(
+        dispatcher,
+        "dispatch_request",
+        lambda x, x1, x2, fn: fn(rm=12, dialogue=MagicMock()),
+    ), pytest.raises(ValueError, match=r"Invalid message type"):
+        dispatcher.get_raw_message(MagicMock(), MagicMock(), MagicMock())
+
+    with patch.object(
+        dispatcher,
+        "dispatch_request",
+        lambda x, x1, x2, fn: fn(tx=b"some_data", dialogue=MagicMock()),
+    ):
+        with pytest.raises(
+            ValueError,
+            match=r"Invalid transaction type, got=<class '.+'>, expected=typing.Dict",
+        ):
+            dispatcher.get_deploy_transaction(MagicMock(), MagicMock(), MagicMock())
+        with pytest.raises(
+            ValueError,
+            match=r"Invalid transaction type, got=<class '.+'>, expected=typing.Dict",
+        ):
+            dispatcher.get_raw_transaction(MagicMock(), MagicMock(), MagicMock())
