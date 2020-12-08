@@ -9,7 +9,8 @@ then
   exit 1
 fi
 
-read -p 'Where to upload the image (prod, or colearn)?: ' envvar
+# read -p 'Where to upload the image (prod, or colearn)?: ' envvar
+envvar="colearn"
 shopt -s nocasematch
 case "$envvar" in
  "prod" ) 
