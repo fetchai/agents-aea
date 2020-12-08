@@ -121,6 +121,8 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 The following dependency is **only relevant if you intend to contribute** to the repository:
 
+- All Pull Requests should be opened against the `develop` branch. Do **not** open a Pull Request against `master`!
+
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
 The following steps are **only relevant if you intend to contribute** to the repository. They are **not required** for agent development.
@@ -137,34 +139,17 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
       pip install -e ".[all]"
 
-- To run tests:
+- To run tests: `tox -e py3.7` or `make test`. To only test specific modules try `make dir=PATH_TO_MODULE tdir=PATH_TO_TESTS test-sub`.
 
-      tox -e py3.7
+- To run linters (code style checks) and code formatters: `tox -e flake8` and `tox -e black` and ` tox -e isort` or `make lint`
 
-- To run linters (code style checks):
+- To run static type checks: `tox -e mypy` or `make static`
 
-      tox -e flake8
-      tox -e pylint
+- To run pylint: `tox -e pylint` or `make pylint`
 
-- To run static type checks:
+- To run security checks: `tox -e bandit` and `tox -e safety` or `make security`
 
-      tox -e mypy
-
-- To run black code formatter:
-
-      tox -e black
-
-- To run isort code formatter:
-
-      tox -e isort
-
-- To run bandit security checks:
-
-      tox -e bandit
-
-- To start a live-reloading docs server on localhost
-	
-      mkdocs serve
+- To start a live-reloading docs server on localhost: `mkdocs serve`
 
 - To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
@@ -179,7 +164,7 @@ consider to cite it with the following BibTex entry:
 
 ```
 @misc{agents-aea,
-  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál},
+  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál and James Riehl},
   Title = {Autonomous Economic Agent (AEA) Framework},
   Year = {2019},
 }
