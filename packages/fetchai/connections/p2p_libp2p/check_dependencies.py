@@ -32,6 +32,6 @@ def check_binary(name: str):
         raise Exception(ERROR_MESSAGE_TEMPLATE.format(command=name))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     check_binary("go")
     check_binary("gcc")
