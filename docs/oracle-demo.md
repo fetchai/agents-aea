@@ -1,3 +1,7 @@
+This demo shows how an AEA can be used to maintain an oracle.
+
+## Discussion
+
 **Oracle agents** are agents that have permission to update or validate updates to state variables in a smart contract and whose goal is to accurately estimate or predict some real world quantity or quantities.
 
 This demonstration shows how to set up a simple oracle agent who deploys an oracle contract and updates the contract with a token price fetched from a public API.
