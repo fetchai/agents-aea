@@ -505,7 +505,7 @@ class Description:
         elif value_case == proto_value["location"]:
             result = Location.decode(value.location)
         else:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 f"Incorrect value. Expected either of {list(proto_value.values())}. Found {value_case}."
             )
 
@@ -1009,7 +1009,8 @@ class ConstraintType:
                     Location.decode(loc)
                     for loc in constraint_type_pb.values.location.values
                 ]
-                decoding = ConstraintType(set_enum, locations)
+                location_tuple = tuple(locations)
+                decoding = ConstraintType(set_enum, location_tuple)
         elif category == CONSTRAINT_CATEGORY_DISTANCE:
             distance_enum = ConstraintTypes.DISTANCE
             center = Location.decode(constraint_type_pb.center)
@@ -1099,7 +1100,7 @@ class ConstraintExpr(ABC):
             result = Not.decode(constraint_expression_pb.not_)
         elif expression == proto_expression["constraint"]:
             result = Constraint.decode(constraint_expression_pb.constraint)
-        else:
+        else:  # pragma: nocover
             raise ValueError(
                 f"Incorrect argument. Expected either of {list(proto_expression.keys())}. Found {expression}."
             )
@@ -1443,7 +1444,7 @@ class Constraint(ConstraintExpr):
             constraint.set_.CopyFrom(self.constraint_type.encode())
         elif self.constraint_type.type == ConstraintTypes.DISTANCE:
             constraint.distance.CopyFrom(self.constraint_type.encode())
-        else:
+        else:  # pragma: nocover
             raise ValueError(
                 f"Incorrect constraint type. Expected a ConstraintTypes. Found {self.constraint_type.type}."
             )
