@@ -28,20 +28,21 @@ from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
 
+from packages.fetchai.protocols.contract_api.custom_types import Kwargs
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
-from packages.fetchai.skills.generic_buyer.dialogues import (
+from packages.fetchai.skills.confirmation_aw1.dialogues import (
+    ContractApiDialogue,
+    ContractApiDialogues,
     DefaultDialogue,
     DefaultDialogues,
-    FipaDialogue,
-    FipaDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
-    OefSearchDialogue,
-    OefSearchDialogues,
+    RegisterDialogue,
+    RegisterDialogues,
     SigningDialogue,
     SigningDialogues,
 )
@@ -50,9 +51,9 @@ from tests.conftest import ROOT_DIR
 
 
 class TestDialogues(BaseSkillTestCase):
-    """Test dialogue classes of generic buyer."""
+    """Test dialogue classes of confirmation aw1."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw1")
 
     @classmethod
     def setup(cls):
@@ -61,14 +62,14 @@ class TestDialogues(BaseSkillTestCase):
         cls.default_dialogues = cast(
             DefaultDialogues, cls._skill.skill_context.default_dialogues
         )
-        cls.fipa_dialogues = cast(
-            FipaDialogues, cls._skill.skill_context.fipa_dialogues
+        cls.contract_api_dialogues = cast(
+            ContractApiDialogues, cls._skill.skill_context.contract_api_dialogues
+        )
+        cls.register_dialogues = cast(
+            RegisterDialogues, cls._skill.skill_context.register_dialogues
         )
         cls.ledger_api_dialogues = cast(
             LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
-        )
-        cls.oef_search_dialogues = cast(
-            OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
         cls.signing_dialogues = cast(
             SigningDialogues, cls._skill.skill_context.signing_dialogues
@@ -84,19 +85,19 @@ class TestDialogues(BaseSkillTestCase):
         assert dialogue.role == DefaultDialogue.Role.AGENT
         assert dialogue.self_address == self.skill.skill_context.agent_address
 
-    def test_fipa_dialogue(self):
-        """Test the FipaDialogue class."""
-        fipa_dialogue = FipaDialogue(
+    def test_register_dialogue(self):
+        """Test the RegisterDialogue class."""
+        register_dialogue = RegisterDialogue(
             DialogueLabel(
                 ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
-            role=DefaultDialogue.Role.AGENT,
+            role=RegisterDialogue.Role.AGENT,
         )
 
         # terms
         with pytest.raises(AEAEnforceError, match="Terms not set!"):
-            assert fipa_dialogue.terms
+            assert register_dialogue.terms
         terms = Terms(
             "some_ledger_id",
             self.skill.skill_context.agent_address,
@@ -105,19 +106,76 @@ class TestDialogues(BaseSkillTestCase):
             {"good_id": -10},
             "some_nonce",
         )
-        fipa_dialogue.terms = terms
+        register_dialogue.terms = terms
         with pytest.raises(AEAEnforceError, match="Terms already set!"):
-            fipa_dialogue.terms = terms
-        assert fipa_dialogue.terms == terms
+            register_dialogue.terms = terms
+        assert register_dialogue.terms == terms
 
-    def test_fipa_dialogues(self):
-        """Test the FipaDialogues class."""
-        _, dialogue = self.fipa_dialogues.create(
+    def test_register_dialogues(self):
+        """Test the RegisterDialogues class."""
+        _, dialogue = self.register_dialogues.create(
             counterparty=COUNTERPARTY_ADDRESS,
-            performative=FipaMessage.Performative.CFP,
-            query="some_query",
+            performative=RegisterMessage.Performative.REGISTER,
+            info={"some_key": "some_value"},
         )
-        assert dialogue.role == FipaDialogue.Role.BUYER
+        assert dialogue.role == RegisterDialogue.Role.AGENT
+        assert dialogue.self_address == self.skill.skill_context.agent_address
+
+    def test_contract_api_dialogue(self):
+        """Test the ContractApiDialogue class."""
+        contract_api_dialogue = ContractApiDialogue(
+            DialogueLabel(
+                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+            ),
+            self.skill.skill_context.agent_address,
+            role=ContractApiDialogue.Role.AGENT,
+        )
+
+        # associated_register_dialogue
+        with pytest.raises(ValueError, match="Associated register dialogue not set!"):
+            assert contract_api_dialogue.associated_register_dialogue
+
+        register_dialogue = RegisterDialogue(
+            DialogueLabel(
+                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+            ),
+            self.skill.skill_context.agent_address,
+            role=RegisterDialogue.Role.AGENT,
+        )
+        contract_api_dialogue.associated_register_dialogue = register_dialogue
+        with pytest.raises(
+            AEAEnforceError, match="Associated register dialogue already set!"
+        ):
+            contract_api_dialogue.associated_register_dialogue = register_dialogue
+        assert contract_api_dialogue.associated_register_dialogue == register_dialogue
+
+        # terms
+        with pytest.raises(ValueError, match="Terms not set!"):
+            assert contract_api_dialogue.terms
+        terms = Terms(
+            "some_ledger_id",
+            self.skill.skill_context.agent_address,
+            "counterprty",
+            {"currency_id": 50},
+            {"good_id": -10},
+            "some_nonce",
+        )
+        contract_api_dialogue.terms = terms
+        with pytest.raises(AEAEnforceError, match="Terms already set!"):
+            contract_api_dialogue.terms = terms
+        assert contract_api_dialogue.terms == terms
+
+    def test_contract_api_dialogues(self):
+        """Test the ContractApiDialogues class."""
+        _, dialogue = self.contract_api_dialogues.create(
+            counterparty=COUNTERPARTY_ADDRESS,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            ledger_id="some_ledger_id",
+            contract_id="some_contract_id",
+            callable="some_callable",
+            kwargs=Kwargs({"some_key": "some_value"}),
+        )
+        assert dialogue.role == ContractApiDialogue.Role.AGENT
         assert dialogue.self_address == self.skill.skill_context.agent_address
 
     def test_ledger_api_dialogue(self):
@@ -130,20 +188,20 @@ class TestDialogues(BaseSkillTestCase):
             role=LedgerApiDialogue.Role.AGENT,
         )
 
-        # associated_fipa_dialogue
-        with pytest.raises(AEAEnforceError, match="FipaDialogue not set!"):
-            assert ledger_api_dialogue.associated_fipa_dialogue
-        fipa_dialogue = FipaDialogue(
+        # associated_register_dialogue
+        with pytest.raises(AEAEnforceError, match="RegisterDialogue not set!"):
+            assert ledger_api_dialogue.associated_register_dialogue
+        register_dialogue = RegisterDialogue(
             DialogueLabel(
                 ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
-            role=FipaDialogue.Role.BUYER,
+            role=RegisterDialogue.Role.AGENT,
         )
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        with pytest.raises(AEAEnforceError, match="FipaDialogue already set!"):
-            ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        assert ledger_api_dialogue.associated_fipa_dialogue == fipa_dialogue
+        ledger_api_dialogue.associated_register_dialogue = register_dialogue
+        with pytest.raises(AEAEnforceError, match="RegisterDialogue already set!"):
+            ledger_api_dialogue.associated_register_dialogue = register_dialogue
+        assert ledger_api_dialogue.associated_register_dialogue == register_dialogue
 
     def test_ledger_api_dialogues(self):
         """Test the LedgerApiDialogues class."""
@@ -154,16 +212,6 @@ class TestDialogues(BaseSkillTestCase):
             address="some_address",
         )
         assert dialogue.role == LedgerApiDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
-
-    def test_oef_search_dialogues(self):
-        """Test the OefSearchDialogues class."""
-        _, dialogue = self.oef_search_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
-            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            query="some_query",
-        )
-        assert dialogue.role == OefSearchDialogue.Role.AGENT
         assert dialogue.self_address == self.skill.skill_context.agent_address
 
     def test_signing_dialogue(self):

@@ -25,20 +25,21 @@ from unittest.mock import patch
 
 import pytest
 
+from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.skills.confirmation_aw1.behaviours import (
-    TransactionBehaviour,
     LEDGER_API_ADDRESS,
+    TransactionBehaviour,
 )
 from packages.fetchai.skills.confirmation_aw1.dialogues import (
-    RegisterDialogue,
-    RegisterDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
+    RegisterDialogue,
+    RegisterDialogues,
 )
 from packages.fetchai.skills.confirmation_aw1.strategy import Strategy
 
@@ -71,7 +72,10 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         )
 
         cls.list_of_registration_messages = (
-            DialogueMessage(RegisterMessage.Performative.REGISTER, {"info": {"some_key": "some_value"}}),
+            DialogueMessage(
+                RegisterMessage.Performative.REGISTER,
+                {"info": {"some_key": "some_value"}},
+            ),
         )
 
     @staticmethod
@@ -108,15 +112,27 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         )
 
     @staticmethod
-    def _setup_register_ledger_api_dialogues(self_) -> Tuple[LedgerApiDialogue, RegisterDialogue]:
+    def _setup_register_ledger_api_dialogues(
+        self_,
+    ) -> Tuple[LedgerApiDialogue, RegisterDialogue]:
         """Setup register and ledger_api dialogues for some of the following tests."""
         register_dialogue = cast(
             RegisterDialogue,
             self_.prepare_skill_dialogue(
-                dialogues=self_.register_dialogues, messages=self_.list_of_registration_messages,
+                dialogues=self_.register_dialogues,
+                messages=self_.list_of_registration_messages,
             ),
         )
-        register_dialogue.terms = "some_term"
+        register_dialogue.terms = Terms(
+            ledger_id="some_ledger_id",
+            sender_address="some_sender_address",
+            counterparty_address="some_counterparty",
+            amount_by_currency_id={"1": -10},
+            quantities_by_good_id={},
+            is_sender_payable_tx_fee=True,
+            nonce="some_none",
+            fee_by_currency_id={"1": 100},
+        )
 
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
@@ -186,7 +202,10 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_act_iii(self):
         """Test the act method of the transaction behaviour where processing is NOT None and processing_time > max_processing."""
         # setup
-        ledger_api_dialogue, register_dialogue = self._setup_register_ledger_api_dialogues(self)
+        (
+            ledger_api_dialogue,
+            register_dialogue,
+        ) = self._setup_register_ledger_api_dialogues(self)
 
         processing_time = 121.0
         self.transaction_behaviour.processing = ledger_api_dialogue
@@ -237,7 +256,10 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_failed_processing(self):
         """Test the failed_processing method of the transaction behaviour."""
         # setup
-        ledger_api_dialogue, register_dialogue = self._setup_register_ledger_api_dialogues(self)
+        (
+            ledger_api_dialogue,
+            register_dialogue,
+        ) = self._setup_register_ledger_api_dialogues(self)
 
         self.transaction_behaviour.timedout.add(ledger_api_dialogue.dialogue_label)
 
@@ -262,7 +284,10 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_finish_processing_i(self):
         """Test the finish_processing method of the transaction behaviour where self.processing == ledger_api_dialogue."""
         # setup
-        ledger_api_dialogue, register_dialogue = self._setup_register_ledger_api_dialogues(self)
+        (
+            ledger_api_dialogue,
+            register_dialogue,
+        ) = self._setup_register_ledger_api_dialogues(self)
         self.transaction_behaviour.processing = ledger_api_dialogue
 
         # operation
@@ -275,7 +300,10 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_finish_processing_ii(self):
         """Test the finish_processing method of the transaction behaviour where ledger_api_dialogue's dialogue_label is NOT in self.timedout."""
         # setup
-        ledger_api_dialogue, register_dialogue = self._setup_register_ledger_api_dialogues(self)
+        (
+            ledger_api_dialogue,
+            register_dialogue,
+        ) = self._setup_register_ledger_api_dialogues(self)
 
         # operation
         with pytest.raises(ValueError) as err:

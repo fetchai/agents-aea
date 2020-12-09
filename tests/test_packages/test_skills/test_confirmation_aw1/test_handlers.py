@@ -21,12 +21,11 @@
 import logging
 from pathlib import Path
 from typing import cast
-from unittest.mock import patch, PropertyMock
+from unittest.mock import PropertyMock, patch
 
 import pytest
 
 from aea.crypto.ledger_apis import LedgerApis
-from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import (
     RawTransaction,
     SignedTransaction,
@@ -37,30 +36,29 @@ from aea.helpers.transaction.base import (
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
 
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs, State
+from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.confirmation_aw1.behaviours import TransactionBehaviour
 from packages.fetchai.skills.confirmation_aw1.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
-    RegisterDialogue,
-    RegisterDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
+    RegisterDialogue,
+    RegisterDialogues,
     SigningDialogue,
     SigningDialogues,
 )
 from packages.fetchai.skills.confirmation_aw1.handlers import (
     AW1RegistrationHandler,
     ContractApiHandler,
+    LEDGER_API_ADDRESS,
     LedgerApiHandler,
     SigningHandler,
-    LEDGER_API_ADDRESS,
 )
 from packages.fetchai.skills.confirmation_aw1.strategy import Strategy
 
@@ -102,7 +100,7 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
             fee_by_currency_id={"1": 100},
         )
         cls.list_of_registration_messages = (
-            DialogueMessage(RegisterMessage.Performative.REGISTER, {"info": cls.info})
+            DialogueMessage(RegisterMessage.Performative.REGISTER, {"info": cls.info}),
         )
 
     def test_setup(self):
@@ -118,7 +116,7 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
             message_type=RegisterMessage,
             dialogue_reference=incorrect_dialogue_reference,
             performative=RegisterMessage.Performative.REGISTER,
-            info=self.info
+            info=self.info,
         )
 
         # operation
@@ -134,19 +132,28 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
     def test_handle_register_is_valid(self):
         """Test the _handle_register method of the register handler where is_valid is True."""
         # setup
-        incoming_message = cast(RegisterMessage, self.build_incoming_message(
-            message_type=RegisterMessage,
-            performative=RegisterMessage.Performative.REGISTER,
-            info=self.info,
-        ))
+        incoming_message = cast(
+            RegisterMessage,
+            self.build_incoming_message(
+                message_type=RegisterMessage,
+                performative=RegisterMessage.Performative.REGISTER,
+                info=self.info,
+            ),
+        )
 
         # operation
         with patch.object(
             self.strategy, "valid_registration", return_value=(True, 0, "all good!"),
         ) as mock_valid:
-            with patch.object(self.strategy, "lock_registration_temporarily") as mock_lock:
-                with patch.object(self.strategy, "get_kwargs", return_value=self.kwargs) as mock_kwargs:
-                    with patch.object(self.strategy, "get_terms", return_value=self.terms) as mock_terms:
+            with patch.object(
+                self.strategy, "lock_registration_temporarily"
+            ) as mock_lock:
+                with patch.object(
+                    self.strategy, "get_kwargs", return_value=self.kwargs
+                ) as mock_kwargs:
+                    with patch.object(
+                        self.strategy, "get_terms", return_value=self.terms
+                    ) as mock_terms:
                         with patch.object(self.logger, "log") as mock_logger:
                             self.register_handler.handle(incoming_message)
 
@@ -177,8 +184,12 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        contract_api_dialogue = cast(ContractApiDialogue, self.contract_api_dialogues.get_dialogue(message))
-        register_dialogue = cast(RegisterDialogue, self.register_dialogues.get_dialogue(incoming_message))
+        contract_api_dialogue = cast(
+            ContractApiDialogue, self.contract_api_dialogues.get_dialogue(message)
+        )
+        register_dialogue = cast(
+            RegisterDialogue, self.register_dialogues.get_dialogue(incoming_message)
+        )
 
         assert contract_api_dialogue.terms == self.terms
         assert contract_api_dialogue.associated_register_dialogue == register_dialogue
@@ -186,18 +197,23 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
     def test_handle_register_is_not_valid(self):
         """Test the _handle_register method of the register handler where is_valid is False."""
         # setup
-        incoming_message = cast(RegisterMessage, self.build_incoming_message(
-            message_type=RegisterMessage,
-            performative=RegisterMessage.Performative.REGISTER,
-            info=self.info,
-        ))
+        incoming_message = cast(
+            RegisterMessage,
+            self.build_incoming_message(
+                message_type=RegisterMessage,
+                performative=RegisterMessage.Performative.REGISTER,
+                info=self.info,
+            ),
+        )
 
         error_code = 1
         error_msg = "already registered!"
 
         # operation
         with patch.object(
-            self.strategy, "valid_registration", return_value=(False, error_code, error_msg),
+            self.strategy,
+            "valid_registration",
+            return_value=(False, error_code, error_msg),
         ) as mock_valid:
             with patch.object(self.logger, "log") as mock_logger:
                 self.register_handler.handle(incoming_message)
@@ -208,8 +224,7 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
         mock_valid.called_once()
 
         mock_logger.assert_any_call(
-            logging.INFO,
-            f"invalid registration={incoming_message.info}. Rejecting.",
+            logging.INFO, f"invalid registration={incoming_message.info}. Rejecting.",
         )
 
         message = self.get_message_from_outbox()
@@ -235,11 +250,14 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
                 messages=self.list_of_registration_messages[:1],
             ),
         )
-        incoming_message = cast(RegisterMessage, self.build_incoming_message_for_skill_dialogue(
-            dialogue=register_dialogue,
-            performative=RegisterMessage.Performative.SUCCESS,
-            info=self.info,
-        ))
+        incoming_message = cast(
+            RegisterMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=register_dialogue,
+                performative=RegisterMessage.Performative.SUCCESS,
+                info=self.info,
+            ),
+        )
 
         # operation
         with patch.object(self.logger, "log") as mock_logger:
@@ -260,9 +278,7 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
 class TestContractApiHandler(BaseSkillTestCase):
     """Test contract_api handler of confirmation aw1."""
 
-    path_to_skill = Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw1"
-    )
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw1")
 
     @classmethod
     def setup(cls):
@@ -317,7 +333,9 @@ class TestContractApiHandler(BaseSkillTestCase):
         )
         cls.list_of_registration_messages = (
             DialogueMessage(
-                RegisterMessage.Performative.REGISTER, {"info": cls.info}, is_incoming=True
+                RegisterMessage.Performative.REGISTER,
+                {"info": cls.info},
+                is_incoming=True,
             ),
         )
 
@@ -371,13 +389,15 @@ class TestContractApiHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=contract_api_dialogue,
             performative=ContractApiMessage.Performative.STATE,
-            state=self.state
+            state=self.state,
         )
 
         # operation
         with patch.object(self.logger, "log") as mock_logger:
             with patch.object(self.strategy, "has_staked", return_value=True):
-                with patch.object(self.strategy, "finalize_registration") as mock_finalize:
+                with patch.object(
+                    self.strategy, "finalize_registration"
+                ) as mock_finalize:
                     self.contract_api_handler.handle(incoming_message)
 
         # after
@@ -419,7 +439,7 @@ class TestContractApiHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=contract_api_dialogue,
             performative=ContractApiMessage.Performative.STATE,
-            state=self.state
+            state=self.state,
         )
 
         # operation
@@ -464,7 +484,7 @@ class TestContractApiHandler(BaseSkillTestCase):
                 messages=self.list_of_registration_messages[:1],
             ),
         )
-        register_dialogue._incoming_messages=[]
+        register_dialogue._incoming_messages = []
 
         contract_api_dialogue = cast(
             ContractApiDialogue,
@@ -479,7 +499,7 @@ class TestContractApiHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=contract_api_dialogue,
             performative=ContractApiMessage.Performative.STATE,
-            state=self.state
+            state=self.state,
         )
 
         # operation
@@ -604,7 +624,9 @@ class TestSigningHandler(BaseSkillTestCase):
         cls.info = {"ethereum_address": "some_ethereum_address"}
         cls.list_of_registration_messages = (
             DialogueMessage(
-                RegisterMessage.Performative.REGISTER, {"info": cls.info}, is_incoming=True
+                RegisterMessage.Performative.REGISTER,
+                {"info": cls.info},
+                is_incoming=True,
             ),
         )
 
@@ -854,6 +876,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         cls.ledger_api_dialogues = cast(
             LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
+        cls.signing_dialogues = cast(
+            SigningDialogues, cls._skill.skill_context.signing_dialogues
+        )
 
         cls.terms = Terms(
             "some_ledger_id",
@@ -863,21 +888,15 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             {"good_id": -10},
             "some_nonce",
         )
-        # cls.list_of_fipa_messages = (
-        #     DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
-        #     DialogueMessage(
-        #         FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
-        #     ),
-        #     DialogueMessage(FipaMessage.Performative.ACCEPT),
-        #     DialogueMessage(
-        #         FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-        #         {"info": {"address": "some_term_sender_address"}},
-        #     ),
-        #     DialogueMessage(
-        #         FipaMessage.Performative.INFORM,
-        #         {"info": {"transaction_digest": "some_transaction_digest_body"}},
-        #     ),
-        # )
+        cls.info = {"ethereum_address": "some_ethereum_address"}
+        cls.list_of_registration_messages = (
+            DialogueMessage(
+                RegisterMessage.Performative.REGISTER,
+                {"info": cls.info},
+                is_incoming=True,
+            ),
+        )
+
         cls.raw_transaction = RawTransaction(
             "some_ledger_id", {"some_key": "some_value"}
         )
@@ -916,28 +935,57 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             ),
         )
 
+        cls.list_of_aws_aeas = ["awx_aea_1", "awx_aea_2"]
+        cls.developer_handle = "some_developer_handle"
+
+    def _check_send_confirmation_details_to_awx_aeas(self, aea, mock_logger):
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"informing awx_aeas={self.list_of_aws_aeas} of registration success of confirmed aea={aea} of developer={self.developer_handle}.",
+        )
+        for awx_awa in self.list_of_aws_aeas:
+            message = self.get_message_from_outbox()
+            has_attributes, error_str = self.message_has_attributes(
+                actual_message=message,
+                message_type=DefaultMessage,
+                performative=DefaultMessage.Performative.BYTES,
+                to=awx_awa,
+                sender=self.skill.skill_context.agent_address,
+                content=f"{aea}_{self.developer_handle}".encode("utf-8"),
+            )
+            assert has_attributes, error_str
+
     def test_setup(self):
         """Test the setup method of the ledger_api handler."""
         # setup
         list_of_aea = ["aea_1", "aea_2"]
-        list_of_aws_aeas = ["awx_aea_1", "awx_aea_2"]
-        developer_handle = "some_developer_handle"
 
         # operation
-        with patch.object(type(self.strategy), "all_registered_aeas", new_callable=PropertyMock, return_value=list_of_aea):
-            with patch.object(type(self.strategy), "awx_aeas", new_callable=PropertyMock, return_value=list_of_aws_aeas):
-                with patch.object(self.strategy, "get_developer_handle", return_value=developer_handle):
+        with patch.object(
+            type(self.strategy),
+            "all_registered_aeas",
+            new_callable=PropertyMock,
+            return_value=list_of_aea,
+        ):
+            with patch.object(
+                type(self.strategy),
+                "awx_aeas",
+                new_callable=PropertyMock,
+                return_value=self.list_of_aws_aeas,
+            ):
+                with patch.object(
+                    self.strategy,
+                    "get_developer_handle",
+                    return_value=self.developer_handle,
+                ):
                     with patch.object(self.logger, "log") as mock_logger:
                         self.ledger_api_handler.setup()
 
         # after
-        for aea in list_of_aea:
-            # _send_confirmation_details_to_awx_aeas
-            mock_logger.assert_any_call(
-                logging.INFO,
-                f"informing awx_aeas={self.strategy.awx_aeas} of registration success of confirmed aea={aea} of developer={developer_handle}."
-            )
+        self.assert_quantity_in_outbox(len(self.list_of_aws_aeas) * len(list_of_aea))
 
+        for aea in list_of_aea:
+            self._check_send_confirmation_details_to_awx_aeas(aea, mock_logger)
 
     def test_handle_unidentified_dialogue(self):
         """Test the _handle_unidentified_dialogue method of the ledger_api handler."""
@@ -946,9 +994,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message(
             message_type=LedgerApiMessage,
             dialogue_reference=incorrect_dialogue_reference,
-            performative=LedgerApiMessage.Performative.GET_BALANCE,
-            ledger_id="some_ledger_id",
-            address="some_address",
+            performative=LedgerApiMessage.Performative.ERROR,
+            code=1,
         )
 
         # operation
@@ -961,86 +1008,18 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"received invalid ledger_api message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_balance_positive_balance(self):
-        """Test the _handle_balance method of the ledger_api handler where balance is positive."""
-        # setup
-        balance = 10
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.ledger_api_dialogues,
-                messages=(
-                    DialogueMessage(
-                        LedgerApiMessage.Performative.GET_BALANCE,
-                        {"ledger_id": "some_ledger_id", "address": "some_address"},
-                    ),
-                ),
-                counterparty=LEDGER_API_ADDRESS,
-            ),
-        )
-        incoming_message = cast(
-            LedgerApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.BALANCE,
-                ledger_id="some-Ledger_id",
-                balance=balance,
-            ),
-        )
-
-        # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            self.ledger_api_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(
-            logging.INFO,
-            f"starting balance on {self.strategy.ledger_id} ledger={incoming_message.balance}.",
-        )
-        assert self.strategy.balance == balance
-        assert self.strategy.is_searching
-
-    def test_handle_balance_zero_balance(self):
-        """Test the _handle_balance method of the ledger_api handler where balance is zero."""
-        # setup
-        balance = 0
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.ledger_api_dialogues,
-                messages=(
-                    DialogueMessage(
-                        LedgerApiMessage.Performative.GET_BALANCE,
-                        {"ledger_id": "some_ledger_id", "address": "some_address"},
-                    ),
-                ),
-                counterparty=LEDGER_API_ADDRESS,
-            ),
-        )
-        incoming_message = cast(
-            LedgerApiMessage,
-            self.build_incoming_message_for_skill_dialogue(
-                dialogue=ledger_api_dialogue,
-                performative=LedgerApiMessage.Performative.BALANCE,
-                ledger_id="some-Ledger_id",
-                balance=balance,
-            ),
-        )
-
-        # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            self.ledger_api_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(
-            logging.WARNING,
-            f"you have no starting balance on {self.strategy.ledger_id} ledger!",
-        )
-        assert not self.skill.skill_context.is_active
-
     def test_handle_raw_transaction(self):
         """Test the _handle_raw_transaction method of the ledger_api handler."""
         # setup
+        register_dialogue = cast(
+            RegisterDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.register_dialogues,
+                messages=self.list_of_registration_messages[:1],
+            ),
+        )
+        register_dialogue.terms = self.terms
+
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
@@ -1049,14 +1028,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        fipa_dialogue.terms = self.terms
+        ledger_api_dialogue.associated_register_dialogue = register_dialogue
+
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -1071,16 +1044,15 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             self.ledger_api_handler.handle(incoming_message)
 
         # after
+        self.assert_quantity_in_decision_making_queue(1)
+
         mock_logger.assert_any_call(
             logging.INFO, f"received raw transaction={incoming_message}"
         )
 
-        message_quantity = self.get_quantity_in_decision_maker_inbox()
-        assert (
-            message_quantity == 1
-        ), f"Invalid number of messages in decision maker queue. Expected {1}. Found {message_quantity}."
+        message = self.get_message_from_decision_maker_inbox()
         has_attributes, error_str = self.message_has_attributes(
-            actual_message=self.get_message_from_decision_maker_inbox(),
+            actual_message=message,
             message_type=SigningMessage,
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             to=self.skill.skill_context.decision_maker_address,
@@ -1088,6 +1060,12 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             terms=self.terms,
         )
         assert has_attributes, error_str
+
+        signing_dialogue = cast(
+            SigningDialogue, self.signing_dialogues.get_dialogue(message)
+        )
+
+        assert signing_dialogue.associated_ledger_api_dialogue == ledger_api_dialogue
 
         mock_logger.assert_any_call(
             logging.INFO,
@@ -1142,6 +1120,15 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     def test_handle_transaction_receipt_i(self):
         """Test the _handle_transaction_receipt method of the ledger_api handler."""
         # setup
+        register_dialogue = cast(
+            RegisterDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.register_dialogues,
+                messages=self.list_of_registration_messages[:1],
+            ),
+        )
+        register_dialogue.terms = self.terms
+
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
@@ -1150,14 +1137,11 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
+        ledger_api_dialogue.associated_register_dialogue = register_dialogue
+        last_outgoing_message = cast(
+            LedgerApiMessage, ledger_api_dialogue.last_outgoing_message
         )
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        fipa_dialogue.terms = self.terms
+
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -1169,32 +1153,62 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.ledger_api_handler.context.behaviours.transaction, "finish_processing"
-        ):
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
-                with patch.object(self.logger, "log") as mock_logger:
-                    self.ledger_api_handler.handle(incoming_message)
+            self.transaction_behaviour, "finish_processing"
+        ) as mocked_finish:
+            with patch.object(
+                LedgerApis, "is_transaction_settled", return_value=True
+            ) as mocked_settled:
+                with patch.object(
+                    type(self.strategy),
+                    "awx_aeas",
+                    new_callable=PropertyMock,
+                    return_value=self.list_of_aws_aeas,
+                ):
+                    with patch.object(
+                        self.strategy,
+                        "get_developer_handle",
+                        return_value=self.developer_handle,
+                    ):
+                        with patch.object(self.logger, "log") as mock_logger:
+                            self.ledger_api_handler.handle(incoming_message)
 
         # after
-        mock_logger.assert_any_call(
-            logging.INFO,
-            f"transaction confirmed, informing counterparty={fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:]} of transaction digest.",
-        )
+        mocked_settled.assert_called_once()
+        mocked_finish.assert_any_call(ledger_api_dialogue)
 
-        self.assert_quantity_in_outbox(1)
+        self.assert_quantity_in_outbox(3)
+        message = self.get_message_from_outbox()
         has_attributes, error_str = self.message_has_attributes(
-            actual_message=self.get_message_from_outbox(),
-            message_type=FipaMessage,
-            performative=FipaMessage.Performative.INFORM,
+            actual_message=message,
+            message_type=RegisterMessage,
+            performative=RegisterMessage.Performative.SUCCESS,
             to=COUNTERPARTY_ADDRESS,
             sender=self.skill.skill_context.agent_address,
-            info={"transaction_digest": self.transaction_digest.body},
+            info={"transaction_digest": last_outgoing_message.transaction_digest.body},
         )
         assert has_attributes, error_str
 
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"informing counterparty={message.to} of registration success.",
+        )
+
+        # _send_confirmation_details_to_awx_aeas
+        self._check_send_confirmation_details_to_awx_aeas(message.to, mock_logger)
+
     def test_handle_transaction_receipt_ii(self):
-        """Test the _handle_transaction_receipt method of the ledger_api handler where fipa dialogue's last_incoming_message is None."""
+        """Test the _handle_transaction_receipt method of the ledger_api handler where last register msg is None."""
         # setup
+        register_dialogue = cast(
+            RegisterDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.register_dialogues,
+                messages=self.list_of_registration_messages[:1],
+            ),
+        )
+        register_dialogue.terms = self.terms
+        register_dialogue._incoming_messages = []
+
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
@@ -1203,17 +1217,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        ledger_api_dialogue.associated_register_dialogue = register_dialogue
 
-        fipa_dialogue._incoming_messages = []
-
-        fipa_dialogue.terms = self.terms
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -1225,21 +1230,32 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.ledger_api_handler.context.behaviours.transaction, "finish_processing"
-        ):
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=True):
-                with patch.object(self.logger, "log"):
-                    with pytest.raises(
-                        ValueError, match="Could not retrieve last fipa message"
-                    ):
-                        self.ledger_api_handler.handle(incoming_message)
+            self.transaction_behaviour, "finish_processing"
+        ) as mocked_finish:
+            with patch.object(
+                LedgerApis, "is_transaction_settled", return_value=True
+            ) as mocked_settled:
+                with pytest.raises(
+                    ValueError, match="Could not retrieve last register message"
+                ):
+                    self.ledger_api_handler.handle(incoming_message)
 
         # after
-        self.assert_quantity_in_outbox(0)
+        mocked_settled.assert_called_once()
+        mocked_finish.assert_any_call(ledger_api_dialogue)
 
     def test_handle_transaction_receipt_iii(self):
         """Test the _handle_transaction_receipt method of the ledger_api handler where tx is NOT settled."""
         # setup
+        register_dialogue = cast(
+            RegisterDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.register_dialogues,
+                messages=self.list_of_registration_messages[:1],
+            ),
+        )
+        register_dialogue.terms = self.terms
+
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
             self.prepare_skill_dialogue(
@@ -1248,14 +1264,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 counterparty=LEDGER_API_ADDRESS,
             ),
         )
-        fipa_dialogue = cast(
-            FipaDialogue,
-            self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
-            ),
-        )
-        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-        fipa_dialogue.terms = self.terms
+        ledger_api_dialogue.associated_register_dialogue = register_dialogue
+
         incoming_message = cast(
             LedgerApiMessage,
             self.build_incoming_message_for_skill_dialogue(
@@ -1267,13 +1277,18 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.ledger_api_handler.context.behaviours.transaction, "failed_processing"
-        ):
-            with patch.object(LedgerApis, "is_transaction_settled", return_value=False):
+            self.transaction_behaviour, "failed_processing"
+        ) as mocked_failed:
+            with patch.object(
+                LedgerApis, "is_transaction_settled", return_value=False
+            ) as mocked_settled:
                 with patch.object(self.logger, "log") as mock_logger:
                     self.ledger_api_handler.handle(incoming_message)
 
         # after
+        mocked_settled.assert_called_once()
+        mocked_failed.assert_any_call(ledger_api_dialogue)
+
         self.assert_quantity_in_outbox(0)
         assert self.transaction_behaviour.processing is None
         assert self.transaction_behaviour.processing_time == 0.0
@@ -1298,15 +1313,17 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 code=1,
             ),
         )
-        ledger_api_dialogue.associated_fipa_dialogue = "mock"
+
         # operation
         with patch.object(
-            self.ledger_api_handler.context.behaviours.transaction, "failed_processing"
-        ):
+            self.transaction_behaviour, "failed_processing"
+        ) as mocked_failed:
             with patch.object(self.logger, "log") as mock_logger:
                 self.ledger_api_handler.handle(incoming_message)
 
         # after
+        mocked_failed.assert_called_once()
+
         mock_logger.assert_any_call(
             logging.INFO,
             f"received ledger_api error message={incoming_message} in dialogue={ledger_api_dialogue}.",
