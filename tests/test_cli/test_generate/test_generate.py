@@ -22,7 +22,10 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli.generate import _generate_item
-from aea.configurations.base import ProtocolSpecificationParseError
+from aea.configurations.base import (
+    ProtocolSpecification,
+    ProtocolSpecificationParseError,
+)
 
 from tests.test_cli.tools_for_testing import ContextMock
 
@@ -50,7 +53,10 @@ def _raise_psperror(*args, **kwargs):
 
 
 @mock.patch("builtins.open", mock.mock_open())
-@mock.patch("aea.protocols.generator.common.ConfigLoader")
+@mock.patch(
+    "aea.protocols.generator.common.ConfigLoader.load_protocol_specification",
+    return_value=ProtocolSpecification(name="name", author="author", version="1.0.0"),
+)
 @mock.patch("aea.cli.utils.decorators._cast_ctx")
 class GenerateItemTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
@@ -87,7 +93,6 @@ class GenerateItemTestCase(TestCase):
         )
         self.assertEqual(cm.exception.message, expected_msg)
 
-    # @pytest.mark.skip
     @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
     @mock.patch("aea.protocols.generator.base.shutil.which", return_value="some")
     @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_psperror)
