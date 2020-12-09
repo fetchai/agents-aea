@@ -91,6 +91,6 @@ info: [my_oracle_agent] Oracle role successfully granted!
 ...
 info: [my_oracle_agent] Oracle value successfully updated!
 ```
-The oracle contract will continue to be updated with the latest retrieved coin price at the default time interval (every 10 seconds).
+The oracle contract will continue to be updated with the latest retrieved coin price at the default time interval (every 15 seconds).
 
 *This demo will soon be extended to include an oracle client AEA who requests and purchases the oracle value with FET tokens.*
