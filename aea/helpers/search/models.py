@@ -634,6 +634,7 @@ class ConstraintType:
                     f"Expected one of type in (int, float, str), got {self.value}",
                 )
             elif self.type == ConstraintTypes.WITHIN:
+                allowed_sub_types = (int, float, str)
                 enforce(
                     isinstance(self.value, tuple),
                     f"Expected tuple, got {type(self.value)}",
@@ -646,6 +647,14 @@ class ConstraintType:
                 )
                 enforce(
                     isinstance(self.value[1], type(self.value[0])), "Invalid types."
+                )
+                enforce(
+                    isinstance(self.value[0], allowed_sub_types),
+                    f"Invalid type for first element. Expected either of {allowed_sub_types}. Found {type(self.value[0])}."
+                )
+                enforce(
+                    isinstance(self.value[1], allowed_sub_types),
+                    f"Invalid type for second element. Expected either of {allowed_sub_types}. Found {type(self.value[1])}."
                 )
             elif self.type == ConstraintTypes.IN:
                 enforce(
@@ -747,17 +756,17 @@ class ConstraintType:
         :raises ValueError: if the constraint type is not recognized.
         """
         if self.type == ConstraintTypes.EQUAL:
-            return self.value == value
+            return value == self.value
         if self.type == ConstraintTypes.NOT_EQUAL:
-            return self.value != value
+            return value != self.value
         if self.type == ConstraintTypes.LESS_THAN:
-            return self.value < value
+            return value < self.value
         if self.type == ConstraintTypes.LESS_THAN_EQ:
-            return self.value <= value
+            return value <= self.value
         if self.type == ConstraintTypes.GREATER_THAN:
-            return self.value > value
+            return value > self.value
         if self.type == ConstraintTypes.GREATER_THAN_EQ:
-            return self.value >= value
+            return value >= self.value
         if self.type == ConstraintTypes.WITHIN:
             low = self.value[0]
             high = self.value[1]
@@ -1630,12 +1639,11 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     :return: the Haversine distance.
     """
     lat1, lon1, lat2, lon2, = map(radians, [lat1, lon1, lat2, lon2])
-    # average earth radius
-    earth_radius = 6372.8
+    earth_radius = 6372.8  # average earth radius
     dlat = lat2 - lat1
     dlon = lon2 - lon1
     sin_lat_squared = sin(dlat * 0.5) * sin(dlat * 0.5)
     sin_lon_squared = sin(dlon * 0.5) * sin(dlon * 0.5)
     computation = asin(sqrt(sin_lat_squared + sin_lon_squared * cos(lat1) * cos(lat2)))
-    d = 2 * earth_radius * computation
-    return d
+    distance = 2 * earth_radius * computation
+    return distance

@@ -394,8 +394,8 @@ def test_constraints_expression():
     """Test constraint expressions: And, Or, Not, Constraint."""
     and_expression = And(
         [
-            Constraint("number", ConstraintType(ConstraintTypes.GREATER_THAN, 15)),
-            Constraint("number", ConstraintType(ConstraintTypes.LESS_THAN, 10)),
+            Constraint("number", ConstraintType(ConstraintTypes.LESS_THAN, 15)),
+            Constraint("number", ConstraintType(ConstraintTypes.GREATER_THAN, 10)),
         ]
     )
     and_expression.check_validity()
@@ -462,8 +462,8 @@ def test_constraints_and():
     """Test And."""
     and_expression = And(
         [
-            Constraint("number", ConstraintType(ConstraintTypes.GREATER_THAN, 15)),
-            Constraint("number", ConstraintType(ConstraintTypes.LESS_THAN, 10)),
+            Constraint("number", ConstraintType(ConstraintTypes.LESS_THAN, 15)),
+            Constraint("number", ConstraintType(ConstraintTypes.GREATER_THAN, 10)),
         ]
     )
     and_expression.check_validity()
