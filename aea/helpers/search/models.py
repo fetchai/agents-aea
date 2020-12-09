@@ -650,11 +650,11 @@ class ConstraintType:
                 )
                 enforce(
                     isinstance(self.value[0], allowed_sub_types),
-                    f"Invalid type for first element. Expected either of {allowed_sub_types}. Found {type(self.value[0])}."
+                    f"Invalid type for first element. Expected either of {allowed_sub_types}. Found {type(self.value[0])}.",
                 )
                 enforce(
                     isinstance(self.value[1], allowed_sub_types),
-                    f"Invalid type for second element. Expected either of {allowed_sub_types}. Found {type(self.value[1])}."
+                    f"Invalid type for second element. Expected either of {allowed_sub_types}. Found {type(self.value[1])}.",
                 )
             elif self.type == ConstraintTypes.IN:
                 enforce(

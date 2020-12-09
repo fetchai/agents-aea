@@ -44,7 +44,7 @@ from aea.helpers.search.models import (
 
 def test_location():
     """Test Location type."""
-    location = Location(1.1, 2.2)
+    location = Location(latitude=1.1, longitude=2.2)
     assert location is not None
 
     assert location.tuple == (location.latitude, location.longitude)
@@ -55,6 +55,8 @@ def test_location():
     location_pb = location.encode()
     actual_location = Location.decode(location_pb)
     assert actual_location == location
+    assert location.latitude == actual_location.latitude
+    assert location.longitude == actual_location.longitude
 
 
 def test_attribute():
