@@ -8,10 +8,10 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmTzcAB5zTCZ9nXhzjHQv5Qnji9JH6KZSKaT4zBvULk3Zz
   __init__.py: QmYcCsWNz4qmSUBorY9N4XgyXvdYrrzNGr6oP3iQP9wUM5
-  dialogues.py: QmcNpY8X1rCVxbvaanWugs43ofkRWUEsvxqx3bfwizschU
+  dialogues.py: QmSg5DmxpnvN9g2ThzmB4N6fJ2SeQ63iGa2ByGrLQD6BKF
   message.py: QmTjhBP4DMvDi6pUDGcGQcRTiKindr1Ngc8rwQWZq4Sqt8
   prometheus.proto: Qmas8rPVHgiaH2hzZLhzudinmNE2BX35d6cbDFAfehACYZ
-  prometheus_pb2.py: QmfPVpCHJBKpFaxLJ7rB1LLd8CRxrnkcwFnCuGMB5AjuJc
+  prometheus_pb2.py: QmeMWfTFCFB2YnnWgEWCK9pUyqB9WBhK4FdBf8VCSGvDX3
   serialization.py: QmedSKUhA5XBxecbcifsDYaRQWpd8b6uogVFEEWVEBnd72
 fingerprint_ignore_patterns: []
 dependencies:

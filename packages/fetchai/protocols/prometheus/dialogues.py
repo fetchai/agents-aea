@@ -94,6 +94,8 @@ class PrometheusDialogues(Dialogues, ABC):
 
     END_STATES = frozenset({PrometheusDialogue.EndState.SUCCESSFUL})
 
+    _keep_terminal_state_dialogues = False
+
     def __init__(
         self,
         self_address: Address,
