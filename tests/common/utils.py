@@ -317,8 +317,7 @@ def run_aea_subprocess(*args, cwd: str = ".") -> Tuple[subprocess.Popen, str, st
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         cwd=cwd,
-        text=True,
     )
     result.wait()
     stdout, stderr = result.communicate()
-    return result, stdout, stderr
+    return result, stdout.decode("utf-8"), stderr.decode("utf-8")
