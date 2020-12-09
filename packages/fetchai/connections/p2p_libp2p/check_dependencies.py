@@ -145,4 +145,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()  # pragma: nocov
+    main()  # pragma: nocover
