@@ -85,11 +85,11 @@ aea run
 
 After a few moments, you should see the following notices in the logs:
 ```bash
-info: [my_oracle_agent] Oracle contract successfully deployed!
+info: [coin_price_oracle] Oracle contract successfully deployed!
 ...
-info: [my_oracle_agent] Oracle role successfully granted!
+info: [coin_price_oracle] Oracle role successfully granted!
 ...
-info: [my_oracle_agent] Oracle value successfully updated!
+info: [coin_price_oracle] Oracle value successfully updated!
 ```
 The oracle contract will continue to be updated with the latest retrieved coin price at the default time interval (every 15 seconds).
 
