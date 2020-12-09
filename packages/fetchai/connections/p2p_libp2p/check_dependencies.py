@@ -21,7 +21,7 @@
 """Check that the dependencies 'gcc' and 'go' are installed in the system."""
 import re
 import shutil
-import subprocess
+import subprocess  # nosec
 from itertools import islice
 from typing import Any, Iterable, List, Pattern, Tuple
 
@@ -107,8 +107,14 @@ def check_binary(
             ERROR_MESSAGE_TEMPLATE_BINARY_NOT_FOUND.format(command=binary_name)
         )
 
-    stdout = subprocess.check_output([binary_name, *args]).decode("utf-8")
+    version_getter_command = [binary_name, *args]
+    stdout = subprocess.check_output(version_getter_command).decode("utf-8")  # nosec
     version_match = version_regex.search(stdout)
+    if version_match is None:
+        print(
+            f"Warning: cannot parse '{binary_name}' version from command: {version_getter_command}."
+        )
+        return
     actual_version: VERSION = get_version(*map(int, version_match.groups(default="0")))
     if actual_version < version_lower_bound:
         raise AEAException(
@@ -139,4 +145,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: nocov

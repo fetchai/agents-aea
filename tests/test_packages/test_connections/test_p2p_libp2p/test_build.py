@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Test P2PLibp2p connection build."""
+from io import StringIO
 from unittest import mock
 
 import pytest
@@ -29,7 +30,11 @@ from packages.fetchai.connections.p2p_libp2p.check_dependencies import main
 
 def test_build_script():
     """Test the build script - positive case."""
-    main()
+    with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
+        main()
+        stdout = mock_stdout.getvalue()
+    assert "check 'go'>=1.14.0, found " in stdout
+    assert "check 'gcc'>=7.5.0, found " in stdout
 
 
 def test_build_script_negative_binary_not_found():
@@ -53,3 +58,18 @@ def test_build_script_negative_version_too_low():
             match="The installed version of 'go' is too low: expected at least 1.14.0; found 0.0.0.",
         ):
             main()
+
+
+def test_build_script_negative_cannot_parse_version():
+    """Test the build script - negative case, cannot parse version."""
+    with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
+        with mock.patch("subprocess.check_output", return_value=b""):
+            main()
+        stdout = mock_stdout.getvalue()
+    assert (
+        "Warning: cannot parse 'go' version from command: ['go', 'version']." in stdout
+    )
+    assert (
+        "Warning: cannot parse 'gcc' version from command: ['gcc', '--version'].\n"
+        in stdout
+    )
