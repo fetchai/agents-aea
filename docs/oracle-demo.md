@@ -16,7 +16,7 @@ Fetch the AEA that will deploy and update the oracle contract.
 
 ``` bash
 aea fetch fetchai/coin_price_oracle:0.1.0
-cd coin_price_oracle_client
+cd coin_price_oracle
 aea install
 ```
 
@@ -67,7 +67,7 @@ The oracle AEAs require either a locally runnning test node or a connection to a
 
 ## Setting up with a local Ganache node
 
-The easiest way to test the oracle agents is to set up a local Ethereum test node using Ganache. This can be done by running the following docker command, which will also fund the accounts of the two AEAs:
+The easiest way to test the oracle agents is to set up a local Ethereum test node using Ganache. This can be done by running the following docker command from the directory you started from (in a separate terminal). This command will also fund the account of the AEA:
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000"
 ```
@@ -89,4 +89,4 @@ info: [my_oracle_agent] Oracle value successfully updated!
 ```
 The oracle contract will continue to be updated with the latest retrieved coin price at the default time interval (every 10 seconds).
 
-This demo will soon be extended to include an oracle client AEA who requests and purchases the oracle value with FET tokens.
+*This demo will soon be extended to include an oracle client AEA who requests and purchases the oracle value with FET tokens.*
