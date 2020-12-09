@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package dhtnode;
+
+message Register {
+    string protocol_version = 1;
+    string agent_address = 2;
+    string agent_public_key = 3;
+    string conn_public_key = 4;
+    string proof_of_representation = 5;
+}
+
+message RegisterResponse {
+    enum Status {
+        SUCCESS = 0;
+        ERROR_UNSUPPORTED_VERSION = 1;
+        ERROR_INVALID_AGENT_ADDRESS = 2;
+        ERROR_INVALID_PUBLIC_KEY = 3;
+        ERROR_INVALID_PROOF = 4;
+        ERROR_GENERIC = 5;
+    }
+
+    Status status = 1;
+    repeated string msgs = 2;
+}

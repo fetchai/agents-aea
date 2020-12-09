@@ -29,7 +29,10 @@ import (
 
 	"libp2p_node/aea"
 	"libp2p_node/dht/dhtclient"
+	"libp2p_node/dht/dhtnode"
 	"libp2p_node/utils"
+
+	"github.com/golang/protobuf/proto"
 )
 
 /*
@@ -73,11 +76,36 @@ var (
 		"roiuioMXPhu1PRFSYqpnMgvUrDCmRY3canmBQu16CTZozyQAc",
 		"2LcDvsoiTmUPkFFdMTAGEUdZY7Y2xyYCQxEXvLD8MoMhTe4Ldi",
 	}
+
+	AgentsTestKeys = []string{}
 )
 
 /*
 	DHT Network: DHTPeer-to-DHTPeer
 */
+
+func TestFetchAICrypto(t *testing.T) {
+	publicKey := "02358e3e42a6ba15cf6b2ba6eb05f02b8893acf82b316d7dd9cda702b0892b8c71"
+	address := "fetch19dq2mkcpp6x0aypxt9c9gz6n4fqvax0x9a7t5r"
+	connPublicKey := "027af21aff853b9d9589867ea142b0a60a9611fc8e1fae04c2f7144113fa4e938e"
+	signatureConnPublicKey_str_canonize := "N/GOa7/m3HU8/gpLJ88VCQ6vXsdrfiiYcqnNtF+c2N9VG9ZIiycykN4hdbpbOCGrChMYZQA3G1GpozsShrUBgg=="
+
+	addressFromPublicKey, _ := utils.FetchAIAddressFromPublicKey(publicKey)
+	if address != addressFromPublicKey {
+		t.Error("[ERR] Addresses don't match")
+	} else {
+		t.Log("[OK] Agent address matches its public key")
+	}
+
+	valid, err := utils.VerifyFetchAISignatureBTC([]byte(connPublicKey), signatureConnPublicKey_str_canonize, publicKey)
+	if !valid {
+		t.Errorf("Signature using BTC don't match %s", err.Error())
+	}
+	valid, err = utils.VerifyFetchAISignatureLibp2p([]byte(connPublicKey), signatureConnPublicKey_str_canonize, publicKey)
+	if !valid {
+		t.Errorf("Signature using LPP don't match %s", err.Error())
+	}
+}
 
 // TestRoutingDHTPeerToSelf dht peer with agent attached
 func TestRoutingDHTPeerToSelf(t *testing.T) {
@@ -1392,11 +1420,23 @@ func SetupDelegateClient(address string, host string, port uint16) (*DelegateCli
 		return nil, nil, err
 	}
 
-	err = utils.WriteBytesConn(client.Conn, []byte(address))
+	registration := &dhtnode.Register{ProtocolVersion: "0.1.0"}
+	registration.AgentAddress = address
+	registration.AgentPublicKey = "AgentPublicKey"
+	registration.ConnPublicKey = "ConnPublicKey"
+	registration.ProofOfRepresentation = "signature"
+	data, err := proto.Marshal(registration)
+
+	err = utils.WriteBytesConn(client.Conn, data)
 	ignore(err)
-	_, err = utils.ReadBytesConn(client.Conn)
+	data, err = utils.ReadBytesConn(client.Conn)
 	if err != nil {
 		return nil, nil, err
+	}
+	response := &dhtnode.RegisterResponse{}
+	err = proto.Unmarshal(data, response)
+	if response.Status != dhtnode.RegisterResponse_SUCCESS {
+		println("Registration error")
 	}
 
 	go func() {

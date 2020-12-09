@@ -35,6 +35,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/rs/zerolog"
 
 	"github.com/libp2p/go-libp2p"
@@ -505,9 +506,74 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		return
 	}
 
-	addr := string(buf)
+	registration := &dhtnode.Register{}
+	err = proto.Unmarshal(buf, registration)
+	if err != nil {
+		lerror(err).Msg("couldn't deserialize registration message")
+		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_GENERIC}
+		buf, err = proto.Marshal(response)
+		err = utils.WriteBytesConn(conn, buf)
+		ignore(err)
+
+		nbrConns.Dec()
+		return
+	}
+
+	linfo().Msgf("Received registration request %s", registration)
+
+	addr := registration.AgentAddress
 	linfo().Msgf("connection from %s established for Address %s",
 		conn.RemoteAddr().String(), addr)
+
+	// check that agent address and public key match
+	addrFromPubKey, err := utils.FetchAIAddressFromPublicKey(registration.AgentPublicKey)
+	if err != nil || addrFromPubKey != registration.AgentAddress {
+		if err == nil {
+			err = errors.New("Agent address and public key don't match")
+		}
+		lerror(err).Msg("Couldn't verify agent address and public key association")
+		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_AGENT_ADDRESS}
+		buf, err = proto.Marshal(response)
+		err = utils.WriteBytesConn(conn, buf)
+		ignore(err)
+
+		nbrConns.Dec()
+		return
+	}
+
+	// check that connection public key match
+	connPubKey, err := utils.PubKeyFromFetchAIPublicKey(registration.ConnPublicKey)
+	if err != nil || !connPubKey.Equals(dhtPeer.publicKey) {
+		if err == nil {
+			err = errors.New("Registration connection public key doesn't match peer key")
+		}
+		lerror(err).Msg("Couldn't verify agent address and public key association")
+		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_PUBLIC_KEY}
+		buf, err = proto.Marshal(response)
+		err = utils.WriteBytesConn(conn, buf)
+		ignore(err)
+
+		nbrConns.Dec()
+		return
+
+	}
+
+	// check that signature is valid
+	ok, err := utils.VerifyFetchAISignatureBTC([]byte(registration.ConnPublicKey), registration.ProofOfRepresentation, registration.AgentPublicKey)
+	if !ok || err != nil {
+		if err == nil {
+			err = errors.New("Proof of representation of peer public key is not valid")
+		}
+		lerror(err).Msg("Couldn't verify agent address and public key association")
+		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_PROOF}
+		buf, err = proto.Marshal(response)
+		err = utils.WriteBytesConn(conn, buf)
+		ignore(err)
+
+		nbrConns.Dec()
+		return
+
+	}
 
 	// Add connection to map
 	dhtPeer.tcpAddressesLock.Lock()
@@ -522,7 +588,9 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		}
 	}
 
-	err = utils.WriteBytesConn(conn, []byte("DONE"))
+	response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_SUCCESS}
+	buf, err = proto.Marshal(response)
+	err = utils.WriteBytesConn(conn, buf)
 	ignore(err)
 
 	duration := timer.GetTimer(start)

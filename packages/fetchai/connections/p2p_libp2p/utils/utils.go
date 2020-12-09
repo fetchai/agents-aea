@@ -23,6 +23,8 @@ package utils
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -40,11 +42,13 @@ import (
 	"github.com/multiformats/go-multiaddr"
 	"github.com/multiformats/go-multihash"
 	"github.com/rs/zerolog"
+	"golang.org/x/crypto/ripemd160"
 
 	host "github.com/libp2p/go-libp2p-core/host"
 	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
 
 	btcec "github.com/btcsuite/btcd/btcec"
+	"github.com/btcsuite/btcutil/bech32"
 	proto "google.golang.org/protobuf/proto"
 
 	"libp2p_node/aea"
@@ -184,6 +188,117 @@ func ComputeCID(addr string) (cid.Cid, error) {
 	return c, nil
 }
 
+// GetPeersAddrInfo Parse multiaddresses and convert them to peer.AddrInfo
+func GetPeersAddrInfo(peers []string) ([]peer.AddrInfo, error) {
+	pinfos := make([]peer.AddrInfo, len(peers))
+	for i, addr := range peers {
+		maddr := multiaddr.StringCast(addr)
+		p, err := peer.AddrInfoFromP2pAddr(maddr)
+		if err != nil {
+			return pinfos, err
+		}
+		pinfos[i] = *p
+	}
+	return pinfos, nil
+}
+
+/*
+	FetchAI Crypto Helpers
+*/
+
+// PubKeyFromFetchAIPublicKey create libp2p public key from fetchai hex encoded secp256k1 key
+func PubKeyFromFetchAIPublicKey(publicKey string) (crypto.PubKey, error) {
+	hexBytes, _ := hex.DecodeString(publicKey)
+	return crypto.UnmarshalSecp256k1PublicKey(hexBytes)
+}
+
+// BTCPubKeyFromFetchAIPublicKey
+func BTCPubKeyFromFetchAIPublicKey(publicKey string) (*btcec.PublicKey, error) {
+	pbkBytes, err := hex.DecodeString(publicKey)
+	if err != nil {
+		return nil, err
+	}
+	pbk, err := btcec.ParsePubKey(pbkBytes, btcec.S256())
+	return pbk, err
+}
+
+// ConvertStrEncodedSignatureToDER
+// References:
+//  - https://github.com/fetchai/agents-aea/blob/master/aea/crypto/cosmos.py#L258
+//  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
+func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
+	rb := signature[:len(signature)/2]
+	sb := signature[len(signature)/2:]
+	length := 6 + len(rb) + len(sb)
+	sigDER := make([]byte, length)
+	sigDER[0] = 0x30
+	sigDER[1] = byte(length - 2)
+	sigDER[2] = 0x02
+	sigDER[3] = byte(len(rb))
+	offset := copy(sigDER[4:], rb) + 4
+	sigDER[offset] = 0x02
+	sigDER[offset+1] = byte(len(sb))
+	copy(sigDER[offset+2:], sb)
+	return sigDER
+}
+
+// ParseFetchAISignature create btcec Signature from base64 formated, string (not DER) encoded RFC6979 signature
+func ParseFetchAISignature(signature string) (*btcec.Signature, error) {
+	// First convert the signature into a DER one
+	sigBytes, err := base64.StdEncoding.DecodeString(signature)
+	if err != nil {
+		return nil, err
+	}
+	sigDER := ConvertStrEncodedSignatureToDER(sigBytes)
+
+	// Parse
+	sigBTC, err := btcec.ParseSignature(sigDER, btcec.S256())
+	return sigBTC, err
+}
+
+// VerifyFetchAISignatureBTC verify the RFC6967 string-encoded signature of message using FetchAI public key
+func VerifyFetchAISignatureBTC(message []byte, signature string, pubkey string) (bool, error) {
+	// construct verifying key
+	verifyKey, err := BTCPubKeyFromFetchAIPublicKey(pubkey)
+	if err != nil {
+		return false, err
+	}
+
+	// construct signature
+	signatureBTC, err := ParseFetchAISignature(signature)
+	if err != nil {
+		return false, err
+	}
+
+	// verify signature
+	messageHash := sha256.New()
+	_, err = messageHash.Write([]byte(message))
+	if err != nil {
+		return false, err
+	}
+
+	return signatureBTC.Verify(messageHash.Sum(nil), verifyKey), nil
+}
+
+// VerifyFetchAISignatureLibp2p verify RFC6967 string-encoded signature of message using FetchAI public key
+func VerifyFetchAISignatureLibp2p(message []byte, signature string, pubkey string) (bool, error) {
+	// construct verifying key
+	verifyKey, err := PubKeyFromFetchAIPublicKey(pubkey)
+	if err != nil {
+		return false, err
+	}
+
+	// Convert signature into DER encoding
+	sigBytes, err := base64.StdEncoding.DecodeString(signature)
+	if err != nil {
+		return false, err
+	}
+	sigDER := ConvertStrEncodedSignatureToDER(sigBytes)
+
+	// verify signature
+	return verifyKey.Verify(message, sigDER)
+}
+
 // KeyPairFromFetchAIKey  key pair from hex encoded secp256k1 private key
 func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
 	pk_bytes, err := hex.DecodeString(key)
@@ -200,22 +315,57 @@ func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
 	return prvKey, pubKey, nil
 }
 
-// GetPeersAddrInfo Parse multiaddresses and convert them to peer.AddrInfo
-func GetPeersAddrInfo(peers []string) ([]peer.AddrInfo, error) {
-	pinfos := make([]peer.AddrInfo, len(peers))
-	for i, addr := range peers {
-		maddr := multiaddr.StringCast(addr)
-		p, err := peer.AddrInfoFromP2pAddr(maddr)
-		if err != nil {
-			return pinfos, err
-		}
-		pinfos[i] = *p
+// FetchAIAddressFromPublicKey get wallet address from hex encoded secp256k1 public key
+// format from: https://github.com/fetchai/agents-aea/blob/master/aea/crypto/cosmos.py#L120
+func FetchAIAddressFromPublicKey(publicKey string) (string, error) {
+	var addr string
+	var err error
+	hexBytes, err := hex.DecodeString(publicKey)
+	if err != nil {
+		return addr, err
 	}
-	return pinfos, nil
+	hash := sha256.New()
+	_, err = hash.Write(hexBytes)
+	if err != nil {
+		return addr, err
+	}
+	sha256Hash := hash.Sum(nil)
+	hash = ripemd160.New()
+	_, err = hash.Write(sha256Hash)
+	if err != nil {
+		return addr, err
+	}
+	ripemd160Hash := hash.Sum(nil)
+	fiveBitsChar, err := bech32.ConvertBits(ripemd160Hash, 8, 5, true)
+	if err != nil {
+		return addr, err
+	}
+	addr, err = bech32.Encode("fetch", fiveBitsChar)
+	return addr, err
 }
 
 // IDFromFetchAIPublicKey Get PeeID (multihash) from fetchai public key
 func IDFromFetchAIPublicKey(public_key string) (peer.ID, error) {
+	b, err := hex.DecodeString(public_key)
+	if err != nil {
+		return "", err
+	}
+
+	pub_key, err := btcec.ParsePubKey(b, btcec.S256())
+	if err != nil {
+		return "", err
+	}
+
+	multihash, err := peer.IDFromPublicKey((*crypto.Secp256k1PublicKey)(pub_key))
+	if err != nil {
+		return "", err
+	}
+
+	return multihash, nil
+}
+
+// IDFromFetchAIPublicKeyUncompressed Get PeeID (multihash) from fetchai public key
+func IDFromFetchAIPublicKeyUncompressed(public_key string) (peer.ID, error) {
 	b, err := hex.DecodeString(public_key)
 	if err != nil {
 		return "", err
