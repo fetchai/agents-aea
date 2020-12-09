@@ -20,10 +20,13 @@
 """Module with generic utils of the aea cli."""
 
 import os
+import subprocess  # nosec
 from typing import Dict, List
 
 import yaml
 from click import ClickException
+
+from aea.cli.utils.constants import DEFAULT_CLI_TIMEOUT
 
 
 def get_parent_object(obj: Dict, dotted_path: List[str]):
@@ -84,3 +87,24 @@ def is_readme_present(readme_path: str) -> bool:
     :return: bool is readme file present.
     """
     return os.path.exists(readme_path)
+
+
+def run_cli_command_subprocess(*args, timeout: int = DEFAULT_CLI_TIMEOUT, **kwargs):
+    """
+    Run a CLI command using a subprocess.
+
+    :param args: arguments to subprocess.Popen
+    :param timeout: the timeout for waiting the completion of the subprocess.
+    :param kwargs: keyword arguments to subprocess.Open
+    :return: None
+    """
+    process = subprocess.Popen(*args, **kwargs)  # nosec
+    try:
+        process.wait(timeout)
+        return_code = process.returncode
+    finally:
+        poll = process.poll()
+        if poll is None:  # pragma: no cover
+            process.terminate()
+            process.wait(timeout)
+    return return_code

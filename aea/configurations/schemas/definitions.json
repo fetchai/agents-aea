@@ -106,6 +106,9 @@
         "$ref": "definitions.json#/definitions/ignore_pattern"
       }
     },
+    "build_entrypoint": {
+      "type": "string"
+    },
     "ledger_id": {
       "type": "string",
       "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"

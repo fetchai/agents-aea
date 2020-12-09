@@ -251,6 +251,7 @@ protocol_config_files = [
     os.path.join(FETCHAI_PREF, "protocols", "signing", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML),
+    os.path.join(CUR_PATH, "data", "dummy_protocol", PROTOCOL_YAML),
 ]
 
 connection_config_files = [
