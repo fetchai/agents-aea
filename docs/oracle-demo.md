@@ -31,7 +31,7 @@ Create the AEA that will deploy the contract.
 
 ``` bash
 aea create coin_price_oracle
-cd coin_price_oracle_client
+cd coin_price_oracle
 aea add connection fetchai/http_client:0.14.0
 aea add connection fetchai/ledger:0.10.0
 aea add connection fetchai/p2p_libp2p:0.12.0
