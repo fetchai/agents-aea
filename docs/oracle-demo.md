@@ -69,14 +69,14 @@ aea add-key ethereum ethereum_private_key.txt
 
 The oracle AEAs require either a locally runnning test node or a connection to a remote testnet.
 
-## Setting up with a local Ganache node
+### Setting up with a local Ganache node
 
 The easiest way to test the oracle agents is to set up a local Ethereum test node using Ganache. This can be done by running the following docker command from the directory you started from (in a separate terminal). This command will also fund the account of the AEA:
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000"
 ```
 
-## Run the Oracle AEA
+### Run the Oracle AEA
 
 Run the oracle agent. This will deploy a contract to the testnet, grant oracle permissions to the AEA's wallet address, and periodically update the contract with the latest price of FET (or whichever coin was specified).
 ```bash
