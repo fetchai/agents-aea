@@ -31,8 +31,8 @@ cd coin_price_oracle_client
 aea add connection fetchai/http_client:latest
 aea add connection fetchai/ledger:latest
 aea add connection fetchai/p2p_libp2p:latest
-aea add --local skill fetchai/coin_price:0.1.0
-aea add --local skill fetchai/simple_oracle:0.1.0
+aea add skill fetchai/coin_price:0.1.0
+aea add skill fetchai/simple_oracle:0.1.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:latest
 ```
