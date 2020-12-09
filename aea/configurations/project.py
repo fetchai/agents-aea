@@ -60,11 +60,13 @@ class Project:
         """
         ctx = Context(cwd=working_dir, registry_path=registry_path)
         ctx.set_config("skip_consistency_check", skip_consistency_check)
+
         path = os.path.join(working_dir, public_id.author, public_id.name)
         target_dir = os.path.join(public_id.author, public_id.name)
 
         if not is_restore and not os.path.exists(target_dir):
             if is_local:
+                ctx.set_config("is_local", True)
                 fetch_agent_locally(ctx, public_id, target_dir=target_dir)
             else:
                 fetch_agent(ctx, public_id, target_dir=target_dir)

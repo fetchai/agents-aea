@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of runtime for economic agent (AEA)."""
 import asyncio
 from asyncio.events import AbstractEventLoop
@@ -94,7 +92,7 @@ class BaseRuntime(Runnable, WithLogger):
         if agent.storage_uri:
             # threaded has to be always True, cause syncrhonous operations are supported
             return Storage(agent.storage_uri, threaded=True)
-        return None
+        return None  # pragma: nocover
 
     @property
     def storage(self) -> Optional[Storage]:
