@@ -12,7 +12,7 @@ fingerprint:
   dialogues.py: QmVvP34aKWEtHrKmccNMvEdDnx5B7xpE5aEGzr6GU2u8UK
   message.py: QmPe3bDLXp4nEQo9Xz5dVTsQNMv2VcDdLzMifooseVpTwT
   ml_trade.proto: QmXqDTBhno2kMLdAbNiZWcAHpjiJ95qXL4doUnhdmCNkhk
-  ml_trade_pb2.py: QmeKzqAkBYziFFZuY5k45pkuHCd7TDWDzfK7D8bHgGqJR7
+  ml_trade_pb2.py: QmdV8LAo3xNJyJXUr8cdVUnPdZE7KqTDiNMwAHrvYTwsKF
   serialization.py: QmNnEyqVdHuXXQLjAvbyibmdRbWBZG8tNEQy32s7SAVtcE
 fingerprint_ignore_patterns: []
 dependencies:

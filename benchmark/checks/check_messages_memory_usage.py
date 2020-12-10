@@ -66,7 +66,7 @@ def run(messages_amount: int):
 
 
 @click.command()
-@click.option("--messages", default=10 ** 5, help="Amount of messages.")
+@click.option("--messages", default=10 ** 6, help="Amount of messages.")
 @click.option("--number_of_runs", default=10, help="How many times run test.")
 def main(messages, number_of_runs):
     """Run test."""
