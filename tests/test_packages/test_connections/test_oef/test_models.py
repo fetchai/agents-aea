@@ -192,10 +192,10 @@ class TestCheckValidity:
         assert m_constraint.check("Paris")
         assert str(m_constraint.type) == "!="
         m_constraint = ConstraintType("<", 3.14)
-        assert m_constraint.check(5.0)
+        assert m_constraint.check(3.0)
         assert str(m_constraint.type) == "<"
         m_constraint = ConstraintType(">", 3.14)
-        assert m_constraint.check(2.0)
+        assert m_constraint.check(5.0)
         assert str(m_constraint.type) == ">"
         m_constraint = ConstraintType("<=", 5)
         assert m_constraint.check(5)
