@@ -22,10 +22,8 @@ Another benefit is memory saving with offloading feature.
 
 ### Keep terminal state dialogues
 
-Dialogues/Model skill has the optional boolean argument `keep_terminal_state_dialogues`
-specifies should dialogue reached terminal state kept in memory or not.
-if `keep_terminal_state_dialogues` is False, dialogues that reaches  terminal state  is removed from the memory and can not be used anymore
-if `keep_terminal_state_dialogues` is True, dialogues that reaches  terminal state  is removed from the memory and can not be used anymore
+The Dialogues class has the optional boolean argument `keep_terminal_state_dialogues`
+which specifies whether a dialogue which has reached its terminal state is kept in memory or not. If `keep_terminal_state_dialogues` is `False`, dialogues that reach a terminal state are removed from memory and can not be used anymore. If `keep_terminal_state_dialogues` is `True`, dialogues that reach a terminal state are kept.
 
 It useful to save memory with dialogues that are in terminal state and probably will be never used again.
 
@@ -34,13 +32,6 @@ Default behaviour on keep terminals state dialogues is set according to the prot
 
 Skill configuration to keep terminated dialogues for DefaultDialogues.
 Example:
-```
-models:
-  default_dialogues:
-    args:
-    	keep_terminal_state_dialogues: true
-    class_name: DefaultDialogues
-```
 ### Dialogues dump/restore on agent restart
 if storage is enabled: all the dialogues present in memory will be stored on agent's teardown and loaded on agent's start.
 
