@@ -75,7 +75,7 @@ class TestPrometheusConnection:
         """Initialise the class."""
         self.metrics = {}
         configuration = ConnectionConfig(
-            connection_id=PrometheusConnection.connection_id
+            connection_id=PrometheusConnection.connection_id, port=8080,
         )
         self.agent_address = "my_address"
         identity = Identity("name", address=self.agent_address)

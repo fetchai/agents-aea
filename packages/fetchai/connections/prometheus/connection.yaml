@@ -7,14 +7,13 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmQSsaKFYKePv83epZUcJCxB8TLruv19vUT6gAk8XwrYtD
-  __init__.py: Qmd6FFfGMToC6VWfXcy88VXUErg4rcQ8K2xmEpgpHteG7K
-  connection.py: QmYe7fyrAX95ihJMpVrxuVcm9P4eUmdosJ8zNaVMofhSzo
+  __init__.py: QmWVrDiiePsr6vTnvbPTcDrayR89ji3hf25rs9V9TiJUPv
+  connection.py: QmNYkh3PkgdbvWhLmKzb2DPYQubHti3jfvtH2dZVN6ykdu
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []
 class_name: PrometheusConnection
 config:
-  host: 127.0.0.1
   port: 8080
 excluded_protocols: []
 restricted_to_protocols: []

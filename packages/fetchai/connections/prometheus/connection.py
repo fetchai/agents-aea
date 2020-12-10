@@ -44,6 +44,8 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.prometheus
 
 PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.1.0")
 
+DEFAULT_PORT = 8080
+
 
 class PrometheusDialogues(BasePrometheusDialogues):
     """The dialogues class keeps track of all prometheus dialogues."""
@@ -76,12 +78,18 @@ class PrometheusDialogues(BasePrometheusDialogues):
 
 
 class PrometheusChannel:
-    """A wrapper of the prometheus environment."""
+    """A wrapper for interacting with a prometheus server."""
 
     THREAD_POOL_SIZE = 3
 
-    def __init__(self, address: Address, metrics: Dict[str, Any]):
-        """Initialize a prometheus channel."""
+    def __init__(self, address: Address, metrics: Dict[str, Any], port: int):
+        """
+        Initialize a prometheus channel.
+
+        :param address: The address of the connection.
+        :param metrics: The prometheus metrics.
+        :param port: The port at which to expose the metrics.
+        """
         self.address = address
         self.metrics = metrics
         self._loop: Optional[asyncio.AbstractEventLoop] = None
@@ -91,7 +99,7 @@ class PrometheusChannel:
         )
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = _default_logger
         self._dialogues = PrometheusDialogues()
-        self._port = 8080
+        self._port = port
 
     def _get_message_and_dialogue(
         self, envelope: Envelope
@@ -116,9 +124,9 @@ class PrometheusChannel:
 
     async def connect(self) -> None:
         """
-        Connect an address to the prometheus.
+        Start prometheus http server.
 
-        :return: an asynchronous queue, that constitutes the communication channel.
+        :return: None
         """
         if self._queue:  # pragma: nocover
             return None
@@ -140,7 +148,7 @@ class PrometheusChannel:
 
     async def handle_prometheus_message(self, envelope: Envelope) -> None:
         """
-        Forward a message to prometheus.
+        Handle messages to prometheus.
 
         :param envelope: the envelope
         :return: None
@@ -236,19 +244,22 @@ class PrometheusConnection(Connection):
 
     def __init__(self, **kwargs):
         """
-        Initialize a connection to a local prometheus environment.
+        Initialize a connection to a local prometheus server.
 
         :param kwargs: the keyword arguments of the parent class.
         """
         super().__init__(**kwargs)
 
+        print(self.configuration)
+
+        self.port = cast(int, self.configuration.config.get("port", DEFAULT_PORT))
         self.metrics = {}
-        self.channel = PrometheusChannel(self.address, self.metrics)
+        self.channel = PrometheusChannel(self.address, self.metrics, self.port)
         self._connection = None  # type: Optional[asyncio.Queue]
 
     async def connect(self) -> None:
         """
-        Connect to prometheus server.
+        Connect to prometheus server via prometheus channel.
 
         :return: None
         """
@@ -285,7 +296,11 @@ class PrometheusConnection(Connection):
         await self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
-        """Receive an envelope."""
+        """
+        Receive an envelope.
+
+        :return: The received envelope or None
+        """
         self._ensure_connected()
         try:
             envelope = await self.channel.get()

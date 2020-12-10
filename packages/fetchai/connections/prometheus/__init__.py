@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Scaffold of the Prometheus connection."""
+"""Implementation of the Prometheus connection."""

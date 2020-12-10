@@ -38,7 +38,7 @@ models:
       currency: usd
       decimals: 5
       url: https://api.coingecko.com/api/v3/
-      use_http_server: true
+      use_http_server: false
     class_name: CoinPriceModel
   http_dialogues:
     args: {}
