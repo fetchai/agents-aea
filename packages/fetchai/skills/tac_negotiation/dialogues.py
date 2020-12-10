@@ -170,15 +170,15 @@ class FipaDialogues(Model, BaseFipaDialogues):
             """
             fipa_message = cast(FipaMessage, message)
             if fipa_message.performative != FipaMessage.Performative.CFP:
-                raise ValueError("First message must be a CFP!")
+                raise ValueError("First message must be a CFP!")  # pragma: nocover
             query = fipa_message.query
             if query.model is None:
-                raise ValueError("Query must have a data model!")
+                raise ValueError("Query must have a data model!")  # pragma: nocover
             if query.model.name not in [
                 SUPPLY_DATAMODEL_NAME,
                 DEMAND_DATAMODEL_NAME,
             ]:
-                raise ValueError(
+                raise ValueError(  # pragma: nocover
                     "Query data model name must be in [{},{}]".format(
                         SUPPLY_DATAMODEL_NAME, DEMAND_DATAMODEL_NAME
                     )
@@ -198,6 +198,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
             self,
             self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
+            dialogue_class=FipaDialogue,
         )
 
 

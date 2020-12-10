@@ -128,8 +128,8 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.9.0",
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.12.0",
+            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
+            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
         # generate random location
@@ -141,14 +141,14 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         # Setup seller
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.13.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/thermometer:0.16.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.15.0")
+        self.eject_item("skill", "fetchai/thermometer:0.16.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.nested_set_config(
             "skills.thermometer.models.strategy.args",
@@ -188,10 +188,10 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.13.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.16.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
@@ -285,7 +285,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
             "received proposal=",
             "accepting the proposal from sender=",
             "received MATCH_ACCEPT_W_INFORM from sender=",
-            "requesting transfer transaction from ledger api...",
+            "requesting transfer transaction from ledger api for message=",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "transaction signing was successful.",

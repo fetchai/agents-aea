@@ -1,5 +1,57 @@
 # Release History
 
+## 0.7.5 (2020-11-25)
+
+- Adds AW3 AEAs
+- Adds basic oracle skills and contracts
+- Replaces usage of Ropsten testnet with Ganache in packages
+- Fixes multiplexer setup when used outside AEA
+- Improves help command output of CLI
+- Adds integration tests for simple skills
+- Adds version check on CLI push
+- Adds integration tests for tac negotiation skills
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
+## 0.7.4 (2020-11-18)
+
+- Replaces error skill handler usage with built in handler
+- Extends MultiAgentManager to support persistence between runs
+- Replaces usage of Ropsten testnet with Ganache
+- Adds support for symlink creation during scaffold and add
+- Makes contract interface loading extensible
+- Adds support for PEP561
+- Adds integration tests for launcher command
+- Adds support for storage of unique page address in SOEF
+- Fixes publish command bug on Windows
+- Refactors constants usage throughout
+- Adds support for profiling on aea run
+- Multiple stability improvements to core async modules
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
+## 0.7.3 (2020-11-12)
+
+- Extends AW AEAs
+- Fixes overwriting of private key files on startup
+- Fixes behaviour bugs
+- Adds tests for tac participation skill
+- Adds development setup guide
+- Improves exception logging for easier debugging
+- Fixes mixed mode in upgrade command
+- Reduces verbosity of some CLI commands
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
+## 0.7.2 (2020-11-09)
+
+- Fixes some AW2 AEAs
+- Improves generic buyer AEA
+- Fixes a few backwards incompatibilities on CLI (upgrade, add, fetch) introduced in 0.7.1
+- Fixes geo locations in some tests
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.7.1 (2020-11-05)
 
 - Adds two AEAs for Agent World 2

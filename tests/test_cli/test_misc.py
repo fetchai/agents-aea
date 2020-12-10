@@ -47,49 +47,55 @@ def test_flag_help():
         result.stdout
         == """Usage: aea [OPTIONS] COMMAND [ARGS]...
 
-  Command-line tool for setting up an Autonomous Economic Agent.
+  Command-line tool for setting up an Autonomous Economic Agent (AEA).
 
 Options:
   --version                     Show the version and exit.
   -v, --verbosity LVL           One of NOTSET, DEBUG, INFO, WARNING, ERROR,
                                 CRITICAL, OFF
 
-  -s, --skip-consistency-check  Skip consistency check.
+  -s, --skip-consistency-check  Skip consistency checks of agent during command
+                                execution.
+
   --help                        Show this message and exit.
 
 Commands:
-  add               Add a resource to the agent.
-  add-key           Add a private key to the wallet.
-  config            Read or modify a configuration.
-  create            Create an agent.
+  add               Add a package to the agent.
+  add-key           Add a private key to the wallet of the agent.
+  build             Build the agent and its components.
+  config            Read or modify a configuration of the agent.
+  create            Create a new agent.
   delete            Delete an agent.
-  eject             Eject an installed item.
-  fetch             Fetch Agent from Registry.
-  fingerprint       Fingerprint a resource.
-  freeze            Get the dependencies.
-  generate          Generate a resource for the agent.
-  generate-key      Generate private keys.
-  generate-wealth   Generate wealth for address on test network.
-  get-address       Get the address associated with the private key.
+  eject             Eject a vendor package of the agent.
+  fetch             Fetch an agent from the registry.
+  fingerprint       Fingerprint a non-vendor package of the agent.
+  freeze            Get the dependencies of the agent.
+  generate          Generate a package for the agent.
+  generate-key      Generate a private key and place it in a file.
+  generate-wealth   Generate wealth for the agent on a test network.
+  get-address       Get the address associated with a private key of the...
   get-multiaddress  Get the multiaddress associated with a private key or...
-  get-wealth        Get the wealth associated with the private key.
+  get-wealth        Get the wealth associated with the private key of the...
   gui               Run the CLI GUI.
   init              Initialize your AEA configurations.
-  install           Install the dependencies.
-  interact          Interact with a running AEA via the stub connection.
+  install           Install the dependencies of the agent.
+  interact          Interact with the running agent via the stub connection.
   launch            Launch many agents at the same time.
-  list              List the installed resources.
-  login             Login to Registry account.
-  logout            Logout from Registry account.
-  publish           Publish Agent to Registry.
-  push              Push item to Registry or save it in local packages.
-  register          Register a new Registry account.
-  remove            Remove a resource from the agent.
-  reset_password    Reset password of Registry account.
+  list              List the installed packages of the agent.
+  login             Login to the registry account.
+  logout            Logout from the registry account.
+  publish           Publish the agent to the registry.
+  push              Push a non-vendor package of the agent to the registry.
+  register          Create a new registry account.
+  remove            Remove a package from the agent.
+  remove-key        Remove a private key from the wallet of the agent.
+  reset_password    Reset the password of the registry account.
   run               Run the agent.
-  scaffold          Scaffold a resource for the agent.
-  search            Search for components in the registry.
-  transfer          Get the wealth associated with the private key.
-  upgrade           Upgrade agent's component.
+  scaffold          Scaffold a package for the agent.
+  search            Search for packages in the registry.
+  transfer          Transfer wealth associated with a private key of the
+                    agent...
+
+  upgrade           Upgrade the packages of the agent.
 """
     )

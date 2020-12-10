@@ -33,20 +33,26 @@ from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import (
-    AgentConfig,
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_VERSION,
-)
+from aea.configurations.base import AgentConfig, PublicId
 from aea.configurations.constants import (
+    CONNECTION,
+    CONNECTIONS,
+    CONTRACTS,
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
     DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_PATH,
     DEFAULT_SKILL,
+    DEFAULT_VERSION,
+    PROTOCOL,
+    PROTOCOLS,
     SIGNING_PROTOCOL,
+    SKILL,
+    SKILLS,
     STATE_UPDATE_PROTOCOL,
+    VENDOR,
 )
 
 
@@ -68,7 +74,7 @@ def create(
     local: bool,
     empty: bool,
 ):
-    """Create an agent."""
+    """Create a new agent."""
     ctx = cast(Context, click_context.obj)
     create_aea(ctx, agent_name, local, author=author, empty=empty)
 
@@ -128,14 +134,14 @@ def create_aea(
 
     try:
         # set up packages directories.
-        _setup_package_folder(Path(agent_name, "protocols"))
-        _setup_package_folder(Path(agent_name, "contracts"))
-        _setup_package_folder(Path(agent_name, "connections"))
-        _setup_package_folder(Path(agent_name, "skills"))
+        _setup_package_folder(Path(agent_name, PROTOCOLS))
+        _setup_package_folder(Path(agent_name, CONTRACTS))
+        _setup_package_folder(Path(agent_name, CONNECTIONS))
+        _setup_package_folder(Path(agent_name, SKILLS))
 
         # set up a vendor directory
-        Path(agent_name, "vendor").mkdir(exist_ok=False)
-        Path(agent_name, "vendor", "__init__.py").touch(exist_ok=False)
+        Path(agent_name, VENDOR).mkdir(exist_ok=False)
+        Path(agent_name, VENDOR, "__init__.py").touch(exist_ok=False)
 
         # create a config file inside it
         click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -149,11 +155,11 @@ def create_aea(
             click.echo("Adding default packages ...")
             if local:
                 ctx.set_config("is_local", True)
-            add_item(ctx, "protocol", DEFAULT_PROTOCOL)
-            add_item(ctx, "protocol", SIGNING_PROTOCOL)
-            add_item(ctx, "protocol", STATE_UPDATE_PROTOCOL)
-            add_item(ctx, "connection", DEFAULT_CONNECTION)
-            add_item(ctx, "skill", DEFAULT_SKILL)
+            add_item(ctx, PROTOCOL, PublicId.from_str(DEFAULT_PROTOCOL))
+            add_item(ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL))
+            add_item(ctx, PROTOCOL, PublicId.from_str(STATE_UPDATE_PROTOCOL))
+            add_item(ctx, CONNECTION, PublicId.from_str(DEFAULT_CONNECTION))
+            add_item(ctx, SKILL, PublicId.from_str(DEFAULT_SKILL))
 
     except Exception as e:
         raise click.ClickException(str(e))
@@ -178,7 +184,7 @@ def _crete_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agent
         registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
         description="",
         default_ledger=DEFAULT_LEDGER,
-        default_connection=str(DEFAULT_CONNECTION.to_any()),
+        default_connection=str(PublicId.from_str(DEFAULT_CONNECTION).to_any()),
     )
 
     with open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w") as config_file:
@@ -199,7 +205,7 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
     while current not in (home, root):
         files = set(map(lambda x: x.name, current.iterdir()))
         if DEFAULT_AEA_CONFIG_FILE in files:
-            raise Exception(
+            raise ValueError(
                 "Folder {} has file named {}".format(current, DEFAULT_AEA_CONFIG_FILE)
             )
         current = current.parent.resolve()

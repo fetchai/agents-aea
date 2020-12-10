@@ -35,9 +35,25 @@ from typing import Dict, List, Set
 import yaml
 
 from aea.configurations.base import PackageId, PackageType, PublicId
+from aea.configurations.constants import (
+    AGENTS,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
 
 DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
+
+CONFIG_FILE_NAMES = [
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+]  # type: List[str]
 
 
 class DependencyNotFound(Exception):
@@ -67,7 +83,12 @@ class DependencyNotFound(Exception):
 def find_all_configuration_files():
     """Find all configuration files."""
     packages_dir = Path("packages")
-    return list(chain(packages_dir.glob("*/*/*/*.yaml"), default_config_file_paths()))
+    config_files = [
+        path
+        for path in packages_dir.glob("*/*/*/*.yaml")
+        if any([file in str(path) for file in CONFIG_FILE_NAMES])
+    ]
+    return list(chain(config_files, default_config_file_paths()))
 
 
 def default_config_file_paths():
@@ -83,10 +104,18 @@ def get_public_id_from_yaml(configuration_file: Path):
     :param configuration_file: the path to the config yaml
     """
     data = unified_yaml_load(configuration_file)
-    author = data["author"]
+    author = data.get("author", None)
+    if not author:
+        raise KeyError(f"No author field in {str(configuration_file)}")
     # handle the case when it's a package or agent config file.
-    name = data["name"] if "name" in data else data["agent_name"]
-    version = data["version"]
+    try:
+        name = data["name"] if "name" in data else data["agent_name"]
+    except KeyError:
+        print(f"No name or agent_name field in {str(configuration_file)}")
+        raise
+    version = data.get("version", None)
+    if not version:
+        raise KeyError(f"No version field in {str(configuration_file)}")
     return PublicId(author, name, version)
 
 
@@ -121,7 +150,7 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
     """
     package_type = configuration_file.parent.parent.name
     with configuration_file.open() as fp:
-        if package_type != "agents":
+        if package_type != AGENTS:
             return yaml.safe_load(fp)
         # when it is an agent configuration file,
         # we are interested only in the first page of the YAML,

@@ -22,6 +22,7 @@ import queue
 import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
+from concurrent.futures._base import TimeoutError as FuturesTimeoutError
 from contextlib import suppress
 from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
 
@@ -68,6 +69,8 @@ class MultiplexerStatus(AsyncState):
 
 class AsyncMultiplexer(Runnable, WithLogger):
     """This class can handle multiple connections at once."""
+
+    DISCONNECT_TIMEOUT = 5
 
     def __init__(
         self,
@@ -380,7 +383,13 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self.logger.debug("Tear the multiplexer connections down.")
         for connection_id, connection in self._id_to_connection.items():
             try:
-                await asyncio.wait_for(self._disconnect_one(connection_id), timeout=5)
+                await asyncio.wait_for(
+                    self._disconnect_one(connection_id), timeout=self.DISCONNECT_TIMEOUT
+                )
+            except FuturesTimeoutError:
+                self.logger.debug(  # pragma: nocover
+                    f"Disconnection of `{connection_id}` timed out."
+                )
             except Exception as e:  # pylint: disable=broad-except
                 self.logger.exception(
                     "Error while disconnecting {}: {}".format(
@@ -436,7 +445,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
             self.logger.debug("Sending loop cancelled.")
             raise
         except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-            self.logger.error("Error in the sending loop: {}".format(str(e)))
+            self.logger.exception("Error in the sending loop: {}".format(str(e)))
             raise
 
     async def _receiving_loop(self) -> None:
@@ -603,7 +612,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :return: None.
         """
         self.default_routing = default_routing or {}
+
+        # replace connections
         self._connections = []
+        self._id_to_connection = {}
+
         for c in connections:
             self.add_connection(c, c.public_id == default_connection)
 

@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Conftest module for Pytest."""
-import asyncio
+import difflib
 import inspect
 import logging
 import os
@@ -31,16 +31,13 @@ import threading
 import time
 from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
-from threading import Timer
 from types import FunctionType, MethodType
-from typing import Callable, List, Optional, Sequence, cast
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, cast
 from unittest.mock import patch
 
 import docker as docker
 import gym
 import pytest
-from docker.models.containers import Container
-from oef.agents import AsyncioCore, OEFAgent
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -60,11 +57,16 @@ from aea.contracts.base import Contract, contract_registry
 from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import _COSMOS
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
-from aea.crypto.ethereum import _ETHEREUM
+from aea.crypto.ethereum import DEFAULT_CHAIN_ID as ETHEREUM_DEFAULT_CHAIN_ID
+from aea.crypto.ethereum import (
+    DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM,
+)
+from aea.crypto.ethereum import EthereumApi, EthereumCrypto, _ETHEREUM
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.fetchai import _FETCHAI
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
-from aea.crypto.registries import make_crypto
+from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
+from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
@@ -83,6 +85,11 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
+from tests.common.docker_image import (
+    DockerImage,
+    GanacheDockerImage,
+    OEFSearchDockerImage,
+)
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
 
@@ -122,6 +129,11 @@ COSMOS = _COSMOS
 ETHEREUM = _ETHEREUM
 FETCHAI = _FETCHAI
 
+# URL to local Ganache instance
+DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
+DEFAULT_GANACHE_PORT = 8545
+DEFAULT_GANACHE_CHAIN_ID = 1337
+
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
 
@@ -129,12 +141,19 @@ COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
 ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
 FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
 
+ETHEREUM_PRIVATE_KEY_TWO_FILE = "ethereum_private_key_two.txt"
+
+DEFAULT_AMOUNT = 1000000000000000000000
+
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", COSMOS_PRIVATE_KEY_FILE
 )
 ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
+)
+ETHEREUM_PRIVATE_KEY_TWO_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_TWO_FILE
 )
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
@@ -183,15 +202,16 @@ NON_GENESIS_CONFIG_TWO = {
     "public_uri": "127.0.0.1:9002",
     "ledger_id": "cosmos",
 }
-PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
-PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-PUBLIC_DHT_DELEGATE_URI_1 = "agents-p2p-dht.sandbox.fetch-ai.com:11000"
-PUBLIC_DHT_DELEGATE_URI_2 = "agents-p2p-dht.sandbox.fetch-ai.com:11001"
+PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
+PUBLIC_DHT_P2P_MADDR_2 = "/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
+PUBLIC_DHT_DELEGATE_URI_1 = "acn.fetch.ai:11000"
+PUBLIC_DHT_DELEGATE_URI_2 = "acn.fetch.ai:11001"
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
 ETHEREUM_TESTNET_CONFIG = {
     "address": ETHEREUM_DEFAULT_ADDRESS,
+    "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
     "gas_price": 50,
 }
 FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
@@ -231,6 +251,7 @@ protocol_config_files = [
     os.path.join(FETCHAI_PREF, "protocols", "signing", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML),
+    os.path.join(CUR_PATH, "data", "dummy_protocol", PROTOCOL_YAML),
 ]
 
 connection_config_files = [
@@ -251,7 +272,6 @@ connection_config_files = [
     os.path.join(CUR_PATH, "data", "dummy_connection", CONNECTION_YAML),
     os.path.join(CUR_PATH, "data", "gym-connection.yaml"),
 ]
-
 
 skill_config_files = [
     os.path.join(ROOT_DIR, "aea", "skills", "scaffold", SKILL_YAML),
@@ -286,7 +306,6 @@ skill_config_files = [
     os.path.join(CUR_PATH, "data", "dependencies_skill", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "exception_skill", SKILL_YAML),
 ]
-
 
 agent_config_files = [
     os.path.join(CUR_PATH, "data", "dummy_aea", AGENT_YAML),
@@ -323,6 +342,43 @@ protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
+
+
+def match_files(fname1: str, fname2: str) -> Tuple[bool, str]:
+    """
+    Find out whether two text files match.
+
+    :param fname1: string path to file 1
+    :param fname2: string path to file 2
+
+    :return: whether files match (True) or not (False) and a string of their difference ("" if they match)
+    """
+    with open(fname1, "r") as f1, open(fname2, "r") as f2:
+        difference = set(f1).difference(f2)
+    are_identical = difference == set()
+
+    diff = ""
+    if not are_identical:
+        diff = find_difference(fname1, fname2)
+    return are_identical, diff
+
+
+def find_difference(fname1: str, fname2: str) -> str:
+    """Find the difference between two text files."""
+    diff = ""
+    with open(fname1) as f1, open(fname2) as f2:
+        differ = difflib.Differ()
+
+        for line in differ.compare(f1.readlines(), f2.readlines()):
+            if not (line.startswith(" ") or line.startswith("? ")):
+                line = line[2:].lstrip()
+                diff += line
+    return diff
+
+
+def number_of_diff_lines(diff: str) -> int:
+    """Give number of lines in a diff string."""
+    return diff.count("\n") if diff != "" else 0
 
 
 def only_windows(fn: Callable) -> Callable:
@@ -362,6 +418,7 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
 
     :return: decorated object
     """
+
     # for docstyle.
     def decorator(pytest_func):
         """
@@ -424,6 +481,18 @@ def oef_port() -> int:
     return 10000
 
 
+@pytest.fixture(scope="session")
+def ganache_addr() -> str:
+    """HTTP address to the Ganache node."""
+    return DEFAULT_GANACHE_ADDR
+
+
+@pytest.fixture(scope="session")
+def ganache_port() -> int:
+    """Port of the connection to the OEF Node to use during the tests."""
+    return DEFAULT_GANACHE_PORT
+
+
 def tcpping(ip, port, log_exception: bool = True) -> bool:
     """Ping TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -454,144 +523,6 @@ def wait_for_localhost_ports_to_close(
             elapsed += sleep_time
     if open_ports != []:
         raise ValueError("Some ports are open: {}!".format(open_ports))
-
-
-class OEFHealthCheck(object):
-    """A health check class."""
-
-    def __init__(
-        self,
-        oef_addr: str,
-        oef_port: int,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
-    ):
-        """
-        Initialize.
-
-        :param oef_addr: IP address of the OEF node.
-        :param oef_port: Port of the OEF node.
-        """
-        self.oef_addr = oef_addr
-        self.oef_port = oef_port
-
-        self._result = False
-        self._stop = False
-        self._core = AsyncioCore()
-        self.agent = OEFAgent(
-            "check", core=self._core, oef_addr=self.oef_addr, oef_port=self.oef_port
-        )
-        self.agent.on_connect_success = self.on_connect_ok
-        self.agent.on_connection_terminated = self.on_connect_terminated
-        self.agent.on_connect_failed = self.exception_handler
-
-    def exception_handler(self, url=None, ex=None):
-        """Handle exception during a connection attempt."""
-        print("An error occurred. Exception: {}".format(ex))
-        self._stop = True
-
-    def on_connect_ok(self, url=None):
-        """Handle a successful connection."""
-        print("Connection OK!")
-        self._result = True
-        self._stop = True
-
-    def on_connect_terminated(self, url=None):
-        """Handle a connection failure."""
-        print("Connection terminated.")
-        self._stop = True
-
-    def run(self) -> bool:
-        """
-        Run the check, asynchronously.
-
-        :return: True if the check is successful, False otherwise.
-        """
-        self._result = False
-        self._stop = False
-
-        def stop_connection_attempt(self):
-            if self.agent.state == "connecting":
-                self.agent.state = "failed"
-
-        t = Timer(1.5, stop_connection_attempt, args=(self,))
-
-        try:
-            print("Connecting to {}:{}...".format(self.oef_addr, self.oef_port))
-            self._core.run_threaded()
-
-            t.start()
-            self._result = self.agent.connect()
-            self._stop = True
-
-            if self._result:
-                print("Connection established. Tearing down connection...")
-                self.agent.disconnect()
-                t.cancel()
-            else:
-                print("A problem occurred. Exiting...")
-            return self._result
-
-        except Exception as e:
-            print(str(e))
-            return self._result
-        finally:
-            t.join(1.0)
-            self.agent.stop()
-            self.agent.disconnect()
-            self._core.stop()
-
-
-def _stop_oef_search_images():
-    """Stop the OEF search image."""
-    client = docker.from_env()
-    for container in client.containers.list():
-        if "fetchai/oef-search:0.7" in container.image.tags:
-            logger.info("Stopping existing Docker image...")
-            container.stop()
-
-
-def _wait_for_oef(max_attempts: int = 15, sleep_rate: float = 1.0):
-    """Wait until the OEF is up."""
-    success = False
-    attempt = 0
-    while not success and attempt < max_attempts:
-        attempt += 1
-        logger.info("Attempt {}...".format(attempt))
-        oef_healthcheck = OEFHealthCheck("127.0.0.1", 10000)
-        result = oef_healthcheck.run()
-        if result:
-            success = True
-        else:
-            logger.info(
-                "OEF not available yet - sleeping for {} second...".format(sleep_rate)
-            )
-            time.sleep(sleep_rate)
-
-    return success
-
-
-def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
-    client = docker.from_env()
-
-    logger.info(ROOT_DIR + "/tests/common/oef_search_pluto_scripts")
-    ports = {
-        "20000/tcp": ("0.0.0.0", 20000),  # nosec
-        "30000/tcp": ("0.0.0.0", 30000),  # nosec
-        "{}/tcp".format(oef_port_): ("0.0.0.0", oef_port_),  # nosec
-    }
-    volumes = {
-        ROOT_DIR
-        + "/tests/common/oef_search_pluto_scripts": {"bind": "/config", "mode": "rw"},
-        ROOT_DIR + "/data/oef-logs": {"bind": "/logs", "mode": "rw"},
-    }
-    c = client.containers.run(
-        "fetchai/oef-search:0.7",
-        "/config/node_config.json",
-        detach=True,
-        ports=ports,
-        volumes=volumes,
-    )
-    return c
 
 
 def pytest_addoption(parser) -> None:
@@ -645,36 +576,94 @@ def apply_aea_loop(request) -> None:
 
 
 @pytest.fixture(scope="session")
+@action_for_platform("Linux", skip=False)
 def network_node(
     oef_addr, oef_port, pytestconfig, timeout: float = 2.0, max_attempts: int = 10
 ):
     """Network node initialization."""
-    if sys.version_info < (3, 7):
-        pytest.skip("Python version < 3.7 not supported by the OEF.")
-        return
+    client = docker.from_env()
+    image = OEFSearchDockerImage(client, oef_addr, oef_port)
+    yield from _launch_image(image, timeout, max_attempts)
 
-    if os.name == "nt":
-        pytest.skip("Skip test as it doesn't work on Windows.")
 
-    _stop_oef_search_images()
-    c = _create_oef_docker_image(oef_addr, oef_port)
-    c.start()
+@pytest.fixture(scope="session")
+def ganache_configuration():
+    """Get the Ganache configuration for testing purposes."""
+    return dict(
+        accounts_balances=[
+            (FUNDED_ETH_PRIVATE_KEY_1, DEFAULT_AMOUNT),
+            (FUNDED_ETH_PRIVATE_KEY_2, DEFAULT_AMOUNT),
+            (FUNDED_ETH_PRIVATE_KEY_3, DEFAULT_AMOUNT),
+            (Path(ETHEREUM_PRIVATE_KEY_PATH).read_text().strip(), DEFAULT_AMOUNT),
+        ],
+    )
 
-    # wait for the setup...
-    logger.info("Setting up the OEF node...")
-    success = _wait_for_oef(max_attempts=max_attempts, sleep_rate=timeout)
 
+@pytest.fixture(scope="session")
+def ethereum_testnet_config(ganache_addr, ganache_port):
+    """Get Ethereum ledger api configurations using Ganache."""
+    new_uri = f"{ganache_addr}:{ganache_port}"
+    new_config = {
+        "address": new_uri,
+        "chain_id": DEFAULT_GANACHE_CHAIN_ID,
+        "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
+    }
+    return new_config
+
+
+@pytest.fixture(scope="function")
+def update_default_ethereum_ledger_api(ethereum_testnet_config):
+    """Change temporarily default Ethereum ledger api configurations to interact with local Ganache."""
+    old_config = DEFAULT_LEDGER_CONFIGS.pop(EthereumApi.identifier, None)
+    DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = ethereum_testnet_config
+    yield
+    DEFAULT_LEDGER_CONFIGS.pop(EthereumApi.identifier)
+    DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = old_config
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.fixture(scope="session")
+@action_for_platform("Linux", skip=False)
+def ganache(
+    ganache_configuration,
+    ganache_addr,
+    ganache_port,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
+    """Launch the Ganache image."""
+    client = docker.from_env()
+    image = GanacheDockerImage(
+        client, "http://127.0.0.1", 8545, config=ganache_configuration
+    )
+    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
+
+
+def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 10):
+    """
+    Launch image.
+
+    :param image: an instancoe of Docker image.
+    :return: None
+    """
+    image.check_skip()
+    image.stop_if_already_running()
+    container = image.create()
+    container.start()
+    logger.info(f"Setting up image {image.tag}...")
+    success = image.wait(max_attempts, timeout)
     if not success:
-        c.stop()
-        c.remove()
-        pytest.fail("OEF doesn't work. Exiting...")
+        container.stop()
+        container.remove()
+        pytest.fail(f"{image.tag} doesn't work. Exiting...")
     else:
         logger.info("Done!")
         time.sleep(timeout)
         yield
-        logger.info("Stopping the OEF node...")
-        c.stop()
-        c.remove()
+        logger.info(f"Stopping the image {image.tag}...")
+        container.stop()
+        container.remove()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -857,6 +846,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
 
     :return: decorated method.
     """
+
     # for pydcostyle
     @wraps(fn)
     def wrapper(self, *args, **kwargs):
@@ -990,7 +980,7 @@ def check_test_threads(request):
 
 
 @pytest.fixture()
-async def ledger_apis_connection(request):
+async def ledger_apis_connection(request, ethereum_testnet_config):
     """Make a connection."""
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("name", crypto.address)
@@ -1001,13 +991,27 @@ async def ledger_apis_connection(request):
     )
     connection = cast(Connection, connection)
     connection._logger = logging.getLogger("aea.packages.fetchai.connections.ledger")
+
+    # use testnet config
+    connection.configuration.config.get("ledger_apis", {})[
+        "ethereum"
+    ] = ethereum_testnet_config
+
     await connection.connect()
     yield connection
     await connection.disconnect()
 
 
 @pytest.fixture()
-def erc1155_contract():
+def ledger_api(ethereum_testnet_config, ganache):
+    """Ledger api fixture."""
+    ledger_id, config = ETHEREUM, ethereum_testnet_config
+    api = ledger_apis_registry.make(ledger_id, **config)
+    yield api
+
+
+@pytest.fixture()
+def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
     """
     Instantiate an ERC1155 contract instance.
 
@@ -1023,7 +1027,102 @@ def erc1155_contract():
         Contract.from_config(configuration)
 
     contract = contract_registry.make(str(configuration.public_id))
-    yield contract
+
+    # deploy contract
+    crypto = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+
+    tx = contract.get_deploy_transaction(
+        ledger_api=ledger_api, deployer_address=crypto.address, gas=5000000
+    )
+    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    tx["gas"] = gas
+    tx_signed = crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    contract_address = cast(Dict, receipt)["contractAddress"]
+    yield contract, contract_address
+
+
+@pytest.fixture()
+def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port):
+    """Instantiate an ERC20 contract."""
+    directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "fet_erc20")
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
+    configuration._directory = directory
+    configuration = cast(ContractConfig, configuration)
+
+    if str(configuration.public_id) not in contract_registry.specs:
+        # load contract into sys modules
+        Contract.from_config(configuration)
+
+    contract = contract_registry.make(str(configuration.public_id))
+
+    # get two accounts
+    account1 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    account2 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_TWO_PATH)
+
+    tx = contract.get_deploy_transaction(
+        ledger_api=ledger_api,
+        deployer_address=account1.address,
+        gas=5000000,
+        name="FetERC20Mock",
+        symbol="MFET",
+        initialSupply=int(1e23),
+        decimals_=18,
+    )
+    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    tx["gas"] = gas
+    tx_signed = account1.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    contract_address = cast(Dict, receipt)["contractAddress"]
+
+    # Transfer some MFET to another default account
+    tx = contract.get_transfer_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        from_address=account1.address,
+        gas=200000,
+        receiver=account2.address,
+        amount=int(1e20),
+    )
+    tx_signed = account1.sign_transaction(tx)
+    ledger_api.send_signed_transaction(tx_signed)
+
+    yield contract, contract_address
+
+
+@pytest.fixture()
+def oracle_contract(ledger_api, ganache, ganache_addr, ganache_port, erc20_contract):
+    """Instantiate a Fetch Oracle contract."""
+    directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "oracle")
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
+    configuration._directory = directory
+    configuration = cast(ContractConfig, configuration)
+
+    if str(configuration.public_id) not in contract_registry.specs:
+        # load contract into sys modules
+        Contract.from_config(configuration)
+
+    contract = contract_registry.make(str(configuration.public_id))
+
+    _, erc20_address = erc20_contract
+
+    # deploy contract
+    crypto = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+
+    tx = contract.get_deploy_transaction(
+        ledger_api=ledger_api,
+        deployer_address=crypto.address,
+        gas=5000000,
+        ERC20Address=erc20_address,
+        initialFee=10000000000,
+    )
+    tx_signed = crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    contract_address = cast(Dict, receipt)["contractAddress"]
+    yield contract, contract_address
 
 
 def env_path_separator() -> str:
@@ -1048,3 +1147,17 @@ def random_string(length: int = 8) -> str:
     return "".join(
         random.choice(string.ascii_lowercase) for _ in range(length)  # nosec
     )
+
+
+def make_uri(addr: str, port: int):
+    """Make uri from address and port."""
+    return f"{addr}:{port}"
+
+
+@pytest.mark.integration
+class UseGanache:
+    """Inherit from this class to use Ganache."""
+
+    @pytest.fixture(autouse=True)
+    def _start_ganache(self, ganache):
+        """Start a Ganache image."""

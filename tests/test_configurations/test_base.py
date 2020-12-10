@@ -34,10 +34,6 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     ContractConfig,
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_GIT_REF,
-    DEFAULT_PYPI_INDEX_URL,
-    DEFAULT_SKILL_CONFIG_FILE,
     Dependency,
     PackageId,
     PackageType,
@@ -54,7 +50,13 @@ from aea.configurations.base import (
     dependencies_from_json,
     dependencies_to_json,
 )
-from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_GIT_REF,
+    DEFAULT_LEDGER,
+    DEFAULT_PYPI_INDEX_URL,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
 
 from tests.conftest import (
@@ -123,6 +125,15 @@ class TestCRUDCollection:
         keyvalue_pairs = collection.read_all()
         assert {("one", 1), ("two", 2)} == set(keyvalue_pairs)
 
+    def test_keys(self):
+        """Test the keys method."""
+        collection = CRUDCollection()
+        collection.create("one", 1)
+        collection.create("two", 2)
+
+        keyvalue_pairs = collection.keys()
+        assert {"one", "two"} == set(keyvalue_pairs)
+
 
 class TestContractConfig:
     """Test the contract configuration class."""
@@ -139,20 +150,6 @@ class TestContractConfig:
         actual_config = ContractConfig.from_json(expected_json)
         actual_json = actual_config.json
         assert expected_json == actual_json
-
-    @pytest.mark.parametrize("contract_path", contract_config_files)
-    def test_contract_interfaces_getter(self, contract_path):
-        """Test the '_get_contract_interfaces' method and 'contract_interfaces' property work correctly."""
-        f = open(contract_path)
-        original_json = yaml.safe_load(f)
-
-        config = ContractConfig.from_json(original_json)
-        config.directory = Path(contract_path).parent
-        assert config.contract_interfaces != {}
-        assert (
-            "cosmos" in config.contract_interfaces
-            or "ethereum" in config.contract_interfaces
-        )
 
 
 class TestConnectionConfig:
@@ -458,6 +455,12 @@ class AgentConfigTestCase(TestCase):
         agent_config.default_connection = 1
         agent_config.public_id
 
+    def test_name_and_author(self):
+        """Test case for default_connection setter positive result."""
+        agent_config = AgentConfig(agent_name="my_agent", author="fetchai")
+        agent_config.name = "new_name"
+        agent_config.author = "new_author"
+
 
 class SpeechActContentConfigTestCase(TestCase):
     """Test case for SpeechActContentConfig class."""
@@ -745,6 +748,17 @@ def test_component_id_prefix_import_path():
     assert component_id.json
 
 
+def test_component_id_same_prefix():
+    """Test ComponentId.same_prefix"""
+    component_id_1 = ComponentId(
+        ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0")
+    )
+    component_id_2 = ComponentId(
+        ComponentType.PROTOCOL, PublicId("author", "name", "0.2.0")
+    )
+    assert component_id_1.same_prefix(component_id_2)
+
+
 def test_component_configuration_load_file_not_found():
     """Test Component.load when a file is not found."""
     with mock.patch("builtins.open", side_effect=FileNotFoundError):
@@ -837,12 +851,14 @@ def test_agent_config_to_json_with_optional_configurations():
         execution_timeout=1.0,
         max_reactions=100,
         decision_maker_handler=dict(dotted_path="", file_path=""),
+        error_handler=dict(dotted_path="", file_path=""),
         skill_exception_policy="propagate",
         connection_exception_policy="propagate",
         default_routing={"author/name:0.1.0": "author/name:0.1.0"},
         currency_denominations={"fetchai": "fet"},
         loop_mode="sync",
         runtime_mode="async",
+        storage_uri="some_uri_to_storage",
     )
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER

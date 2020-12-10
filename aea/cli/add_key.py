@@ -26,8 +26,11 @@ import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, try_validate_private_key_path
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    PRIVATE_KEY_PATH_SCHEMA,
+)
+from aea.crypto.helpers import try_validate_private_key_path
 from aea.crypto.registries import crypto_registry
 
 
@@ -50,7 +53,7 @@ from aea.crypto.registries import crypto_registry
 @click.pass_context
 @check_aea_project
 def add_key(click_context, type_, file, connection):
-    """Add a private key to the wallet."""
+    """Add a private key to the wallet of the agent."""
     _add_private_key(click_context, type_, file, connection)
 
 

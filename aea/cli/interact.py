@@ -29,16 +29,16 @@ import click
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.common import Address
-from aea.configurations.base import (
-    ConnectionConfig,
-    DEFAULT_AEA_CONFIG_FILE,
-    PackageType,
-)
+from aea.configurations.base import ConnectionConfig, PackageType, PublicId
 from aea.configurations.constants import (
+    CONNECTIONS,
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
+    PROTOCOLS,
     SIGNING_PROTOCOL,
     STATE_UPDATE_PROTOCOL,
+    VENDOR,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
@@ -68,34 +68,41 @@ if TYPE_CHECKING:  # pragma: nocover
 @click.pass_context
 @check_aea_project
 def interact(click_context: click.core.Context):  # pylint: disable=unused-argument
-    """Interact with a running AEA via the stub connection."""
+    """Interact with the running agent via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
 
 
 def _load_packages(agent_identity: Identity):
     """Load packages in the current interpreter."""
+    default_protocol_id = PublicId.from_str(DEFAULT_PROTOCOL)
     Protocol.from_dir(
         os.path.join(
-            "vendor", DEFAULT_PROTOCOL.author, "protocols", DEFAULT_PROTOCOL.name
+            VENDOR, default_protocol_id.author, PROTOCOLS, default_protocol_id.name
         )
     )
+    signing_protocol_id = PublicId.from_str(SIGNING_PROTOCOL)
     Protocol.from_dir(
         os.path.join(
-            "vendor", SIGNING_PROTOCOL.author, "protocols", SIGNING_PROTOCOL.name
+            VENDOR, signing_protocol_id.author, PROTOCOLS, signing_protocol_id.name
         )
     )
+    state_update_protocol_id = PublicId.from_str(STATE_UPDATE_PROTOCOL)
     Protocol.from_dir(
         os.path.join(
-            "vendor",
-            STATE_UPDATE_PROTOCOL.author,
-            "protocols",
-            STATE_UPDATE_PROTOCOL.name,
+            VENDOR,
+            state_update_protocol_id.author,
+            PROTOCOLS,
+            state_update_protocol_id.name,
         )
     )
+    default_connection_id = PublicId.from_str(DEFAULT_CONNECTION)
     Connection.from_dir(
         os.path.join(
-            "vendor", DEFAULT_CONNECTION.author, "connections", DEFAULT_CONNECTION.name
+            VENDOR,
+            default_connection_id.author,
+            CONNECTIONS,
+            default_connection_id.name,
         ),
         agent_identity,
         CryptoStore(),

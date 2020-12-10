@@ -118,6 +118,8 @@ class OefSearchDialogues(Dialogues, ABC):
         {OefSearchDialogue.EndState.SUCCESSFUL, OefSearchDialogue.EndState.FAILED}
     )
 
+    _keep_terminal_state_dialogues = False
+
     def __init__(
         self,
         self_address: Address,

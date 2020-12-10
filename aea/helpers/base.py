@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Miscellaneous helpers."""
-
 import builtins
 import contextlib
 import importlib.util
@@ -35,9 +33,12 @@ from collections import OrderedDict, UserString, defaultdict, deque
 from copy import copy
 from functools import wraps
 from pathlib import Path
+from threading import RLock
 from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
 
 from dotenv import load_dotenv
+
+from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
@@ -385,6 +386,7 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             not both_are_dict
             and value_type != value_to_update_type
             and value is not None
+            and value_to_update is not None
         ):
             raise ValueError(
                 f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."
@@ -463,3 +465,94 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
         raise ValueError("Graph has at least one cycle.")
 
     return order
+
+
+def reachable_nodes(
+    adjacency_list: Dict[T, Set[T]], starting_nodes: Set[T]
+) -> Dict[T, Set[T]]:
+    """
+    Find the reachable subgraph induced by a set of starting nodes.
+
+    :param adjacency_list: the adjacency list of the full graph.
+    :param starting_nodes: the starting nodes of the new graph.
+    :return: the adjacency list of the subgraph.
+    """
+    all_nodes = set()
+    for node, nodes in adjacency_list.items():
+        all_nodes.add(node)
+        all_nodes.update(nodes)
+    enforce(
+        all(s in all_nodes for s in starting_nodes),
+        f"These starting nodes are not in the set of nodes: {starting_nodes.difference(all_nodes)}",
+    )
+    visited: Set[T] = set()
+    result: Dict[T, Set[T]] = {start_node: set() for start_node in starting_nodes}
+    queue: Deque[T] = deque()
+    queue.extend(starting_nodes)
+    while len(queue) > 0:
+        current = queue.pop()
+        if current in visited or current not in adjacency_list:
+            continue
+        successors = adjacency_list.get(current, set())
+        result.setdefault(current, set()).update(successors)
+        queue.extendleft(successors)
+        visited.add(current)
+    return result
+
+
+_NOT_FOUND = object()
+
+
+# copied from python3.8 functools
+class cached_property:  # pragma: nocover
+    """Cached property from python3.8 functools."""
+
+    def __init__(self, func):
+        """Init cached property."""
+        self.func = func
+        self.attrname = None
+        self.__doc__ = func.__doc__
+        self.lock = RLock()
+
+    def __set_name__(self, _, name):
+        """Set name."""
+        if self.attrname is None:
+            self.attrname = name
+        elif name != self.attrname:
+            raise TypeError(
+                "Cannot assign the same cached_property to two different names "
+                f"({self.attrname!r} and {name!r})."
+            )
+
+    def __get__(self, instance, _=None):
+        """Get instance."""
+        if instance is None:
+            return self
+        if self.attrname is None:
+            raise TypeError(
+                "Cannot use cached_property instance without calling __set_name__ on it."
+            )
+        try:
+            cache = instance.__dict__
+        except AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
+            msg = (
+                f"No '__dict__' attribute on {type(instance).__name__!r} "
+                f"instance to cache {self.attrname!r} property."
+            )
+            raise TypeError(msg) from None
+        val = cache.get(self.attrname, _NOT_FOUND)
+        if val is _NOT_FOUND:
+            with self.lock:
+                # check if another thread filled cache while we awaited lock
+                val = cache.get(self.attrname, _NOT_FOUND)
+                if val is _NOT_FOUND:
+                    val = self.func(instance)
+                    try:
+                        cache[self.attrname] = val
+                    except TypeError:
+                        msg = (
+                            f"The '__dict__' attribute on {type(instance).__name__!r} instance "
+                            f"does not support item assignment for caching {self.attrname!r} property."
+                        )
+                        raise TypeError(msg) from None
+        return val

@@ -124,8 +124,8 @@ class Transactions(Model):
 
             # check the next transaction, if present
             if len(queue) == 0:
-                break
-            next_date, next_item = queue[0]
+                break  # pragma: no cover
+            next_date, next_item = queue[0]  # pragma: no cover
 
     def add_pending_proposal(
         self, dialogue_label: DialogueLabel, proposal_id: int, terms: Terms,
@@ -261,7 +261,9 @@ class Transactions(Model):
         self._locked_txs_as_seller.pop(transaction_id, None)
         return terms
 
-    def ownership_state_after_locks(self, is_seller: bool) -> OwnershipState:
+    def ownership_state_after_locks(
+        self, is_seller: bool
+    ) -> OwnershipState:  # pragma: no cover
         """
         Apply all the locks to the current ownership state of the agent.
 

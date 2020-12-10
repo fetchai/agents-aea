@@ -567,7 +567,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         )
         cls.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
         cls.transaction_receipt = TransactionReceipt(
-            "some_ledger_id", "some_receipt", "some_transaction"
+            "some_ledger_id", {"some_key": "some_value"}, {"some_key": "some_value"}
         )
         cls.list_of_ledger_api_messages = (
             DialogueMessage(

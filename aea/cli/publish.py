@@ -37,7 +37,16 @@ from aea.cli.utils.package_utils import (
     try_get_item_source_path,
     try_get_item_target_path,
 )
-from aea.configurations.base import CRUDCollection, DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import CRUDCollection, PublicId
+from aea.configurations.constants import (
+    AGENT,
+    AGENTS,
+    CONNECTIONS,
+    CONTRACTS,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOLS,
+    SKILLS,
+)
 
 
 @click.command(name="publish")
@@ -48,14 +57,14 @@ from aea.configurations.base import CRUDCollection, DEFAULT_AEA_CONFIG_FILE, Pub
 @click.pass_context
 @check_aea_project
 def publish(click_context, local, remote):  # pylint: disable=unused-argument
-    """Publish Agent to Registry."""
+    """Publish the agent to the registry."""
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
     _validate_config(ctx)
     if remote:
         publish_agent(ctx)
     else:
-        _save_agent_locally(ctx, is_mixed=not local)
+        _save_agent_locally(ctx, is_mixed=not local and not remote)
 
 
 def _validate_config(ctx: Context) -> None:
@@ -68,7 +77,7 @@ def _validate_config(ctx: Context) -> None:
     :raises ClickException: if validation is failed.
     """
     try:
-        validate_item_config("agent", Path(ctx.cwd))
+        validate_item_config(AGENT, Path(ctx.cwd))
     except AEAConfigException as e:  # pragma: no cover
         raise click.ClickException("Failed to validate agent config. {}".format(str(e)))
 
@@ -84,7 +93,7 @@ def _validate_pkp(private_key_paths: CRUDCollection) -> None:
     """
     if private_key_paths.read_all() != []:
         raise click.ClickException(
-            "You are not allowed to publish agents with non-empty private_key_paths."
+            "You are not allowed to publish agents with non-empty private_key_paths. Use the `aea remove-key` command to remove key paths from `private_key_paths: {}` in `aea-config.yaml`."
         )
 
 
@@ -138,7 +147,7 @@ def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
 
     :return: None
     """
-    for item_type_plural in ("connections", "contracts", "protocols", "skills"):
+    for item_type_plural in (CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS):
         dependencies = getattr(ctx.agent_config, item_type_plural)
         for public_id in dependencies:
             if is_mixed:
@@ -154,7 +163,7 @@ def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
                     ctx.agent_config.registry_path,
                 )
 
-    item_type_plural = "agents"
+    item_type_plural = AGENTS
 
     target_dir = try_get_item_target_path(
         ctx.agent_config.registry_path,

@@ -6,12 +6,12 @@ description: A protocol for exchanging any bytes message.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmXoT16RqYsTsuXQNZz8kcDh5NyGsQyXXT8pJNCAkNMj3Q
+  README.md: QmZ3zMSAf98BPAP1ucWkfoGjgjVPK2KphJbzFwsXSeSQ4f
   __init__.py: QmRWWkHpiBGcYVXSvnxZLFD9QCyKcdtvbZ6GhLHLUWFa6G
   custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
   default.proto: QmbbAXpav8jfU1r59afGbLAj3FpPXEwWuezPocAMyqcfax
   default_pb2.py: QmWmXC4LUJrk5krrAszmpPUjBMLCbw9Fwm4RKY5QM2t9DQ
-  dialogues.py: QmfAXmyjyW6SeGPTeeNrQvRYtcaDshA8rxBqTfVG4MeU4Z
+  dialogues.py: QmSpToyoXJm3nhjgn4zERdDihpYwJzQ5Z4kYFYg94a8Suy
   message.py: QmaKCeuYZQU9zrowKjvoQhg29JLWoiPKqfgSunwuhKP5SZ
   serialization.py: QmXGv9ERazqdBfJKGBB1kfCDWWdDSZFNodX3xE5BtaVMBH
 fingerprint_ignore_patterns: []

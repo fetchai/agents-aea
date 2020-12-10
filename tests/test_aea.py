@@ -34,13 +34,13 @@ from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
-from aea.exceptions import AEAException
+from aea.exceptions import AEAActException, AEAException, AEAHandleException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
-from aea.runtime import RuntimeStates, _StopRuntime
+from aea.runtime import RuntimeStates
 from aea.skills.base import Skill, SkillContext
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
@@ -207,6 +207,7 @@ def test_handle():
         builder = AEABuilder()
         builder.set_name(agent_name)
         builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+        builder.add_protocol(Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"))
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
@@ -233,37 +234,42 @@ def test_handle():
         msg.sender = aea.identity.address
 
         encoded_msg = DefaultSerializer.encode(msg)
-        envelope = Envelope(
-            to=msg.to,
-            sender=msg.sender,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=msg,
-        )
 
+        # reset counts on error handler
+        error_handler = aea._get_error_handler()
+        error_handler.unsupported_protocol_count = 0
+        error_handler.unsupported_skill_count = 0
+        error_handler.decoding_error_count = 0
         with run_in_thread(aea.start, timeout=5):
             wait_for_condition(lambda: aea.is_running, timeout=10)
             dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
-            dummy_handler = dummy_skill.handlers["dummy"]
+            dummy_handler = dummy_skill.skill_context.handlers.dummy
 
+            # UNSUPPORTED PROTOCOL
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+                message=msg,
+            )
+            # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             aea.outbox.put(envelope)
-
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 1, timeout=1,
+                lambda: error_handler.unsupported_protocol_count == 1, timeout=1,
             )
 
-            #   DECODING ERROR
+            # DECODING ERROR
             envelope = Envelope(
                 to=aea.identity.address,
                 sender=aea.identity.address,
                 protocol_id=DefaultMessage.protocol_id,
                 message=b"",
             )
-            # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             aea.outbox._multiplexer.put(envelope)
-            """ inbox twice cause first message is invalid. generates error message and it accepted """
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 2, timeout=1,
+                lambda: error_handler.decoding_error_count == 1, timeout=1,
             )
+
             #   UNSUPPORTED SKILL
             msg = FipaMessage(
                 performative=FipaMessage.Performative.ACCEPT,
@@ -276,10 +282,10 @@ def test_handle():
             envelope = Envelope(
                 to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
             )
-            # send envelope via localnode back to agent
+            # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             aea.outbox.put(envelope)
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 3, timeout=2,
+                lambda: error_handler.unsupported_skill_count == 1, timeout=2,
             )
 
             #   DECODING OK
@@ -292,7 +298,7 @@ def test_handle():
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             aea.outbox._multiplexer.put(envelope)
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 4, timeout=1,
+                lambda: len(dummy_handler.handled_messages) == 1, timeout=1,
             )
             aea.stop()
 
@@ -507,35 +513,6 @@ def test_add_behaviour_dynamically():
         )
 
 
-def test_error_handler_is_not_set():
-    """Test stop on no error handler presents."""
-    agent_name = "my_agent"
-    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
-    wallet = Wallet({DEFAULT_LEDGER: private_key_path})
-    identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
-    resources = Resources()
-    context_namespace = {"key1": 1, "key2": 2}
-    agent = AEA(identity, wallet, resources, **context_namespace)
-
-    msg = DefaultMessage(
-        dialogue_reference=("", ""),
-        message_id=1,
-        target=0,
-        performative=DefaultMessage.Performative.BYTES,
-        content=b"hello",
-    )
-    msg.to = agent.identity.address
-    envelope = Envelope(
-        to=agent.identity.address,
-        sender=agent.identity.address,
-        protocol_id=DefaultMessage.protocol_id,
-        message=msg,
-    )
-
-    with pytest.raises(_StopRuntime):
-        agent.handle_envelope(envelope)
-
-
 def test_no_handlers_registered():
     """Test no handlers are registered for message processing."""
     agent_name = "MyAgent"
@@ -545,9 +522,7 @@ def test_no_handlers_registered():
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
     aea = builder.build()
 
-    with patch.object(
-        aea._get_error_handler().context._logger, "warning"
-    ) as mock_logger:
+    with patch.object(aea.logger, "warning") as mock_logger:
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -569,7 +544,7 @@ def test_no_handlers_registered():
         ):
             aea.handle_envelope(envelope)
         mock_logger.assert_any_call(
-            f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'."
+            f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'. Sender={envelope.sender}, to={envelope.sender}."
         )
 
 
@@ -699,8 +674,9 @@ class TestAeaExceptionPolicy:
         self.handler.handle = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
         self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
 
-        with pytest.raises(ExpectedExcepton):
-            self.aea.start()
+        with pytest.raises(AEAHandleException):
+            with pytest.raises(ExpectedExcepton):
+                self.aea.start()
 
         assert not self.aea.is_running
 
@@ -736,8 +712,9 @@ class TestAeaExceptionPolicy:
         self.aea._skills_exception_policy = ExceptionPolicyEnum.propagate
         self.behaviour.act = self.raise_exception  # type: ignore # cause error: Cannot assign to a method
 
-        with pytest.raises(ExpectedExcepton):
-            self.aea.start()
+        with pytest.raises(AEAActException):
+            with pytest.raises(ExpectedExcepton):
+                self.aea.start()
 
         assert self.aea.runtime.state == RuntimeStates.error
 

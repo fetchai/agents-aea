@@ -842,7 +842,7 @@ class TestGame(BaseSkillTestCase):
             competition_timeout=300,
             inactivity_timeout=30,
             whitelist=[],
-            location={"longitude": 51.5194, "latitude": 0.1270},
+            location={"longitude": 0.1270, "latitude": 51.5194},
             service_data={"key": "tac", "value": "v1"},
             name="parameters",
             skill_context=cls._skill.skill_context,
@@ -1342,7 +1342,9 @@ class TestGame(BaseSkillTestCase):
 
         assert type(description) == Description
         assert description.data_model is AGENT_LOCATION_MODEL
-        assert description.values.get("location", "") == Location(0.1270, 51.5194)
+        assert description.values.get("location", "") == Location(
+            longitude=0.1270, latitude=51.5194
+        )
 
     def test_get_register_tac_description(self):
         """Test the get_register_tac_description method of the Game class."""

@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """HTTP server connection, channel, server, and handler."""
 import asyncio
 import email
@@ -26,6 +24,7 @@ from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
+from concurrent.futures._base import CancelledError as FuturesCancelledError
 from traceback import format_exc
 from typing import Dict, Optional, Set, cast
 from urllib.parse import parse_qs, urlencode, urlparse
@@ -66,7 +65,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.13.0")
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -460,6 +459,10 @@ class HTTPChannel(BaseAsyncChannel):
 
         except asyncio.TimeoutError:
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
+        except FuturesCancelledError:
+            return Response(  # pragma: nocover
+                status=SERVER_ERROR, reason="Server terminated unexpectedly."
+            )
         except BaseException:  # pragma: nocover # pylint: disable=broad-except
             self.logger.exception("Error during handling incoming request")
             return Response(
@@ -512,7 +515,8 @@ class HTTPChannel(BaseAsyncChannel):
                     message, dialogue.incomplete_dialogue_label
                 )
             )
-        else:
+            return
+        if not future.done():
             future.set_result(message)
 
     async def disconnect(self) -> None:
@@ -543,7 +547,9 @@ class HTTPServerConnection(Connection):
         port = cast(int, self.configuration.config.get("port"))
         if host is None or port is None:  # pragma: nocover
             raise ValueError("host and port must be set!")
-        api_spec_path = cast(str, self.configuration.config.get("api_spec_path"))
+        api_spec_path = cast(
+            Optional[str], self.configuration.config.get("api_spec_path")
+        )
         self.channel = HTTPChannel(
             self.address,
             host,

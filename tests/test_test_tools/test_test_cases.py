@@ -24,6 +24,8 @@ from pathlib import Path
 
 import pytest
 
+import aea
+from aea.configurations.base import AgentConfig
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
@@ -220,6 +222,24 @@ class TestGenericCases(AEATestCaseEmpty):
             assert f.read() == "hi"
 
 
+class TestLoadAgentConfig(AEATestCaseEmpty):
+    """Test function 'load_agent_config'."""
+
+    def test_load_agent_config(self):
+        """Test load_agent_config."""
+        agent_config = self.load_agent_config(self.agent_name)
+        assert isinstance(agent_config, AgentConfig)
+
+    def test_load_agent_config_when_agent_name_not_exists(self):
+        """Test load_agent_config with a wrong agent name."""
+        wrong_agent_name = "non-existing-agent-name"
+        with pytest.raises(
+            AEATestingException,
+            match=f"Cannot find agent '{wrong_agent_name}' in the current test case.",
+        ):
+            self.load_agent_config(wrong_agent_name)
+
+
 class TestAddAndEjectComponent(AEATestCaseEmpty):
     """Test add/reject components."""
 
@@ -256,6 +276,9 @@ class TestGenerateAndAddKey(AEATestCaseEmpty):
         )
         assert result.exit_code == 0
         result = self.add_private_key("cosmos", "cosmos_private_key.txt")
+        assert result.exit_code == 0
+
+        result = self.remove_private_key("cosmos")
         assert result.exit_code == 0
 
 
@@ -321,3 +344,13 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
         received_envelope = self.read_envelope_from_agent(self.agent_name)
         received_message = DefaultMessage.serializer.decode(received_envelope.message)
         assert sent_envelope.message.content == received_message.content
+
+
+class TestInvoke(AEATestCaseEmpty):
+    """Test invoke method."""
+
+    def test_invoke(self):
+        """Test invoke method."""
+        result = self.invoke("--version")
+        assert result.exit_code == 0
+        assert f"aea, version {aea.__version__}" in result.stdout

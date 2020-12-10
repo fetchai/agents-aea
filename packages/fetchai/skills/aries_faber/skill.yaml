@@ -1,6 +1,6 @@
 name: aries_faber
 author: fetchai
-version: 0.10.0
+version: 0.12.0
 type: skill
 description: The aries_faber skill implements the faber player in the aries cloud
   agent demo
@@ -8,14 +8,14 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmdkSNCYx5dNGDAAveapQgoyM7Y7iYeQzR7KN2Sso3CJG4
-  __init__.py: QmZMRM6cFwktgX9kLttuoC77uVKWBNRCEXYCEhyjqMJ7v6
+  __init__.py: QmVVpsR8JCk338HFiFbZ8QN9fWcEgWrqTwBKxvZhCkfMBA
   behaviours.py: QmYLnc1FbdeN94X227kP9GSbS19xBPRWvspy5sx2w5cfJd
   dialogues.py: QmUEjYSjTsN8KDCkidZmeyoWxPbmSxoVJkaNEPbdEcVLgS
   handlers.py: QmQHx7LcPWbQVP1cAKFDVwGbe4Srawh37MN7621tJ3scPA
   strategy.py: QmTHHpfXMjD3F2yifFJt8jDJQEmEoVRSzAZHJ4s79PWo5S
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.12.0
+- fetchai/http_client:0.14.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0

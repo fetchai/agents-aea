@@ -16,19 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """HTTP client connection and channel."""
-
 import asyncio
-import json
+import email
 import logging
+import ssl
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Set, Tuple, Type, Union, cast
 
 import aiohttp
+import certifi  # pylint: disable=wrong-import-order
 from aiohttp.client_reqrep import ClientResponse
 
 from aea.common import Address
@@ -48,11 +48,27 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.14.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
+
+ssl_context = ssl.create_default_context(cafile=certifi.where())
+
+
+def headers_to_string(headers: Dict):
+    """
+    Convert headers to string.
+
+    :param headers: dict
+
+    :return: str
+    """
+    msg = email.message.Message()
+    for name, value in headers.items():
+        msg.add_header(name, value)
+    return msg.as_string()
 
 
 class HttpDialogue(BaseHttpDialogue):
@@ -167,7 +183,7 @@ class HTTPClientAsyncChannel:
         self._tasks: Set[Task] = set()
 
         self.logger = _default_logger
-        self.logger.info("Initialised the HTTP client channel")
+        self.logger.debug("Initialised the HTTP client channel")
 
     async def connect(self, loop: AbstractEventLoop) -> None:
         """
@@ -257,12 +273,19 @@ class HTTPClientAsyncChannel:
         :return: aiohttp.ClientResponse
         """
         try:
+            if request_http_message.is_set("headers") and request_http_message.headers:
+                headers: Optional[dict] = dict(
+                    email.message_from_string(request_http_message.headers).items()
+                )
+            else:
+                headers = None
             async with aiohttp.ClientSession() as session:
                 async with session.request(
                     method=request_http_message.method,
                     url=request_http_message.url,
-                    headers=request_http_message.headers,
+                    headers=headers,
                     data=request_http_message.body,
+                    ssl=ssl_context,
                 ) as resp:
                     await resp.read()
                 return resp
@@ -370,7 +393,7 @@ class HTTPClientAsyncChannel:
             performative=HttpMessage.Performative.RESPONSE,
             target_message=http_request_message,
             status_code=status_code,
-            headers=json.dumps(dict(headers.items())),
+            headers=headers_to_string(headers),
             status_text=status_text,
             body=body,
             version="",

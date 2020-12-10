@@ -28,13 +28,8 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
-from aea.runtime import (
-    AsyncRuntime,
-    BaseRuntime,
-    RuntimeStates,
-    ThreadedRuntime,
-    _StopRuntime,
-)
+from aea.exceptions import _StopRuntime
+from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import CUR_PATH
@@ -54,6 +49,7 @@ class TestAsyncRuntime:
         builder.set_name(agent_name)
         builder.add_private_key(DEFAULT_LEDGER, private_key_path)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+        builder.set_storage_uri("sqlite://:memory:")
         self.agent = builder.build()
         self.runtime = self.RUNTIME(self.agent, threaded=True)
 
@@ -109,9 +105,11 @@ class TestAsyncRuntime:
 
     def test_error_state(self):
         """Test runtime fails on start."""
-        with patch.object(
-            self.runtime, "_start_agent_loop", side_effect=ValueError("oops")
-        ):
+
+        async def error(*args, **kwargs):
+            raise ValueError("oops")
+
+        with patch.object(self.runtime, "_start_agent_loop", error):
             with pytest.raises(ValueError, match="oops"):
                 self.runtime.start_and_wait_completed(sync=True)
 

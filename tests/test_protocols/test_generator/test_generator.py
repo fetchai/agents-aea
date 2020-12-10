@@ -19,7 +19,6 @@
 """This module contains miscellaneous tests for the protocol generator."""
 import logging
 import os
-import pprint
 import shutil
 import tempfile
 from pathlib import Path
@@ -34,7 +33,7 @@ from aea.configurations.base import (
 )
 from aea.protocols.generator.base import ProtocolGenerator
 
-from tests.conftest import ROOT_DIR
+from tests.conftest import ROOT_DIR, match_files
 from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
 from tests.test_protocols.test_generator.common import (
     PATH_TO_T_PROTOCOL,
@@ -45,18 +44,6 @@ from tests.test_protocols.test_generator.common import (
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
-
-
-def _match_files(fname1: str, fname2: str) -> bool:
-    """Simple match file function."""
-    with open(fname1, "r") as f1, open(fname2, "r") as f2:
-        file1_content = f1.read()
-        file2_content = f2.read()
-        result = file1_content == file2_content
-        if not result:
-            pprint.pprint(file1_content)
-            pprint.pprint(file2_content)
-        return result
 
 
 class TestCompareLatestGeneratorOutputWithTestProtocol:
@@ -98,22 +85,28 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         # compare __init__.py
         init_file_generated = Path(self.t, T_PROTOCOL_NAME, "__init__.py")
         init_file_original = Path(PATH_TO_T_PROTOCOL, "__init__.py",)
-        assert _match_files(init_file_generated, init_file_original)
+        is_matched, diff = match_files(init_file_generated, init_file_original)
+        assert is_matched, f"Difference Found between __init__.py files:\n{diff}"
 
         # compare message.py
         message_file_generated = Path(self.t, T_PROTOCOL_NAME, "message.py")
         message_file_original = Path(PATH_TO_T_PROTOCOL, "message.py",)
-        assert _match_files(message_file_generated, message_file_original)
+        is_matched, diff = match_files(message_file_generated, message_file_original)
+        assert is_matched, f"Difference Found between message.py files:\n{diff}"
 
         # compare serialization.py
         serialization_file_generated = Path(self.t, T_PROTOCOL_NAME, "serialization.py")
         serialization_file_original = Path(PATH_TO_T_PROTOCOL, "serialization.py",)
-        assert _match_files(serialization_file_generated, serialization_file_original)
+        is_matched, diff = match_files(
+            serialization_file_generated, serialization_file_original
+        )
+        assert is_matched, f"Difference Found between serialization.py files:\n{diff}"
 
         # compare dialogues.py
         dialogue_file_generated = Path(self.t, T_PROTOCOL_NAME, "dialogues.py")
         dialogue_file_original = Path(PATH_TO_T_PROTOCOL, "dialogues.py",)
-        assert _match_files(dialogue_file_generated, dialogue_file_original)
+        is_matched, diff = match_files(dialogue_file_generated, dialogue_file_original)
+        assert is_matched, f"Difference Found between dialogues.py files:\n{diff}"
 
         # compare .proto
         proto_file_generated = Path(
@@ -122,7 +115,8 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         proto_file_original = Path(
             PATH_TO_T_PROTOCOL, "{}.proto".format(T_PROTOCOL_NAME),
         )
-        assert _match_files(proto_file_generated, proto_file_original)
+        is_matched, diff = match_files(proto_file_generated, proto_file_original)
+        assert is_matched, f"Difference Found between .proto files:\n{diff}"
 
         # compare _pb2.py # noqa: E800
         # ToDo this part fails in CI. Investigate why?
@@ -132,7 +126,8 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         # pb2_file_original = Path( # noqa: E800
         #     PATH_TO_T_PROTOCOL, "{}_pb2.py".format(T_PROTOCOL_NAME), # noqa: E800
         # ) # noqa: E800
-        # assert _match_files(pb2_file_generated, pb2_file_original) # noqa: E800
+        # is_matched, diff = match_files(pb2_file_generated, pb2_file_original) # noqa: E800
+        # assert is_matched, f"Difference Found between _pb2.py files:\n{diff}" # noqa: E800
 
     @classmethod
     def teardown_class(cls):
@@ -191,30 +186,36 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         # compare __init__.py
         init_file_generated = Path(self.t, protocol_name, "__init__.py")
         init_file_original = Path(path_to_protocol, "__init__.py",)
-        assert _match_files(init_file_generated, init_file_original)
+        is_matched, diff = match_files(init_file_generated, init_file_original)
+        assert is_matched, f"Difference Found between __init__.py files:\n{diff}"
 
         # compare message.py
         message_file_generated = Path(self.t, protocol_name, "message.py")
         message_file_original = Path(path_to_protocol, "message.py",)
-        print(open(message_file_generated).read())
-        assert _match_files(message_file_generated, message_file_original)
+        is_matched, diff = match_files(message_file_generated, message_file_original)
+        assert is_matched, f"Difference Found between message.py files:\n{diff}"
 
         # compare serialization.py
         serialization_file_generated = Path(self.t, protocol_name, "serialization.py")
         serialization_file_original = Path(path_to_protocol, "serialization.py",)
-        assert _match_files(serialization_file_generated, serialization_file_original)
+        is_matched, diff = match_files(
+            serialization_file_generated, serialization_file_original
+        )
+        assert is_matched, f"Difference Found between serialization.py files:\n{diff}"
 
         # compare dialogues.py
         dialogue_file_generated = Path(self.t, protocol_name, "dialogues.py")
         dialogue_file_original = Path(path_to_protocol, "dialogues.py",)
-        assert _match_files(dialogue_file_generated, dialogue_file_original)
+        is_matched, diff = match_files(dialogue_file_generated, dialogue_file_original)
+        assert is_matched, f"Difference Found between dialogues.py files:\n{diff}"
 
         # compare .proto
         proto_file_generated = Path(
             self.t, protocol_name, "{}.proto".format(protocol_name)
         )
         proto_file_original = Path(path_to_protocol, "{}.proto".format(protocol_name),)
-        assert _match_files(proto_file_generated, proto_file_original)
+        is_matched, diff = match_files(proto_file_generated, proto_file_original)
+        assert is_matched, f"Difference Found between .proto files:\n{diff}"
 
         # compare _pb2.py # noqa: E800
         # ToDo this part fails in CI. Investigate why? # noqa: E800
@@ -222,7 +223,8 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         #     self.t, protocol_name, "{}_pb2.py".format(protocol_name) # noqa: E800
         # ) # noqa: E800
         # pb2_file_original = Path(path_to_protocol, "{}_pb2.py".format(protocol_name),) # noqa: E800
-        # assert _match_files(pb2_file_generated, pb2_file_original) # noqa: E800
+        # is_matched, diff = match_files(pb2_file_generated, pb2_file_original) # noqa: E800
+        # assert is_matched, f"Difference Found between _pb2.py files:\n{diff}" # noqa: E800
 
     @classmethod
     def teardown_class(cls):

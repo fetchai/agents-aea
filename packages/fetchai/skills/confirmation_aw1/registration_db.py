@@ -22,7 +22,7 @@
 import logging
 import os
 import sqlite3
-from typing import Tuple
+from typing import List, Tuple
 
 from aea.skills.base import Model
 
@@ -36,7 +36,7 @@ class RegistrationDB(Model):
     """Communicate between the database and the python objects."""
 
     def __init__(self, **kwargs):
-        """Initialise the Detection Database Communication class."""
+        """Initialise the class."""
         custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
         this_dir = os.getcwd()
@@ -45,6 +45,8 @@ class RegistrationDB(Model):
             if custom_path is None
             else custom_path
         )
+        if not os.path.exists(os.path.dirname(os.path.abspath(self.db_path))):
+            raise ValueError(f"Path={self.db_path} not valid!")
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:
@@ -85,12 +87,31 @@ class RegistrationDB(Model):
         result = self._execute_single_sql(command, variables)
         return len(result) != 0
 
+    def get_developer_handle(self, address: str) -> str:
+        """Get developer handle relating to an address."""
+        command = "SELECT developer_handle FROM registered_table WHERE address=?"
+        variables = (address,)
+        result = self._execute_single_sql(command, variables)
+        if len(result[0]) != 1:
+            raise ValueError(
+                f"More than one developer_handle found for address={address}."
+            )
+        return result[0][0]
+
+    def get_all_registered(self) -> List[str]:
+        """Get all registered AW-1 AEAs."""
+        command = "SELECT address FROM registered_table"
+        variables = ()
+        results = self._execute_single_sql(command, variables)
+        registered = [result[0] for result in results]
+        return registered
+
     def _execute_single_sql(
         self,
         command: str,
         variables: Tuple[str, ...] = (),
         print_exceptions: bool = True,
-    ):
+    ) -> List[Tuple[str, ...]]:
         """Query the database - all the other functions use this under the hood."""
         conn = None
         ret = []

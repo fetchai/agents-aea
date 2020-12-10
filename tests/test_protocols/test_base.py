@@ -139,6 +139,10 @@ class TestMessageProperties:
             str(self.message)
             == "Message(sender=sender,to=to,body_1=1,body_2=2,kwarg=1)"
         )
+        assert (
+            repr(self.message)
+            == "Message(sender=sender,to=to,body_1=1,body_2=2,kwarg=1)"
+        )
         assert self.message.valid_performatives == set()
 
 
@@ -292,6 +296,21 @@ class TestBaseSerializations:
         m_dict = {"content": "data"}
         self.message2._body = m_dict
         assert self.message2._body == m_dict
+
+
+class TestMessageEncode:
+    """Test the 'Protocol.from_dir' method."""
+
+    def test_encode(self):
+        """Test encode on message."""
+
+        class TTMessage(TMessage):
+            """Test class extended."""
+
+            serializer = ExampleProtobufSerializer
+
+        msg = TTMessage({"body_1": "1", "body_2": "2"})
+        msg.encode()
 
 
 class TestProtocolFromDir:

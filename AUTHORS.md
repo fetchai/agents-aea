@@ -13,3 +13,4 @@ This is the official list of Fetch.AI authors for copyright purposes.
 * Lokman Rahmani <lokman.rahmani@fetch.ai> [lrahmani](https://github.com/lrahmani)
 * Jiří Vestfál <jiri.vestfal@fetch.ai> [MissingNO57](https://github.com/MissingNO57)
 * Ed Fitzgerald <ed.fitzgerald@fetch.ai> [ejfitzgerald](https://github.com/ejfitzgerald)
+* James Riehl <james.riehl@fetch.ai> [jrriehl](https://github.com/jrriehl)

@@ -111,12 +111,9 @@ class ProtocolGenerator:
             raise
 
         # Load protocol specification
-        try:
-            self.protocol_specification = load_protocol_specification(
-                path_to_protocol_specification
-            )
-        except Exception:
-            raise
+        self.protocol_specification = load_protocol_specification(
+            path_to_protocol_specification
+        )
 
         # Helper fields
         self.path_to_protocol_specification = path_to_protocol_specification
@@ -138,10 +135,7 @@ class ProtocolGenerator:
         self.indent = ""
 
         # Extract specification fields
-        try:
-            self.spec = extract(self.protocol_specification)
-        except Exception:
-            raise
+        self.spec = extract(self.protocol_specification)
 
     def _change_indent(self, number: int, mode: str = None) -> None:
         """
@@ -1121,6 +1115,11 @@ class ProtocolGenerator:
         cls_str += self.indent + "END_STATES = frozenset(\n"
         cls_str += self.indent + "{" + end_states_str + "}"
         cls_str += self.indent + ")\n\n"
+
+        cls_str += (
+            self.indent
+            + f"_keep_terminal_state_dialogues = {repr(self.spec.keep_terminal_state_dialogues)}\n\n"
+        )
 
         cls_str += self.indent + "def __init__(\n"
         self._change_indent(1)

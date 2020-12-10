@@ -23,6 +23,7 @@ import os
 import re
 import shutil
 from pathlib import Path
+from typing import cast
 
 import click
 from jsonschema import ValidationError
@@ -32,24 +33,42 @@ from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import validate_package_name
-from aea.configurations.base import (  # noqa: F401  # pylint: disable=unused-import
+from aea.cli.utils.package_utils import (
+    create_symlink_packages_to_vendor,
+    create_symlink_vendor_to_local,
+    validate_package_name,
+)
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unused-import
+    CONNECTION,
+    CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
-    PublicId,
+    DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
+    PROTOCOL,
+    SCAFFOLD_PUBLIC_ID,
+    SKILL,
 )
-from aea.configurations.constants import SCAFFOLD_PUBLIC_ID
 
 
 @click.group()
+@click.option(
+    "--with-symlinks",
+    is_flag=True,
+    help="Add symlinks from vendor to non-vendor and packages to vendor folders.",
+)
 @click.pass_context
 @check_aea_project
-def scaffold(click_context):  # pylint: disable=unused-argument
-    """Scaffold a resource for the agent."""
+def scaffold(
+    click_context: click.core.Context, with_symlinks: bool
+):  # pylint: disable=unused-argument
+    """Scaffold a package for the agent."""
+    ctx = cast(Context, click_context.obj)
+    ctx.set_config("with_symlinks", with_symlinks)
 
 
 @scaffold.command()
@@ -57,7 +76,7 @@ def scaffold(click_context):  # pylint: disable=unused-argument
 @pass_ctx
 def connection(ctx: Context, connection_name: str) -> None:
     """Add a connection scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "connection", connection_name)
+    scaffold_item(ctx, CONNECTION, connection_name)
 
 
 @scaffold.command()
@@ -65,7 +84,7 @@ def connection(ctx: Context, connection_name: str) -> None:
 @pass_ctx
 def contract(ctx: Context, contract_name: str) -> None:
     """Add a contract scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "contract", contract_name)
+    scaffold_item(ctx, CONTRACT, contract_name)
 
 
 @scaffold.command()
@@ -73,7 +92,7 @@ def contract(ctx: Context, contract_name: str) -> None:
 @pass_ctx
 def protocol(ctx: Context, protocol_name: str):
     """Add a protocol scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "protocol", protocol_name)
+    scaffold_item(ctx, PROTOCOL, protocol_name)
 
 
 @scaffold.command()
@@ -81,7 +100,7 @@ def protocol(ctx: Context, protocol_name: str):
 @pass_ctx
 def skill(ctx: Context, skill_name: str):
     """Add a skill scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, "skill", skill_name)
+    scaffold_item(ctx, SKILL, skill_name)
 
 
 @scaffold.command()
@@ -89,6 +108,13 @@ def skill(ctx: Context, skill_name: str):
 def decision_maker_handler(ctx: Context):
     """Add a decision maker scaffolding to the configuration file and agent."""
     _scaffold_dm_handler(ctx)
+
+
+@scaffold.command()
+@pass_ctx
+def error_handler(ctx: Context):
+    """Add an error scaffolding to the configuration file and agent."""
+    _scaffold_error_handler(ctx)
 
 
 @clean_after
@@ -164,6 +190,13 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         # fingerprint item.
         fingerprint_item(ctx, item_type, new_public_id)
 
+        if ctx.config.get("with_symlinks", False):
+            click.echo(
+                "Adding symlinks from vendor to non-vendor and packages to vendor folders."
+            )
+            create_symlink_vendor_to_local(ctx, item_type, new_public_id)
+            create_symlink_packages_to_vendor(ctx)
+
     except ValidationError:
         raise click.ClickException(
             f"Error when validating the {item_type} configuration file."
@@ -173,35 +206,63 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
 
 def _scaffold_dm_handler(ctx: Context):
-    """Add a scaffolded decision maker handler to the project and configuration."""
-    existing_dm_handler = ctx.agent_config.decision_maker_handler
+    """Scaffold the decision maker handler."""
+    _scaffold_non_package_item(
+        ctx,
+        "decision_maker_handler",
+        "decision maker handler",
+        "DecisionMakerHandler",
+        "decision_maker",
+    )
 
-    # check if we already have a decision maker in the project
-    if existing_dm_handler != {}:
+
+def _scaffold_error_handler(ctx):
+    """Scaffold the error handler."""
+    _scaffold_non_package_item(
+        ctx, "error_handler", "error handler", "ErrorHandler", "error_handler"
+    )
+
+
+def _scaffold_non_package_item(
+    ctx: Context, item_type: str, type_name: str, class_name: str, aea_dir: str
+):
+    """
+    Scaffold a non-package item (e.g. decision maker handler, or error handler).
+
+    :param ctx: the CLI context.
+    :param item_type: the item type (e.g. 'decision_maker_handler')
+    :param type_name: the type name (e.g. "decision maker")
+    :param class_name: the class name (e.g. "DecisionMakerHandler")
+    :param aea_dir: the AEA directory that contains the scaffold module
+    :return: None
+    """
+    existing_item = getattr(ctx.agent_config, item_type)
+    if existing_item != {}:
         raise click.ClickException(
-            "A decision maker handler specification already exists. Aborting..."
+            f"A {type_name} specification already exists. Aborting..."
         )
 
-    dest = Path("decision_maker.py")
+    dest = Path(f"{item_type}.py")
     agent_name = ctx.agent_config.agent_name
-    click.echo("Adding decision maker scaffold to the agent '{}'...".format(agent_name))
-
+    click.echo(f"Adding {type_name} scaffold to the agent '{agent_name}'...")
     # create the file name
-    dotted_path = ".decision_maker::DecisionMakerHandler"
+    dotted_path = f".{item_type}{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}{class_name}"
     try:
         # copy the item package into the agent project.
-        src = Path(os.path.join(AEA_DIR, "decision_maker", "scaffold.py"))
-        logger.debug("Copying decision maker. src={} dst={}".format(src, dest))
+        src = Path(os.path.join(AEA_DIR, aea_dir, "scaffold.py"))
+        logger.debug(f"Copying error handler. src={src} dst={dest}")
         shutil.copyfile(src, dest)
 
         # add the item to the configurations.
-        logger.debug(
-            "Registering the decision_maker into {}".format(DEFAULT_AEA_CONFIG_FILE)
+        logger.debug(f"Registering the {type_name} into {DEFAULT_AEA_CONFIG_FILE}")
+        setattr(
+            ctx.agent_config,
+            item_type,
+            {
+                "dotted_path": str(dotted_path),
+                "file_path": str(os.path.join(".", dest)),
+            },
         )
-        ctx.agent_config.decision_maker_handler = {
-            "dotted_path": str(dotted_path),
-            "file_path": str(os.path.join(".", dest)),
-        }
         ctx.agent_loader.dump(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
         )

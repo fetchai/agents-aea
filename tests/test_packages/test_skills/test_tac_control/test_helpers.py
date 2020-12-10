@@ -33,6 +33,7 @@ from packages.fetchai.skills.tac_control.helpers import (
     generate_currency_endowments,
     generate_currency_id_to_name,
     generate_currency_ids,
+    generate_equilibrium_prices_and_holdings,
     generate_exchange_params,
     generate_good_endowments,
     generate_good_id_to_name,
@@ -53,7 +54,7 @@ class TestHelpers(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
 
-    def test_generate_good_ids(self):
+    def test_generate_good_ids_succeeds(self):
         """Test the generate_good_ids of Helpers module."""
         expected_list = [1, 2, 3, 4, 5]
         with patch.object(
@@ -62,14 +63,38 @@ class TestHelpers(BaseSkillTestCase):
             good_ids = generate_good_ids(5, 2)
         assert good_ids == expected_list
 
-    def test_generate_currency_ids(self):
-        """Test the generate_good_ids of Helpers module."""
+    def test_generate_good_ids_fails(self):
+        """Test the generate_good_ids of Helpers module which fails because the generate_token_ids generates wrong good ids."""
+        expected_list = [1, 2, 3, 4, 5, 6]
+        with patch.object(
+            ERC1155Contract, "generate_token_ids", return_value=expected_list
+        ):
+            with pytest.raises(
+                AEAEnforceError,
+                match="Length of good ids and number of goods must match.",
+            ):
+                assert generate_good_ids(5, 2)
+
+    def test_generate_currency_ids_succeeds(self):
+        """Test the generate_good_ids of Helpers module which succeeds."""
         expected_list = [1, 2, 3, 4, 5]
         with patch.object(
             ERC1155Contract, "generate_token_ids", return_value=expected_list
         ):
             currency_ids = generate_currency_ids(5, 2)
         assert currency_ids == expected_list
+
+    def test_generate_currency_ids_fails(self):
+        """Test the generate_good_ids of Helpers module which fails because generate_token_ids generates wrong currency ids."""
+        expected_list = [1, 2, 3, 4, 5, 6]
+        with patch.object(
+            ERC1155Contract, "generate_token_ids", return_value=expected_list
+        ):
+            with pytest.raises(
+                AEAEnforceError,
+                match="Length of currency ids and number of currencies must match.",
+            ):
+                assert generate_currency_ids(5, 2)
 
     def test_generate_currency_id_to_name(self):
         """Test the generate_currency_id_to_name of Helpers module."""
@@ -123,8 +148,10 @@ class TestHelpers(BaseSkillTestCase):
         endowments = generate_good_endowments(
             ["ag_1_add", "ag_2_add"], ["good_id_1", "good_id_2"], 2, 1, 1
         )
-        assert "ag_1_add" in endowments
-        assert "ag_2_add" in endowments
+        assert "good_id_1" in endowments["ag_1_add"]
+        assert "good_id_2" in endowments["ag_1_add"]
+        assert "good_id_1" in endowments["ag_2_add"]
+        assert "good_id_2" in endowments["ag_2_add"]
 
     def test_generate_utility_params(self):
         """Test the generate_utility_params of Helpers module."""
@@ -167,3 +194,27 @@ class TestHelpers(BaseSkillTestCase):
 
         assert currency_endowments["ag_2_add"]["currency_id_1"] == 1.0
         assert currency_endowments["ag_2_add"]["currency_id_2"] == 1.0
+
+    def test_generate_equilibrium_prices_and_holdings(self):
+        """Test the generate_equilibrium_prices_and_holdings of Helpers module."""
+        (
+            eq_prices_dict,
+            eq_good_holdings_dict,
+            eq_currency_holdings_dict,
+        ) = generate_equilibrium_prices_and_holdings(
+            {"ag_1": {"good_1": 1}},
+            {"ag_1": {"good_1": 1.0}},
+            {"ag_1": {"currency_1": 10}},
+            {"ag_1": {"currency_1": 1.0}},
+            2.0,
+        )
+
+        assert len(eq_prices_dict) == 1
+        assert type(eq_prices_dict["good_1"]) == float
+
+        assert len(eq_good_holdings_dict) == 1
+        assert len(eq_good_holdings_dict["ag_1"]) == 1
+        assert type(eq_good_holdings_dict["ag_1"]["good_1"]) == float
+
+        assert len(eq_currency_holdings_dict) == 1
+        assert type(eq_currency_holdings_dict["ag_1"]) == float

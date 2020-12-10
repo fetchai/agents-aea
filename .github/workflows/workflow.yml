@@ -60,6 +60,8 @@ jobs:
         run: tox -e mypy
       - name: Golang code style check
         uses: golangci/golangci-lint-action@v1
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
           version: v1.28
           working-directory: packages/fetchai/connections/p2p_libp2p/
@@ -98,6 +100,10 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+          unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
           # install IPFS
           sudo apt-get install -y wget
           wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
@@ -114,8 +120,26 @@ jobs:
         run: tox -e package_version_checks
       - name: Check package dependencies
         run: tox -e package_dependencies_checks
+      - name: Check generate protocols
+        run: tox -e check_generate_all_protocols
       - name: Generate Documentation
         run: tox -e docs
+
+  common_checks_5:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request' && github.head_ref == 'master'
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Check Docs links
+        run: tox -e check_doc_links
+      - name: Check API Docs updated
+        run: tox -e check_api_docs
+
 
   integration_checks:
     continue-on-error: True
@@ -140,7 +164,10 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        sudo apt-get install -y protobuf-compiler
+        # install Protobuf compiler
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
     - name: Sync AEA loop integration tests
       run: |
         tox -e py3.8 -- -m 'sync'  # --aea-loop sync
@@ -169,9 +196,6 @@ jobs:
           pip install tox
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
-        continue-on-error: true
-      - name: Force green exit
-        run: exit 0
 
   platform_checks:
     continue-on-error: True
@@ -185,7 +209,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python_version: [3.6, 3.7, 3.8, 3.9]
-    timeout-minutes: 40
+    timeout-minutes: 50
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -201,20 +225,33 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        sudo apt-get install -y protobuf-compiler
+        # install Protobuf compiler
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
+    # sudo apt-get install -y protobuf-compiler
     # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
     # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
     - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
       run: |
         pip install tox
-        brew install protobuf
+        # brew install protobuf
+        # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-osx-x86_64.zip
+        unzip protoc-3.11.4-osx-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
     - if: matrix.os == 'windows-latest'
       name: Install dependencies (windows-latest)
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       run: |
         pip install tox
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-        choco install protoc
+        choco install protoc --version 3.11.4
+        # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-win64.zip
+        # unzip protoc-3.11.4-win64.zip -d protoc
+        # sudo mv protoc/bin/protoc /usr/local/bin/protoc
         python scripts/update_symlinks_cross_platform.py
     - if: matrix.os == 'ubuntu-latest' || matrix.python_version != '3.9'
       name: Unit tests
@@ -244,7 +281,9 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        sudo apt-get install -y protobuf-compiler
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
     - name: Unit tests with sync agent loop
       run: |
         tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
@@ -298,7 +337,11 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        sudo apt-get install -y protobuf-compiler
+        # install Protobuf compiler
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
+    # sudo apt-get install -y protobuf-compiler
     - name: Run all tests
       run: tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
       continue-on-error: true

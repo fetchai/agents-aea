@@ -35,27 +35,14 @@ from tests.conftest import (
     ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
-    ETHEREUM_TESTNET_CONFIG,
     FETCHAI,
     FETCHAI_TESTNET_CONFIG,
 )
 
 
-ledger = [
-    (ETHEREUM, ETHEREUM_TESTNET_CONFIG),
-]
-
 crypto = [
     (ETHEREUM,),
 ]
-
-
-@pytest.fixture(params=ledger)
-def ledger_api(request):
-    """Ledger api fixture."""
-    ledger_id, config = request.param
-    api = ledger_apis_registry.make(ledger_id, **config)
-    yield api
 
 
 @pytest.fixture(params=crypto)
@@ -70,6 +57,7 @@ def crypto_api(request):
 @pytest.mark.ledger
 def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
     """Test helper methods and get transactions."""
+    contract, contract_address = erc1155_contract
     expected_a = [
         340282366920938463463374607431768211456,
         340282366920938463463374607431768211457,
@@ -82,15 +70,15 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
         340282366920938463463374607431768211464,
         340282366920938463463374607431768211465,
     ]
-    actual = erc1155_contract.generate_token_ids(token_type=1, nb_tokens=10)
+    actual = contract.generate_token_ids(token_type=1, nb_tokens=10)
     assert expected_a == actual
     expected_b = [
         680564733841876926926749214863536422912,
         680564733841876926926749214863536422913,
     ]
-    actual = erc1155_contract.generate_token_ids(token_type=2, nb_tokens=2)
+    actual = contract.generate_token_ids(token_type=2, nb_tokens=2)
     assert expected_b == actual
-    tx = erc1155_contract.get_deploy_transaction(
+    tx = contract.get_deploy_transaction(
         ledger_api=ledger_api, deployer_address=ETHEREUM_ADDRESS_ONE
     )
     assert len(tx) == 6
@@ -99,7 +87,7 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
     assert all(
         [key in tx for key in ["value", "from", "gas", "gasPrice", "nonce"]]
     ), "Error, found: {}".format(tx)
-    tx = erc1155_contract.get_create_batch_transaction(
+    tx = contract.get_create_batch_transaction(
         ledger_api=ledger_api,
         contract_address=ETHEREUM_ADDRESS_ONE,
         deployer_address=ETHEREUM_ADDRESS_ONE,
@@ -111,7 +99,7 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
     assert all(
         [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
     ), "Error, found: {}".format(tx)
-    tx = erc1155_contract.get_create_single_transaction(
+    tx = contract.get_create_single_transaction(
         ledger_api=ledger_api,
         contract_address=ETHEREUM_ADDRESS_ONE,
         deployer_address=ETHEREUM_ADDRESS_ONE,
@@ -124,7 +112,7 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
         [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
     ), "Error, found: {}".format(tx)
     mint_quantities = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    tx = erc1155_contract.get_mint_batch_transaction(
+    tx = contract.get_mint_batch_transaction(
         ledger_api=ledger_api,
         contract_address=ETHEREUM_ADDRESS_ONE,
         deployer_address=ETHEREUM_ADDRESS_ONE,
@@ -139,7 +127,7 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
         [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
     ), "Error, found: {}".format(tx)
     mint_quantity = 1
-    tx = erc1155_contract.get_mint_single_transaction(
+    tx = contract.get_mint_single_transaction(
         ledger_api=ledger_api,
         contract_address=ETHEREUM_ADDRESS_ONE,
         deployer_address=ETHEREUM_ADDRESS_ONE,
@@ -159,15 +147,15 @@ def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
 @pytest.mark.ledger
 def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     """Test get single atomic swap."""
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    contract, contract_address = erc1155_contract
     from_address = ETHEREUM_ADDRESS_ONE
     to_address = ETHEREUM_ADDRESS_TWO
-    token_id = erc1155_contract.generate_token_ids(token_type=2, nb_tokens=1)[0]
+    token_id = contract.generate_token_ids(token_type=2, nb_tokens=1)[0]
     from_supply = 0
     to_supply = 10
     value = 1
     trade_nonce = 1
-    tx_hash = erc1155_contract.get_hash_single(
+    tx_hash = contract.get_hash_single(
         ledger_api,
         contract_address,
         from_address,
@@ -180,7 +168,7 @@ def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     )
     assert isinstance(tx_hash, bytes)
     signature = crypto_api.sign_message(tx_hash)
-    tx = erc1155_contract.get_atomic_swap_single_transaction(
+    tx = contract.get_atomic_swap_single_transaction(
         ledger_api=ledger_api,
         contract_address=contract_address,
         from_address=from_address,
@@ -207,15 +195,15 @@ def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
 @pytest.mark.ledger
 def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     """Test get batch atomic swap."""
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
+    contract, contract_address = erc1155_contract
     from_address = ETHEREUM_ADDRESS_ONE
     to_address = ETHEREUM_ADDRESS_TWO
-    token_ids = erc1155_contract.generate_token_ids(token_type=2, nb_tokens=10)
+    token_ids = contract.generate_token_ids(token_type=2, nb_tokens=10)
     from_supplies = [0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
     to_supplies = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
     value = 1
     trade_nonce = 1
-    tx_hash = erc1155_contract.get_hash_batch(
+    tx_hash = contract.get_hash_batch(
         ledger_api,
         contract_address,
         from_address,
@@ -228,7 +216,7 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     )
     assert isinstance(tx_hash, bytes)
     signature = crypto_api.sign_message(tx_hash)
-    tx = erc1155_contract.get_atomic_swap_batch_transaction(
+    tx = contract.get_atomic_swap_batch_transaction(
         ledger_api=ledger_api,
         contract_address=contract_address,
         from_address=from_address,
@@ -361,19 +349,21 @@ class TestCosmWasmContract:
             ]
         )
 
+    @pytest.mark.skip
     @pytest.mark.integration
     @pytest.mark.ledger
     def test_cosmwasm_contract_deploy_and_interact(self, erc1155_contract):
         """Test cosmwasm contract deploy and interact."""
         # Deploy contract
-        tx = erc1155_contract.get_deploy_transaction(
+        contract, contract_address = erc1155_contract
+        tx = contract.get_deploy_transaction(
             ledger_api=self.ledger_api,
             deployer_address=self.deployer_crypto.address,
             gas=900000,
         )
         assert len(tx) == 6
         self.sign_send_verify_deploy_init_transaction(tx, self.deployer_crypto)
-        code_id = erc1155_contract.get_last_code_id(self.ledger_api)
+        code_id = contract.get_last_code_id(self.ledger_api)
 
         # Init contract
         tx = self.ledger_api.get_init_transaction(
@@ -387,12 +377,10 @@ class TestCosmWasmContract:
         assert len(tx) == 6
         self.sign_send_verify_deploy_init_transaction(tx, self.deployer_crypto)
 
-        contract_address = erc1155_contract.get_contract_address(
-            self.ledger_api, code_id
-        )
+        contract_address = contract.get_contract_address(self.ledger_api, code_id)
 
         # Create single token
-        tx = erc1155_contract.get_create_single_transaction(
+        tx = contract.get_create_single_transaction(
             ledger_api=self.ledger_api,
             contract_address=contract_address,
             deployer_address=self.deployer_crypto.address,
@@ -402,7 +390,7 @@ class TestCosmWasmContract:
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Create batch of tokens
-        tx = erc1155_contract.get_create_batch_transaction(
+        tx = contract.get_create_batch_transaction(
             ledger_api=self.ledger_api,
             contract_address=contract_address,
             deployer_address=self.deployer_crypto.address,
@@ -412,7 +400,7 @@ class TestCosmWasmContract:
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Mint single token
-        tx = erc1155_contract.get_mint_single_transaction(
+        tx = contract.get_mint_single_transaction(
             ledger_api=self.ledger_api,
             contract_address=contract_address,
             deployer_address=self.deployer_crypto.address,
@@ -424,7 +412,7 @@ class TestCosmWasmContract:
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Get balance of single token
-        res = erc1155_contract.get_balance(
+        res = contract.get_balance(
             ledger_api=self.ledger_api,
             contract_address=contract_address,
             agent_address=self.item_owner_crypto.address,
@@ -434,7 +422,7 @@ class TestCosmWasmContract:
         assert res["balance"][self.token_id_b] == 1
 
         # Mint batch of tokens
-        tx = erc1155_contract.get_mint_batch_transaction(
+        tx = contract.get_mint_batch_transaction(
             ledger_api=self.ledger_api,
             contract_address=contract_address,
             deployer_address=self.deployer_crypto.address,
@@ -446,7 +434,7 @@ class TestCosmWasmContract:
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Get balances of multiple tokens
-        res = erc1155_contract.get_balances(
+        res = contract.get_balances(
             ledger_api=self.ledger_api,
             contract_address=contract_address,
             agent_address=self.item_owner_crypto.address,
@@ -462,9 +450,10 @@ class TestCosmWasmContract:
         self, erc1155_contract
     ):
         """Test unimplemented exception single atomic swap."""
+        contract, contract_address = erc1155_contract
         pytest.raises(
             NotImplementedError,
-            erc1155_contract.get_atomic_swap_single_transaction,
+            contract.get_atomic_swap_single_transaction,
             self.ledger_api,
             contract_address=None,
             from_address=None,
@@ -481,9 +470,10 @@ class TestCosmWasmContract:
     @pytest.mark.ledger
     def test_cosmwasm_unimplemented_exception_batch_atomic_swap(self, erc1155_contract):
         """Test unimplemented exception batch atomic swap."""
+        contract, contract_address = erc1155_contract
         pytest.raises(
             NotImplementedError,
-            erc1155_contract.get_atomic_swap_batch_transaction,
+            contract.get_atomic_swap_batch_transaction,
             self.ledger_api,
             contract_address=None,
             from_address=None,

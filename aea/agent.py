@@ -25,6 +25,7 @@ from logging import Logger
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from aea.abstract_agent import AbstractAgent
+from aea.configurations.constants import CONNECTIONS
 from aea.connections.base import Connection
 from aea.exceptions import AEAException
 from aea.helpers.logging import WithLogger
@@ -54,6 +55,7 @@ class Agent(AbstractAgent, WithLogger):
         period: float = 1.0,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        storage_uri: Optional[str] = None,
         logger: Logger = _default_logger,
     ) -> None:
         """
@@ -65,6 +67,7 @@ class Agent(AbstractAgent, WithLogger):
         :param period: period to call agent's act
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode to up agent.
+        :param storage_uri: optional uri to set generic storage
 
         :return: None
         """
@@ -74,6 +77,8 @@ class Agent(AbstractAgent, WithLogger):
         self._period = period
         self._tick = 0
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
+        self._storage_uri = storage_uri
+
         runtime_cls = self._get_runtime_class()
         self._runtime: BaseRuntime = runtime_cls(
             agent=self, loop_mode=loop_mode, loop=loop
@@ -86,6 +91,11 @@ class Agent(AbstractAgent, WithLogger):
     def connections(self) -> List[Connection]:
         """Return list of connections."""
         return self._connections
+
+    @property
+    def storage_uri(self) -> Optional[str]:
+        """Return storage uri."""
+        return self._storage_uri
 
     @property
     def active_connections(self) -> List[Connection]:
@@ -116,7 +126,7 @@ class Agent(AbstractAgent, WithLogger):
 
         :return: dict of kwargs
         """
-        return {"connections": self.active_connections}
+        return {CONNECTIONS: self.active_connections}
 
     @property
     def identity(self) -> Identity:

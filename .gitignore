@@ -121,6 +121,9 @@ output_file
 
 !packages/fetchai/contracts/erc1155/build
 !packages/fetchai/contracts/staking_erc20/build
+!packages/fetchai/contracts/oracle/build
+!packages/fetchai/contracts/oracle_client/build
+!packages/fetchai/contracts/fet_erc20/build
 packages/fetchai/connections/p2p_libp2p/libp2p_node
 
 !tests/data/dummy_contract/build

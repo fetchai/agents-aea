@@ -525,6 +525,15 @@ Implement the reaction to a message.
 
 None
 
+<a name="aea.skills.base.Handler.handle_wrapper"></a>
+#### handle`_`wrapper
+
+```python
+ | handle_wrapper(message: Message) -> None
+```
+
+Wrap the call of the handler. This method must be called only by the framework.
+
 <a name="aea.skills.base.Handler.parse_module"></a>
 #### parse`_`module
 

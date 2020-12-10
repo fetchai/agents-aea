@@ -17,11 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """Tools used for CLI registry testing."""
-
 from typing import List
 from unittest.mock import Mock
 
 from click import ClickException
+
+from aea.configurations.base import PackageVersion
 
 from tests.conftest import AUTHOR, COSMOS, ETHEREUM
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
@@ -56,9 +57,17 @@ class AgentConfigMock:
         self.get = lambda x, default=None: getattr(self, x, default)
         self.component_configurations = {}
         self.package_dependencies = set()
+        self.config: dict = {}
 
     registry_path = "registry"
     name = "name"
+
+
+class FaultyAgentConfigMock:
+    """A Class to mock Agent config with missing attributes."""
+
+    def __init__(self, *args, **kwargs):
+        """Init faulty agent config."""
 
 
 class ContextMock:
@@ -70,12 +79,13 @@ class ContextMock:
         """Init the ContextMock object."""
         self.invoke = Mock()
         self.agent_config = AgentConfigMock(*args, **kwargs)
-        self.config = self.agent_config
+        self.config: dict = {}
         self.connection_loader = ConfigLoaderMock()
         self.agent_loader = ConfigLoaderMock()
         self.clean_paths: List = []
         self.obj = self
         self.registry_path = ""
+        self.cwd = "cwd"
 
     def set_config(self, key, value):
         """Set config."""
@@ -98,6 +108,11 @@ class PublicIdMock:
         """Create object from str public_id without validation."""
         author, name, version = public_id.replace(":", "/").split("/")
         return cls(author, name, version)
+
+    @property
+    def package_version(self) -> PackageVersion:
+        """Get package version."""
+        return PackageVersion(self.version)
 
 
 class AEAConfMock:

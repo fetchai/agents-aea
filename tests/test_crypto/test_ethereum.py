@@ -16,24 +16,43 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the ethereum module."""
 
 import hashlib
 import logging
 import time
-from unittest.mock import MagicMock
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-import eth_account
 import pytest
 
-from aea.crypto.ethereum import EthereumApi, EthereumCrypto, EthereumFaucetApi
+from aea.crypto.ethereum import (
+    AttributeDictTranslator,
+    EthereumApi,
+    EthereumCrypto,
+    EthereumFaucetApi,
+)
 
 from tests.conftest import (
+    DEFAULT_GANACHE_CHAIN_ID,
     ETHEREUM_PRIVATE_KEY_PATH,
-    ETHEREUM_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
+    ROOT_DIR,
 )
+
+
+def test_attribute_dict_translator():
+    """Test the AttributeDictTranslator."""
+    di = {
+        "1": None,
+        "2": True,
+        "3": b"some",
+        "4": 0.1,
+        "5": [1, None, True, {}],
+        "6": {"hex": "0x01"},
+    }
+    res = AttributeDictTranslator.from_dict(di)
+    assert AttributeDictTranslator.to_dict(res) == di
 
 
 def test_creation():
@@ -107,14 +126,14 @@ def test_dump_positive():
     account.dump(MagicMock())
 
 
-def test_api_creation():
+def test_api_creation(ethereum_testnet_config):
     """Test api instantiation."""
-    assert EthereumApi(**ETHEREUM_TESTNET_CONFIG), "Failed to initialise the api"
+    assert EthereumApi(**ethereum_testnet_config), "Failed to initialise the api"
 
 
-def test_api_none():
+def test_api_none(ethereum_testnet_config):
     """Test the "api" of the cryptoApi is none."""
-    eth_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    eth_api = EthereumApi(**ethereum_testnet_config)
     assert eth_api.api is not None, "The api property is None."
 
 
@@ -128,9 +147,9 @@ def test_validate_address():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_get_balance():
+def test_get_balance(ethereum_testnet_config, ganache):
     """Test the balance is zero for a new account."""
-    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
     ec = EthereumCrypto()
     balance = ethereum_api.get_balance(ec.address)
     assert balance == 0, "New account has a positive balance."
@@ -142,11 +161,26 @@ def test_get_balance():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_construct_sign_and_submit_transfer_transaction():
+def test_get_state(ethereum_testnet_config, ganache):
+    """Test that get_state() with 'getBlock' function returns something containing the block number."""
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+    callable_name = "getBlock"
+    args = ("latest",)
+    block = ethereum_api.get_state(callable_name, *args)
+    assert block is not None, "response to getBlock is empty."
+    assert "number" in block, "response to getBlock() does not contain 'number'"
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_construct_sign_and_submit_transfer_transaction(
+    ethereum_testnet_config, ganache
+):
     """Test the construction, signing and submitting of a transfer transaction."""
     account = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
 
     amount = 40000
     tx_nonce = ethereum_api.generate_tx_nonce(ec2.address, account.address)
@@ -156,7 +190,7 @@ def test_construct_sign_and_submit_transfer_transaction():
         amount=amount,
         tx_fee=30000,
         tx_nonce=tx_nonce,
-        chain_id=3,
+        chain_id=DEFAULT_GANACHE_CHAIN_ID,
     )
     assert (
         isinstance(transfer_transaction, dict) and len(transfer_transaction) == 7
@@ -164,8 +198,7 @@ def test_construct_sign_and_submit_transfer_transaction():
 
     signed_transaction = account.sign_transaction(transfer_transaction)
     assert (
-        isinstance(signed_transaction, eth_account.datastructures.SignedTransaction)
-        and len(signed_transaction) == 5
+        isinstance(signed_transaction, dict) and len(signed_transaction) == 5
     ), "Incorrect signed_transaction constructed."
 
     transaction_digest = ethereum_api.send_signed_transaction(signed_transaction)
@@ -200,19 +233,19 @@ def test_get_wealth_positive(caplog):
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
         ethereum_faucet_api = EthereumFaucetApi()
         ec = EthereumCrypto()
-        ethereum_faucet_api.get_wealth(ec.address)
+        ethereum_faucet_api.get_wealth(ec.address, "some_url")
         assert (
-            "Response: " in caplog.text
+            "Invalid URL" in caplog.text
         ), f"Cannot find message in output: {caplog.text}"
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_get_contract_instance():
+def test_get_contract_instance(erc1155_contract, ethereum_testnet_config):
     """Test the get contract instance method."""
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
-    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    contract, contract_address = erc1155_contract
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
     interface = {"abi": [], "bytecode": b""}
     instance = ethereum_api.get_contract_instance(
         contract_interface=interface, contract_address=contract_address,
@@ -227,9 +260,9 @@ def test_get_contract_instance():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_get_deploy_transaction():
+def test_get_deploy_transaction(ethereum_testnet_config, ganache):
     """Test the get deploy transaction method."""
-    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
     ec2 = EthereumCrypto()
     interface = {"abi": [], "bytecode": b""}
     deploy_tx = ethereum_api.get_deploy_transaction(
@@ -240,3 +273,30 @@ def test_get_deploy_transaction():
         key in ["from", "value", "gas", "gasPrice", "nonce", "data"]
         for key in deploy_tx.keys()
     )
+
+
+def test_load_contract_interface():
+    """Test the load_contract_interface method."""
+    path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
+    result = EthereumApi.load_contract_interface(path)
+    assert "abi" in result
+    assert "bytecode" in result
+
+
+@patch.object(EthereumApi, "_try_get_transaction_count", return_value=None)
+def test_ethereum_api_get_transfer_transaction(*args):
+    """Test EthereumApi.get_transfer_transaction."""
+    ethereum_api = EthereumApi()
+    assert ethereum_api.get_transfer_transaction(*[MagicMock()] * 7) is None
+
+
+def test_ethereum_api_get_deploy_transaction(*args):
+    """Test EthereumApi.get_deploy_transaction."""
+    ethereum_api = EthereumApi()
+    with patch.object(ethereum_api.api.eth, "getTransactionCount", return_value=None):
+        assert (
+            ethereum_api.get_deploy_transaction(
+                {"acc": "acc"}, "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+            )
+            is None
+        )

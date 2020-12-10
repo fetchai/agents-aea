@@ -16,12 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
 import logging
 import unittest.mock
 from typing import cast
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -79,7 +79,6 @@ class ContractApiDialogues(BaseContractApiDialogues):
 @pytest.mark.asyncio
 async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
-    # TODO to fix
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     request, contract_api_dialogue = contract_api_dialogues.create(
@@ -118,10 +117,15 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
-async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connection):
+async def test_erc1155_get_raw_transaction(
+    erc1155_contract,
+    ledger_apis_connection,
+    update_default_ethereum_ledger_api,
+    ganache,
+):
     """Test get state with contract erc1155."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     contract_api_dialogues = ContractApiDialogues(address)
     request, contract_api_dialogue = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
@@ -165,8 +169,8 @@ async def test_erc1155_get_raw_transaction(erc1155_contract, ledger_apis_connect
 @pytest.mark.asyncio
 async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     contract_api_dialogues = ContractApiDialogues(address)
     request, contract_api_dialogue = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
@@ -216,8 +220,8 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
 @pytest.mark.asyncio
 async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
     """Test get state with contract erc1155."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     contract_api_dialogues = ContractApiDialogues(address)
     token_id = 1
     request, contract_api_dialogue = contract_api_dialogues.create(
@@ -306,10 +310,10 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
 
     Test the case of either GET_STATE, GET_RAW_MESSAGE or GET_RAW_TRANSACTION.
     """
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     token_id = 1
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     request, _ = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=ContractApiMessage.Performative.GET_STATE,
@@ -338,7 +342,7 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
             await asyncio.sleep(0.01)
             response = await ledger_apis_connection.receive()
             mock_logger.assert_any_call(
-                "Expected two or more positional arguments, got 1"
+                "Exception during contract request: Expected two or more positional arguments, got 1"
             )
             assert (
                 response.message.performative == ContractApiMessage.Performative.ERROR
@@ -360,6 +364,7 @@ async def test_callable_wrong_number_of_arguments_apis(
 
     Test the case of either GET_DEPLOY_TRANSACTION.
     """
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     request, _ = contract_api_dialogues.create(
@@ -390,7 +395,7 @@ async def test_callable_wrong_number_of_arguments_apis(
                 await asyncio.sleep(0.01)
                 response = await ledger_apis_connection.receive()
                 mock_logger.assert_any_call(
-                    "Expected one or more positional arguments, got 0"
+                    "Exception during contract request: Expected one or more positional arguments, got 0"
                 )
                 assert (
                     response.message.performative
@@ -413,6 +418,7 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
 
     Test the case of either GET_DEPLOY_TRANSACTION.
     """
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     request, _ = contract_api_dialogues.create(
@@ -447,10 +453,10 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
 @pytest.mark.asyncio
 async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
     """Test error messages when an exception is raised while processing the request."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     token_id = 1
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     request, _ = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=ContractApiMessage.Performative.GET_STATE,
@@ -492,10 +498,10 @@ async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
 @pytest.mark.asyncio
 async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, caplog):
     """Test error messages when an exception is raised while processing the request."""
+    contract, contract_address = erc1155_contract
     address = ETHEREUM_ADDRESS_ONE
     contract_api_dialogues = ContractApiDialogues(address)
     token_id = 1
-    contract_address = "0x250A2aeb3eB84782e83365b4c42dbE3CDA9920e4"
     request, _ = contract_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=ContractApiMessage.Performative.GET_STATE,
@@ -518,3 +524,39 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
         await ledger_apis_connection.send(envelope)
         await asyncio.sleep(0.01)
         assert f"Cannot find {request.callable} in contract" in caplog.text
+
+
+def test_build_response_fails_on_bad_data_type():
+    """Test internal build_response functions for data type check."""
+    dispatcher = ContractApiRequestDispatcher(MagicMock())
+    with patch.object(
+        dispatcher,
+        "dispatch_request",
+        lambda x, x1, x2, fn: fn(data=b"some_data", dialogue=MagicMock()),
+    ), pytest.raises(
+        ValueError, match=r"Invalid state type, got=<class '.+'>, expected=typing.Dict"
+    ):
+        dispatcher.get_state(MagicMock(), MagicMock(), MagicMock())
+
+    with patch.object(
+        dispatcher,
+        "dispatch_request",
+        lambda x, x1, x2, fn: fn(rm=12, dialogue=MagicMock()),
+    ), pytest.raises(ValueError, match=r"Invalid message type"):
+        dispatcher.get_raw_message(MagicMock(), MagicMock(), MagicMock())
+
+    with patch.object(
+        dispatcher,
+        "dispatch_request",
+        lambda x, x1, x2, fn: fn(tx=b"some_data", dialogue=MagicMock()),
+    ):
+        with pytest.raises(
+            ValueError,
+            match=r"Invalid transaction type, got=<class '.+'>, expected=typing.Dict",
+        ):
+            dispatcher.get_deploy_transaction(MagicMock(), MagicMock(), MagicMock())
+        with pytest.raises(
+            ValueError,
+            match=r"Invalid transaction type, got=<class '.+'>, expected=typing.Dict",
+        ):
+            dispatcher.get_raw_transaction(MagicMock(), MagicMock(), MagicMock())

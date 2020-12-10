@@ -29,19 +29,28 @@ import click
 
 from aea.aea_builder import AEABuilder
 from aea.cli.utils.click_utils import PublicIdParameter
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.config import load_item_config, try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import get_item_public_id_by_author_name
+from aea.cli.utils.package_utils import (
+    get_item_public_id_by_author_name,
+    is_item_present,
+)
 from aea.configurations.base import (
     AgentConfig,
     ComponentId,
     ComponentType,
-    DEFAULT_AEA_CONFIG_FILE,
     PackageConfiguration,
     PackageId,
     PublicId,
+)
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
 )
 
 
@@ -55,7 +64,7 @@ from aea.configurations.base import (
 @click.pass_context
 @check_aea_project
 def remove(click_context, with_dependencies):  # pylint: disable=unused-argument
-    """Remove a resource from the agent."""
+    """Remove a package from the agent."""
     ctx = cast(Context, click_context.obj)
     if with_dependencies:
         ctx.set_config("with_dependencies", True)
@@ -70,7 +79,7 @@ def connection(ctx: Context, connection_id):
 
     It expects the public id of the connection to remove from the local registry.
     """
-    remove_item(ctx, "connection", connection_id)
+    remove_item(ctx, CONNECTION, connection_id)
 
 
 @remove.command()
@@ -82,7 +91,7 @@ def contract(ctx: Context, contract_id):
 
     It expects the public id of the contract to remove from the local registry.
     """
-    remove_item(ctx, "contract", contract_id)
+    remove_item(ctx, CONTRACT, contract_id)
 
 
 @remove.command()
@@ -94,7 +103,7 @@ def protocol(ctx: Context, protocol_id):
 
     It expects the public id of the protocol to remove from the local registry.
     """
-    remove_item(ctx, "protocol", protocol_id)
+    remove_item(ctx, PROTOCOL, protocol_id)
 
 
 @remove.command()
@@ -106,15 +115,17 @@ def skill(ctx: Context, skill_id):
 
     It expects the public id of the skill to remove from the local registry.
     """
-    remove_item(ctx, "skill", skill_id)
+    remove_item(ctx, SKILL, skill_id)
 
 
 class ItemRemoveHelper:
     """Helper to check dependencies on removing component from agent config."""
 
-    def __init__(self, agent_config: AgentConfig) -> None:
+    def __init__(self, ctx: Context, ignore_non_vendor: bool = False) -> None:
         """Init helper."""
-        self._agent_config = agent_config
+        self._ctx = ctx
+        self._agent_config = ctx.agent_config
+        self._ignore_non_vendor = ignore_non_vendor
 
     def get_agent_dependencies_with_reverse_dependencies(
         self,
@@ -169,18 +180,21 @@ class ItemRemoveHelper:
                 f"Can not find folder for the package: {package_id.package_type} {package_id.public_id}"
             )
 
-    @staticmethod
     def _get_item_requirements(
-        item: PackageConfiguration,
+        self, item: PackageConfiguration, ignore_non_vendor: bool = False
     ) -> Generator[PackageId, None, None]:
         """
-        List all the requiemenents for item provided.
+        List all the requirements for item provided.
 
         :return: generator with package ids: (type, public_id)
         """
         for item_type in map(str, ComponentType):
             items = getattr(item, f"{item_type}s", set())
             for item_public_id in items:
+                if ignore_non_vendor and is_item_present(
+                    self._ctx, item_type, item_public_id, is_vendor=False
+                ):
+                    continue
                 yield PackageId(item_type, item_public_id)
 
     def get_item_dependencies_with_reverse_dependencies(
@@ -195,7 +209,9 @@ class ItemRemoveHelper:
         """
         result: defaultdict = defaultdict(set)
 
-        for dep_package_id in self._get_item_requirements(item):
+        for dep_package_id in self._get_item_requirements(
+            item, self._ignore_non_vendor
+        ):
             if package_id is None:
                 _ = result[dep_package_id]  # init default dict value
             else:
@@ -230,7 +246,7 @@ class ItemRemoveHelper:
 
         required by - set of components that requires this component
         can be deleted - set of dependencies used only by component so can be deleted
-        can not be deleted  - dict - keys - packages can not be deleted, values are set of packages requireed by.
+        can not be deleted  - dict - keys - packages can not be deleted, values are set of packages required by.
 
         :return: Tuple[required by, can be deleted, can not be deleted.]
         """
@@ -268,6 +284,8 @@ def remove_unused_component_configurations(ctx: Context):
         saved_configuration_by_component_prefix = {
             key.component_prefix: value for key, value in saved_configuration.items()
         }
+        # need to reload agent configuration with the updated references
+        try_to_load_agent_config(ctx)
         for component_id in ctx.agent_config.package_dependencies:
             if component_id.component_prefix in saved_configuration_by_component_prefix:
                 ctx.agent_config.component_configurations[
@@ -290,6 +308,7 @@ class RemoveItem:
         item_id: PublicId,
         with_dependencies: bool,
         force: bool = False,
+        ignore_non_vendor: bool = False,
     ) -> None:
         """
         Init remove item tool.
@@ -298,11 +317,14 @@ class RemoveItem:
         :param item_type: str, package type
         :param item_id: PublicId of the item to remove.
         :param force: bool. if True remove even required by another package.
+        :param ignore_non_vendor: bool. if True, ignore non-vendor packages when computing
+          inverse dependencies. The effect of this flag is ignored if force = True
 
         :return: None
         """
         self.ctx = ctx
         self.force = force
+        self.ignore_non_vendor = ignore_non_vendor
         self.item_type = item_type
         self.item_id = item_id
         self.with_dependencies = with_dependencies
@@ -317,7 +339,9 @@ class RemoveItem:
                 self.required_by,
                 self.dependencies_can_be_removed,
                 *_,
-            ) = ItemRemoveHelper(self.agent_config).check_remove(
+            ) = ItemRemoveHelper(
+                self.ctx, ignore_non_vendor=self.ignore_non_vendor
+            ).check_remove(
                 self.item_type, self.current_item
             )
         except FileNotFoundError:  # pragma: nocover
@@ -339,23 +363,11 @@ class RemoveItem:
 
     def remove(self) -> None:
         """Remove item and it's dependencies if specified."""
-        click.echo(
-            "Removing {item_type} '{item_name}' from the agent '{agent_name}'...".format(
-                agent_name=self.agent_name,
-                item_type=self.item_type,
-                item_name=self.item_name,
-            )
-        )
+        click.echo(f"Removing {self.item_type} '{self.current_item}'...")
         self.remove_item()
         if self.with_dependencies:
             self.remove_dependencies()
-        click.echo(
-            "{item_type} '{item_name}' was removed from the agent '{agent_name}'...".format(
-                agent_name=self.agent_name,
-                item_type=self.item_type,
-                item_name=self.item_name,
-            )
-        )
+        click.echo(f"Successfully removed {self.item_type} '{self.current_item}'.")
 
     @property
     def agent_items(self) -> Set[PublicId]:
@@ -394,7 +406,7 @@ class RemoveItem:
         return self.ctx.agent_config
 
     @property
-    def agent_name(self) -> str:
+    def agent_name(self) -> str:  # pragma: nocover
         """Get agent name."""
         return self.ctx.agent_config.agent_name
 
@@ -435,10 +447,10 @@ class RemoveItem:
         """Remove all the dependecies related only to the package."""
         if not self.dependencies_can_be_removed:
             return
-        click.echo(
-            f"Removing obsolete dependencies for {self.agent_name}: {self.dependencies_can_be_removed}..."
-        )
         for dependency in self.dependencies_can_be_removed:
+            click.echo(
+                f"Removing obsolete dependency {str(dependency.package_type)} '{str(dependency.public_id)}'..."
+            )
             RemoveItem(
                 self.ctx,
                 str(dependency.package_type),
@@ -447,7 +459,7 @@ class RemoveItem:
                 force=True,
             ).remove_item()
             click.echo(
-                f"{str(dependency.package_type).capitalize()} {dependency.public_id} was removed from {self.agent_name}."
+                f"Successfully removed {str(dependency.package_type)} '{dependency.public_id}'."
             )
 
 

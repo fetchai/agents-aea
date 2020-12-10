@@ -14,13 +14,13 @@ cd my_aea
 Add the http server connection package
 
 ``` bash
-aea add connection fetchai/http_server:0.12.0
+aea add connection fetchai/http_server:0.13.0
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.12.0
+aea config set agent.default_connection fetchai/http_server:0.13.0
 ```
 
 Modify the `api_spec_path`:
@@ -166,7 +166,7 @@ handlers:
 
 Finally, we run the fingerprinter:
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.10.0
+aea fingerprint skill fetchai/http_echo:0.11.0
 ```
 Note, you will have to replace the author name with your author handle.
 

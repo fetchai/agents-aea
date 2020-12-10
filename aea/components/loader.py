@@ -23,9 +23,16 @@ from typing import Dict, Type
 
 from aea.components.base import Component
 from aea.configurations.base import ComponentConfiguration, ComponentType
+from aea.configurations.constants import PACKAGES
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
-from aea.exceptions import AEAPackageLoadingError, enforce
+from aea.exceptions import (
+    AEAComponentLoadException,
+    AEAInstantiationException,
+    AEAPackageLoadingError,
+    enforce,
+    parse_exception,
+)
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
 
@@ -59,6 +66,14 @@ def load_component_from_config(  # type: ignore
     component_class = component_type_to_class(component_type)
     try:
         return component_class.from_config(*args, configuration=configuration, **kwargs)  # type: ignore
+    except AEAInstantiationException as e:
+        raise e
+    except AEAComponentLoadException as e:
+        raise AEAPackageLoadingError(
+            "Package loading error: An error occurred while loading {} {}: {}".format(
+                str(configuration.component_type), configuration.public_id, e
+            )
+        )
     except ModuleNotFoundError as e:
         _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:  # pylint: disable=broad-except
@@ -93,7 +108,7 @@ def _handle_error_while_loading_component_module_not_found(
     import_path = match.group(1)
     parts = import_path.split(".")
     nb_parts = len(parts)
-    if parts[0] != "packages" or nb_parts < 2:
+    if parts[0] != PACKAGES or nb_parts < 2:
         # if the first part of the import path is not 'packages',
         # the error is due for other reasons - just re-raise the error
         raise e from e
@@ -133,7 +148,7 @@ def _handle_error_while_loading_component_module_not_found(
         new_message = get_new_error_message_with_package_found()
 
     raise AEAPackageLoadingError(
-        "An error occurred while loading {} {}: No module named {}; {}".format(
+        "Package loading error: An error occurred while loading {} {}: No module named {}; {}".format(
             str(configuration.component_type),
             configuration.public_id,
             import_path,
@@ -150,8 +165,9 @@ def _handle_error_while_loading_component_generic_error(
 
     :raises Exception: the same exception, but prepending an informative message.
     """
-    raise Exception(
-        "An error occurred while loading {} {}: {}".format(
-            str(configuration.component_type), configuration.public_id, str(e)
+    e_str = parse_exception(e)
+    raise AEAPackageLoadingError(
+        "Package loading error: An error occurred while loading {} {}: {}".format(
+            str(configuration.component_type), configuration.public_id, e_str
         )
-    ) from e
+    )

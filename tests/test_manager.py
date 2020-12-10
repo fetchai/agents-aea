@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
 import os
+from contextlib import suppress
+from shutil import rmtree
 from unittest.mock import Mock, patch
 
 import pytest
@@ -60,6 +62,18 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         assert os.path.exists(self.working_dir)
         self.manager.stop_manager()
         assert not os.path.exists(self.working_dir)
+        assert not os.path.exists(self.working_dir)
+
+    def test_keys_dir_presents(self):
+        """Check not fails on exists key dir."""
+        try:
+            os.makedirs(self.working_dir)
+            os.makedirs(self.manager._keys_dir)
+            self.manager.start_manager()
+            self.manager.stop_manager()
+        finally:
+            with suppress(Exception):
+                rmtree(self.working_dir)
 
     def test_MultiAgentManager_is_running(self):
         """Check MultiAgentManager is running property reflects state."""
@@ -318,6 +332,35 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         ) as install_mock:
             self.manager.install_pypi_dependencies()
             install_mock.assert_called_once()
+
+    def test_save_load_positive(self):
+        """Test save-load func of MultiAgentManager for positive result."""
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+
+        self.manager.add_agent(self.project_public_id, self.agent_name)
+        self.manager.stop_manager(save=True)
+        assert os.path.exists(self.manager._save_path)
+
+        self.manager.start_manager()
+        assert self.project_public_id in self.manager._projects.keys()
+        assert self.agent_name in self.manager._agents.keys()
+
+    def test_list_agents_info_positive(self):
+        """Test list_agents_info method for positive result."""
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+
+        self.manager.add_agent(self.project_public_id, self.agent_name)
+        result = self.manager.list_agents_info()
+        expected_result = [
+            {
+                "agent_name": self.agent_name,
+                "public_id": str(self.project_public_id),
+                "is_running": False,
+            }
+        ]
+        assert result == expected_result
 
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):

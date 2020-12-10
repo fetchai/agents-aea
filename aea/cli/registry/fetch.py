@@ -28,7 +28,14 @@ from aea.cli.registry.utils import download_file, extract, request_api
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
+)
 
 
 @clean_after
@@ -48,7 +55,7 @@ def fetch_agent(
     :return: None
     """
     author, name, version = public_id.author, public_id.name, public_id.version
-    api_path = "/agents/{}/{}/{}".format(author, name, version)
+    api_path = f"/agents/{author}/{name}/{version}"
     resp = request_api("GET", api_path)
     file_url = resp["file"]
 
@@ -75,7 +82,7 @@ def fetch_agent(
         )
 
     click.echo("Fetching dependencies...")
-    for item_type in ("connection", "contract", "skill", "protocol"):
+    for item_type in (CONNECTION, CONTRACT, SKILL, PROTOCOL):
         item_type_plural = item_type + "s"
 
         # initialize fetched agent with empty folders for custom packages
@@ -88,9 +95,7 @@ def fetch_agent(
                 add_item(ctx, item_type, item_public_id)
             except Exception as e:
                 raise click.ClickException(
-                    'Unable to fetch dependency for agent "{}", aborting. {}'.format(
-                        name, e
-                    )
+                    f'Unable to fetch dependency for agent "{name}", aborting. {e}'
                 )
     click.echo("Dependencies successfully fetched.")
-    click.echo("Agent {} successfully fetched to {}.".format(name, aea_folder))
+    click.echo(f"Agent {name} successfully fetched to {aea_folder}.")

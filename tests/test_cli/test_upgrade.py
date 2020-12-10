@@ -23,8 +23,8 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Set
-from unittest.mock import patch
+from typing import List, Set, cast
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click.exceptions import ClickException
@@ -32,6 +32,7 @@ from click.testing import Result
 
 from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
+from aea.cli.utils.config import load_item_config
 from aea.configurations.base import (
     AgentConfig,
     ComponentId,
@@ -46,6 +47,7 @@ from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
+from packages.fetchai.connections.oef.connection import PUBLIC_ID as OEF_PUBLIC_ID
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
@@ -80,6 +82,11 @@ class BaseTestCase:
         with path.open(mode="r", encoding="utf-8") as fp:
             agent_config = agent_loader.load(fp)
         return agent_config
+
+    def load_mock_context(self) -> MagicMock:
+        """Load mock context."""
+        context_mock = MagicMock(agent_config=self.load_config())
+        return context_mock
 
     def dump_config(self, agent_config: AgentConfig) -> None:
         """Dump AgentConfig to current directory."""
@@ -281,6 +288,45 @@ class TestRemoveAndDependencies(BaseTestCase):
             assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
 
 
+class TestUpgradeSharedDependencies(AEATestCaseEmpty):
+    """
+    Test removal of shared dependency.
+
+    The shared dependency in this test case is 'fetchai/oef_search:0.9.0'.
+    """
+
+    IS_EMPTY = True
+    OLD_SOEF_ID = PublicId.from_str("fetchai/soef:0.11.0")
+    OLD_OEF_SEARCH_ID = PublicId.from_str("fetchai/oef_search:0.9.0")
+    OLD_OEF_ID = PublicId.from_str("fetchai/oef:0.12.0")
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        super().setup_class()
+        result = cls.run_cli_command(
+            "add", "connection", str(cls.OLD_SOEF_ID), cwd=cls._get_cwd()
+        )
+        assert result.exit_code == 0
+        result = cls.run_cli_command(
+            "add", "connection", str(cls.OLD_OEF_ID), cwd=cls._get_cwd()
+        )
+        assert result.exit_code == 0
+
+    def test_upgrade_shared_dependencies(self):
+        """Test upgrade shared dependencies."""
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert result.exit_code == 0
+
+        agent_config: AgentConfig = cast(
+            AgentConfig,
+            load_item_config(PackageType.AGENT.value, Path(self.current_agent_context)),
+        )
+        assert OefSearchMessage.protocol_id in agent_config.protocols
+        assert SOEF_PUBLIC_ID in agent_config.connections
+        assert OEF_PUBLIC_ID in agent_config.connections
+
+
 class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
     """Test that the command 'aea upgrade' works."""
 
@@ -296,7 +342,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.13.0",
+            "fetchai/generic_buyer:0.16.0",
             "--alias",
             cls.agent_name,
         )
@@ -314,7 +360,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         """Test upgrade project old version to latest one and compare with latest project fetched."""
         with cd(self.latest_agent_name):
             latest_agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -327,7 +373,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
                 catch_exceptions=False,
             )
             agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -342,7 +388,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
                 catch_exceptions=False,
             )
             agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -377,7 +423,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.13.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.16.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -394,7 +440,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         """Test upgrade project dependencies not removed cause non vendor."""
         with cd(self.agent_name):
             base_agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -406,7 +452,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
                 catch_exceptions=False,
             )
             agent_items = set(
-                ItemRemoveHelper(self.load_config())
+                ItemRemoveHelper(self.load_mock_context())
                 .get_agent_dependencies_with_reverse_dependencies()
                 .keys()
             )
@@ -681,6 +727,7 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
     - scaffold a package, one for each possible package type;
     - add the protocol "fetchai/default:0.7.0" as dependency to each of them.
     - add the skill "fetchai/error:0.7.0"; this will also add the default protocol.
+      add it also as dependency of non-vendor skill.
     - run 'aea upgrade'
     - check that the reference to "fetchai/default" in each scaffolded package
       has the new version.
@@ -708,6 +755,13 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
                 f"{ComponentType(item_type).to_plural()}.{name}.protocols",
                 [str(cls.old_default_protocol_id)],
             )
+
+        # add the vendor skill as dependency of the non-vendor skill
+        if item_type == ComponentType.SKILL.value:
+            cls.nested_set_config(
+                f"{ComponentType(item_type).to_plural()}.{name}.skills",
+                [str(cls.old_error_skill_id)],
+            )
         return result
 
     @classmethod
@@ -725,28 +779,47 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
             str(cls.old_error_skill_id),
             cwd=cls._get_cwd(),
         )
+        cls.run_cli_command(
+            "--skip-consistency-check", "upgrade", "--local", cwd=cls._get_cwd()
+        )
+
+    def test_agent_config_updated(self):
+        """Test the agent configuration is updated."""
+        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+        with Path(self._get_cwd(), DEFAULT_AEA_CONFIG_FILE).open() as fp:
+            agent_config = loader.load(fp)
+        assert DefaultMessage.protocol_id in agent_config.protocols
+        assert ERROR_SKILL_PUBLIC_ID in agent_config.skills
 
     def test_non_vendor_update_references_to_upgraded_packages(
         self,
     ):  # pylint: disable=unused-argument
         """Test that dependencies in non-vendor packages are updated correctly after upgrade."""
-        self.run_cli_command(
-            "--skip-consistency-check", "upgrade", "--local", cwd=self._get_cwd()
+        self.assert_dependency_updated(
+            ComponentType.CONNECTION,
+            "my_connection",
+            "protocols",
+            {DefaultMessage.protocol_id},
         )
         self.assert_dependency_updated(
-            ComponentType.CONNECTION, "my_connection", {DefaultMessage.protocol_id},
+            ComponentType.SKILL, "my_skill", "protocols", {DefaultMessage.protocol_id}
         )
         self.assert_dependency_updated(
-            ComponentType.SKILL, "my_skill", {DefaultMessage.protocol_id}
+            ComponentType.SKILL, "my_skill", "skills", {ERROR_SKILL_PUBLIC_ID}
         )
 
     def assert_dependency_updated(
-        self, item_type: ComponentType, package_name: str, expected: Set[PublicId]
+        self,
+        item_type: ComponentType,
+        package_name: str,
+        package_type: str,
+        expected: Set[PublicId],
     ):
         """Assert dependency is updated."""
         package_path = Path(self._get_cwd(), item_type.to_plural(), package_name)
         component_config = load_component_configuration(item_type, package_path)
-        assert component_config.protocols == expected  # type: ignore
+        assert hasattr(component_config, package_type), "Test is not well-written."
+        assert getattr(component_config, package_type) == expected  # type: ignore
 
 
 class TestUpdateReferences(AEATestCaseEmpty):
@@ -853,4 +926,7 @@ class TestNothingToUpgrade(AEATestCaseEmpty):
     def test_nothing_to_upgrade(self):
         """Test nothing to upgrade."""
         result = self.run_cli_command("upgrade", cwd=self._get_cwd())
-        assert result.stdout == "Starting project upgrade...\n"
+        assert (
+            result.stdout
+            == "Starting project upgrade...\nEverything is already up to date!\n"
+        )

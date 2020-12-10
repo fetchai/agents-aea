@@ -3,7 +3,8 @@
 | Command                                     | Description                                                                  |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
 | `add [package_type] [public_id]`            | Add a `package_type` connection, contract, protocol, or skill, with `[public_id]`, to the AEA. `add --local` to add from local `packages` directory. |
-| `add-key [ledger_id] file`                  | Add a private key from a file for `ledger_id`.	                             |
+| `add-key [ledger_id] file [--connection]`   | Add a private key from a file for `ledger_id`.	                             |
+| `build`                                     | Build the agent and its components.                      |
 | `create [name]`                             | Create a new aea project called `name`.                                    |
 | `config get [path]`                         | Reads the config specified in `path` and prints its target.                |
 | `config set [path] [--type TYPE]`           | Sets a new value for the target of the `path`. Optionally cast to type.    |
@@ -27,11 +28,12 @@
 | `login USERNAME [--password password]`      | Login to a registry account with credentials.                                |
 | `logout`                                    | Logout from registry account.                                                |
 | `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.`publish --local` to publish to local `packages` directory. |
-| `push [package_type] [public_id]`          | Push connection, protocol, or skill with `public_id` to registry.	`push --local` to push to local `packages` directory. |
-| `remove [package_type] [name]`             | Remove connection, protocol, or skill, called `name`, from AEA.            |
+| `push [package_type] [public_id]`           | Push connection, protocol, or skill with `public_id` to registry.	`push --local` to push to local `packages` directory. |
+| `remove [package_type] [name]`              | Remove connection, protocol, or skill, called `name`, from AEA.            |
+| `remove-key [ledger_id] [name]`             | Remove a private key registered with id `ledger_id`.	                             |
 | `run {using [connections, ...]}`            | Run the AEA on the Fetch.ai network with default or specified connections.   |
-| `search [package_type]`                    | Search for components in the registry. `search --local [package_type] [--query searching_query]` to search in local `packages` directory. |
-| `scaffold [package_type] [name]`           | Scaffold a new connection, protocol, or skill called `name`.               |
+| `search [package_type]`                     | Search for components in the registry. `search --local [package_type] [--query searching_query]` to search in local `packages` directory. |
+| `scaffold [package_type] [name]`            | Scaffold a new connection, protocol, or skill called `name`.               |
 | `-v DEBUG run`                              | Run with debugging.                                                          |
 
 <!--

@@ -24,7 +24,8 @@ from typing import Optional
 
 import click
 
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
+from aea.crypto.helpers import create_private_key
 from aea.crypto.registries import crypto_registry
 
 
@@ -42,7 +43,7 @@ from aea.crypto.registries import crypto_registry
     required=False,
 )
 def generate_key(type_, file):
-    """Generate private keys."""
+    """Generate a private key and place it in a file."""
     _generate_private_key(type_, file)
 
 

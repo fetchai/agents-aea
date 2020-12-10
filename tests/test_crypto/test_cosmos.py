@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
-from unittest.mock import MagicMock
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
 
-from aea.crypto.cosmos import CosmosApi, CosmosCrypto
+from aea.crypto.cosmos import CosmosApi, CosmosCrypto, CosmosHelper
+from aea.crypto.cosmos import _default_logger as cosmos_logger
 
-from tests.conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG
+from tests.conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG, ROOT_DIR
 
 
 def test_creation():
@@ -98,3 +100,54 @@ def test_validate_address():
     account = CosmosCrypto()
     assert CosmosApi.is_valid_address(account.address)
     assert not CosmosApi.is_valid_address(account.address + "wrong")
+
+
+def test_load_contract_interface():
+    """Test the load_contract_interface method."""
+    path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.wasm")
+    result = CosmosApi.load_contract_interface(path)
+    assert "wasm_byte_code" in result
+
+
+def test_helper_is_settled():
+    """Test CosmosHelper.is_transaction_settled."""
+    assert CosmosHelper.is_transaction_settled({"code": None}) is True
+    with patch.object(cosmos_logger, "warning") as warning_mock:
+        assert CosmosHelper.is_transaction_settled({"code": "some value"}) is False
+        warning_mock.assert_called_once()
+
+
+@patch.object(
+    CosmosApi, "_try_get_account_number_and_sequence", return_value=(None, None)
+)
+def test_cosmos_api_get_deploy_transaction(*args):
+    """Test CosmosApi._get_deploy_transaction."""
+    cosmos_api = CosmosApi()
+    assert cosmos_api.get_deploy_transaction(*[Mock()] * 7) is None
+
+
+@patch.object(
+    CosmosApi, "_try_get_account_number_and_sequence", return_value=(None, None)
+)
+def test_cosmos_api_get_init_transaction(*args):
+    """Test CosmosApi.get_init_transaction."""
+    cosmos_api = CosmosApi()
+    assert cosmos_api.get_init_transaction(*[Mock()] * 7) is None
+
+
+@patch.object(
+    CosmosApi, "_try_get_account_number_and_sequence", return_value=(None, None)
+)
+def test_cosmos_api_get_handle_transaction(*args):
+    """Test CosmosApi.get_handle_transaction."""
+    cosmos_api = CosmosApi()
+    assert cosmos_api.get_handle_transaction(*[Mock()] * 7) is None
+
+
+@patch.object(
+    CosmosApi, "_try_get_account_number_and_sequence", return_value=(None, None)
+)
+def test_cosmos_api_get_transfer_transaction(*args):
+    """Test CosmosApi.get_transfer_transaction."""
+    cosmos_api = CosmosApi()
+    assert cosmos_api.get_transfer_transaction(*[Mock()] * 7) is None

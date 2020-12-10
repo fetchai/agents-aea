@@ -1,28 +1,36 @@
 name: confirmation_aw1
 author: fetchai
-version: 0.2.0
+version: 0.4.0
 type: skill
 description: The confirmation_aw1 skill is a skill to confirm registration for Agent
   World 1.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  __init__.py: QmZqjAQt2MaZBHNybRwUd2541wmj4XpUCTcGxjyysQPVAo
-  dialogues.py: QmdMjuAT8h7ZUSfqMVkF88Hnz1kc6advg8oVg8QB7xGPw1
-  handlers.py: QmVmTJCyEqPn2BR6ucPCe7nV3t8N9cYwoASKSxoJYkr9Wp
-  registration_db.py: QmfUXubG3ZRbTmMDs7AKjC3zKg9mRhxuTi1CtfU1DMcNsL
-  strategy.py: Qma26LVujewf4BGs6DZkrRg5uwRfBBnWEBy1nSSjt1ntfV
+  README.md: QmYRNztBr6i8G1T5mgdMLoKBEi5C68EeWM8pZCzpDXSMgd
+  __init__.py: QmXi1DqLvPq64eCAg1cYn8CfRLymQp5wejqvnq1ks63iy5
+  behaviours.py: Qmc9Jc2RcBbXwen3vBojNssg8poeRw2ggrwKhGoeG3BQLx
+  dialogues.py: QmcshtdAosn6fXtKNE8224t2tWwJYjFcKkuVYkjzc3Fzuj
+  handlers.py: QmdXRMnghbx1LZD8vPBEiSEnUJnkU7fHwf5mB9R4kfNzhX
+  registration_db.py: QmSSHJ3CfvbbQ69CAmiEWsjT7TUmTXR7jPf4hrue8N248x
+  strategy.py: QmU4xrEKWx9dsbPpPwA396FhEGz14eFJgqN3nCghMe9J58
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.9.0
+- fetchai/ledger:0.10.0
 contracts:
 - fetchai/staking_erc20:0.1.0
 protocols:
+- fetchai/default:0.9.0
 - fetchai/ledger_api:0.7.0
 - fetchai/register:0.2.0
 - fetchai/signing:0.7.0
 skills: []
-behaviours: {}
+behaviours:
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   contract_api:
     args: {}
@@ -40,6 +48,9 @@ models:
   contract_api_dialogues:
     args: {}
     class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
@@ -55,6 +66,7 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      awx_aeas: []
       fetchai_staking_contract_address: '0x351bac612b50e87b46e4b10a282f632d41397de2'
       override_staking_check: false
       token_denomination: atestfet

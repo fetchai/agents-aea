@@ -43,7 +43,7 @@ from aea.crypto.registries import ledger_apis_registry
 @click.pass_context
 @check_aea_project
 def get_wealth(click_context, type_):
-    """Get the wealth associated with the private key."""
+    """Get the wealth associated with the private key of the agent."""
     ctx = cast(Context, click_context.obj)
     wealth = _try_get_wealth(ctx, type_)
     click.echo(wealth)

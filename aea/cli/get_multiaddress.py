@@ -32,6 +32,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import get_package_path_unified
 from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.constants import CONNECTION
 from aea.crypto.base import Crypto
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
@@ -72,7 +73,7 @@ def get_multiaddress(
     port_field: str,
     uri_field: str,
 ):
-    """Get the multiaddress associated with a private key or connection."""
+    """Get the multiaddress associated with a private key or connection of the agent."""
     address = _try_get_multiaddress(
         click_context,
         ledger_id,
@@ -224,9 +225,9 @@ def _try_get_connection_multiaddress(
     if connection_id not in ctx.agent_config.connections:
         raise ValueError(f"Cannot find connection with the public id {connection_id}.")
 
-    package_path = Path(get_package_path_unified(ctx, "connection", connection_id))
+    package_path = Path(get_package_path_unified(ctx, CONNECTION, connection_id))
     connection_config = cast(
-        ConnectionConfig, load_item_config("connection", package_path)
+        ConnectionConfig, load_item_config(CONNECTION, package_path)
     )
 
     host, port = _read_host_and_port_from_config(

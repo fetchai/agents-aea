@@ -27,7 +27,12 @@ from aea.cli.utils.config import (
     _try_get_configuration_object_from_aea_config,
     handle_dotted_path,
 )
-from aea.cli.utils.constants import FALSE_EQUIVALENTS, FROM_STRING_TO_TYPE
+from aea.cli.utils.constants import (
+    CONFIG_SUPPORTED_KEY_TYPES,
+    CONFIG_SUPPORTED_VALUE_TYPES,
+    FALSE_EQUIVALENTS,
+    FROM_STRING_TO_TYPE,
+)
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.generic import get_parent_object, load_yaml
@@ -46,7 +51,7 @@ from aea.exceptions import AEAException
 @click.pass_context
 @check_aea_project
 def config(click_context):  # pylint: disable=unused-argument
-    """Read or modify a configuration."""
+    """Read or modify a configuration of the agent."""
 
 
 @config.command()
@@ -62,7 +67,7 @@ def get(ctx: Context, json_path: str):
 @click.option(
     "--type",
     default="str",
-    type=click.Choice(["str", "int", "bool", "float", "dict", "list"]),
+    type=click.Choice(CONFIG_SUPPORTED_KEY_TYPES),
     help="Specify the type of the value.",
 )
 @click.argument("JSON_PATH", required=True)
@@ -193,9 +198,7 @@ class ConfigGetSet:
 
         if attr_name not in parent_obj:
             raise click.ClickException("Attribute '{}' not found.".format(attr_name))
-        if not isinstance(
-            parent_obj.get(attr_name), (str, int, bool, float, dict, list)
-        ):
+        if not isinstance(parent_obj.get(attr_name), CONFIG_SUPPORTED_VALUE_TYPES):
             raise click.ClickException(  # pragma: nocover
                 "Attribute '{}' is not of primitive type.".format(attr_name)
             )
@@ -319,6 +322,8 @@ class ConfigGetSet:
         try:
             if type_ == bool:
                 parent_object[self.attr_name] = value not in FALSE_EQUIVALENTS
+            elif type_ is None:
+                parent_object[self.attr_name] = None
             elif type_ in (dict, list):
                 parent_object[self.attr_name] = json.loads(value)
             else:

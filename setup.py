@@ -107,6 +107,7 @@ setup(
     url=about["__url__"],
     long_description=parse_readme(),
     long_description_content_type="text/markdown",
+    package_data={"aea": ["py.typed"]},
     packages=find_packages(include=["aea*"]),
     classifiers=[
         "Environment :: Console",
