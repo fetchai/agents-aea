@@ -133,7 +133,7 @@ def main():
     check_binary(
         "go",
         ["version"],
-        re.compile(r"go version go([0-9]+)\.([0-9]+) "),
+        re.compile(r"go version go([0-9]+)\.([0-9]+)"),
         MINIMUM_GO_VERSION,
     )
     check_binary(

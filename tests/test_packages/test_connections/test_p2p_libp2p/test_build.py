@@ -25,6 +25,7 @@ import pytest
 
 from aea.exceptions import AEAException
 
+from packages.fetchai.connections.p2p_libp2p import check_dependencies
 from packages.fetchai.connections.p2p_libp2p.check_dependencies import main
 
 
@@ -49,9 +50,8 @@ def test_build_script_negative_binary_not_found():
 
 def test_build_script_negative_version_too_low():
     """Test the build script - negative case, version too low."""
-    with mock.patch(
-        "packages.fetchai.connections.p2p_libp2p.check_dependencies.get_version",
-        return_value=(0, 0, 0),
+    with mock.patch.object(
+        check_dependencies, "get_version", return_value=(0, 0, 0),
     ):
         with pytest.raises(
             AEAException,
