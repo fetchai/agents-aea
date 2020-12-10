@@ -32,7 +32,7 @@ Default behaviour on keep terminals state dialogues is set according to the prot
 Skill configuration to keep terminated dialogues for DefaultDialogues.
 Example:
 ### Dialogues dump/restore on agent restart
-if storage is enabled: all the dialogues present in memory will be stored on agent's teardown and loaded on agent's start.
+If storage is enabled then all the dialogues present in memory will be stored on agent's teardown and loaded on agent's start.
 
 
 ### Offload terminal state dialogues
