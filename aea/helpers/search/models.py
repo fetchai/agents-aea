@@ -836,8 +836,6 @@ class ConstraintType:
                 query_value.double = self.value
             elif isinstance(self.value, str):
                 query_value.string = self.value
-            elif isinstance(self.value, Location):
-                query_value.location.CopyFrom(self.value.encode())
             relation.value.CopyFrom(query_value)
 
             encoding = relation
@@ -860,13 +858,6 @@ class ConstraintType:
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.double_pair.CopyFrom(values)
-            elif (
-                type(self.value[0]) == Location  # pylint: disable=unidiomatic-typecheck
-            ):
-                values = models_pb2.Query.LocationPair()
-                values.first.CopyFrom(self.value[0].encode())
-                values.second.CopyFrom(self.value[1].encode())
-                range_.location_pair.CopyFrom(values)
             encoding = range_
 
         elif self.type == ConstraintTypes.IN or self.type == ConstraintTypes.NOT_IN:
@@ -955,10 +946,6 @@ class ConstraintType:
                 decoding = ConstraintType(
                     relation_enum, constraint_type_pb.value.double
                 )
-            elif value_case == proto_value["location"]:
-                decoding = ConstraintType(
-                    relation_enum, Location.decode(constraint_type_pb.value.location),
-                )
         elif category == CONSTRAINT_CATEGORY_RANGE:
             range_enum = ConstraintTypes.WITHIN
             range_case = constraint_type_pb.WhichOneof("pair")
@@ -984,14 +971,6 @@ class ConstraintType:
                     (
                         constraint_type_pb.double_pair.first,
                         constraint_type_pb.double_pair.second,
-                    ),
-                )
-            elif range_case == proto_range_pairs["location"]:
-                decoding = ConstraintType(
-                    range_enum,
-                    (
-                        Location.decode(constraint_type_pb.location_pair.first),
-                        Location.decode(constraint_type_pb.location_pair.second),
                     ),
                 )
         elif category == CONSTRAINT_CATEGORY_SET:
@@ -1477,7 +1456,7 @@ class Constraint(ConstraintExpr):
         elif constraint_case == proto_constraint["distance"]:
             constraint_type = ConstraintType.decode(constraint_pb.distance, "distance")
         else:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 f"Incorrect argument. Expected either of ['relation', 'set_', 'range_', 'distance']. Found {constraint_case}."
             )
 
