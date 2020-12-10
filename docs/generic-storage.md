@@ -7,11 +7,10 @@ Generic storage provides an API for general data manipulation in key-object styl
 
 
 ## Configuration
-Storage enabled by providing agent configuration option named `storage_uri`
-Storage uri consists of backend name and string data provided to selected backend.
+Storage is enabled by providing in the agent configuration (`aea-config.yaml`) an optional `storage_uri`. The storage uri consists of the backend name and string data provided to selected backend.
 
-Storage uri structure is `<BACKEND_NAME>://[Optional string]`
-Example: `storage_uri: sqlite://./some_file.db` tells to use sqlite backend and store data in ./some_file.db
+The storage uri schema is `<BACKEND_NAME>://[Optional string]`
+Example: `storage_uri: sqlite://./some_file.db` tells the AEA to use sqlite backend and store data in `./some_file.db`.
 
 Supported backends:
 * sqlite - bundled with python simple sql engine that uses file or in-memory storage.
