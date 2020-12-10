@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pytest
 import requests
-from prometheus_client.parser import text_string_to_metric_families
+from prometheus_client.parser import text_string_to_metric_families  # type: ignore
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 

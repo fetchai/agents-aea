@@ -33,9 +33,14 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
 import packages
-from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogue, PrometheusDialogues
+from packages.fetchai.protocols.prometheus.dialogues import (
+    PrometheusDialogue,
+    PrometheusDialogues,
+)
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.protocols.prometheus.message import _default_logger as prometheus_message_logger
+from packages.fetchai.protocols.prometheus.message import (
+    _default_logger as prometheus_message_logger,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -57,7 +62,10 @@ def test_add_metric_serialization():
     )
     msg.to = "receiver"
     envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=PrometheusMessage.protocol_id, message=msg,
+        to=msg.to,
+        sender="sender",
+        protocol_id=PrometheusMessage.protocol_id,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -88,7 +96,10 @@ def test_update_metric_serialization():
     )
     msg.to = "receiver"
     envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=PrometheusMessage.protocol_id, message=msg,
+        to=msg.to,
+        sender="sender",
+        protocol_id=PrometheusMessage.protocol_id,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -105,6 +116,7 @@ def test_update_metric_serialization():
     expected_msg = msg
     assert expected_msg == actual_msg
 
+
 def test_response_serialization():
     """Test the serialization for 'response' speech-act works."""
     msg = PrometheusMessage(
@@ -117,7 +129,10 @@ def test_response_serialization():
     )
     msg.to = "receiver"
     envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=PrometheusMessage.protocol_id, message=msg,
+        to=msg.to,
+        sender="sender",
+        protocol_id=PrometheusMessage.protocol_id,
+        message=msg,
     )
     envelope_bytes = envelope.encode()
 
@@ -137,7 +152,9 @@ def test_response_serialization():
 
 def test_performative_string_value():
     """Test the string value of the performatives."""
-    assert str(PrometheusMessage.Performative.ADD_METRIC) == "add_metric", "The str value must be add_metric"
+    assert (
+        str(PrometheusMessage.Performative.ADD_METRIC) == "add_metric"
+    ), "The str value must be add_metric"
     assert (
         str(PrometheusMessage.Performative.UPDATE_METRIC) == "update_metric"
     ), "The str value must be update_metric"
@@ -158,7 +175,9 @@ def test_encoding_unknown_performative():
     )
 
     with pytest.raises(ValueError, match="Performative not valid:"):
-        with mock.patch.object(PrometheusMessage.Performative, "__eq__", return_value=False):
+        with mock.patch.object(
+            PrometheusMessage.Performative, "__eq__", return_value=False
+        ):
             PrometheusMessage.serializer.encode(msg)
 
 
@@ -175,7 +194,9 @@ def test_decoding_unknown_performative():
 
     encoded_msg = PrometheusMessage.serializer.encode(msg)
     with pytest.raises(ValueError, match="Performative not valid:"):
-        with mock.patch.object(PrometheusMessage.Performative, "__eq__", return_value=False):
+        with mock.patch.object(
+            PrometheusMessage.Performative, "__eq__", return_value=False
+        ):
             PrometheusMessage.serializer.decode(encoded_msg)
 
 

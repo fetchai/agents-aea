@@ -18,30 +18,26 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the prometheus connection module."""
 import asyncio
-import logging
-import os
 from typing import cast
-from unittest.mock import patch
 
-import prometheus_client
 import pytest
 
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig
+from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
-from packages.fetchai.connections.prometheus.connection import PrometheusConnection
+from packages.fetchai.connections.prometheus.connection import (
+    ConnectionStates,
+    PrometheusConnection,
+)
 from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogue
-from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogues as BasePrometheusDialogues
+from packages.fetchai.protocols.prometheus.dialogues import (
+    PrometheusDialogues as BasePrometheusDialogues,
+)
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.behaviours import CoinPriceBehaviour
-
-from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
-
-
-logger = logging.getLogger(__name__)
 
 
 class PrometheusDialogues(BasePrometheusDialogues):
@@ -78,7 +74,9 @@ class TestPrometheusConnection:
     def setup(self):
         """Initialise the class."""
         self.metrics = {}
-        configuration = ConnectionConfig(connection_id=PrometheusConnection.connection_id)
+        configuration = ConnectionConfig(
+            connection_id=PrometheusConnection.connection_id
+        )
         self.agent_address = "my_address"
         identity = Identity("name", address=self.agent_address)
         self.prometheus_con = PrometheusConnection(
@@ -87,152 +85,147 @@ class TestPrometheusConnection:
         self.loop = asyncio.get_event_loop()
         self.prometheus_address = str(PrometheusConnection.connection_id)
         self.dialogues = PrometheusDialogues(self.agent_address)
-        self.loop.run_until_complete(self.prometheus_con.connect())
+
+    async def send_add_metric(self, title: str, metric_type: str) -> None:
+        """Send an add_metric message."""
+        msg, sending_dialogue = self.dialogues.create(
+            counterparty=self.prometheus_address,
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            title=title,
+            type=metric_type,
+            description="a gauge",
+            labels=(),
+        )
+        assert sending_dialogue is not None
+
+        envelope = Envelope(
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+        )
+        await self.prometheus_con.send(envelope)
+
+    async def send_update_metric(self, title: str, update_func: str) -> None:
+        """Send an update_metric message."""
+        msg, sending_dialogue = self.dialogues.create(
+            counterparty=self.prometheus_address,
+            performative=PrometheusMessage.Performative.UPDATE_METRIC,
+            title=title,
+            callable=update_func,
+            value=1.0,
+        )
+        assert sending_dialogue is not None
+        assert sending_dialogue.last_message is not None
+
+        envelope = Envelope(
+            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+        )
+        await self.prometheus_con.send(envelope)
 
     def teardown(self):
         """Clean up after tests."""
         self.loop.run_until_complete(self.prometheus_con.disconnect())
 
     @pytest.mark.asyncio
-    async def test_decode_envelope_error(self):
-        """Test the decoding error for the envelopes."""
+    async def test_connection(self):
+        """Test connect."""
+        assert (
+            self.prometheus_con.state == ConnectionStates.disconnected
+        ), "should not be connected yet"
+        await self.prometheus_con.connect()
+        assert (
+            self.prometheus_con.state == ConnectionStates.connected
+        ), "should be connected"
+
+        # test add metric (correct)
+        await self.send_add_metric("some_metric", "Gauge")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 200
+        assert msg.message == "New Gauge successfully added: some_metric."
+
+        # test add metric (already exists)
+        await self.send_add_metric("some_metric", "Gauge")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 409
+        assert msg.message == "Metric already exists."
+
+        # test add metric (wrong type)
+        await self.send_add_metric("cool_metric", "CoolBar")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 404
+        assert msg.message == "CoolBar is not a recognized prometheus metric."
+
+        # test update metric (correct)
+        await self.send_update_metric("some_metric", "inc")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 200
+        assert msg.message == "Metric some_metric successfully updated."
+
+        # test update metric (doesn't exist)
+        await self.send_update_metric("cool_metric", "inc")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 404
+        assert msg.message == "Metric cool_metric not found."
+
+        # test update metric (bad update function)
+        await self.send_update_metric("some_metric", "go")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 400
+        assert msg.message == "Update function go not found for metric some_metric."
+
+        # Test that invalid message is rejected.
+        with pytest.raises(AEAEnforceError):
+            envelope = Envelope(
+                to="some_address",
+                sender="me",
+                protocol_id="some_id",
+                message=Message({}),
+            )
+            await self.prometheus_con.channel.handle_prometheus_message(envelope)
+
+        # Test that envelope without dialogue produces warning.
+        msg = PrometheusMessage(
+            PrometheusMessage.Performative.RESPONSE, code=0, message=""
+        )
         envelope = Envelope(
             to=self.prometheus_address,
             sender=self.agent_address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=b"hello",
+            protocol_id="some_id",
+            message=msg,
         )
+        await self.prometheus_con.channel.handle_prometheus_message(envelope)
 
+        # Test that envelope with invalid protocol_id raises error.
         with pytest.raises(ValueError):
-            await self.prometheus_con.send(envelope)
-
-    # @pytest.mark.asyncio
-    # async def test_send_connection_error(self):
-    #     """Test send connection error."""
-    #     msg, sending_dialogue = self.dialogues.create(
-    #         counterparty=self.prometheus_address,
-    #         performative=PrometheusMessage.Performative.UPDATE_METRIC,
-    #         title="some_metric",
-    #         callable="some_update_func",
-    #         value=0,
-    #     )
-    #     envelope = Envelope(
-    #         to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-    #     )
-
-    #     with pytest.raises(ConnectionError):
-    #         await self.prometheus_con.send(envelope)
+            msg, _ = self.dialogues.create(
+                counterparty=self.prometheus_address,
+                performative=PrometheusMessage.Performative.UPDATE_METRIC,
+                title="",
+                callable="",
+                value=1.0,
+            )
+            envelope = Envelope(
+                to=self.prometheus_address,
+                sender=self.agent_address,
+                protocol_id="bad_id",
+                message=msg,
+            )
+            await self.prometheus_con.channel.send(envelope)
 
     @pytest.mark.asyncio
-    async def test_send_response(self):
-        """Test send response message."""
-        sending_dialogue = await self.send_add_metric()
-        assert sending_dialogue.last_message is not None
-        # msg = sending_dialogue.reply(
-        #     performative=PrometheusMessage.Performative.RESPONSE,
-        #     code=0,
-        #     message="some_message",
-        # )
-        # envelope = Envelope(
-        #     to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        # )
-
-        # observation = 1
-        # reward = 1.0
-        # done = True
-        # info = "some info"
-        # with patch.object(
-        #     self.env, "step", return_value=(observation, reward, done, info)
-        # ) as mock:
-        #     await self.prometheus_con.send(envelope)
-        #     mock.assert_called()
-
-        # response = await asyncio.wait_for(self.prometheus_con.receive(), timeout=3)
-        # response_msg = cast(PrometheusMessage, response.message)
-        # response_dialogue = self.dialogues.update(response_msg)
-
-        # assert response_msg.performative == PrometheusMessage.Performative.UPDATE_METRIC
-        # assert response_msg.step_id == msg.step_id
-        # assert response_msg.observation.any == observation
-        # assert response_msg.reward == reward
-        # assert response_msg.done == done
-        # assert response_msg.info.any == info
-        # assert sending_dialogue == response_dialogue
-
-    # @pytest.mark.asyncio
-    # async def test_send_reset(self):
-    #     """Test send reset message."""
-    #     _ = await self.send_reset()
-
-    # @pytest.mark.asyncio
-    # async def test_send_close(self):
-    #     """Test send close message."""
-    #     sending_dialogue = await self.send_reset()
-    #     assert sending_dialogue.last_message is not None
-    #     msg = sending_dialogue.reply(performative=PrometheusMessage.Performative.RESPONSE,)
-    #     envelope = Envelope(
-    #         to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-    #     )
-    #     await self.prometheus_con.connect()
-
-    #     with patch.object(self.env, "close") as mock:
-    #         await self.prometheus_con.send(envelope)
-    #         mock.assert_called()
-
-    # @pytest.mark.asyncio
-    # async def test_send_close_negative(self):
-    #     """Test send close message with invalid reference and message id and target."""
-    #     incorrect_msg = PrometheusMessage(
-    #         performative=PrometheusMessage.Performative.RESPONSE,
-    #         dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
-    #     )
-    #     incorrect_msg.to = self.prometheus_address
-    #     incorrect_msg.sender = self.agent_address
-
-    #     # the incorrect message cannot be sent into a dialogue, so this is omitted.
-
-    #     envelope = Envelope(
-    #         to=incorrect_msg.to,
-    #         sender=incorrect_msg.sender,
-    #         protocol_id=incorrect_msg.protocol_id,
-    #         message=incorrect_msg,
-    #     )
-    #     await self.prometheus_con.connect()
-
-    #     with patch.object(self.prometheus_con.channel.logger, "warning") as mock_logger:
-    #         await self.prometheus_con.send(envelope)
-    #         mock_logger.assert_any_call(
-    #             f"Could not create dialogue from message={incorrect_msg}"
-    #         )
-
-    async def send_add_metric(self) -> PrometheusDialogue:
-        """Send an add_metric message."""
-        msg, sending_dialogue = self.dialogues.create(
-            counterparty=self.prometheus_address,
-            performative=PrometheusMessage.Performative.ADD_METRIC,
-            title="some_metric",
-            type="Gauge",
-            description="a gauge",
-            labels=(),
-        )
-        assert sending_dialogue is not None
-        return sending_dialogue
-        # envelope = Envelope(
-        #     to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        # )
-
-        # response = await asyncio.wait_for(self.prometheus_con.receive(), timeout=3)
-        # response_msg = cast(PrometheusMessage, response.message)
-        # response_dialogue = self.dialogues.update(response_msg)
-
-        # assert response_msg.performative == PrometheusMessage.Performative.RESPONSE
-        # assert response_msg.content == "New Gauge successfully added: some_metric."
-        # assert sending_dialogue == response_dialogue
-        # return sending_dialogue
-
-    # @pytest.mark.asyncio
-    # async def test_receive_connection_error(self):
-    #     """Test receive connection error and Cancel Error."""
-    #     with pytest.raises(ConnectionError):
-    #         await self.prometheus_con.receive()
-
+    async def test_disconnect(self):
+        """Test disconnect."""
+        await self.prometheus_con.disconnect()
+        assert (
+            self.prometheus_con.state == ConnectionStates.disconnected
+        ), "should be disconnected"

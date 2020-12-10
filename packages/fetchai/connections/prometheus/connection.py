@@ -24,7 +24,7 @@ import logging
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Optional, Tuple, Union, cast
 
-import prometheus_client
+import prometheus_client  # type: ignore
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -137,9 +137,6 @@ class PrometheusChannel:
         if envelope.protocol_id != PrometheusMessage.protocol_id:
             raise ValueError("This protocol is not valid for prometheus.")
         await self.handle_prometheus_message(envelope)
-
-    async def _run_in_executor(self, fn, *args):
-        return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
 
     async def handle_prometheus_message(self, envelope: Envelope) -> None:
         """
@@ -260,7 +257,9 @@ class PrometheusConnection(Connection):
 
         with self._connect_context():
             self.channel.logger = self.logger
+            self._state.set(ConnectionStates.connecting)
             await self.channel.connect()
+            self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
         """
