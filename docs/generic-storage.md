@@ -17,8 +17,7 @@ Supported backends:
 
 ## Dialogues and Storage integration
 
-One of the most useful cases is integration of dialogues and storage, that helps easily keep dialogues state during the agent restart.
-Another benefit is memory saving with offloading feature.
+One of the most useful cases is the integration of the dialogues subsystem and storage. It helps maintain dialogues state during agent restarts and reduced memory requirements due to the offloading feature.
 
 ### Keep terminal state dialogues
 
