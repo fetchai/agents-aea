@@ -38,11 +38,9 @@ if storage is enabled: all the dialogues present in memory will be stored on age
 
 ### Offload terminal state dialogues
 
-If keep options is set and storage is available dialogues in terminal state will be dumped to generic storage and removed from memory.
-This option helps to save memory and handle terminated dialogues with the same functionality as they just kept in memory.
+If keep options is set and storage is available dialogues in terminal state will be dumped to generic storage and removed from memory. This option helps to save memory and handle terminated dialogues with the same functionality as when they are kept in memory.
 
-All the active dialogues will be stored and loaded during agent restart.
-All the terminated offloaded dialogues will stay on agent restart.
+All the active dialogues will be stored and loaded during agent restart. All the terminated offloaded dialogues will stay in storage on agent restart.
 
 To enable dialogues offloading `keep_terminal_state_dialogues` has to be enabled and storage configured.
 
