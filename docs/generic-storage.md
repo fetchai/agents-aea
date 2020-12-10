@@ -1,9 +1,9 @@
 The AEA generic storage: description and usage.
 
 ## AEA Generic Storage
-AEA generic storage is system allows AEA skill's components to store data permanently and use it any time.
+AEA generic storage allows AEA skill's components to store data permanently and use it any time.
 The primary scenario: to save AEA data on shutdown and load back on startup.
-Storage provides API for general data manipulation in key, object style.
+Generic storage provides an API for general data manipulation in key-object style.
 
 
 ## Configuration
