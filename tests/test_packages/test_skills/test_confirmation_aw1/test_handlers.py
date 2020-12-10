@@ -512,7 +512,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             logging.INFO, f"received state message={incoming_message}"
         )
 
-    def test_handle_error(self):
+    def test_handle_error_i(self):
         """Test the _handle_error method of the contract_api handler."""
         # setup
         register_dialogue = cast(
@@ -554,6 +554,48 @@ class TestContractApiHandler(BaseSkillTestCase):
         )
 
         mock_unlock.assert_called_once()
+
+    def test_handle_error_ii(self):
+        """Test the _handle_error method of the contract_api handler where register_dialogue's last incoming message is None."""
+        # setup
+        register_dialogue = cast(
+            RegisterDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.register_dialogues,
+                messages=self.list_of_registration_messages[:1],
+            ),
+        )
+        register_dialogue._incoming_messages = []
+
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:1],
+            ),
+        )
+        contract_api_dialogue.associated_register_dialogue = register_dialogue
+        contract_api_dialogue.terms = self.terms
+
+        incoming_message = cast(
+            ContractApiMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=contract_api_dialogue,
+                performative=ContractApiMessage.Performative.ERROR,
+                data=b"some_data",
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            with pytest.raises(ValueError, match="Could not retrieve fipa message"):
+                self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received ledger_api error message={incoming_message} in dialogue={contract_api_dialogue}.",
+        )
 
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the contract_api handler."""

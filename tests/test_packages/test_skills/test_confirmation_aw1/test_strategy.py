@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
+from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import Terms
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -233,7 +234,7 @@ class TestStrategy(BaseSkillTestCase):
         assert msg == "fetchai address of agent and registration info do not match!"
 
     def test_valid_registration_fails_iii(self):
-        """Test the valid_registration method of the Strategy class which fails because _valid_signature returns False."""
+        """Test the valid_registration method of the Strategy class which fails because _valid_signature returns False for first call."""
         # setup
         incorrect_registration_info = {
             "ethereum_address": "some_ethereum_address",
@@ -259,6 +260,32 @@ class TestStrategy(BaseSkillTestCase):
         assert msg == "fetchai address and signature do not match!"
 
     def test_valid_registration_fails_iv(self):
+        """Test the valid_registration method of the Strategy class which fails because _valid_signature returns False for second call."""
+        # setup
+        incorrect_registration_info = {
+            "ethereum_address": "some_ethereum_address",
+            "fetchai_address": self.address,
+            "signature_of_ethereum_address": "some_signature_of_ethereum_address",
+            "signature_of_fetchai_address": "some_signature_of_fetchai_address",
+            "developer_handle": "some_developer_handle",
+        }
+
+        # operation
+        with patch.object(
+            self.strategy, "_valid_signature", side_effect=[True, False]
+        ) as mock_valid:
+            is_valid, code, msg = self.strategy.valid_registration(
+                incorrect_registration_info, self.address
+            )
+
+        # after
+        mock_valid.assert_called()
+
+        assert not is_valid
+        assert code == 1
+        assert msg == "ethereum address and signature do not match!"
+
+    def test_valid_registration_fails_v(self):
         """Test the valid_registration method of the Strategy class which fails because agent registration is in progress."""
         # setup
         registration_info = {
@@ -285,7 +312,7 @@ class TestStrategy(BaseSkillTestCase):
         assert code == 1
         assert msg == "registration in process for this address!"
 
-    def test_valid_registration_fails_v(self):
+    def test_valid_registration_fails_vi(self):
         """Test the valid_registration method of the Strategy class which fails because agent already registered."""
         # setup
         registration_info = {
@@ -312,6 +339,72 @@ class TestStrategy(BaseSkillTestCase):
         assert not is_valid
         assert code == 1
         assert msg == "already registered!"
+
+    def test__valid_signature_i(self):
+        """Test the _valid_signature method of the Strategy class where result is True."""
+        # setup
+        expected_signer = "some_expected_signer"
+        signature = "some_signature"
+        message_str = "some_message_str"
+        ledger_id = "some_ledger_id"
+
+        # operation
+        with patch.object(
+            LedgerApis, "recover_message", return_value=(expected_signer,)
+        ) as mock_recover:
+            is_valid = self.strategy._valid_signature(
+                expected_signer, signature, message_str, ledger_id
+            )
+
+        # after
+        mock_recover.assert_called_once()
+        assert is_valid
+
+    def test__valid_signature_ii(self):
+        """Test the _valid_signature method of the Strategy class where result is False."""
+        # setup
+        expected_signer = "some_expected_signer"
+        signature = "some_signature"
+        message_str = "some_message_str"
+        ledger_id = "some_ledger_id"
+
+        # operation
+        with patch.object(
+            LedgerApis, "recover_message", return_value=("some_other_signer",)
+        ) as mock_recover:
+            is_valid = self.strategy._valid_signature(
+                expected_signer, signature, message_str, ledger_id
+            )
+
+        # after
+        mock_recover.assert_called_once()
+        assert not is_valid
+
+    def test__valid_signature_iii(self):
+        """Test the _valid_signature method of the Strategy class where an exception is raised."""
+        # setup
+        expected_signer = "some_expected_signer"
+        signature = "some_signature"
+        message_str = "some_message_str"
+        ledger_id = "some_ledger_id"
+
+        exception_message = "some_exception_message"
+
+        # operation
+        with patch.object(
+            LedgerApis, "recover_message", side_effect=Exception(exception_message)
+        ) as mock_recover:
+            with patch.object(self.logger, "log") as mock_logger:
+                is_valid = self.strategy._valid_signature(
+                    expected_signer, signature, message_str, ledger_id
+                )
+
+        # after
+        mock_recover.assert_called_once()
+        mock_logger.assert_any_call(
+            logging.WARNING, f"Signing exception: {exception_message}",
+        )
+        assert not is_valid
 
     def test_get_terms(self):
         """Test the get_terms method of the Strategy class."""
