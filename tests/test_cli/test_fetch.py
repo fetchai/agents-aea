@@ -59,7 +59,9 @@ class FetchAgentLocallyTestCase(TestCase):
     @mock.patch("aea.cli.fetch.copy_tree")
     def test_fetch_agent_locally_positive(self, copy_tree, *mocks):
         """Test for fetch_agent_locally method positive result."""
-        fetch_agent_locally(ContextMock(), PublicIdMock(), alias="some-alias")
+        ctx = ContextMock()
+        ctx.config["is_local"] = True
+        fetch_agent_locally(ctx, PublicIdMock(), alias="some-alias")
         copy_tree.assert_called_once_with("path", "joined-path")
 
     @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
@@ -67,16 +69,20 @@ class FetchAgentLocallyTestCase(TestCase):
     @mock.patch("aea.cli.fetch.copy_tree")
     def test_fetch_agent_locally_already_exists(self, *mocks):
         """Test for fetch_agent_locally method agent already exists."""
+        ctx = ContextMock()
+        ctx.config["is_local"] = True
         with self.assertRaises(ClickException):
-            fetch_agent_locally(ContextMock(), PublicIdMock())
+            fetch_agent_locally(ctx, PublicIdMock())
 
     @mock.patch("aea.cli.fetch._is_version_correct", return_value=False)
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=True)
     @mock.patch("aea.cli.fetch.copy_tree")
     def test_fetch_agent_locally_incorrect_version(self, *mocks):
         """Test for fetch_agent_locally method incorrect agent version."""
+        ctx = ContextMock()
+        ctx.config["is_local"] = True
         with self.assertRaises(ClickException):
-            fetch_agent_locally(ContextMock(), PublicIdMock())
+            fetch_agent_locally(ctx, PublicIdMock())
 
     @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
     @mock.patch("aea.cli.fetch.add_item")
@@ -91,6 +97,7 @@ class FetchAgentLocallyTestCase(TestCase):
             skills=[public_id],
             contracts=[public_id],
         )
+        ctx_mock.config["is_local"] = True
         fetch_agent_locally(ctx_mock, PublicIdMock())
 
     @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
@@ -106,6 +113,7 @@ class FetchAgentLocallyTestCase(TestCase):
             skills=[public_id],
             contracts=[public_id],
         )
+        ctx_mock.config["is_local"] = True
         with self.assertRaises(ClickException):
             fetch_agent_locally(ctx_mock, PublicIdMock())
 

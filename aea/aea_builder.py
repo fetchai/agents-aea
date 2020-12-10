@@ -19,12 +19,12 @@
 
 
 """This module contains utilities for building an AEA."""
-
-import itertools
+import ast
 import logging
 import logging.config
 import os
 import pprint
+import sys
 from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
@@ -34,6 +34,7 @@ import jsonschema
 from packaging.specifiers import SpecifierSet
 
 from aea.aea import AEA
+from aea.cli.utils.generic import run_cli_command_subprocess
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -78,7 +79,7 @@ from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
-from aea.exceptions import AEAException, AEAValidationError
+from aea.exceptions import AEAException, AEAValidationError, enforce
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
@@ -360,6 +361,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if not is_full_reset:
             return
         self._default_ledger: Optional[str] = None
+        self._build_entrypoint: Optional[str] = None
         self._currency_denominations: Dict[str, str] = {}
         self._default_connection: Optional[PublicId] = None
         self._context_namespace: Dict[str, Any] = {}
@@ -706,6 +708,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._default_ledger = identifier
         return self
 
+    def set_build_entrypoint(
+        self, build_entrypoint: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set build entrypoint.
+
+        :param build_entrypoint: path to the builder script.
+        :return: the AEABuilder
+        """
+        self._build_entrypoint = build_entrypoint
+        return self
+
     def set_currency_denominations(
         self, currency_denominations: Dict[str, str]
     ) -> "AEABuilder":  # pragma: nocover
@@ -865,6 +879,43 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
+
+    def call_all_build_entrypoints(self):
+        """Call all the build entrypoints."""
+        for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
+            if not config.build_entrypoint:
+                continue
+            self.logger.info(f"Building package {config.component_id}...")
+            directory = cast(str, config.directory)
+            build_entrypoint = cast(str, config.build_entrypoint)
+            self._run_build_entrypoint(build_entrypoint, directory)
+
+        if self._build_entrypoint:
+            self.logger.info("Building AEA package...")
+            directory = cast(str, ".")
+            build_entrypoint = cast(str, self._build_entrypoint)
+            self._run_build_entrypoint(build_entrypoint, directory)
+
+    def _run_build_entrypoint(self, build_entrypoint: str, directory: str) -> None:
+        """
+        Run a build entrypoint script.
+
+        :param build_entrypoint: the path to the build script relative to directory.
+        :param directory: the directory root for the entrypoint path.
+        :return: None
+        """
+        self._check_valid_entrypoint(build_entrypoint, directory)
+
+        command = [sys.executable, build_entrypoint]
+        command_str = " ".join(command)
+        self.logger.info(f"Running command '{command_str}'")
+        try:
+            return_code = run_cli_command_subprocess(command, cwd=directory)
+            enforce(return_code == 0, f"Return code {return_code} != 0")
+        except Exception as e:
+            raise AEAException(
+                f"An error occurred while running command '{command_str}': {str(e)}"
+            ) from e
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """
@@ -1273,6 +1324,35 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 )
             )
 
+    @staticmethod
+    def _check_valid_entrypoint(build_entrypoint: str, directory: str):
+        """
+        Check a configuration has a valid entrypoint.
+
+        :param build_entrypoint: the build entrypoint.
+        :param directory: the directory from where to start reading the script.
+        :return: None
+        """
+        enforce(
+            build_entrypoint is not None,
+            "Package has not a build entrypoint specified.",
+        )
+        build_entrypoint = cast(str, build_entrypoint)
+        script_path = Path(directory) / build_entrypoint
+        enforce(
+            script_path.exists(), f"File '{build_entrypoint}' does not exists.",
+        )
+        enforce(
+            script_path.is_file(), f"'{build_entrypoint}' is not a file.",
+        )
+        try:
+            ast.parse(script_path.read_text())
+        except SyntaxError as e:
+            message = f"{str(e)}: {e.text}"
+            raise AEAException(
+                f"The Python script at '{build_entrypoint}' has a syntax error: {message}"
+            ) from e
+
     def set_from_configuration(
         self,
         agent_configuration: AgentConfig,
@@ -1291,6 +1371,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # set name and other configurations
         self.set_name(agent_configuration.name)
         self.set_default_ledger(agent_configuration.default_ledger)
+        self.set_build_entrypoint(agent_configuration.build_entrypoint)
         self.set_currency_denominations(agent_configuration.currency_denominations)
         self.set_default_connection(agent_configuration.default_connection)
         self.set_period(agent_configuration.period)
@@ -1333,65 +1414,19 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 ledger_identifier, private_key_path, is_connection=True
             )
 
-        component_ids = itertools.chain(
-            [
-                ComponentId(ComponentType.PROTOCOL, p_id)
-                for p_id in agent_configuration.protocols
-            ],
-            [
-                ComponentId(ComponentType.CONTRACT, p_id)
-                for p_id in agent_configuration.contracts
-            ],
-        )
-        for component_id in component_ids:
-            component_path = self.find_component_directory_from_component_id(
-                aea_project_path, component_id
-            )
-            self.add_component(
-                component_id.component_type,
-                component_path,
-                skip_consistency_check=skip_consistency_check,
+        for component_type in [
+            ComponentType.PROTOCOL,
+            ComponentType.CONTRACT,
+            ComponentType.CONNECTION,
+            ComponentType.SKILL,
+        ]:
+            self._add_components_of_type(
+                component_type,
+                agent_configuration,
+                aea_project_path,
+                skip_consistency_check,
             )
 
-        connection_ids = [
-            ComponentId(ComponentType.CONNECTION, p_id)
-            for p_id in agent_configuration.connections
-        ]
-        if len(connection_ids) != 0:
-            connection_import_order = self._find_import_order(
-                connection_ids, aea_project_path, skip_consistency_check
-            )
-
-            for connection_id in connection_import_order:
-                component_path = self.find_component_directory_from_component_id(
-                    aea_project_path, connection_id
-                )
-                self.add_component(
-                    connection_id.component_type,
-                    component_path,
-                    skip_consistency_check=skip_consistency_check,
-                )
-
-        skill_ids = [
-            ComponentId(ComponentType.SKILL, p_id)
-            for p_id in agent_configuration.skills
-        ]
-
-        if len(skill_ids) == 0:
-            return
-
-        skill_import_order = self._find_import_order(
-            skill_ids, aea_project_path, skip_consistency_check
-        )
-        for skill_id in skill_import_order:
-            component_path = self.find_component_directory_from_component_id(
-                aea_project_path, skill_id
-            )
-            self.add_component(
-                skill_id.component_type,
-                component_path,
-                skip_consistency_check=skip_consistency_check,
-            )
         self._custom_component_configurations = (
             agent_configuration.component_configurations
         )
@@ -1566,7 +1601,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         It deep-copies the configuration, to avoid undesired side-effects.
 
         :param configuration: the configuration object.
-        :param custom_config: the configurations to apply.
         :return: the new configuration instance.
         """
         new_configuration = deepcopy(configuration)
@@ -1575,6 +1609,43 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         )
         new_configuration.update(custom_config)
         return new_configuration
+
+    def _add_components_of_type(
+        self,
+        component_type: ComponentType,
+        agent_configuration: AgentConfig,
+        aea_project_path: Path,
+        skip_consistency_check: bool,
+    ):
+        """
+        Add components of a given type.
+
+        :param component_type: the type of components to add.
+        :param agent_configuration: the agent configuration from where to retrieve the components.
+        :param aea_project_path: path to the AEA project.
+        :param skip_consistency_check: if true, skip consistency checks.
+        :return: None
+        """
+        public_ids = getattr(agent_configuration, component_type.to_plural())
+        component_ids = [
+            ComponentId(component_type, public_id) for public_id in public_ids
+        ]
+        if component_type in {ComponentType.PROTOCOL, ComponentType.CONTRACT}:
+            # if protocols or contracts, import order doesn't matter.
+            import_order = component_ids
+        else:
+            import_order = self._find_import_order(
+                component_ids, aea_project_path, skip_consistency_check
+            )
+        for component_id in import_order:
+            component_path = self.find_component_directory_from_component_id(
+                aea_project_path, component_id
+            )
+            self.add_component(
+                component_id.component_type,
+                component_path,
+                skip_consistency_check=skip_consistency_check,
+            )
 
 
 def make_component_logger(

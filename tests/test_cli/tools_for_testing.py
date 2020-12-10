@@ -57,6 +57,7 @@ class AgentConfigMock:
         self.get = lambda x, default=None: getattr(self, x, default)
         self.component_configurations = {}
         self.package_dependencies = set()
+        self.config: dict = {}
 
     registry_path = "registry"
     name = "name"
@@ -78,12 +79,13 @@ class ContextMock:
         """Init the ContextMock object."""
         self.invoke = Mock()
         self.agent_config = AgentConfigMock(*args, **kwargs)
-        self.config = self.agent_config
+        self.config: dict = {}
         self.connection_loader = ConfigLoaderMock()
         self.agent_loader = ConfigLoaderMock()
         self.clean_paths: List = []
         self.obj = self
         self.registry_path = ""
+        self.cwd = "cwd"
 
     def set_config(self, key, value):
         """Set config."""

@@ -20,6 +20,7 @@
 """This module contains the implementation of the contract API request dispatcher."""
 import inspect
 import logging
+from collections.abc import Mapping
 from typing import Callable, Optional, Union, cast
 
 from aea.common import JSONLike
@@ -176,7 +177,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         def build_response(
             data: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
-            if isinstance(data, bytes):
+            if not isinstance(data, Mapping):
                 raise ValueError(
                     f"Invalid state type, got={type(data)}, expected={JSONLike}."
                 )
@@ -208,7 +209,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         def build_response(
             tx: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
-            if isinstance(tx, bytes):
+            if not isinstance(tx, Mapping):
                 raise ValueError(
                     f"Invalid transaction type, got={type(tx)}, expected={JSONLike}."
                 )
@@ -272,7 +273,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         def build_response(
             rm: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
-            if isinstance(rm, dict):
+            if not isinstance(rm, bytes):
                 raise ValueError(
                     f"Invalid message type, got={type(rm)}, expected=bytes."
                 )

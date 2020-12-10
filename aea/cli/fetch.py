@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea fetch' subcommand."""
-
 import os
 from distutils.dir_util import copy_tree
 from typing import Optional, cast
@@ -43,6 +41,7 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
+from aea.exceptions import enforce
 
 
 @click.command(name="fetch")
@@ -106,7 +105,10 @@ def fetch_agent_locally(
     source_path = try_get_item_source_path(
         packages_path, public_id.author, AGENTS, public_id.name
     )
-
+    enforce(
+        ctx.config.get("is_local") is True or ctx.config.get("is_mixed") is True,
+        "Please use `ctx.set_config('is_local', True)` or `ctx.set_config('is_mixed', True)` to fetch agent and all components locally.",
+    )
     try_to_load_agent_config(ctx, agent_src_path=source_path)
     if not _is_version_correct(ctx, public_id):
         raise click.ClickException(
@@ -136,7 +138,6 @@ def fetch_agent_locally(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
         )
 
-    # add dependencies
     _fetch_agent_deps(ctx)
     click.echo("Agent {} successfully fetched.".format(public_id.name))
 

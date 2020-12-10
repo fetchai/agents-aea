@@ -31,6 +31,7 @@ nav:
     - Gym example: 'gym-example.md'
     - Gym skill: 'gym-skill.md'
     - ML skills: 'ml-skills.md'
+    - Oracle skills: 'oracle-demo.md'
     - TAC skills: 'tac-skills.md'
     - TAC skills ledger-based: 'tac-skills-contract.md'
     - TAC external app: 'tac.md'

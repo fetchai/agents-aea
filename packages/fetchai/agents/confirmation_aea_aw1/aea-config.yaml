@@ -71,7 +71,7 @@ config:
   delegate_uri: null
   public_uri: null
   entry_peers:
-  - /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
+  - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ---
 public_id: fetchai/soef:0.13.0
 type: connection
