@@ -63,10 +63,8 @@ Handlers, Behaviours and Models are able to use storage if enabled.
 Storage is available with skill context: `self.context.storage`
 if `self.context.storage` is not None, storage is enabled and ready to use.
 
-Generic storage consists of two parts:
-Objects and collections.
-Object consists f  object_id (unique string) and object body. Object body is any json friendly python data type: list, dict, int, float, string ,bool.
-
+Generic storage consists of two parts: objects and collections.
+Objects consist of the object_id (unique string) and object body. The object body is any json friendly python data type: list, dict, int, float, string, bool.
 
 Collection is a group of the objects, objects data types can vary in the same collection.
 Collection name is name consists of letters, numbers and _.
