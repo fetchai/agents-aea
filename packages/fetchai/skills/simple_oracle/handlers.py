@@ -206,6 +206,10 @@ class LedgerApiHandler(Handler):
                     self.context.logger.info("Failed to grant oracle role")
             elif transaction_label == "update":
                 self.context.logger.info("Oracle value successfully updated!")
+                if self.context.prometheus_dialogues.enabled:
+                    self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
+                        "num_oracle_updates", "inc", 1.0
+                    )
             else:
                 self.context.logger.error("unexpected transaction receipt!")
         else:

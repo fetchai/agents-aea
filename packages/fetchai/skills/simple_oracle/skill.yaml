@@ -8,9 +8,9 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmZK5MpWxkgPwSXw8XLbg1PLKRBDz8AQ39n1icPDgEfDeg
   __init__.py: QmZJXwpiddFFGMSthjrpFqji7AwA4GRkRWUyLhNAVHCUi1
-  behaviours.py: QmaR4Vk958siF22qbGP7wcpKynjPnsHkuvK7E7G7ECTbdg
+  behaviours.py: QmchyNdSU6vEFnHYMiQ7DUsu1s5aPqotGf1d1yL57UXPHk
   dialogues.py: QmdxsJa4eE2zFVVd6TNdCLaa4gNmPDKGGMq2E8Mz63ZNs6
-  handlers.py: QmdBJUAuBVQMFJPDysbpCmWsjmiYozXhiL3MfPznyAMWoE
+  handlers.py: QmaGhE5pVkj3YWMYEjhjaDWo1HU2aLJiN9YtZLb2SW3a3d
   strategy.py: QmV4yni8FqkYh3jvV494f9HGiCxYbQVv4ryWq6cDujGZ1t
 fingerprint_ignore_patterns: []
 contracts:
@@ -54,6 +54,9 @@ models:
       - name: oracle_account_balance_ETH
         type: Gauge
         description: Balance of oracle contract (ETH)
+      - name: num_oracle_updates
+        type: Gauge
+        description: Number of updates published to oracle contract
     class_name: PrometheusDialogues
   signing_dialogues:
     args: {}

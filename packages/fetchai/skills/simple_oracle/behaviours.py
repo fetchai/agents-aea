@@ -91,6 +91,9 @@ class SimpleOracleBehaviour(TickerBehaviour):
 
         strategy = cast(Strategy, self.context.strategy)
 
+        # Request account balance
+        self._get_balance()
+
         if not strategy.is_contract_deployed:
             self.context.logger.info("Oracle contract not yet deployed")
             return
@@ -111,9 +114,6 @@ class SimpleOracleBehaviour(TickerBehaviour):
             update_args = oracle_data.copy()
             update_args["expiration_block"] = EXPIRATION_BLOCK
             self._request_update_transaction(update_args)
-
-        # Request account balance
-        self._get_balance()
 
     def _request_contract_deploy_transaction(self) -> None:
         """
