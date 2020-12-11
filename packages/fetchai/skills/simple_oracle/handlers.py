@@ -30,12 +30,15 @@ from aea.skills.base import Handler
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.simple_oracle.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
+    PrometheusDialogue,
+    PrometheusDialogues,
     SigningDialogue,
     SigningDialogues,
 )
@@ -481,3 +484,71 @@ class SigningHandler(Handler):
                 signing_msg.performative, signing_dialogue
             )
         )
+
+
+class PrometheusHandler(Handler):
+    """This class handles responses from the prometheus server."""
+
+    SUPPORTED_PROTOCOL = PrometheusMessage.protocol_id
+
+    def __init__(self, **kwargs):
+        """Initialize the handler."""
+        super().__init__(**kwargs)
+
+        self.handled_message = None
+
+    def setup(self) -> None:
+        """Set up the handler."""
+        if self.context.prometheus_dialogues.enabled:
+            self.context.logger.info("setting up PrometheusHandler")
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+
+        message = cast(PrometheusMessage, message)
+
+        # recover dialogue
+        prometheus_dialogues = cast(
+            PrometheusDialogues, self.context.prometheus_dialogues
+        )
+        prometheus_dialogue = cast(
+            PrometheusDialogue, prometheus_dialogues.update(message)
+        )
+        if prometheus_dialogue is None:
+            self._handle_unidentified_dialogue(message)
+            return
+
+        self.handled_message = message
+        if message.performative == PrometheusMessage.Performative.RESPONSE:
+            self.context.logger.debug(
+                f"Prometheus response ({message.code}): {message.message}"
+            )
+        else:
+            self.context.logger.debug(
+                f"got unexpected prometheus message: Performative = {PrometheusMessage.Performative}"
+            )
+
+    def _handle_unidentified_dialogue(self, msg: Message) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the unidentified message to be handled
+        :return: None
+        """
+
+        self.context.logger.info(
+            "received invalid message={}, unidentified dialogue.".format(msg)
+        )
+
+    def teardown(self) -> None:
+        """
+        Teardown the handler.
+
+        :return: None
+        """
+        pass

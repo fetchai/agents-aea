@@ -6,9 +6,9 @@ description: Connection for exposing agent metrics to prometheus server
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmQSsaKFYKePv83epZUcJCxB8TLruv19vUT6gAk8XwrYtD
+  README.md: QmWoYeZvxLR33YJqxWyajzSZdTomZEqFNKFUKV67up2pqr
   __init__.py: QmWVrDiiePsr6vTnvbPTcDrayR89ji3hf25rs9V9TiJUPv
-  connection.py: QmNYkh3PkgdbvWhLmKzb2DPYQubHti3jfvtH2dZVN6ykdu
+  connection.py: QmZA73YrYxUhhX4wP5qz8igEMv4igitHj7qtDKJ8TmKd3n
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []

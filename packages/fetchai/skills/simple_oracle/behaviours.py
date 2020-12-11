@@ -19,19 +19,24 @@
 
 """This package contains a simple Fetch oracle contract deployment behaviour."""
 
-from typing import Any, Dict, cast
+from typing import Any, Dict, Optional, Union, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
+from packages.fetchai.connections.prometheus.connection import (
+    PUBLIC_ID as PROM_CONNECTION_ID,
+)
 from packages.fetchai.contracts.oracle.contract import PUBLIC_ID as CONTRACT_PUBLIC_ID
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 from packages.fetchai.skills.simple_oracle.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
     LedgerApiDialogues,
+    PrometheusDialogues,
 )
 from packages.fetchai.skills.simple_oracle.strategy import Strategy
 
@@ -67,6 +72,15 @@ class SimpleOracleBehaviour(TickerBehaviour):
 
         if strategy.is_oracle_role_granted:
             self.context.logger.info("Oracle role already granted")
+
+        prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
+
+        if prom_dialogues.enabled:
+            for metric in prom_dialogues.metrics:
+                self.context.logger.info("Adding Prometheus metric: " + metric["name"])
+                self.add_prometheus_metric(
+                    metric["name"], metric["type"], metric["description"]
+                )
 
     def act(self) -> None:
         """
@@ -228,6 +242,70 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             message=ledger_api_msg, context=envelope_context
         )
+
+    def add_prometheus_metric(
+        self, metric_name: str, metric_type: str, description: str = None
+    ) -> None:
+        """
+        Add a prometheus metric.
+
+        :param metric_name: the name of the metric to add.
+        :param type: the type of the metric.
+        :param description: a description of the metric..
+        :return: None
+        """
+
+        # context
+        prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
+
+        # prometheus update message
+        message, _ = prom_dialogues.create(
+            counterparty=str(PROM_CONNECTION_ID),
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            type=metric_type,
+            title=metric_name,
+            description=description,
+            labels=(),
+        )
+
+        # send message
+        envelope_context = EnvelopeContext(
+            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
+        )
+        self.context.outbox.put_message(message=message, context=envelope_context)
+
+    def update_prometheus_metric(
+        self,
+        metric_name: str,
+        update_func: str,
+        value: Optional[Union[float, str]] = None,
+    ) -> None:
+        """
+        Update a prometheus metric.
+
+        :param metric_name: the name of the metric.
+        :param update_func: the name of the update function (e.g. inc, observe).
+        :param value: the value to provide to the update function.
+        :return: None
+        """
+
+        # context
+        prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
+
+        # prometheus update message
+        message, _ = prom_dialogues.create(
+            counterparty=str(PROM_CONNECTION_ID),
+            performative=PrometheusMessage.Performative.UPDATE_METRIC,
+            title=metric_name,
+            callable=update_func,
+            value=value,
+        )
+
+        # send message
+        envelope_context = EnvelopeContext(
+            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
+        )
+        self.context.outbox.put_message(message=message, context=envelope_context)
 
     def teardown(self) -> None:
         """

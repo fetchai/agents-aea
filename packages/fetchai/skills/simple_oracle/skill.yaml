@@ -8,9 +8,9 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmZK5MpWxkgPwSXw8XLbg1PLKRBDz8AQ39n1icPDgEfDeg
   __init__.py: QmZJXwpiddFFGMSthjrpFqji7AwA4GRkRWUyLhNAVHCUi1
-  behaviours.py: QmWfvpaCdMV3epKFKmHJ6nNYtgZHPwZVNTtTiHGeAaSh7W
-  dialogues.py: QmfYuTaa2zs9Cuyg6T8tbbEgkQNnPFhaAgyxy8oF8YUqPv
-  handlers.py: QmU4m8pSYfZowZss4k2irv63tqFESyGCSi1YXfsKbsFRho
+  behaviours.py: QmWB84LbHn21z4zt2deRmA33BuFVEmR74VTT7EuTJjR1Ds
+  dialogues.py: QmdxsJa4eE2zFVVd6TNdCLaa4gNmPDKGGMq2E8Mz63ZNs6
+  handlers.py: QmWsZv1RVzdbJDeoAPyCTJrCnWRfVA98V2aZaxaTmzXYVY
   strategy.py: QmV4yni8FqkYh3jvV494f9HGiCxYbQVv4ryWq6cDujGZ1t
 fingerprint_ignore_patterns: []
 contracts:
@@ -19,6 +19,7 @@ protocols:
 - fetchai/contract_api:0.8.0
 - fetchai/default:0.9.0
 - fetchai/ledger_api:0.7.0
+- fetchai/prometheus:0.1.0
 - fetchai/signing:0.7.0
 skills: []
 behaviours:
@@ -33,6 +34,9 @@ handlers:
   ledger_api:
     args: {}
     class_name: LedgerApiHandler
+  prometheus:
+    args: {}
+    class_name: PrometheusHandler
   signing:
     args: {}
     class_name: SigningHandler
@@ -43,6 +47,14 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
+  prometheus_dialogues:
+    args:
+      enabled: true
+      metrics:
+      - name: oracle_contract_balance
+        type: Gauge
+        description: Balance of oracle contract (ETH)
+    class_name: PrometheusDialogues
   signing_dialogues:
     args: {}
     class_name: SigningDialogues

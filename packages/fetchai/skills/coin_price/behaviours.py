@@ -159,6 +159,7 @@ class CoinPriceBehaviour(TickerBehaviour):
 
         if prom_dialogues.enabled:
             for metric in prom_dialogues.metrics:
+                self.context.logger.info("Adding Prometheus metric: " + metric["name"])
                 self.add_prometheus_metric(
                     metric["name"], metric["type"], metric["description"]
                 )

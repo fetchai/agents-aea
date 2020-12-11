@@ -30,7 +30,7 @@ from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
-from aea.mail.base import Envelope, Message
+from aea.mail.base import Envelope, EnvelopeContext, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.protocols.prometheus.dialogues import PrometheusDialogue
@@ -209,8 +209,13 @@ class PrometheusChannel:
             code=response_code,
             message=response_msg,
         )
+        context = cast(EnvelopeContext, envelope.context)
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
+            message=msg,
+            context=context,
         )
         await self._send(envelope)
 
