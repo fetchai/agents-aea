@@ -112,6 +112,9 @@ class SimpleOracleBehaviour(TickerBehaviour):
             update_args["expiration_block"] = EXPIRATION_BLOCK
             self._request_update_transaction(update_args)
 
+        # Request account balance
+        self._get_balance()
+
     def _request_contract_deploy_transaction(self) -> None:
         """
         Request contract deployment transaction
@@ -250,7 +253,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         Add a prometheus metric.
 
         :param metric_name: the name of the metric to add.
-        :param type: the type of the metric.
+        :param type: the type of the metric {"Gauge", "Counter", ...}.
         :param description: a description of the metric..
         :return: None
         """
@@ -284,7 +287,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         Update a prometheus metric.
 
         :param metric_name: the name of the metric.
-        :param update_func: the name of the update function (e.g. inc, observe).
+        :param update_func: the name of the update function {"inc", "set", ...}.
         :param value: the value to provide to the update function.
         :return: None
         """

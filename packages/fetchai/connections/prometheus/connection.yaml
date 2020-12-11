@@ -14,7 +14,7 @@ connections: []
 protocols: []
 class_name: PrometheusConnection
 config:
-  port: 8080
+  port: 9090
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:

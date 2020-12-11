@@ -122,10 +122,14 @@ class LedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         """
         self.context.logger.info(
-            "starting balance on {} ledger={}.".format(
+            "Balance on {} ledger={}.".format(
                 ledger_api_msg.ledger_id, ledger_api_msg.balance,
             )
         )
+        if self.context.prometheus_dialogues.enabled:
+            self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
+                "oracle_account_balance_ETH", "set", float(ledger_api_msg.balance)
+            )
 
     def _handle_transaction_digest(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue

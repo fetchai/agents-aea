@@ -8,9 +8,9 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmZK5MpWxkgPwSXw8XLbg1PLKRBDz8AQ39n1icPDgEfDeg
   __init__.py: QmZJXwpiddFFGMSthjrpFqji7AwA4GRkRWUyLhNAVHCUi1
-  behaviours.py: QmWB84LbHn21z4zt2deRmA33BuFVEmR74VTT7EuTJjR1Ds
+  behaviours.py: QmRPnCFAtmJnCSUVe8WuNTzyHCPgnxwAoTELbEsSsmZgKc
   dialogues.py: QmdxsJa4eE2zFVVd6TNdCLaa4gNmPDKGGMq2E8Mz63ZNs6
-  handlers.py: QmWsZv1RVzdbJDeoAPyCTJrCnWRfVA98V2aZaxaTmzXYVY
+  handlers.py: QmdBJUAuBVQMFJPDysbpCmWsjmiYozXhiL3MfPznyAMWoE
   strategy.py: QmV4yni8FqkYh3jvV494f9HGiCxYbQVv4ryWq6cDujGZ1t
 fingerprint_ignore_patterns: []
 contracts:
@@ -51,7 +51,7 @@ models:
     args:
       enabled: true
       metrics:
-      - name: oracle_contract_balance
+      - name: oracle_account_balance_ETH
         type: Gauge
         description: Balance of oracle contract (ETH)
     class_name: PrometheusDialogues
