@@ -3,7 +3,7 @@ The prometheus connection allows agents to create and update prometheus metrics.
 
 ## Usage
 
-First, add the connection to your AEA project (`aea add connection fetchai/prometheus:0.1.0`). The default port (`8080`) to expose metrics can be changed by updating the `config` in `connection.yaml`. Then, add the protocol (`aea add protocol fetchai/prometheus:0.1.0`) to your project. 
+First, add the connection to your AEA project (`aea add connection fetchai/prometheus:0.1.0`). The default port (`9090`) to expose metrics can be changed by updating the `config` in `connection.yaml`. Then, add the protocol (`aea add protocol fetchai/prometheus:0.1.0`) to your project. 
 
 It may be convenient to add a model `prometheus_dialogues` to your skill, to handle the metrics configuration and messages to the prometheus connection.
 

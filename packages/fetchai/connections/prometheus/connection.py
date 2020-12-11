@@ -44,7 +44,7 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.prometheus
 
 PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.1.0")
 
-DEFAULT_PORT = 8080
+DEFAULT_PORT = 9090
 
 
 class PrometheusDialogues(BasePrometheusDialogues):
