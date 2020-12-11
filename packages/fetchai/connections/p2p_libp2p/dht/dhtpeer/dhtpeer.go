@@ -481,6 +481,35 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 	}
 }
 
+func isValidProofOfRepresentation(registration *dhtnode.Register) (*dhtnode.RegisterResponse, error) {
+
+	// check that agent address and public key match
+	addrFromPubKey, err := utils.FetchAIAddressFromPublicKey(registration.AgentPublicKey)
+	if err != nil || addrFromPubKey != registration.AgentAddress {
+		if err == nil {
+			err = errors.New("Agent address and public key don't match")
+		}
+		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_AGENT_ADDRESS}
+		return response, err
+	}
+
+	// check that signature is valid
+	ok, err := utils.VerifyFetchAISignatureBTC([]byte(registration.ConnPublicKey), registration.ProofOfRepresentation, registration.AgentPublicKey)
+	if !ok || err != nil {
+		if err == nil {
+			err = errors.New("Signature is not valid")
+		}
+		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_PROOF}
+		return response, err
+
+	}
+
+	// PoR is valid
+	response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_SUCCESS}
+	return response, nil
+
+}
+
 func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	defer dhtPeer.goroutines.Done()
 	defer conn.Close()
@@ -498,7 +527,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 
 	//linfo().Msgf("received a new connection from %s", conn.RemoteAddr().String())
 
-	// read agent address
+	// read agent registration message
 	buf, err := utils.ReadBytesConn(conn)
 	if err != nil {
 		lerror(err).Msg("while receiving agent's Address")
@@ -525,22 +554,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	linfo().Msgf("connection from %s established for Address %s",
 		conn.RemoteAddr().String(), addr)
 
-	// check that agent address and public key match
-	addrFromPubKey, err := utils.FetchAIAddressFromPublicKey(registration.AgentPublicKey)
-	if err != nil || addrFromPubKey != registration.AgentAddress {
-		if err == nil {
-			err = errors.New("Agent address and public key don't match")
-		}
-		lerror(err).Msg("Couldn't verify agent address and public key association")
-		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_AGENT_ADDRESS}
-		buf, err = proto.Marshal(response)
-		err = utils.WriteBytesConn(conn, buf)
-		ignore(err)
-
-		nbrConns.Dec()
-		return
-	}
-
 	// check that connection public key match
 	connPubKey, err := utils.PubKeyFromFetchAIPublicKey(registration.ConnPublicKey)
 	if err != nil || !connPubKey.Equals(dhtPeer.publicKey) {
@@ -555,24 +568,25 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 
 		nbrConns.Dec()
 		return
-
 	}
 
-	// check that signature is valid
-	ok, err := utils.VerifyFetchAISignatureBTC([]byte(registration.ConnPublicKey), registration.ProofOfRepresentation, registration.AgentPublicKey)
-	if !ok || err != nil {
-		if err == nil {
-			err = errors.New("Proof of representation of peer public key is not valid")
-		}
-		lerror(err).Msg("Couldn't verify agent address and public key association")
-		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_PROOF}
+	// check if the PoR is valid
+	response, err := isValidProofOfRepresentation(registration)
+	if err != nil {
+		lerror(err).Msg("PoR is not valid")
 		buf, err = proto.Marshal(response)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
 
 		nbrConns.Dec()
 		return
+	}
 
+	buf, err = proto.Marshal(response)
+	err = utils.WriteBytesConn(conn, buf)
+	if err != nil {
+		nbrConns.Dec()
+		return
 	}
 
 	// Add connection to map
@@ -587,11 +601,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			return
 		}
 	}
-
-	response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_SUCCESS}
-	buf, err = proto.Marshal(response)
-	err = utils.WriteBytesConn(conn, buf)
-	ignore(err)
 
 	duration := timer.GetTimer(start)
 	opLatencyRegister.Observe(float64(duration.Microseconds()))

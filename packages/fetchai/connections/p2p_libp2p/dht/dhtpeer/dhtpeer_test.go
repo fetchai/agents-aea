@@ -22,6 +22,7 @@ package dhtpeer
 
 import (
 	"context"
+	"encoding/base64"
 	"net"
 	"strconv"
 	"testing"
@@ -33,6 +34,7 @@ import (
 	"libp2p_node/utils"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/pkg/errors"
 )
 
 /*
@@ -64,20 +66,31 @@ var (
 		"9427c1472b66f6abd94a6c246eee495e3709ec45882ae0badcbc71ad2cd8f8b2",
 	}
 
-	AgentsTestAddresses = []string{
-		"PMRHuYJRhrbRHDagMMtkwfdFwJi7cbG9oxWkf9Au5zTi4kqng",
-		"19SkNL4ozZbnL3xenQiCq8267KDmRpy1BTFtQoYRbVruXDamH",
-		"2U1id59VqSx4cD6pxRDGnDQJA8UQj1r8X4iyti7k4F6u3Aayfb",
-		"sgaaoJ3rW3g9vkvUdUMTqMW6ZTD3bdnr6Drg8Ro9FcenNo6RM",
-		"2Rn9GTp5NHt8B8k4w5Ct44RrDKErRYsu5sgBrHAqBTkfCCKqLP",
-		"2sTsbPFCxbfVUENtLt62bNjTYFPffdASbZAUGast4ZZUVdkN4r",
-		"2EBBRDJWJ3NoRUJK1sjNh6gi3iRpMcUHqGU9JHiuuvVyuZyA4n",
-		"fTFcTd8wJ4PmiffhTwFhP2J45A6V6XuMDWrA59hheHaWgdrPv",
-		"roiuioMXPhu1PRFSYqpnMgvUrDCmRY3canmBQu16CTZozyQAc",
-		"2LcDvsoiTmUPkFFdMTAGEUdZY7Y2xyYCQxEXvLD8MoMhTe4Ldi",
+	AgentsTestKeys = []string{
+		"730c22474709a6d17cf11599a80413a84ddb691a3c7b11a6d8d47a2c024b7b56",
+		"a085c5eeb39636a21c85a9bc667bae18bf3e327a220ecb3998e317b62ab20ec6",
+		"0b7af750e7e96ceb9fe5582bdf9bdafae726427d34447f7245a084b6cf0aa5e5",
+		"dffaa5a9779931a2c1194794e6e9a89787557d6cd708d84c74de20ec5e03a7bf",
+		"509c4019dd96a337a36149031869e6de5db014ab9ae5d8097ac997ca8f10422a",
+		"a385fa48b4f40a2f4ea66de88c0021532299865fe6137d765788f9f856e79453",
+		"ff212371e454f8292fd3b13020a3910fc91002a7ab5eb3f297b71df6b7ff9bc1",
+		"04289e97041fc025c103141909d2cce649944153822f032b646214a850363618",
+		"116294510fba759d19af7a65b915467384258d997695ed7018d8c19d38c29412",
+		"dc2f0238e65c0291bedae58cb1c013bd03e0f41f78e1779744ac401952ec2b51",
 	}
 
-	AgentsTestKeys = []string{}
+	AgentsTestAddresses = []string{
+		"fetch1y39e4tec9fll66x2k7wed5qn7zhaneayjm55kk",
+		"fetch1ufjmhth6dnhrckxrvk05lmt8s2vture23xvwjl",
+		"fetch1dja5uazc9n7jpjm94rhmkkmcyv5nj3kt8aexgf",
+		"fetch18v5lz9psp53akm26ztk3exytqfdvpnfdsyx232",
+		"fetch10u6ra4qmukhf57xadv64jt9jhr9gdrg707x6l9",
+		"fetch1hys3k2anw5mxe0y2vksccpe58jyk5gksrsjd60",
+		"fetch1t07jnjjtlqa07mstg4gw9twjs2ddtqs3sgtx7c",
+		"fetch18sxxgat6uaxqxvd7mgt99y7avyy3c24av36u2l",
+		"fetch1sx2rmtndc5t97pn00x76sksrzgc9s2watpgw64",
+		"fetch1mwd8n27t68svv4w5urztgw7e3kjh7nqkqz0j94",
+	}
 )
 
 /*
@@ -627,8 +640,25 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 	DHT network: DelegateClient
 */
 
+func signFetchAI(message []byte, privKey string) (string, error) {
+	signingKey, _, err := utils.KeyPairFromFetchAIKey(privKey)
+	if err != nil {
+		return "", err
+	}
+	signature, err := signingKey.Sign(message)
+	if err != nil {
+		return "", err
+	}
+	strSignature, err := utils.ConvertDEREncodedSignatureToStr(signature)
+	if err != nil {
+		return "", err
+	}
+	encodedSignature := base64.StdEncoding.EncodeToString(strSignature)
+	return encodedSignature, nil
+}
+
 // TestRoutingDelegateClientToDHTPeer
-func TestRoutingDelegateClientToDHTPeer(t *testing.T) {
+func TestRoutingDelegateClientToDHTPeerX(t *testing.T) {
 	peer, peerCleanup, err := SetupLocalDHTPeer(
 		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
@@ -638,7 +668,21 @@ func TestRoutingDelegateClientToDHTPeer(t *testing.T) {
 	}
 	defer peerCleanup()
 
-	client, clientCleanup, err := SetupDelegateClient(AgentsTestAddresses[1], DefaultLocalHost, DefaultDelegatePort)
+	peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(FetchAITestKeys[0])
+	if err != nil {
+		t.Fatal("Failed to get public key from DHTPeer:", err)
+	}
+
+	agentPublicKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(AgentsTestKeys[1])
+	if err != nil {
+		t.Fatal("Failed to get public key from Agent key:", err)
+	}
+
+	signature, err := signFetchAI([]byte(peerPubKey), AgentsTestKeys[1])
+	if err != nil {
+		t.Fatal("Failed to sign peer public key:", err)
+	}
+	client, clientCleanup, err := SetupDelegateClientWithPoR(AgentsTestAddresses[1], DefaultLocalHost, DefaultDelegatePort, agentPublicKey, peerPubKey, signature)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -1420,11 +1464,46 @@ func SetupDelegateClient(address string, host string, port uint16) (*DelegateCli
 		return nil, nil, err
 	}
 
+	err = utils.WriteBytesConn(client.Conn, []byte(address))
+	ignore(err)
+	_, err = utils.ReadBytesConn(client.Conn)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	go func() {
+		for {
+			envel, err := utils.ReadEnvelopeConn(client.Conn)
+			if err != nil {
+				break
+			}
+			if client.processEnvelope != nil {
+				err = client.processEnvelope(envel)
+				ignore(err)
+			} else {
+				client.Rx <- envel
+			}
+		}
+	}()
+
+	return client, func() { client.Close() }, nil
+}
+
+func SetupDelegateClientWithPoR(address string, host string, port uint16, pubkey string, connKey string, sig string) (*DelegateClient, func(), error) {
+	var err error
+	client := &DelegateClient{}
+	client.AgentAddress = address
+	client.Rx = make(chan *aea.Envelope)
+	client.Conn, err = net.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10))
+	if err != nil {
+		return nil, nil, err
+	}
+
 	registration := &dhtnode.Register{ProtocolVersion: "0.1.0"}
 	registration.AgentAddress = address
-	registration.AgentPublicKey = "AgentPublicKey"
-	registration.ConnPublicKey = "ConnPublicKey"
-	registration.ProofOfRepresentation = "signature"
+	registration.AgentPublicKey = pubkey
+	registration.ConnPublicKey = connKey
+	registration.ProofOfRepresentation = sig
 	data, err := proto.Marshal(registration)
 
 	err = utils.WriteBytesConn(client.Conn, data)
@@ -1436,7 +1515,8 @@ func SetupDelegateClient(address string, host string, port uint16) (*DelegateCli
 	response := &dhtnode.RegisterResponse{}
 	err = proto.Unmarshal(data, response)
 	if response.Status != dhtnode.RegisterResponse_SUCCESS {
-		println("Registration error")
+		println("Registration error:", response.Status.String())
+		return nil, nil, errors.New(response.Status.String())
 	}
 
 	go func() {

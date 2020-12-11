@@ -14,6 +14,7 @@ require (
 	github.com/libp2p/go-libp2p-kad-dht v0.7.11
 	github.com/multiformats/go-multiaddr v0.2.1
 	github.com/multiformats/go-multihash v0.0.13
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
 	github.com/rs/zerolog v1.19.0
 	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d

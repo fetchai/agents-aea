@@ -242,6 +242,22 @@ func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 	return sigDER
 }
 
+// ConvertDEREncodedSignatureToStr
+// References:
+//  - https://github.com/fetchai/agents-aea/blob/master/aea/crypto/cosmos.py#L258
+//  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
+func ConvertDEREncodedSignatureToStr(signature []byte) ([]byte, error) {
+	length := len(signature) - 6
+	if length%2 != 0 {
+		return []byte{}, errors.New("DER signature length must be even")
+	}
+	sigStr := make([]byte, length)
+	offset := 4 + length/2
+	copy(sigStr, signature[4:offset])
+	copy(sigStr[length/2:], signature[offset+2:])
+	return sigStr, nil
+}
+
 // ParseFetchAISignature create btcec Signature from base64 formated, string (not DER) encoded RFC6979 signature
 func ParseFetchAISignature(signature string) (*btcec.Signature, error) {
 	// First convert the signature into a DER one
@@ -386,6 +402,16 @@ func IDFromFetchAIPublicKeyUncompressed(public_key string) (peer.ID, error) {
 	}
 
 	return multihash, nil
+}
+
+func FetchAIPublicKeyFromFetchAIPrivateKey(privateKey string) (string, error) {
+	pkBytes, err := hex.DecodeString(privateKey)
+	if err != nil {
+		return "", err
+	}
+	_, btcPublicKey := btcec.PrivKeyFromBytes(btcec.S256(), pkBytes)
+
+	return hex.EncodeToString(btcPublicKey.SerializeCompressed()), nil
 }
 
 /*
