@@ -1,6 +1,13 @@
 AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.1.0`.
 
-To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090` to see the latest values of the metrics `num_retrievals` and `num_requests`. You can then instruct a prometheus server running on the same computing cluster as a deployed agent to scrape these metrics for remote monitoring and visualisation with the Prometheus/Grafana toolset.
+To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090` to see the latest values of the metrics `num_retrievals` and `num_requests`:
+```bash
+aea fetch fetchai/coin_price_feed:0.1.0
+cd coin_price_feed
+aea install
+aea run
+```
+You can then instruct a prometheus server running on the same computing cluster as a deployed agent to scrape these metrics for remote monitoring and visualisation with the Prometheus/Grafana toolset.
 
 To use this connection, add a model `prometheus_dialogues` to your skill to handle the metrics configuration and messages to the prometheus connection.
 
