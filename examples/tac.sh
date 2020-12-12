@@ -1,35 +1,49 @@
 #!/bin/bash -e
-datetime=$1
-# '01 01 2020  00:01'
+min=$1
+# 2
 participants=$2
 # 2
 
-if [ -z "$datetime" ];
-    then exit 1;
+if [ -z "$min" ];
+    then echo "No minutes provided"; exit 1;
 fi
 
 if [ -z "$participants" ];
-    then exit 1;
+    then echo "No participants provided"; exit 1;
 fi
 
 # create working dir
 folder=tac_$(date "+%d_%m_%H%M")
+function cleanup {
+  echo "Removing" $folder
+  cd ..
+  rm  -rf $folder
+}
+trap cleanup EXIT
 mkdir $folder
 cd $folder
 
-# create controller
+# helper
+function empty_lines {
+  for i in {1..2}
+  do
+    echo ""
+  done
+}
+
+echo "Creating controller..."
 aea fetch fetchai/tac_controller:0.15.0
 cd tac_controller
 aea install
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$datetime"
-aea config get vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time
 multiaddress=$(aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)
 cd ..
 
-# create participants
+
+empty_lines
+echo "Creating participants..."
 agents=""
 for i in $(seq $participants);
 do
@@ -44,5 +58,17 @@ aea install
 cd ..
 done
 
-# run agents
+empty_lines
+time_diff=$(printf '+%sM' "$min")
+datetime_now=$(date "+%d %m %Y %H:%M")
+datetime_start=$(date -v $time_diff "+%d %m %Y %H:%M")
+# '01 01 2020  00:01'
+echo "Now:" $datetime_now "Start:" $datetime_start
+cd tac_controller
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$datetime_start"
+echo "Start time set:" $(aea config get vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time)
+cd ..
+
+empty_lines
+echo "Running agents..."
 aea launch tac_controller $agents
