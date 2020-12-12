@@ -87,7 +87,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         # test prometheus metrics
         metrics = {}
-        prom_response = requests.get("http://127.0.0.1:8080")
+        prom_response = requests.get("http://127.0.0.1:9090")
         for family in text_string_to_metric_families(prom_response.content.decode()):
             for sample in family.samples:
                 metrics[sample.name] = sample.value
