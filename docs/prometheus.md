@@ -117,7 +117,7 @@ def update_prometheus_metric(
     Update a prometheus metric.
 
     :param metric_name: the name of the metric.
-    :param update_func: the name of the update function (e.g. inc, observe).
+    :param update_func: the name of the update function (e.g. inc, set, observe).
     :param value: the value to provide to the update function.
     :return: None
     """
@@ -163,7 +163,7 @@ if self.context.prometheus_dialogues.enabled:
     )
 ```
 
-Finally, you can add a `PrometheusHandler` to your skill to process response messages from the promtheus connection.
+Finally, you can add a `PrometheusHandler` to your skill to process response messages from the prometheus connection.
 
 <details><summary>Click here for example</summary>
 

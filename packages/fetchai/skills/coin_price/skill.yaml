@@ -8,7 +8,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmcNJBNktp8Hhic4LXpWWyMbiaYVx2FXAimoFPywfuhbyV
   __init__.py: QmX5WhZZrXfasUVaWY8fUGUELNiEF7mBjRhHt6KB8vEknM
-  behaviours.py: QmYPP5DPuQDBmRnuhS5UbTjyis6g2rX5jf9pRt27coRTtj
+  behaviours.py: QmTi1MpBSjpj6z1HZ5FPWBVwpiZqTznuJaWH36Pc8bZLNp
   coin_api_spec.yaml: QmP9pN1roizqYWbhiQstntAQFBQdBuVq5mj9CYcA9nD3Q6
   dialogues.py: QmRJgfoHqCbxJhf6bF86sRZ1JwFR1vDe4hH7gbKyWy31BP
   handlers.py: QmTcEBhyfhtT4h6jS1UWbmHWZiiEsW13JQscULohRgrtWg

@@ -124,7 +124,7 @@ class CoinPriceBehaviour(TickerBehaviour):
         Update a prometheus metric.
 
         :param metric_name: the name of the metric.
-        :param update_func: the name of the update function (e.g. inc, observe).
+        :param update_func: the name of the update function (e.g. inc, set, observe).
         :param value: the value to provide to the update function.
         :return: None
         """
