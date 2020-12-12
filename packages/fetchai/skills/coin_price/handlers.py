@@ -177,7 +177,7 @@ class HttpHandler(Handler):
 
         if self.context.prometheus_dialogues.enabled:
             self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-                "num_requests", "inc", float(1)
+                "num_requests", "inc", 1.0
             )
 
     def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:

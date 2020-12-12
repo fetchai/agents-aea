@@ -11,7 +11,7 @@ fingerprint:
   behaviours.py: QmYPP5DPuQDBmRnuhS5UbTjyis6g2rX5jf9pRt27coRTtj
   coin_api_spec.yaml: QmP9pN1roizqYWbhiQstntAQFBQdBuVq5mj9CYcA9nD3Q6
   dialogues.py: QmRJgfoHqCbxJhf6bF86sRZ1JwFR1vDe4hH7gbKyWy31BP
-  handlers.py: QmTWTmK62wL28kaYBTCLbyLE7xyuqzg388Dkjgs866iBgr
+  handlers.py: QmTcEBhyfhtT4h6jS1UWbmHWZiiEsW13JQscULohRgrtWg
   models.py: QmP878qJZGF4tJTrbxZez3puAZ8epECtmrhTB8RYKQUkri
 fingerprint_ignore_patterns: []
 contracts: []
