@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmeTbjNHgFJddBcxxz9LoiT8tTaod5hZvptp2etgnP9JRe
   dialogues.py: QmeuRrNPpbvyTAcPwAtEkTfJTDunqyfzPoDhMZWTvCyrJA
   handlers.py: QmfS3N2JhkC29iqHLiK273HVA4Qf5rziJKXHpYTg3C1Pdc
-  registration_db.py: QmUDfeE9DKgzKyzFoiiSUE4ZDSCMkGduPwWcsHxhUTd8YH
+  registration_db.py: QmZcK4tLLyRmb3QaKnYfFdSyChEQpDdEL8NeQ23f3dqYtp
   strategy.py: QmcE2Zu8XxnJaGcttWewavHzpCHH5B2spHETexXYydmYeV
 fingerprint_ignore_patterns: []
 connections:
