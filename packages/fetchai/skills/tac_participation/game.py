@@ -181,12 +181,14 @@ class Game(Model):
 
     def __init__(self, **kwargs):
         """Instantiate the game class."""
-        self._expected_version_id = kwargs.pop("expected_version_id", "")  # type: str
         self._expected_controller_addr = kwargs.pop(
             "expected_controller_addr", None
         )  # type: Optional[str]
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        if "search_value" not in self._search_query:
+            raise ValueError("search_value not found in search_query")
+        self._expected_version_id = self._search_query["search_value"]
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = Location(
             latitude=location["latitude"], longitude=location["longitude"]
@@ -297,7 +299,7 @@ class Game(Model):
         )
         enforce(
             tac_message.version_id == self.expected_version_id,
-            "TacMessage for unexpected game.",
+            f"TacMessage for unexpected game, expected={self.expected_version_id}, found={tac_message.version_id}",
         )
         self._conf = Configuration(
             tac_message.version_id,

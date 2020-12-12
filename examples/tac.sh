@@ -3,6 +3,8 @@ min=$1
 # 2
 participants=$2
 # 2
+identifier=$3
+# some string
 
 if [ -z "$min" ];
     then echo "No minutes provided"; exit 1;
@@ -31,6 +33,9 @@ function empty_lines {
   done
 }
 
+entry_peer="/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
+tac_name=v1_$identifier
+
 echo "Creating controller..."
 aea fetch fetchai/tac_controller:0.15.0
 cd tac_controller
@@ -38,9 +43,14 @@ aea install
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
-multiaddress=$(aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)
+json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:10000", "public_uri": null}' "$entry_peer")
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
+aea config get vendor.fetchai.connections.p2p_libp2p.config
+# multiaddress=$(aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)
+json=$(printf '{"key": "tac", "value": "%s"}' $tac_name)
+aea config set --type dict vendor.fetchai.skills.tac_control.models.parameters.args.service_data "$json"
+aea config get vendor.fetchai.skills.tac_control.models.parameters.args.service_data
 cd ..
-
 
 empty_lines
 echo "Creating participants..."
@@ -51,9 +61,11 @@ agent=tac_participant_$i
 agents=$(echo $agent $agents)
 aea fetch fetchai/tac_participant:0.17.0 --alias $agent
 cd $agent
-json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:1%0.4d", "public_uri": null}' "$multiaddress" "$i")
+json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:1%0.4d", "public_uri": null}' "$entry_peer" "$i")
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 aea config get vendor.fetchai.connections.p2p_libp2p.config
+aea config set vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value $tac_name
+aea config get vendor.fetchai.skills.tac_participation.models.game.args.search_query
 aea install
 cd ..
 done
