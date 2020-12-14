@@ -105,6 +105,8 @@ type DHTPeer struct {
 	monitoringPort uint16
 	enableRelay    bool
 
+	registrationDelay time.Duration
+
 	key             crypto.PrivKey
 	publicKey       crypto.PubKey
 	localMultiaddr  multiaddr.Multiaddr
@@ -133,7 +135,7 @@ type DHTPeer struct {
 // New creates a new DHTPeer
 func New(opts ...Option) (*DHTPeer, error) {
 	var err error
-	dhtPeer := &DHTPeer{}
+	dhtPeer := &DHTPeer{registrationDelay: addressRegistrationDelay}
 
 	dhtPeer.dhtAddresses = map[string]string{}
 	dhtPeer.tcpAddresses = map[string]net.Conn{}
@@ -145,7 +147,6 @@ func New(opts ...Option) (*DHTPeer, error) {
 			return nil, err
 		}
 	}
-
 	dhtPeer.closing = make(chan struct{})
 	dhtPeer.goroutines = &sync.WaitGroup{}
 
@@ -484,7 +485,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	defer conn.Close()
 
 	// to limit spamming
-	time.Sleep(addressRegistrationDelay)
+	time.Sleep(dhtPeer.registrationDelay)
 
 	nbrConns, _ := dhtPeer.monitor.GetGauge(metricServiceDelegateClientsCount)
 	nbrClients, _ := dhtPeer.monitor.GetCounter(metricServiceDelegateClientsCountAll)
@@ -951,7 +952,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
 	// to limit spamming
-	time.Sleep(addressRegistrationDelay)
+	time.Sleep(dhtPeer.registrationDelay)
 
 	nbrClients, _ := dhtPeer.monitor.GetCounter(metricServiceRelayClientsCountAll)
 

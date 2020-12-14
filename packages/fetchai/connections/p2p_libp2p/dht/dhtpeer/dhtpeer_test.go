@@ -1324,6 +1324,7 @@ func SetupLocalDHTPeer(key string, addr string, dhtPort uint16, delegatePort uin
 		IdentityFromFetchAIKey(key),
 		EnableRelayService(),
 		BootstrapFrom(entry),
+		WithRegistrationDelay(5 * time.Second),
 	}
 
 	if addr != "" {
