@@ -66,6 +66,19 @@ var (
 		"9427c1472b66f6abd94a6c246eee495e3709ec45882ae0badcbc71ad2cd8f8b2",
 	}
 
+	FetchAITestPublicKeys = []string{
+		"03b7e977f498dce004e2614764ff576e17cc6691135497e7bcb5d3441e816ba9e1",
+		"02344c3f0e79f56aef8e167a6fea912745f1f770b66b4c5096040c0e8c9e3c68b3",
+		"023d6021c001c7b562af8b6e54ace4f98b1b14170d7db4749ecab2b1f0e4252794",
+		"02a0eb20ae23f2f78650b42dfafa6bf4e4752657905da8598b2c0806478e0bfa0d",
+		"023db373d1fc21212f2f03fec1ddd49f193f54f71545e72f37c8a70ca20ef1622b",
+		"03290b4e5dabcca2a994a8d63057f5c83f60d999ede181a8d9b42084e3bee256c2",
+		"03510651fbb9d2ce5b7ae00968339055fbc552e565c54cce8c69f5a52209d3d6a7",
+		"02c11df29b5873e0c37d1427c488ba84e5ccc57405d39299757cee06893ab8595d",
+		"031545edc0fe81a17c77a391a343f95547745b28703bbe664e12c523e3272b637e",
+		"02dd78522785e4175e7db9794b03adcdcfaf707153f307caa3368da5a30594d369",
+	}
+
 	AgentsTestKeys = []string{
 		"730c22474709a6d17cf11599a80413a84ddb691a3c7b11a6d8d47a2c024b7b56",
 		"a085c5eeb39636a21c85a9bc667bae18bf3e327a220ecb3998e317b62ab20ec6",
@@ -668,21 +681,7 @@ func TestRoutingDelegateClientToDHTPeerX(t *testing.T) {
 	}
 	defer peerCleanup()
 
-	peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(FetchAITestKeys[0])
-	if err != nil {
-		t.Fatal("Failed to get public key from DHTPeer:", err)
-	}
-
-	agentPublicKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(AgentsTestKeys[1])
-	if err != nil {
-		t.Fatal("Failed to get public key from Agent key:", err)
-	}
-
-	signature, err := signFetchAI([]byte(peerPubKey), AgentsTestKeys[1])
-	if err != nil {
-		t.Fatal("Failed to sign peer public key:", err)
-	}
-	client, clientCleanup, err := SetupDelegateClientWithPoR(AgentsTestAddresses[1], DefaultLocalHost, DefaultDelegatePort, agentPublicKey, peerPubKey, signature)
+	client, clientCleanup, err := SetupDelegateClientWithPoR(AgentsTestKeys[1], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -1437,6 +1436,10 @@ func SetupDHTClient(key string, address string, entry []string) (*dhtclient.DHTC
 
 type DelegateClient struct {
 	AgentAddress    string
+	AgentKey        string
+	AgentPubKey     string
+	PeerPubKey      string
+	PoR             string
 	Rx              chan *aea.Envelope
 	Conn            net.Conn
 	processEnvelope func(*aea.Envelope) error
@@ -1489,22 +1492,43 @@ func SetupDelegateClient(address string, host string, port uint16) (*DelegateCli
 	return client, func() { client.Close() }, nil
 }
 
-func SetupDelegateClientWithPoR(address string, host string, port uint16, pubkey string, connKey string, sig string) (*DelegateClient, func(), error) {
+func SetupDelegateClientWithPoR(key string, host string, port uint16, peerPubKey string) (*DelegateClient, func(), error) {
 	var err error
 	client := &DelegateClient{}
+	client.AgentKey = key
+
+	pubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
+	if err != nil {
+		return nil, nil, err
+	}
+	client.AgentPubKey = pubKey
+
+	address, err := utils.FetchAIAddressFromPublicKey(pubKey)
+	if err != nil {
+		return nil, nil, err
+	}
 	client.AgentAddress = address
+
+	signature, err := signFetchAI([]byte(peerPubKey), key)
+	if err != nil {
+		return nil, nil, err
+	}
+	client.PoR = signature
+
 	client.Rx = make(chan *aea.Envelope)
 	client.Conn, err = net.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10))
 	if err != nil {
 		return nil, nil, err
 	}
 
-	registration := &dhtnode.Register{ProtocolVersion: "0.1.0"}
-	registration.AgentAddress = address
-	registration.AgentPublicKey = pubkey
-	registration.ConnPublicKey = connKey
-	registration.ProofOfRepresentation = sig
-	data, err := proto.Marshal(registration)
+	record := &dhtnode.AgentRecord{}
+	record.Address = address
+	record.PublicKey = pubKey
+	record.PeerPublicKey = peerPubKey
+	record.Signature = signature
+	registration := &dhtnode.Register{Record: record}
+	msg := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Register{registration}}
+	data, err := proto.Marshal(msg)
 
 	err = utils.WriteBytesConn(client.Conn, data)
 	ignore(err)
@@ -1512,11 +1536,24 @@ func SetupDelegateClientWithPoR(address string, host string, port uint16, pubkey
 	if err != nil {
 		return nil, nil, err
 	}
-	response := &dhtnode.RegisterResponse{}
+	response := &dhtnode.AcnMessage{}
 	err = proto.Unmarshal(data, response)
-	if response.Status != dhtnode.RegisterResponse_SUCCESS {
-		println("Registration error:", response.Status.String())
-		return nil, nil, errors.New(response.Status.String())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get Status message
+	var status *dhtnode.Status
+	switch pl := response.Payload.(type) {
+	case *dhtnode.AcnMessage_Status:
+		status = pl.Status
+	default:
+		return nil, nil, err
+	}
+
+	if status.Code != dhtnode.Status_SUCCESS {
+		println("Registration error:", status.String())
+		return nil, nil, errors.New(status.String())
 	}
 
 	go func() {

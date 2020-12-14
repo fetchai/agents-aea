@@ -481,31 +481,31 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 	}
 }
 
-func isValidProofOfRepresentation(registration *dhtnode.Register) (*dhtnode.RegisterResponse, error) {
+func isValidProofOfRepresentation(record *dhtnode.AgentRecord) (*dhtnode.Status, error) {
 
 	// check that agent address and public key match
-	addrFromPubKey, err := utils.FetchAIAddressFromPublicKey(registration.AgentPublicKey)
-	if err != nil || addrFromPubKey != registration.AgentAddress {
+	addrFromPubKey, err := utils.FetchAIAddressFromPublicKey(record.PublicKey)
+	if err != nil || addrFromPubKey != record.Address {
 		if err == nil {
 			err = errors.New("Agent address and public key don't match")
 		}
-		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_AGENT_ADDRESS}
+		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_INVALID_AGENT_ADDRESS}
 		return response, err
 	}
 
 	// check that signature is valid
-	ok, err := utils.VerifyFetchAISignatureBTC([]byte(registration.ConnPublicKey), registration.ProofOfRepresentation, registration.AgentPublicKey)
+	ok, err := utils.VerifyFetchAISignatureBTC([]byte(record.PeerPublicKey), record.Signature, record.PublicKey)
 	if !ok || err != nil {
 		if err == nil {
 			err = errors.New("Signature is not valid")
 		}
-		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_PROOF}
+		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_INVALID_PROOF}
 		return response, err
 
 	}
 
 	// PoR is valid
-	response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_SUCCESS}
+	response := &dhtnode.Status{Code: dhtnode.Status_SUCCESS}
 	return response, nil
 
 }
@@ -535,11 +535,11 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		return
 	}
 
-	registration := &dhtnode.Register{}
-	err = proto.Unmarshal(buf, registration)
+	msg := &dhtnode.AcnMessage{}
+	err = proto.Unmarshal(buf, msg)
 	if err != nil {
-		lerror(err).Msg("couldn't deserialize registration message")
-		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_GENERIC}
+		lerror(err).Msg("couldn't deserialize acn registration message")
+		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_GENERIC, Msgs: []string{err.Error()}}
 		buf, err = proto.Marshal(response)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
@@ -548,20 +548,37 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		return
 	}
 
-	linfo().Msgf("Received registration request %s", registration)
+	linfo().Msgf("Received registration request %s", msg)
 
-	addr := registration.AgentAddress
+	// Get Register message
+	var register *dhtnode.Register
+	switch pl := msg.Payload.(type) {
+	case *dhtnode.AcnMessage_Register:
+		register = pl.Register
+	default:
+		err = errors.New("Unexpected payload")
+		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_UNEXPECTED_PAYLOAD}
+		buf, err = proto.Marshal(response)
+		err = utils.WriteBytesConn(conn, buf)
+		ignore(err)
+
+		nbrConns.Dec()
+		return
+	}
+	record := register.Record
+	addr := record.Address
+
 	linfo().Msgf("connection from %s established for Address %s",
 		conn.RemoteAddr().String(), addr)
 
 	// check that connection public key match
-	connPubKey, err := utils.PubKeyFromFetchAIPublicKey(registration.ConnPublicKey)
+	connPubKey, err := utils.PubKeyFromFetchAIPublicKey(record.PeerPublicKey)
 	if err != nil || !connPubKey.Equals(dhtPeer.publicKey) {
 		if err == nil {
 			err = errors.New("Registration connection public key doesn't match peer key")
 		}
 		lerror(err).Msg("Couldn't verify agent address and public key association")
-		response := &dhtnode.RegisterResponse{Status: dhtnode.RegisterResponse_ERROR_INVALID_PUBLIC_KEY}
+		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_INVALID_PUBLIC_KEY}
 		buf, err = proto.Marshal(response)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
@@ -571,7 +588,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	}
 
 	// check if the PoR is valid
-	response, err := isValidProofOfRepresentation(registration)
+	response, err := isValidProofOfRepresentation(record)
 	if err != nil {
 		lerror(err).Msg("PoR is not valid")
 		buf, err = proto.Marshal(response)
@@ -582,7 +599,8 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		return
 	}
 
-	buf, err = proto.Marshal(response)
+	msg = &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{response}}
+	buf, err = proto.Marshal(msg)
 	err = utils.WriteBytesConn(conn, buf)
 	if err != nil {
 		nbrConns.Dec()
