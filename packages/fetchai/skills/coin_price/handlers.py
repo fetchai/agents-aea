@@ -234,8 +234,7 @@ class PrometheusHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        if self.context.prometheus_dialogues.enabled:
-            self.context.logger.info("setting up PrometheusHandler")
+        self.context.logger.info("setting up PrometheusHandler")
 
     def handle(self, message: Message) -> None:
         """

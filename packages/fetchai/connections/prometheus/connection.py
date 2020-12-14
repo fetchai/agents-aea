@@ -138,9 +138,9 @@ class PrometheusChannel:
         self.logger.debug("Processing message from {}: {}".format(sender, envelope))
         if envelope.protocol_id != PrometheusMessage.protocol_id:
             raise ValueError("This protocol is not valid for prometheus.")
-        await self.handle_prometheus_message(envelope)
+        await self._handle_prometheus_message(envelope)
 
-    async def handle_prometheus_message(self, envelope: Envelope) -> None:
+    async def _handle_prometheus_message(self, envelope: Envelope) -> None:
         """
         Handle messages to prometheus.
 
@@ -160,42 +160,14 @@ class PrometheusChannel:
             return
 
         if message.performative == PrometheusMessage.Performative.ADD_METRIC:
-
-            if message.title in self.metrics:
-                response_code = 409
-                response_msg = "Metric already exists."
-            else:
-                metric_type = getattr(prometheus_client, message.type, None)
-                if metric_type is None:
-                    response_code = 404
-                    response_msg = (
-                        f"{message.type} is not a recognized prometheus metric."
-                    )
-                else:
-                    self.metrics[message.title] = metric_type(
-                        message.title, message.description
-                    )
-                    response_code = 200
-                    response_msg = (
-                        f"New {message.type} successfully added: {message.title}."
-                    )
-
+            response = self._handle_add_metric(message)
         elif message.performative == PrometheusMessage.Performative.UPDATE_METRIC:
+            response = self._handle_update_metric(message)
+        else:  # pragma: nocover
+            self.logger.warning("Unrecognized performative for PrometheusMessage")
+            return
 
-            metric = message.title
-            if metric not in self.metrics:
-                response_code = 404
-                response_msg = f"Metric {metric} not found."
-            else:
-                update_func = getattr(self.metrics[metric], message.callable, None)
-                if update_func is None:
-                    response_code = 400
-                    response_msg = f"Update function {message.callable} not found for metric {metric}."
-                else:
-                    # Update the metric
-                    update_func(message.value)
-                    response_code = 200
-                    response_msg = f"Metric {metric} successfully updated."
+        response_code, response_msg = cast(Tuple[int, str], response)
 
         msg = dialogue.reply(
             performative=PrometheusMessage.Performative.RESPONSE,
@@ -212,6 +184,58 @@ class PrometheusChannel:
             context=context,
         )
         await self._send(envelope)
+
+    async def _handle_add_metric(self, message: PrometheusMessage) -> Tuple[int, str]:
+        """Handle add metric message.
+
+        :param message: the message to handle.
+        :return: the response code and response message.
+        """
+        if message.title in self.metrics:
+            response_code = 409
+            response_msg = "Metric already exists."
+        else:
+            metric_type = getattr(prometheus_client, message.type, None)
+            if metric_type is None:
+                response_code = 404
+                response_msg = f"{message.type} is not a recognized prometheus metric."
+            else:
+                self.metrics[message.title] = metric_type(
+                    message.title, message.description
+                )
+                response_code = 200
+                response_msg = (
+                    f"New {message.type} successfully added: {message.title}."
+                )
+
+        return response_code, response_msg
+
+    async def _handle_update_metric(
+        self, message: PrometheusMessage
+    ) -> Tuple[int, str]:
+        """Handle update metric message.
+
+        :param message: the message to handle.
+        :return: the response code and response message.
+        """
+        metric = message.title
+        if metric not in self.metrics:
+            response_code = 404
+            response_msg = f"Metric {metric} not found."
+        else:
+            update_func = getattr(self.metrics[metric], message.callable, None)
+            if update_func is None:
+                response_code = 400
+                response_msg = (
+                    f"Update function {message.callable} not found for metric {metric}."
+                )
+            else:
+                # Update the metric
+                update_func(message.value)
+                response_code = 200
+                response_msg = f"Metric {metric} successfully updated."
+
+        return response_code, response_msg
 
     async def _send(self, envelope: Envelope) -> None:
         """Send a message.
@@ -248,8 +272,6 @@ class PrometheusConnection(Connection):
         :param kwargs: the keyword arguments of the parent class.
         """
         super().__init__(**kwargs)
-
-        print(self.configuration)
 
         self.port = cast(int, self.configuration.config.get("port", DEFAULT_PORT))
         self.metrics = {}
