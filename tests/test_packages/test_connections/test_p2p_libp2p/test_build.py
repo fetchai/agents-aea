@@ -17,7 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """Test P2PLibp2p connection build."""
+import os
+import tempfile
 from io import StringIO
 from unittest import mock
 
@@ -26,30 +29,34 @@ import pytest
 from aea.exceptions import AEAException
 
 from packages.fetchai.connections.p2p_libp2p import check_dependencies
-from packages.fetchai.connections.p2p_libp2p.check_dependencies import main
+from packages.fetchai.connections.p2p_libp2p.check_dependencies import (
+    build_node,
+    check_versions,
+)
+from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_NODE_MODULE_NAME
 
 
-def test_build_script():
-    """Test the build script - positive case."""
+def test_check_versions():
+    """Test check_versions - positive case."""
     with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
-        main()
+        check_versions()
         stdout = mock_stdout.getvalue()
     assert "check 'go'>=1.14.0, found " in stdout
     assert "check 'gcc'>=7.5.0, found " in stdout
 
 
-def test_build_script_negative_binary_not_found():
-    """Test the build script - negative case, binary not found."""
+def test_check_versions_negative_binary_not_found():
+    """Test check_versions - negative case, binary not found."""
     with mock.patch("shutil.which", return_value=None):
         with pytest.raises(
             AEAException,
             match="'go' is required by the libp2p connection, but it is not installed, or it is not accessible from the system path.",
         ):
-            main()
+            check_versions()
 
 
-def test_build_script_negative_version_too_low():
-    """Test the build script - negative case, version too low."""
+def test_check_versions_negative_version_too_low():
+    """Test check_versions - negative case, version too low."""
     with mock.patch.object(
         check_dependencies, "get_version", return_value=(0, 0, 0),
     ):
@@ -57,14 +64,14 @@ def test_build_script_negative_version_too_low():
             AEAException,
             match="The installed version of 'go' is too low: expected at least 1.14.0; found 0.0.0.",
         ):
-            main()
+            check_versions()
 
 
-def test_build_script_negative_cannot_parse_version():
-    """Test the build script - negative case, cannot parse version."""
+def test_check_versions_negative_cannot_parse_version():
+    """Test the check_versions - negative case, cannot parse version."""
     with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
         with mock.patch("subprocess.check_output", return_value=b""):
-            main()
+            check_versions()
         stdout = mock_stdout.getvalue()
     assert (
         "Warning: cannot parse 'go' version from command: ['go', 'version']." in stdout
@@ -73,3 +80,10 @@ def test_build_script_negative_cannot_parse_version():
         "Warning: cannot parse 'gcc' version from command: ['gcc', '--version'].\n"
         in stdout
     )
+
+
+def test_build_node():
+    """Test build node function."""
+    with tempfile.TemporaryDirectory() as build_dir:
+        build_node(build_dir)
+        assert os.path.exists(os.path.join(build_dir, LIBP2P_NODE_MODULE_NAME))

@@ -788,19 +788,13 @@ class TestExtraDeps(AEATestCaseEmpty):
 class BaseTestBuildEntrypoint(AEATestCaseEmpty):
     """Test build entrypoint."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Set up the test."""
-        super().setup_class()
-        cls.builder = AEABuilder.from_aea_project(Path(cls._get_cwd()))
-        cls.component_id = "component_id"
+        self.builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        self.component_id = "component_id"
         # add project-wide build entrypoint
-        cls.script_path = Path("script.py")
-        cls.builder._build_entrypoint = str(cls.script_path)
-
-
-class TestBuildAEAEntrypointPositive(BaseTestBuildEntrypoint):
-    """Test build project-wide entrypoint, positive case."""
+        self.script_path = Path("script.py")
+        self.builder._build_entrypoint = str(self.script_path)
 
     def test_build_positive_aea(self):
         """Test build project-wide entrypoint, positive."""
@@ -810,11 +804,7 @@ class TestBuildAEAEntrypointPositive(BaseTestBuildEntrypoint):
                 self.builder.call_all_build_entrypoints()
 
         info_mock.assert_any_call("Building AEA package...")
-        info_mock.assert_any_call(RegexComparator("Running command '.*script.py'"))
-
-
-class TestBuildPackageEntrypointPositive(BaseTestBuildEntrypoint):
-    """Test build package entrypoint, positive case."""
+        info_mock.assert_any_call(RegexComparator("Running command '.*script.py .*'"))
 
     def test_build_positive_package(self):
         """Test build package entrypoint, positive."""
@@ -834,11 +824,7 @@ class TestBuildPackageEntrypointPositive(BaseTestBuildEntrypoint):
                     self.builder.call_all_build_entrypoints()
 
         info_mock.assert_any_call(f"Building package {self.component_id}...")
-        info_mock.assert_any_call(RegexComparator("Running command '.*script.py'"))
-
-
-class TestBuildNegativeSyntaxError(BaseTestBuildEntrypoint):
-    """Test build, negative due to a syntax error in the script."""
+        info_mock.assert_any_call(RegexComparator("Running command '.*script.py .*'"))
 
     def test_build_negative_syntax_error(self):
         """Test build, negative due to a syntax error in the script."""
@@ -847,17 +833,13 @@ class TestBuildNegativeSyntaxError(BaseTestBuildEntrypoint):
             self.script_path.write_text("syntax+.error")
             self.builder.call_all_build_entrypoints()
 
-
-class TestBuildNegativeSubprocessError(BaseTestBuildEntrypoint):
-    """Test build, negative due to script error at runtime."""
-
     @mock.patch(
         "aea.aea_builder.run_cli_command_subprocess",
         side_effect=Exception("some error."),
     )
     def test_build_negative_subprocess(self, *_mocks):
         """Test build, negative due to script error at runtime."""
-        match = f"An error occurred while running command '.*script.py': some error."
+        match = f"An error occurred while running command '.*script.py .+': some error."
         with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
             self.script_path.write_text("")
             self.builder.call_all_build_entrypoints()

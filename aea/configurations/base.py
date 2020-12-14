@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
-
 import functools
 import pprint
 import re
@@ -1110,6 +1109,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
     ):
         """Set component configuration."""
@@ -1124,6 +1124,17 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             build_entrypoint,
         )
         self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
+        self._build_directory = build_directory
+
+    @property
+    def build_directory(self) -> Optional[str]:
+        """Get the component type."""
+        return self._build_directory
+
+    @build_directory.setter
+    def build_directory(self, value: Optional[str]) -> None:
+        """Get the component type."""
+        self._build_directory = value
 
     @property
     def component_type(self) -> ComponentType:
@@ -1206,6 +1217,7 @@ class ConnectionConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
         connections: Optional[Set[PublicId]] = None,
@@ -1247,6 +1259,7 @@ class ConnectionConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.class_name = class_name
@@ -1376,6 +1389,7 @@ class ProtocolConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
@@ -1390,6 +1404,7 @@ class ProtocolConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -1486,6 +1501,7 @@ class SkillConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         connections: Optional[Set[PublicId]] = None,
         protocols: Optional[Set[PublicId]] = None,
         contracts: Optional[Set[PublicId]] = None,
@@ -1504,6 +1520,7 @@ class SkillConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.connections = connections if connections is not None else set()
@@ -2201,6 +2218,7 @@ class ContractConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
@@ -2216,6 +2234,7 @@ class ContractConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}

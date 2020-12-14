@@ -49,6 +49,7 @@ class AgentContext:
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
         decision_maker_address: Address,
+        build_dir: str = ".build",
         storage_callable: Callable[[], Optional[Storage]] = lambda: None,
         **kwargs
     ):
@@ -85,6 +86,12 @@ class AgentContext:
         self._default_routing = default_routing
         self._storage_callable = storage_callable
         self._namespace = SimpleNamespace(**kwargs)
+        self._build_dir = build_dir
+
+    @property
+    def build_dir(self) -> str:
+        """Return storage instance if enabled in AEA."""
+        return self._build_dir
 
     @property
     def storage(self) -> Optional[Storage]:

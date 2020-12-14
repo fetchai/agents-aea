@@ -435,7 +435,6 @@ class BaseSkillTestCase:
         _skill_config_overrides = cast(
             Dict[str, Any], kwargs.pop("config_overrides", dict())
         )
-
         agent_context = AgentContext(
             identity=identity,
             connection_status=cls._multiplexer.connection_status,

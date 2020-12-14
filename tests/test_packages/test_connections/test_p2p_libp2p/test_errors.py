@@ -16,10 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains Negative tests for Libp2p connection."""
-
-import asyncio
 import os
 import shutil
 import tempfile
@@ -32,7 +29,6 @@ from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
-    AwaitableProc,
     LIBP2P_NODE_MODULE_NAME,
     P2PLibp2pConnection,
     _golang_module_build_async,
@@ -210,13 +206,6 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
-
-def test_libp2pconnection_awaitable_proc_cancelled():
-    """Test awaitable proc cancelled."""
-    proc = AwaitableProc(["sleep", "100"], shell=False)
-    proc_task = asyncio.ensure_future(proc.start())
-    proc_task.cancel()
 
 
 def test_libp2pconnection_mixed_ip_address():

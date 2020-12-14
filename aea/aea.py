@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import datetime
 from asyncio import AbstractEventLoop
@@ -65,6 +64,8 @@ class AEA(Agent):
         "sync": SyncAgentLoop,
     }
     DEFAULT_RUN_LOOP: str = "async"
+
+    DEFAULT_BUILD_DIR_NAME = ".build"
 
     def __init__(
         self,
@@ -173,6 +174,7 @@ class AEA(Agent):
             search_service_address,
             decision_maker_handler.self_address,
             storage_callable=lambda: self._runtime.storage,
+            build_dir=self.get_build_dir(),
             **kwargs,
         )
         self._execution_timeout = execution_timeout
@@ -183,6 +185,11 @@ class AEA(Agent):
         )
 
         self._setup_loggers()
+
+    @classmethod
+    def get_build_dir(cls) -> str:
+        """Get agent build directory."""
+        return cls.DEFAULT_BUILD_DIR_NAME
 
     @property
     def context(self) -> AgentContext:

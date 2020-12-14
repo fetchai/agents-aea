@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the p2p libp2p connection."""
 
 import asyncio
@@ -38,8 +37,7 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
-from aea.exceptions import AEAException
-from aea.helpers.async_utils import AwaitableProc
+from aea.exceptions import enforce
 from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
@@ -87,39 +85,34 @@ def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
 
 
 async def _golang_module_build_async(
-    path: str,
-    log_file_desc: IO[str],
-    timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
-    logger: logging.Logger = _default_logger,
-) -> int:
+    path: str, timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
+) -> Optional[str]:
     """
     Builds go module located at `path`, downloads necessary dependencies
 
-    :return: build command returncode
+    :return: str with logs or error description if happens
     """
-    cmd = ["go", "build"]
-
-    env = os.environ
-
-    proc = AwaitableProc(
-        cmd, env=env, cwd=path, stdout=log_file_desc, stderr=log_file_desc, shell=False,
+    proc = await asyncio.create_subprocess_exec(
+        "go",
+        "build",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+        cwd=path,
+        env=os.environ,
     )
 
-    golang_build = asyncio.ensure_future(proc.start())
-
     try:
-        returncode = await asyncio.wait_for(golang_build, timeout)
-    except asyncio.TimeoutError:
-        e = Exception(
-            "Failed to download libp2p dependencies within timeout({})".format(
-                LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT
-            )
+        stdout, _ = await asyncio.wait_for(  # type: ignore
+            proc.communicate(), timeout=timeout  # type: ignore
         )
-        logger.error(e)
-        golang_build.cancel()
-        raise e
+    except asyncio.TimeoutError:
+        proc.terminate()
+        await proc.wait()
+        return "terminated by timeout"
 
-    return returncode
+    if proc.returncode != 0:
+        return stdout.decode()  # type: ignore
+    return None
 
 
 def _golang_module_run(
@@ -294,25 +287,23 @@ class Libp2pNode:
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
-        # open log file
         self._log_file_desc = open(self.log_file, "a", 1)
+        self._log_file_desc.write("test")
+        self._log_file_desc.flush()
 
         # build the node
-        self.logger.info("Downloading golang dependencies. This may take a while...")
-        returncode = await _golang_module_build_async(
-            self.source, self._log_file_desc, logger=self.logger
+        """self.logger.info("Downloading golang dependencies. This may take a while...")
+        err_string = await _golang_module_build_async(
+            self.source
         )
-        node_log = ""
-        with open(self.log_file, "r") as f:
-            node_log = f.read()
-        if returncode != 0:
+        if err_string:
             raise Exception(
-                "Error while downloading golang dependencies and building it: {}\n{}".format(
-                    returncode, node_log
+                "Error while downloading golang dependencies and building it: {}".format(
+                    err_string
                 )
             )
         self.logger.info("Finished downloading golang dependencies.")
-
+        """
         # setup fifos
         self.pipe = make_ipc_channel(logger=self.logger)
 
@@ -509,7 +500,6 @@ class P2PLibp2pConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize a p2p libp2p connection."""
 
-        self._check_go_installed()
         # we put it here so below we can access the address
         super().__init__(**kwargs)
         ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
@@ -596,14 +586,26 @@ class P2PLibp2pConnection(Connection):
 
         # libp2p local node
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
+        enforce(
+            self.configuration.build_directory,
+            "Connection Configuration build directory is not set!",
+        )
+        libp2p_node_module_path = os.path.join(
+            self.configuration.build_directory, LIBP2P_NODE_MODULE_NAME
+        )
+        enforce(
+            os.path.exists(libp2p_node_module_path),
+            f"Module {LIBP2P_NODE_MODULE_NAME} does not present in {self.configuration.build_directory}, please call `aea build` command",
+        )
         temp_dir = tempfile.mkdtemp()
         self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
-        shutil.copytree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
+
+        shutil.copy(libp2p_node_module_path, self.libp2p_workdir)
 
         self.node = Libp2pNode(
             self.address,
             key,
-            self.libp2p_workdir,
+            self.configuration.build_directory,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
@@ -722,14 +724,3 @@ class P2PLibp2pConnection(Connection):
             self._in_queue.put_nowait(data)
             if data is None:
                 break
-
-    @staticmethod
-    def _check_go_installed() -> None:
-        """Checks if go is installed. Sys.exits if not"""
-        res = shutil.which("go")
-        if res is None:
-            raise AEAException(  # pragma: nocover
-                "Please install go before running the `{} connection. Go is available for download here: https://golang.org/doc/install".format(
-                    PUBLIC_ID
-                )
-            )

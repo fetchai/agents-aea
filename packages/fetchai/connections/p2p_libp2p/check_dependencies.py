@@ -19,11 +19,34 @@
 # ------------------------------------------------------------------------------
 
 """Check that the dependencies 'gcc' and 'go' are installed in the system."""
+import asyncio
 import re
 import shutil
 import subprocess  # nosec
+import sys
+from distutils.dir_util import copy_tree
 from itertools import islice
 from typing import Any, Iterable, List, Pattern, Tuple
+
+from aea.helpers.base import ensure_dir
+
+
+try:
+    # flake8: noqa
+    # pylint: disable=unused-import,ungrouped-imports
+    from .connection import (  # type: ignore
+        LIBP2P_NODE_MODULE,
+        LIBP2P_NODE_MODULE_NAME,
+        _golang_module_build_async,
+    )
+except ImportError:
+    # flake8: noqa
+    # pylint: disable=unused-import,ungrouped-imports
+    from connection import (  # type: ignore
+        LIBP2P_NODE_MODULE,
+        LIBP2P_NODE_MODULE_NAME,
+        _golang_module_build_async,
+    )
 
 from aea.exceptions import AEAException
 
@@ -128,8 +151,8 @@ def check_binary(
     print_ok_message(binary_name, actual_version, version_lower_bound)
 
 
-def main():
-    """The main entrypoint of the script."""
+def check_versions():
+    """Check versions."""
     check_binary(
         "go",
         ["version"],
@@ -139,9 +162,28 @@ def main():
     check_binary(
         "gcc",
         ["--version"],
-        re.compile(r"gcc.*([0-9]+)\.([0-9]+)\.([0-9]+)"),
+        re.compile(r"gcc.* ([0-9]+)\.([0-9]+)\.([0-9]+)"),
         MINIMUM_GCC_VERSION,
     )
+
+
+def main():
+    """The main entrypoint of the script."""
+    if len(sys.argv) < 2:
+        raise ValueError("Please provide build directory path as an argument!")
+    build_dir = sys.argv[1]
+    ensure_dir(build_dir)
+    check_versions()
+    build_node(build_dir)
+
+
+def build_node(build_dir: str) -> None:
+    """Build node placed inside build_dir."""
+    copy_tree(LIBP2P_NODE_MODULE, build_dir)
+    loop = asyncio.get_event_loop()
+    err_str = loop.run_until_complete(_golang_module_build_async(build_dir))
+    if err_str:
+        raise Exception(f"Node build failed: {err_str}")
 
 
 if __name__ == "__main__":
