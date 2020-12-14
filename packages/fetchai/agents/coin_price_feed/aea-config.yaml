@@ -21,11 +21,11 @@ protocols:
 skills:
 - fetchai/coin_price:0.1.0
 - fetchai/error:0.9.0
-default_connection: fetchai/http_server:latest
+default_connection: fetchai/http_server:0.13.0
 default_ledger: fetchai
 default_routing:
-  fetchai/http:latest: fetchai/http_client:latest
-  fetchai/prometheus:latest: fetchai/prometheus:latest
+  fetchai/http:0.9.0: fetchai/http_client:0.14.0
+  fetchai/prometheus:0.1.0: fetchai/prometheus:0.1.0
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
