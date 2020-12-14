@@ -1278,7 +1278,7 @@ class TestValidate(TestCase):
         assert invalid_result_2 is False
         assert (
             invalid_msg_2
-            == "Performative 'perm_5' specified in \"reply\" is not defined in the protocol's speech-acts."
+            == "Performative 'perm_5' in the list of replies for 'perm_4' is not defined in speech-acts."
         )
 
     def test_validate_termination(self):
@@ -1317,19 +1317,19 @@ class TestValidate(TestCase):
 
     def test_validate_roles(self):
         """Test for the '_validate_roles' method."""
-        valid_roles_1 = {"role_1", "role_2"}
+        valid_roles_1 = {"role_1": None, "role_2": None}
         valid_result_1, valid_msg_1 = _validate_roles(valid_roles_1)
         assert valid_result_1 is True
         assert valid_msg_1 == "Dialogue roles are valid."
 
-        valid_roles_2 = {"role_1"}
+        valid_roles_2 = {"role_1": None}
         valid_result_2, valid_msg_2 = _validate_roles(valid_roles_2)
         assert valid_result_2 is True
         assert valid_msg_2 == "Dialogue roles are valid."
 
         ###################################################
 
-        invalid_roles_1 = set()
+        invalid_roles_1 = dict()
         invalid_result_1, invalid_msg_1 = _validate_roles(invalid_roles_1)
         assert invalid_result_1 is False
         assert (
@@ -1337,7 +1337,7 @@ class TestValidate(TestCase):
             == "There must be either 1 or 2 roles defined in this dialogue. Found 0"
         )
 
-        invalid_roles_2 = {"role_1", "role_2", "role_3"}
+        invalid_roles_2 = {"role_1": None, "role_2": None, "role_3": None}
         invalid_result_2, invalid_msg_2 = _validate_roles(invalid_roles_2)
         assert invalid_result_2 is False
         assert (
@@ -1345,7 +1345,7 @@ class TestValidate(TestCase):
             == "There must be either 1 or 2 roles defined in this dialogue. Found 3"
         )
 
-        invalid_roles_3 = {"_agent_"}
+        invalid_roles_3 = {"_agent_": None}
         invalid_result_3, invalid_msg_3 = _validate_roles(invalid_roles_3)
         assert invalid_result_3 is False
         assert (
@@ -1410,6 +1410,7 @@ class TestValidate(TestCase):
             ],
             "roles": {"role_1": None, "role_2": None},
             "end_states": ["end_state_1", "end_state_2", "end_state_3"],
+            "keep_terminal_state_dialogues": True
         }
         valid_performatives_set_1 = {
             "performative_ct",

@@ -19,7 +19,7 @@
 """This module validates a protocol specification."""
 
 import re
-from typing import Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolSpecification
 from aea.protocols.generator.common import (
@@ -691,7 +691,7 @@ def _validate_termination(
     return True, "Terminal messages are valid."
 
 
-def _validate_roles(roles: Set[str]) -> Tuple[bool, str]:
+def _validate_roles(roles: Dict[str, Any]) -> Tuple[bool, str]:
     """
     Evaluate whether roles field in a protocol specification is valid.
 
