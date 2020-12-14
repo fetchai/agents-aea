@@ -186,7 +186,7 @@ class Game(Model):
         )  # type: Optional[str]
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
-        if "search_value" not in self._search_query:
+        if "search_value" not in self._search_query:  # pragma: nocover
             raise ValueError("search_value not found in search_query")
         self._expected_version_id = self._search_query["search_value"]
         location = kwargs.pop("location", DEFAULT_LOCATION)

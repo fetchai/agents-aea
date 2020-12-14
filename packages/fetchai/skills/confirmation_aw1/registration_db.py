@@ -98,9 +98,9 @@ class RegistrationDB(Model):
             )
         return result[0][0]
 
-    def get_ethereum_address(  # pragma: no cover
+    def get_ethereum_address(
         self, address: str, developer_handle: str
-    ) -> str:
+    ) -> str:  # pragma: no cover
         """Get ethereum address relating to an address (hacky for backwards compatibility)."""
         command = "SELECT ethereum_address FROM registered_table WHERE address=?"
         variables = (address,)
