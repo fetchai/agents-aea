@@ -11,7 +11,7 @@ fingerprint:
   __init__.py: QmTQX82uQ5ih6Zpy5XD3rG9a3GfJM8UMriKJgEKTATiWZU
   behaviours.py: QmX3UbuLohnPSLM2W6LrWcZyo4zXCr1YN5Bznu61v27SZC
   dialogues.py: QmNpUa8xfobabDQBRGqHU136FX7w3fxTrrkporNq4VH7Lg
-  game.py: QmPaTWuT7SMX6wsgfyUSYbrpHZzvkKKhmTwPpWyiVycCBF
+  game.py: QmNbV6sSACCB6sDM3Ju1jL3z3GxjjXm59eZgKubxKCEmo5
   handlers.py: QmduWXtYNBmSrSXyskLmAb5jW9GmDWTZ3f7X9HwPN1F8MB
 fingerprint_ignore_patterns: []
 connections: []
@@ -41,7 +41,6 @@ handlers:
 models:
   game:
     args:
-      expected_version_id: v1
       is_using_contract: false
       location:
         latitude: 51.5194

@@ -148,6 +148,39 @@ class RegistrationDB(Model):
         )
         return False
 
+    def has_completed_two_trades(self, address: str) -> bool:
+        """
+        Check if address has completed two trades.
+
+        :return: bool
+        """
+        record = self.get_trade_table(address)
+        if record is None:
+            return False
+        first_trade: Optional[str] = record[1]
+        second_trade: Optional[str] = record[2]
+        first_trade_present: bool = first_trade is not None
+        second_trade_present: bool = second_trade is not None
+        return first_trade_present and second_trade_present
+
+    def completed_two_trades(self) -> List[Tuple[str, str, str]]:
+        """
+        Get the address, ethereum_address and developer handle combos which completed two trades.
+
+        :return: (address, ethereum_address, developer_handle)
+        """
+        command = "SELECT * FROM registered_table"
+        variables = ()
+        result = self._execute_single_sql(command, variables)
+        completed: List[Tuple[str, str, str]] = []
+        for row in result:
+            address = row[0]
+            ethereum_address = row[1]
+            developer_handle = row[4]
+            if self.has_completed_two_trades(address):
+                completed.append((address, ethereum_address, developer_handle))
+        return completed
+
     def _execute_single_sql(
         self,
         command: str,
