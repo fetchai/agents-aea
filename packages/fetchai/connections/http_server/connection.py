@@ -27,7 +27,7 @@ from asyncio.futures import Future
 from concurrent.futures._base import CancelledError as FuturesCancelledError
 from traceback import format_exc
 from typing import Dict, Optional, Set, cast
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import parse_qs, urlparse
 
 from aiohttp import web
 from aiohttp.web_request import BaseRequest
