@@ -366,7 +366,7 @@ func TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
 */
 
 // TestRoutingDHTClientToDHTPeer dht client to its bootstrap peer
-func TestRoutingDHTClientToDHTPeer(t *testing.T) {
+func TestRoutingDHTClientToDHTPeerX(t *testing.T) {
 	peer, peerCleanup, err := SetupLocalDHTPeer(
 		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},

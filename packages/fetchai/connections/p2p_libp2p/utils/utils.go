@@ -117,14 +117,14 @@ func BootstrapConnect(ctx context.Context, ph host.Host, kaddht *dht.IpfsDHT, pe
 		wg.Add(1)
 		go func(p peer.AddrInfo) {
 			defer wg.Done()
-			defer logger.Debug().Msgf("%s bootstrapDial %s %s", ctx, ph.ID(), p.ID)
+			//defer logger.Debug().Msgf("%s bootstrapDial %s %s", ctx, ph.ID(), p.ID)
 			logger.Debug().Msgf("%s bootstrapping to %s", ph.ID(), p.ID)
 
 			ph.Peerstore().AddAddrs(p.ID, p.Addrs, peerstore.PermanentAddrTTL)
 			if err := ph.Connect(ctx, p); err != nil {
-				logger.Error().
-					Str("err", err.Error()).
-					Msgf("failed to bootstrap with %v", p.ID)
+				//logger.Error().
+				//	Str("err", err.Error()).
+				//	Msgf("failed to bootstrap with %v", p.ID)
 				errs <- err
 				return
 			}
