@@ -177,11 +177,7 @@ class Request(OpenAPIRequest):
 
         :return: envelope
         """
-        url = (
-            self.full_url_pattern
-            if self.parameters.query == {}
-            else self.full_url_pattern + "?" + urlencode(self.parameters.query)
-        )
+        url = self.full_url_pattern
         uri = URI(self.full_url_pattern)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
         http_message, http_dialogue = dialogues.create(
