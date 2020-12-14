@@ -29,6 +29,7 @@ from aea.helpers.search.models import (
     Attribute,
     AttributeInconsistencyException,
     Constraint,
+    ConstraintExpr,
     ConstraintType,
     ConstraintTypes,
     DataModel,
@@ -43,7 +44,7 @@ from aea.helpers.search.models import (
 
 def test_location():
     """Test Location type."""
-    location = Location(1.1, 2.2)
+    location = Location(latitude=1.1, longitude=2.2)
     assert location is not None
 
     assert location.tuple == (location.latitude, location.longitude)
@@ -54,6 +55,8 @@ def test_location():
     location_pb = location.encode()
     actual_location = Location.decode(location_pb)
     assert actual_location == location
+    assert location.latitude == actual_location.latitude
+    assert location.longitude == actual_location.longitude
 
 
 def test_attribute():
@@ -153,6 +156,7 @@ def test_description():
             values={"test": object()},
             data_model=generate_data_model("test", {"test": object()}),
         )
+
     assert re.match(r"Description\(values=.*data_model=.*", str(description))
 
     description_pb = description._encode()
@@ -167,67 +171,164 @@ def test_description():
 
 def test_constraint_type():
     """Test ConstraintType."""
-    for cons_type in [
-        ConstraintTypes.EQUAL,
-        ConstraintTypes.NOT_EQUAL,
+    constraint_type_values = {
+        "int": 12,
+        "bool": True,
+        "float": 10.4,
+        "str": "some_string",
+        "location": Location(1.1, 2.2),
+    }
+    constraint_type_types = {
+        "int": int,
+        "bool": bool,
+        "float": float,
+        "str": str,
+        "location": Location,
+    }
+    to_check = {
+        "int": 13,
+        "bool": False,
+        "float": 9.3,
+        "str": "some_other_string",
+        "location": Location(1.2, 2.3),
+    }
+
+    # = and !=
+    for constraint_types_type in [ConstraintTypes.EQUAL, ConstraintTypes.NOT_EQUAL]:
+        for allowed_type in ["int", "bool", "float", "str"]:
+            constraint_type = ConstraintType(
+                constraint_types_type, constraint_type_values[allowed_type]
+            )
+            constraint_type.is_valid(
+                Attribute("test", constraint_type_types[allowed_type], True)
+            )
+            constraint_type.check(to_check[allowed_type])
+            assert constraint_type == ConstraintType(
+                constraint_types_type, constraint_type_values[allowed_type]
+            )
+            assert (
+                str(constraint_type)
+                == f"ConstraintType(value={constraint_type_values[allowed_type]},type={constraint_types_type})"
+            )
+
+            constraint_type_pb = constraint_type.encode()
+            actual_constraint_type = ConstraintType.decode(
+                constraint_type_pb, "relation"
+            )
+            assert actual_constraint_type == constraint_type
+
+    # < and <= and > and >=
+    for constraint_types_type in [
         ConstraintTypes.LESS_THAN,
         ConstraintTypes.LESS_THAN_EQ,
         ConstraintTypes.GREATER_THAN,
         ConstraintTypes.GREATER_THAN_EQ,
     ]:
-        constraint_type = ConstraintType(cons_type, 12)
-        constraint_type.is_valid(Attribute("test", int, True))
-        constraint_type.check(13)
-        assert constraint_type == ConstraintType(cons_type, 12)
-        assert str(constraint_type) == f"ConstraintType(value={12},type={cons_type})"
+        for allowed_type in ["int", "float", "str"]:
+            constraint_type = ConstraintType(
+                constraint_types_type, constraint_type_values[allowed_type]
+            )
+            constraint_type.is_valid(
+                Attribute("test", constraint_type_types[allowed_type], True)
+            )
+            constraint_type.check(to_check[allowed_type])
+            assert constraint_type == ConstraintType(
+                constraint_types_type, constraint_type_values[allowed_type]
+            )
+            assert (
+                str(constraint_type)
+                == f"ConstraintType(value={constraint_type_values[allowed_type]},type={constraint_types_type})"
+            )
 
+            constraint_type_pb = constraint_type.encode()
+            actual_constraint_type = ConstraintType.decode(
+                constraint_type_pb, "relation"
+            )
+            assert actual_constraint_type == constraint_type
+
+    # within
+    constraint_type_values = {
+        "int": (1, 2),
+        "float": (2.4, 5.4),
+        "str": ("str_1", "str_2"),
+        "location": (Location(1.1, 2.2), Location(1.2, 5.2)),
+    }
+    constraint_type_types = {
+        "int": int,
+        "float": float,
+        "str": str,
+        "location": Location,
+    }
+    to_check = {
+        "int": 13,
+        "float": 9.3,
+        "str": "some_other_string",
+        "location": Location(1.2, 2.3),
+    }
+
+    for range_constraint_type in ["int", "float", "str"]:  # location is not working
+        constraint_type = ConstraintType(
+            ConstraintTypes.WITHIN, constraint_type_values[range_constraint_type]
+        )
+        constraint_type.is_valid(
+            Attribute("test", constraint_type_types[range_constraint_type], True)
+        )
+        constraint_type.check(to_check[range_constraint_type])
+        assert constraint_type == ConstraintType(
+            ConstraintTypes.WITHIN, constraint_type_values[range_constraint_type]
+        )
+        assert (
+            str(constraint_type)
+            == f"ConstraintType(value={constraint_type_values[range_constraint_type]},type=within)"
+        )
         constraint_type_pb = constraint_type.encode()
-        actual_constraint_type = ConstraintType.decode(constraint_type_pb, "relation")
+        actual_constraint_type = ConstraintType.decode(constraint_type_pb, "range")
         assert actual_constraint_type == constraint_type
 
-    constraint_range = (1, 2)
-    constraint_type_within = ConstraintType(ConstraintTypes.WITHIN, constraint_range)
-    constraint_type_within.is_valid(Attribute("test", int, True))
-    constraint_type_within.check(13)
-    assert constraint_type_within == ConstraintType(
-        ConstraintTypes.WITHIN, constraint_range
-    )
-    assert (
-        str(constraint_type_within)
-        == f"ConstraintType(value={constraint_range},type=within)"
-    )
-    constraint_type_within_pb = constraint_type_within.encode()
-    actual_constraint_type_within = ConstraintType.decode(
-        constraint_type_within_pb, "range"
-    )
-    assert actual_constraint_type_within == constraint_type_within
+    # in and not_in
+    constraint_type_values = {
+        "int": (1, 2),
+        "bool": (True, False),
+        "float": (2.4, 5.4),
+        "str": ("str_1", "str_2"),
+        "location": (Location(1.1, 2.2), Location(1.2, 5.2)),
+    }
+    constraint_type_types = {
+        "int": int,
+        "bool": bool,
+        "float": float,
+        "str": str,
+        "location": Location,
+    }
+    to_check = {
+        "int": 13,
+        "bool": False,
+        "float": 9.3,
+        "str": "some_other_string",
+        "location": Location(1.2, 2.3),
+    }
 
-    constraint_set = (1, 2)
-    constraint_type_in = ConstraintType(ConstraintTypes.IN, constraint_set)
-    constraint_type_in.is_valid(Attribute("test", int, True))
-    constraint_type_in.check(13)
-    assert constraint_type_in == ConstraintType(ConstraintTypes.IN, constraint_set)
-    assert str(constraint_type_in) == f"ConstraintType(value={constraint_set},type=in)"
-    constraint_type_in_pb = constraint_type_in.encode()
-    actual_constraint_type_in = ConstraintType.decode(constraint_type_in_pb, "set")
-    assert actual_constraint_type_in == constraint_type_in
+    for constraint_types_type in [ConstraintTypes.IN, ConstraintTypes.NOT_IN]:
+        for constraint_set in ["int", "bool", "float", "str", "location"]:
+            constraint_type = ConstraintType(
+                constraint_types_type, constraint_type_values[constraint_set]
+            )
+            constraint_type.is_valid(
+                Attribute("test", constraint_type_types[constraint_set], True)
+            )
+            constraint_type.check(to_check[constraint_set])
+            assert constraint_type == ConstraintType(
+                constraint_types_type, constraint_type_values[constraint_set]
+            )
+            assert (
+                str(constraint_type)
+                == f"ConstraintType(value={constraint_type_values[constraint_set]},type={constraint_types_type})"
+            )
+            constraint_type_pb = constraint_type.encode()
+            actual_constraint_type = ConstraintType.decode(constraint_type_pb, "set")
+            assert actual_constraint_type == constraint_type
 
-    constraint_type_not_in = ConstraintType(ConstraintTypes.NOT_IN, constraint_set)
-    constraint_type_not_in.is_valid(Attribute("test", int, True))
-    constraint_type_not_in.check(13)
-    assert constraint_type_not_in == ConstraintType(
-        ConstraintTypes.NOT_IN, constraint_set
-    )
-    assert (
-        str(constraint_type_not_in)
-        == f"ConstraintType(value={constraint_set},type=not_in)"
-    )
-    constraint_type_not_in_pb = constraint_type_not_in.encode()
-    actual_constraint_type_not_in = ConstraintType.decode(
-        constraint_type_not_in_pb, "set"
-    )
-    assert actual_constraint_type_not_in == constraint_type_not_in
-
+    # distance
     constraint_location = (Location(1.1, 2.2), 2.2)
     constraint_type_distance = ConstraintType(
         ConstraintTypes.DISTANCE, constraint_location
@@ -243,6 +344,7 @@ def test_constraint_type():
     )
     assert actual_constraint_type_distance == constraint_type_distance
 
+    # failures
     with pytest.raises(ValueError):
         ConstraintType("something", [Location(1.1, 2.2), 2.2]).is_valid(
             Attribute("test", int, True)
@@ -281,13 +383,89 @@ def test_constraint_type():
     ):
         ConstraintType(ConstraintTypes.DISTANCE, list_location)
 
+    incorrect_category = "some_incorrect_category"
+    with pytest.raises(
+        ValueError,
+        match=r"Incorrect category. Expected either of .* Found some_incorrect_category.",
+    ):
+        constraint_type_distance_pb = constraint_type_distance.encode()
+        ConstraintType.decode(constraint_type_distance_pb, incorrect_category)
 
-def test_constraints_expressions():
-    """Test constraint expressions: And, Or, Not."""
+
+def test_constraints_expression():
+    """Test constraint expressions: And, Or, Not, Constraint."""
     and_expression = And(
         [
-            Constraint("number", ConstraintType(ConstraintTypes.GREATER_THAN, 15)),
-            Constraint("number", ConstraintType(ConstraintTypes.LESS_THAN, 10)),
+            Constraint("number", ConstraintType(ConstraintTypes.LESS_THAN, 15)),
+            Constraint("number", ConstraintType(ConstraintTypes.GREATER_THAN, 10)),
+        ]
+    )
+    and_expression.check_validity()
+    assert and_expression.check(Description({"number": 12}))
+    assert and_expression.is_valid(
+        DataModel("some_name", [Attribute("number", int, True)])
+    )
+    and_expression_pb = ConstraintExpr._encode(and_expression)
+    actual_and_expression = ConstraintExpr._decode(and_expression_pb)
+    assert actual_and_expression == and_expression
+
+    or_expression = Or(
+        [
+            Constraint("number", ConstraintType(ConstraintTypes.EQUAL, 12)),
+            Constraint("number", ConstraintType(ConstraintTypes.EQUAL, 13)),
+        ]
+    )
+    or_expression.check_validity()
+    assert or_expression.check(Description({"number": 12}))
+    assert or_expression.is_valid(
+        DataModel("some_name", [Attribute("number", int, True)])
+    )
+    or_expression_pb = ConstraintExpr._encode(or_expression)
+    actual_or_expression = ConstraintExpr._decode(or_expression_pb)
+    assert actual_or_expression == or_expression
+
+    not_expression = Not(
+        And(
+            [
+                Constraint("number", ConstraintType(ConstraintTypes.EQUAL, 12)),
+                Constraint("number", ConstraintType(ConstraintTypes.EQUAL, 12)),
+            ]
+        )
+    )
+    not_expression.check_validity()
+    assert not_expression.check(Description({"number": 13}))
+    assert not_expression.is_valid(
+        DataModel("some_name", [Attribute("number", int, True)])
+    )
+    not_expression_pb = ConstraintExpr._encode(not_expression)
+    actual_not_expression = ConstraintExpr._decode(not_expression_pb)
+    assert actual_not_expression == not_expression
+
+    # constraint
+    constraint_expression = Constraint("author", ConstraintType("==", "Stephen King"))
+    constraint_expression.check_validity()
+    assert constraint_expression.check(Description({"author": "Stephen King"}))
+    assert constraint_expression.is_valid(
+        DataModel("some_name", [Attribute("author", str, True)])
+    )
+    constraint_expression_pb = ConstraintExpr._encode(constraint_expression)
+    actual_constraint_expression = ConstraintExpr._decode(constraint_expression_pb)
+    assert actual_constraint_expression == constraint_expression
+
+    incorrect_expression = Location(1.1, 2.2)
+    with pytest.raises(
+        ValueError,
+        match=f"Invalid expression type. Expected either of 'And', 'Or', 'Not', 'Constraint'. Found {type(incorrect_expression)}.",
+    ):
+        ConstraintExpr._encode(incorrect_expression)
+
+
+def test_constraints_and():
+    """Test And."""
+    and_expression = And(
+        [
+            Constraint("number", ConstraintType(ConstraintTypes.LESS_THAN, 15)),
+            Constraint("number", ConstraintType(ConstraintTypes.GREATER_THAN, 10)),
         ]
     )
     and_expression.check_validity()
@@ -299,6 +477,9 @@ def test_constraints_expressions():
     actual_and_expression = And.decode(and_expression_pb)
     assert actual_and_expression == and_expression
 
+
+def test_constraints_or():
+    """Test Or."""
     or_expression = Or(
         [
             Constraint("number", ConstraintType(ConstraintTypes.EQUAL, 12)),
@@ -314,6 +495,9 @@ def test_constraints_expressions():
     actual_or_expression = Or.decode(or_expression_pb)
     assert actual_or_expression == or_expression
 
+
+def test_constraints_not():
+    """Test Not."""
     not_expression = Not(
         And(
             [
@@ -335,9 +519,19 @@ def test_constraints_expressions():
 def test_constraint():
     """Test Constraint."""
     c1 = Constraint("author", ConstraintType("==", "Stephen King"))
-    c2 = Constraint("author", ConstraintType("in", ("Stephen King",)))
-    book_1 = Description({"author": "Stephen King", "year": 1991, "genre": "horror"})
-    book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
+    c2 = Constraint("year", ConstraintType("within", (2000, 2010)))
+    c3 = Constraint("author", ConstraintType("in", ("Stephen King", "J. K. Rowling")))
+    c4 = Constraint(
+        "author", ConstraintType("not_in", ("Stephen King", "J. K. Rowling"))
+    )
+    c5 = Constraint("address", ConstraintType("distance", (Location(1.1, 2.2), 2.2)))
+
+    book_1 = Description(
+        {"author": "Stephen King", "year": 2005, "address": Location(1.1, 2.2)}
+    )
+    book_2 = Description(
+        {"author": "George Orwell", "year": 1948, "address": Location(1.1, 2.2)}
+    )
 
     assert c1.check(book_1)
     assert not c1.check(book_2)
@@ -360,7 +554,7 @@ def test_constraint():
     )
     assert (
         str(c2)
-        == f"Constraint(attribute_name=author,constraint_type={c2.constraint_type})"
+        == f"Constraint(attribute_name=year,constraint_type={c2.constraint_type})"
     )
 
     c1_pb = c1.encode()
@@ -371,11 +565,24 @@ def test_constraint():
     actual_c2 = Constraint.decode(c2_pb)
     assert actual_c2 == c2
 
+    c3_pb = c3.encode()
+    actual_c3 = Constraint.decode(c3_pb)
+    assert actual_c3 == c3
+
+    c4_pb = c4.encode()
+    actual_c4 = Constraint.decode(c4_pb)
+    assert actual_c4 == c4
+
+    c5_pb = c5.encode()
+    actual_c5 = Constraint.decode(c5_pb)
+    assert actual_c5 == c5
+
 
 def test_query():
     """Test Query."""
     c1 = Constraint("author", ConstraintType("==", "Stephen King"))
-    query = Query([c1])
+    model = generate_data_model("book_author", {"author": "author of the book"})
+    query = Query([c1], model=model)
 
     assert query.check(
         Description({"author": "Stephen King", "year": 1991, "genre": "horror"})
@@ -394,11 +601,13 @@ def test_query():
             [c1], generate_data_model("test", {"notauthor": "not some author"})
         ).check_validity()
 
-    assert query == Query([c1])
+    assert query == Query(
+        [c1], model=generate_data_model("book_author", {"author": "author of the book"})
+    )
 
     assert (
         str(query)
-        == "Query(constraints=['Constraint(attribute_name=author,constraint_type=ConstraintType(value=Stephen King,type===))'],model=None)"
+        == f"Query(constraints=['Constraint(attribute_name=author,constraint_type=ConstraintType(value=Stephen King,type===))'],model={model})"
     )
 
     query_pb = query._encode()
