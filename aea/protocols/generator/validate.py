@@ -764,7 +764,10 @@ def _validate_keep_terminal(keep_terminal_state_dialogues: bool) -> Tuple[bool, 
     :return: Boolean result, and associated message.
     """
     # check the type of keep_terminal_state_dialogues's value
-    if type(keep_terminal_state_dialogues) != bool:  # pylint: disable=unidiomatic-typecheck
+    if (
+        type(keep_terminal_state_dialogues)  # pylint: disable=unidiomatic-typecheck
+        != bool
+    ):
         return (
             False,
             "Invalid type for keep_terminal_state_dialogues. Expected bool. Found {}.".format(
