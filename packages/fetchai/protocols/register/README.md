@@ -33,6 +33,7 @@ reply:
 termination: [success, error]
 roles: {agent}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: true
 ...
 ```
 

@@ -128,6 +128,8 @@ class TacDialogues(Dialogues, ABC):
         {TacDialogue.EndState.SUCCESSFUL, TacDialogue.EndState.FAILED}
     )
 
+    _keep_terminal_state_dialogues = True
+
     def __init__(
         self,
         self_address: Address,

@@ -52,7 +52,7 @@ class TestGenericSkills(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.9.0",
+            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
             "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
@@ -68,8 +68,8 @@ class TestGenericSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/generic_seller:0.16.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/generic_seller:0.17.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
         )
@@ -108,8 +108,8 @@ class TestGenericSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.16.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.17.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -233,7 +233,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.9.0",
+            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
             "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
         }
 
@@ -249,14 +249,14 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/generic_seller:0.16.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/generic_seller:0.17.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.14.0", seller_aea_name
+            "fetchai/generic_seller:0.15.0", seller_aea_name
         )
         assert (
             diff == []
@@ -292,14 +292,14 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.13.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.9.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.16.0")
+        self.add_item("connection", "fetchai/ledger:0.10.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.17.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.15.0", buyer_aea_name
+            "fetchai/generic_buyer:0.16.0", buyer_aea_name
         )
         assert (
             diff == []
@@ -390,13 +390,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "received proposal=",
             "accepting the proposal from sender=",
             "received MATCH_ACCEPT_W_INFORM from sender=",
-            "requesting transfer transaction from ledger api...",
+            "requesting transfer transaction from ledger api for message=",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "transaction signing was successful.",
             "sending transaction to ledger.",
             "transaction was successfully submitted. Transaction digest=",
-            "informing counterparty=",
+            "transaction confirmed, informing counterparty=",
             "received INFORM from sender=",
             "received the following data=",
         )

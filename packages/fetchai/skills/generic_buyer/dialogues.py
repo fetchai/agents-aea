@@ -126,7 +126,6 @@ class FipaDialogue(BaseFipaDialogue):
             message_class=message_class,
         )
         self._terms = None  # type: Optional[Terms]
-        self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
 
     @property
     def terms(self) -> Terms:
@@ -140,24 +139,6 @@ class FipaDialogue(BaseFipaDialogue):
         """Set terms."""
         enforce(self._terms is None, "Terms already set!")
         self._terms = terms
-
-    @property
-    def associated_ledger_api_dialogue(self) -> "LedgerApiDialogue":
-        """Get associated_ledger_api_dialogue."""
-        if self._associated_ledger_api_dialogue is None:
-            raise AEAEnforceError("LedgerApiDialogue not set!")
-        return self._associated_ledger_api_dialogue
-
-    @associated_ledger_api_dialogue.setter
-    def associated_ledger_api_dialogue(
-        self, ledger_api_dialogue: "LedgerApiDialogue"
-    ) -> None:
-        """Set associated_ledger_api_dialogue"""
-        enforce(
-            self._associated_ledger_api_dialogue is None,
-            "LedgerApiDialogue already set!",
-        )
-        self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
 class FipaDialogues(Model, BaseFipaDialogues):
@@ -321,20 +302,25 @@ class SigningDialogue(BaseSigningDialogue):
             role=role,
             message_class=message_class,
         )
-        self._associated_fipa_dialogue = None  # type: Optional[FipaDialogue]
+        self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
 
     @property
-    def associated_fipa_dialogue(self) -> FipaDialogue:
-        """Get associated_fipa_dialogue."""
-        if self._associated_fipa_dialogue is None:
-            raise AEAEnforceError("FipaDialogue not set!")
-        return self._associated_fipa_dialogue
+    def associated_ledger_api_dialogue(self) -> LedgerApiDialogue:
+        """Get associated_ledger_api_dialogue."""
+        if self._associated_ledger_api_dialogue is None:
+            raise AEAEnforceError("LedgerApiDialogue not set!")
+        return self._associated_ledger_api_dialogue
 
-    @associated_fipa_dialogue.setter
-    def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
-        """Set associated_fipa_dialogue"""
-        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
-        self._associated_fipa_dialogue = fipa_dialogue
+    @associated_ledger_api_dialogue.setter
+    def associated_ledger_api_dialogue(
+        self, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """Set associated_ledger_api_dialogue"""
+        enforce(
+            self._associated_ledger_api_dialogue is None,
+            "LedgerApiDialogue already set!",
+        )
+        self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
 class SigningDialogues(Model, BaseSigningDialogues):

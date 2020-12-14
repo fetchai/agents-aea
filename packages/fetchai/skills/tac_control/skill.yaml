@@ -1,6 +1,6 @@
 name: tac_control
 author: fetchai
-version: 0.11.0
+version: 0.12.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
@@ -8,13 +8,13 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmdWECpRXZXH5JPV6wVHqeUtvjBhieUFTEoT2e7EY16N8M
-  __init__.py: Qme2NqP8jQrjuCLy3Jrm7UyHoRE8Xdxh7cvytmMTybMQdt
+  __init__.py: QmPhyWTTJsPuZPyekd2w4dnjt5S31f59CVj6nLdYtRmaq5
   behaviours.py: QmPtGBEFGEdQCzeXC3ZkJuNTrSe217JupP1wtP8DMnm6cK
   dialogues.py: QmR4LnuUkRz3EBzF6eom9dZczsz3xFUFokceZbsdRYMiVh
   game.py: QmeLsodbMjCzv6wot9YF4Ua86YtfVe79AmVj8Z2ubc7DKz
   handlers.py: Qmedq4uRwnFvp8qo9y2tiPAxqknQS7WC8nqy89LEvv2ARw
   helpers.py: QmZ2zknFsPyzsyJVUnP1DDuRDMyn62En3PpRgUSC9RSh3F
-  parameters.py: QmNQ93KGHGmZH5oRsryxsV73XDVUqKxiL4ZkQ9eFEmAyoD
+  parameters.py: QmUAg2bgciQu5FNQmXmVwwcxbpwdTN41rFF9GNjDvq3zz8
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
@@ -53,7 +53,6 @@ models:
       good_ids: []
       inactivity_timeout: 60
       item_setup_timeout: 0
-      ledger_id: ethereum
       location:
         latitude: 51.5194
         longitude: 0.127

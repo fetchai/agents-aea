@@ -62,7 +62,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.15.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.16.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 ```
@@ -76,8 +76,8 @@ aea create my_thermometer_aea
 cd my_thermometer_aea
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/thermometer:0.15.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/thermometer:0.16.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -85,7 +85,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 
@@ -96,7 +96,7 @@ default_routing:
 
 Then, fetch the thermometer client AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.16.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.17.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 ```
@@ -110,8 +110,8 @@ aea create my_thermometer_client
 cd my_thermometer_client
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/thermometer_client:0.15.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/thermometer_client:0.16.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 ```
@@ -119,7 +119,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 In `my_thermometer_aea/aea-config.yaml` add 
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.9.0
+  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
   fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 

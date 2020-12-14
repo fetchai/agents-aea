@@ -45,6 +45,10 @@ def test_agent_context():
     kwargs = {"some_key": value}
     default_ledger_id = "fetchai"
     currency_denominations = {}
+
+    def storage_callable_():
+        pass
+
     ac = AgentContext(
         identity=identity,
         connection_status=connection_status,
@@ -58,6 +62,7 @@ def test_agent_context():
         default_routing=default_routing,
         search_service_address=search_service_address,
         decision_maker_address=decision_maker_address,
+        storage_callable=storage_callable_,
         **kwargs
     )
     assert ac.shared_state == {}
@@ -77,3 +82,4 @@ def test_agent_context():
     assert ac.search_service_address == search_service_address
     assert ac.namespace.some_key == value
     assert ac.decision_maker_address == decision_maker_address
+    assert ac.storage == storage_callable_()

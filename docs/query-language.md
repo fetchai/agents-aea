@@ -90,10 +90,10 @@ There are two kind of _set_ constraints:
 from aea.helpers.search.models import Constraint, ConstraintType
 
 # all the books whose genre is one of `Horror`, `Science fiction`, `Non-fiction`
-Constraint("genre", ConstraintType("in", ["horror", "science fiction", "non-fiction"]))
+Constraint("genre", ConstraintType("in", ("horror", "science fiction", "non-fiction")))
 
 # all the books that have not been published neither in 1990, nor in 1995, nor in 2000
-Constraint("year", ConstraintType("not_in", [1990, 1995, 2000]))
+Constraint("year", ConstraintType("not_in", (1990, 1995, 2000)))
 ```
 
 ## Range

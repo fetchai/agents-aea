@@ -1,5 +1,9 @@
 This page provides some tips of how to upgrade between versions.
 
+## v0.7.4 to v0.7.5
+
+No backwards incompatible changes for skill and connection development.
+
 ## v0.7.3 to v0.7.4
 
 No backwards incompatible changes for skill and connection development.
@@ -43,6 +47,8 @@ from aea.configurations.base import PublicId
 PUBLIC_ID = PublicId.from_str("author/name:0.1.0")
 ```
 - The `fetchai/http` protocol's `bodyy` field has been renamed to `body`.
+
+- Skills can now specify `connections` as dependencies in the config yaml.
 
 
 ## v0.6.2 to v0.6.3

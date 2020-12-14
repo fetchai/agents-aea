@@ -1,0 +1,18 @@
+{{- range $key, $spec := .Values }}
+{{- if eq $key "dns" }}
+{{- if $spec.enabled }}
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: agents-dht-net
+spec:
+  endpoints:
+  - dnsName:  {{ $.Values.dns.dnsname}}
+    recordTTL: 180
+    recordType: CNAME
+    targets:
+    - {{ $.Values.dns.targetgw }}
+{{- end }}
+{{- end }}
+{{- end }}

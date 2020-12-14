@@ -1,6 +1,6 @@
 agent_name: tac_controller
 author: fetchai
-version: 0.14.0
+version: 0.15.0
 description: An AEA to manage an instance of the TAC (trading agent competition)
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
@@ -18,7 +18,7 @@ protocols:
 - fetchai/tac:0.10.0
 skills:
 - fetchai/error:0.9.0
-- fetchai/tac_control:0.11.0
+- fetchai/tac_control:0.12.0
 default_connection: fetchai/p2p_libp2p:0.12.0
 default_ledger: fetchai
 logging_config:

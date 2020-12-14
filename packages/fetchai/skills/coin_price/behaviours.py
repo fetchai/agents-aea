@@ -94,7 +94,7 @@ class CoinPriceBehaviour(TickerBehaviour):
         model = cast(CoinPriceModel, self.context.coin_price_model)
 
         self.context.logger.info(
-            f"Fetching price of {model.coin_id} in {model.currency} from CoinPrice"
+            f"Fetching price of {model.coin_id} in {model.currency} from {model.url}"
         )
 
         url = f"{model.url}simple/price?ids={model.coin_id}&vs_currencies={model.currency}"

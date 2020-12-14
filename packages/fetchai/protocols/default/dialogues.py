@@ -92,6 +92,8 @@ class DefaultDialogues(Dialogues, ABC):
         {DefaultDialogue.EndState.SUCCESSFUL, DefaultDialogue.EndState.FAILED}
     )
 
+    _keep_terminal_state_dialogues = True
+
     def __init__(
         self,
         self_address: Address,

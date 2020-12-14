@@ -15,6 +15,7 @@ fingerprint:
   aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
+  check_dependencies.py: QmerCUXVvp3dG5V7Dp2tHfJv1agbXef2ofCAdVHUig8Y8F
   connection.py: QmQksMwB6RrKVQ5LhFBuzztoUKAeiCHazdV4BkcpDHsWzt
   dht/dhtclient/dhtclient.go: QmasA3GrgswTnUJoffBzeeqxeT3GjLu6foN6PHJhWNpMMa
   dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
@@ -34,6 +35,7 @@ fingerprint:
   libp2p_node.go: QmPSjki74GPAEdfvXxcXSiXcbodsnGtS1BBo9vTXzRY8Cb
   utils/utils.go: QmZmiAaiY5G83r83nuBGWnj2o1u3UHBQagmCAxjgRTQpG4
 fingerprint_ignore_patterns: []
+build_entrypoint: check_dependencies.py
 connections: []
 protocols: []
 class_name: P2PLibp2pConnection

@@ -1,6 +1,6 @@
 name: simple_buyer
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 type: skill
 description: This skill purchases information from other agents as specified in its
   configuration.
@@ -8,14 +8,14 @@ license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmPGf61Zh32daECQRnErBsjADpXd5YVEc3SeJA96qEJBzV
-  __init__.py: QmYRuBLb7yAVEWMNMP87pwjjn31Cdxm6L9DXk9jmJEAv8M
-  behaviours.py: QmXw3wGKAqCT55MRX61g3eN1T2YVY4XC5z9b4Dg7x1Wihc
+  __init__.py: QmZ7mhzz5i5qL4c2rQDD8GoPCVMMrd4PHYJk6x7N8wqmTL
+  behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
   strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.9.0
+- fetchai/ledger:0.10.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -24,12 +24,17 @@ protocols:
 - fetchai/oef_search:0.10.0
 - fetchai/signing:0.7.0
 skills:
-- fetchai/generic_buyer:0.16.0
+- fetchai/generic_buyer:0.17.0
 behaviours:
   search:
     args:
       search_interval: 5
     class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   fipa:
     args: {}
@@ -66,8 +71,10 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
+      max_quantity: 100
       max_tx_fee: 1
       max_unit_price: 20
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: seller_service

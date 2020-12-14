@@ -141,7 +141,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.7.4
+v0.7.5
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -232,7 +232,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.7.4
+v0.7.5
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -308,7 +308,7 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 
 The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
-First, get the packages directory from the AEA repository:
+First, get the packages directory from the AEA repository (execute from the working directory which contains the `my_first_aea` folder):
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
@@ -319,8 +319,12 @@ Then write the test:
 import signal
 import time
 
+from aea.common import Address
 from aea.mail.base import Envelope
-from packages.fetchai.protocols.default.dialogues import DefaultDialogues
+from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue
+
+from packages.fetchai.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import AEATestCase
@@ -337,7 +341,11 @@ class TestEchoSkill(AEATestCase):
 
         # add sending and receiving envelope from input/output files
         sender_aea = "sender_aea"
-        dialogues = DefaultDialogues(sender_aea)
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            return DefaultDialogue.Role.AGENT
+        dialogues = DefaultDialogues(sender_aea, role_from_first_message)
         message_content = b"hello"
         message = DefaultMessage(
             performative=DefaultMessage.Performative.BYTES,

@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.16.0
+aea fetch fetchai/tac_controller_contract:0.17.0
 cd tac_controller_contract
 aea install
 ```
@@ -8,8 +8,8 @@ aea create tac_controller_contract
 cd tac_controller_contract
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/tac_control_contract:0.13.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/tac_control_contract:0.14.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
@@ -19,21 +19,17 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
-aea generate-wealth ethereum
-```
-``` bash
-aea get-wealth ethereum
-```
-``` bash
-aea fetch fetchai/tac_participant:0.16.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.17.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 cd ..
-aea fetch fetchai/tac_participant:0.16.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.17.0 --alias tac_participant_two
 cd tac_participant_two
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 ```
 ``` bash
@@ -44,9 +40,11 @@ aea create tac_participant_two
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
+aea add connection fetchai/ledger:0.10.0
 aea add skill fetchai/tac_participation:0.13.0
-aea add skill fetchai/tac_negotiation:0.14.0
+aea add skill fetchai/tac_negotiation:0.15.0
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
@@ -57,9 +55,11 @@ aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_con
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
+aea add connection fetchai/ledger:0.10.0
 aea add skill fetchai/tac_participation:0.13.0
-aea add skill fetchai/tac_negotiation:0.14.0
+aea add skill fetchai/tac_negotiation:0.15.0
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
@@ -70,6 +70,11 @@ aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_con
 aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time
 aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
+``` bash
+docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat tac_controller_contract/ethereum_private_key.txt),1000000000000000000000" --account="$(cat tac_participant_one/ethereum_private_key.txt),1000000000000000000000" --account="$(cat tac_participant_two/ethereum_private_key.txt),1000000000000000000000"
+```
+``` bash
+aea get-wealth ethereum
 ```
 ``` bash
 aea launch tac_controller_contract tac_participant_one tac_participant_two

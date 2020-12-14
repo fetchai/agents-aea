@@ -86,6 +86,7 @@ def try_to_load_agent_config(
         path = Path(os.path.join(agent_src_path, DEFAULT_AEA_CONFIG_FILE))
         with path.open(mode="r", encoding="utf-8") as fp:
             ctx.agent_config = ctx.agent_loader.load(fp)
+            ctx.agent_config.directory = Path(agent_src_path)
             logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         if is_exit_on_except:

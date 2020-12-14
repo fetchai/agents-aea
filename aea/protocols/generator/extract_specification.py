@@ -164,6 +164,7 @@ class PythonicProtocolSpecification:  # pylint: disable=too-few-public-methods
         self.terminal_performatives = list()  # type: List[str]
         self.roles = list()  # type: List[str]
         self.end_states = list()  # type: List[str]
+        self.keep_terminal_state_dialogues = False  # type: bool
 
         self.typing_imports = {
             "Set": True,
@@ -257,5 +258,11 @@ def extract(
         spec.roles = sorted(roles_set)
         spec.end_states = cast(
             List[str], protocol_specification.dialogue_config["end_states"]
+        )
+        spec.keep_terminal_state_dialogues = cast(
+            bool,
+            protocol_specification.dialogue_config.get(
+                "keep_terminal_state_dialogues", False
+            ),
         )
     return spec

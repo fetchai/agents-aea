@@ -101,7 +101,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 In the root directory, fetch the controller AEA:
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.16.0
+aea fetch fetchai/tac_controller_contract:0.17.0
 cd tac_controller_contract
 aea install
 ```
@@ -115,8 +115,8 @@ aea create tac_controller_contract
 cd tac_controller_contract
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
-aea add skill fetchai/tac_control_contract:0.13.0
+aea add connection fetchai/ledger:0.10.0
+aea add skill fetchai/tac_control_contract:0.14.0
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
@@ -125,44 +125,27 @@ aea config set agent.default_ledger ethereum
 </p>
 </details>
 
-### Fund the controller AEA
-
-We first generate a private key.
+Then, generate a private key.
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 
-To create some wealth for your AEAs for the Ethereum `ropsten` network. Note that this needs to be executed from each AEA folder:
-
-``` bash
-aea generate-wealth ethereum
-```
-
-To check the wealth use (after some time for the wealth creation to be mined on Ropsten):
-
-``` bash
-aea get-wealth ethereum
-```
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>If no wealth appears after a while, then try funding the private key directly using a web faucet.</p>
-</div>
-
 ### Create the TAC participant AEAs
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.16.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.17.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 cd ..
-aea fetch fetchai/tac_participant:0.16.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.17.0 --alias tac_participant_two
 cd tac_participant_two
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 ```
 
@@ -180,9 +163,11 @@ Build participant one:
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
+aea add connection fetchai/ledger:0.10.0
 aea add skill fetchai/tac_participation:0.13.0
-aea add skill fetchai/tac_negotiation:0.14.0
+aea add skill fetchai/tac_negotiation:0.15.0
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
@@ -195,9 +180,11 @@ Then, build participant two:
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.12.0
 aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.9.0
+aea add connection fetchai/ledger:0.10.0
 aea add skill fetchai/tac_participation:0.13.0
-aea add skill fetchai/tac_negotiation:0.14.0
+aea add skill fetchai/tac_negotiation:0.15.0
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
 aea config set agent.default_ledger ethereum
@@ -220,6 +207,21 @@ Navigate to the tac controller project, then use the command line to get and set
 aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time
 aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
+
+## Run Ganache
+
+Run the following command
+``` bash
+docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat tac_controller_contract/ethereum_private_key.txt),1000000000000000000000" --account="$(cat tac_participant_one/ethereum_private_key.txt),1000000000000000000000" --account="$(cat tac_participant_two/ethereum_private_key.txt),1000000000000000000000"
+```
+
+To check the wealth of one of the AEAs, use:
+
+``` bash
+aea get-wealth ethereum
+```
+
+You should get `1000000000000000000000`.
 
 ### Run the AEAs
 

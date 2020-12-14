@@ -9,15 +9,15 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmYYF78yDibk4SC9kGutTwBw9ne1faG9KPHHBR9W6zkcyX
   __init__.py: QmWfVzmPTaXCh45cWMvkRB4VGZZ4n8xGxHhmTLEQk1zexf
-  behaviours.py: QmSF5tvfKnBRojZE5hKFE6n6iUCRySjge6Zm2CSfNNc4gg
+  behaviours.py: QmeTbjNHgFJddBcxxz9LoiT8tTaod5hZvptp2etgnP9JRe
   dialogues.py: QmeuRrNPpbvyTAcPwAtEkTfJTDunqyfzPoDhMZWTvCyrJA
   handlers.py: QmfS3N2JhkC29iqHLiK273HVA4Qf5rziJKXHpYTg3C1Pdc
   registration_db.py: QmUDfeE9DKgzKyzFoiiSUE4ZDSCMkGduPwWcsHxhUTd8YH
-  strategy.py: QmVpRvSF5pKPTHAbB83F9Y6jqARYtmdKBxqXUMm95L8qdA
+  strategy.py: QmcE2Zu8XxnJaGcttWewavHzpCHH5B2spHETexXYydmYeV
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.13.0
-- fetchai/ledger:0.9.0
+- fetchai/http_client:0.14.0
+- fetchai/ledger:0.10.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
@@ -26,12 +26,17 @@ protocols:
 - fetchai/oef_search:0.10.0
 - fetchai/signing:0.7.0
 skills:
-- fetchai/generic_buyer:0.16.0
+- fetchai/generic_buyer:0.17.0
 behaviours:
   search:
     args:
       search_interval: 1800
     class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   default_handler:
     args: {}
@@ -118,10 +123,10 @@ models:
           latitude: -4.4419
           longitude: 15.2663
       max_negotiations: 1
+      max_quantity: 100
       max_tx_fee: 1
       max_unit_price: 20
-      minimum_minutes_since_last_attempt: 2
-      mininum_hours_between_txs: 4
+      min_quantity: 1
       search_queries:
         weather:
           constraint_type: ==

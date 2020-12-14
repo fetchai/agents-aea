@@ -521,7 +521,7 @@ class TestFilter:
         """Test that the internal messages are handled."""
         t = SigningMessage(
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
-            signed_transaction=SignedTransaction("ledger_id", "tx"),
+            signed_transaction=SignedTransaction("ledger_id", {"tx": "v"}),
         )
         t.to = str(PublicId("dummy_author", "dummy", "0.1.0"))
         t.sender = "decision_maker"

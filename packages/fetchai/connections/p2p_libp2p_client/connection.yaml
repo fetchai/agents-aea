@@ -18,9 +18,8 @@ class_name: P2PLibp2pClientConnection
 config:
   ledger_id: fetchai
   nodes:
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11000
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11001
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11002
+  - uri: acn.fetch.ai:11000
+  - uri: acn.fetch.ai:11001
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

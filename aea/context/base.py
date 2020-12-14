@@ -17,14 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains the agent context class."""
 
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from aea.common import Address
 from aea.configurations.base import PublicId
+from aea.helpers.storage.generic_storage import Storage
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.skills.tasks import TaskManager
@@ -47,6 +49,7 @@ class AgentContext:
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
         decision_maker_address: Address,
+        storage_callable: Callable[[], Optional[Storage]] = lambda: None,
         **kwargs
     ):
         """
@@ -64,6 +67,7 @@ class AgentContext:
         :param default_routing: the default routing
         :param search_service_address: the address of the search service
         :param decision_maker_address: the address of the decision maker
+        :param storage_callable: function that returns optional storage attached to agent.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
         self._shared_state = {}  # type: Dict[str, Any]
@@ -79,7 +83,13 @@ class AgentContext:
         self._currency_denominations = currency_denominations
         self._default_connection = default_connection
         self._default_routing = default_routing
+        self._storage_callable = storage_callable
         self._namespace = SimpleNamespace(**kwargs)
+
+    @property
+    def storage(self) -> Optional[Storage]:
+        """Return storage instance if enabled in AEA."""
+        return self._storage_callable()
 
     @property
     def shared_state(self) -> Dict[str, Any]:

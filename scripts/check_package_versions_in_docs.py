@@ -34,6 +34,14 @@ from typing import Callable, Dict, List, Set
 import yaml
 
 from aea.configurations.base import ComponentType, PackageId, PackageType, PublicId
+from aea.configurations.constants import (
+    AGENTS,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
 
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
@@ -79,12 +87,13 @@ class PackageIdNotFound(Exception):
 
 DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
 
+
 CONFIG_FILE_NAMES = [
-    "aea-config.yaml",
-    "skill.yaml",
-    "connection.yaml",
-    "contract.yaml",
-    "protocol.yaml",
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
 ]  # type: List[str]
 
 
@@ -103,7 +112,7 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
     """
     package_type = configuration_file.parent.parent.name
     with configuration_file.open() as fp:
-        if package_type != "agents":
+        if package_type != AGENTS:
             return yaml.safe_load(fp)
         # when it is an agent configuration file,
         # we are interested only in the first page of the YAML,

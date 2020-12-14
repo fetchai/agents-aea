@@ -7,7 +7,7 @@ As described in the guide on <a href="../agent-oriented-development">agent-orien
 * multiple stakeholders, which
 * are represented by AEAs, that
 * interact autonomously and
-* communicate decentrally.
+* communicate _via_ a peer-to-peer network.
 
 There are at least five general application areas for AEAs:
 
@@ -23,7 +23,7 @@ In the short-term we see AEAs primarily deployed in three areas:
 
 * Off-load repetitive tasks: AEAs can automate well defined processes in supply chain, transport and finance.
 
-* Micro transactions: AEAs make it economically viable to execute trades which reference only small values. This is particularly relevant in areas where there is a (data) supply side constituted of many small actors and a single demand side.
+* Micro transactions: AEAs make it economically viable to execute trades which involve small value transfers. This is particularly relevant in areas where there is a (data) supply side constituted of many small actors and a single demand side.
 
 * Wallet agents: AEAs can simplify the interactions with blockchains for end users. For instance, they can act as "smart wallets" which optimize blockchain interactions on behalf of the user.
 

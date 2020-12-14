@@ -125,6 +125,15 @@ class TestCRUDCollection:
         keyvalue_pairs = collection.read_all()
         assert {("one", 1), ("two", 2)} == set(keyvalue_pairs)
 
+    def test_keys(self):
+        """Test the keys method."""
+        collection = CRUDCollection()
+        collection.create("one", 1)
+        collection.create("two", 2)
+
+        keyvalue_pairs = collection.keys()
+        assert {"one", "two"} == set(keyvalue_pairs)
+
 
 class TestContractConfig:
     """Test the contract configuration class."""
@@ -842,12 +851,14 @@ def test_agent_config_to_json_with_optional_configurations():
         execution_timeout=1.0,
         max_reactions=100,
         decision_maker_handler=dict(dotted_path="", file_path=""),
+        error_handler=dict(dotted_path="", file_path=""),
         skill_exception_policy="propagate",
         connection_exception_policy="propagate",
         default_routing={"author/name:0.1.0": "author/name:0.1.0"},
         currency_denominations={"fetchai": "fet"},
         loop_mode="sync",
         runtime_mode="async",
+        storage_uri="some_uri_to_storage",
     )
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER

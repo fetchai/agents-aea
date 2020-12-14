@@ -7,14 +7,18 @@ spec:
   selector:
     app: ph-deployment-name-here
   ports:
-    - name: libp2p 
+    - name: tcp-libp2p
       protocol: TCP
       port: ph-node-port-number-here
-      targetPort: ph-node-port-number-here
-    - name: tcp
+      targetPort: 9000
+    - name: tcp-delegate
       protocol: TCP
       port: ph-node-delegate-port-number-here
-      targetPort: ph-node-delegate-port-number-here
+      targetPort: 11000
+    - name: tcp-monitoring
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: StatefulSet

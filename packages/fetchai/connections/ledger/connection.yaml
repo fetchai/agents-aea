@@ -1,17 +1,17 @@
 name: ledger
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 type: connection
 description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmQVAghp4oC2hEwsYuPw9joL2JyZ4kgeD71nv9tW2NrNfE
+  README.md: QmdodGui7nMJSVEyovYAGCGzPD2XTW44vWKCzuGgRuU8Vs
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmTLGo4PcrimsmCJBW3s7G5herwGrjJBXqstXADqhqnzX3
+  base.py: QmcthxPnqcpzUG5wU2RVgsGpNzDfEehfWGqSCaAVeesQaa
   connection.py: Qmc9XVMhHh3DDsWAWRt7TVgqRe1utQChMUWW8zZUehTKU7
-  contract_dispatcher.py: QmbwomSmrddSY4wREL7ywHF2p9qQ3daCiv9VoYf9cbBR61
-  ledger_dispatcher.py: QmfFNHQQdGiE33Cef5vRHMnXJmLVr6mQGR3iENx5ShDnQk
+  contract_dispatcher.py: QmXYJfCnUADdAXKZYzzGuZt7R7Fh1Mio2B8BWYajS5PoPL
+  ledger_dispatcher.py: QmSVrfAv7ScRUzuRmjYsde23xPG11tBoDLXsZKe8eE6eNv
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

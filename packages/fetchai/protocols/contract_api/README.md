@@ -73,6 +73,7 @@ reply:
 termination: [state, raw_transaction, raw_message]
 roles: {agent, ledger}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: false
 ...
 ```
 

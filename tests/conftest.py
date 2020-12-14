@@ -141,6 +141,8 @@ COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
 ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
 FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
 
+ETHEREUM_PRIVATE_KEY_TWO_FILE = "ethereum_private_key_two.txt"
+
 DEFAULT_AMOUNT = 1000000000000000000000
 
 # private keys with value on testnet
@@ -149,6 +151,9 @@ COSMOS_PRIVATE_KEY_PATH = os.path.join(
 )
 ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
+)
+ETHEREUM_PRIVATE_KEY_TWO_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_TWO_FILE
 )
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
@@ -197,14 +202,10 @@ NON_GENESIS_CONFIG_TWO = {
     "public_uri": "127.0.0.1:9002",
     "ledger_id": "cosmos",
 }
-PUBLIC_DHT_P2P_MADDR_1 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
-PUBLIC_DHT_P2P_MADDR_2 = "/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-PUBLIC_DHT_DELEGATE_URI_1 = "agents-p2p-dht.sandbox.fetch-ai.com:11000"
-PUBLIC_DHT_DELEGATE_URI_2 = "agents-p2p-dht.sandbox.fetch-ai.com:11001"
-PUBLIC_DHT_P2P_MADDR_1_PROD = "/dns4/agents-p2p-dht.prod.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
-PUBLIC_DHT_P2P_MADDR_2_PROD = "/dns4/agents-p2p-dht.prod.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-PUBLIC_DHT_DELEGATE_URI_1_PROD = "agents-p2p-dht.prod.fetch-ai.com:11000"
-PUBLIC_DHT_DELEGATE_URI_2_PROD = "agents-p2p-dht.prod.fetch-ai.com:11001"
+PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
+PUBLIC_DHT_P2P_MADDR_2 = "/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
+PUBLIC_DHT_DELEGATE_URI_1 = "acn.fetch.ai:11000"
+PUBLIC_DHT_DELEGATE_URI_2 = "acn.fetch.ai:11001"
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
@@ -250,6 +251,7 @@ protocol_config_files = [
     os.path.join(FETCHAI_PREF, "protocols", "signing", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML),
+    os.path.join(CUR_PATH, "data", "dummy_protocol", PROTOCOL_YAML),
 ]
 
 connection_config_files = [
@@ -619,6 +621,8 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
     DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = old_config
 
 
+@pytest.mark.integration
+@pytest.mark.ledger
 @pytest.fixture(scope="session")
 @action_for_platform("Linux", skip=False)
 def ganache(
@@ -1039,6 +1043,88 @@ def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
     yield contract, contract_address
 
 
+@pytest.fixture()
+def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port):
+    """Instantiate an ERC20 contract."""
+    directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "fet_erc20")
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
+    configuration._directory = directory
+    configuration = cast(ContractConfig, configuration)
+
+    if str(configuration.public_id) not in contract_registry.specs:
+        # load contract into sys modules
+        Contract.from_config(configuration)
+
+    contract = contract_registry.make(str(configuration.public_id))
+
+    # get two accounts
+    account1 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    account2 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_TWO_PATH)
+
+    tx = contract.get_deploy_transaction(
+        ledger_api=ledger_api,
+        deployer_address=account1.address,
+        gas=5000000,
+        name="FetERC20Mock",
+        symbol="MFET",
+        initialSupply=int(1e23),
+        decimals_=18,
+    )
+    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    tx["gas"] = gas
+    tx_signed = account1.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    contract_address = cast(Dict, receipt)["contractAddress"]
+
+    # Transfer some MFET to another default account
+    tx = contract.get_transfer_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        from_address=account1.address,
+        gas=200000,
+        receiver=account2.address,
+        amount=int(1e20),
+    )
+    tx_signed = account1.sign_transaction(tx)
+    ledger_api.send_signed_transaction(tx_signed)
+
+    yield contract, contract_address
+
+
+@pytest.fixture()
+def oracle_contract(ledger_api, ganache, ganache_addr, ganache_port, erc20_contract):
+    """Instantiate a Fetch Oracle contract."""
+    directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "oracle")
+    configuration = load_component_configuration(ComponentType.CONTRACT, directory)
+    configuration._directory = directory
+    configuration = cast(ContractConfig, configuration)
+
+    if str(configuration.public_id) not in contract_registry.specs:
+        # load contract into sys modules
+        Contract.from_config(configuration)
+
+    contract = contract_registry.make(str(configuration.public_id))
+
+    _, erc20_address = erc20_contract
+
+    # deploy contract
+    crypto = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+
+    tx = contract.get_deploy_transaction(
+        ledger_api=ledger_api,
+        deployer_address=crypto.address,
+        gas=5000000,
+        ERC20Address=erc20_address,
+        initialFee=10000000000,
+    )
+    tx_signed = crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    contract_address = cast(Dict, receipt)["contractAddress"]
+    yield contract, contract_address
+
+
 def env_path_separator() -> str:
     """
     Get the separator between path items in PATH variables, cross platform.
@@ -1066,3 +1152,12 @@ def random_string(length: int = 8) -> str:
 def make_uri(addr: str, port: int):
     """Make uri from address and port."""
     return f"{addr}:{port}"
+
+
+@pytest.mark.integration
+class UseGanache:
+    """Inherit from this class to use Ganache."""
+
+    @pytest.fixture(autouse=True)
+    def _start_ganache(self, ganache):
+        """Start a Ganache image."""

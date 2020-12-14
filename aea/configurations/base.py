@@ -562,6 +562,10 @@ class CRUDCollection(Generic[T]):
             (k, v) for k, v in self._items_by_id.items()
         ]
 
+    def keys(self) -> Set[str]:
+        """Get the set of keys."""
+        return set(self._items_by_id.keys())
+
 
 class PublicId(JSONSerializable):
     """This class implement a public identifier.
@@ -990,6 +994,7 @@ class PackageConfiguration(Configuration, ABC):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        build_entrypoint: Optional[str] = None,
     ):
         """
         Initialize a package configuration.
@@ -1004,6 +1009,7 @@ class PackageConfiguration(Configuration, ABC):
            The fixed version is interpreted with the specifier '=='.
         :param fingerprint: the fingerprint.
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
+        :param build_entrypoint: path to a script to execute at build time.
         """
         super().__init__()
         if name is None or author is None:  # pragma: nocover
@@ -1018,6 +1024,7 @@ class PackageConfiguration(Configuration, ABC):
             if fingerprint_ignore_patterns is not None
             else []
         )
+        self.build_entrypoint = build_entrypoint
         self.aea_version = aea_version if aea_version != "" else __aea_version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
@@ -1102,6 +1109,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        build_entrypoint: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
     ):
         """Set component configuration."""
@@ -1113,6 +1121,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
+            build_entrypoint,
         )
         self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
 
@@ -1196,6 +1205,7 @@ class ConnectionConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        build_entrypoint: Optional[str] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
         connections: Optional[Set[PublicId]] = None,
@@ -1236,6 +1246,7 @@ class ConnectionConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
+            build_entrypoint,
             dependencies,
         )
         self.class_name = class_name
@@ -1273,7 +1284,7 @@ class ConnectionConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -1296,6 +1307,9 @@ class ConnectionConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
+        if self.build_entrypoint:
+            result["build_entrypoint"] = self.build_entrypoint
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -1319,6 +1333,7 @@ class ConnectionConfig(ComponentConfiguration):
             fingerprint_ignore_patterns=cast(
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
+            build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
             connections=cast(Set[PublicId], connections),
@@ -1360,6 +1375,7 @@ class ProtocolConfig(ComponentConfiguration):
         license_: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        build_entrypoint: Optional[str] = None,
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
@@ -1373,6 +1389,7 @@ class ProtocolConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
+            build_entrypoint,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -1381,7 +1398,7 @@ class ProtocolConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -1395,6 +1412,9 @@ class ProtocolConfig(ComponentConfiguration):
                 "dependencies": dependencies_to_json(self.dependencies),
             }
         )
+        if self.build_entrypoint:
+            result["build_entrypoint"] = self.build_entrypoint
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -1410,6 +1430,7 @@ class ProtocolConfig(ComponentConfiguration):
             fingerprint_ignore_patterns=cast(
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
+            build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
@@ -1464,6 +1485,7 @@ class SkillConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        build_entrypoint: Optional[str] = None,
         connections: Optional[Set[PublicId]] = None,
         protocols: Optional[Set[PublicId]] = None,
         contracts: Optional[Set[PublicId]] = None,
@@ -1481,6 +1503,7 @@ class SkillConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
+            build_entrypoint,
             dependencies,
         )
         self.connections = connections if connections is not None else set()
@@ -1550,6 +1573,8 @@ class SkillConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
+        if self.build_entrypoint:
+            result["build_entrypoint"] = self.build_entrypoint
         return result
 
     @classmethod
@@ -1564,6 +1589,7 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns = cast(
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
+        build_entrypoint = cast(Optional[str], obj.get("build_entrypoint"))
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
         protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
         contracts = {PublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
@@ -1578,6 +1604,7 @@ class SkillConfig(ComponentConfiguration):
             aea_version=aea_version_specifiers,
             fingerprint=fingerprint,
             fingerprint_ignore_patterns=fingerprint_ignore_patterns,
+            build_entrypoint=build_entrypoint,
             connections=connections,
             protocols=protocols,
             contracts=contracts,
@@ -1673,6 +1700,7 @@ class AgentConfig(PackageConfiguration):
             "default_connection",
             "default_ledger",
             "default_routing",
+            "storage_uri",
         ]
     )
 
@@ -1685,12 +1713,14 @@ class AgentConfig(PackageConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        build_entrypoint: Optional[str] = None,
         registry_path: str = DEFAULT_REGISTRY_NAME,
         description: str = "",
         logging_config: Optional[Dict] = None,
         period: Optional[float] = None,
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
+        error_handler: Optional[Dict] = None,
         decision_maker_handler: Optional[Dict] = None,
         skill_exception_policy: Optional[str] = None,
         connection_exception_policy: Optional[str] = None,
@@ -1700,6 +1730,7 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict[str, str]] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        storage_uri: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
     ):
         """Instantiate the agent configuration object."""
@@ -1711,6 +1742,7 @@ class AgentConfig(PackageConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
+            build_entrypoint,
         )
         self.agent_name = self.name
         self.registry_path = registry_path
@@ -1744,6 +1776,7 @@ class AgentConfig(PackageConfiguration):
         self.skill_exception_policy: Optional[str] = skill_exception_policy
         self.connection_exception_policy: Optional[str] = connection_exception_policy
 
+        self.error_handler = error_handler if error_handler is not None else {}
         self.decision_maker_handler = (
             decision_maker_handler if decision_maker_handler is not None else {}
         )
@@ -1758,6 +1791,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        self.storage_uri = storage_uri
         # this attribute will be set through the setter below
         self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
@@ -1874,6 +1908,9 @@ class AgentConfig(PackageConfiguration):
             }
         )  # type: Dict[str, Any]
 
+        if self.build_entrypoint:
+            config["build_entrypoint"] = self.build_entrypoint
+
         # framework optional configs are only printed if defined.
         if self.period is not None:
             config["period"] = self.period
@@ -1881,6 +1918,8 @@ class AgentConfig(PackageConfiguration):
             config["execution_timeout"] = self.execution_timeout
         if self.max_reactions is not None:
             config["max_reactions"] = self.max_reactions
+        if self.error_handler != {}:
+            config["error_handler"] = self.error_handler
         if self.decision_maker_handler != {}:
             config["decision_maker_handler"] = self.decision_maker_handler
         if self.skill_exception_policy is not None:
@@ -1891,6 +1930,8 @@ class AgentConfig(PackageConfiguration):
             config["loop_mode"] = self.loop_mode
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
+        if self.storage_uri is not None:
+            config["storage_uri"] = self.storage_uri
         if self.currency_denominations != {}:
             config["currency_denominations"] = self.currency_denominations
 
@@ -1911,10 +1952,12 @@ class AgentConfig(PackageConfiguration):
             fingerprint_ignore_patterns=cast(
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
+            build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
             period=cast(float, obj.get("period")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
+            error_handler=cast(Dict, obj.get("error_handler", {})),
             decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),
             skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
             connection_exception_policy=cast(
@@ -1926,6 +1969,7 @@ class AgentConfig(PackageConfiguration):
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
+            storage_uri=cast(str, obj.get("storage_uri")),
             component_configurations=None,
         )
 
@@ -2075,7 +2119,7 @@ class ProtocolSpecification(ProtocolConfig):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result: Dict[str, Any] = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -2089,6 +2133,7 @@ class ProtocolSpecification(ProtocolConfig):
                 },
             }
         )
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -2155,6 +2200,7 @@ class ContractConfig(ComponentConfiguration):
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
+        build_entrypoint: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
@@ -2169,6 +2215,7 @@ class ContractConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
+            build_entrypoint,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -2181,7 +2228,7 @@ class ContractConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        result = OrderedDict(
             {
                 "name": self.name,
                 "author": self.author,
@@ -2197,6 +2244,9 @@ class ContractConfig(ComponentConfiguration):
                 "dependencies": dependencies_to_json(self.dependencies),
             }
         )
+        if self.build_entrypoint:
+            result["build_entrypoint"] = self.build_entrypoint
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -2214,6 +2264,7 @@ class ContractConfig(ComponentConfiguration):
             fingerprint_ignore_patterns=cast(
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
+            build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
             contract_interface_paths=cast(

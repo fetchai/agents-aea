@@ -349,6 +349,7 @@ class TestCosmWasmContract:
             ]
         )
 
+    @pytest.mark.skip
     @pytest.mark.integration
     @pytest.mark.ledger
     def test_cosmwasm_contract_deploy_and_interact(self, erc1155_contract):
