@@ -8,7 +8,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmQEerhrqx6UBhgm7ftcfSwbVf9PvTHoZPW284Mknze6Kd
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
-  connection.py: QmZ76BZvFWicAvPAHWwqvYZAoqFS4vqMsFAzjCm3gvpCfr
+  connection.py: Qmcy1T3y1fCaZzRuwryjc4XWZeKRfvdfYfUA4x4bceRdr6
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
@@ -19,7 +19,7 @@ config:
   chain_identifier: fetchai_v2_testnet_stable
   soef_addr: soef.fetch.ai
   soef_port: 9002
-  token_storage_path: null
+  token_storage_path: soef_token.txt
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/oef_search:0.10.0
