@@ -165,9 +165,9 @@ class RegistrationDB(Model):
 
     def completed_two_trades(self) -> List[Tuple[str, str, str]]:
         """
-        Get the pair of address and developer handle which completed two trades.
+        Get the address, ethereum_address and developer handle combos which completed two trades.
 
-        :return: (address, developer_handle)
+        :return: (address, ethereum_address, developer_handle)
         """
         command = "SELECT * FROM registered_table"
         variables = ()

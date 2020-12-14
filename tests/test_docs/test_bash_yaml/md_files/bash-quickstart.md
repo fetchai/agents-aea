@@ -101,11 +101,11 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.9.0,\x08\x01\x12\x011*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.9.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
 ```
 ``` bash
 info: Echo Behaviour: act method called.
-info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=sender_aea
+Echo Handler: message=Message(sender=sender_aea,to=my_first_aea,content=b'hello',dialogue_reference=('1', ''),message_id=1,performative=bytes,target=0), sender=sender_aea
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
