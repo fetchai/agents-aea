@@ -536,7 +536,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		envel, err := utils.ReadEnvelopeConn(conn)
 		if err != nil {
 			if err == io.EOF {
-				linfo().Str("addr", addr).Msgf("connection closed by client: %s, stoppig...", err.Error())
+				linfo().Str("addr", addr).Msgf("connection closed by client: %s, stopping...", err.Error())
 			} else {
 				lerror(err).Str("addr", addr).Msg("while reading envelope from client connection, aborting...")
 			}

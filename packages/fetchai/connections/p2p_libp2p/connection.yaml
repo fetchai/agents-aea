@@ -16,14 +16,14 @@ fingerprint:
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmY8EiWapBspyR3zKGEY3TnQayz7hF7DxZ2d9zozVfFhtA
-  connection.py: QmPgP24WDzSpFC4acng7ncuuYGoAEWZ7Rh6ggYi1gx6cRW
+  connection.py: QmVjvkLFT4NnUnfunmT8eukiE64KMpHyUpKMa25rUCP2dr
   dht/dhtclient/dhtclient.go: QmeHnMoBdff59vSqRRsYUGGJPUMi5Euk8pKiKa5jTzHHQD
   dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtpeer/benchmarks_test.go: QmXDDpoThiFPZ3DDb1L9rNaJANSYeZZgfu5EQ4vSARaG5f
-  dht/dhtpeer/dhtpeer.go: QmQRHhpMHrsvim8PzPXxnFpPVRUpC3AbTC2yTE9pA994cq
+  dht/dhtpeer/dhtpeer.go: QmNhwnereuoWd2Dw2azYNYTrwydGDqprUZSALV7yCms9wv
   dht/dhtpeer/dhtpeer_test.go: QmRdsFpDLNf1KwWyRKGkrX7nD1orFyPKweP9BtZkQx7SqL
   dht/dhtpeer/options.go: QmfQMgMJyPeNXroH2faDuLCWhjh48eJnez3pevyatjMxPW
   dht/dhttests/dhttests.go: QmZpYRCiVARGL1n4nDwqjhzHA95Y4ACNWoa3HSDnB6PitK

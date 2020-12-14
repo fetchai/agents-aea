@@ -30,6 +30,7 @@ from packages.fetchai.connections.p2p_libp2p.check_dependencies import (
     main,
     MINIMUM_GO_VERSION,
     MINIMUM_GCC_VERSION,
+    version_to_string,
 )
 
 
@@ -38,8 +39,8 @@ def test_build_script():
     with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
         main()
         stdout = mock_stdout.getvalue()
-    assert f"check 'go'>={MINIMUM_GO_VERSION}, found " in stdout
-    assert f"check 'gcc'>={MINIMUM_GCC_VERSION}, found " in stdout
+    assert f"check 'go'>={version_to_string(MINIMUM_GO_VERSION)}, found " in stdout
+    assert f"check 'gcc'>={version_to_string(MINIMUM_GCC_VERSION)}, found " in stdout
 
 
 def test_build_script_negative_binary_not_found():
@@ -59,7 +60,7 @@ def test_build_script_negative_version_too_low():
     ):
         with pytest.raises(
             AEAException,
-            match=f"The installed version of 'go' is too low: expected at least {MINIMUM_GO_VERSION}; found 0.0.0.",
+            match=f"The installed version of 'go' is too low: expected at least {version_to_string(MINIMUM_GO_VERSION)}; found 0.0.0.",
         ):
             main()
 

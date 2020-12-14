@@ -584,7 +584,7 @@ class P2PLibp2pConnection(Connection):
         if peer_registration_delay is not None:
             try:
                 delay = float(peer_registration_delay)
-            except ValueError as e:
+            except ValueError:
                 raise ValueError(
                     f"peer_registration_delay {peer_registration_delay} must be a float number in seconds"
                 )
