@@ -30,7 +30,7 @@ from ipaddress import ip_address
 from pathlib import Path
 from random import randint
 from socket import gethostbyname
-from typing import Dict, IO, List, Optional, Sequence, cast
+from typing import IO, List, Optional, Sequence, cast
 
 from aea.common import Address
 from aea.configurations.base import PublicId

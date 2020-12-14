@@ -27,9 +27,9 @@ from aea.exceptions import AEAException
 
 from packages.fetchai.connections.p2p_libp2p import check_dependencies
 from packages.fetchai.connections.p2p_libp2p.check_dependencies import (
-    main,
-    MINIMUM_GO_VERSION,
     MINIMUM_GCC_VERSION,
+    MINIMUM_GO_VERSION,
+    main,
     version_to_string,
 )
 
