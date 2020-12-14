@@ -21,14 +21,10 @@ fingerprint:
   dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
-  dht/dhtnode/message.pb.go: QmdYgtrp5wVo9ML5UYRkUvcwWKikbez5caX2t87bck8Ltu
-  dht/dhtnode/message.proto: QmR1wuYjzz4Gmzs96ADkjaQMMPBvV2rgsPgdQiFRnenNtb
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtpeer/benchmarks_test.go: QmXDDpoThiFPZ3DDb1L9rNaJANSYeZZgfu5EQ4vSARaG5f
   dht/dhtpeer/dhtpeer.go: QmTqC3SACF8W2KG5wMS4Vh7n1HKG32RUSCqD6uqqPFjm6W
   dht/dhtpeer/dhtpeer_test.go: QmeWksk2g4hmQPNUeF9SbdAdmMmAL2RhkHLcNHrFcBeGby
-  dht/dhtpeer/dhtpeer_test.go.back: QmVGSKeXxj2D91YtxPTdzk8yMxVti7vUz2EEWK4ADK9czb
-  dht/dhtpeer/golang.bin: QmajXKvRy6nbwRTE48H83NjexHSNcmAYhSy8w4RSD98fEp
   dht/dhtpeer/options.go: QmR7RGGoRhum8CnMRAGjTN5M5v8yDCbyn7zkvFLnJX4Vr9
   dht/dhttests/dhttests.go: QmZpYRCiVARGL1n4nDwqjhzHA95Y4ACNWoa3HSDnB6PitK
   dht/monitoring/file.go: QmZB8pNf7infMXWaC5A46rr3mghNfkuSd8UKH4Ceg8nDSM
