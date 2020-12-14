@@ -1410,7 +1410,7 @@ class TestValidate(TestCase):
             ],
             "roles": {"role_1": None, "role_2": None},
             "end_states": ["end_state_1", "end_state_2", "end_state_3"],
-            "keep_terminal_state_dialogues": True
+            "keep_terminal_state_dialogues": True,
         }
         valid_performatives_set_1 = {
             "performative_ct",

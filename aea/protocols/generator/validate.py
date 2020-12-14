@@ -832,7 +832,7 @@ def _validate_dialogue_section(
 
         # Validate roles
         result_roles_validation, msg_roles_validation = _validate_roles(
-            cast(Set[str], protocol_specification.dialogue_config["roles"])
+            cast(Dict[str, Any], protocol_specification.dialogue_config["roles"])
         )
         if not result_roles_validation:
             return result_roles_validation, msg_roles_validation
