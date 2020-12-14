@@ -21,7 +21,6 @@
 
 import asyncio
 import logging
-from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Optional, Tuple, Union, cast
 
 import prometheus_client  # type: ignore
@@ -80,8 +79,6 @@ class PrometheusDialogues(BasePrometheusDialogues):
 class PrometheusChannel:
     """A wrapper for interacting with a prometheus server."""
 
-    THREAD_POOL_SIZE = 3
-
     def __init__(self, address: Address, metrics: Dict[str, Any], port: int):
         """
         Initialize a prometheus channel.
@@ -94,9 +91,6 @@ class PrometheusChannel:
         self.metrics = metrics
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._queue: Optional[asyncio.Queue] = None
-        self._threaded_pool: ThreadPoolExecutor = ThreadPoolExecutor(
-            self.THREAD_POOL_SIZE
-        )
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = _default_logger
         self._dialogues = PrometheusDialogues()
         self._port = port
