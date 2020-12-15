@@ -105,12 +105,12 @@ async def _golang_module_build_async(
         stdout, _ = await asyncio.wait_for(  # type: ignore
             proc.communicate(), timeout=timeout  # type: ignore
         )
-    except asyncio.TimeoutError:
+    except asyncio.TimeoutError:  # pragma: nocover
         proc.terminate()
         await proc.wait()
         return "terminated by timeout"
 
-    if proc.returncode != 0:
+    if proc.returncode != 0:  # pragma: nocover
         return stdout.decode()  # type: ignore
     return None
 
@@ -291,19 +291,6 @@ class Libp2pNode:
         self._log_file_desc.write("test")
         self._log_file_desc.flush()
 
-        # build the node
-        """self.logger.info("Downloading golang dependencies. This may take a while...")
-        err_string = await _golang_module_build_async(
-            self.source
-        )
-        if err_string:
-            raise Exception(
-                "Error while downloading golang dependencies and building it: {}".format(
-                    err_string
-                )
-            )
-        self.logger.info("Finished downloading golang dependencies.")
-        """
         # setup fifos
         self.pipe = make_ipc_channel(logger=self.logger)
 

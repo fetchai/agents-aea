@@ -119,11 +119,10 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
 
         # run oracle agent
         self.set_agent_context(oracle_agent_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         oracle_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

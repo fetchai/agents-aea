@@ -143,6 +143,7 @@ class TestContractConfig:
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(contract_path)
         original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
 
         expected_config = ContractConfig.from_json(original_json)
         assert isinstance(expected_config, ContractConfig)
@@ -160,6 +161,7 @@ class TestConnectionConfig:
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(connection_path)
         original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
 
         expected_config = ConnectionConfig.from_json(original_json)
         assert isinstance(expected_config, ConnectionConfig)
@@ -177,6 +179,7 @@ class TestProtocolConfig:
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(protocol_path)
         original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
 
         expected_config = ProtocolConfig.from_json(original_json)
         assert isinstance(expected_config, ProtocolConfig)
@@ -198,6 +201,7 @@ class TestSkillConfig:
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(skill_path)
         original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
 
         expected_config = SkillConfig.from_json(original_json)
         assert isinstance(expected_config, SkillConfig)
@@ -297,6 +301,7 @@ class TestAgentConfig:
         components = original_jsons[1:]
         original_json = original_jsons[0]
         original_json["component_configurations"] = components
+        original_json["build_entrypoint"] = "some"
 
         expected_config = AgentConfig.from_json(original_json)
         assert isinstance(expected_config, AgentConfig)

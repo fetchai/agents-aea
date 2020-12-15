@@ -39,7 +39,7 @@ try:
         LIBP2P_NODE_MODULE_NAME,
         _golang_module_build_async,
     )
-except ImportError:
+except ImportError:  # pragma: nocover
     # flake8: noqa
     # pylint: disable=unused-import,ungrouped-imports
     from connection import (  # type: ignore
@@ -167,7 +167,7 @@ def check_versions():
     )
 
 
-def main():
+def main():  # pragma: nocover
     """The main entrypoint of the script."""
     if len(sys.argv) < 2:
         raise ValueError("Please provide build directory path as an argument!")
@@ -182,8 +182,9 @@ def build_node(build_dir: str) -> None:
     copy_tree(LIBP2P_NODE_MODULE, build_dir)
     loop = asyncio.get_event_loop()
     err_str = loop.run_until_complete(_golang_module_build_async(build_dir))
-    if err_str:
+    if err_str:  # pragma: nocover
         raise Exception(f"Node build failed: {err_str}")
+    print(f"libp2p_node built successfully!")
 
 
 if __name__ == "__main__":

@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA skill testing."""
-
 import asyncio
 from pathlib import Path
 from queue import Queue

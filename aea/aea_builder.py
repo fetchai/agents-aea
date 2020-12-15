@@ -918,7 +918,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             self._run_build_entrypoint(
                 build_entrypoint, source_directory, target_directory
             )
-
         if self._build_entrypoint:
             self.logger.info("Building AEA package...")
             source_directory = "."

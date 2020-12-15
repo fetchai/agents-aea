@@ -1322,6 +1322,8 @@ class ConnectionConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1347,6 +1349,7 @@ class ConnectionConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
             connections=cast(Set[PublicId], connections),
@@ -1429,6 +1432,8 @@ class ProtocolConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1446,6 +1451,7 @@ class ProtocolConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
@@ -1592,6 +1598,8 @@ class SkillConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1629,6 +1637,7 @@ class SkillConfig(ComponentConfiguration):
             dependencies=dependencies,
             description=description,
             is_abstract=obj.get("is_abstract", False),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
         )
 
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():
@@ -2265,6 +2274,8 @@ class ContractConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -2284,6 +2295,7 @@ class ContractConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
             contract_interface_paths=cast(

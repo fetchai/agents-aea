@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """Test P2PLibp2p connection build."""
 import os
 import tempfile

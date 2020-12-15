@@ -135,11 +135,10 @@ class TestWeatherSkills(AEATestCaseMany):
 
         # run agents
         self.set_agent_context(weather_station_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         weather_station_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -153,11 +152,10 @@ class TestWeatherSkills(AEATestCaseMany):
         ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
         self.set_agent_context(weather_client_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         weather_client_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -313,11 +311,10 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         self.nested_set_config(setting_path, location)
 
         self.set_agent_context(weather_station_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         weather_station_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -331,11 +328,10 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
         ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
         self.set_agent_context(weather_client_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         weather_client_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

@@ -132,11 +132,10 @@ class TestThermometerSkill(AEATestCaseMany):
 
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         thermometer_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -150,11 +149,10 @@ class TestThermometerSkill(AEATestCaseMany):
         ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
 
         self.set_agent_context(thermometer_client_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         thermometer_client_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -317,11 +315,10 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         thermometer_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -335,11 +332,10 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
 
         self.set_agent_context(thermometer_client_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         thermometer_client_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

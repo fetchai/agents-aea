@@ -655,7 +655,9 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         self.new_model_args = {"model_arg_1": 42}
         self._add_dummy_skill_config()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+
         with cd(self._get_cwd()):
+            builder.call_all_build_entrypoints()
             aea = builder.build()
 
         dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
@@ -701,6 +703,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
         self._add_dummy_skill_config()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
+            builder.call_all_build_entrypoints()
             aea = builder.build()
 
         dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
@@ -785,7 +788,7 @@ class TestExtraDeps(AEATestCaseEmpty):
             pass
 
 
-class BaseTestBuildEntrypoint(AEATestCaseEmpty):
+class TestBuildEntrypoint(AEATestCaseEmpty):
     """Test build entrypoint."""
 
     def setup(self):
