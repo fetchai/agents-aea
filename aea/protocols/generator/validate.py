@@ -697,15 +697,12 @@ def _validate_termination(
             )
 
     # check that there are no repetitive performatives in termination
-    duplicates_dict: Dict[str, int] = {}
-    for performative in termination:
-        duplicates_dict[performative] = duplicates_dict.get(performative, 0) + 1
-    duplicates = [k for k, v in duplicates_dict.items() if v > 1]
-    if len(duplicates) != 0:
+    number_of_duplicates = len(termination) - len(set(termination))
+    if number_of_duplicates > 0:
         return (
             False,
-            'The following performatives in "termination" are repeated: {}'.format(
-                duplicates,
+            'There are {} duplicate performatives in "termination".'.format(
+                number_of_duplicates,
             ),
         )
 
@@ -865,13 +862,16 @@ def _validate_dialogue_section(
             return result_reply_validation, msg_reply_validation
 
         # Validate termination
+        terminal_performatives_from_reply = cast(
+            Set[str], terminal_performatives_from_reply
+        )
         (
             result_termination_validation,
             msg_termination_validation,
         ) = _validate_termination(
             cast(List[str], protocol_specification.dialogue_config["termination"]),
             performatives_set,
-            cast(Set[str], terminal_performatives_from_reply),
+            terminal_performatives_from_reply,
         )
         if not result_termination_validation:
             return result_termination_validation, msg_termination_validation

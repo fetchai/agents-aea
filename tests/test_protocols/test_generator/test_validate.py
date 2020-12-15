@@ -1516,8 +1516,7 @@ class TestValidate(TestCase):
         )
         assert invalid_result_4 is False
         assert (
-            invalid_msg_4
-            == f"The following performatives in \"termination\" are repeated: {['perm_4', 'perm_3']}"
+            invalid_msg_4 == f'There are {2} duplicate performatives in "termination".'
         )
 
         invalid_termination_5 = ["perm_4", "perm_3"]
