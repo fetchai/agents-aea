@@ -57,7 +57,7 @@ ERROR_MESSAGE_TEMPLATE_VERSION_TOO_LOW = "The installed version of '{command}' i
 # for the purposes of this script,
 # a version is a tuple of integers: (major, minor, patch)
 VERSION = Tuple[int, int, int]
-MINIMUM_GO_VERSION: VERSION = (1, 14, 0)
+MINIMUM_GO_VERSION: VERSION = (1, 13, 0)
 MINIMUM_GCC_VERSION: VERSION = (7, 5, 0)
 
 
@@ -184,7 +184,7 @@ def build_node(build_dir: str) -> None:
     err_str = loop.run_until_complete(_golang_module_build_async(build_dir))
     if err_str:  # pragma: nocover
         raise Exception(f"Node build failed: {err_str}")
-    print(f"libp2p_node built successfully!")
+    print("libp2p_node built successfully!")
 
 
 if __name__ == "__main__":

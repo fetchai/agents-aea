@@ -82,6 +82,7 @@ class ContractApiMessage(Message):
         "raw_transaction",
         "state",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

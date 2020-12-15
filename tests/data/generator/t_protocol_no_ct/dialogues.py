@@ -122,7 +122,7 @@ class TProtocolNoCtDialogues(Dialogues, ABC):
         }
     )
 
-    _keep_terminal_state_dialogues = False
+    _keep_terminal_state_dialogues = True
 
     def __init__(
         self,

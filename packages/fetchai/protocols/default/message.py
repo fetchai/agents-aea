@@ -52,6 +52,7 @@ class DefaultMessage(Message):
             return str(self.value)
 
     _performatives = {"bytes", "error"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

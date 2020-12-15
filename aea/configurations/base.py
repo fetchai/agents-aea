@@ -2071,20 +2071,6 @@ class SpeechActContentConfig(Configuration):
         """Initialize a speech_act content configuration."""
         super().__init__()
         self.args = args  # type: Dict[str, str]
-        self._check_consistency()
-
-    def _check_consistency(self):
-        """Check consistency of the args."""
-        for content_name, content_type in self.args.items():
-            if not isinstance(content_name, str) or not isinstance(content_type, str):
-                raise ProtocolSpecificationParseError(
-                    "Contents' names and types must be string."
-                )
-            # Check each content definition key/value (i.e. content name/type) is not empty
-            if content_name == "" or content_type == "":
-                raise ProtocolSpecificationParseError(
-                    "Contents' names and types cannot be empty."
-                )
 
     @property
     def json(self) -> Dict:
@@ -2179,34 +2165,7 @@ class ProtocolSpecification(ProtocolConfig):
             protocol_specification.speech_acts.create(
                 speech_act, speech_act_content_config
             )
-        protocol_specification._check_consistency()  # pylint: disable=protected-access
         return protocol_specification
-
-    def _check_consistency(self):
-        """Validate the correctness of the speech_acts."""
-        if len(self.speech_acts.read_all()) == 0:
-            raise ProtocolSpecificationParseError(
-                "There should be at least one performative defined in the speech_acts."
-            )
-        content_dict = {}
-        for performative, speech_act_content_config in self.speech_acts.read_all():
-            if not isinstance(performative, str):
-                raise ProtocolSpecificationParseError(
-                    "A 'performative' is not specified as a string."
-                )
-            if performative == "":
-                raise ProtocolSpecificationParseError(
-                    "A 'performative' cannot be an empty string."
-                )
-            for content_name, content_type in speech_act_content_config.args.items():
-                if content_name in content_dict.keys():
-                    if content_type != content_dict[content_name]:  # pragma: no cover
-                        raise ProtocolSpecificationParseError(
-                            "The content '{}' appears more than once with different types in speech_acts.".format(
-                                content_name
-                            )
-                        )
-                content_dict[content_name] = content_type
 
 
 class ContractConfig(ComponentConfiguration):

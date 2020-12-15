@@ -65,6 +65,7 @@ class TacMessage(Message):
         "transaction_confirmation",
         "unregister",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

@@ -819,6 +819,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
                     component_id=self.component_id,
                     build_entrypoint=str(self.script_path),
                     directory=".",
+                    build_directory="test",
                 )
                 mock_values = MagicMock(return_value=[mock_config])
                 _mock_mgr._dependencies = MagicMock(values=mock_values)
