@@ -78,6 +78,7 @@ class OefSearchMessage(Message):
         "success",
         "unregister_service",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

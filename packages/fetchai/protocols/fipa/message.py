@@ -72,6 +72,7 @@ class FipaMessage(Message):
         "match_accept_w_inform",
         "propose",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (
