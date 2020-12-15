@@ -109,9 +109,8 @@ func New(opts ...Option) (*DHTClient, error) {
 	}
 
 	// agent record is mandatory
-	// FIXME
 	if dhtClient.myAgentRecord == nil {
-		//	return nil, errors.New("missing agent record")
+		return nil, errors.New("missing agent record")
 	}
 
 	// check if the PoR is delivered for my public  key
@@ -542,8 +541,9 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 		Msgf("registering addr and peerID to relay peer")
 
 	registration := &dhtnode.Register{Record: dhtClient.myAgentRecord}
-	msg := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Register{registration}}
+	msg := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Register{Register: registration}}
 	buf, err := proto.Marshal(msg)
+	ignore(err)
 
 	err = utils.WriteBytes(stream, buf)
 	if err != nil {

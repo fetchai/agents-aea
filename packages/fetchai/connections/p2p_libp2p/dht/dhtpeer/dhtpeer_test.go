@@ -32,8 +32,8 @@ import (
 	"libp2p_node/dht/dhtnode"
 	"libp2p_node/utils"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 /*
@@ -1544,9 +1544,9 @@ func SetupDelegateClient(key string, host string, port uint16, peerPubKey string
 	record.PeerPublicKey = peerPubKey
 	record.Signature = signature
 	registration := &dhtnode.Register{Record: record}
-	msg := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Register{registration}}
+	msg := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Register{Register: registration}}
 	data, err := proto.Marshal(msg)
-
+	ignore(err)
 	err = utils.WriteBytesConn(client.Conn, data)
 	ignore(err)
 	data, err = utils.ReadBytesConn(client.Conn)

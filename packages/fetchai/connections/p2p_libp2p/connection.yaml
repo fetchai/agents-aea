@@ -17,7 +17,7 @@ fingerprint:
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmY8EiWapBspyR3zKGEY3TnQayz7hF7DxZ2d9zozVfFhtA
   connection.py: QmVf4XX25S8FQHcZca6o1xC77Ez9dUNp66K3dGnVB724GC
-  dht/dhtclient/dhtclient.go: QmeKS6wgfeoYDaHRfb9FEDSCT2fDYnRXZxmEjc8yz7Zbec
+  dht/dhtclient/dhtclient.go: QmQSCmviTBg9GRAHkRWsyt3uppTfLYseHie6KVLSSeVd2L
   dht/dhtclient/dhtclient_test.go: QmYVnf5j8Jyahi5jZNswkGR2tdnM4D1r5Fjdrz654EcD1F
   dht/dhtclient/options.go: QmWs7fQqHRavjwe1PjihHFi85HeJu9qSEVyMdcRviZzaT2
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
@@ -26,8 +26,8 @@ fingerprint:
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtnode/utils.go: QmZi91a8RWrUUM6LztpMWBhLKj47W7UwMoTvooptF6oNHU
   dht/dhtpeer/benchmarks_test.go: QmUj4zGAG8QgDVFf9PeP5kKdjUbqBi5nzdYmhrUfX2eZBD
-  dht/dhtpeer/dhtpeer.go: QmWDqiqMiz7MNZAiJLLZnNWCjgCSwyjwMbPPf6bQgSB26G
-  dht/dhtpeer/dhtpeer_test.go: QmVn5BRKtyBAqR52RH5frBGiynyPoaWr9737bZZniMGgex
+  dht/dhtpeer/dhtpeer.go: QmTYaRrrRphDfK3JUa52qFFZ1FgP7LSEnen4628me492RX
+  dht/dhtpeer/dhtpeer_test.go: QmbAKGzUvotDNrjk4QWAUUD4vhgTmeeTGrFjo5rJBwjfkw
   dht/dhtpeer/options.go: Qme5L9bRBQZaR5fciPJ1feFwqaQpkdYfW8TaiY1TDXs91H
   dht/dhttests/dhttests.go: QmQJxw2rJCGUFTXKxH3sf3Zaqta7H76EvaB7mWNNfikFkA
   dht/monitoring/file.go: QmZB8pNf7infMXWaC5A46rr3mghNfkuSd8UKH4Ceg8nDSM
@@ -36,7 +36,7 @@ fingerprint:
   go.mod: QmScMYT69B7HbQApxXmZFpSwsKBZVPAJimVFYpTVYTvzbe
   go.sum: QmawFS81vDFYVZUZMKxQjNdKkLxDzfRRfqD1Tcpzze66yd
   libp2p_node.go: QmSMPBU6GMJ7gAHWMsYGVDSUv5sw48x2rvNKydcxVv7MqL
-  utils/utils.go: QmcgF9WCrP74kmQSSQWFyhbNBV9QwfXiF6J9BP7Yqnuyva
+  utils/utils.go: QmcXJwBg95H627cnzgkqgcEDmBCNum74KVnPEvPkhw4BDm
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []

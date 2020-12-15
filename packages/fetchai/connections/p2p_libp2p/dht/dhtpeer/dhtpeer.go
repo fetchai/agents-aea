@@ -35,8 +35,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/rs/zerolog"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
@@ -526,8 +526,9 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	if err != nil {
 		lerror(err).Msg("couldn't deserialize acn registration message")
 		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_GENERIC, Msgs: []string{err.Error()}}
-		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{Status: status}}
 		buf, err = proto.Marshal(response)
+		ignore(err)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
 
@@ -544,9 +545,10 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		register = pl.Register
 	default:
 		err = errors.New("Unexpected payload")
-		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_UNEXPECTED_PAYLOAD}
-		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_UNEXPECTED_PAYLOAD, Msgs: []string{err.Error()}}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{Status: status}}
 		buf, err = proto.Marshal(response)
+		ignore(err)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
 
@@ -565,8 +567,9 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	status, err := dhtnode.IsValidProofOfRepresentation(record, myPubKey)
 	if err != nil {
 		lerror(err).Msg("PoR is not valid")
-		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{Status: status}}
 		buf, err = proto.Marshal(response)
+		ignore(err)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
 
@@ -574,8 +577,9 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		return
 	}
 
-	msg = &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+	msg = &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{Status: status}}
 	buf, err = proto.Marshal(msg)
+	ignore(err)
 	err = utils.WriteBytesConn(conn, buf)
 	if err != nil {
 		nbrConns.Dec()
@@ -1053,7 +1057,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	if err != nil {
 		lerror(err).Msg("couldn't deserialize acn registration message")
 		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_GENERIC, Msgs: []string{err.Error()}}
-		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{Status: status}}
 		buf, err = proto.Marshal(response)
 		ignore(err)
 		err = utils.WriteBytes(stream, buf)
@@ -1072,8 +1076,8 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		register = pl.Register
 	default:
 		err = errors.New("Unexpected payload")
-		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_UNEXPECTED_PAYLOAD}
-		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_UNEXPECTED_PAYLOAD, Msgs: []string{err.Error()}}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{Status: status}}
 		buf, err = proto.Marshal(response)
 		ignore(err)
 		err = utils.WriteBytes(stream, buf)
@@ -1094,7 +1098,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	status, err := dhtnode.IsValidProofOfRepresentation(record, clientPubKey)
 	if err != nil {
 		lerror(err).Msg("PoR is not valid")
-		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{Status: status}}
 		buf, err = proto.Marshal(response)
 		ignore(err)
 		err = utils.WriteBytes(stream, buf)
@@ -1104,8 +1108,9 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		return
 	}
 
-	msg = &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+	msg = &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{Status: status}}
 	buf, err = proto.Marshal(msg)
+	ignore(err)
 	err = utils.WriteBytes(stream, buf)
 	if err != nil {
 		err = stream.Reset()

@@ -42,7 +42,7 @@ import (
 	"github.com/multiformats/go-multiaddr"
 	"github.com/multiformats/go-multihash"
 	"github.com/rs/zerolog"
-	"golang.org/x/crypto/ripemd160"
+	"golang.org/x/crypto/ripemd160" // nolint:staticcheck
 
 	host "github.com/libp2p/go-libp2p-core/host"
 	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
