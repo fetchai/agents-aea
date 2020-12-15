@@ -236,6 +236,7 @@ jobs:
       name: Install dependencies (macos-latest)
       run: |
         pip install tox
+        brew install gcc
         # brew install protobuf
         # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-osx-x86_64.zip
@@ -249,6 +250,7 @@ jobs:
         pip install tox
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
         choco install protoc --version 3.11.4
+        choco install mingw -y
         # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-win64.zip
         # unzip protoc-3.11.4-win64.zip -d protoc
         # sudo mv protoc/bin/protoc /usr/local/bin/protoc

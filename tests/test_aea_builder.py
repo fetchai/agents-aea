@@ -838,8 +838,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
             self.builder.call_all_build_entrypoints()
 
     @mock.patch(
-        "aea.aea_builder.run_cli_command_subprocess",
-        side_effect=Exception("some error."),
+        "aea.aea_builder.check_call", side_effect=Exception("some error."),
     )
     def test_build_negative_subprocess(self, *_mocks):
         """Test build, negative due to script error at runtime."""

@@ -32,7 +32,6 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     P2PLibp2pConnection,
-    _golang_module_build_async,
     _golang_module_run,
     _ip_all_private_or_all_public,
 )
@@ -42,47 +41,6 @@ from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
 
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
-
-
-@pytest.mark.asyncio
-class TestP2PLibp2pConnectionFailureGolangBuild:
-    """Test that golang build async fails if timeout exceeded or wrong path"""
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        cls.connection = _make_libp2p_connection()
-        cls.wrong_path = tempfile.mkdtemp()
-
-    @pytest.mark.asyncio
-    async def test_timeout(self):
-        """Test the timeout."""
-        log_file_desc = open("log", "a", 1)
-        with pytest.raises(Exception):
-            await _golang_module_build_async(
-                self.connection.node.source, log_file_desc, timeout=0
-            )
-
-    @pytest.mark.asyncio
-    async def test_wrong_path(self):
-        """Test the wrong path."""
-        self.connection.node.source = self.wrong_path
-        with pytest.raises(Exception):
-            await self.connection.connect()
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-            shutil.rmtree(cls.wrong_path)
-        except (OSError, IOError):
-            pass
 
 
 class TestP2PLibp2pConnectionFailureGolangRun:

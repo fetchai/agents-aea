@@ -17,10 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the p2p libp2p connection."""
-
 import asyncio
 import logging
 import os
+import platform
 import shutil
 import subprocess  # nosec
 import tempfile
@@ -48,6 +48,9 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
 
 LIBP2P_NODE_MODULE_NAME = "libp2p_node"
+
+if platform.system() == "Windows":  # pragma: nocover
+    LIBP2P_NODE_MODULE_NAME += ".exe"
 
 LIBP2P_NODE_LOG_FILE = "libp2p_node.log"
 
@@ -82,37 +85,6 @@ def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
         if ip_address(gethostbyname(addr)).is_loopback != is_loopback:
             return False
     return True
-
-
-async def _golang_module_build_async(
-    path: str, timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
-) -> Optional[str]:
-    """
-    Builds go module located at `path`, downloads necessary dependencies
-
-    :return: str with logs or error description if happens
-    """
-    proc = await asyncio.create_subprocess_exec(
-        "go",
-        "build",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-        cwd=path,
-        env=os.environ,
-    )
-
-    try:
-        stdout, _ = await asyncio.wait_for(  # type: ignore
-            proc.communicate(), timeout=timeout  # type: ignore
-        )
-    except asyncio.TimeoutError:  # pragma: nocover
-        proc.terminate()
-        await proc.wait()
-        return "terminated by timeout"
-
-    if proc.returncode != 0:  # pragma: nocover
-        return stdout.decode()  # type: ignore
-    return None
 
 
 def _golang_module_run(

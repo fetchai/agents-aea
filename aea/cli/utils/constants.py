@@ -83,4 +83,3 @@ RESOURCE_TYPE_TO_CONFIG_FILE = {
 FALSE_EQUIVALENTS = ["f", "false", "False"]
 
 REQUIREMENTS = "requirements.txt"
-DEFAULT_CLI_TIMEOUT = 120

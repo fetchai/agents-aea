@@ -17,16 +17,17 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Check that the dependencies 'gcc' and 'go' are installed in the system."""
 import asyncio
+import os
 import re
 import shutil
 import subprocess  # nosec
 import sys
 from distutils.dir_util import copy_tree
 from itertools import islice
-from typing import Any, Iterable, List, Pattern, Tuple
+from subprocess import Popen, TimeoutExpired  # nosec
+from typing import Any, Iterable, List, Optional, Pattern, Tuple
 
 from aea.helpers.base import ensure_dir
 
@@ -35,17 +36,17 @@ try:
     # flake8: noqa
     # pylint: disable=unused-import,ungrouped-imports
     from .connection import (  # type: ignore
+        LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
         LIBP2P_NODE_MODULE,
         LIBP2P_NODE_MODULE_NAME,
-        _golang_module_build_async,
     )
 except ImportError:  # pragma: nocover
     # flake8: noqa
     # pylint: disable=unused-import,ungrouped-imports
     from connection import (  # type: ignore
+        LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
         LIBP2P_NODE_MODULE,
         LIBP2P_NODE_MODULE_NAME,
-        _golang_module_build_async,
     )
 
 from aea.exceptions import AEAException
@@ -177,11 +178,39 @@ def main():  # pragma: nocover
     build_node(build_dir)
 
 
+def _golang_module_build(
+    path: str, timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
+) -> Optional[str]:
+    """
+    Builds go module located at `path`, downloads necessary dependencies
+
+    :return: str with logs or error description if happens
+    """
+    proc = Popen(  # nosec
+        ["go", "build"],
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+        cwd=path,
+        env=os.environ,
+    )
+
+    try:
+        stdout, _ = proc.communicate(timeout=timeout)  # type: ignore
+    except TimeoutExpired:  # pragma: nocover
+        proc.terminate()
+        proc.wait(timeout=timeout)
+        return "terminated by timeout"
+
+    if proc.returncode != 0:  # pragma: nocover
+        return stdout.decode()  # type: ignore
+    return None
+
+
 def build_node(build_dir: str) -> None:
     """Build node placed inside build_dir."""
     copy_tree(LIBP2P_NODE_MODULE, build_dir)
-    loop = asyncio.get_event_loop()
-    err_str = loop.run_until_complete(_golang_module_build_async(build_dir))
+
+    err_str = _golang_module_build(build_dir)
     if err_str:  # pragma: nocover
         raise Exception(f"Node build failed: {err_str}")
     print("libp2p_node built successfully!")

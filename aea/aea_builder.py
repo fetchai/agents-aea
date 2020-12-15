@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains utilities for building an AEA."""
 import ast
 import logging
@@ -28,13 +26,13 @@ import sys
 from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
+from subprocess import check_call  # nosec
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
 from packaging.specifiers import SpecifierSet
 
 from aea.aea import AEA
-from aea.cli.utils.generic import run_cli_command_subprocess
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -306,7 +304,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
     AEA_CLASS = AEA
-
+    BUILD_TIMEOUT = 120
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
 
     # pylint: disable=attribute-defined-outside-init
@@ -943,8 +941,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         command_str = " ".join(command)
         self.logger.info(f"Running command '{command_str}'")
         try:
-            return_code = run_cli_command_subprocess(command, cwd=source_directory)
-            enforce(return_code == 0, f"Return code {return_code} != 0")
+            check_call(
+                command, cwd=source_directory, timeout=self.BUILD_TIMEOUT
+            )  # nosec
         except Exception as e:
             raise AEAException(
                 f"An error occurred while running command '{command_str}': {str(e)}"
