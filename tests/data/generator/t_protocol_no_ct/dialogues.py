@@ -44,7 +44,6 @@ class TProtocolNoCtDialogue(Dialogue):
         {
             TProtocolNoCtMessage.Performative.PERFORMATIVE_MT,
             TProtocolNoCtMessage.Performative.PERFORMATIVE_O,
-            TProtocolNoCtMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS,
         }
     )
     VALID_REPLIES = {
