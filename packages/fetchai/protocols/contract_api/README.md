@@ -70,7 +70,7 @@ reply:
   raw_message: []
   state: []
   error: []
-termination: [state, raw_transaction, raw_message]
+termination: [state, raw_transaction, raw_message, error]
 roles: {agent, ledger}
 end_states: [successful, failed]
 keep_terminal_state_dialogues: false

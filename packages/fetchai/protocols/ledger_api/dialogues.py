@@ -51,6 +51,7 @@ class LedgerApiDialogue(Dialogue):
             LedgerApiMessage.Performative.BALANCE,
             LedgerApiMessage.Performative.STATE,
             LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+            LedgerApiMessage.Performative.ERROR,
         }
     )
     VALID_REPLIES = {
