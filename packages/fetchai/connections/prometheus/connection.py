@@ -43,6 +43,7 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.prometheus
 
 PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.1.0")
 
+DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 9090
 
 
@@ -79,7 +80,7 @@ class PrometheusDialogues(BasePrometheusDialogues):
 class PrometheusChannel:
     """A wrapper for interacting with a prometheus server."""
 
-    def __init__(self, address: Address, metrics: Dict[str, Any], port: int):
+    def __init__(self, address: Address, metrics: Dict[str, Any], host: str, port: int):
         """
         Initialize a prometheus channel.
 
@@ -93,6 +94,7 @@ class PrometheusChannel:
         self._queue: Optional[asyncio.Queue] = None
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = _default_logger
         self._dialogues = PrometheusDialogues()
+        self._host = host
         self._port = port
         self._service = aioprometheus.Service()
 
@@ -127,7 +129,7 @@ class PrometheusChannel:
             return None
         self._loop = asyncio.get_event_loop()
         self._queue = asyncio.Queue()
-        await self._service.start(addr="127.0.0.1", port=self._port)
+        await self._service.start(addr=self._host, port=self._port)
 
     async def send(self, envelope: Envelope) -> None:
         """
@@ -279,9 +281,12 @@ class PrometheusConnection(Connection):
         """
         super().__init__(**kwargs)
 
+        self.host = cast(int, self.configuration.config.get("host", DEFAULT_HOST))
         self.port = cast(int, self.configuration.config.get("port", DEFAULT_PORT))
         self.metrics = {}
-        self.channel = PrometheusChannel(self.address, self.metrics, self.port)
+        self.channel = PrometheusChannel(
+            self.address, self.metrics, self.host, self.port
+        )
         self._connection = None  # type: Optional[asyncio.Queue]
 
     async def connect(self) -> None:

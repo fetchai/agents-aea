@@ -8,12 +8,13 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmVHrRiCyf4esFvF3sAN2TJDsWRZgHn3FanEoYSRZpW2fV
   __init__.py: QmWVrDiiePsr6vTnvbPTcDrayR89ji3hf25rs9V9TiJUPv
-  connection.py: QmZz1CPGPNRkCow4dwxqrDEQBPNoT89ekQ2vfJ9DUPDyv6
+  connection.py: QmYtf7eu6PvS6ahDtCKFHLbtdZxyYwWMHGPWjzrUo2x71d
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []
 class_name: PrometheusConnection
 config:
+  host: 127.0.0.1
   port: 9090
 excluded_protocols: []
 restricted_to_protocols:
