@@ -161,8 +161,16 @@ class TestPrometheusConnection:
         assert msg.code == 404
         assert msg.message == "CoolBar is not a recognized prometheus metric."
 
-        # test update metric (correct)
+        # test update metric (inc: correct)
         await self.send_update_metric("some_metric", "inc")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 200
+        assert msg.message == "Metric some_metric successfully updated."
+
+        # test update metric (set: correct)
+        await self.send_update_metric("some_metric", "set")
         envelope = await self.prometheus_con.receive()
         msg = cast(PrometheusMessage, envelope.message)
         assert msg.performative == PrometheusMessage.Performative.RESPONSE
