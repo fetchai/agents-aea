@@ -128,7 +128,7 @@ class LedgerApiHandler(Handler):
         )
         if self.context.prometheus_dialogues.enabled:
             self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
-                "oracle_account_balance_ETH", "set", float(ledger_api_msg.balance)
+                "oracle_account_balance_ETH", "set", float(ledger_api_msg.balance), {}
             )
 
     def _handle_transaction_digest(
@@ -208,7 +208,7 @@ class LedgerApiHandler(Handler):
                 self.context.logger.info("Oracle value successfully updated!")
                 if self.context.prometheus_dialogues.enabled:
                     self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
-                        "num_oracle_updates", "inc", 1.0
+                        "num_oracle_updates", "inc", 1.0, {}
                     )
             else:
                 self.context.logger.error("unexpected transaction receipt!")

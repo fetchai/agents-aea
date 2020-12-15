@@ -6,13 +6,13 @@ description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmTzcAB5zTCZ9nXhzjHQv5Qnji9JH6KZSKaT4zBvULk3Zz
+  README.md: QmaJ2im2UiPT2bigecuR3YrpLmmDNShesDtG3ffv2GeGX5
   __init__.py: QmYcCsWNz4qmSUBorY9N4XgyXvdYrrzNGr6oP3iQP9wUM5
   dialogues.py: QmSg5DmxpnvN9g2ThzmB4N6fJ2SeQ63iGa2ByGrLQD6BKF
-  message.py: QmTjhBP4DMvDi6pUDGcGQcRTiKindr1Ngc8rwQWZq4Sqt8
-  prometheus.proto: Qmas8rPVHgiaH2hzZLhzudinmNE2BX35d6cbDFAfehACYZ
-  prometheus_pb2.py: QmeMWfTFCFB2YnnWgEWCK9pUyqB9WBhK4FdBf8VCSGvDX3
-  serialization.py: QmedSKUhA5XBxecbcifsDYaRQWpd8b6uogVFEEWVEBnd72
+  message.py: QmXqQHsanCqLAK2QhqxrRDKdG9jKt8y3ibfc7KtEpycz6p
+  prometheus.proto: QmUmvB2uvp8gdWzvUoxDJyc4Lvi4bFuaSdqMTMyk6hBhgF
+  prometheus_pb2.py: QmXwmam9ZPyR3yf6UTmgMNVuvxTAZzgx6hPohzVPmKq452
+  serialization.py: QmUgeNdHPqtCTyRM5K42a8rtzr1RYP94YiV7qycGDxdYzg
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

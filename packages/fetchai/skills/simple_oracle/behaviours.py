@@ -19,7 +19,7 @@
 
 """This package contains a simple Fetch oracle contract deployment behaviour."""
 
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -79,7 +79,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
             for metric in prom_dialogues.metrics:
                 self.context.logger.info("Adding Prometheus metric: " + metric["name"])
                 self.add_prometheus_metric(
-                    metric["name"], metric["type"], metric["description"]
+                    metric["name"],
+                    metric["type"],
+                    metric["description"],
+                    metric["labels"],
                 )
 
     def act(self) -> None:
@@ -247,14 +250,19 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
 
     def add_prometheus_metric(
-        self, metric_name: str, metric_type: str, description: str = None
+        self,
+        metric_name: str,
+        metric_type: str,
+        description: str,
+        labels: Dict[str, str],
     ) -> None:
         """
         Add a prometheus metric.
 
         :param metric_name: the name of the metric to add.
-        :param type: the type of the metric {"Gauge", "Counter", ...}.
-        :param description: a description of the metric..
+        :param type: the type of the metric.
+        :param description: a description of the metric.
+        :param labels: the metric labels.
         :return: None
         """
 
@@ -268,7 +276,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
             type=metric_type,
             title=metric_name,
             description=description,
-            labels=(),
+            labels=labels,
         )
 
         # send message
@@ -278,17 +286,15 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=message, context=envelope_context)
 
     def update_prometheus_metric(
-        self,
-        metric_name: str,
-        update_func: str,
-        value: Optional[Union[float, str]] = None,
+        self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
     ) -> None:
         """
         Update a prometheus metric.
 
         :param metric_name: the name of the metric.
-        :param update_func: the name of the update function {"inc", "set", ...}.
+        :param update_func: the name of the update function (e.g. inc, dec, set, ...).
         :param value: the value to provide to the update function.
+        :param labels: the metric labels.
         :return: None
         """
 
@@ -302,6 +308,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
             title=metric_name,
             callable=update_func,
             value=value,
+            labels=labels,
         )
 
         # send message

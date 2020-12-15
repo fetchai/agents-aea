@@ -19,11 +19,12 @@ speech_acts:
     type: pt:str
     title: pt:str
     description: pt:str
-    labels: pt:list[pt:str]
+    labels: pt:dict[pt:str, pt:str]
   update_metric:
     title: pt:str
     callable: pt:str
-    value: pt:optional[pt:float]
+    value: pt:float
+    labels: pt:dict[pt:str, pt:str]
   response:
     code: pt:int
     message: pt:optional[pt:str]

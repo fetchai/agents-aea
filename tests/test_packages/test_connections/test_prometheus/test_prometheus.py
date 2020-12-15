@@ -23,7 +23,7 @@ from typing import cast
 import pytest
 
 from aea.common import Address
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
@@ -78,6 +78,7 @@ class TestPrometheusConnection:
             connection_id=PrometheusConnection.connection_id, port=9090,
         )
         self.agent_address = "my_address"
+        self.protocol_id = PublicId.from_str("fetchai/prometheus:0.1.0")
         identity = Identity("name", address=self.agent_address)
         self.prometheus_con = PrometheusConnection(
             identity=identity, configuration=configuration
@@ -94,7 +95,7 @@ class TestPrometheusConnection:
             title=title,
             type=metric_type,
             description="a gauge",
-            labels=(),
+            labels={},
         )
         assert sending_dialogue is not None
 
@@ -111,6 +112,7 @@ class TestPrometheusConnection:
             title=title,
             callable=update_func,
             value=1.0,
+            labels={},
         )
         assert sending_dialogue is not None
         assert sending_dialogue.last_message is not None
@@ -188,10 +190,10 @@ class TestPrometheusConnection:
             envelope = Envelope(
                 to="some_address",
                 sender="me",
-                protocol_id="some_id",
+                protocol_id=self.protocol_id,
                 message=Message({}),
             )
-            await self.prometheus_con.channel.handle_prometheus_message(envelope)
+            await self.prometheus_con.channel.send(envelope)
 
         # Test that envelope without dialogue produces warning.
         msg = PrometheusMessage(
@@ -200,10 +202,10 @@ class TestPrometheusConnection:
         envelope = Envelope(
             to=self.prometheus_address,
             sender=self.agent_address,
-            protocol_id="some_id",
+            protocol_id=self.protocol_id,
             message=msg,
         )
-        await self.prometheus_con.channel.handle_prometheus_message(envelope)
+        await self.prometheus_con.channel.send(envelope)
 
         # Test that envelope with invalid protocol_id raises error.
         with pytest.raises(ValueError):
@@ -213,6 +215,7 @@ class TestPrometheusConnection:
                 title="",
                 callable="",
                 value=1.0,
+                labels={},
             )
             envelope = Envelope(
                 to=self.prometheus_address,

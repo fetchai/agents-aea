@@ -23,7 +23,7 @@ import asyncio
 import logging
 from typing import Any, Dict, Optional, Tuple, Union, cast
 
-import prometheus_client  # type: ignore
+import aioprometheus  # type: ignore
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -94,6 +94,7 @@ class PrometheusChannel:
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = _default_logger
         self._dialogues = PrometheusDialogues()
         self._port = port
+        self._service = aioprometheus.Service()
 
     def _get_message_and_dialogue(
         self, envelope: Envelope
@@ -126,7 +127,7 @@ class PrometheusChannel:
             return None
         self._loop = asyncio.get_event_loop()
         self._queue = asyncio.Queue()
-        prometheus_client.start_http_server(self._port)
+        await self._service.start(addr="127.0.0.1", port=self._port)
 
     async def send(self, envelope: Envelope) -> None:
         """
@@ -160,9 +161,9 @@ class PrometheusChannel:
             return
 
         if message.performative == PrometheusMessage.Performative.ADD_METRIC:
-            response = self._handle_add_metric(message)
+            response = await self._handle_add_metric(message)
         elif message.performative == PrometheusMessage.Performative.UPDATE_METRIC:
-            response = self._handle_update_metric(message)
+            response = await self._handle_update_metric(message)
         else:  # pragma: nocover
             self.logger.warning("Unrecognized performative for PrometheusMessage")
             return
@@ -195,14 +196,15 @@ class PrometheusChannel:
             response_code = 409
             response_msg = "Metric already exists."
         else:
-            metric_type = getattr(prometheus_client, message.type, None)
+            metric_type = getattr(aioprometheus, message.type, None)
             if metric_type is None:
                 response_code = 404
                 response_msg = f"{message.type} is not a recognized prometheus metric."
             else:
                 self.metrics[message.title] = metric_type(
-                    message.title, message.description
+                    message.title, message.description, message.labels
                 )
+                self._service.register(self.metrics[message.title])
                 response_code = 200
                 response_msg = (
                     f"New {message.type} successfully added: {message.title}."
@@ -230,8 +232,11 @@ class PrometheusChannel:
                     f"Update function {message.callable} not found for metric {metric}."
                 )
             else:
-                # Update the metric
-                update_func(message.value)
+                # Update the metric ("inc" and "dec" do not take "value" argument)
+                if message.callable in {"inc", "dec"}:
+                    update_func(message.labels)
+                else:
+                    update_func(message.labels, message.value)
                 response_code = 200
                 response_msg = f"Metric {metric} successfully updated."
 
@@ -254,6 +259,7 @@ class PrometheusChannel:
         if self._queue is not None:
             await self._queue.put(None)
             self._queue = None
+        await self._service.stop()
 
     async def get(self) -> Optional[Envelope]:
         """Get incoming envelope."""

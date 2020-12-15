@@ -1,6 +1,6 @@
 AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.1.0`.
 
-To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090` to see the latest values of the metrics `num_retrievals` and `num_requests`:
+To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `num_retrievals` and `num_requests`:
 ```bash
 aea fetch fetchai/coin_price_feed:0.1.0
 cd coin_price_feed
@@ -59,23 +59,30 @@ models:
       - name: num_retrievals
         type: Gauge
         description: Number of price quotes retrieved
+        labels: {}
       - name: num_requests
         type: Gauge
         description: Number of price quote requests served
+        labels: {}
     class_name: PrometheusDialogues
 ```
 
 Add a metric `metric_name` of type `metric_type` {`Gauge`, `Counter`, ...} and description `description` by sending a message with performative `ADD_METRIC` to the prometheus connection:
 ```python
 def add_prometheus_metric(
-    self, metric_name: str, metric_type: str, description: str = None
+    self,
+    metric_name: str,
+    metric_type: str,
+    description: str,
+    labels: Dict[str, str],
 ) -> None:
     """
     Add a prometheus metric.
 
     :param metric_name: the name of the metric to add.
     :param type: the type of the metric.
-    :param description: a description of the metric..
+    :param description: a description of the metric.
+    :param labels: the metric labels.
     :return: None
     """
 
@@ -89,14 +96,14 @@ def add_prometheus_metric(
         type=metric_type,
         title=metric_name,
         description=description,
-        labels=(),
-        )
+        labels=labels,
+    )
 
-        # send message
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-        )
-        self.context.outbox.put_message(message=message, context=envelope_context)
+    # send message
+    envelope_context = EnvelopeContext(
+        skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
+    )
+    self.context.outbox.put_message(message=message, context=envelope_context)
 ```
 where `PROM_CONNECTION_ID` should be imported to your skill as follows:
 ```python
@@ -108,17 +115,15 @@ from packages.fetchai.connections.prometheus.connection import (
 Update metric `metric_name` with update function `update_func` {`inc`, `set`, `observe`, ...} and value `value` by sending a message with performative `UPDATE_METRIC` to the prometheus connection:
 ```python
 def update_prometheus_metric(
-    self,
-    metric_name: str,
-    update_func: str,
-    value: Optional[Union[float, str]] = None,
+    self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
 ) -> None:
     """
     Update a prometheus metric.
 
     :param metric_name: the name of the metric.
-    :param update_func: the name of the update function (e.g. inc, set, observe).
+    :param update_func: the name of the update function (e.g. inc, dec, set, ...).
     :param value: the value to provide to the update function.
+    :param labels: the metric labels.
     :return: None
     """
 
@@ -132,6 +137,7 @@ def update_prometheus_metric(
         title=metric_name,
         callable=update_func,
         value=value,
+        labels=labels,
     )
 
     # send message
@@ -151,7 +157,7 @@ def setup(self) -> None:
         for metric in prom_dialogues.metrics:
             self.context.logger.info("Adding Prometheus metric: " + metric["name"])
             self.add_prometheus_metric(
-                metric["name"], metric["type"], metric["description"]
+                metric["name"], metric["type"], metric["description"], metric["labels"]
 ```
 
 Then call the `update_prometheus_metric` function from the appropriate places.
@@ -159,7 +165,7 @@ For example, the following code in `handlers.py` for the `coin_price` skill upda
 ```python
 if self.context.prometheus_dialogues.enabled:
     self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-        "num_requests", "inc", 1.0
+        "num_requests", "inc", 1.0, {}
     )
 ```
 

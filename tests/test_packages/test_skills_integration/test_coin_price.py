@@ -20,10 +20,10 @@
 """This test module contains the integration test for the coin price skill."""
 
 from pathlib import Path
+from typing import Dict
 
 import pytest
 import requests
-from prometheus_client.parser import text_string_to_metric_families  # type: ignore
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -35,6 +35,16 @@ API_SPEC_PATH = str(
         ROOT_DIR, "packages", "fetchai", "skills", "coin_price", "coin_api_spec.yaml"
     ).absolute()
 )
+
+
+def parse_prometheus_output(prom_data: bytes) -> Dict[str, float]:
+    """Convert prometheus text output to a dict of {"metric": value}"""
+    metrics = {}
+    for line in prom_data.decode().splitlines():
+        tokens = line.split()
+        if tokens[0] != "#":
+            metrics.update({tokens[0]: float(tokens[1])})
+    return metrics
 
 
 @pytest.mark.integration
@@ -86,13 +96,10 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         assert response.content == b"", "Post not allowed"
 
         # test prometheus metrics
-        metrics = {}
-        prom_response = requests.get("http://127.0.0.1:9090")
-        for family in text_string_to_metric_families(prom_response.content.decode()):
-            for sample in family.samples:
-                metrics[sample.name] = sample.value
-        assert metrics["num_retrievals"] > 0, "num_retrievals metric not updated"
-        assert metrics["num_requests"] == 1, "num_requests metric not equal to 1"
+        prom_response = requests.get("http://127.0.0.1:9090/metrics")
+        metrics = parse_prometheus_output(prom_response.content)
+        assert metrics["num_retrievals"] > 0.0, "num_retrievals metric not updated"
+        assert metrics["num_requests"] == 1.0, "num_requests metric not equal to 1"
 
         self.terminate_agents()
         assert (

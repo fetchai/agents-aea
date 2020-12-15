@@ -61,7 +61,7 @@ class PrometheusSerializer(Serializer):
             description = msg.description
             performative.description = description
             labels = msg.labels
-            performative.labels.extend(labels)
+            performative.labels.update(labels)
             prometheus_msg.add_metric.CopyFrom(performative)
         elif performative_id == PrometheusMessage.Performative.UPDATE_METRIC:
             performative = prometheus_pb2.PrometheusMessage.Update_Metric_Performative()  # type: ignore
@@ -69,10 +69,10 @@ class PrometheusSerializer(Serializer):
             performative.title = title
             callable = msg.callable
             performative.callable = callable
-            if msg.is_set("value"):
-                performative.value_is_set = True
-                value = msg.value
-                performative.value = value
+            value = msg.value
+            performative.value = value
+            labels = msg.labels
+            performative.labels.update(labels)
             prometheus_msg.update_metric.CopyFrom(performative)
         elif performative_id == PrometheusMessage.Performative.RESPONSE:
             performative = prometheus_pb2.PrometheusMessage.Response_Performative()  # type: ignore
@@ -122,16 +122,18 @@ class PrometheusSerializer(Serializer):
             description = prometheus_pb.add_metric.description
             performative_content["description"] = description
             labels = prometheus_pb.add_metric.labels
-            labels_tuple = tuple(labels)
-            performative_content["labels"] = labels_tuple
+            labels_dict = dict(labels)
+            performative_content["labels"] = labels_dict
         elif performative_id == PrometheusMessage.Performative.UPDATE_METRIC:
             title = prometheus_pb.update_metric.title
             performative_content["title"] = title
             callable = prometheus_pb.update_metric.callable
             performative_content["callable"] = callable
-            if prometheus_pb.update_metric.value_is_set:
-                value = prometheus_pb.update_metric.value
-                performative_content["value"] = value
+            value = prometheus_pb.update_metric.value
+            performative_content["value"] = value
+            labels = prometheus_pb.update_metric.labels
+            labels_dict = dict(labels)
+            performative_content["labels"] = labels_dict
         elif performative_id == PrometheusMessage.Performative.RESPONSE:
             code = prometheus_pb.response.code
             performative_content["code"] = code

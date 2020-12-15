@@ -20,7 +20,7 @@
 """This package contains a behaviour for fetching a coin price from an API."""
 
 import json
-from typing import Dict, Optional, Union, cast
+from typing import Dict, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -84,14 +84,19 @@ class CoinPriceBehaviour(TickerBehaviour):
         )
 
     def add_prometheus_metric(
-        self, metric_name: str, metric_type: str, description: str = None
+        self,
+        metric_name: str,
+        metric_type: str,
+        description: str,
+        labels: Dict[str, str],
     ) -> None:
         """
         Add a prometheus metric.
 
         :param metric_name: the name of the metric to add.
         :param type: the type of the metric.
-        :param description: a description of the metric..
+        :param description: a description of the metric.
+        :param labels: the metric labels.
         :return: None
         """
 
@@ -105,7 +110,7 @@ class CoinPriceBehaviour(TickerBehaviour):
             type=metric_type,
             title=metric_name,
             description=description,
-            labels=(),
+            labels=labels,
         )
 
         # send message
@@ -115,17 +120,15 @@ class CoinPriceBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=message, context=envelope_context)
 
     def update_prometheus_metric(
-        self,
-        metric_name: str,
-        update_func: str,
-        value: Optional[Union[float, str]] = None,
+        self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
     ) -> None:
         """
         Update a prometheus metric.
 
         :param metric_name: the name of the metric.
-        :param update_func: the name of the update function (e.g. inc, set, observe).
+        :param update_func: the name of the update function (e.g. inc, dec, set, ...).
         :param value: the value to provide to the update function.
+        :param labels: the metric labels.
         :return: None
         """
 
@@ -139,6 +142,7 @@ class CoinPriceBehaviour(TickerBehaviour):
             title=metric_name,
             callable=update_func,
             value=value,
+            labels=labels,
         )
 
         # send message
@@ -161,7 +165,10 @@ class CoinPriceBehaviour(TickerBehaviour):
             for metric in prom_dialogues.metrics:
                 self.context.logger.info("Adding Prometheus metric: " + metric["name"])
                 self.add_prometheus_metric(
-                    metric["name"], metric["type"], metric["description"]
+                    metric["name"],
+                    metric["type"],
+                    metric["description"],
+                    metric["labels"],
                 )
 
     def act(self) -> None:

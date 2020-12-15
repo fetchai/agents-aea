@@ -9,14 +9,14 @@ message PrometheusMessage{
         string type = 1;
         string title = 2;
         string description = 3;
-        repeated string labels = 4;
+        map<string, string> labels = 4;
     }
 
     message Update_Metric_Performative{
         string title = 1;
         string callable = 2;
         float value = 3;
-        bool value_is_set = 4;
+        map<string, string> labels = 4;
     }
 
     message Response_Performative{

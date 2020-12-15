@@ -8,7 +8,7 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmVHrRiCyf4esFvF3sAN2TJDsWRZgHn3FanEoYSRZpW2fV
   __init__.py: QmWVrDiiePsr6vTnvbPTcDrayR89ji3hf25rs9V9TiJUPv
-  connection.py: QmV81kFioq8XSwAvvZM45Sf7eZUnLkQhfMBAY6DibxBz48
+  connection.py: QmZz1CPGPNRkCow4dwxqrDEQBPNoT89ekQ2vfJ9DUPDyv6
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []
@@ -19,6 +19,6 @@ excluded_protocols: []
 restricted_to_protocols:
 - fetchai/prometheus:0.1.0
 dependencies:
-  prometheus_client:
-    version: <1.0.0,>=0.8.0
+  aioprometheus:
+    version: <21.0.0,>=20.0.0
 is_abstract: false
