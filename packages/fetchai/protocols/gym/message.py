@@ -55,6 +55,7 @@ class GymMessage(Message):
             return str(self.value)
 
     _performatives = {"act", "close", "percept", "reset", "status"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

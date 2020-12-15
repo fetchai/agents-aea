@@ -84,6 +84,7 @@ class SigningMessage(Message):
         "signed_message",
         "signed_transaction",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

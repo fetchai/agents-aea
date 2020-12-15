@@ -49,6 +49,7 @@ class RegisterMessage(Message):
             return str(self.value)
 
     _performatives = {"error", "register", "success"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (
