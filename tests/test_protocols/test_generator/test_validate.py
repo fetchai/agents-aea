@@ -1346,12 +1346,17 @@ class TestValidate(TestCase):
             "performative_empty_contents",
         }
 
-        valid_result_1, valid_msg_1, terminal_performatives_from_reply_1 = _validate_reply(
-            valid_reply_1, valid_performatives_set_1
-        )
+        (
+            valid_result_1,
+            valid_msg_1,
+            terminal_performatives_from_reply_1,
+        ) = _validate_reply(valid_reply_1, valid_performatives_set_1)
         assert valid_result_1 is True
         assert valid_msg_1 == "Reply structure is valid."
-        assert terminal_performatives_from_reply_1 == {"performative_mt", "performative_o"}
+        assert terminal_performatives_from_reply_1 == {
+            "performative_mt",
+            "performative_o",
+        }
 
         ###################################################
 
@@ -1363,9 +1368,11 @@ class TestValidate(TestCase):
         }
         invalid_performatives_set_1 = {"perm_1", "perm_2", "perm_3", "perm_4", "perm_5"}
 
-        invalid_result_1, invalid_msg_1, invalid_terminal_performatives_from_reply_1= _validate_reply(
-            invalid_reply_1, invalid_performatives_set_1
-        )
+        (
+            invalid_result_1,
+            invalid_msg_1,
+            invalid_terminal_performatives_from_reply_1,
+        ) = _validate_reply(invalid_reply_1, invalid_performatives_set_1)
         assert invalid_result_1 is False
         assert (
             invalid_msg_1
@@ -1383,9 +1390,11 @@ class TestValidate(TestCase):
             "perm_5": [],
         }
         invalid_performatives_set_2 = {"perm_1", "perm_2", "perm_3", "perm_4"}
-        invalid_result_2, invalid_msg_2, invalid_terminal_performatives_from_reply_2 = _validate_reply(
-            invalid_reply_2, invalid_performatives_set_2
-        )
+        (
+            invalid_result_2,
+            invalid_msg_2,
+            invalid_terminal_performatives_from_reply_2,
+        ) = _validate_reply(invalid_reply_2, invalid_performatives_set_2)
         assert invalid_result_2 is False
         assert (
             invalid_msg_2
@@ -1394,9 +1403,11 @@ class TestValidate(TestCase):
         assert invalid_terminal_performatives_from_reply_2 is None
 
         invalid_reply_3 = ["perm_1", "perm_2", "perm_3", "perm_4", "perm_5"]
-        invalid_result_3, invalid_msg_3, invalid_terminal_performatives_from_reply_3 = _validate_reply(
-            invalid_reply_3, invalid_performatives_set_1
-        )
+        (
+            invalid_result_3,
+            invalid_msg_3,
+            invalid_terminal_performatives_from_reply_3,
+        ) = _validate_reply(invalid_reply_3, invalid_performatives_set_1)
         assert invalid_result_3 is False
         assert (
             invalid_msg_3
@@ -1411,9 +1422,11 @@ class TestValidate(TestCase):
             "perm_4": {"perm_5"},
             "perm_5": set(),
         }
-        invalid_result_4, invalid_msg_4, invalid_terminal_performatives_from_reply_4 = _validate_reply(
-            invalid_reply_4, invalid_performatives_set_1
-        )
+        (
+            invalid_result_4,
+            invalid_msg_4,
+            invalid_terminal_performatives_from_reply_4,
+        ) = _validate_reply(invalid_reply_4, invalid_performatives_set_1)
         assert invalid_result_4 is False
         assert (
             invalid_msg_4
@@ -1428,9 +1441,11 @@ class TestValidate(TestCase):
             "perm_4": ["perm_1"],
             "perm_5": [],
         }
-        invalid_result_5, invalid_msg_5, invalid_terminal_performatives_from_reply_5 = _validate_reply(
-            invalid_reply_5, invalid_performatives_set_2
-        )
+        (
+            invalid_result_5,
+            invalid_msg_5,
+            invalid_terminal_performatives_from_reply_5,
+        ) = _validate_reply(invalid_reply_5, invalid_performatives_set_2)
         assert invalid_result_5 is False
         assert (
             invalid_msg_5
@@ -1444,7 +1459,9 @@ class TestValidate(TestCase):
         valid_performatives_set = {"perm_1", "perm_2", "perm_3", "perm_4"}
         valid_terminal_performatives_from_reply_1 = {"perm_4", "perm_3"}
         valid_result_1, valid_msg_1 = _validate_termination(
-            valid_termination_1, valid_performatives_set, valid_terminal_performatives_from_reply_1
+            valid_termination_1,
+            valid_performatives_set,
+            valid_terminal_performatives_from_reply_1,
         )
         assert valid_result_1 is True
         assert valid_msg_1 == "Terminal messages are valid."
@@ -1454,7 +1471,9 @@ class TestValidate(TestCase):
         invalid_termination_1 = []
         invalid_terminal_performatives_from_reply_1 = set()
         invalid_result_1, invalid_msg_1 = _validate_termination(
-            invalid_termination_1, valid_performatives_set, valid_terminal_performatives_from_reply_1
+            invalid_termination_1,
+            valid_performatives_set,
+            invalid_terminal_performatives_from_reply_1,
         )
         assert invalid_result_1 is False
         assert (
@@ -1465,7 +1484,9 @@ class TestValidate(TestCase):
         invalid_termination_2 = ["perm_5"]
         invalid_terminal_performatives_from_reply_2 = {"perm_5"}
         invalid_result_2, invalid_msg_2 = _validate_termination(
-            invalid_termination_2, valid_performatives_set, invalid_terminal_performatives_from_reply_2
+            invalid_termination_2,
+            valid_performatives_set,
+            invalid_terminal_performatives_from_reply_2,
         )
         assert invalid_result_2 is False
         assert (
@@ -1476,7 +1497,9 @@ class TestValidate(TestCase):
         invalid_termination_3 = {"perm_5"}
         invalid_terminal_performatives_from_reply_3 = {"perm_5"}
         invalid_result_3, invalid_msg_3 = _validate_termination(
-            invalid_termination_3, valid_performatives_set, invalid_terminal_performatives_from_reply_3
+            invalid_termination_3,
+            valid_performatives_set,
+            invalid_terminal_performatives_from_reply_3,
         )
         assert invalid_result_3 is False
         assert (
@@ -1487,26 +1510,41 @@ class TestValidate(TestCase):
         invalid_termination_4 = ["perm_4", "perm_3", "perm_4", "perm_3", "perm_1"]
         invalid_terminal_performatives_from_reply_4 = {"perm_4", "perm_3", "perm_1"}
         invalid_result_4, invalid_msg_4 = _validate_termination(
-            invalid_termination_4, valid_performatives_set, invalid_terminal_performatives_from_reply_4
+            invalid_termination_4,
+            valid_performatives_set,
+            invalid_terminal_performatives_from_reply_4,
         )
         assert invalid_result_4 is False
-        assert invalid_msg_4 == f"The following performatives in \"termination\" are repeated: {['perm_4', 'perm_3']}"
+        assert (
+            invalid_msg_4
+            == f"The following performatives in \"termination\" are repeated: {['perm_4', 'perm_3']}"
+        )
 
         invalid_termination_5 = ["perm_4", "perm_3"]
         invalid_terminal_performatives_from_reply_5 = {"perm_4"}
         invalid_result_5, invalid_msg_5 = _validate_termination(
-            invalid_termination_5, valid_performatives_set, invalid_terminal_performatives_from_reply_5
+            invalid_termination_5,
+            valid_performatives_set,
+            invalid_terminal_performatives_from_reply_5,
         )
         assert invalid_result_5 is False
-        assert invalid_msg_5 == f"The terminal performative 'perm_3' specified in \"termination\" is assigned replies in \"reply\"."
+        assert (
+            invalid_msg_5
+            == f'The terminal performative \'perm_3\' specified in "termination" is assigned replies in "reply".'
+        )
 
         invalid_termination_6 = ["perm_4"]
         invalid_terminal_performatives_from_reply_6 = {"perm_4", "perm_3"}
         invalid_result_6, invalid_msg_6 = _validate_termination(
-            invalid_termination_6, valid_performatives_set, invalid_terminal_performatives_from_reply_6
+            invalid_termination_6,
+            valid_performatives_set,
+            invalid_terminal_performatives_from_reply_6,
         )
         assert invalid_result_6 is False
-        assert invalid_msg_6 == f"The performative 'perm_3' has no replies but is not listed as a terminal performative in \"termination\"."
+        assert (
+            invalid_msg_6
+            == f"The performative 'perm_3' has no replies but is not listed as a terminal performative in \"termination\"."
+        )
 
     def test_validate_roles(self):
         """Test for the '_validate_roles' method."""
@@ -1640,10 +1678,7 @@ class TestValidate(TestCase):
                 "performative_o": [],
                 "performative_empty_contents": ["performative_empty_contents"],
             },
-            "termination": [
-                "performative_mt",
-                "performative_o",
-            ],
+            "termination": ["performative_mt", "performative_o"],
             "roles": {"role_1": None, "role_2": None},
             "end_states": ["end_state_1", "end_state_2", "end_state_3"],
             "keep_terminal_state_dialogues": True,

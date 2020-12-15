@@ -658,7 +658,9 @@ def _validate_reply(
 
 
 def _validate_termination(
-    termination: List[str], performatives_set: Set[str], terminal_performatives_from_reply: Set[str]
+    termination: List[str],
+    performatives_set: Set[str],
+    terminal_performatives_from_reply: Set[str],
 ) -> Tuple[bool, str]:
     """
     Evaluate whether termination field in a protocol specification is valid.
@@ -695,14 +697,14 @@ def _validate_termination(
             )
 
     # check that there are no repetitive performatives in termination
-    duplicates_dict = {}
+    duplicates_dict: Dict[str, int] = {}
     for performative in termination:
         duplicates_dict[performative] = duplicates_dict.get(performative, 0) + 1
     duplicates = [k for k, v in duplicates_dict.items() if v > 1]
     if len(duplicates) != 0:
         return (
             False,
-            "The following performatives in \"termination\" are repeated: {}".format(
+            'The following performatives in "termination" are repeated: {}'.format(
                 duplicates,
             ),
         )
@@ -712,7 +714,7 @@ def _validate_termination(
         if performative not in terminal_performatives_from_reply:
             return (
                 False,
-                "The terminal performative '{}' specified in \"termination\" is assigned replies in \"reply\".".format(
+                'The terminal performative \'{}\' specified in "termination" is assigned replies in "reply".'.format(
                     performative,
                 ),
             )
@@ -851,7 +853,11 @@ def _validate_dialogue_section(
             return result_initiation_validation, msg_initiation_validation
 
         # Validate reply
-        result_reply_validation, msg_reply_validation, terminal_performatives_from_reply = _validate_reply(
+        (
+            result_reply_validation,
+            msg_reply_validation,
+            terminal_performatives_from_reply,
+        ) = _validate_reply(
             cast(Dict[str, List[str]], protocol_specification.dialogue_config["reply"]),
             performatives_set,
         )
@@ -865,7 +871,7 @@ def _validate_dialogue_section(
         ) = _validate_termination(
             cast(List[str], protocol_specification.dialogue_config["termination"]),
             performatives_set,
-            terminal_performatives_from_reply,
+            cast(Set[str], terminal_performatives_from_reply),
         )
         if not result_termination_validation:
             return result_termination_validation, msg_termination_validation
