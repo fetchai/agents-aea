@@ -20,6 +20,7 @@
 
 """Read to and write from file with envelopes."""
 
+import codecs
 import logging
 from contextlib import contextmanager
 from logging import Logger
@@ -66,7 +67,9 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     # protobuf messages cannot be delimited as they can contain an arbitrary byte sequence; however
     # we know everything remaining constitutes the protobuf message.
     message = SEPARATOR.join(split[3:-1])
-    # message = codecs.decode(message, "unicode-escape").encode("utf-8")  # noqa: E800
+    if b"\\x" in message:  # pragma: nocover
+        # hack to account for manual usage of `echo`
+        message = codecs.decode(message, "unicode-escape").encode("utf-8")
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 

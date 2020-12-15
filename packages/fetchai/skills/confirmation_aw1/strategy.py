@@ -178,6 +178,8 @@ class Strategy(Model):
             "fetchai",
         ):
             return (False, 1, "ethereum address and signature do not match!")
+        if registration_info["developer_handle"] in ("", None):
+            return (False, 1, "missing developer_handle!")
         if sender in self._in_process_registrations:
             return (False, 1, "registration in process for this address!")
         registration_db = cast(RegistrationDB, self.context.registration_db)
