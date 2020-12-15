@@ -17,9 +17,12 @@ message StateUpdateMessage{
         map<string, int32> quantities_by_good_id = 2;
     }
 
+    message End_Performative{}
+
 
     oneof performative{
         Apply_Performative apply = 5;
-        Initialize_Performative initialize = 6;
+        End_Performative end = 6;
+        Initialize_Performative initialize = 7;
     }
 }

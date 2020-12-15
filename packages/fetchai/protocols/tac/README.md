@@ -76,7 +76,7 @@ reply:
   game_data: [transaction, transaction_confirmation, cancelled]
   transaction_confirmation: [transaction, transaction_confirmation, cancelled]
   tac_error: [transaction, transaction_confirmation, cancelled]
-termination: [cancelled, tac_error]
+termination: [cancelled]
 roles: {participant, controller}
 end_states: [successful, failed]
 keep_terminal_state_dialogues: true

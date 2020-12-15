@@ -21,6 +21,7 @@ speech_acts:
     error_code: ct:ErrorCode
     error_msg: pt:str
     error_data: pt:dict[pt:str, pt:bytes]
+  end: {}
 ...
 ---
 ct:ErrorCode: |
@@ -36,9 +37,10 @@ ct:ErrorCode: |
 ---
 initiation: [bytes, error]
 reply:
-  bytes: [bytes, error]
+  bytes: [bytes, error, end]
   error: []
-termination: [bytes, error]
+  end: []
+termination: [end, error]
 roles: {agent}
 end_states: [successful, failed]
 keep_terminal_state_dialogues: true

@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="aea.fetchai.default",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\rdefault.proto\x12\x13\x61\x65\x61.fetchai.default"\xb3\x05\n\x0e\x44\x65\x66\x61ultMessage\x12G\n\x05\x62ytes\x18\x05 \x01(\x0b\x32\x36.aea.fetchai.default.DefaultMessage.Bytes_PerformativeH\x00\x12G\n\x05\x65rror\x18\x06 \x01(\x0b\x32\x36.aea.fetchai.default.DefaultMessage.Error_PerformativeH\x00\x1a\xdd\x01\n\tErrorCode\x12O\n\nerror_code\x18\x01 \x01(\x0e\x32;.aea.fetchai.default.DefaultMessage.ErrorCode.ErrorCodeEnum"\x7f\n\rErrorCodeEnum\x12\x18\n\x14UNSUPPORTED_PROTOCOL\x10\x00\x12\x12\n\x0e\x44\x45\x43ODING_ERROR\x10\x01\x12\x13\n\x0fINVALID_MESSAGE\x10\x02\x12\x15\n\x11UNSUPPORTED_SKILL\x10\x03\x12\x14\n\x10INVALID_DIALOGUE\x10\x04\x1a%\n\x12\x42ytes_Performative\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\x0c\x1a\xf7\x01\n\x12\x45rror_Performative\x12\x41\n\nerror_code\x18\x01 \x01(\x0b\x32-.aea.fetchai.default.DefaultMessage.ErrorCode\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12Y\n\nerror_data\x18\x03 \x03(\x0b\x32\x45.aea.fetchai.default.DefaultMessage.Error_Performative.ErrorDataEntry\x1a\x30\n\x0e\x45rrorDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\rdefault.proto\x12\x13\x61\x65\x61.fetchai.default"\x8c\x06\n\x0e\x44\x65\x66\x61ultMessage\x12G\n\x05\x62ytes\x18\x05 \x01(\x0b\x32\x36.aea.fetchai.default.DefaultMessage.Bytes_PerformativeH\x00\x12\x43\n\x03\x65nd\x18\x06 \x01(\x0b\x32\x34.aea.fetchai.default.DefaultMessage.End_PerformativeH\x00\x12G\n\x05\x65rror\x18\x07 \x01(\x0b\x32\x36.aea.fetchai.default.DefaultMessage.Error_PerformativeH\x00\x1a\xdd\x01\n\tErrorCode\x12O\n\nerror_code\x18\x01 \x01(\x0e\x32;.aea.fetchai.default.DefaultMessage.ErrorCode.ErrorCodeEnum"\x7f\n\rErrorCodeEnum\x12\x18\n\x14UNSUPPORTED_PROTOCOL\x10\x00\x12\x12\n\x0e\x44\x45\x43ODING_ERROR\x10\x01\x12\x13\n\x0fINVALID_MESSAGE\x10\x02\x12\x15\n\x11UNSUPPORTED_SKILL\x10\x03\x12\x14\n\x10INVALID_DIALOGUE\x10\x04\x1a%\n\x12\x42ytes_Performative\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\x0c\x1a\xf7\x01\n\x12\x45rror_Performative\x12\x41\n\nerror_code\x18\x01 \x01(\x0b\x32-.aea.fetchai.default.DefaultMessage.ErrorCode\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12Y\n\nerror_data\x18\x03 \x03(\x0b\x32\x45.aea.fetchai.default.DefaultMessage.Error_Performative.ErrorDataEntry\x1a\x30\n\x0e\x45rrorDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x12\n\x10\x45nd_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
@@ -61,8 +61,8 @@ _DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     serialized_options=None,
-    serialized_start=298,
-    serialized_end=425,
+    serialized_start=367,
+    serialized_end=494,
 )
 _sym_db.RegisterEnumDescriptor(_DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM)
 
@@ -101,8 +101,8 @@ _DEFAULTMESSAGE_ERRORCODE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=204,
-    serialized_end=425,
+    serialized_start=273,
+    serialized_end=494,
 )
 
 _DEFAULTMESSAGE_BYTES_PERFORMATIVE = _descriptor.Descriptor(
@@ -139,8 +139,8 @@ _DEFAULTMESSAGE_BYTES_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=427,
-    serialized_end=464,
+    serialized_start=496,
+    serialized_end=533,
 )
 
 _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY = _descriptor.Descriptor(
@@ -195,8 +195,8 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=666,
-    serialized_end=714,
+    serialized_start=735,
+    serialized_end=783,
 )
 
 _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
@@ -269,8 +269,27 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=467,
-    serialized_end=714,
+    serialized_start=536,
+    serialized_end=783,
+)
+
+_DEFAULTMESSAGE_END_PERFORMATIVE = _descriptor.Descriptor(
+    name="End_Performative",
+    full_name="aea.fetchai.default.DefaultMessage.End_Performative",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=785,
+    serialized_end=803,
 )
 
 _DEFAULTMESSAGE = _descriptor.Descriptor(
@@ -299,10 +318,28 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="error",
-            full_name="aea.fetchai.default.DefaultMessage.error",
+            name="end",
+            full_name="aea.fetchai.default.DefaultMessage.end",
             index=1,
             number=6,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="error",
+            full_name="aea.fetchai.default.DefaultMessage.error",
+            index=2,
+            number=7,
             type=11,
             cpp_type=10,
             label=1,
@@ -322,6 +359,7 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
         _DEFAULTMESSAGE_ERRORCODE,
         _DEFAULTMESSAGE_BYTES_PERFORMATIVE,
         _DEFAULTMESSAGE_ERROR_PERFORMATIVE,
+        _DEFAULTMESSAGE_END_PERFORMATIVE,
     ],
     enum_types=[],
     serialized_options=None,
@@ -338,7 +376,7 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=39,
-    serialized_end=730,
+    serialized_end=819,
 )
 
 _DEFAULTMESSAGE_ERRORCODE.fields_by_name[
@@ -357,9 +395,11 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE.fields_by_name[
     "error_data"
 ].message_type = _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY
 _DEFAULTMESSAGE_ERROR_PERFORMATIVE.containing_type = _DEFAULTMESSAGE
+_DEFAULTMESSAGE_END_PERFORMATIVE.containing_type = _DEFAULTMESSAGE
 _DEFAULTMESSAGE.fields_by_name[
     "bytes"
 ].message_type = _DEFAULTMESSAGE_BYTES_PERFORMATIVE
+_DEFAULTMESSAGE.fields_by_name["end"].message_type = _DEFAULTMESSAGE_END_PERFORMATIVE
 _DEFAULTMESSAGE.fields_by_name[
     "error"
 ].message_type = _DEFAULTMESSAGE_ERROR_PERFORMATIVE
@@ -369,6 +409,12 @@ _DEFAULTMESSAGE.oneofs_by_name["performative"].fields.append(
 _DEFAULTMESSAGE.fields_by_name[
     "bytes"
 ].containing_oneof = _DEFAULTMESSAGE.oneofs_by_name["performative"]
+_DEFAULTMESSAGE.oneofs_by_name["performative"].fields.append(
+    _DEFAULTMESSAGE.fields_by_name["end"]
+)
+_DEFAULTMESSAGE.fields_by_name["end"].containing_oneof = _DEFAULTMESSAGE.oneofs_by_name[
+    "performative"
+]
 _DEFAULTMESSAGE.oneofs_by_name["performative"].fields.append(
     _DEFAULTMESSAGE.fields_by_name["error"]
 )
@@ -418,6 +464,15 @@ DefaultMessage = _reflection.GeneratedProtocolMessageType(
                 # @@protoc_insertion_point(class_scope:aea.fetchai.default.DefaultMessage.Error_Performative)
             },
         ),
+        "End_Performative": _reflection.GeneratedProtocolMessageType(
+            "End_Performative",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _DEFAULTMESSAGE_END_PERFORMATIVE,
+                "__module__": "default_pb2"
+                # @@protoc_insertion_point(class_scope:aea.fetchai.default.DefaultMessage.End_Performative)
+            },
+        ),
         "DESCRIPTOR": _DEFAULTMESSAGE,
         "__module__": "default_pb2"
         # @@protoc_insertion_point(class_scope:aea.fetchai.default.DefaultMessage)
@@ -428,6 +483,7 @@ _sym_db.RegisterMessage(DefaultMessage.ErrorCode)
 _sym_db.RegisterMessage(DefaultMessage.Bytes_Performative)
 _sym_db.RegisterMessage(DefaultMessage.Error_Performative)
 _sym_db.RegisterMessage(DefaultMessage.Error_Performative.ErrorDataEntry)
+_sym_db.RegisterMessage(DefaultMessage.End_Performative)
 
 
 _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY._options = None
