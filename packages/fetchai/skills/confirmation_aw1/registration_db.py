@@ -98,6 +98,34 @@ class RegistrationDB(Model):
             )
         return result[0][0]
 
+    def get_ethereum_address(
+        self, address: str, developer_handle: str
+    ) -> str:  # pragma: no cover
+        """Get ethereum address relating to an address (hacky for backwards compatibility)."""
+        command = "SELECT ethereum_address FROM registered_table WHERE address=?"
+        variables = (address,)
+        result = self._execute_single_sql(command, variables)
+        if len(result) != 0 and len(result[0]) != 1:
+            raise ValueError(
+                f"More than one ethereum_address found for address={address}."
+            )
+        if len(result) != 0 and (result[0][0] != "" or developer_handle == ""):
+            return result[0][0]
+        command = (
+            "SELECT ethereum_address FROM registered_table WHERE developer_handle=?"
+        )
+        variables = (developer_handle,)
+        result = self._execute_single_sql(command, variables)
+        if len(result) == 0:
+            raise ValueError(
+                f"No ethereum_address found for address={address} and developer_handle={developer_handle}."
+            )
+        if len(result[0]) != 1:
+            raise ValueError(
+                f"More than one ethereum_address found for developer_handle={developer_handle}."
+            )
+        return result[0][0]
+
     def get_all_registered(self) -> List[str]:
         """Get all registered AW-1 AEAs."""
         command = "SELECT address FROM registered_table"

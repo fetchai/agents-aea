@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/rs/zerolog"
 
@@ -89,6 +90,9 @@ func main() {
 	// entry peers
 	entryPeers := agent.EntryPeers()
 
+	// add artificial delay for agent registration
+	registrationDelay := agent.RegistrationDelayInSeconds()
+
 	// libp2p node
 	var node dhtnode.DHTNode
 
@@ -117,6 +121,10 @@ func main() {
 		}
 		if nodePortMonitoring != 0 {
 			opts = append(opts, dhtpeer.EnablePrometheusMonitoring(nodePortMonitoring))
+		}
+		if registrationDelay != 0 {
+			durationSeconds := time.Duration(registrationDelay)
+			opts = append(opts, dhtpeer.WithRegistrationDelay(durationSeconds*1000000*time.Microsecond))
 		}
 		node, err = dhtpeer.New(opts...)
 	}

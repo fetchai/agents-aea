@@ -28,6 +28,7 @@ from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from enum import Enum
+from pathlib import Path
 from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
@@ -256,6 +257,8 @@ class SOEFChannel:
         self.oef_search_dialogues = OefSearchDialogues()
 
         self._token_storage_path = token_storage_path
+        if self._token_storage_path is not None:
+            Path(self._token_storage_path).touch()
         self.declared_name = uuid4().hex
         self._unique_page_address = None  # type: Optional[str]
         self.agent_location = None  # type: Optional[Location]

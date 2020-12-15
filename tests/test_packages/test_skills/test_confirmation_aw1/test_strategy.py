@@ -286,6 +286,32 @@ class TestStrategy(BaseSkillTestCase):
         assert msg == "ethereum address and signature do not match!"
 
     def test_valid_registration_fails_v(self):
+        """Test the valid_registration method of the Strategy class which fails because no developer_handle was provided."""
+        # setup
+        incorrect_registration_info = {
+            "ethereum_address": "some_ethereum_address",
+            "fetchai_address": self.address,
+            "signature_of_ethereum_address": "some_signature_of_ethereum_address",
+            "signature_of_fetchai_address": "some_signature_of_fetchai_address",
+            "developer_handle": "",
+        }
+
+        # operation
+        with patch.object(
+            self.strategy, "_valid_signature", return_value=True
+        ) as mock_valid:
+            is_valid, code, msg = self.strategy.valid_registration(
+                incorrect_registration_info, self.address
+            )
+
+        # after
+        mock_valid.assert_called()
+
+        assert not is_valid
+        assert code == 1
+        assert msg == "missing developer_handle!"
+
+    def test_valid_registration_fails_vi(self):
         """Test the valid_registration method of the Strategy class which fails because agent registration is in progress."""
         # setup
         registration_info = {
@@ -312,7 +338,7 @@ class TestStrategy(BaseSkillTestCase):
         assert code == 1
         assert msg == "registration in process for this address!"
 
-    def test_valid_registration_fails_vi(self):
+    def test_valid_registration_fails_vii(self):
         """Test the valid_registration method of the Strategy class which fails because agent already registered."""
         # setup
         registration_info = {

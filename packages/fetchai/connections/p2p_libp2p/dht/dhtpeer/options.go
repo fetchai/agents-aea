@@ -22,6 +22,7 @@ package dhtpeer
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/multiformats/go-multiaddr"
 	"github.com/rs/zerolog"
@@ -124,6 +125,13 @@ func LoggingLevel(lvl zerolog.Level) Option {
 func EnablePrometheusMonitoring(port uint16) Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.monitoringPort = port
+		return nil
+	}
+}
+
+func WithRegistrationDelay(delay time.Duration) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.registrationDelay = delay
 		return nil
 	}
 }

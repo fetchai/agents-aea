@@ -199,7 +199,7 @@ class TestGame(BaseSkillTestCase):
     def setup(cls):
         """Setup the test class."""
         super().setup()
-        cls.expected_version_id = "some_version_id"
+        cls.expected_version_id = "v1"
         cls.expected_controller_addr = "some_controller_address"
         cls.search_query = {
             "search_key": "tac",

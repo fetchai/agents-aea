@@ -59,6 +59,7 @@ class MlTradeMessage(Message):
             return str(self.value)
 
     _performatives = {"accept", "cfp", "data", "terms"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (
