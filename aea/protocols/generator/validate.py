@@ -540,10 +540,7 @@ def _validate_field_existence(dialogue_config) -> Tuple[bool, str]:
                 ),
             )
 
-    return (
-        True,
-        "Dialogue section has all the required fields and their values have correct types.",
-    )
+    return True, "Dialogue section has all the required fields."
 
 
 def _validate_initiation(

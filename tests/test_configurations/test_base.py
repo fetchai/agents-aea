@@ -40,7 +40,6 @@ from aea.configurations.base import (
     PackageVersion,
     ProtocolConfig,
     ProtocolSpecification,
-    ProtocolSpecificationParseError,
     PublicId,
     SkillConfig,
     SpeechActContentConfig,
@@ -465,18 +464,9 @@ class AgentConfigTestCase(TestCase):
 class SpeechActContentConfigTestCase(TestCase):
     """Test case for SpeechActContentConfig class."""
 
-    @mock.patch("aea.configurations.base.SpeechActContentConfig._check_consistency")
-    def test_speech_act_content_config_init_positive(self, arg):
+    def test_speech_act_content_config_init_positive(self):
         """Test case for __init__ method positive result."""
         SpeechActContentConfig()
-
-    def test__check_consistency_positive(self):
-        """Test case for _check_consistency method positive result."""
-        SpeechActContentConfig(arg1="arg1", arg2="arg2")
-        with self.assertRaises(ProtocolSpecificationParseError):
-            SpeechActContentConfig(arg1=None, arg2=1)
-        with self.assertRaises(ProtocolSpecificationParseError):
-            SpeechActContentConfig(arg1="", arg2="")
 
     def test_json_positive(self):
         """Test case for json property positive result."""
@@ -501,7 +491,6 @@ class ProtocolSpecificationTestCase(TestCase):
         obj.json
 
     @mock.patch("aea.configurations.base.SpeechActContentConfig.from_json")
-    @mock.patch("aea.configurations.base.ProtocolSpecification._check_consistency")
     def test_from_json_positive(self, *mocks):
         """Test case for from_json method positive result."""
         json_disc = {
@@ -513,29 +502,6 @@ class ProtocolSpecificationTestCase(TestCase):
             "speech_acts": {"arg1": "arg1", "arg2": "arg2"},
         }
         ProtocolSpecification.from_json(json_disc)
-
-    def test__check_consistency_positive(self):
-        """Test case for _check_consistency method positive result."""
-        obj = ProtocolSpecification(name="my_protocol", author="fetchai")
-        with self.assertRaises(ProtocolSpecificationParseError):
-            obj._check_consistency()
-
-        obj.speech_acts = mock.Mock()
-        read_all_mock = mock.Mock(return_value=[(1, 2)])
-        obj.speech_acts.read_all = read_all_mock
-        with self.assertRaises(ProtocolSpecificationParseError):
-            obj._check_consistency()
-
-        read_all_mock = mock.Mock(return_value=[["", 1]])
-        obj.speech_acts.read_all = read_all_mock
-        with self.assertRaises(ProtocolSpecificationParseError):
-            obj._check_consistency()
-
-        speech_act_content_config = mock.Mock()
-        speech_act_content_config.args = {1: 2}
-        read_all_mock = mock.Mock(return_value=[["1", speech_act_content_config]])
-        obj.speech_acts.read_all = read_all_mock
-        obj._check_consistency()
 
 
 def test_package_type_plural():
