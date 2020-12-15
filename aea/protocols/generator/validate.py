@@ -19,7 +19,7 @@
 """This module validates a protocol specification."""
 
 import re
-from typing import Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolSpecification
 from aea.protocols.generator.common import (
@@ -42,6 +42,15 @@ CT_CONTENT_TYPE_REGEX_PATTERN = "^ct:([A-Z]+[a-z]*)+$"  # or maybe "ct:(?:[A-Z][
 
 ROLE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 END_STATE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
+
+DIALOGUE_SECTION_REQUIRED_FIELDS = [
+    "initiation",
+    "reply",
+    "termination",
+    "roles",
+    "end_states",
+    "keep_terminal_state_dialogues",
+]
 
 
 def _is_reserved_name(content_name: str) -> bool:
@@ -283,6 +292,7 @@ def _validate_performatives(performative: str) -> Tuple[bool, str]:
     :param performative: a performative.
     :return: Boolean result, and associated message.
     """
+    # check performative is not a reserved name
     if _is_reserved_name(performative):
         return (
             False,
@@ -291,6 +301,7 @@ def _validate_performatives(performative: str) -> Tuple[bool, str]:
             ),
         )
 
+    # check performative's format
     if not _is_valid_regex(PERFORMATIVE_REGEX_PATTERN, performative):
         return (
             False,
@@ -311,6 +322,7 @@ def _validate_content_name(content_name: str, performative: str) -> Tuple[bool, 
 
     :return: Boolean result, and associated message.
     """
+    # check content name's format
     if not _is_valid_regex(CONTENT_NAME_REGEX_PATTERN, content_name):
         return (
             False,
@@ -319,6 +331,7 @@ def _validate_content_name(content_name: str, performative: str) -> Tuple[bool, 
             ),
         )
 
+    # check content name is not a reserved name
     if _is_reserved_name(content_name):
         return (
             False,
@@ -375,6 +388,9 @@ def _validate_speech_acts_section(
     custom_types_set = set()
     performatives_set = set()
 
+    content_names_types: Dict[str, Tuple[str, str]] = dict()
+
+    # check that speech-acts definition is not empty
     if len(protocol_specification.speech_acts.read_all()) == 0:
         return (
             False,
@@ -418,6 +434,17 @@ def _validate_speech_acts_section(
                     None,
                 )
 
+            # check type of content_type
+            if not isinstance(content_type, str):
+                return (
+                    False,
+                    "Invalid type for '{}'. Expected str. Found {}.".format(
+                        content_name, type(content_type)
+                    ),
+                    None,
+                    None,
+                )
+
             # Validate content type
             (
                 result_content_type_validation,
@@ -430,6 +457,26 @@ def _validate_speech_acts_section(
                     None,
                     None,
                 )
+
+            # check content name isn't repeated with a different type
+            if content_name in content_names_types:
+                last_performative = content_names_types[content_name][0]
+                last_content_type = content_names_types[content_name][1]
+                if last_content_type != content_type:
+                    return (
+                        False,
+                        "Content '{}' with type '{}' under performative '{}' is already defined under performative '{}' with a different type ('{}').".format(
+                            content_name,
+                            content_type,
+                            performative,
+                            last_performative,
+                            last_content_type,
+                        ),
+                        None,
+                        None,
+                    )
+
+            content_names_types[content_name] = (performative, content_type)
 
             if _is_valid_ct(content_type):
                 custom_types_set.add(content_type.strip())
@@ -444,7 +491,7 @@ def _validate_protocol_buffer_schema_code_snippets(
     Evaluate whether the protobuf code snippet section of a protocol specification is valid.
 
     :param protocol_specification: a protocol specification.
-    :param custom_types_set: set of all custom types in the dialogue.
+    :param custom_types_set: set of all custom types in the protocol.
 
     :return: Boolean result, and associated message.
     """
@@ -452,6 +499,7 @@ def _validate_protocol_buffer_schema_code_snippets(
         protocol_specification.protobuf_snippets is not None
         and protocol_specification.protobuf_snippets != ""
     ):
+        # check all custom types are actually used in speech-acts definition
         for custom_type in protocol_specification.protobuf_snippets.keys():
             if custom_type not in custom_types_set:
                 return (
@@ -462,6 +510,7 @@ def _validate_protocol_buffer_schema_code_snippets(
                 )
             custom_types_set.remove(custom_type)
 
+        # check that no custom type already used in speech-acts definition is missing
         if len(custom_types_set) != 0:
             return (
                 False,
@@ -471,6 +520,27 @@ def _validate_protocol_buffer_schema_code_snippets(
             )
 
     return True, "Protobuf code snippet section is valid."
+
+
+def _validate_field_existence(dialogue_config) -> Tuple[bool, str]:
+    """
+    Evaluate whether the dialogue section of a protocol specification contains the required fields.
+
+    :param dialogue_config: the dialogue section of a protocol specification.
+
+    :return: Boolean result, and associated message.
+    """
+    # check required fields exist
+    for required_field in DIALOGUE_SECTION_REQUIRED_FIELDS:
+        if required_field not in dialogue_config:
+            return (
+                False,
+                "Missing required field '{}' in the dialogue section of the protocol specification.".format(
+                    required_field
+                ),
+            )
+
+    return True, "Dialogue section has all the required fields."
 
 
 def _validate_initiation(
@@ -484,12 +554,23 @@ def _validate_initiation(
 
     :return: Boolean result, and associated message.
     """
+    # check type
+    if not isinstance(initiation, list):
+        return (
+            False,
+            "Invalid type for initiation. Expected list. Found '{}'.".format(
+                type(initiation)
+            ),
+        )
+
+    # check initiation is not empty/None
     if len(initiation) == 0 or initiation is None:
         return (
             False,
             "At least one initial performative for this dialogue must be specified.",
         )
 
+    # check performatives are previously defined
     for performative in initiation:
         if performative not in performatives_set:
             return (
@@ -503,19 +584,29 @@ def _validate_initiation(
 
 
 def _validate_reply(
-    reply: Dict[str, List[str]], performatives_set: Set[str]
+    reply_definition: Dict[str, List[str]], performatives_set: Set[str]
 ) -> Tuple[bool, str]:
     """
-    Evaluate whether the reply structure in a protocol specification is valid.
+    Evaluate whether the reply definition in a protocol specification is valid.
 
-    :param reply: Reply structure of a dialogue.
+    :param reply_definition: Reply structure of a dialogue.
     :param performatives_set: set of all performatives in the dialogue.
 
     :return: Boolean result, and associated message.
     """
+    # check type
+    if not isinstance(reply_definition, dict):
+        return (
+            False,
+            "Invalid type for the reply definition. Expected dict. Found '{}'.".format(
+                type(reply_definition)
+            ),
+        )
+
     performatives_set_2 = performatives_set.copy()
 
-    for performative in reply.keys():
+    for performative, replies in reply_definition.items():
+        # check only previously defined performatives are included in the reply definition
         if performative not in performatives_set_2:
             return (
                 False,
@@ -523,8 +614,29 @@ def _validate_reply(
                     performative,
                 ),
             )
+
+        # check the type of replies
+        if not isinstance(replies, list):
+            return (
+                False,
+                "Invalid type for replies of performative {}. Expected list. Found '{}'.".format(
+                    performative, type(replies)
+                ),
+            )
+
+        # check all replies are performatives which are previously defined in the speech-acts definition
+        for reply in replies:
+            if reply not in performatives_set:
+                return (
+                    False,
+                    "Performative '{}' in the list of replies for '{}' is not defined in speech-acts.".format(
+                        reply, performative
+                    ),
+                )
+
         performatives_set_2.remove(performative)
 
+    # check all previously defined performatives are included in the reply definition
     if len(performatives_set_2) != 0:
         return (
             False,
@@ -547,12 +659,23 @@ def _validate_termination(
 
     :return: Boolean result, and associated message.
     """
+    # check type
+    if not isinstance(termination, list):
+        return (
+            False,
+            "Invalid type for termination. Expected list. Found '{}'.".format(
+                type(termination)
+            ),
+        )
+
+    # check termination is not empty/None
     if len(termination) == 0 or termination is None:
         return (
             False,
             "At least one terminal performative for this dialogue must be specified.",
         )
 
+    # check terminal performatives are previously defined
     for performative in termination:
         if performative not in performatives_set:
             return (
@@ -565,13 +688,21 @@ def _validate_termination(
     return True, "Terminal messages are valid."
 
 
-def _validate_roles(roles: Set[str]) -> Tuple[bool, str]:
+def _validate_roles(roles: Dict[str, Any]) -> Tuple[bool, str]:
     """
     Evaluate whether roles field in a protocol specification is valid.
 
     :param roles: Set of roles of a dialogue.
     :return: Boolean result, and associated message.
     """
+    # check type
+    if not isinstance(roles, dict):
+        return (
+            False,
+            "Invalid type for roles. Expected dict. Found '{}'.".format(type(roles)),
+        )
+
+    # check number of roles
     if not 1 <= len(roles) <= 2:
         return (
             False,
@@ -580,6 +711,7 @@ def _validate_roles(roles: Set[str]) -> Tuple[bool, str]:
             ),
         )
 
+    # check each role's format
     for role in roles:
         if not _is_valid_regex(ROLE_REGEX_PATTERN, role):
             return (
@@ -599,6 +731,16 @@ def _validate_end_states(end_states: List[str]) -> Tuple[bool, str]:
     :param end_states: List of end states of a dialogue.
     :return: Boolean result, and associated message.
     """
+    # check type
+    if not isinstance(end_states, list):
+        return (
+            False,
+            "Invalid type for roles. Expected list. Found '{}'.".format(
+                type(end_states)
+            ),
+        )
+
+    # check each end_state's format
     for end_state in end_states:
         if not _is_valid_regex(END_STATE_REGEX_PATTERN, end_state):
             return (
@@ -609,6 +751,28 @@ def _validate_end_states(end_states: List[str]) -> Tuple[bool, str]:
             )
 
     return True, "Dialogue end_states are valid."
+
+
+def _validate_keep_terminal(keep_terminal_state_dialogues: bool) -> Tuple[bool, str]:
+    """
+    Evaluate whether keep_terminal_state_dialogues field in a protocol specification is valid.
+
+    :param keep_terminal_state_dialogues: the value of keep_terminal_state_dialogues.
+    :return: Boolean result, and associated message.
+    """
+    # check the type of keep_terminal_state_dialogues's value
+    if (
+        type(keep_terminal_state_dialogues)  # pylint: disable=unidiomatic-typecheck
+        != bool
+    ):
+        return (
+            False,
+            "Invalid type for keep_terminal_state_dialogues. Expected bool. Found {}.".format(
+                type(keep_terminal_state_dialogues)
+            ),
+        )
+
+    return True, "Dialogue keep_terminal_state_dialogues is valid."
 
 
 def _validate_dialogue_section(
@@ -626,6 +790,16 @@ def _validate_dialogue_section(
         protocol_specification.dialogue_config != {}
         and protocol_specification.dialogue_config is not None
     ):
+        # validate required fields exist
+        (
+            result_field_existence_validation,
+            msg_field_existence_validation,
+        ) = _validate_field_existence(
+            cast(List[str], protocol_specification.dialogue_config),
+        )
+        if not result_field_existence_validation:
+            return result_field_existence_validation, msg_field_existence_validation
+
         # Validate initiation
         result_initiation_validation, msg_initiation_validation = _validate_initiation(
             cast(List[str], protocol_specification.dialogue_config["initiation"]),
@@ -655,7 +829,7 @@ def _validate_dialogue_section(
 
         # Validate roles
         result_roles_validation, msg_roles_validation = _validate_roles(
-            cast(Set[str], protocol_specification.dialogue_config["roles"])
+            cast(Dict[str, Any], protocol_specification.dialogue_config["roles"])
         )
         if not result_roles_validation:
             return result_roles_validation, msg_roles_validation
@@ -666,6 +840,19 @@ def _validate_dialogue_section(
         )
         if not result_end_states_validation:
             return result_end_states_validation, msg_end_states_validation
+
+        # Validate keep_terminal_state_dialogues
+        (
+            result_keep_terminal_validation,
+            msg_keep_terminal_validation,
+        ) = _validate_keep_terminal(
+            cast(
+                bool,
+                protocol_specification.dialogue_config["keep_terminal_state_dialogues"],
+            )
+        )
+        if not result_keep_terminal_validation:
+            return result_keep_terminal_validation, msg_keep_terminal_validation
 
     return True, "Dialogue section of the protocol specification is valid."
 

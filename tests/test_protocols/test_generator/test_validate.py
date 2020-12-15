@@ -41,7 +41,9 @@ from aea.protocols.generator.validate import (
     _validate_content_type,
     _validate_dialogue_section,
     _validate_end_states,
+    _validate_field_existence,
     _validate_initiation,
+    _validate_keep_terminal,
     _validate_performatives,
     _validate_protocol_buffer_schema_code_snippets,
     _validate_reply,
@@ -1077,10 +1079,9 @@ class TestValidate(TestCase):
         assert invalid_all_content_2 is None
 
         invalid_speech_act_content_config_2 = SpeechActContentConfig(
-            conten_name_1="pt: set[pt:int]"
+            content_name_1="pt: set[pt:int]"
         )
         speech_act_5 = CRUDCollection()
-        valid_perm = "perm_1"
         speech_act_5.create(valid_perm, invalid_speech_act_content_config_2)
 
         mocked_spec.speech_acts = speech_act_5
@@ -1094,7 +1095,7 @@ class TestValidate(TestCase):
         assert invalid_result_3 is False
         assert (
             invalid_msg_3
-            == "Invalid type for content 'conten_name_1' of performative '{}'. See documentation for the correct format of specification types.".format(
+            == "Invalid type for content 'content_name_1' of performative '{}'. See documentation for the correct format of specification types.".format(
                 valid_perm,
             )
         )
@@ -1114,6 +1115,52 @@ class TestValidate(TestCase):
         assert invalid_msg_4 == "Speech-acts cannot be empty!"
         assert invalid_all_per_4 is None
         assert invalid_all_content_4 is None
+
+        invalid_speech_act_content_config_3 = SpeechActContentConfig(content_name_1=123)
+        speech_act_7 = CRUDCollection()
+        speech_act_7.create(valid_perm, invalid_speech_act_content_config_3)
+
+        mocked_spec.speech_acts = speech_act_7
+
+        (
+            invalid_result_5,
+            invalid_msg_5,
+            invalid_all_per_5,
+            invalid_all_content_5,
+        ) = _validate_speech_acts_section(mocked_spec)
+        assert invalid_result_5 is False
+        assert (
+            invalid_msg_5
+            == f"Invalid type for '{'content_name_1'}'. Expected str. Found {type(123)}."
+        )
+        assert invalid_all_per_5 is None
+        assert invalid_all_content_5 is None
+
+        invalid_speech_act_content_config_4 = SpeechActContentConfig(
+            content_name_1="pt:int"
+        )
+        invalid_speech_act_content_config_5 = SpeechActContentConfig(
+            content_name_1="pt:float"
+        )
+        speech_act_8 = CRUDCollection()
+        speech_act_8.create("perm_1", invalid_speech_act_content_config_4)
+        speech_act_8.create("perm_2", invalid_speech_act_content_config_5)
+
+        mocked_spec.speech_acts = speech_act_8
+
+        (
+            invalid_result_6,
+            invalid_msg_6,
+            invalid_all_per_6,
+            invalid_all_content_6,
+        ) = _validate_speech_acts_section(mocked_spec)
+        assert invalid_result_6 is False
+        assert (
+            invalid_msg_6
+            == f"Content 'content_name_1' with type 'pt:float' under performative 'perm_2' is already defined under performative 'perm_1' with a different type ('pt:int')."
+        )
+        assert invalid_all_per_6 is None
+        assert invalid_all_content_6 is None
 
     @mock.patch("aea.configurations.base.ProtocolSpecification",)
     def test_validate_protocol_buffer_schema_code_snippets(self, mocked_spec):
@@ -1181,12 +1228,67 @@ class TestValidate(TestCase):
             )
         )
 
+    def test_validate_field_existence(self):
+        """Test for the '_validate_field_existence' method."""
+        valid_dialogue_config_1 = {
+            "initiation": ["performative_ct", "performative_pt"],
+            "reply": {
+                "performative_ct": ["performative_pct"],
+                "performative_pt": ["performative_pmt"],
+                "performative_pct": ["performative_mt", "performative_o"],
+                "performative_pmt": ["performative_mt", "performative_o"],
+                "performative_mt": [],
+                "performative_o": [],
+                "performative_empty_contents": ["performative_empty_contents"],
+            },
+            "termination": [
+                "performative_mt",
+                "performative_o",
+                "performative_empty_contents",
+            ],
+            "roles": {"role_1": None, "role_2": None},
+            "end_states": ["end_state_1", "end_state_2", "end_state_3"],
+            "keep_terminal_state_dialogues": True,
+        }
+
+        valid_result_1, valid_msg_1, = _validate_field_existence(
+            valid_dialogue_config_1
+        )
+        assert valid_result_1 is True
+        assert valid_msg_1 == "Dialogue section has all the required fields."
+
+        ###################################################
+
+        invalid_dialogue_config_1 = valid_dialogue_config_1.copy()
+        invalid_dialogue_config_1.pop("initiation")
+
+        invalid_result_1, invalid_msg_1, = _validate_field_existence(
+            invalid_dialogue_config_1
+        )
+        assert invalid_result_1 is False
+        assert (
+            invalid_msg_1
+            == "Missing required field 'initiation' in the dialogue section of the protocol specification."
+        )
+
+        invalid_dialogue_config_2 = valid_dialogue_config_1.copy()
+        invalid_dialogue_config_2.pop("reply")
+
+        invalid_result_2, invalid_msg_2, = _validate_field_existence(
+            invalid_dialogue_config_2
+        )
+        assert invalid_result_2 is False
+        assert (
+            invalid_msg_2
+            == "Missing required field 'reply' in the dialogue section of the protocol specification."
+        )
+
     def test_validate_initiation(self):
         """Test for the '_validate_initiation' method."""
         valid_initiation_1 = ["perm_1", "perm_2"]
-        valid_performatives_set_1 = {"perm_1", "perm_2", "perm_3", "perm_4"}
+        valid_performatives_set = {"perm_1", "perm_2", "perm_3", "perm_4"}
         valid_result_1, valid_msg_1 = _validate_initiation(
-            valid_initiation_1, valid_performatives_set_1
+            valid_initiation_1, valid_performatives_set
         )
         assert valid_result_1 is True
         assert valid_msg_1 == "Initial messages are valid."
@@ -1194,9 +1296,8 @@ class TestValidate(TestCase):
         ###################################################
 
         invalid_initiation_1 = []
-        invalid_performatives_set_1 = {"perm_1", "perm_2", "perm_3", "perm_4"}
         invalid_result_1, invalid_msg_1 = _validate_initiation(
-            invalid_initiation_1, invalid_performatives_set_1
+            invalid_initiation_1, valid_performatives_set
         )
         assert invalid_result_1 is False
         assert (
@@ -1205,14 +1306,23 @@ class TestValidate(TestCase):
         )
 
         invalid_initiation_2 = ["perm_5"]
-        invalid_performatives_set_2 = {"perm_1", "perm_2", "perm_3", "perm_4"}
         invalid_result_2, invalid_msg_2 = _validate_initiation(
-            invalid_initiation_2, invalid_performatives_set_2
+            invalid_initiation_2, valid_performatives_set
         )
         assert invalid_result_2 is False
         assert (
             invalid_msg_2
             == "Performative 'perm_5' specified in \"initiation\" is not defined in the protocol's speech-acts."
+        )
+
+        invalid_initiation_3 = "perm_1"
+        invalid_result_3, invalid_msg_3 = _validate_initiation(
+            invalid_initiation_3, valid_performatives_set
+        )
+        assert invalid_result_3 is False
+        assert (
+            invalid_msg_3
+            == f"Invalid type for initiation. Expected list. Found '{type(invalid_initiation_3)}'."
         )
 
     def test_validate_reply(self):
@@ -1271,22 +1381,62 @@ class TestValidate(TestCase):
             "perm_5": [],
         }
         invalid_performatives_set_2 = {"perm_1", "perm_2", "perm_3", "perm_4"}
-
         invalid_result_2, invalid_msg_2, = _validate_reply(
             invalid_reply_2, invalid_performatives_set_2
         )
         assert invalid_result_2 is False
         assert (
             invalid_msg_2
-            == "Performative 'perm_5' specified in \"reply\" is not defined in the protocol's speech-acts."
+            == "Performative 'perm_5' in the list of replies for 'perm_4' is not defined in speech-acts."
+        )
+
+        invalid_reply_3 = ["perm_1", "perm_2", "perm_3", "perm_4", "perm_5"]
+        invalid_result_3, invalid_msg_3, = _validate_reply(
+            invalid_reply_3, invalid_performatives_set_1
+        )
+        assert invalid_result_3 is False
+        assert (
+            invalid_msg_3
+            == f"Invalid type for the reply definition. Expected dict. Found '{type(invalid_reply_3)}'."
+        )
+        invalid_reply_4 = {
+            "perm_1": {"perm_2"},
+            "perm_2": {"perm_3"},
+            "perm_3": {"perm_4"},
+            "perm_4": {"perm_5"},
+            "perm_5": set(),
+        }
+        invalid_result_4, invalid_msg_4, = _validate_reply(
+            invalid_reply_4, invalid_performatives_set_1
+        )
+        assert invalid_result_4 is False
+        assert (
+            invalid_msg_4
+            == f"Invalid type for replies of performative perm_1. Expected list. Found '{type({'perm_2'})}'."
+        )
+
+        invalid_reply_5 = {
+            "perm_1": ["perm_2"],
+            "perm_2": ["perm_3"],
+            "perm_3": ["perm_4"],
+            "perm_4": ["perm_1"],
+            "perm_5": [],
+        }
+        invalid_result_5, invalid_msg_5, = _validate_reply(
+            invalid_reply_5, invalid_performatives_set_2
+        )
+        assert invalid_result_5 is False
+        assert (
+            invalid_msg_5
+            == f"Performative 'perm_5' specified in \"reply\" is not defined in the protocol's speech-acts."
         )
 
     def test_validate_termination(self):
         """Test for the '_validate_termination' method."""
         valid_termination_1 = ["perm_4", "perm_3"]
-        valid_performatives_set_1 = {"perm_1", "perm_2", "perm_3", "perm_4"}
+        valid_performatives_set = {"perm_1", "perm_2", "perm_3", "perm_4"}
         valid_result_1, valid_msg_1 = _validate_termination(
-            valid_termination_1, valid_performatives_set_1
+            valid_termination_1, valid_performatives_set
         )
         assert valid_result_1 is True
         assert valid_msg_1 == "Terminal messages are valid."
@@ -1294,9 +1444,8 @@ class TestValidate(TestCase):
         ###################################################
 
         invalid_termination_1 = []
-        invalid_performatives_set_1 = {"perm_1", "perm_2", "perm_3", "perm_4"}
         invalid_result_1, invalid_msg_1 = _validate_termination(
-            invalid_termination_1, invalid_performatives_set_1
+            invalid_termination_1, valid_performatives_set
         )
         assert invalid_result_1 is False
         assert (
@@ -1305,9 +1454,8 @@ class TestValidate(TestCase):
         )
 
         invalid_termination_2 = ["perm_5"]
-        invalid_performatives_set_2 = {"perm_1", "perm_2", "perm_3", "perm_4"}
         invalid_result_2, invalid_msg_2 = _validate_termination(
-            invalid_termination_2, invalid_performatives_set_2
+            invalid_termination_2, valid_performatives_set
         )
         assert invalid_result_2 is False
         assert (
@@ -1315,21 +1463,31 @@ class TestValidate(TestCase):
             == "Performative 'perm_5' specified in \"termination\" is not defined in the protocol's speech-acts."
         )
 
+        invalid_termination_3 = {"perm_5"}
+        invalid_result_3, invalid_msg_3 = _validate_termination(
+            invalid_termination_3, valid_performatives_set
+        )
+        assert invalid_result_3 is False
+        assert (
+            invalid_msg_3
+            == f"Invalid type for termination. Expected list. Found '{type(invalid_termination_3)}'."
+        )
+
     def test_validate_roles(self):
         """Test for the '_validate_roles' method."""
-        valid_roles_1 = {"role_1", "role_2"}
+        valid_roles_1 = {"role_1": None, "role_2": None}
         valid_result_1, valid_msg_1 = _validate_roles(valid_roles_1)
         assert valid_result_1 is True
         assert valid_msg_1 == "Dialogue roles are valid."
 
-        valid_roles_2 = {"role_1"}
+        valid_roles_2 = {"role_1": None}
         valid_result_2, valid_msg_2 = _validate_roles(valid_roles_2)
         assert valid_result_2 is True
         assert valid_msg_2 == "Dialogue roles are valid."
 
         ###################################################
 
-        invalid_roles_1 = set()
+        invalid_roles_1 = dict()
         invalid_result_1, invalid_msg_1 = _validate_roles(invalid_roles_1)
         assert invalid_result_1 is False
         assert (
@@ -1337,7 +1495,7 @@ class TestValidate(TestCase):
             == "There must be either 1 or 2 roles defined in this dialogue. Found 0"
         )
 
-        invalid_roles_2 = {"role_1", "role_2", "role_3"}
+        invalid_roles_2 = {"role_1": None, "role_2": None, "role_3": None}
         invalid_result_2, invalid_msg_2 = _validate_roles(invalid_roles_2)
         assert invalid_result_2 is False
         assert (
@@ -1345,7 +1503,7 @@ class TestValidate(TestCase):
             == "There must be either 1 or 2 roles defined in this dialogue. Found 3"
         )
 
-        invalid_roles_3 = {"_agent_"}
+        invalid_roles_3 = {"_agent_": None}
         invalid_result_3, invalid_msg_3 = _validate_roles(invalid_roles_3)
         assert invalid_result_3 is False
         assert (
@@ -1353,6 +1511,14 @@ class TestValidate(TestCase):
             == "Invalid name for role '_agent_'. Role names must match the following regular expression: {} ".format(
                 ROLE_REGEX_PATTERN
             )
+        )
+
+        invalid_roles_4 = {"client"}
+        invalid_result_4, invalid_msg_4 = _validate_roles(invalid_roles_4)
+        assert invalid_result_4 is False
+        assert (
+            invalid_msg_4
+            == f"Invalid type for roles. Expected dict. Found '{type(invalid_roles_4)}'."
         )
 
     def test_validate_end_states(self):
@@ -1389,6 +1555,42 @@ class TestValidate(TestCase):
             )
         )
 
+        invalid_end_states_3 = {"end_state_1"}
+        invalid_result_3, invalid_msg_3 = _validate_end_states(invalid_end_states_3)
+        assert invalid_result_3 is False
+        assert (
+            invalid_msg_3
+            == f"Invalid type for roles. Expected list. Found '{type(invalid_end_states_3)}'."
+        )
+
+    def test_validate_keep_terminal(self):
+        """Test for the '_validate_keep_terminal' method."""
+        valid_keep_terminal_state_dialogues_1 = True
+        valid_result_1, valid_msg_1 = _validate_keep_terminal(
+            valid_keep_terminal_state_dialogues_1
+        )
+        assert valid_result_1 is True
+        assert valid_msg_1 == "Dialogue keep_terminal_state_dialogues is valid."
+
+        valid_keep_terminal_state_dialogues_2 = False
+        valid_result_2, valid_msg_2 = _validate_keep_terminal(
+            valid_keep_terminal_state_dialogues_2
+        )
+        assert valid_result_2 is True
+        assert valid_msg_2 == "Dialogue keep_terminal_state_dialogues is valid."
+
+        ###################################################
+
+        invalid_keep_terminal_state_dialogues_1 = "some_non_boolean_value"
+        invalid_result_1, invalid_msg_1 = _validate_keep_terminal(
+            invalid_keep_terminal_state_dialogues_1
+        )
+        assert invalid_result_1 is False
+        assert (
+            invalid_msg_1
+            == f"Invalid type for keep_terminal_state_dialogues. Expected bool. Found {type(invalid_keep_terminal_state_dialogues_1)}."
+        )
+
     @mock.patch("aea.configurations.base.ProtocolSpecification",)
     def test_validate_dialogue_section(self, mocked_spec):
         """Test for the '_validate_dialogue_section' method."""
@@ -1410,6 +1612,7 @@ class TestValidate(TestCase):
             ],
             "roles": {"role_1": None, "role_2": None},
             "end_states": ["end_state_1", "end_state_2", "end_state_3"],
+            "keep_terminal_state_dialogues": True,
         }
         valid_performatives_set_1 = {
             "performative_ct",
@@ -1513,6 +1716,33 @@ class TestValidate(TestCase):
             == "Invalid name for end_state 'end_$tate_1'. End_state names must match the following regular expression: {} ".format(
                 END_STATE_REGEX_PATTERN
             )
+        )
+
+        invalid_dialogue_config_6 = valid_dialogue_config_1.copy()
+        invalid_dialogue_config_6.pop("termination")
+        mocked_spec.dialogue_config = invalid_dialogue_config_6
+
+        invalid_result_6, invalid_msg_6, = _validate_dialogue_section(
+            mocked_spec, valid_performatives_set_1
+        )
+        assert invalid_result_6 is False
+        assert (
+            invalid_msg_6
+            == f"Missing required field 'termination' in the dialogue section of the protocol specification."
+        )
+
+        invalid_value = 521
+        invalid_dialogue_config_7 = valid_dialogue_config_1.copy()
+        invalid_dialogue_config_7["keep_terminal_state_dialogues"] = invalid_value
+        mocked_spec.dialogue_config = invalid_dialogue_config_7
+
+        invalid_result_7, invalid_msg_7, = _validate_dialogue_section(
+            mocked_spec, valid_performatives_set_1
+        )
+        assert invalid_result_7 is False
+        assert (
+            invalid_msg_7
+            == f"Invalid type for keep_terminal_state_dialogues. Expected bool. Found {type(invalid_value)}."
         )
 
     @mock.patch("aea.configurations.base.ProtocolSpecification")
