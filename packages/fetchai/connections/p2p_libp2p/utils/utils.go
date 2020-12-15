@@ -212,6 +212,15 @@ func PubKeyFromFetchAIPublicKey(publicKey string) (crypto.PubKey, error) {
 	return crypto.UnmarshalSecp256k1PublicKey(hexBytes)
 }
 
+// FetchAIPublicKeyFromPubKey return FetchAI's format serialized public key
+func FetchAIPublicKeyFromPubKey(publicKey crypto.PubKey) (string, error) {
+	raw, err := publicKey.Raw()
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(raw), nil
+}
+
 // BTCPubKeyFromFetchAIPublicKey
 func BTCPubKeyFromFetchAIPublicKey(publicKey string) (*btcec.PublicKey, error) {
 	pbkBytes, err := hex.DecodeString(publicKey)
@@ -239,6 +248,7 @@ func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 	sigDER[offset] = 0x02
 	sigDER[offset+1] = byte(len(sb))
 	copy(sigDER[offset+2:], sb)
+	println(len(sigDER))
 	return sigDER
 }
 
@@ -247,15 +257,11 @@ func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 //  - https://github.com/fetchai/agents-aea/blob/master/aea/crypto/cosmos.py#L258
 //  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
 func ConvertDEREncodedSignatureToStr(signature []byte) ([]byte, error) {
-	length := len(signature) - 6
-	if length%2 != 0 {
-		return []byte{}, errors.New("DER signature length must be even")
+	sig, err := btcec.ParseDERSignature(signature, btcec.S256())
+	if err != nil {
+		return []byte{}, err
 	}
-	sigStr := make([]byte, length)
-	offset := 4 + length/2
-	copy(sigStr, signature[4:offset])
-	copy(sigStr[length/2:], signature[offset+2:])
-	return sigStr, nil
+	return append(sig.R.Bytes(), sig.S.Bytes()...), nil
 }
 
 // ParseFetchAISignature create btcec Signature from base64 formated, string (not DER) encoded RFC6979 signature

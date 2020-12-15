@@ -20,7 +20,11 @@
 
 package dhtclient
 
-import "libp2p_node/utils"
+import (
+	"libp2p_node/aea"
+	"libp2p_node/dht/dhtnode"
+	"libp2p_node/utils"
+)
 
 // Option for dhtclient.New
 type Option func(*DHTClient) error
@@ -41,6 +45,22 @@ func IdentityFromFetchAIKey(key string) Option {
 func RegisterAgentAddress(addr string, isReady func() bool) Option {
 	return func(dhtClient *DHTClient) error {
 		dhtClient.myAgentAddress = addr
+		dhtClient.myAgentReady = isReady
+		return nil
+	}
+}
+
+func RegisterAgentAddressWithPoR(record *aea.AgentRecord, isReady func() bool) Option {
+	return func(dhtClient *DHTClient) error {
+		pbRecord := &dhtnode.AgentRecord{}
+		pbRecord.Address = record.Address
+		pbRecord.PublicKey = record.PublicKey
+		pbRecord.PeerPublicKey = record.PeerPublicKey
+		pbRecord.Signature = record.Signature
+		pbRecord.ServiceId = record.ServiceId
+
+		dhtClient.myAgentAddress = record.Address
+		dhtClient.myAgentRecord = pbRecord
 		dhtClient.myAgentReady = isReady
 		return nil
 	}

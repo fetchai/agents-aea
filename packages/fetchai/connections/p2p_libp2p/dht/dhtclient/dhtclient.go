@@ -28,9 +28,11 @@ import (
 	"errors"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
@@ -73,6 +75,7 @@ type DHTClient struct {
 	routedHost *routedhost.RoutedHost
 
 	myAgentAddress  string
+	myAgentRecord   *dhtnode.AgentRecord
 	myAgentReady    func() bool
 	processEnvelope func(*aea.Envelope) error
 
@@ -103,6 +106,26 @@ func New(opts ...Option) (*DHTClient, error) {
 	// agent address is mandatory
 	if dhtClient.myAgentAddress == "" {
 		return nil, errors.New("missing agent address")
+	}
+
+	// agent record is mandatory
+	// FIXME
+	if dhtClient.myAgentRecord == nil {
+		//	return nil, errors.New("missing agent record")
+	}
+
+	// check if the PoR is delivered for my public  key
+	myPublicKey, err := utils.FetchAIPublicKeyFromPubKey(dhtClient.publicKey)
+	status, errPoR := dhtnode.IsValidProofOfRepresentation(dhtClient.myAgentRecord, myPublicKey)
+	if status.Code != dhtnode.Status_SUCCESS {
+		msg := "Invalid AgentRecord"
+		if err != nil {
+			msg += " - " + err.Error()
+		}
+		if errPoR != nil {
+			msg += " - " + errPoR.Error()
+		}
+		return nil, errors.New(msg)
 	}
 
 	// bootsrap peers
@@ -426,7 +449,6 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		stream.Close()
 	}
 
-	println("Envelope sent:::::::::::::::::::::::::::::::::::::::::::::::", envel.String())
 	return err
 
 }
@@ -518,21 +540,48 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 		Str("op", "register").
 		Str("addr", dhtClient.myAgentAddress).
 		Msgf("registering addr and peerID to relay peer")
-	err = utils.WriteBytes(stream, []byte(dhtClient.myAgentAddress))
+
+	registration := &dhtnode.Register{Record: dhtClient.myAgentRecord}
+	msg := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Register{registration}}
+	buf, err := proto.Marshal(msg)
+
+	err = utils.WriteBytes(stream, buf)
 	if err != nil {
 		errReset := stream.Reset()
 		ignore(errReset)
 		return err
 	}
-	_, _ = utils.ReadBytes(stream)
-	err = utils.WriteBytes(stream, []byte(dhtClient.routedHost.ID().Pretty()))
+	buf, err = utils.ReadBytes(stream)
+	if err != nil {
+		errReset := stream.Reset()
+		ignore(errReset)
+		return err
+	}
+	response := &dhtnode.AcnMessage{}
+	err = proto.Unmarshal(buf, response)
 	if err != nil {
 		errReset := stream.Reset()
 		ignore(errReset)
 		return err
 	}
 
-	_, _ = utils.ReadBytes(stream)
+	// Get Status message
+	var status *dhtnode.Status
+	switch pl := response.Payload.(type) {
+	case *dhtnode.AcnMessage_Status:
+		status = pl.Status
+	default:
+		errReset := stream.Reset()
+		ignore(errReset)
+		return err
+	}
+
+	if status.Code != dhtnode.Status_SUCCESS {
+		errReset := stream.Reset()
+		ignore(errReset)
+		return errors.New("Registration failed: " + strings.Join(status.Msgs, ","))
+	}
+
 	stream.Close()
 	return nil
 

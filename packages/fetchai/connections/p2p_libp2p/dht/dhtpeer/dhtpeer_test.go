@@ -430,8 +430,8 @@ func TestRoutingDHTClientToDHTPeerX(t *testing.T) {
 	}
 	defer peerCleanup()
 
-	client, clientCleanup, err := SetupDHTClient(
-		FetchAITestKeys[1], AgentsTestAddresses[1], []string{peer.MultiAddr()},
+	client, clientCleanup, err := SetupDHTClientWithPoR(
+		FetchAITestKeys[1], AgentsTestKeys[1], []string{peer.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -1395,11 +1395,62 @@ func SetupLocalDHTPeer(key string, addr string, dhtPort uint16, delegatePort uin
 		IdentityFromFetchAIKey(key),
 		EnableRelayService(),
 		BootstrapFrom(entry),
-		WithRegistrationDelay(5 * time.Second),
 	}
 
 	if addr != "" {
 		opts = append(opts, RegisterAgentAddress(addr, func() bool { return true }))
+	}
+
+	if delegatePort != 0 {
+		opts = append(opts, EnableDelegateService(delegatePort))
+	}
+
+	dhtPeer, err := New(opts...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return dhtPeer, func() { dhtPeer.Close() }, nil
+
+}
+
+func SetupLocalDHTPeerWithPoR(key string, agentKey string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
+	opts := []Option{
+		LocalURI(DefaultLocalHost, dhtPort),
+		PublicURI(DefaultLocalHost, dhtPort),
+		IdentityFromFetchAIKey(key),
+		EnableRelayService(),
+		BootstrapFrom(entry),
+	}
+
+	if agentKey != "" {
+		agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		agentAddress, err := utils.FetchAIAddressFromPublicKey(agentPubKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		signature, err := signFetchAI([]byte(peerPubKey), agentKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		record := &aea.AgentRecord{}
+		record.Address = agentAddress
+		record.PublicKey = agentPubKey
+		record.PeerPublicKey = peerPubKey
+		record.Signature = signature
+
+		opts = append(opts, RegisterAgentAddressWithPoR(record, func() bool { return true }))
 	}
 
 	if delegatePort != 0 {
@@ -1426,6 +1477,49 @@ func SetupDHTClient(key string, address string, entry []string) (*dhtclient.DHTC
 
 	dhtClient, err := dhtclient.New(opts...)
 	if err != nil {
+		return nil, nil, err
+	}
+
+	return dhtClient, func() { dhtClient.Close() }, nil
+}
+
+func SetupDHTClientWithPoR(key string, agentKey string, entry []string) (*dhtclient.DHTClient, func(), error) {
+
+	agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	agentAddress, err := utils.FetchAIAddressFromPublicKey(agentPubKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	signature, err := signFetchAI([]byte(peerPubKey), agentKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	record := &aea.AgentRecord{}
+	record.Address = agentAddress
+	record.PublicKey = agentPubKey
+	record.PeerPublicKey = peerPubKey
+	record.Signature = signature
+
+	opts := []dhtclient.Option{
+		dhtclient.IdentityFromFetchAIKey(key),
+		dhtclient.RegisterAgentAddressWithPoR(record, func() bool { return true }),
+		dhtclient.BootstrapFrom(entry),
+	}
+
+	dhtClient, err := dhtclient.New(opts...)
+	if err != nil {
+		println(err)
 		return nil, nil, err
 	}
 

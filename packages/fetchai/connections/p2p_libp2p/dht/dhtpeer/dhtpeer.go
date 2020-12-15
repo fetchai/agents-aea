@@ -120,12 +120,16 @@ type DHTPeer struct {
 
 	addressAnnounced bool
 	myAgentAddress   string
+	myAgentRecord    *dhtnode.AgentRecord
 	myAgentReady     func() bool
 	dhtAddresses     map[string]string
 	tcpAddresses     map[string]net.Conn
+	agentRecords     map[string]*dhtnode.AgentRecord
 	dhtAddressesLock sync.RWMutex
 	tcpAddressesLock sync.RWMutex
-	processEnvelope  func(*aea.Envelope) error
+	agentRecordsLock sync.RWMutex
+	// TOFIX(LR): maps and locks need refactoring for better abstraction
+	processEnvelope func(*aea.Envelope) error
 
 	monitor    monitoring.MonitoringService
 	closing    chan struct{}
@@ -140,8 +144,10 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	dhtPeer.dhtAddresses = map[string]string{}
 	dhtPeer.tcpAddresses = map[string]net.Conn{}
+	dhtPeer.agentRecords = map[string]*dhtnode.AgentRecord{}
 	dhtPeer.dhtAddressesLock = sync.RWMutex{}
 	dhtPeer.tcpAddressesLock = sync.RWMutex{}
+	dhtPeer.agentRecordsLock = sync.RWMutex{}
 
 	for _, opt := range opts {
 		if err := opt(dhtPeer); err != nil {
@@ -166,6 +172,15 @@ func New(opts ...Option) (*DHTPeer, error) {
 	// public uri
 	if dhtPeer.publicMultiaddr == nil {
 		return nil, errors.New("public host and port must be set")
+	}
+
+	// check if the PoR is delivered for my public  key
+	if dhtPeer.myAgentRecord != nil {
+		myPublicKey, err := utils.FetchAIPublicKeyFromPubKey(dhtPeer.publicKey)
+		status, errPoR := dhtnode.IsValidProofOfRepresentation(dhtPeer.myAgentRecord, myPublicKey)
+		if status.Code != dhtnode.Status_SUCCESS {
+			return nil, errors.New("Invalid AgentRecord - " + err.Error() + " - " + errPoR.Error())
+		}
 	}
 
 	/* setup libp2p node */
@@ -481,35 +496,6 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 	}
 }
 
-func isValidProofOfRepresentation(record *dhtnode.AgentRecord) (*dhtnode.Status, error) {
-
-	// check that agent address and public key match
-	addrFromPubKey, err := utils.FetchAIAddressFromPublicKey(record.PublicKey)
-	if err != nil || addrFromPubKey != record.Address {
-		if err == nil {
-			err = errors.New("Agent address and public key don't match")
-		}
-		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_INVALID_AGENT_ADDRESS}
-		return response, err
-	}
-
-	// check that signature is valid
-	ok, err := utils.VerifyFetchAISignatureBTC([]byte(record.PeerPublicKey), record.Signature, record.PublicKey)
-	if !ok || err != nil {
-		if err == nil {
-			err = errors.New("Signature is not valid")
-		}
-		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_INVALID_PROOF}
-		return response, err
-
-	}
-
-	// PoR is valid
-	response := &dhtnode.Status{Code: dhtnode.Status_SUCCESS}
-	return response, nil
-
-}
-
 func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	defer dhtPeer.goroutines.Done()
 	defer conn.Close()
@@ -530,7 +516,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	// read agent registration message
 	buf, err := utils.ReadBytesConn(conn)
 	if err != nil {
-		lerror(err).Msg("while receiving agent's Address")
+		lerror(err).Msg("while receiving agent's registration request")
 		nbrConns.Dec()
 		return
 	}
@@ -539,7 +525,8 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	err = proto.Unmarshal(buf, msg)
 	if err != nil {
 		lerror(err).Msg("couldn't deserialize acn registration message")
-		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_GENERIC, Msgs: []string{err.Error()}}
+		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_GENERIC, Msgs: []string{err.Error()}}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
 		buf, err = proto.Marshal(response)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
@@ -557,7 +544,8 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		register = pl.Register
 	default:
 		err = errors.New("Unexpected payload")
-		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_UNEXPECTED_PAYLOAD}
+		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_UNEXPECTED_PAYLOAD}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
 		buf, err = proto.Marshal(response)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
@@ -571,26 +559,13 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	linfo().Msgf("connection from %s established for Address %s",
 		conn.RemoteAddr().String(), addr)
 
-	// check that connection public key match
-	connPubKey, err := utils.PubKeyFromFetchAIPublicKey(record.PeerPublicKey)
-	if err != nil || !connPubKey.Equals(dhtPeer.publicKey) {
-		if err == nil {
-			err = errors.New("Registration connection public key doesn't match peer key")
-		}
-		lerror(err).Msg("Couldn't verify agent address and public key association")
-		response := &dhtnode.Status{Code: dhtnode.Status_ERROR_INVALID_PUBLIC_KEY}
-		buf, err = proto.Marshal(response)
-		err = utils.WriteBytesConn(conn, buf)
-		ignore(err)
-
-		nbrConns.Dec()
-		return
-	}
-
 	// check if the PoR is valid
-	response, err := isValidProofOfRepresentation(record)
+	myPubKey, err := utils.FetchAIPublicKeyFromPubKey(dhtPeer.publicKey)
+	ignore(err)
+	status, err := dhtnode.IsValidProofOfRepresentation(record, myPubKey)
 	if err != nil {
 		lerror(err).Msg("PoR is not valid")
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
 		buf, err = proto.Marshal(response)
 		err = utils.WriteBytesConn(conn, buf)
 		ignore(err)
@@ -599,7 +574,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		return
 	}
 
-	msg = &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{response}}
+	msg = &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
 	buf, err = proto.Marshal(msg)
 	err = utils.WriteBytesConn(conn, buf)
 	if err != nil {
@@ -608,11 +583,15 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	}
 
 	// Add connection to map
+	dhtPeer.agentRecordsLock.Lock()
+	dhtPeer.agentRecords[addr] = record
+	dhtPeer.agentRecordsLock.Unlock()
 	dhtPeer.tcpAddressesLock.Lock()
 	dhtPeer.tcpAddresses[addr] = conn
 	dhtPeer.tcpAddressesLock.Unlock()
 	if dhtPeer.addressAnnounced {
 		//linfo().Msgf("announcing tcp client address %s...", addr)
+		// TOFIX(LR) disconnect client?
 		err = dhtPeer.registerAgentAddress(addr)
 		if err != nil {
 			lerror(err).Msgf("while announcing tcp client address %s to the dht", addr)
@@ -652,6 +631,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	dhtPeer.tcpAddressesLock.Lock()
 	delete(dhtPeer.tcpAddresses, addr)
 	dhtPeer.tcpAddressesLock.Unlock()
+	// TOFIX(LR) currently I am keeping the agent record
 
 }
 
@@ -1058,46 +1038,102 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	//linfo().Str("op", "register").
 	//	Msg("Got a new aea register stream")
 
-	clientAddr, err := utils.ReadBytes(stream)
+	buf, err := utils.ReadBytes(stream)
 	if err != nil {
 		lerror(err).Str("op", "register").
-			Msg("while reading client Address from stream")
+			Msg("while reading relay client registration request from stream")
+		err = stream.Reset()
+		ignore(err)
+		return
+	}
+	///////////
+
+	msg := &dhtnode.AcnMessage{}
+	err = proto.Unmarshal(buf, msg)
+	if err != nil {
+		lerror(err).Msg("couldn't deserialize acn registration message")
+		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_GENERIC, Msgs: []string{err.Error()}}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		buf, err = proto.Marshal(response)
+		ignore(err)
+		err = utils.WriteBytes(stream, buf)
+		ignore(err)
 		err = stream.Reset()
 		ignore(err)
 		return
 	}
 
-	err = utils.WriteBytes(stream, []byte("doneAddress"))
-	ignore(err)
+	linfo().Msgf("Received relay registration request %s", msg)
 
-	clientPeerID, err := utils.ReadBytes(stream)
+	// Get Register message
+	var register *dhtnode.Register
+	switch pl := msg.Payload.(type) {
+	case *dhtnode.AcnMessage_Register:
+		register = pl.Register
+	default:
+		err = errors.New("Unexpected payload")
+		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_UNEXPECTED_PAYLOAD}
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		buf, err = proto.Marshal(response)
+		ignore(err)
+		err = utils.WriteBytes(stream, buf)
+		ignore(err)
+		err = stream.Reset()
+		ignore(err)
+		return
+	}
+	record := register.Record
+	clientAddr := record.Address
+
+	//linfo().Msgf("connection from %s established for Address %s",
+	//	stream.Conn().RemotePeer().Pretty(), clientAddr)
+
+	// check if the PoR is valid
+	clientPubKey, err := utils.FetchAIPublicKeyFromPubKey(stream.Conn().RemotePublicKey())
+	ignore(err)
+	status, err := dhtnode.IsValidProofOfRepresentation(record, clientPubKey)
 	if err != nil {
-		lerror(err).Str("op", "register").
-			Msgf("while reading client peerID from stream")
+		lerror(err).Msg("PoR is not valid")
+		response := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+		buf, err = proto.Marshal(response)
+		ignore(err)
+		err = utils.WriteBytes(stream, buf)
+		ignore(err)
 		err = stream.Reset()
 		ignore(err)
 		return
 	}
 
-	err = utils.WriteBytes(stream, []byte("donePeerID"))
-	ignore(err)
+	msg = &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Status{status}}
+	buf, err = proto.Marshal(msg)
+	err = utils.WriteBytes(stream, buf)
+	if err != nil {
+		err = stream.Reset()
+		ignore(err)
+		return
+	}
 
 	nbrClients.Inc()
 
 	//linfo().Str("op", "register").
 	//	Str("addr", string(clientAddr)).
 	//	Msgf("Received address registration request for peer id %s", string(clientPeerID))
+	clientPeerID := stream.Conn().RemotePeer().Pretty()
+	dhtPeer.agentRecordsLock.Lock()
+	dhtPeer.agentRecords[clientAddr] = record
+	dhtPeer.agentRecordsLock.Unlock()
 	dhtPeer.dhtAddressesLock.Lock()
-	dhtPeer.dhtAddresses[string(clientAddr)] = string(clientPeerID)
+	dhtPeer.dhtAddresses[clientAddr] = clientPeerID
 	dhtPeer.dhtAddressesLock.Unlock()
 	if dhtPeer.addressAnnounced {
 		linfo().Str("op", "register").
-			Str("addr", string(clientAddr)).
-			Msgf("Announcing client address on behalf of %s...", string(clientPeerID))
+			Str("addr", clientAddr).
+			Msgf("Announcing client address on behalf of %s...", clientPeerID)
 		err = dhtPeer.registerAgentAddress(string(clientAddr))
 		if err != nil {
+			//TOFIX(LR) remove agent from map, or don't add it unless announcement done
 			lerror(err).Str("op", "register").
-				Str("addr", string(clientAddr)).
+				Str("addr", clientAddr).
 				Msg("while announcing client address to the dht")
 			err = stream.Reset()
 			ignore(err)
