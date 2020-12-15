@@ -388,7 +388,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         # set tac id
         data = {"key": "tac", "value": tac_id}
         setting_path = (
-            "vendor.fetchai.skills.tac_control.models.parameters.args.service_data"
+            "vendor.fetchai.skills.tac_control_contract.models.parameters.args.service_data"
         )
         self.nested_set_config(setting_path, data)
 
