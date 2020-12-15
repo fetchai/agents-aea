@@ -585,7 +585,7 @@ def _validate_initiation(
 
 def _validate_reply(
     reply_definition: Dict[str, List[str]], performatives_set: Set[str]
-) -> Tuple[bool, str]:
+) -> Tuple[bool, str, Optional[Set[str]]]:
     """
     Evaluate whether the reply definition in a protocol specification is valid.
 
@@ -601,9 +601,11 @@ def _validate_reply(
             "Invalid type for the reply definition. Expected dict. Found '{}'.".format(
                 type(reply_definition)
             ),
+            None,
         )
 
     performatives_set_2 = performatives_set.copy()
+    terminal_performatives_from_reply = set()
 
     for performative, replies in reply_definition.items():
         # check only previously defined performatives are included in the reply definition
@@ -613,6 +615,7 @@ def _validate_reply(
                 "Performative '{}' specified in \"reply\" is not defined in the protocol's speech-acts.".format(
                     performative,
                 ),
+                None,
             )
 
         # check the type of replies
@@ -622,6 +625,7 @@ def _validate_reply(
                 "Invalid type for replies of performative {}. Expected list. Found '{}'.".format(
                     performative, type(replies)
                 ),
+                None,
             )
 
         # check all replies are performatives which are previously defined in the speech-acts definition
@@ -632,9 +636,13 @@ def _validate_reply(
                     "Performative '{}' in the list of replies for '{}' is not defined in speech-acts.".format(
                         reply, performative
                     ),
+                    None,
                 )
 
         performatives_set_2.remove(performative)
+
+        if len(replies) == 0:
+            terminal_performatives_from_reply.add(performative)
 
     # check all previously defined performatives are included in the reply definition
     if len(performatives_set_2) != 0:
@@ -643,13 +651,14 @@ def _validate_reply(
             "No reply is provided for the following performatives: {}".format(
                 performatives_set_2,
             ),
+            None,
         )
 
-    return True, "Reply structure is valid."
+    return True, "Reply structure is valid.", terminal_performatives_from_reply
 
 
 def _validate_termination(
-    termination: List[str], performatives_set: Set[str]
+    termination: List[str], performatives_set: Set[str], terminal_performatives_from_reply: Set[str]
 ) -> Tuple[bool, str]:
     """
     Evaluate whether termination field in a protocol specification is valid.
@@ -681,6 +690,39 @@ def _validate_termination(
             return (
                 False,
                 "Performative '{}' specified in \"termination\" is not defined in the protocol's speech-acts.".format(
+                    performative,
+                ),
+            )
+
+    # check that there are no repetitive performatives in termination
+    duplicates_dict = {}
+    for performative in termination:
+        duplicates_dict[performative] = duplicates_dict.get(performative, 0) + 1
+    duplicates = [k for k, v in duplicates_dict.items() if v > 1]
+    if len(duplicates) != 0:
+        return (
+            False,
+            "The following performatives in \"termination\" are repeated: {}".format(
+                duplicates,
+            ),
+        )
+
+    # check terminal performatives have no replies
+    for performative in termination:
+        if performative not in terminal_performatives_from_reply:
+            return (
+                False,
+                "The terminal performative '{}' specified in \"termination\" is assigned replies in \"reply\".".format(
+                    performative,
+                ),
+            )
+
+    # check performatives with no replies are specified as terminal performatives
+    for performative in terminal_performatives_from_reply:
+        if performative not in termination:
+            return (
+                False,
+                "The performative '{}' has no replies but is not listed as a terminal performative in \"termination\".".format(
                     performative,
                 ),
             )
@@ -809,7 +851,7 @@ def _validate_dialogue_section(
             return result_initiation_validation, msg_initiation_validation
 
         # Validate reply
-        result_reply_validation, msg_reply_validation = _validate_reply(
+        result_reply_validation, msg_reply_validation, terminal_performatives_from_reply = _validate_reply(
             cast(Dict[str, List[str]], protocol_specification.dialogue_config["reply"]),
             performatives_set,
         )
@@ -823,6 +865,7 @@ def _validate_dialogue_section(
         ) = _validate_termination(
             cast(List[str], protocol_specification.dialogue_config["termination"]),
             performatives_set,
+            terminal_performatives_from_reply,
         )
         if not result_termination_validation:
             return result_termination_validation, msg_termination_validation

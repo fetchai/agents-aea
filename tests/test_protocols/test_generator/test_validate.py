@@ -1346,11 +1346,12 @@ class TestValidate(TestCase):
             "performative_empty_contents",
         }
 
-        valid_result_1, valid_msg_1, = _validate_reply(
+        valid_result_1, valid_msg_1, terminal_performatives_from_reply_1 = _validate_reply(
             valid_reply_1, valid_performatives_set_1
         )
         assert valid_result_1 is True
         assert valid_msg_1 == "Reply structure is valid."
+        assert terminal_performatives_from_reply_1 == {"performative_mt", "performative_o"}
 
         ###################################################
 
@@ -1362,7 +1363,7 @@ class TestValidate(TestCase):
         }
         invalid_performatives_set_1 = {"perm_1", "perm_2", "perm_3", "perm_4", "perm_5"}
 
-        invalid_result_1, invalid_msg_1, = _validate_reply(
+        invalid_result_1, invalid_msg_1, invalid_terminal_performatives_from_reply_1= _validate_reply(
             invalid_reply_1, invalid_performatives_set_1
         )
         assert invalid_result_1 is False
@@ -1372,6 +1373,7 @@ class TestValidate(TestCase):
                 {"perm_5"},
             )
         )
+        assert invalid_terminal_performatives_from_reply_1 is None
 
         invalid_reply_2 = {
             "perm_1": ["perm_2"],
@@ -1381,7 +1383,7 @@ class TestValidate(TestCase):
             "perm_5": [],
         }
         invalid_performatives_set_2 = {"perm_1", "perm_2", "perm_3", "perm_4"}
-        invalid_result_2, invalid_msg_2, = _validate_reply(
+        invalid_result_2, invalid_msg_2, invalid_terminal_performatives_from_reply_2 = _validate_reply(
             invalid_reply_2, invalid_performatives_set_2
         )
         assert invalid_result_2 is False
@@ -1389,9 +1391,10 @@ class TestValidate(TestCase):
             invalid_msg_2
             == "Performative 'perm_5' in the list of replies for 'perm_4' is not defined in speech-acts."
         )
+        assert invalid_terminal_performatives_from_reply_2 is None
 
         invalid_reply_3 = ["perm_1", "perm_2", "perm_3", "perm_4", "perm_5"]
-        invalid_result_3, invalid_msg_3, = _validate_reply(
+        invalid_result_3, invalid_msg_3, invalid_terminal_performatives_from_reply_3 = _validate_reply(
             invalid_reply_3, invalid_performatives_set_1
         )
         assert invalid_result_3 is False
@@ -1399,6 +1402,8 @@ class TestValidate(TestCase):
             invalid_msg_3
             == f"Invalid type for the reply definition. Expected dict. Found '{type(invalid_reply_3)}'."
         )
+        assert invalid_terminal_performatives_from_reply_3 is None
+
         invalid_reply_4 = {
             "perm_1": {"perm_2"},
             "perm_2": {"perm_3"},
@@ -1406,7 +1411,7 @@ class TestValidate(TestCase):
             "perm_4": {"perm_5"},
             "perm_5": set(),
         }
-        invalid_result_4, invalid_msg_4, = _validate_reply(
+        invalid_result_4, invalid_msg_4, invalid_terminal_performatives_from_reply_4 = _validate_reply(
             invalid_reply_4, invalid_performatives_set_1
         )
         assert invalid_result_4 is False
@@ -1414,6 +1419,7 @@ class TestValidate(TestCase):
             invalid_msg_4
             == f"Invalid type for replies of performative perm_1. Expected list. Found '{type({'perm_2'})}'."
         )
+        assert invalid_terminal_performatives_from_reply_4 is None
 
         invalid_reply_5 = {
             "perm_1": ["perm_2"],
@@ -1422,7 +1428,7 @@ class TestValidate(TestCase):
             "perm_4": ["perm_1"],
             "perm_5": [],
         }
-        invalid_result_5, invalid_msg_5, = _validate_reply(
+        invalid_result_5, invalid_msg_5, invalid_terminal_performatives_from_reply_5 = _validate_reply(
             invalid_reply_5, invalid_performatives_set_2
         )
         assert invalid_result_5 is False
@@ -1430,13 +1436,15 @@ class TestValidate(TestCase):
             invalid_msg_5
             == f"Performative 'perm_5' specified in \"reply\" is not defined in the protocol's speech-acts."
         )
+        assert invalid_terminal_performatives_from_reply_5 is None
 
     def test_validate_termination(self):
         """Test for the '_validate_termination' method."""
         valid_termination_1 = ["perm_4", "perm_3"]
         valid_performatives_set = {"perm_1", "perm_2", "perm_3", "perm_4"}
+        valid_terminal_performatives_from_reply_1 = {"perm_4", "perm_3"}
         valid_result_1, valid_msg_1 = _validate_termination(
-            valid_termination_1, valid_performatives_set
+            valid_termination_1, valid_performatives_set, valid_terminal_performatives_from_reply_1
         )
         assert valid_result_1 is True
         assert valid_msg_1 == "Terminal messages are valid."
@@ -1444,8 +1452,9 @@ class TestValidate(TestCase):
         ###################################################
 
         invalid_termination_1 = []
+        invalid_terminal_performatives_from_reply_1 = set()
         invalid_result_1, invalid_msg_1 = _validate_termination(
-            invalid_termination_1, valid_performatives_set
+            invalid_termination_1, valid_performatives_set, valid_terminal_performatives_from_reply_1
         )
         assert invalid_result_1 is False
         assert (
@@ -1454,8 +1463,9 @@ class TestValidate(TestCase):
         )
 
         invalid_termination_2 = ["perm_5"]
+        invalid_terminal_performatives_from_reply_2 = {"perm_5"}
         invalid_result_2, invalid_msg_2 = _validate_termination(
-            invalid_termination_2, valid_performatives_set
+            invalid_termination_2, valid_performatives_set, invalid_terminal_performatives_from_reply_2
         )
         assert invalid_result_2 is False
         assert (
@@ -1464,14 +1474,39 @@ class TestValidate(TestCase):
         )
 
         invalid_termination_3 = {"perm_5"}
+        invalid_terminal_performatives_from_reply_3 = {"perm_5"}
         invalid_result_3, invalid_msg_3 = _validate_termination(
-            invalid_termination_3, valid_performatives_set
+            invalid_termination_3, valid_performatives_set, invalid_terminal_performatives_from_reply_3
         )
         assert invalid_result_3 is False
         assert (
             invalid_msg_3
             == f"Invalid type for termination. Expected list. Found '{type(invalid_termination_3)}'."
         )
+
+        invalid_termination_4 = ["perm_4", "perm_3", "perm_4", "perm_3", "perm_1"]
+        invalid_terminal_performatives_from_reply_4 = {"perm_4", "perm_3", "perm_1"}
+        invalid_result_4, invalid_msg_4 = _validate_termination(
+            invalid_termination_4, valid_performatives_set, invalid_terminal_performatives_from_reply_4
+        )
+        assert invalid_result_4 is False
+        assert invalid_msg_4 == f"The following performatives in \"termination\" are repeated: {['perm_4', 'perm_3']}"
+
+        invalid_termination_5 = ["perm_4", "perm_3"]
+        invalid_terminal_performatives_from_reply_5 = {"perm_4"}
+        invalid_result_5, invalid_msg_5 = _validate_termination(
+            invalid_termination_5, valid_performatives_set, invalid_terminal_performatives_from_reply_5
+        )
+        assert invalid_result_5 is False
+        assert invalid_msg_5 == f"The terminal performative 'perm_3' specified in \"termination\" is assigned replies in \"reply\"."
+
+        invalid_termination_6 = ["perm_4"]
+        invalid_terminal_performatives_from_reply_6 = {"perm_4", "perm_3"}
+        invalid_result_6, invalid_msg_6 = _validate_termination(
+            invalid_termination_6, valid_performatives_set, invalid_terminal_performatives_from_reply_6
+        )
+        assert invalid_result_6 is False
+        assert invalid_msg_6 == f"The performative 'perm_3' has no replies but is not listed as a terminal performative in \"termination\"."
 
     def test_validate_roles(self):
         """Test for the '_validate_roles' method."""
@@ -1608,7 +1643,6 @@ class TestValidate(TestCase):
             "termination": [
                 "performative_mt",
                 "performative_o",
-                "performative_empty_contents",
             ],
             "roles": {"role_1": None, "role_2": None},
             "end_states": ["end_state_1", "end_state_2", "end_state_3"],
