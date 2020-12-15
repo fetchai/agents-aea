@@ -38,6 +38,7 @@ reply:
 termination: [response]
 roles: {agent, server}
 end_states: [successful]
+keep_terminal_state_dialogues: false
 ...
 ```
 
