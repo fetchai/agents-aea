@@ -34,7 +34,7 @@ ERROR_MESSAGE_TEMPLATE_VERSION_TOO_LOW = "The installed version of '{command}' i
 # for the purposes of this script,
 # a version is a tuple of integers: (major, minor, patch)
 VERSION = Tuple[int, int, int]
-MINIMUM_GO_VERSION: VERSION = (1, 14, 0)
+MINIMUM_GO_VERSION: VERSION = (1, 13, 0)
 MINIMUM_GCC_VERSION: VERSION = (7, 5, 0)
 
 

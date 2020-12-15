@@ -220,6 +220,7 @@ class Libp2pNode:
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
         logger: logging.Logger = _default_logger,
+        peer_registration_delay: Optional[float] = None,
     ):
         """
         Initialize a p2p libp2p node.
@@ -236,6 +237,7 @@ class Libp2pNode:
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
         :param logger: the logger.
+        :param peer_registration_delay: add artificial delay to agent registration in seconds
         """
 
         self.address = agent_addr
@@ -258,6 +260,9 @@ class Libp2pNode:
 
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
+
+        # peer configuration
+        self.peer_registration_delay = peer_registration_delay
 
         # node startup
         self.source = os.path.abspath(module_path)
@@ -343,6 +348,11 @@ class Libp2pNode:
             )
             self._config += "AEA_P2P_URI_MONITORING={}\n".format(
                 str(self.monitoring_uri) if self.monitoring_uri is not None else ""
+            )
+            self._config += "AEA_P2P_CFG_REGISTRATION_DELAY={}\n".format(
+                str(self.peer_registration_delay)
+                if self.peer_registration_delay is not None
+                else str(0.0)
             )
             env_file.write(self._config)
 
@@ -536,6 +546,9 @@ class P2PLibp2pConnection(Connection):
         libp2p_entry_peers = list(cast(List, libp2p_entry_peers))
         log_file = self.configuration.config.get("log_file")  # Optional[str]
         env_file = self.configuration.config.get("env_file")  # Optional[str]
+        peer_registration_delay = self.configuration.config.get(
+            "peer_registration_delay"
+        )  # Optional[str]
 
         if (
             self.has_crypto_store
@@ -566,6 +579,15 @@ class P2PLibp2pConnection(Connection):
         entry_peers = [
             MultiAddr.from_string(str(maddr)) for maddr in libp2p_entry_peers
         ]
+
+        delay = None
+        if peer_registration_delay is not None:
+            try:
+                delay = float(peer_registration_delay)
+            except ValueError:
+                raise ValueError(
+                    f"peer_registration_delay {peer_registration_delay} must be a float number in seconds"
+                )
 
         if public_uri is None:
             # node will be run as a ClientDHT
@@ -613,6 +635,7 @@ class P2PLibp2pConnection(Connection):
             log_file,
             env_file,
             self.logger,
+            delay,
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
