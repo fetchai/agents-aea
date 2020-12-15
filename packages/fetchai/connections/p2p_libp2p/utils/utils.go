@@ -321,6 +321,23 @@ func VerifyFetchAISignatureLibp2p(message []byte, signature string, pubkey strin
 	return verifyKey.Verify(message, sigDER)
 }
 
+func SignFetchAI(message []byte, privKey string) (string, error) {
+	signingKey, _, err := KeyPairFromFetchAIKey(privKey)
+	if err != nil {
+		return "", err
+	}
+	signature, err := signingKey.Sign(message)
+	if err != nil {
+		return "", err
+	}
+	strSignature, err := ConvertDEREncodedSignatureToStr(signature)
+	if err != nil {
+		return "", err
+	}
+	encodedSignature := base64.StdEncoding.EncodeToString(strSignature)
+	return encodedSignature, nil
+}
+
 // KeyPairFromFetchAIKey  key pair from hex encoded secp256k1 private key
 func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
 	pk_bytes, err := hex.DecodeString(key)

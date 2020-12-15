@@ -42,7 +42,7 @@ func IdentityFromFetchAIKey(key string) Option {
 }
 
 // RegisterAgentAddress for dhtclient.New
-func RegisterAgentAddress(addr string, isReady func() bool) Option {
+func RegisterAgentAddressOld(addr string, isReady func() bool) Option {
 	return func(dhtClient *DHTClient) error {
 		dhtClient.myAgentAddress = addr
 		dhtClient.myAgentReady = isReady
@@ -50,7 +50,7 @@ func RegisterAgentAddress(addr string, isReady func() bool) Option {
 	}
 }
 
-func RegisterAgentAddressWithPoR(record *aea.AgentRecord, isReady func() bool) Option {
+func RegisterAgentAddress(record *aea.AgentRecord, isReady func() bool) Option {
 	return func(dhtClient *DHTClient) error {
 		pbRecord := &dhtnode.AgentRecord{}
 		pbRecord.Address = record.Address

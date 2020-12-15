@@ -22,7 +22,6 @@ package dhtpeer
 
 import (
 	"context"
-	"encoding/base64"
 	"net"
 	"strconv"
 	"testing"
@@ -44,8 +43,6 @@ import (
 const (
 	DefaultLocalHost    = "127.0.0.1"
 	DefaultLocalPort    = 2000
-	DefaultFetchAIKey   = "5071fbef50ed1fa1061d84dbf8152c7811f9a3a992ca6c43ae70b80c5ceb56df"
-	DefaultAgentAddress = "2FRCqDBo7Yw3E2VJc1tAkggppWzLnCCYjPN9zHrQrj8Fupzmkr"
 	DefaultDelegatePort = 3000
 
 	EnvelopeDeliveryTimeout = 20 * time.Second
@@ -110,39 +107,33 @@ var (
 	DHT Network: DHTPeer-to-DHTPeer
 */
 
-func TestFetchAICrypto(t *testing.T) {
-	publicKey := "02358e3e42a6ba15cf6b2ba6eb05f02b8893acf82b316d7dd9cda702b0892b8c71"
-	address := "fetch19dq2mkcpp6x0aypxt9c9gz6n4fqvax0x9a7t5r"
-	connPublicKey := "027af21aff853b9d9589867ea142b0a60a9611fc8e1fae04c2f7144113fa4e938e"
-	signatureConnPublicKey_str_canonize := "N/GOa7/m3HU8/gpLJ88VCQ6vXsdrfiiYcqnNtF+c2N9VG9ZIiycykN4hdbpbOCGrChMYZQA3G1GpozsShrUBgg=="
-
-	addressFromPublicKey, _ := utils.FetchAIAddressFromPublicKey(publicKey)
-	if address != addressFromPublicKey {
-		t.Error("[ERR] Addresses don't match")
-	} else {
-		t.Log("[OK] Agent address matches its public key")
-	}
-
-	valid, err := utils.VerifyFetchAISignatureBTC([]byte(connPublicKey), signatureConnPublicKey_str_canonize, publicKey)
-	if !valid {
-		t.Errorf("Signature using BTC don't match %s", err.Error())
-	}
-	valid, err = utils.VerifyFetchAISignatureLibp2p([]byte(connPublicKey), signatureConnPublicKey_str_canonize, publicKey)
-	if !valid {
-		t.Errorf("Signature using LPP don't match %s", err.Error())
-	}
-}
-
 // TestRoutingDHTPeerToSelf dht peer with agent attached
 func TestRoutingDHTPeerToSelf(t *testing.T) {
 	opts := []Option{
 		LocalURI(DefaultLocalHost, DefaultLocalPort),
 		PublicURI(DefaultLocalHost, DefaultLocalPort),
-		IdentityFromFetchAIKey(DefaultFetchAIKey),
-		RegisterAgentAddress(DefaultAgentAddress, func() bool { return true }),
+		IdentityFromFetchAIKey(FetchAITestKeys[0]),
 		EnableRelayService(),
 		EnableDelegateService(DefaultDelegatePort),
 	}
+
+	agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(AgentsTestKeys[0])
+	if err != nil {
+		t.Fatal("Failed at DHTPeer initialization:", err)
+	}
+
+	signature, err := utils.SignFetchAI([]byte(FetchAITestPublicKeys[0]), AgentsTestKeys[0])
+	if err != nil {
+		t.Fatal("Failed at DHTPeer initialization:", err)
+	}
+
+	record := &aea.AgentRecord{}
+	record.Address = AgentsTestAddresses[0]
+	record.PublicKey = agentPubKey
+	record.PeerPublicKey = FetchAITestPublicKeys[0]
+	record.Signature = signature
+
+	opts = append(opts, RegisterAgentAddress(record, func() bool { return true }))
 
 	dhtPeer, err := New(opts...)
 	if err != nil {
@@ -157,7 +148,7 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 	})
 
 	err = dhtPeer.RouteEnvelope(&aea.Envelope{
-		To: DefaultAgentAddress,
+		To: AgentsTestAddresses[0],
 	})
 	if err != nil {
 		t.Error("Failed to Route envelope to local Agent")
@@ -172,7 +163,7 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 // TestRoutingDHTPeerToDHTPeerDirect from a dht peer to its bootstrap peer
 func TestRoutingDHTPeerToDHTPeerDirect(t *testing.T) {
 	dhtPeer1, cleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -181,7 +172,7 @@ func TestRoutingDHTPeerToDHTPeerDirect(t *testing.T) {
 	defer cleanup1()
 
 	dhtPeer2, cleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{dhtPeer1.MultiAddr()},
 	)
 	if err != nil {
@@ -222,7 +213,7 @@ func TestRoutingDHTPeerToDHTPeerDirect(t *testing.T) {
 // TestRoutingDHTPeerToDHTPeerIndirect two dht peers connected to the same peer
 func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
 	entryPeer, cleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -231,7 +222,7 @@ func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
 	defer cleanup()
 
 	dhtPeer1, cleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{entryPeer.MultiAddr()},
 	)
 	if err != nil {
@@ -240,7 +231,7 @@ func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
 	defer cleanup1()
 
 	dhtPeer2, cleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
+		FetchAITestKeys[2], AgentsTestKeys[2], DefaultLocalPort+2, DefaultDelegatePort+2,
 		[]string{entryPeer.MultiAddr()},
 	)
 	if err != nil {
@@ -281,7 +272,7 @@ func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
 // TestRoutingDHTPeerToDHTPeerIndirectTwoHops two dht peers connected to different peers
 func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 	entryPeer1, cleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -290,7 +281,7 @@ func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 	defer cleanup()
 
 	entryPeer2, cleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{entryPeer1.MultiAddr()},
 	)
 	if err != nil {
@@ -300,7 +291,7 @@ func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 	dhtPeer1, cleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
+		FetchAITestKeys[2], AgentsTestKeys[2], DefaultLocalPort+2, DefaultDelegatePort+2,
 		[]string{entryPeer1.MultiAddr()},
 	)
 	if err != nil {
@@ -309,7 +300,7 @@ func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 	defer cleanup1()
 
 	dhtPeer2, cleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[3], AgentsTestAddresses[3], DefaultLocalPort+3, DefaultDelegatePort+3,
+		FetchAITestKeys[3], AgentsTestKeys[3], DefaultLocalPort+3, DefaultDelegatePort+3,
 		[]string{entryPeer2.MultiAddr()},
 	)
 	if err != nil {
@@ -354,7 +345,7 @@ func TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
 
 	for i := range FetchAITestKeys {
 		peer, cleanup, err := SetupLocalDHTPeer(
-			FetchAITestKeys[i], AgentsTestAddresses[i],
+			FetchAITestKeys[i], AgentsTestKeys[i],
 			DefaultLocalPort+uint16(i), DefaultDelegatePort+uint16(i),
 			func() []string {
 				multiaddrs := []string{}
@@ -422,7 +413,7 @@ func TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
 // TestRoutingDHTClientToDHTPeer dht client to its bootstrap peer
 func TestRoutingDHTClientToDHTPeerX(t *testing.T) {
 	peer, peerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -430,7 +421,7 @@ func TestRoutingDHTClientToDHTPeerX(t *testing.T) {
 	}
 	defer peerCleanup()
 
-	client, clientCleanup, err := SetupDHTClientWithPoR(
+	client, clientCleanup, err := SetupDHTClient(
 		FetchAITestKeys[1], AgentsTestKeys[1], []string{peer.MultiAddr()},
 	)
 	if err != nil {
@@ -470,7 +461,7 @@ func TestRoutingDHTClientToDHTPeerX(t *testing.T) {
 // TestRoutingDHTClientToDHTPeerIndirect dht client to dht peer different than its bootstrap one
 func TestRoutingDHTClientToDHTPeerIndirect(t *testing.T) {
 	entryPeer, entryPeerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -479,7 +470,7 @@ func TestRoutingDHTClientToDHTPeerIndirect(t *testing.T) {
 	defer entryPeerCleanup()
 
 	peer, peerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{entryPeer.MultiAddr()},
 	)
 	if err != nil {
@@ -489,7 +480,7 @@ func TestRoutingDHTClientToDHTPeerIndirect(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 	client, clientCleanup, err := SetupDHTClient(
-		FetchAITestKeys[2], AgentsTestAddresses[2], []string{entryPeer.MultiAddr()},
+		FetchAITestKeys[2], AgentsTestKeys[2], []string{entryPeer.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -529,7 +520,7 @@ func TestRoutingDHTClientToDHTPeerIndirect(t *testing.T) {
 // TestRoutingDHTClientToDHTClient dht client to dht client connected to the same peer
 func TestRoutingDHTClientToDHTClient(t *testing.T) {
 	peer, peerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -538,7 +529,7 @@ func TestRoutingDHTClientToDHTClient(t *testing.T) {
 	defer peerCleanup()
 
 	client1, clientCleanup1, err := SetupDHTClient(
-		FetchAITestKeys[1], AgentsTestAddresses[1], []string{peer.MultiAddr()},
+		FetchAITestKeys[1], AgentsTestKeys[1], []string{peer.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -546,7 +537,7 @@ func TestRoutingDHTClientToDHTClient(t *testing.T) {
 	defer clientCleanup1()
 
 	client2, clientCleanup2, err := SetupDHTClient(
-		FetchAITestKeys[2], AgentsTestAddresses[2], []string{peer.MultiAddr()},
+		FetchAITestKeys[2], AgentsTestKeys[2], []string{peer.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -585,7 +576,7 @@ func TestRoutingDHTClientToDHTClient(t *testing.T) {
 // TestRoutingDHTClientToDHTClientIndirect dht client to dht client connected to a different peer
 func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 	peer1, peerCleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -594,7 +585,7 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 	defer peerCleanup1()
 
 	peer2, peerCleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{peer1.MultiAddr()},
 	)
 	if err != nil {
@@ -603,7 +594,7 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 	defer peerCleanup2()
 
 	client1, clientCleanup1, err := SetupDHTClient(
-		FetchAITestKeys[2], AgentsTestAddresses[2], []string{peer1.MultiAddr()},
+		FetchAITestKeys[2], AgentsTestKeys[2], []string{peer1.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -611,7 +602,7 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 	defer clientCleanup1()
 
 	client2, clientCleanup2, err := SetupDHTClient(
-		FetchAITestKeys[3], AgentsTestAddresses[3], []string{peer2.MultiAddr()},
+		FetchAITestKeys[3], AgentsTestKeys[3], []string{peer2.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -653,27 +644,10 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 	DHT network: DelegateClient
 */
 
-func signFetchAI(message []byte, privKey string) (string, error) {
-	signingKey, _, err := utils.KeyPairFromFetchAIKey(privKey)
-	if err != nil {
-		return "", err
-	}
-	signature, err := signingKey.Sign(message)
-	if err != nil {
-		return "", err
-	}
-	strSignature, err := utils.ConvertDEREncodedSignatureToStr(signature)
-	if err != nil {
-		return "", err
-	}
-	encodedSignature := base64.StdEncoding.EncodeToString(strSignature)
-	return encodedSignature, nil
-}
-
 // TestRoutingDelegateClientToDHTPeer
 func TestRoutingDelegateClientToDHTPeerX(t *testing.T) {
 	peer, peerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -681,7 +655,7 @@ func TestRoutingDelegateClientToDHTPeerX(t *testing.T) {
 	}
 	defer peerCleanup()
 
-	client, clientCleanup, err := SetupDelegateClientWithPoR(AgentsTestKeys[1], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
+	client, clientCleanup, err := SetupDelegateClient(AgentsTestKeys[1], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -717,7 +691,7 @@ func TestRoutingDelegateClientToDHTPeerX(t *testing.T) {
 // TestRoutingDelegateClientToDHTPeerIndirect
 func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	peer1, peerCleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -726,7 +700,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	defer peerCleanup1()
 
 	peer2, peerCleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{peer1.MultiAddr()},
 	)
 	if err != nil {
@@ -735,7 +709,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	defer peerCleanup2()
 
 	time.Sleep(1 * time.Second)
-	client, clientCleanup, err := SetupDelegateClient(AgentsTestAddresses[2], DefaultLocalHost, DefaultDelegatePort+1)
+	client, clientCleanup, err := SetupDelegateClient(AgentsTestKeys[2], DefaultLocalHost, DefaultDelegatePort+1, FetchAITestPublicKeys[1])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -773,7 +747,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 // TestRoutingDelegateClientToDHTPeerIndirectTwoHops
 func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 	entryPeer, entryPeerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -782,7 +756,7 @@ func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 	defer entryPeerCleanup()
 
 	peer1, peerCleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{entryPeer.MultiAddr()},
 	)
 	if err != nil {
@@ -791,7 +765,7 @@ func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 	defer peerCleanup1()
 
 	peer2, peerCleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
+		FetchAITestKeys[2], AgentsTestKeys[2], DefaultLocalPort+2, DefaultDelegatePort+2,
 		[]string{entryPeer.MultiAddr()},
 	)
 	if err != nil {
@@ -800,7 +774,7 @@ func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 	defer peerCleanup2()
 
 	time.Sleep(1 * time.Second)
-	client, clientCleanup, err := SetupDelegateClient(AgentsTestAddresses[3], DefaultLocalHost, DefaultDelegatePort+2)
+	client, clientCleanup, err := SetupDelegateClient(AgentsTestKeys[3], DefaultLocalHost, DefaultDelegatePort+2, FetchAITestPublicKeys[2])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -838,7 +812,7 @@ func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 // TestRoutingDelegateClientToDelegateClient
 func TestRoutingDelegateClientToDelegateClient(t *testing.T) {
 	_, peerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -846,13 +820,13 @@ func TestRoutingDelegateClientToDelegateClient(t *testing.T) {
 	}
 	defer peerCleanup()
 
-	client1, clientCleanup1, err := SetupDelegateClient(AgentsTestAddresses[1], DefaultLocalHost, DefaultDelegatePort)
+	client1, clientCleanup1, err := SetupDelegateClient(AgentsTestKeys[1], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
 	defer clientCleanup1()
 
-	client2, clientCleanup2, err := SetupDelegateClient(AgentsTestAddresses[2], DefaultLocalHost, DefaultDelegatePort)
+	client2, clientCleanup2, err := SetupDelegateClient(AgentsTestKeys[2], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -883,7 +857,7 @@ func TestRoutingDelegateClientToDelegateClient(t *testing.T) {
 // TestRoutingDelegateClientToDelegateClientIndirect
 func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 	peer1, peer1Cleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -892,7 +866,7 @@ func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 	defer peer1Cleanup()
 
 	peer2, peer2Cleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{peer1.MultiAddr()},
 	)
 	if err != nil {
@@ -900,13 +874,13 @@ func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 	}
 	defer peer2Cleanup()
 
-	client1, clientCleanup1, err := SetupDelegateClient(AgentsTestAddresses[2], DefaultLocalHost, DefaultDelegatePort)
+	client1, clientCleanup1, err := SetupDelegateClient(AgentsTestKeys[2], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
 	defer clientCleanup1()
 
-	client2, clientCleanup2, err := SetupDelegateClient(AgentsTestAddresses[3], DefaultLocalHost, DefaultDelegatePort+1)
+	client2, clientCleanup2, err := SetupDelegateClient(AgentsTestKeys[3], DefaultLocalHost, DefaultDelegatePort+1, FetchAITestPublicKeys[1])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -938,7 +912,7 @@ func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 // TestRoutingDelegateClientToDHTClientDirect
 func TestRoutingDelegateClientToDHTClientDirect(t *testing.T) {
 	peer, peerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -947,14 +921,14 @@ func TestRoutingDelegateClientToDHTClientDirect(t *testing.T) {
 	defer peerCleanup()
 
 	dhtClient, dhtClientCleanup, err := SetupDHTClient(
-		FetchAITestKeys[1], AgentsTestAddresses[1], []string{peer.MultiAddr()},
+		FetchAITestKeys[1], AgentsTestKeys[1], []string{peer.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
 	}
 	defer dhtClientCleanup()
 
-	delegateClient, delegateClientCleanup, err := SetupDelegateClient(AgentsTestAddresses[2], DefaultLocalHost, DefaultDelegatePort)
+	delegateClient, delegateClientCleanup, err := SetupDelegateClient(AgentsTestKeys[2], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -985,7 +959,7 @@ func TestRoutingDelegateClientToDHTClientDirect(t *testing.T) {
 // TestRoutingDelegateClientToDHTClientIndirect
 func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 	peer1, peerCleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -994,7 +968,7 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 	defer peerCleanup1()
 
 	peer2, peerCleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{peer1.MultiAddr()},
 	)
 	if err != nil {
@@ -1003,7 +977,7 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 	defer peerCleanup2()
 
 	dhtClient, dhtClientCleanup, err := SetupDHTClient(
-		FetchAITestKeys[2], AgentsTestAddresses[2], []string{peer1.MultiAddr()},
+		FetchAITestKeys[2], AgentsTestKeys[2], []string{peer1.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -1011,7 +985,7 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 	defer dhtClientCleanup()
 
 	delegateClient, delegateClientCleanup, err := SetupDelegateClient(
-		AgentsTestAddresses[3], DefaultLocalHost, DefaultDelegatePort+1,
+		AgentsTestKeys[3], DefaultLocalHost, DefaultDelegatePort+1, FetchAITestPublicKeys[1],
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
@@ -1066,7 +1040,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	// setup DHTPeers
 
 	dhtPeer1, dhtPeerCleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestAddresses[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -1094,7 +1068,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	dhtPeer2, dhtPeerCleanup2, err := SetupLocalDHTPeer(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
 		[]string{dhtPeer1.MultiAddr()},
 	)
 	if err != nil {
@@ -1122,7 +1096,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	dhtPeer3, dhtPeerCleanup3, err := SetupLocalDHTPeer(
-		FetchAITestKeys[2], AgentsTestAddresses[2], DefaultLocalPort+2, DefaultDelegatePort+2,
+		FetchAITestKeys[2], AgentsTestKeys[2], DefaultLocalPort+2, DefaultDelegatePort+2,
 		[]string{dhtPeer1.MultiAddr()},
 	)
 	if err != nil {
@@ -1150,7 +1124,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	dhtPeer4, dhtPeerCleanup4, err := SetupLocalDHTPeer(
-		FetchAITestKeys[3], AgentsTestAddresses[3], DefaultLocalPort+3, DefaultDelegatePort+3,
+		FetchAITestKeys[3], AgentsTestKeys[3], DefaultLocalPort+3, DefaultDelegatePort+3,
 		[]string{dhtPeer2.MultiAddr()},
 	)
 	if err != nil {
@@ -1180,7 +1154,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	// setup DHTClients
 
 	dhtClient1, dhtClientCleanup1, err := SetupDHTClient(
-		FetchAITestKeys[4], AgentsTestAddresses[4], []string{dhtPeer3.MultiAddr()},
+		FetchAITestKeys[4], AgentsTestKeys[4], []string{dhtPeer3.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -1207,7 +1181,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	dhtClient2, dhtClientCleanup2, err := SetupDHTClient(
-		FetchAITestKeys[5], AgentsTestAddresses[5], []string{dhtPeer3.MultiAddr()},
+		FetchAITestKeys[5], AgentsTestKeys[5], []string{dhtPeer3.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -1234,7 +1208,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	dhtClient3, dhtClientCleanup3, err := SetupDHTClient(
-		FetchAITestKeys[6], AgentsTestAddresses[6], []string{dhtPeer4.MultiAddr()},
+		FetchAITestKeys[6], AgentsTestKeys[6], []string{dhtPeer4.MultiAddr()},
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DHTClient:", err)
@@ -1263,7 +1237,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	// setup DelegateClients
 
 	delegateClient1, delegateClientCleanup1, err := SetupDelegateClient(
-		AgentsTestAddresses[7], DefaultLocalHost, DefaultDelegatePort+2,
+		AgentsTestKeys[7], DefaultLocalHost, DefaultDelegatePort+2, FetchAITestPublicKeys[2],
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
@@ -1290,7 +1264,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	delegateClient2, delegateClientCleanup2, err := SetupDelegateClient(
-		AgentsTestAddresses[8], DefaultLocalHost, DefaultDelegatePort+3,
+		AgentsTestKeys[8], DefaultLocalHost, DefaultDelegatePort+3, FetchAITestPublicKeys[3],
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
@@ -1317,7 +1291,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	delegateClient3, delegateClientCleanup3, err := SetupDelegateClient(
-		AgentsTestAddresses[9], DefaultLocalHost, DefaultDelegatePort+3,
+		AgentsTestKeys[9], DefaultLocalHost, DefaultDelegatePort+3, FetchAITestPublicKeys[3],
 	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
@@ -1382,39 +1356,38 @@ func TestRoutingAllToAll(t *testing.T) {
 
 }
 
+// Crypto operations
+
+func TestFetchAICrypto(t *testing.T) {
+	publicKey := "02358e3e42a6ba15cf6b2ba6eb05f02b8893acf82b316d7dd9cda702b0892b8c71"
+	address := "fetch19dq2mkcpp6x0aypxt9c9gz6n4fqvax0x9a7t5r"
+	peerPublicKey := "027af21aff853b9d9589867ea142b0a60a9611fc8e1fae04c2f7144113fa4e938e"
+	pySigStrCanonize := "N/GOa7/m3HU8/gpLJ88VCQ6vXsdrfiiYcqnNtF+c2N9VG9ZIiycykN4hdbpbOCGrChMYZQA3G1GpozsShrUBgg=="
+
+	addressFromPublicKey, _ := utils.FetchAIAddressFromPublicKey(publicKey)
+	if address != addressFromPublicKey {
+		t.Error("[ERR] Addresses don't match")
+	} else {
+		t.Log("[OK] Agent address matches its public key")
+	}
+
+	valid, err := utils.VerifyFetchAISignatureBTC([]byte(peerPublicKey), pySigStrCanonize, publicKey)
+	if !valid {
+		t.Errorf("Signature using BTC don't match %s", err.Error())
+	}
+	valid, err = utils.VerifyFetchAISignatureLibp2p([]byte(peerPublicKey), pySigStrCanonize, publicKey)
+	if !valid {
+		t.Errorf("Signature using LPP don't match %s", err.Error())
+	}
+}
+
 /*
 	Helpers
 	TOFIX(LR) how to share test helpers between packages tests
 	 without having circular dependencies
 */
 
-func SetupLocalDHTPeer(key string, addr string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
-	opts := []Option{
-		LocalURI(DefaultLocalHost, dhtPort),
-		PublicURI(DefaultLocalHost, dhtPort),
-		IdentityFromFetchAIKey(key),
-		EnableRelayService(),
-		BootstrapFrom(entry),
-	}
-
-	if addr != "" {
-		opts = append(opts, RegisterAgentAddress(addr, func() bool { return true }))
-	}
-
-	if delegatePort != 0 {
-		opts = append(opts, EnableDelegateService(delegatePort))
-	}
-
-	dhtPeer, err := New(opts...)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return dhtPeer, func() { dhtPeer.Close() }, nil
-
-}
-
-func SetupLocalDHTPeerWithPoR(key string, agentKey string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
+func SetupLocalDHTPeer(key string, agentKey string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
 	opts := []Option{
 		LocalURI(DefaultLocalHost, dhtPort),
 		PublicURI(DefaultLocalHost, dhtPort),
@@ -1439,7 +1412,7 @@ func SetupLocalDHTPeerWithPoR(key string, agentKey string, dhtPort uint16, deleg
 			return nil, nil, err
 		}
 
-		signature, err := signFetchAI([]byte(peerPubKey), agentKey)
+		signature, err := utils.SignFetchAI([]byte(peerPubKey), agentKey)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -1450,7 +1423,7 @@ func SetupLocalDHTPeerWithPoR(key string, agentKey string, dhtPort uint16, deleg
 		record.PeerPublicKey = peerPubKey
 		record.Signature = signature
 
-		opts = append(opts, RegisterAgentAddressWithPoR(record, func() bool { return true }))
+		opts = append(opts, RegisterAgentAddress(record, func() bool { return true }))
 	}
 
 	if delegatePort != 0 {
@@ -1468,22 +1441,7 @@ func SetupLocalDHTPeerWithPoR(key string, agentKey string, dhtPort uint16, deleg
 
 // DHTClient
 
-func SetupDHTClient(key string, address string, entry []string) (*dhtclient.DHTClient, func(), error) {
-	opts := []dhtclient.Option{
-		dhtclient.IdentityFromFetchAIKey(key),
-		dhtclient.RegisterAgentAddress(address, func() bool { return true }),
-		dhtclient.BootstrapFrom(entry),
-	}
-
-	dhtClient, err := dhtclient.New(opts...)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return dhtClient, func() { dhtClient.Close() }, nil
-}
-
-func SetupDHTClientWithPoR(key string, agentKey string, entry []string) (*dhtclient.DHTClient, func(), error) {
+func SetupDHTClient(key string, agentKey string, entry []string) (*dhtclient.DHTClient, func(), error) {
 
 	agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
 	if err != nil {
@@ -1500,7 +1458,7 @@ func SetupDHTClientWithPoR(key string, agentKey string, entry []string) (*dhtcli
 		return nil, nil, err
 	}
 
-	signature, err := signFetchAI([]byte(peerPubKey), agentKey)
+	signature, err := utils.SignFetchAI([]byte(peerPubKey), agentKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -1513,7 +1471,7 @@ func SetupDHTClientWithPoR(key string, agentKey string, entry []string) (*dhtcli
 
 	opts := []dhtclient.Option{
 		dhtclient.IdentityFromFetchAIKey(key),
-		dhtclient.RegisterAgentAddressWithPoR(record, func() bool { return true }),
+		dhtclient.RegisterAgentAddress(record, func() bool { return true }),
 		dhtclient.BootstrapFrom(entry),
 	}
 
@@ -1551,42 +1509,7 @@ func (client *DelegateClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
 	client.processEnvelope = fn
 }
 
-func SetupDelegateClient(address string, host string, port uint16) (*DelegateClient, func(), error) {
-	var err error
-	client := &DelegateClient{}
-	client.AgentAddress = address
-	client.Rx = make(chan *aea.Envelope)
-	client.Conn, err = net.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	err = utils.WriteBytesConn(client.Conn, []byte(address))
-	ignore(err)
-	_, err = utils.ReadBytesConn(client.Conn)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	go func() {
-		for {
-			envel, err := utils.ReadEnvelopeConn(client.Conn)
-			if err != nil {
-				break
-			}
-			if client.processEnvelope != nil {
-				err = client.processEnvelope(envel)
-				ignore(err)
-			} else {
-				client.Rx <- envel
-			}
-		}
-	}()
-
-	return client, func() { client.Close() }, nil
-}
-
-func SetupDelegateClientWithPoR(key string, host string, port uint16, peerPubKey string) (*DelegateClient, func(), error) {
+func SetupDelegateClient(key string, host string, port uint16, peerPubKey string) (*DelegateClient, func(), error) {
 	var err error
 	client := &DelegateClient{}
 	client.AgentKey = key
@@ -1603,7 +1526,7 @@ func SetupDelegateClientWithPoR(key string, host string, port uint16, peerPubKey
 	}
 	client.AgentAddress = address
 
-	signature, err := signFetchAI([]byte(peerPubKey), key)
+	signature, err := utils.SignFetchAI([]byte(peerPubKey), key)
 	if err != nil {
 		return nil, nil, err
 	}
