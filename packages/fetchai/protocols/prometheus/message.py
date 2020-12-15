@@ -49,6 +49,7 @@ class PrometheusMessage(Message):
             return str(self.value)
 
     _performatives = {"add_metric", "response", "update_metric"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (
