@@ -40,7 +40,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
     _ip_all_private_or_all_public,
 )
 
-from tests.conftest import COSMOS, _make_libp2p_connection
+from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
 
 
 DEFAULT_PORT = 10234
@@ -167,7 +167,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        crypto = make_crypto(COSMOS)
+        crypto = make_crypto(DEFAULT_LEDGER)
         cls.identity = Identity("", address=crypto.address)
         cls.host = "localhost"
         cls.port = "10000"
@@ -228,3 +228,28 @@ def test_libp2pconnection_mixed_ip_address():
     assert _ip_all_private_or_all_public(["fetch.ai", "127.0.0.1"]) is False
     assert _ip_all_private_or_all_public(["104.26.2.97", "127.0.0.1"]) is False
     assert _ip_all_private_or_all_public(["fetch.ai", "acn.fetch.ai"]) is True
+
+
+def test_libp2pconnection_node_config_registration_delay():
+    """Test nod registration delay configuration"""
+    crypto = make_crypto(DEFAULT_LEDGER)
+    identity = Identity("", address=crypto.address)
+    host = "localhost"
+    port = "10000"
+
+    configuration = ConnectionConfig(
+        local_uri="{}:{}".format(host, port),
+        public_uri="{}:{}".format(host, port),
+        peer_registration_delay="1.5",
+        connection_id=P2PLibp2pConnection.connection_id,
+    )
+    P2PLibp2pConnection(configuration=configuration, identity=identity)
+
+    configuration = ConnectionConfig(
+        local_uri="{}:{}".format(host, port),
+        public_uri="{}:{}".format(host, port),
+        peer_registration_delay="must_be_float",
+        connection_id=P2PLibp2pConnection.connection_id,
+    )
+    with pytest.raises(ValueError):
+        P2PLibp2pConnection(configuration=configuration, identity=identity)
