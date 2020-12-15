@@ -64,7 +64,7 @@ class TestStateUpdateMessage:
             quantities_by_good_id=good_change,
         )
         assert stum._is_consistent()
-        assert len(stum.valid_performatives) == 2
+        assert len(stum.valid_performatives) == 3
 
     def test_message_inconsistency(self):
         """Test for an error in consistency of a message."""
@@ -113,7 +113,7 @@ class TestSerialization:
             quantities_by_good_id=good_change,
         )
         assert msg._is_consistent()
-        assert len(msg.valid_performatives) == 2
+        assert len(msg.valid_performatives) == 3
         encoded_msg = msg.serializer.encode(msg)
         decoded_msg = msg.serializer.decode(encoded_msg)
         assert msg == decoded_msg

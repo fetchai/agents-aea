@@ -19,6 +19,7 @@
 """This test module contains the integration test for the tac skills."""
 
 import datetime
+import uuid
 from random import uniform
 
 import pytest
@@ -77,6 +78,9 @@ class TestTacSkills(AEATestCaseMany):
             "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
+        # tac name
+        tac_id = uuid.uuid4().hex
+
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
@@ -114,6 +118,10 @@ class TestTacSkills(AEATestCaseMany):
             "vendor.fetchai.skills.tac_control.models.parameters.args.location"
         )
         self.nested_set_config(setting_path, location)
+
+        # set tac id
+        setting_path = "vendor.fetchai.skills.tac_control.models.parameters.args.service_data.value"
+        self.nested_set_config(setting_path, tac_id)
 
         default_routing = {
             "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
@@ -163,6 +171,10 @@ class TestTacSkills(AEATestCaseMany):
                 "vendor.fetchai.skills.tac_participation.models.game.args.location"
             )
             self.nested_set_config(setting_path, location)
+
+            # set tac id
+            setting_path = "vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value"
+            self.nested_set_config(setting_path, tac_id)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
