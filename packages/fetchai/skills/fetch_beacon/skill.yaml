@@ -4,7 +4,7 @@ version: 0.1.0
 type: skill
 description: Retrieve the value of the Fetch DRB
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmVks7ipKr6AQqcH6mEqLnDDpBKi1sHVLyDDZppC27Qnye
   __init__.py: QmZKuR31Cb34hLiQJgC67k3o7s9zN7s1gmmdwhrMzoGxQ3

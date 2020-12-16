@@ -3,7 +3,7 @@ author: fetchai
 version: 0.17.0
 description: An AEA to participate in the TAC (trading agent competition)
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:

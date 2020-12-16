@@ -5,7 +5,7 @@ type: skill
 description: The erc1155 client interacts with the erc1155 deployer to conduct an
   atomic swap.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmZLsx2wJE762rqDqfeqLMg9RBczvALxy3H2U9kfRvgK3s
   __init__.py: QmNey3L1jjFLEhbPntTBhMjNAdH98epqdfJsej4HhA3xcK

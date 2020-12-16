@@ -13,7 +13,7 @@ author: fetchai
 version: 0.9.0
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 speech_acts:
   cfp:
     query: ct:Query

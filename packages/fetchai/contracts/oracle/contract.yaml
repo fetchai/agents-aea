@@ -4,7 +4,7 @@ version: 0.1.0
 type: contract
 description: Fetch oracle contract
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmcCi3y8nbmdPj4MLFRsT7DoPqkuthnTMHHHPjR56AU3Xr
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM

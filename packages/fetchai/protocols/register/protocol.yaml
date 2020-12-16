@@ -4,9 +4,9 @@ version: 0.2.0
 type: protocol
 description: A protocol for communication between two AEAs for registration.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmU7CaZ2fwP7jJkzLDF7JqGm8LtvqwC4zTGAECxg1JaRUj
+  README.md: QmRB3CZsuDHMsK6iG77hUwY77oMSAikPj29nB9ZM7kT9jf
   __init__.py: QmVqqvCtZJ6RNioinbGtGXqXQdxW38jgRjMyBpLhK6HTAz
   dialogues.py: QmcUiHEdDbJLD14bb4RSYkXFJdtxJX74hd52QX6q4oGiSQ
   message.py: QmdFcFbMTf1syhhZHAEdL9j35cuq2AkQyvfCPN1rJYXkJQ

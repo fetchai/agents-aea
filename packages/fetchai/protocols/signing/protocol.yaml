@@ -4,9 +4,9 @@ version: 0.7.0
 type: protocol
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmNrinWtWhu22DRcN1XWneAua7YA79bu1KFBDUNdSG4A1t
+  README.md: QmXGAZMfSPtF1S8g27FMzJwf5z8ssnfaSA3vi3Yk2JTuWM
   __init__.py: QmUcmsCfop25uvwR6XQR3GGaJ63pbDsEPQPJeXM7nASuQW
   custom_types.py: Qmc7sAyCQbAaVs5dZf9hFkTrB2BG8VAioWzbyKBAybrQ1J
   dialogues.py: QmRZWRnWTJYDtdQAxdUY2MRcFciE6uSrrkb2F4css5tv9K

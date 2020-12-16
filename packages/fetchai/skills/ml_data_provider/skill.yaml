@@ -5,7 +5,7 @@ type: skill
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmakpsKWJrGRsoFaKR1Gf94KqcuPrkdXTYyciq5d4EhoFF
   __init__.py: QmUDtusrZzQ3FjjpJGWJZ1nEDtJzjK7ZixpuUUwQ2CsK4Z

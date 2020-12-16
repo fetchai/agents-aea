@@ -5,7 +5,7 @@ type: skill
 description: This skill purchases information from other agents as specified in its
   configuration. It is the confirmation buyer for Agent World 2.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmSgFDQ7YjDzts8JKfTbnJZhnYEFaDQ42j5b1vAQy764Xw
   __init__.py: QmRLuCVjfKcQZ4LHhs8uZ5r8cdzr87VffBqHjQ4hcgjbo7

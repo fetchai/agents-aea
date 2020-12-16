@@ -4,7 +4,7 @@ version: 0.14.0
 description: The gym aea demos the interaction between a skill containing a RL agent
   and a gym connection.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:

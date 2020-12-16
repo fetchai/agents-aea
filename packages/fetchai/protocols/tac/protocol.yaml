@@ -5,9 +5,9 @@ type: protocol
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmWFukfd8ttR9ggXmc22XbnmR9kYSSVeVKYaAXgkE5fNX3
+  README.md: QmWMYK3Tqto5MDEvwr8kjYPXHH45xr7JP3bGQXiQiDasso
   __init__.py: QmSAC7PGra9fig8RhhF1j3XEVpgie9UZNNYPc2AB9Kx9xJ
   custom_types.py: QmXQATfnvuCpt4FicF4QcqCcLj9PQNsSHjCBvVQknWpyaN
   dialogues.py: QmSYjYBpE3YZxPuXE42DK7fo47kgF8dqWT9ySYb9qcB51T

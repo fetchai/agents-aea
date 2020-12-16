@@ -4,7 +4,7 @@ version: 0.2.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmYPXawZEa3x9AaZSnVjVKTDRrVmgUwtWM5NTUhSUwxaEM
   __init__.py: QmdsLqjcRBjEidFcrwC55XsMVkaCfUZTt2QGjLKhBTUqzr

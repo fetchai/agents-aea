@@ -5,7 +5,7 @@ type: skill
 description: This skill is used to request data from a HTTP endpoint and then saving
   it in the AEA's shared state for use by other skills.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmQ9M6KDnQaHvwfCEGCytUuPszHh9HPb7QaHjTUpRFcejZ
   __init__.py: QmVx8cQa6SvJjL7b6FyJieWZVx6TFbciwbpz2Bvr8WK8SK
