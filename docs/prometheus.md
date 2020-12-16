@@ -242,9 +242,3 @@ class PrometheusHandler(Handler):
         """
         pass
 ```
-
-
-
-
-
-
