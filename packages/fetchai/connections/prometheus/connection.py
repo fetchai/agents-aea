@@ -109,7 +109,7 @@ class PrometheusChannel:
         :return: Tuple[Message, Optional[Dialogue]]
         """
         message = cast(PrometheusMessage, envelope.message)
-        dialogue = cast(PrometheusDialogue, self._dialogues.update(message))
+        dialogue = cast(Optional[PrometheusDialogue], self._dialogues.update(message))
         return message, dialogue
 
     @property
