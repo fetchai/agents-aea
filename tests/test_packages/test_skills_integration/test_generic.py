@@ -42,6 +42,8 @@ from tests.conftest import (
 class TestGenericSkills(AEATestCaseMany):
     """Test that generic skills work."""
 
+    capture_log = True
+
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
@@ -101,6 +103,7 @@ class TestGenericSkills(AEATestCaseMany):
             "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -139,14 +142,13 @@ class TestGenericSkills(AEATestCaseMany):
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
         seller_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -163,8 +165,6 @@ class TestGenericSkills(AEATestCaseMany):
         buyer_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -222,6 +222,8 @@ class TestGenericSkills(AEATestCaseMany):
 @pytest.mark.integration
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
     """Test that generic skills work."""
+
+    capture_log = True
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
@@ -285,6 +287,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -328,14 +331,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
         seller_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -352,15 +354,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         buyer_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            buyer_aea_process, check_strings, timeout=240, is_terminating=False
+            buyer_aea_process, check_strings, timeout=10, is_terminating=False
         )
         assert (
             missing_strings == []

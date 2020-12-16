@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
-
 import functools
 import pprint
 import re
@@ -1110,6 +1109,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
     ):
         """Set component configuration."""
@@ -1124,6 +1124,17 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             build_entrypoint,
         )
         self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
+        self._build_directory = build_directory
+
+    @property
+    def build_directory(self) -> Optional[str]:
+        """Get the component type."""
+        return self._build_directory
+
+    @build_directory.setter
+    def build_directory(self, value: Optional[str]) -> None:
+        """Get the component type."""
+        self._build_directory = value
 
     @property
     def component_type(self) -> ComponentType:
@@ -1206,6 +1217,7 @@ class ConnectionConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
         connections: Optional[Set[PublicId]] = None,
@@ -1247,6 +1259,7 @@ class ConnectionConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.class_name = class_name
@@ -1309,6 +1322,8 @@ class ConnectionConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1334,6 +1349,7 @@ class ConnectionConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
             connections=cast(Set[PublicId], connections),
@@ -1376,6 +1392,7 @@ class ProtocolConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
@@ -1390,6 +1407,7 @@ class ProtocolConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -1414,6 +1432,8 @@ class ProtocolConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1431,6 +1451,7 @@ class ProtocolConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
@@ -1486,6 +1507,7 @@ class SkillConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         connections: Optional[Set[PublicId]] = None,
         protocols: Optional[Set[PublicId]] = None,
         contracts: Optional[Set[PublicId]] = None,
@@ -1504,6 +1526,7 @@ class SkillConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.connections = connections if connections is not None else set()
@@ -1575,6 +1598,8 @@ class SkillConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1612,6 +1637,7 @@ class SkillConfig(ComponentConfiguration):
             dependencies=dependencies,
             description=description,
             is_abstract=obj.get("is_abstract", False),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
         )
 
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():
@@ -2160,6 +2186,7 @@ class ContractConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
@@ -2175,6 +2202,7 @@ class ContractConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -2205,6 +2233,8 @@ class ContractConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -2224,6 +2254,7 @@ class ContractConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
             contract_interface_paths=cast(

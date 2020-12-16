@@ -556,3 +556,11 @@ class cached_property:  # pragma: nocover
                         )
                         raise TypeError(msg) from None
         return val
+
+
+def ensure_dir(dir_path: str) -> None:
+    """Check if dir_path is a directory or create it."""
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    else:
+        enforce(os.path.isdir(dir_path), f"{dir_path} is not a directory!")

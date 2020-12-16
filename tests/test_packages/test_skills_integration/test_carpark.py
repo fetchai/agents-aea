@@ -98,6 +98,7 @@ class TestCarPark(AEATestCaseMany):
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
@@ -132,14 +133,13 @@ class TestCarPark(AEATestCaseMany):
             "vendor.fetchai.skills.carpark_client.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(carpark_aea_name)
         carpark_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -156,8 +156,6 @@ class TestCarPark(AEATestCaseMany):
         carpark_client_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -276,6 +274,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
@@ -316,14 +315,13 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
             "vendor.fetchai.skills.carpark_client.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(carpark_aea_name)
         carpark_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -340,8 +338,6 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         carpark_client_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

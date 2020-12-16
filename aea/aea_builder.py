@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains utilities for building an AEA."""
 import ast
 import logging
@@ -28,13 +26,13 @@ import sys
 from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
+from subprocess import check_call  # nosec
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
 from packaging.specifiers import SpecifierSet
 
 from aea.aea import AEA
-from aea.cli.utils.generic import run_cli_command_subprocess
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -80,7 +78,12 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
 from aea.exceptions import AEAException, AEAValidationError, enforce
-from aea.helpers.base import find_topological_order, load_env_file, load_module
+from aea.helpers.base import (
+    ensure_dir,
+    find_topological_order,
+    load_env_file,
+    load_module,
+)
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
@@ -300,7 +303,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
-
+    AEA_CLASS = AEA
+    BUILD_TIMEOUT = 120
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
 
     # pylint: disable=attribute-defined-outside-init
@@ -752,12 +756,31 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         configuration = load_component_configuration(
             component_type, directory, skip_consistency_check
         )
+        self._set_component_build_directory(configuration)
         self._check_can_add(configuration)
         # update dependency graph
         self._package_dependency_manager.add_component(configuration)
         configuration.directory = directory
 
         return self
+
+    def _set_component_build_directory(
+        self, configuration: ComponentConfiguration
+    ) -> None:
+        """
+        Set component build directory, create if not presents.
+
+        :param configuration: component configuration
+
+        :return: None
+        """
+        configuration.build_directory = os.path.join(
+            self.AEA_CLASS.get_build_dir(),
+            configuration.component_type.value,
+            configuration.author,
+            configuration.name,
+        )
+        ensure_dir(configuration.build_directory)
 
     def add_component_instance(self, component: Component) -> "AEABuilder":
         """
@@ -883,35 +906,67 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     def call_all_build_entrypoints(self):
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
-            if not config.build_entrypoint:
-                continue
-            self.logger.info(f"Building package {config.component_id}...")
-            directory = cast(str, config.directory)
-            build_entrypoint = cast(str, config.build_entrypoint)
-            self._run_build_entrypoint(build_entrypoint, directory)
+            self.run_build_for_component_configuration(config, logger=self.logger)
 
         if self._build_entrypoint:
             self.logger.info("Building AEA package...")
-            directory = cast(str, ".")
+            source_directory = "."
+            target_directory = os.path.abspath(self.AEA_CLASS.get_build_dir())
             build_entrypoint = cast(str, self._build_entrypoint)
-            self._run_build_entrypoint(build_entrypoint, directory)
+            self._run_build_entrypoint(
+                build_entrypoint, source_directory, target_directory, logger=self.logger
+            )
 
-    def _run_build_entrypoint(self, build_entrypoint: str, directory: str) -> None:
+    @classmethod
+    def run_build_for_component_configuration(
+        cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None
+    ) -> None:
+        """Run a build entrypoint script for component configuration."""
+        if not config.build_entrypoint:
+            return
+
+        enforce(bool(config.build_directory), f"{config}.build_directory is not set!")
+
+        if not config.build_directory:  # pragma: nocover
+            return
+
+        if logger:
+            logger.info(f"Building package {config.component_id}...")
+
+        source_directory = cast(str, config.directory)
+        target_directory = os.path.abspath(config.build_directory)
+        build_entrypoint = cast(str, config.build_entrypoint)
+        cls._run_build_entrypoint(
+            build_entrypoint, source_directory, target_directory, logger=logger
+        )
+
+    @classmethod
+    def _run_build_entrypoint(
+        cls,
+        build_entrypoint: str,
+        source_directory: str,
+        target_directory: str,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
         """
         Run a build entrypoint script.
 
         :param build_entrypoint: the path to the build script relative to directory.
         :param directory: the directory root for the entrypoint path.
+        :param logger: logger
+
         :return: None
         """
-        self._check_valid_entrypoint(build_entrypoint, directory)
+        cls._check_valid_entrypoint(build_entrypoint, source_directory)
 
-        command = [sys.executable, build_entrypoint]
+        command = [sys.executable, build_entrypoint, target_directory]
         command_str = " ".join(command)
-        self.logger.info(f"Running command '{command_str}'")
+        if logger:
+            logger.info(f"Running command '{command_str}'")
         try:
-            return_code = run_cli_command_subprocess(command, cwd=directory)
-            enforce(return_code == 0, f"Return code {return_code} != 0")
+            check_call(
+                command, cwd=source_directory, timeout=cls.BUILD_TIMEOUT
+            )  # nosec
         except Exception as e:
             raise AEAException(
                 f"An error occurred while running command '{command_str}': {str(e)}"
@@ -1034,7 +1089,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             crypto_store=wallet.connection_cryptos,
         )
         connection_ids = self._process_connection_ids(connection_ids)
-        aea = AEA(
+        aea = self.AEA_CLASS(
             identity,
             wallet,
             resources,

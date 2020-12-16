@@ -53,6 +53,8 @@ MAX_FLAKY_RERUNS_ETH -= 1
 class TestTacSkills(AEATestCaseMany):
     """Test that tac skills work."""
 
+    capture_log = True
+
     @pytest.mark.integration
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
@@ -194,11 +196,10 @@ class TestTacSkills(AEATestCaseMany):
         start_time = fut.strftime("%d %m %Y %H:%M")
         setting_path = "vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time"
         self.set_config(setting_path, start_time)
+        self.run_cli_command("build", cwd=self._get_cwd())
         tac_controller_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -213,14 +214,14 @@ class TestTacSkills(AEATestCaseMany):
 
         # run two agents (participants)
         self.set_agent_context(tac_aea_one)
+        self.run_cli_command("build", cwd=self._get_cwd())
         tac_aea_one_process = self.run_agent()
 
         self.set_agent_context(tac_aea_two)
+        self.run_cli_command("build", cwd=self._get_cwd())
         tac_aea_two_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -234,8 +235,6 @@ class TestTacSkills(AEATestCaseMany):
         ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -309,6 +308,8 @@ class TestTacSkills(AEATestCaseMany):
 
 class TestTacSkillsContract(AEATestCaseMany, UseGanache):
     """Test that tac skills work."""
+
+    capture_log = True
 
     @pytest.mark.integration
     @pytest.mark.ledger
@@ -476,11 +477,10 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         start_time = fut.strftime("%d %m %Y %H:%M")
         setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time"
         self.set_config(setting_path, start_time)
+        self.run_cli_command("build", cwd=self._get_cwd())
         tac_controller_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -507,14 +507,14 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
 
         # run two agents (participants)
         self.set_agent_context(tac_aea_one)
+        self.run_cli_command("build", cwd=self._get_cwd())
         tac_aea_one_process = self.run_agent()
 
         self.set_agent_context(tac_aea_two)
+        self.run_cli_command("build", cwd=self._get_cwd())
         tac_aea_two_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -531,8 +531,6 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

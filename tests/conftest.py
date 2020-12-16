@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Conftest module for Pytest."""
 import difflib
 import inspect
@@ -74,7 +73,9 @@ from aea.test_tools.constants import DEFAULT_AUTHOR
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
+from packages.fetchai.connections.p2p_libp2p.check_dependencies import build_node
 from packages.fetchai.connections.p2p_libp2p.connection import (
+    LIBP2P_NODE_MODULE_NAME,
     MultiAddr,
     P2PLibp2pConnection,
 )
@@ -783,6 +784,7 @@ def _make_libp2p_connection(
     delegate_host: str = "127.0.0.1",
     node_key_file: Optional[str] = None,
     agent_address: Optional[Address] = None,
+    build_directory: Optional[str] = None,
 ) -> P2PLibp2pConnection:
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
@@ -791,6 +793,8 @@ def _make_libp2p_connection(
     if address is None:
         address = make_crypto(COSMOS).address
     identity = Identity("", address=address)
+    if not build_directory:
+        build_directory = os.getcwd()
     if relay and delegate:
         configuration = ConnectionConfig(
             node_key_file=node_key_file,
@@ -800,6 +804,7 @@ def _make_libp2p_connection(
             log_file=log_file,
             delegate_uri="{}:{}".format(delegate_host, delegate_port),
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=build_directory,
         )
     elif relay and not delegate:
         configuration = ConnectionConfig(
@@ -809,6 +814,7 @@ def _make_libp2p_connection(
             entry_peers=entry_peers,
             log_file=log_file,
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=build_directory,
         )
     else:
         configuration = ConnectionConfig(
@@ -817,8 +823,12 @@ def _make_libp2p_connection(
             entry_peers=entry_peers,
             log_file=log_file,
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=build_directory,
         )
-    return P2PLibp2pConnection(configuration=configuration, identity=identity)
+    if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
+        build_node(build_directory)
+    connection = P2PLibp2pConnection(configuration=configuration, identity=identity)
+    return connection
 
 
 def _make_libp2p_client_connection(
@@ -852,13 +862,16 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
     def wrapper(self, *args, **kwargs):
         try:
             fn(self, *args, **kwargs)
-        except Exception as e:
+        except Exception:
             for log_file in self.log_files:
                 print("libp2p log file ======================= {}".format(log_file))
-                with open(log_file, "r") as f:
-                    print(f.read())
+                try:
+                    with open(log_file, "r") as f:
+                        print(f.read())
+                except FileNotFoundError:
+                    pass
                 print("=======================================")
-            raise e
+            raise
 
     return wrapper
 
