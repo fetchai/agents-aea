@@ -1,6 +1,6 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: connection
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
@@ -8,7 +8,7 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmWRXWUuSawx6DoLjYTPHFk7peMKfnY6gKTiGzAtrEXRp9
+  README.md: QmWPeRpF66yhj4t2FTTwGLa9hFgRjYffJpe6DKcag5mpnE
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   aea/api.go: QmThjcaiYGdPBniGAnrc66cEVtZaB4K1cgJb5iig6hTCK9
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
@@ -16,7 +16,7 @@ fingerprint:
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmPEffQZy1Hh8ZuqRp4EcpETt9LnMj9kNButmSt6SnDShB
-  connection.py: QmTCj2KBCbyMqSdyqLbJoB8toEvAbkKD7FVEpWEDBhYyHX
+  connection.py: QmP53cuL1Z9h51Ji34kPQi8S41qGdC2mYe5JdCT3pSJYuG
   dht/dhtclient/dhtclient.go: QmeHnMoBdff59vSqRRsYUGGJPUMi5Euk8pKiKa5jTzHHQD
   dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
   dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s

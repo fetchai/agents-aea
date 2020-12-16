@@ -1,6 +1,6 @@
 name: tac_control_contract
 author: fetchai
-version: 0.14.0
+version: 0.15.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmUiw6Dt97mXLzSizbnMNTsfLy3edGXKdYTNR5bke6sFsm
-  __init__.py: QmaU7tjqkUcFK4WLHxTP9f2DppiCH1HKnad9zPYmfTk3Cv
+  __init__.py: QmaRRVTvGHTruWuJmSQ1vo8rA6M89Mj98kQ6RG1dkvu7Xe
   behaviours.py: Qma7seTXY488dZmwUe61sYLTF1PrRzGYoJCgqNcDLsxZF7
   dialogues.py: QmYFyqgevKLuRfj4q8wdJkWmSNk7FFDTpzpDCvLdtc7dnG
   game.py: QmQwskD5DBVNv1ouRpqGNLb3zQ5krLUcR6XXHUcJ5EVc8L
@@ -17,18 +17,18 @@ fingerprint:
   parameters.py: QmVMNP52fPxkzEbXPhXtQXspnaj2f4ErZNcNdPAqv4cvwq
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.10.0
+- fetchai/ledger:0.11.0
 contracts:
-- fetchai/erc1155:0.12.0
+- fetchai/erc1155:0.13.0
 protocols:
-- fetchai/contract_api:0.8.0
-- fetchai/default:0.9.0
-- fetchai/ledger_api:0.7.0
-- fetchai/oef_search:0.10.0
-- fetchai/signing:0.7.0
-- fetchai/tac:0.10.0
+- fetchai/contract_api:0.9.0
+- fetchai/default:0.10.0
+- fetchai/ledger_api:0.8.0
+- fetchai/oef_search:0.11.0
+- fetchai/signing:0.8.0
+- fetchai/tac:0.11.0
 skills:
-- fetchai/tac_control:0.12.0
+- fetchai/tac_control:0.13.0
 behaviours:
   tac:
     args: {}
