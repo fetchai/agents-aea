@@ -136,6 +136,12 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             os.path.join(self.t, search_agent_name, "soef_key.txt"),
             cwd=search_agent_name,
         )
+        self.run_cli_command(
+            "build", cwd=registration_agent_name,
+        )
+        self.run_cli_command(
+            "build", cwd=search_agent_name,
+        )
 
         proc = PexpectWrapper(  # nosec
             [

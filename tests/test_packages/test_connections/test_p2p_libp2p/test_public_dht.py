@@ -363,7 +363,10 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_connectivity(self):
         """Test connectivity."""
+        self.log_files = []
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
+        self.run_cli_command("build", cwd=self._get_cwd())
+
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
 
         # for logging
@@ -381,7 +384,6 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
         )
 
         self.log_files = [log_file]
-
         process = self.run_agent()
 
         is_running = self.is_running(process, timeout=AEA_LIBP2P_LAUNCH_TIMEOUT)

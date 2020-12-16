@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helper module."""
-
 import os
 import platform
 import re
@@ -26,6 +25,7 @@ import time
 from copy import copy
 from pathlib import Path
 from subprocess import Popen  # nosec
+from tempfile import TemporaryDirectory
 from typing import Dict, Set
 from unittest.mock import patch
 
@@ -35,6 +35,7 @@ from aea.exceptions import AEAEnforceError
 from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
+    ensure_dir,
     exception_log_and_reraise,
     find_topological_order,
     load_env_file,
@@ -379,3 +380,19 @@ class TestReachableNodes:
 
         result = reachable_nodes(g, {3})
         assert result == {3: set()}
+
+
+def test_ensure_dir():
+    """Test ensure_dir."""
+    dir_name = "test"
+    with TemporaryDirectory() as tmpdirname:
+        full_path = os.path.join(tmpdirname, dir_name)
+        assert not os.path.exists(full_path)
+        ensure_dir(full_path)
+        assert os.path.exists(full_path)
+        file_path = os.path.join(full_path, "file_name")
+        with open(file_path, "w"):
+            pass
+
+        with pytest.raises(AEAEnforceError):
+            ensure_dir(file_path)
