@@ -28,8 +28,15 @@ from aea.skills.behaviours import TickerBehaviour
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_CLIENT_ID,
 )
+from packages.fetchai.connections.prometheus.connection import (
+    PUBLIC_ID as PROM_CONNECTION_ID,
+)
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.coin_price.dialogues import HttpDialogues
+from packages.fetchai.protocols.prometheus.message import PrometheusMessage
+from packages.fetchai.skills.coin_price.dialogues import (
+    HttpDialogues,
+    PrometheusDialogues,
+)
 from packages.fetchai.skills.coin_price.models import CoinPriceModel
 
 
@@ -76,6 +83,74 @@ class CoinPriceBehaviour(TickerBehaviour):
             message=request_http_message, context=envelope_context
         )
 
+    def add_prometheus_metric(
+        self,
+        metric_name: str,
+        metric_type: str,
+        description: str,
+        labels: Dict[str, str],
+    ) -> None:
+        """
+        Add a prometheus metric.
+
+        :param metric_name: the name of the metric to add.
+        :param type: the type of the metric.
+        :param description: a description of the metric.
+        :param labels: the metric labels.
+        :return: None
+        """
+
+        # context
+        prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
+
+        # prometheus update message
+        message, _ = prom_dialogues.create(
+            counterparty=str(PROM_CONNECTION_ID),
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            type=metric_type,
+            title=metric_name,
+            description=description,
+            labels=labels,
+        )
+
+        # send message
+        envelope_context = EnvelopeContext(
+            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
+        )
+        self.context.outbox.put_message(message=message, context=envelope_context)
+
+    def update_prometheus_metric(
+        self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
+    ) -> None:
+        """
+        Update a prometheus metric.
+
+        :param metric_name: the name of the metric.
+        :param update_func: the name of the update function (e.g. inc, dec, set, ...).
+        :param value: the value to provide to the update function.
+        :param labels: the metric labels.
+        :return: None
+        """
+
+        # context
+        prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
+
+        # prometheus update message
+        message, _ = prom_dialogues.create(
+            counterparty=str(PROM_CONNECTION_ID),
+            performative=PrometheusMessage.Performative.UPDATE_METRIC,
+            title=metric_name,
+            callable=update_func,
+            value=value,
+            labels=labels,
+        )
+
+        # send message
+        envelope_context = EnvelopeContext(
+            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
+        )
+        self.context.outbox.put_message(message=message, context=envelope_context)
+
     def setup(self) -> None:
         """
         Implement the setup.
@@ -84,13 +159,24 @@ class CoinPriceBehaviour(TickerBehaviour):
         """
         self.context.logger.info("setting up CoinPriceBehaviour")
 
+        prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
+
+        if prom_dialogues.enabled:
+            for metric in prom_dialogues.metrics:
+                self.context.logger.info("Adding Prometheus metric: " + metric["name"])
+                self.add_prometheus_metric(
+                    metric["name"],
+                    metric["type"],
+                    metric["description"],
+                    dict(metric["labels"]),
+                )
+
     def act(self) -> None:
         """
         Implement the act.
 
         :return: None
         """
-
         model = cast(CoinPriceModel, self.context.coin_price_model)
 
         self.context.logger.info(

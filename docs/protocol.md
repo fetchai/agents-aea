@@ -77,6 +77,7 @@ class Performative(Enum):
     """Performatives for the default protocol."""
 
     BYTES = "bytes"
+    END = "end"
     ERROR = "error"
 
     def __str__(self):
@@ -260,6 +261,7 @@ class Performative(Enum):
     ACCEPT_W_INFORM = "accept_w_inform"
     CFP = "cfp"
     DECLINE = "decline"
+    END = "end"
     INFORM = "inform"
     MATCH_ACCEPT = "match_accept"
     MATCH_ACCEPT_W_INFORM = "match_accept_w_inform"

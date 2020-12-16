@@ -19,6 +19,7 @@
 """This test module contains the integration test for the tac skills."""
 
 import datetime
+import uuid
 from random import uniform
 
 import pytest
@@ -79,6 +80,9 @@ class TestTacSkills(AEATestCaseMany):
             "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
+        # tac name
+        tac_id = uuid.uuid4().hex
+
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
@@ -116,6 +120,13 @@ class TestTacSkills(AEATestCaseMany):
             "vendor.fetchai.skills.tac_control.models.parameters.args.location"
         )
         self.nested_set_config(setting_path, location)
+
+        # set tac id
+        data = {"key": "tac", "value": tac_id}
+        setting_path = (
+            "vendor.fetchai.skills.tac_control.models.parameters.args.service_data"
+        )
+        self.nested_set_config(setting_path, data)
 
         default_routing = {
             "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
@@ -165,6 +176,17 @@ class TestTacSkills(AEATestCaseMany):
                 "vendor.fetchai.skills.tac_participation.models.game.args.location"
             )
             self.nested_set_config(setting_path, location)
+
+            # set tac id
+            data = {
+                "search_key": "tac",
+                "search_value": tac_id,
+                "constraint_type": "==",
+            }
+            setting_path = (
+                "vendor.fetchai.skills.tac_participation.models.game.args.search_query"
+            )
+            self.nested_set_config(setting_path, data)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
@@ -315,6 +337,9 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             "longitude": round(uniform(-180, 180), 2),  # nosec
         }
 
+        # tac name
+        tac_id = uuid.uuid4().hex
+
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
@@ -360,6 +385,11 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             "vendor.fetchai.skills.tac_control_contract.models.parameters.args.location"
         )
         self.nested_set_config(setting_path, location)
+
+        # set tac id
+        data = {"key": "tac", "value": tac_id}
+        setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.service_data"
+        self.nested_set_config(setting_path, data)
 
         default_routing = {
             "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
@@ -425,6 +455,17 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
                 "vendor.fetchai.skills.tac_participation.models.game.args.location"
             )
             self.nested_set_config(setting_path, location)
+
+            # set tac id
+            data = {
+                "search_key": "tac",
+                "search_value": tac_id,
+                "constraint_type": "==",
+            }
+            setting_path = (
+                "vendor.fetchai.skills.tac_participation.models.game.args.search_query"
+            )
+            self.nested_set_config(setting_path, data)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)

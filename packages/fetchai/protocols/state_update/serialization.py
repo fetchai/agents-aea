@@ -72,6 +72,9 @@ class StateUpdateSerializer(Serializer):
             quantities_by_good_id = msg.quantities_by_good_id
             performative.quantities_by_good_id.update(quantities_by_good_id)
             state_update_msg.apply.CopyFrom(performative)
+        elif performative_id == StateUpdateMessage.Performative.END:
+            performative = state_update_pb2.StateUpdateMessage.End_Performative()  # type: ignore
+            state_update_msg.end.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -131,6 +134,8 @@ class StateUpdateSerializer(Serializer):
             quantities_by_good_id = state_update_pb.apply.quantities_by_good_id
             quantities_by_good_id_dict = dict(quantities_by_good_id)
             performative_content["quantities_by_good_id"] = quantities_by_good_id_dict
+        elif performative_id == StateUpdateMessage.Performative.END:
+            pass
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 

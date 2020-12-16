@@ -9,20 +9,23 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.14.0
 - fetchai/http_server:0.13.0
+- fetchai/prometheus:0.1.0
 - fetchai/stub:0.12.0
 contracts: []
 protocols:
 - fetchai/default:0.9.0
 - fetchai/http:0.9.0
+- fetchai/prometheus:0.1.0
 - fetchai/signing:0.7.0
 - fetchai/state_update:0.7.0
 skills:
 - fetchai/coin_price:0.1.0
 - fetchai/error:0.9.0
-default_connection: fetchai/http_server:latest
+default_connection: fetchai/http_server:0.13.0
 default_ledger: fetchai
 default_routing:
-  fetchai/http:latest: fetchai/http_client:latest
+  fetchai/http:0.9.0: fetchai/http_client:0.14.0
+  fetchai/prometheus:0.1.0: fetchai/prometheus:0.1.0
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
@@ -34,3 +37,10 @@ public_id: fetchai/http_server:0.13.0
 type: connection
 config:
   api_spec_path: vendor/fetchai/skills/coin_price/coin_api_spec.yaml
+---
+public_id: fetchai/coin_price:0.1.0
+type: skill
+models:
+  coin_price_model:
+    args:
+      use_http_server: true

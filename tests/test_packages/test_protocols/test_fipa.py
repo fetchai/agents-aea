@@ -277,6 +277,34 @@ def test_inform_serialization():
     assert expected_msg == actual_msg
 
 
+def test_end_serialization():
+    """Test the serialization-deserialization of the end performative."""
+    msg = FipaMessage(
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=FipaMessage.Performative.END,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
 def test_performative_string_value():
     """Test the string value of the performatives."""
     assert str(FipaMessage.Performative.CFP) == "cfp", "The str value must be cfp"

@@ -50,6 +50,7 @@ class ContractApiDialogue(Dialogue):
             ContractApiMessage.Performative.STATE,
             ContractApiMessage.Performative.RAW_TRANSACTION,
             ContractApiMessage.Performative.RAW_MESSAGE,
+            ContractApiMessage.Performative.ERROR,
         }
     )
     VALID_REPLIES = {

@@ -28,6 +28,7 @@ speech_acts:
   accept: {}
   decline: {}
   match_accept: {}
+  end: {}
 ...
 ---
 ct:Query: |
@@ -43,10 +44,11 @@ reply:
   accept: [decline, match_accept, match_accept_w_inform]
   accept_w_inform: [decline, match_accept, match_accept_w_inform]
   decline: []
-  match_accept: [inform]
-  match_accept_w_inform: [inform]
-  inform: [inform]
-termination: [decline, match_accept, match_accept_w_inform, inform]
+  match_accept: [inform, end]
+  match_accept_w_inform: [inform, end]
+  inform: [inform, end]
+  end: []
+termination: [decline, end]
 roles: {seller, buyer}
 end_states: [successful, declined_cfp, declined_propose, declined_accept]
 keep_terminal_state_dialogues: true

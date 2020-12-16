@@ -10,6 +10,7 @@ connections:
 - fetchai/http_client:0.14.0
 - fetchai/ledger:0.10.0
 - fetchai/p2p_libp2p:0.12.0
+- fetchai/prometheus:0.1.0
 - fetchai/stub:0.12.0
 contracts:
 - fetchai/oracle:0.1.0
@@ -18,6 +19,7 @@ protocols:
 - fetchai/default:0.9.0
 - fetchai/http:0.9.0
 - fetchai/ledger_api:0.7.0
+- fetchai/prometheus:0.1.0
 - fetchai/signing:0.7.0
 - fetchai/state_update:0.7.0
 skills:
@@ -30,19 +32,13 @@ default_routing:
   fetchai/contract_api:latest: fetchai/ledger:latest
   fetchai/http:latest: fetchai/http_client:latest
   fetchai/ledger_api:latest: fetchai/ledger:latest
+  fetchai/prometheus:latest: fetchai/prometheus:latest
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages
----
-public_id: fetchai/ledger:0.10.0
-type: connection
-config:
-  ledger_apis:
-    ethereum:
-      address: null
 ---
 public_id: fetchai/coin_price:0.1.0
 type: skill

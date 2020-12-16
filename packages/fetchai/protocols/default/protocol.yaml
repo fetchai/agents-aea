@@ -6,14 +6,14 @@ description: A protocol for exchanging any bytes message.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmZ3zMSAf98BPAP1ucWkfoGjgjVPK2KphJbzFwsXSeSQ4f
+  README.md: QmZG2DXmA1BqwMPSY2EfVJhg1gL5Wt1QVQj4xXvmPutuKM
   __init__.py: QmRWWkHpiBGcYVXSvnxZLFD9QCyKcdtvbZ6GhLHLUWFa6G
   custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
-  default.proto: QmbbAXpav8jfU1r59afGbLAj3FpPXEwWuezPocAMyqcfax
-  default_pb2.py: QmWmXC4LUJrk5krrAszmpPUjBMLCbw9Fwm4RKY5QM2t9DQ
-  dialogues.py: QmSpToyoXJm3nhjgn4zERdDihpYwJzQ5Z4kYFYg94a8Suy
-  message.py: QmaKCeuYZQU9zrowKjvoQhg29JLWoiPKqfgSunwuhKP5SZ
-  serialization.py: QmXGv9ERazqdBfJKGBB1kfCDWWdDSZFNodX3xE5BtaVMBH
+  default.proto: QmNMoGYhsiiqQxZGGECeczvmKWnYYxyJ6TNTpvb679c4J1
+  default_pb2.py: QmSbakk8PG4VWSNcDG8mwoSzMgyjKbR9ZbmZjMPnCVmM2e
+  dialogues.py: QmUf8x7AWjzf4YF2pnjyPZryKwzgoEMeEfvL4ypdy889Y7
+  message.py: Qme5KeByH27btfE141SQqHv5PuF8hVS4ZXPpv274sDYnwN
+  serialization.py: QmTJZno4tZPCFFa5ksDmvHuuNyigngCoR2kvSZdMTp3ukb
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

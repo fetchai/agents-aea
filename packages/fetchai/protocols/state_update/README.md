@@ -23,13 +23,15 @@ speech_acts:
   apply:
     amount_by_currency_id: pt:dict[pt:str, pt:int]
     quantities_by_good_id: pt:dict[pt:str, pt:int]
+  end: {}
 ...
 ---
 initiation: [initialize]
 reply:
   initialize: [apply]
-  apply: [apply]
-termination: [apply]
+  apply: [apply, end]
+  end: []
+termination: [end]
 roles: {skill, decision_maker}
 end_states: [successful]
 keep_terminal_state_dialogues: false

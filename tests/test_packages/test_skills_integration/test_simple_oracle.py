@@ -51,14 +51,16 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         default_routing = {
             "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
             "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
-            "fetchai/http:latest": "fetchai/http_client:latest",
+            "fetchai/http:0.9.0": "fetchai/http_client:0.14.0",
+            "fetchai/prometheus:0.1.0": "fetchai/prometheus:0.1.0",
         }
 
         # add packages for oracle agent
         self.set_agent_context(oracle_agent_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
         self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("connection", "fetchai/http_client:latest")
+        self.add_item("connection", "fetchai/http_client:0.14.0")
+        self.add_item("connection", "fetchai/prometheus:0.1.0")
         self.remove_item("connection", "fetchai/stub:0.12.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
         self.set_config("agent.default_ledger", ETHEREUM)
