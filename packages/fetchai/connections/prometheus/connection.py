@@ -44,6 +44,7 @@ PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.1.0")
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 9090
 VALID_UPDATE_FUNCS = {"inc", "dec", "add", "sub", "set", "observe"}
+VALID_METRIC_TYPES = {"Counter", "Gauge", "Histogram", "Summary"}
 
 
 class PrometheusDialogues(BasePrometheusDialogues):
@@ -206,7 +207,7 @@ class PrometheusChannel:
             response_msg = "Metric already exists."
         else:
             metric_type = getattr(aioprometheus, message.type, None)
-            if metric_type is None:
+            if metric_type is None or message.type not in VALID_METRIC_TYPES:
                 response_code = 404
                 response_msg = f"{message.type} is not a recognized prometheus metric."
             else:
