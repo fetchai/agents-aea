@@ -178,7 +178,9 @@ class TestFetchFromRemoteRegistry(AEATestCaseMany):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_fetch_agent_from_remote_registry_positive(self):
         """Test fetch agent from Registry for positive result."""
-        self.run_cli_command("fetch", str(MY_FIRST_AEA_PUBLIC_ID), "--remote")
+        self.run_cli_command(
+            "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest()), "--remote"
+        )
         assert "my_first_aea" in os.listdir(self.t)
 
 
@@ -220,7 +222,12 @@ class TestFetchAgentMixed(BaseAEATestCase):
         "aea.cli.add.find_item_locally_or_distributed",
         side_effect=click.ClickException(""),
     )
-    def test_fetch_mixed(self, mock_fetch_package, _mock_fetch_locally) -> None:
+    @mock.patch(
+        "aea.cli.fetch.fetch_agent_locally", side_effect=click.ClickException(""),
+    )
+    def test_fetch_mixed(
+        self, mock_fetch_package, _mock_fetch_locally, _mock_fetch_agent_locally
+    ) -> None:
         """Test fetch in mixed mode."""
         self.run_cli_command(
             "-v", "DEBUG", "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest())

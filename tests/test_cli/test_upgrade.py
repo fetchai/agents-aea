@@ -302,20 +302,24 @@ class TestUpgradeSharedDependencies(AEATestCaseEmpty):
 
     @classmethod
     def setup_class(cls):
-        """Set the test up."""
+        """
+        Set the test up.
+
+        Skip consistency checks to avoid aea version compatibility checks.
+        """
         super().setup_class()
         result = cls.run_cli_command(
-            "add", "connection", str(cls.OLD_SOEF_ID), cwd=cls._get_cwd()
+            "-s", "add", "connection", str(cls.OLD_SOEF_ID), cwd=cls._get_cwd()
         )
         assert result.exit_code == 0
         result = cls.run_cli_command(
-            "add", "connection", str(cls.OLD_OEF_ID), cwd=cls._get_cwd()
+            "-s", "add", "connection", str(cls.OLD_OEF_ID), cwd=cls._get_cwd()
         )
         assert result.exit_code == 0
 
     def test_upgrade_shared_dependencies(self):
         """Test upgrade shared dependencies."""
-        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        result = self.run_cli_command("-s", "upgrade", cwd=self._get_cwd())
         assert result.exit_code == 0
 
         agent_config: AgentConfig = cast(
@@ -342,7 +346,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.16.0",
+            "fetchai/generic_buyer:0.17.0",
             "--alias",
             cls.agent_name,
         )
@@ -423,7 +427,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.16.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.17.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -830,8 +834,8 @@ class TestUpdateReferences(AEATestCaseEmpty):
 
     How the test works:
     - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
-    - add fetchai/stub:0.12.0
-    - add 'fetchai/default:0.7.0: fetchai/stub:0.12.0' to default routing
+    - add fetchai/stub:0.13.0
+    - add 'fetchai/default:0.7.0: fetchai/stub:0.13.0' to default routing
     - add custom configuration to stub connection.
     - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
     """
@@ -840,7 +844,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
 
     OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.7.0")
     OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.7.0")
-    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.12.0")
+    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.13.0")
 
     @classmethod
     def setup_class(cls):
@@ -906,7 +910,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_connection",
             cwd=self._get_cwd(),
         )
-        assert result.stdout == "fetchai/stub:0.12.0\n"
+        assert result.stdout == "fetchai/stub:0.13.0\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""

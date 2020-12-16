@@ -67,7 +67,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.13.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.14.0")
 
 NOT_SPECIFIED = object()
 
