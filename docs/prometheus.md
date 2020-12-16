@@ -157,7 +157,7 @@ def setup(self) -> None:
         for metric in prom_dialogues.metrics:
             self.context.logger.info("Adding Prometheus metric: " + metric["name"])
             self.add_prometheus_metric(
-                metric["name"], metric["type"], metric["description"], metric["labels"]
+                metric["name"], metric["type"], metric["description"], dict(metric["labels"]),
 ```
 
 Then call the `update_prometheus_metric` function from the appropriate places.

@@ -168,7 +168,7 @@ class CoinPriceBehaviour(TickerBehaviour):
                     metric["name"],
                     metric["type"],
                     metric["description"],
-                    metric["labels"],
+                    dict(metric["labels"]),
                 )
 
     def act(self) -> None:
