@@ -6,14 +6,14 @@ description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
-  README.md: QmUaYoEziWM3BqytUvyvswQ88RmJ2hysXv1FJ9gpNTdmAV
+  README.md: QmTCoPbdFEFX2jNoaMtgyKemULdMfHLuzwjxvTQJp2X6HA
   __init__.py: QmR6pcWX14FsQip4eYJRNeiQdrNMPj6y4m6Tsgd6hd7yU6
   custom_types.py: Qmf72KRbkNsxxAHwMtkmJc5TRL23fU7AuzJAdSTftckwJQ
-  dialogues.py: QmUA4wAouqs1wWM4cbHZDpkKR5gsKKEZJCmPz3YEEzTcM1
-  fipa.proto: QmNjrwZxui2r8tu5wURx3joZa6WAQibB4gZmPQfGeXEcE2
-  fipa_pb2.py: QmaAWiowBrpxVQbw3kFtqK5puqqNfxq3VvnFtdWQZBJuaH
-  message.py: QmYShZPpP6egeb31oSZHwray1DW3JQMsFrEPkFLhNkcUBK
-  serialization.py: QmaFFxUczHpcoPosV3aKfUAwnr9347Cjnotqby4GMdiM2S
+  dialogues.py: QmUGcpRpjx44DCXqi7RmD9YB7R7AoCHqeGjgTqyJRWvqBi
+  fipa.proto: QmZZV4YhcQXMSqWFsiyqb9b6c67NFmrsB4sbDre49GRHNp
+  fipa_pb2.py: QmUdsdHFuXFqNbm373dugcEZ6WcNiAZRNkNLN81yuvfjh9
+  message.py: QmdC6HBcvi64a8vKSHsQm9xHWcJgWR1fa5swL6xkBdt2Qr
+  serialization.py: QmaYjDAEyCe3jLktynmBqwaSquSz4YVj1rVpXuhZGK56Yi
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

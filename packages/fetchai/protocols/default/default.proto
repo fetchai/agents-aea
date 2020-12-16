@@ -28,9 +28,12 @@ message DefaultMessage{
         map<string, bytes> error_data = 3;
     }
 
+    message End_Performative{}
+
 
     oneof performative{
         Bytes_Performative bytes = 5;
-        Error_Performative error = 6;
+        End_Performative end = 6;
+        Error_Performative error = 7;
     }
 }

@@ -53,6 +53,7 @@ class FipaMessage(Message):
         ACCEPT_W_INFORM = "accept_w_inform"
         CFP = "cfp"
         DECLINE = "decline"
+        END = "end"
         INFORM = "inform"
         MATCH_ACCEPT = "match_accept"
         MATCH_ACCEPT_W_INFORM = "match_accept_w_inform"
@@ -67,6 +68,7 @@ class FipaMessage(Message):
         "accept_w_inform",
         "cfp",
         "decline",
+        "end",
         "inform",
         "match_accept",
         "match_accept_w_inform",
@@ -286,6 +288,8 @@ class FipaMessage(Message):
             elif self.performative == FipaMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
             elif self.performative == FipaMessage.Performative.MATCH_ACCEPT:
+                expected_nb_of_contents = 0
+            elif self.performative == FipaMessage.Performative.END:
                 expected_nb_of_contents = 0
 
             # Check correct content count

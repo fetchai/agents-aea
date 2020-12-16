@@ -45,13 +45,14 @@ class DefaultMessage(Message):
         """Performatives for the default protocol."""
 
         BYTES = "bytes"
+        END = "end"
         ERROR = "error"
 
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
 
-    _performatives = {"bytes", "error"}
+    _performatives = {"bytes", "end", "error"}
     __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
@@ -230,6 +231,8 @@ class DefaultMessage(Message):
                             type(value_of_error_data)
                         ),
                     )
+            elif self.performative == DefaultMessage.Performative.END:
+                expected_nb_of_contents = 0
 
             # Check correct content count
             enforce(

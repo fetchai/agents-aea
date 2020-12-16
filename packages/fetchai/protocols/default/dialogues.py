@@ -41,12 +41,17 @@ class DefaultDialogue(Dialogue):
         {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
     )
     TERMINAL_PERFORMATIVES = frozenset(
-        {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
+        {DefaultMessage.Performative.END, DefaultMessage.Performative.ERROR}
     )
     VALID_REPLIES = {
         DefaultMessage.Performative.BYTES: frozenset(
-            {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
+            {
+                DefaultMessage.Performative.BYTES,
+                DefaultMessage.Performative.ERROR,
+                DefaultMessage.Performative.END,
+            }
         ),
+        DefaultMessage.Performative.END: frozenset(),
         DefaultMessage.Performative.ERROR: frozenset(),
     }
 

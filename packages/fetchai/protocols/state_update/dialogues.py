@@ -38,11 +38,12 @@ class StateUpdateDialogue(Dialogue):
     """The state_update dialogue class maintains state of a dialogue and manages it."""
 
     INITIAL_PERFORMATIVES = frozenset({StateUpdateMessage.Performative.INITIALIZE})
-    TERMINAL_PERFORMATIVES = frozenset({StateUpdateMessage.Performative.APPLY})
+    TERMINAL_PERFORMATIVES = frozenset({StateUpdateMessage.Performative.END})
     VALID_REPLIES = {
         StateUpdateMessage.Performative.APPLY: frozenset(
-            {StateUpdateMessage.Performative.APPLY}
+            {StateUpdateMessage.Performative.APPLY, StateUpdateMessage.Performative.END}
         ),
+        StateUpdateMessage.Performative.END: frozenset(),
         StateUpdateMessage.Performative.INITIALIZE: frozenset(
             {StateUpdateMessage.Performative.APPLY}
         ),
