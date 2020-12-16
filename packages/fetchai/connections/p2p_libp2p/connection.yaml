@@ -10,24 +10,24 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmWRXWUuSawx6DoLjYTPHFk7peMKfnY6gKTiGzAtrEXRp9
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmfXwePWUCCcYpKNYe9Uz7dfnZUVSLN66aaBHXQ9jWZb3J
+  aea/api.go: QmTMrqwSJhManituQr23P4mwtbW5ssbcwtL46L5a6MDP6L
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
-  aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
+  aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmY8EiWapBspyR3zKGEY3TnQayz7hF7DxZ2d9zozVfFhtA
   connection.py: QmVf4XX25S8FQHcZca6o1xC77Ez9dUNp66K3dGnVB724GC
-  dht/dhtclient/dhtclient.go: QmajtiksLNCp5YthvVdD9QvuLyudYecpv13sioxbnXdmjZ
-  dht/dhtclient/dhtclient_test.go: QmYVnf5j8Jyahi5jZNswkGR2tdnM4D1r5Fjdrz654EcD1F
+  dht/dhtclient/dhtclient.go: QmZCgMowWw4ueCSsyYY12om3RMQA3Ydp98ti65Eqa5ccuz
+  dht/dhtclient/dhtclient_test.go: QmbTvSmNU1uqjLQo9LdD7zWmDcLuzEacDeg7AG4VXhmriV
   dht/dhtclient/options.go: QmWs7fQqHRavjwe1PjihHFi85HeJu9qSEVyMdcRviZzaT2
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
-  dht/dhtnode/message.pb.go: QmfVCzkS2p2DZbtt8gfBqW3G2oXdPShHGkhME9zbVNfW88
-  dht/dhtnode/message.proto: QmVZrdF8RzhoCKcNdNSzHh8vDwDjA9A7adonXFHrDY1Vpg
+  dht/dhtnode/message.pb.go: QmPnnc1KLiqm82H99YbWQbPWHoYbhHDEZvEaMAYWJsRdB2
+  dht/dhtnode/message.proto: QmRvtWkeS9i1szhYWe3StnK1t4zhQjEGJhwZuLPrGbBsfX
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtnode/utils.go: Qmd5f5JCA41kutBE4953JA4XzRuVofYJJ8g4dTsJETtXcd
   dht/dhtpeer/benchmarks_test.go: QmQcy8WN5DY8Nfp5nkDgRaS6NjQbMzc6DSMbdY8QDPx9ao
-  dht/dhtpeer/dhtpeer.go: QmVkVBXrPhWTZ4wEU2jhjpUwsYyJYhbA25CuCpYSY69x6U
-  dht/dhtpeer/dhtpeer_test.go: Qmc3FqVoq8wx8vJ7Q9NEpRbCVCvpAjiwTNwjWMeE91HRGd
+  dht/dhtpeer/dhtpeer.go: QmRkKAj1uJhNQYwAdPH5eKPRykHyhutwwXJ2yZLbn4c7pb
+  dht/dhtpeer/dhtpeer_test.go: QmQvoVABqb3oDsH1uqF22d5Tjb2a8Hyf7U7q8jaYQfrjfa
   dht/dhtpeer/options.go: Qme5L9bRBQZaR5fciPJ1feFwqaQpkdYfW8TaiY1TDXs91H
   dht/dhttests/dhttests.go: QmQJxw2rJCGUFTXKxH3sf3Zaqta7H76EvaB7mWNNfikFkA
   dht/monitoring/file.go: QmZB8pNf7infMXWaC5A46rr3mghNfkuSd8UKH4Ceg8nDSM
@@ -36,7 +36,7 @@ fingerprint:
   go.mod: QmScMYT69B7HbQApxXmZFpSwsKBZVPAJimVFYpTVYTvzbe
   go.sum: QmawFS81vDFYVZUZMKxQjNdKkLxDzfRRfqD1Tcpzze66yd
   libp2p_node.go: QmSMPBU6GMJ7gAHWMsYGVDSUv5sw48x2rvNKydcxVv7MqL
-  utils/utils.go: QmcXJwBg95H627cnzgkqgcEDmBCNum74KVnPEvPkhw4BDm
+  utils/utils.go: QmeVAETLySSzRpkDh8FRGAKBuqeurLTpfufw4CRYL2dW49
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []

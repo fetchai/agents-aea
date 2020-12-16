@@ -43,7 +43,7 @@ const (
 // TestNew dht client peer
 func TestNew(t *testing.T) {
 
-	rxEnvelopesPeer := make(chan *aea.Envelope)
+	rxEnvelopesPeer := make(chan *aea.Envelope, 2)
 	dhtPeer, cleanup, err := dhttests.NewDHTPeerWithDefaults(rxEnvelopesPeer)
 	if err != nil {
 		t.Fatal("Failed to create DHTPeer (required for DHTClient):", err)
@@ -75,7 +75,7 @@ func TestNew(t *testing.T) {
 	}
 	defer dhtClient.Close()
 
-	rxEnvelopesClient := make(chan *aea.Envelope)
+	rxEnvelopesClient := make(chan *aea.Envelope, 2)
 	dhtClient.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxEnvelopesClient <- envel
 		return nil
@@ -86,7 +86,7 @@ func TestNew(t *testing.T) {
 // TestRouteEnvelopeToPeerAgent send envelope from DHTClient agent to DHTPeer agent
 func TestRouteEnvelopeToPeerAgent(t *testing.T) {
 
-	rxEnvelopesPeer := make(chan *aea.Envelope)
+	rxEnvelopesPeer := make(chan *aea.Envelope, 2)
 	dhtPeer, cleanup, err := dhttests.NewDHTPeerWithDefaults(rxEnvelopesPeer)
 	if err != nil {
 		t.Fatal("Failed to create DHTPeer (required for DHTClient):", err)
@@ -118,7 +118,7 @@ func TestRouteEnvelopeToPeerAgent(t *testing.T) {
 	}
 	defer dhtClient.Close()
 
-	rxEnvelopesClient := make(chan *aea.Envelope)
+	rxEnvelopesClient := make(chan *aea.Envelope, 2)
 	dhtClient.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxEnvelopesClient <- envel
 		return nil

@@ -365,6 +365,13 @@ func (aea *AeaApi) listen_for_envelopes() {
 			}
 			return
 		}
+		if envel.Sender != aea.agent_record.Address {
+			logger.Error().
+				Str("err", "Sender ("+envel.Sender+") must match registered address").
+				Msg("while processing envelope")
+			// TODO send error back to agent
+			continue
+		}
 		logger.Debug().Msgf("received envelope from agent")
 		aea.out_queue <- envel
 		if aea.closing {

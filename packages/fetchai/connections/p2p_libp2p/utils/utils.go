@@ -248,7 +248,6 @@ func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 	sigDER[offset] = 0x02
 	sigDER[offset+1] = byte(len(sb))
 	copy(sigDER[offset+2:], sb)
-	println(len(sigDER))
 	return sigDER
 }
 

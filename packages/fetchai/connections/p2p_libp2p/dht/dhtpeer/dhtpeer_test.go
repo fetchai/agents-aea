@@ -148,7 +148,8 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 	})
 
 	err = dhtPeer.RouteEnvelope(&aea.Envelope{
-		To: AgentsTestAddresses[0],
+		To:     AgentsTestAddresses[0],
+		Sender: AgentsTestAddresses[0],
 	})
 	if err != nil {
 		t.Error("Failed to Route envelope to local Agent")
@@ -180,7 +181,7 @@ func TestRoutingDHTPeerToDHTPeerDirect(t *testing.T) {
 	}
 	defer cleanup2()
 
-	rxPeer1 := make(chan *aea.Envelope)
+	rxPeer1 := make(chan *aea.Envelope, 2)
 	dhtPeer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer1 <- envel
 		err := dhtPeer1.RouteEnvelope(&aea.Envelope{
@@ -190,7 +191,7 @@ func TestRoutingDHTPeerToDHTPeerDirect(t *testing.T) {
 		return err
 	})
 
-	rxPeer2 := make(chan *aea.Envelope)
+	rxPeer2 := make(chan *aea.Envelope, 2)
 	dhtPeer2.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer2 <- envel
 		return nil
@@ -239,7 +240,7 @@ func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
 	}
 	defer cleanup2()
 
-	rxPeer1 := make(chan *aea.Envelope)
+	rxPeer1 := make(chan *aea.Envelope, 2)
 	dhtPeer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer1 <- envel
 		err := dhtPeer1.RouteEnvelope(&aea.Envelope{
@@ -249,7 +250,7 @@ func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
 		return err
 	})
 
-	rxPeer2 := make(chan *aea.Envelope)
+	rxPeer2 := make(chan *aea.Envelope, 2)
 	dhtPeer2.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer2 <- envel
 		return nil
@@ -272,7 +273,7 @@ func TestRoutingDHTPeerToDHTPeerIndirect(t *testing.T) {
 // TestRoutingDHTPeerToDHTPeerIndirectTwoHops two dht peers connected to different peers
 func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 	entryPeer1, cleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], "", DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -308,7 +309,7 @@ func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 	}
 	defer cleanup2()
 
-	rxPeer1 := make(chan *aea.Envelope)
+	rxPeer1 := make(chan *aea.Envelope, 2)
 	dhtPeer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer1 <- envel
 		err := dhtPeer1.RouteEnvelope(&aea.Envelope{
@@ -318,7 +319,7 @@ func TestRoutingDHTPeerToDHTPeerIndirectTwoHops(t *testing.T) {
 		return err
 	})
 
-	rxPeer2 := make(chan *aea.Envelope)
+	rxPeer2 := make(chan *aea.Envelope, 2)
 	dhtPeer2.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer2 <- envel
 		return nil
@@ -359,7 +360,7 @@ func TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
 			t.Fatal("Failed to initialize DHTPeer", i, ":", err)
 		}
 
-		rx := make(chan *aea.Envelope)
+		rx := make(chan *aea.Envelope, 2)
 		peer.ProcessEnvelope(func(envel *aea.Envelope) error {
 			rx <- envel
 			if string(envel.Message) == "ping" {
@@ -429,7 +430,7 @@ func TestRoutingDHTClientToDHTPeerX(t *testing.T) {
 	}
 	defer clientCleanup()
 
-	rxPeer := make(chan *aea.Envelope)
+	rxPeer := make(chan *aea.Envelope, 2)
 	peer.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer <- envel
 		return peer.RouteEnvelope(&aea.Envelope{
@@ -438,7 +439,7 @@ func TestRoutingDHTClientToDHTPeerX(t *testing.T) {
 		})
 	})
 
-	rxClient := make(chan *aea.Envelope)
+	rxClient := make(chan *aea.Envelope, 2)
 	client.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClient <- envel
 		return nil
@@ -487,7 +488,7 @@ func TestRoutingDHTClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer clientCleanup()
 
-	rxPeer := make(chan *aea.Envelope)
+	rxPeer := make(chan *aea.Envelope, 2)
 	peer.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer <- envel
 		return peer.RouteEnvelope(&aea.Envelope{
@@ -496,7 +497,7 @@ func TestRoutingDHTClientToDHTPeerIndirect(t *testing.T) {
 		})
 	})
 
-	rxClient := make(chan *aea.Envelope)
+	rxClient := make(chan *aea.Envelope, 2)
 	client.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClient <- envel
 		return nil
@@ -544,7 +545,7 @@ func TestRoutingDHTClientToDHTClient(t *testing.T) {
 	}
 	defer clientCleanup2()
 
-	rxClient1 := make(chan *aea.Envelope)
+	rxClient1 := make(chan *aea.Envelope, 2)
 	client1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClient1 <- envel
 		return client1.RouteEnvelope(&aea.Envelope{
@@ -553,7 +554,7 @@ func TestRoutingDHTClientToDHTClient(t *testing.T) {
 		})
 	})
 
-	rxClient2 := make(chan *aea.Envelope)
+	rxClient2 := make(chan *aea.Envelope, 2)
 	client2.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClient2 <- envel
 		return nil
@@ -576,7 +577,7 @@ func TestRoutingDHTClientToDHTClient(t *testing.T) {
 // TestRoutingDHTClientToDHTClientIndirect dht client to dht client connected to a different peer
 func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 	peer1, peerCleanup1, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], "", DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -609,7 +610,7 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 	}
 	defer clientCleanup2()
 
-	rxClient1 := make(chan *aea.Envelope)
+	rxClient1 := make(chan *aea.Envelope, 2)
 	client1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClient1 <- envel
 		return client1.RouteEnvelope(&aea.Envelope{
@@ -618,7 +619,7 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 		})
 	})
 
-	rxClient2 := make(chan *aea.Envelope)
+	rxClient2 := make(chan *aea.Envelope, 2)
 	client2.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClient2 <- envel
 		return nil
@@ -661,7 +662,7 @@ func TestRoutingDelegateClientToDHTPeerX(t *testing.T) {
 	}
 	defer clientCleanup()
 
-	rxPeer := make(chan *aea.Envelope)
+	rxPeer := make(chan *aea.Envelope, 2)
 	peer.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer <- envel
 		return nil
@@ -715,7 +716,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer clientCleanup()
 
-	rxPeer1 := make(chan *aea.Envelope)
+	rxPeer1 := make(chan *aea.Envelope, 2)
 	peer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer1 <- envel
 		return nil
@@ -780,7 +781,7 @@ func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 	}
 	defer clientCleanup()
 
-	rxPeer1 := make(chan *aea.Envelope)
+	rxPeer1 := make(chan *aea.Envelope, 2)
 	peer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer1 <- envel
 		return nil
@@ -857,7 +858,7 @@ func TestRoutingDelegateClientToDelegateClient(t *testing.T) {
 // TestRoutingDelegateClientToDelegateClientIndirect
 func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 	peer1, peer1Cleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], "", DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -912,7 +913,7 @@ func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 // TestRoutingDelegateClientToDHTClientDirect
 func TestRoutingDelegateClientToDHTClientDirect(t *testing.T) {
 	peer, peerCleanup, err := SetupLocalDHTPeer(
-		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
+		FetchAITestKeys[0], "", DefaultLocalPort, DefaultDelegatePort,
 		[]string{},
 	)
 	if err != nil {
@@ -934,7 +935,7 @@ func TestRoutingDelegateClientToDHTClientDirect(t *testing.T) {
 	}
 	defer delegateClientCleanup()
 
-	rxClientDHT := make(chan *aea.Envelope)
+	rxClientDHT := make(chan *aea.Envelope, 2)
 	dhtClient.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClientDHT <- envel
 		return dhtClient.RouteEnvelope(&aea.Envelope{
@@ -992,7 +993,7 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 	}
 	defer delegateClientCleanup()
 
-	rxClientDHT := make(chan *aea.Envelope)
+	rxClientDHT := make(chan *aea.Envelope, 2)
 	dhtClient.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClientDHT <- envel
 		return dhtClient.RouteEnvelope(&aea.Envelope{
@@ -1048,7 +1049,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer dhtPeerCleanup1()
 
-	rxPeerDHT1 := make(chan *aea.Envelope)
+	rxPeerDHT1 := make(chan *aea.Envelope, 100)
 	dhtPeer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeerDHT1 <- envel
 		if string(envel.Message) == "ping" {
@@ -1076,7 +1077,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer dhtPeerCleanup2()
 
-	rxPeerDHT2 := make(chan *aea.Envelope)
+	rxPeerDHT2 := make(chan *aea.Envelope, 100)
 	dhtPeer2.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeerDHT2 <- envel
 		if string(envel.Message) == "ping" {
@@ -1104,7 +1105,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer dhtPeerCleanup3()
 
-	rxPeerDHT3 := make(chan *aea.Envelope)
+	rxPeerDHT3 := make(chan *aea.Envelope, 100)
 	dhtPeer3.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeerDHT3 <- envel
 		if string(envel.Message) == "ping" {
@@ -1132,7 +1133,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer dhtPeerCleanup4()
 
-	rxPeerDHT4 := make(chan *aea.Envelope)
+	rxPeerDHT4 := make(chan *aea.Envelope, 100)
 	dhtPeer4.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeerDHT4 <- envel
 		if string(envel.Message) == "ping" {
@@ -1161,7 +1162,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer dhtClientCleanup1()
 
-	rxClientDHT1 := make(chan *aea.Envelope)
+	rxClientDHT1 := make(chan *aea.Envelope, 100)
 	dhtClient1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClientDHT1 <- envel
 		if string(envel.Message) == "ping" {
@@ -1188,7 +1189,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer dhtClientCleanup2()
 
-	rxClientDHT2 := make(chan *aea.Envelope)
+	rxClientDHT2 := make(chan *aea.Envelope, 100)
 	dhtClient2.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClientDHT2 <- envel
 		if string(envel.Message) == "ping" {
@@ -1215,7 +1216,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer dhtClientCleanup3()
 
-	rxClientDHT3 := make(chan *aea.Envelope)
+	rxClientDHT3 := make(chan *aea.Envelope, 100)
 	dhtClient3.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClientDHT3 <- envel
 		if string(envel.Message) == "ping" {
@@ -1244,7 +1245,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer delegateClientCleanup1()
 
-	rxClientDelegate1 := make(chan *aea.Envelope)
+	rxClientDelegate1 := make(chan *aea.Envelope, 100)
 	delegateClient1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClientDelegate1 <- envel
 		if string(envel.Message) == "ping" {
@@ -1271,7 +1272,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer delegateClientCleanup2()
 
-	rxClientDelegate2 := make(chan *aea.Envelope)
+	rxClientDelegate2 := make(chan *aea.Envelope, 100)
 	delegateClient2.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClientDelegate2 <- envel
 		if string(envel.Message) == "ping" {
@@ -1298,7 +1299,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	}
 	defer delegateClientCleanup3()
 
-	rxClientDelegate3 := make(chan *aea.Envelope)
+	rxClientDelegate3 := make(chan *aea.Envelope, 100)
 	delegateClient3.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxClientDelegate3 <- envel
 		if string(envel.Message) == "ping" {
@@ -1477,7 +1478,7 @@ func SetupDHTClient(key string, agentKey string, entry []string) (*dhtclient.DHT
 
 	dhtClient, err := dhtclient.New(opts...)
 	if err != nil {
-		println(err)
+		println("dhtclient.New:", err.Error())
 		return nil, nil, err
 	}
 
@@ -1532,7 +1533,7 @@ func SetupDelegateClient(key string, host string, port uint16, peerPubKey string
 	}
 	client.PoR = signature
 
-	client.Rx = make(chan *aea.Envelope)
+	client.Rx = make(chan *aea.Envelope, 2)
 	client.Conn, err = net.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10))
 	if err != nil {
 		return nil, nil, err
