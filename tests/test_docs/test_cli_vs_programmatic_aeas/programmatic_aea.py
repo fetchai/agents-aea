@@ -16,7 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This scripts contains code from cli-vs-programmatic-aeas.md file."""
+
 import logging
 import os
 import sys
@@ -33,6 +35,7 @@ from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
+import packages.fetchai.connections.p2p_libp2p.connection
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
 from packages.fetchai.connections.soef.connection import SOEFConnection
@@ -137,7 +140,11 @@ def run():
         local_uri="127.0.0.1:9001",
         log_file="libp2p_node.log",
         public_uri="127.0.0.1:9001",
-        build_directory=".",
+        build_directory=os.getcwd(),
+        build_entrypoint="check_dependencies.py",
+    )
+    configuration.directory = os.path.dirname(
+        packages.fetchai.connections.p2p_libp2p.connection.__file__
     )
 
     AEABuilder.run_build_for_component_configuration(configuration)

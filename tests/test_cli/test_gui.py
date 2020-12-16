@@ -74,7 +74,7 @@ class TestGui:
             encoding="utf-8",
             logfile=sys.stdout,
         )
-        self.proc.expect_exact(["Running on http://"], timeout=20)
+        self.proc.expect_exact(["Running on http://"], timeout=40)
 
         assert tcpping("127.0.0.1", 8080)
 

@@ -20,6 +20,7 @@
 """Check that the dependencies 'gcc' and 'go' are installed in the system."""
 import asyncio
 import os
+import platform
 import re
 import shutil
 import subprocess  # nosec
@@ -160,12 +161,20 @@ def check_versions():
         re.compile(r"go version go([0-9]+)\.([0-9]+)"),
         MINIMUM_GO_VERSION,
     )
-    check_binary(
-        "gcc",
-        ["--version"],
-        re.compile(r"gcc.* ([0-9]+)\.([0-9]+)\.([0-9]+)"),
-        MINIMUM_GCC_VERSION,
-    )
+    if platform.system() == "Darwin":
+        check_binary(
+            "gcc",
+            ["--version"],
+            re.compile(r"clang version.* ([0-9]+)\.([0-9]+)\.([0-9]+) "),
+            MINIMUM_GCC_VERSION,
+        )
+    else:
+        check_binary(
+            "gcc",
+            ["--version"],
+            re.compile(r"gcc.* ([0-9]+)\.([0-9]+)\.([0-9]+)"),
+            MINIMUM_GCC_VERSION,
+        )
 
 
 def main():  # pragma: nocover
