@@ -21,7 +21,7 @@
 
 import asyncio
 import logging
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union, cast
 
 import aioprometheus  # type: ignore
 
@@ -38,8 +38,6 @@ from packages.fetchai.protocols.prometheus.dialogues import (
 )
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 
-
-_default_logger = logging.getLogger("aea.packages.fetchai.connections.prometheus")
 
 PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.1.0")
 
@@ -80,7 +78,13 @@ class PrometheusDialogues(BasePrometheusDialogues):
 class PrometheusChannel:
     """A wrapper for interacting with a prometheus server."""
 
-    def __init__(self, address: Address, host: str, port: int):
+    def __init__(
+        self,
+        address: Address,
+        host: str,
+        port: int,
+        logger: Union[logging.Logger, logging.LoggerAdapter],
+    ):
         """
         Initialize a prometheus channel.
 
@@ -89,10 +93,10 @@ class PrometheusChannel:
         :param port: The port at which to expose the metrics.
         """
         self.address = address
-        self.metrics = {}
+        self.metrics = {}  # type: Dict[str, aioprometheus.Collector]
+        self.logger = logger
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._queue: Optional[asyncio.Queue] = None
-        self.logger: Union[logging.Logger, logging.LoggerAdapter] = _default_logger
         self._dialogues = PrometheusDialogues()
         self._host = host
         self._port = port
@@ -140,7 +144,9 @@ class PrometheusChannel:
         sender = envelope.sender
         self.logger.debug("Processing message from {}: {}".format(sender, envelope))
         if envelope.protocol_id != PrometheusMessage.protocol_id:
-            raise ValueError("This protocol is not valid for prometheus.")
+            raise ValueError(
+                f"Protocol {envelope.protocol_id} is not valid for prometheus."
+            )
         await self._handle_prometheus_message(envelope)
 
     async def _handle_prometheus_message(self, envelope: Envelope) -> None:
@@ -235,12 +241,16 @@ class PrometheusChannel:
                 )
             else:
                 # Update the metric ("inc" and "dec" do not take "value" argument)
-                if message.callable in {"inc", "dec"}:
-                    update_func(message.labels)
-                else:
-                    update_func(message.labels, message.value)
-                response_code = 200
-                response_msg = f"Metric {metric} successfully updated."
+                try:
+                    if message.callable in {"inc", "dec"}:
+                        update_func(message.labels)
+                    else:
+                        update_func(message.labels, message.value)
+                    response_code = 200
+                    response_msg = f"Metric {metric} successfully updated."
+                except TypeError as e:
+                    response_code = 400
+                    response_msg = f"Failed to update metric {metric} with update function {message.callable}: {e}."
 
         return response_code, response_msg
 
@@ -284,9 +294,8 @@ class PrometheusConnection(Connection):
         self.host = cast(int, self.configuration.config.get("host", DEFAULT_HOST))
         self.port = cast(int, self.configuration.config.get("port", DEFAULT_PORT))
         self.channel = PrometheusChannel(
-            self.address, self.host, self.port
+            self.address, self.host, self.port, self.logger
         )
-        self._connection = None  # type: Optional[asyncio.Queue]
 
     async def connect(self) -> None:
         """

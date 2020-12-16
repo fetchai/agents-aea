@@ -185,13 +185,24 @@ class TestPrometheusConnection:
         assert msg.code == 404
         assert msg.message == "Metric cool_metric not found."
 
-        # test update metric (bad update function)
+        # test update metric (bad update function: not found in attr)
         await self.send_update_metric("some_metric", "go")
         envelope = await self.prometheus_con.receive()
         msg = cast(PrometheusMessage, envelope.message)
         assert msg.performative == PrometheusMessage.Performative.RESPONSE
         assert msg.code == 400
         assert msg.message == "Update function go not found for metric some_metric."
+
+        # test update metric (bad update function: found in getattr, not a method)
+        await self.send_update_metric("some_metric", "name")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 400
+        assert (
+            msg.message
+            == "Failed to update metric some_metric with update function name: 'str' object is not callable."
+        )
 
         # Test that invalid message is rejected.
         with pytest.raises(AEAEnforceError):
