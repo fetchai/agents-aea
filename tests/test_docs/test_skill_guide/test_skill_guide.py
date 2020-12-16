@@ -174,11 +174,10 @@ class TestBuildSkill(AEATestCaseMany):
 
         # run agents
         self.set_agent_context(simple_service_registration_aea)
+        self.run_cli_command("build", cwd=self._get_cwd())
         simple_service_registration_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -197,11 +196,10 @@ class TestBuildSkill(AEATestCaseMany):
         )
 
         self.set_agent_context(search_aea)
+        self.run_cli_command("build", cwd=self._get_cwd())
         search_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

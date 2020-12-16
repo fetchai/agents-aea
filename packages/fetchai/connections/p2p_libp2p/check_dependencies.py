@@ -136,7 +136,7 @@ def check_binary(
     version_match = version_regex.search(stdout)
     if version_match is None:
         print(
-            f"Warning: cannot parse '{binary_name}' version from command: {version_getter_command}."
+            f"Warning: cannot parse '{binary_name}' version from command: {version_getter_command}. stdout: {stdout}"
         )
         return
     actual_version: VERSION = get_version(*map(int, version_match.groups(default="0")))

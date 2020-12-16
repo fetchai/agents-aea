@@ -122,6 +122,12 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             "2",
             cwd=search_agent_name,
         )
+        self.run_cli_command(
+            "build", cwd=registration_agent_name,
+        )
+        self.run_cli_command(
+            "build", cwd=search_agent_name,
+        )
 
         proc = PexpectWrapper(  # nosec
             [

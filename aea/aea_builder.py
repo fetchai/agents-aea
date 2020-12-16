@@ -906,43 +906,66 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     def call_all_build_entrypoints(self):
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
-            if not config.build_entrypoint:
-                continue
-            self.logger.info(f"Building package {config.component_id}...")
-            source_directory = cast(str, config.directory)
-            target_directory = os.path.abspath(config.build_directory)
-            enforce(config.build_directory, f"{config}.build_directory is not set!")
-            build_entrypoint = cast(str, config.build_entrypoint)
-            self._run_build_entrypoint(
-                build_entrypoint, source_directory, target_directory
-            )
+            self.run_build_for_component_configuration(config, logger=self.logger)
+
         if self._build_entrypoint:
             self.logger.info("Building AEA package...")
             source_directory = "."
             target_directory = os.path.abspath(self.AEA_CLASS.get_build_dir())
             build_entrypoint = cast(str, self._build_entrypoint)
             self._run_build_entrypoint(
-                build_entrypoint, source_directory, target_directory
+                build_entrypoint, source_directory, target_directory, logger=self.logger
             )
 
+    @classmethod
+    def run_build_for_component_configuration(
+        cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None
+    ) -> None:
+        """Run a build entrypoint script for component configuration."""
+        if not config.build_entrypoint:
+            return
+
+        enforce(bool(config.build_directory), f"{config}.build_directory is not set!")
+
+        if not config.build_directory:  # pragma: nocover
+            return
+
+        if logger:
+            logger.info(f"Building package {config.component_id}...")
+
+        source_directory = cast(str, config.directory)
+        target_directory = os.path.abspath(config.build_directory)
+        build_entrypoint = cast(str, config.build_entrypoint)
+        cls._run_build_entrypoint(
+            build_entrypoint, source_directory, target_directory, logger=logger
+        )
+
+    @classmethod
     def _run_build_entrypoint(
-        self, build_entrypoint: str, source_directory: str, target_directory: str
+        cls,
+        build_entrypoint: str,
+        source_directory: str,
+        target_directory: str,
+        logger: Optional[logging.Logger] = None,
     ) -> None:
         """
         Run a build entrypoint script.
 
         :param build_entrypoint: the path to the build script relative to directory.
         :param directory: the directory root for the entrypoint path.
+        :param logger: logger
+
         :return: None
         """
-        self._check_valid_entrypoint(build_entrypoint, source_directory)
+        cls._check_valid_entrypoint(build_entrypoint, source_directory)
 
         command = [sys.executable, build_entrypoint, target_directory]
         command_str = " ".join(command)
-        self.logger.info(f"Running command '{command_str}'")
+        if logger:
+            logger.info(f"Running command '{command_str}'")
         try:
             check_call(
-                command, cwd=source_directory, timeout=self.BUILD_TIMEOUT
+                command, cwd=source_directory, timeout=cls.BUILD_TIMEOUT
             )  # nosec
         except Exception as e:
             raise AEAException(

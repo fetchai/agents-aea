@@ -16,15 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This scripts contains code from cli-vs-programmatic-aeas.md file."""
-
 import logging
 import os
 import sys
 from typing import cast
 
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
@@ -138,7 +137,11 @@ def run():
         local_uri="127.0.0.1:9001",
         log_file="libp2p_node.log",
         public_uri="127.0.0.1:9001",
+        build_directory=".",
     )
+
+    AEABuilder.run_build_for_component_configuration(configuration)
+
     p2p_connection = P2PLibp2pConnection(
         configuration=configuration,
         identity=identity,

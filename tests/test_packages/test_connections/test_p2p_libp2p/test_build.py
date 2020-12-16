@@ -78,7 +78,7 @@ def test_check_versions_negative_cannot_parse_version():
         "Warning: cannot parse 'go' version from command: ['go', 'version']." in stdout
     )
     assert (
-        "Warning: cannot parse 'gcc' version from command: ['gcc', '--version'].\n"
+        "Warning: cannot parse 'gcc' version from command: ['gcc', '--version']."
         in stdout
     )
 

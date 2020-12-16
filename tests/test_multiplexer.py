@@ -773,7 +773,7 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Creating pipes"], timeout=50,
+            ["Starting libp2p node..."], timeout=50,
         )
         self.proc.control_c()
         self.proc.expect_all(
