@@ -16,7 +16,7 @@ This class represents an instance of RawTransaction.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: Any)
+ | __init__(ledger_id: str, body: JSONLike)
 ```
 
 Initialise an instance of RawTransaction.
@@ -220,7 +220,7 @@ This class represents an instance of SignedTransaction.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: Any)
+ | __init__(ledger_id: str, body: JSONLike)
 ```
 
 Initialise an instance of SignedTransaction.
@@ -424,7 +424,7 @@ This class represents an instance of State.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: bytes)
+ | __init__(ledger_id: str, body: JSONLike)
 ```
 
 Initialise an instance of State.
@@ -444,7 +444,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | body()
+ | body() -> JSONLike
 ```
 
 Get the body.
@@ -803,10 +803,20 @@ Get fee by currency.
 
 ```python
  | @property
- | kwargs() -> Dict[str, Any]
+ | kwargs() -> JSONLike
 ```
 
 Get the kwargs.
+
+<a name="aea.helpers.transaction.base.Terms.is_strict"></a>
+#### is`_`strict
+
+```python
+ | @property
+ | is_strict() -> bool
+```
+
+Get is_strict.
 
 <a name="aea.helpers.transaction.base.Terms.get_hash"></a>
 #### get`_`hash
@@ -905,7 +915,7 @@ This class represents an instance of TransactionDigest.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: Any)
+ | __init__(ledger_id: str, body: str)
 ```
 
 Initialise an instance of TransactionDigest.
@@ -925,7 +935,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | body() -> Any
+ | body() -> str
 ```
 
 Get the receipt.
@@ -1002,7 +1012,7 @@ This class represents an instance of TransactionReceipt.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, receipt: Any, transaction: Any)
+ | __init__(ledger_id: str, receipt: JSONLike, transaction: JSONLike)
 ```
 
 Initialise an instance of TransactionReceipt.
@@ -1022,7 +1032,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | receipt() -> Any
+ | receipt() -> JSONLike
 ```
 
 Get the receipt.
@@ -1032,7 +1042,7 @@ Get the receipt.
 
 ```python
  | @property
- | transaction() -> Any
+ | transaction() -> JSONLike
 ```
 
 Get the transaction.

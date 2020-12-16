@@ -305,6 +305,24 @@ Set decision maker handler class.
 
 self
 
+<a name="aea.aea_builder.AEABuilder.set_error_handler"></a>
+#### set`_`error`_`handler
+
+```python
+ | set_error_handler(error_handler_dotted_path: str, file_path: Path) -> "AEABuilder"
+```
+
+Set error handler class.
+
+**Arguments**:
+
+- `error_handler_dotted_path`: the dotted path to the error handler
+- `file_path`: the file path to the file which contains the error handler
+
+**Returns**:
+
+self
+
 <a name="aea.aea_builder.AEABuilder.set_skill_exception_policy"></a>
 #### set`_`skill`_`exception`_`policy
 
@@ -387,6 +405,21 @@ Set the runtime mode.
 **Arguments**:
 
 - `runtime_mode`: the agent runtime mode
+
+**Returns**:
+
+self
+
+<a name="aea.aea_builder.AEABuilder.set_storage_uri"></a>
+#### set`_`storage`_`uri
+
+```python
+ | set_storage_uri(storage_uri: Optional[str]) -> "AEABuilder"
+```
+
+Set the storage uri.
+
+:param storage uri:  storage uri
 
 **Returns**:
 
@@ -513,6 +546,23 @@ Set a default ledger API to use.
 **Arguments**:
 
 - `identifier`: the identifier of the ledger api
+
+**Returns**:
+
+the AEABuilder
+
+<a name="aea.aea_builder.AEABuilder.set_build_entrypoint"></a>
+#### set`_`build`_`entrypoint
+
+```python
+ | set_build_entrypoint(build_entrypoint: Optional[str]) -> "AEABuilder"
+```
+
+Set build entrypoint.
+
+**Arguments**:
+
+- `build_entrypoint`: path to the builder script.
 
 **Returns**:
 
@@ -736,6 +786,25 @@ Remove protocol.
 **Returns**:
 
 the AEABuilder
+
+<a name="aea.aea_builder.AEABuilder.call_all_build_entrypoints"></a>
+#### call`_`all`_`build`_`entrypoints
+
+```python
+ | call_all_build_entrypoints()
+```
+
+Call all the build entrypoints.
+
+<a name="aea.aea_builder.AEABuilder.run_build_for_component_configuration"></a>
+#### run`_`build`_`for`_`component`_`configuration
+
+```python
+ | @classmethod
+ | run_build_for_component_configuration(cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None) -> None
+```
+
+Run a build entrypoint script for component configuration.
 
 <a name="aea.aea_builder.AEABuilder.install_pypi_dependencies"></a>
 #### install`_`pypi`_`dependencies

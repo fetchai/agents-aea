@@ -40,6 +40,16 @@ Init runtime.
 
 None
 
+<a name="aea.runtime.BaseRuntime.storage"></a>
+#### storage
+
+```python
+ | @property
+ | storage() -> Optional[Storage]
+```
+
+Get optional storage.
+
 <a name="aea.runtime.BaseRuntime.loop_mode"></a>
 #### loop`_`mode
 

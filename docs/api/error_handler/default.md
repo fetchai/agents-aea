@@ -1,18 +1,18 @@
-<a name="aea.helpers.temp_error_handler"></a>
-# aea.helpers.temp`_`error`_`handler
+<a name="aea.error_handler.default"></a>
+# aea.error`_`handler.default
 
-Temporary error handler.
+This module contains the default error handler class.
 
-<a name="aea.helpers.temp_error_handler.ErrorHandler"></a>
+<a name="aea.error_handler.default.ErrorHandler"></a>
 ## ErrorHandler Objects
 
 ```python
-class ErrorHandler()
+class ErrorHandler(AbstractErrorHandler)
 ```
 
 Error handler class for handling problematic envelopes.
 
-<a name="aea.helpers.temp_error_handler.ErrorHandler.send_unsupported_protocol"></a>
+<a name="aea.error_handler.default.ErrorHandler.send_unsupported_protocol"></a>
 #### send`_`unsupported`_`protocol
 
 ```python
@@ -30,7 +30,7 @@ Handle the received envelope in case the protocol is not supported.
 
 None
 
-<a name="aea.helpers.temp_error_handler.ErrorHandler.send_decoding_error"></a>
+<a name="aea.error_handler.default.ErrorHandler.send_decoding_error"></a>
 #### send`_`decoding`_`error
 
 ```python
@@ -48,7 +48,7 @@ Handle a decoding error.
 
 None
 
-<a name="aea.helpers.temp_error_handler.ErrorHandler.send_unsupported_skill"></a>
+<a name="aea.error_handler.default.ErrorHandler.send_unsupported_skill"></a>
 #### send`_`unsupported`_`skill
 
 ```python

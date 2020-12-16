@@ -312,3 +312,48 @@ Find the reachable subgraph induced by a set of starting nodes.
 
 the adjacency list of the subgraph.
 
+<a name="aea.helpers.base.cached_property"></a>
+## cached`_`property Objects
+
+```python
+class cached_property()
+```
+
+Cached property from python3.8 functools.
+
+<a name="aea.helpers.base.cached_property.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(func)
+```
+
+Init cached property.
+
+<a name="aea.helpers.base.cached_property.__set_name__"></a>
+#### `__`set`_`name`__`
+
+```python
+ | __set_name__(_, name)
+```
+
+Set name.
+
+<a name="aea.helpers.base.cached_property.__get__"></a>
+#### `__`get`__`
+
+```python
+ | __get__(instance, _=None)
+```
+
+Get instance.
+
+<a name="aea.helpers.base.ensure_dir"></a>
+#### ensure`_`dir
+
+```python
+ensure_dir(dir_path: str) -> None
+```
+
+Check if dir_path is a directory or create it.
+

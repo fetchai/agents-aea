@@ -63,7 +63,7 @@ None
 #### try`_`generate`_`testnet`_`wealth
 
 ```python
-try_generate_testnet_wealth(identifier: str, address: str, _sync: bool = True) -> None
+try_generate_testnet_wealth(identifier: str, address: str, url: Optional[str] = None, _sync: bool = True) -> None
 ```
 
 Try generate wealth on a testnet.
@@ -72,6 +72,7 @@ Try generate wealth on a testnet.
 
 - `identifier`: the identifier of the ledger
 - `address`: the address to check for
+- `url`: the url
 - `_sync`: whether to wait to sync or not; currently unused
 
 **Returns**:

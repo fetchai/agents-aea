@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_ledger_id: str, currency_denominations: Dict[str, str], default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, **kwargs)
+ | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_ledger_id: str, currency_denominations: Dict[str, str], default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, storage_callable: Callable[[], Optional[Storage]] = lambda: None, **kwargs)
 ```
 
 Initialize an agent context.
@@ -35,7 +35,18 @@ Initialize an agent context.
 - `default_routing`: the default routing
 - `search_service_address`: the address of the search service
 - `decision_maker_address`: the address of the decision maker
+- `storage_callable`: function that returns optional storage attached to agent.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
+
+<a name="aea.context.base.AgentContext.storage"></a>
+#### storage
+
+```python
+ | @property
+ | storage() -> Optional[Storage]
+```
+
+Return storage instance if enabled in AEA.
 
 <a name="aea.context.base.AgentContext.shared_state"></a>
 #### shared`_`state

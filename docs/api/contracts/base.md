@@ -105,7 +105,7 @@ the contract object.
 
 ```python
  | @classmethod
- | get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str, **kwargs) -> Dict[str, Any]
+ | get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str, **kwargs) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
@@ -128,7 +128,7 @@ the tx
 
 ```python
  | @classmethod
- | get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
+ | get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -150,7 +150,7 @@ the tx
 
 ```python
  | @classmethod
- | get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
+ | get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Optional[bytes]
 ```
 
 Handler method for the 'GET_RAW_MESSAGE' requests.
@@ -172,7 +172,7 @@ the tx
 
 ```python
  | @classmethod
- | get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
+ | get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_STATE' requests.
