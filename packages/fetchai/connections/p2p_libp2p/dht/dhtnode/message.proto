@@ -14,6 +14,14 @@ message Register {
     AgentRecord record = 1;
 }
 
+message LookupRequest {
+    string agent_address = 1;
+}
+
+message LookupResponse {
+    AgentRecord agent_record = 1;
+}
+
 message Status {
     enum ErrCode {
         // common (0x)
@@ -25,7 +33,8 @@ message Status {
         ERROR_INVALID_AGENT_ADDRESS = 10;
         ERROR_INVALID_PUBLIC_KEY = 11;
         ERROR_INVALID_PROOF = 12;
-        // 
+        // lookup (2x)
+        ERROR_UNKNOWN_AGENT_ADDRESS = 20; 
     }
 
     ErrCode code = 1;
@@ -37,5 +46,7 @@ message AcnMessage {
     oneof payload {
         Status status = 2;
         Register register = 3;
+        LookupRequest lookup_request = 4;
+        LookupResponse lookup_response = 5;
     }
 }

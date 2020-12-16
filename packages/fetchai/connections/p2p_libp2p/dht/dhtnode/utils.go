@@ -26,7 +26,18 @@ import (
 	utils "libp2p_node/utils"
 )
 
-func IsValidProofOfRepresentation(record *AgentRecord, representativePeerPubKey string) (*Status, error) {
+const (
+	CurrentVersion = "0.1.0"
+)
+
+func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, representativePeerPubKey string) (*Status, error) {
+	// check agent address matches
+	if record.Address != agentAddress {
+		err := errors.New("Wrong agent address, expected " + agentAddress)
+		response := &Status{Code: Status_ERROR_INVALID_AGENT_ADDRESS, Msgs: []string{err.Error()}}
+		return response, err
+	}
+
 	// check public key matches
 	if record.PeerPublicKey != representativePeerPubKey {
 		err := errors.New("Wrong peer public key, expected " + representativePeerPubKey)

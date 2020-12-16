@@ -1544,7 +1544,7 @@ func SetupDelegateClient(key string, host string, port uint16, peerPubKey string
 	record.PeerPublicKey = peerPubKey
 	record.Signature = signature
 	registration := &dhtnode.Register{Record: record}
-	msg := &dhtnode.AcnMessage{Version: "0.1.0", Payload: &dhtnode.AcnMessage_Register{Register: registration}}
+	msg := &dhtnode.AcnMessage{Version: dhtnode.CurrentVersion, Payload: &dhtnode.AcnMessage_Register{Register: registration}}
 	data, err := proto.Marshal(msg)
 	ignore(err)
 	err = utils.WriteBytesConn(client.Conn, data)

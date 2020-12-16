@@ -321,7 +321,7 @@ func benchmarkAgentLookup(npeers uint16, b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
-		_, err = peer.lookupAddressDHT(addrs[len(peers)-1-i%len(peers)])
+		_, _, err = peer.lookupAddressDHT(addrs[len(peers)-1-i%len(peers)])
 		if err != nil {
 			b.Fail()
 		}
