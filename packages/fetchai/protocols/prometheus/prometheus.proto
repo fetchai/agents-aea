@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package aea.fetchai.prometheus;
+
+message PrometheusMessage{
+
+    // Performatives and contents
+    message Add_Metric_Performative{
+        string type = 1;
+        string title = 2;
+        string description = 3;
+        map<string, string> labels = 4;
+    }
+
+    message Update_Metric_Performative{
+        string title = 1;
+        string callable = 2;
+        float value = 3;
+        map<string, string> labels = 4;
+    }
+
+    message Response_Performative{
+        int32 code = 1;
+        string message = 2;
+        bool message_is_set = 3;
+    }
+
+
+    oneof performative{
+        Add_Metric_Performative add_metric = 5;
+        Response_Performative response = 6;
+        Update_Metric_Performative update_metric = 7;
+    }
+}

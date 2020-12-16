@@ -30,12 +30,15 @@ from aea.skills.base import Handler
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.simple_oracle.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
     LedgerApiDialogue,
     LedgerApiDialogues,
+    PrometheusDialogue,
+    PrometheusDialogues,
     SigningDialogue,
     SigningDialogues,
 )
@@ -119,10 +122,14 @@ class LedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         """
         self.context.logger.info(
-            "starting balance on {} ledger={}.".format(
+            "Balance on {} ledger={}.".format(
                 ledger_api_msg.ledger_id, ledger_api_msg.balance,
             )
         )
+        if self.context.prometheus_dialogues.enabled:
+            self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
+                "oracle_account_balance_ETH", "set", float(ledger_api_msg.balance), {}
+            )
 
     def _handle_transaction_digest(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -199,6 +206,10 @@ class LedgerApiHandler(Handler):
                     self.context.logger.info("Failed to grant oracle role")
             elif transaction_label == "update":
                 self.context.logger.info("Oracle value successfully updated!")
+                if self.context.prometheus_dialogues.enabled:
+                    self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
+                        "num_oracle_updates", "inc", 1.0, {}
+                    )
             else:
                 self.context.logger.error("unexpected transaction receipt!")
         else:
@@ -481,3 +492,71 @@ class SigningHandler(Handler):
                 signing_msg.performative, signing_dialogue
             )
         )
+
+
+class PrometheusHandler(Handler):
+    """This class handles responses from the prometheus server."""
+
+    SUPPORTED_PROTOCOL = PrometheusMessage.protocol_id
+
+    def __init__(self, **kwargs):
+        """Initialize the handler."""
+        super().__init__(**kwargs)
+
+        self.handled_message = None
+
+    def setup(self) -> None:
+        """Set up the handler."""
+        if self.context.prometheus_dialogues.enabled:
+            self.context.logger.info("setting up PrometheusHandler")
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+
+        message = cast(PrometheusMessage, message)
+
+        # recover dialogue
+        prometheus_dialogues = cast(
+            PrometheusDialogues, self.context.prometheus_dialogues
+        )
+        prometheus_dialogue = cast(
+            PrometheusDialogue, prometheus_dialogues.update(message)
+        )
+        if prometheus_dialogue is None:
+            self._handle_unidentified_dialogue(message)
+            return
+
+        self.handled_message = message
+        if message.performative == PrometheusMessage.Performative.RESPONSE:
+            self.context.logger.debug(
+                f"Prometheus response ({message.code}): {message.message}"
+            )
+        else:
+            self.context.logger.debug(
+                f"got unexpected prometheus message: Performative = {PrometheusMessage.Performative}"
+            )
+
+    def _handle_unidentified_dialogue(self, msg: Message) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the unidentified message to be handled
+        :return: None
+        """
+
+        self.context.logger.info(
+            "received invalid message={}, unidentified dialogue.".format(msg)
+        )
+
+    def teardown(self) -> None:
+        """
+        Teardown the handler.
+
+        :return: None
+        """
+        pass
