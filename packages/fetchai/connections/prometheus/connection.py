@@ -80,7 +80,7 @@ class PrometheusDialogues(BasePrometheusDialogues):
 class PrometheusChannel:
     """A wrapper for interacting with a prometheus server."""
 
-    def __init__(self, address: Address, metrics: Dict[str, Any], host: str, port: int):
+    def __init__(self, address: Address, host: str, port: int):
         """
         Initialize a prometheus channel.
 
@@ -89,7 +89,7 @@ class PrometheusChannel:
         :param port: The port at which to expose the metrics.
         """
         self.address = address
-        self.metrics = metrics
+        self.metrics = {}
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._queue: Optional[asyncio.Queue] = None
         self.logger: Union[logging.Logger, logging.LoggerAdapter] = _default_logger
@@ -283,9 +283,8 @@ class PrometheusConnection(Connection):
 
         self.host = cast(int, self.configuration.config.get("host", DEFAULT_HOST))
         self.port = cast(int, self.configuration.config.get("port", DEFAULT_PORT))
-        self.metrics = {}
         self.channel = PrometheusChannel(
-            self.address, self.metrics, self.host, self.port
+            self.address, self.host, self.port
         )
         self._connection = None  # type: Optional[asyncio.Queue]
 
