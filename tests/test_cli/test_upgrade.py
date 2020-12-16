@@ -302,20 +302,24 @@ class TestUpgradeSharedDependencies(AEATestCaseEmpty):
 
     @classmethod
     def setup_class(cls):
-        """Set the test up."""
+        """
+        Set the test up.
+
+        Skip consistency checks to avoid aea version compatibility checks.
+        """
         super().setup_class()
         result = cls.run_cli_command(
-            "add", "connection", str(cls.OLD_SOEF_ID), cwd=cls._get_cwd()
+            "-s", "add", "connection", str(cls.OLD_SOEF_ID), cwd=cls._get_cwd()
         )
         assert result.exit_code == 0
         result = cls.run_cli_command(
-            "add", "connection", str(cls.OLD_OEF_ID), cwd=cls._get_cwd()
+            "-s", "add", "connection", str(cls.OLD_OEF_ID), cwd=cls._get_cwd()
         )
         assert result.exit_code == 0
 
     def test_upgrade_shared_dependencies(self):
         """Test upgrade shared dependencies."""
-        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        result = self.run_cli_command("-s", "upgrade", cwd=self._get_cwd())
         assert result.exit_code == 0
 
         agent_config: AgentConfig = cast(
