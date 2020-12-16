@@ -43,6 +43,7 @@ PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.1.0")
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 9090
+VALID_UPDATE_FUNCS = {"inc", "dec", "add", "sub", "set", "observe"}
 
 
 class PrometheusDialogues(BasePrometheusDialogues):
@@ -240,17 +241,17 @@ class PrometheusChannel:
                     f"Update function {message.callable} not found for metric {metric}."
                 )
             else:
-                # Update the metric ("inc" and "dec" do not take "value" argument)
-                try:
+                if message.callable in VALID_UPDATE_FUNCS:
+                    # Update the metric ("inc" and "dec" do not take "value" argument)
                     if message.callable in {"inc", "dec"}:
                         update_func(message.labels)
                     else:
                         update_func(message.labels, message.value)
                     response_code = 200
                     response_msg = f"Metric {metric} successfully updated."
-                except TypeError as e:
+                else:
                     response_code = 400
-                    response_msg = f"Failed to update metric {metric} with update function {message.callable}: {e}."
+                    response_msg = f"Failed to update metric {metric}: {message.callable} is not a valid update function."
 
         return response_code, response_msg
 

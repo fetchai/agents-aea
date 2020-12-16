@@ -201,7 +201,7 @@ class TestPrometheusConnection:
         assert msg.code == 400
         assert (
             msg.message
-            == "Failed to update metric some_metric with update function name: 'str' object is not callable."
+            == "Failed to update metric some_metric: name is not a valid update function."
         )
 
         # Test that invalid message is rejected.
