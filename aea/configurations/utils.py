@@ -18,8 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """AEA configuration utils."""
+import os
+import re
+from copy import deepcopy
 from functools import singledispatch
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, Optional, Set, Tuple, cast, List, Match, Any
 
 from aea.configurations.base import (
     AgentConfig,
@@ -199,3 +202,95 @@ def get_latest_component_id_from_prefix(
     ]
     nb_results = len(chosen_component_ids)
     return chosen_component_ids[0] if nb_results == 1 else None
+
+
+
+class Resolver:
+    """Resolver of environment variables."""
+    _ENVVAR_MATCHER = re.compile(r"\${([^}^{]+)\}")
+
+    def __init__(self, obj: Dict):
+        """
+        Initialize.
+
+        :param obj: the object to resolve.
+        """
+        self.obj = deepcopy(obj)
+
+    def _resolve_var(self, value: str) -> Tuple[str, Optional[str]]:
+        """
+        Extract the matched value, expand env variable, and replace the match.
+
+        :param value: the environment variable string to resolve.
+        :return: the replaced value
+        """
+        matches = self._ENVVAR_MATCHER.findall(value)
+        if len(matches) == 0:
+            return value
+        matches = cast(List[Match[str]], matches)
+        # TODO handle all the matches
+        env_var = matches[0].group()[2:-1]
+
+        # check for defaults
+        var_split = env_var.split(":")
+        if len(var_split) == 2:
+            var_name, default_value = var_split
+        elif len(var_split) == 1:
+            var_name, default_value = var_split[0], None
+        else:
+            raise ValueError(f"Cannot resolve environment variable '{env_var}'.")
+        var_name = var_name.strip()
+        default_value = default_value.strip()
+        var_value = os.getenv(var_name, default_value)
+        return var_value, default_value
+
+    def _resolve_vars(self, obj: Dict) -> Dict[str, Tuple[str, Optional[str]]]:
+        """
+        Resolve environment variables into a dictionary.
+
+        This function does side-effect on the argument.
+        It returns a dictionary with:
+        - as keys, the JSON paths to the attribute
+        - as values, a pair of: variable name, default value.
+
+        :param obj: the dictionary to resolve.
+        :return: the replacements done.
+        """
+        replacements: Dict[str, Tuple[str, Optional[str]]] = {}
+        for key, value in obj.items():
+            if isinstance(value, str):
+                resolved, default = self._resolve_var(value)
+                obj[key] = resolved
+                replacements[key] = (resolved, default)
+            elif isinstance(value, (list, tuple)):
+                new_collection = []
+                for index, element in enumerate(value):
+                    if isinstance(element, str):
+                        resolved, default = self._resolve_var(element)
+                        new_collection.append(resolved)
+                        replacements[f"{key}[{index}]"] = (resolved, default)
+                    elif isinstance(element, (list, tuple, dict)):
+                        subreplacements = self._resolve_vars(element)
+                        new_collection.append(element)
+                        self._concatenate_keys(element, f"{key}[{index}]", subreplacements)
+                    else:
+                        new_collection.append(element)
+                obj[key] = type(value)(new_collection)
+            elif isinstance(value, dict):
+                subreplacements = self._resolve_vars(value)
+                self._concatenate_keys(obj, key, subreplacements)
+        return replacements
+
+    def _concatenate_keys(self, obj1: Dict[str, Any], prefix: str, obj2: Dict[str, Any]):
+        """
+        Concatenate keys between two objects.
+
+        It does side-effects on the first object.
+
+        :param obj1: first operand
+        :param prefix: key prefix to prepend to keys of the second operand.
+        :param obj2: second operand
+        :return: None
+        """
+        for subkey, subvalue in obj2.items():
+            obj1[prefix + "." + subkey] = subvalue

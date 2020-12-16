@@ -22,6 +22,7 @@
 import inspect
 import json
 import os
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
@@ -41,10 +42,8 @@ from aea.configurations.base import (
     ProtocolConfig,
     ProtocolSpecification,
     PublicId,
-    SkillConfig,
-)
+    SkillConfig, )
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
-
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
@@ -259,8 +258,10 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """Load component configuration from JSON object."""
         self.validate(configuration_file_json)
         key_order = list(configuration_file_json.keys())
+        replacements = _resolve_vars(configuration_file_json)
         configuration_obj = self.configuration_class.from_json(configuration_file_json)
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
+        configuration_obj._replacements = replacements  # pylint: disable=protected-access
         return configuration_obj
 
     def load_agent_config_from_json(

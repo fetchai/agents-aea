@@ -52,8 +52,8 @@ class _AEAYamlLoader(yaml.SafeLoader):
         _AEAYamlLoader.add_constructor(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, self._construct_mapping
         )
-        _AEAYamlLoader.add_constructor(self.envvar_key, self._envvar_constructor)
-        self._add_implicit_resolver_if_not_present_already()
+        # _AEAYamlLoader.add_constructor(self.envvar_key, self._envvar_constructor)
+        # self._add_implicit_resolver_if_not_present_already()
 
     def _add_implicit_resolver_if_not_present_already(self) -> None:
         """Add implicit resolver for environment variables, if not present already."""

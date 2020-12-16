@@ -472,6 +472,8 @@ class Configuration(JSONSerializable, ABC):
         # this is set by the configuration loader.
         self._key_order = []
 
+        self._replacements: Dict[str, Tuple[str, Optional[str]]] = {}
+
     @classmethod
     def from_json(cls, obj: Dict) -> "Configuration":
         """Build from a JSON object."""
