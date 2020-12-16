@@ -58,7 +58,7 @@ Each message may optionally have any number of contents of varying types.
 
 Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single dialogue, respectively all dialogues, associated with the protocol.
 
-The framework provides a number of helpful classes which implement most of the logic to maintain dialogues, namely the <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> base classes.
+The framework provides a number of helpful classes which implement most of the logic to maintain dialogues, namely the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> base classes.
 
 ## Custom protocol
 

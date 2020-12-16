@@ -263,7 +263,7 @@ We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace 
 
 ## Step 4: Add dialogues model
 
-We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> classes.
+We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes.
 
 ``` python
 from aea.protocols.base import Message

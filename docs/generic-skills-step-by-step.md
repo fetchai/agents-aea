@@ -1357,7 +1357,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 The `FipaDialogues` class stores dialogue with each `my_generic_buyer` (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to a dialogue, access previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
 
-The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
+The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue`, which itself derives from the base <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
 
 ### Step 6: Update the YAML files
 
