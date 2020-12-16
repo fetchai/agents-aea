@@ -1,6 +1,6 @@
 AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.1.0`.
 
-To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `num_retrievals` and `num_requests`:
+To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `coin_price_feed_num_retrievals` and `coin_price_feed_num_requests`:
 ```bash
 aea fetch fetchai/coin_price_feed:0.1.0
 cd coin_price_feed
@@ -155,17 +155,18 @@ def setup(self) -> None:
 
     if prom_dialogues.enabled:
         for metric in prom_dialogues.metrics:
-            self.context.logger.info("Adding Prometheus metric: " + metric["name"])
-            self.add_prometheus_metric(
-                metric["name"], metric["type"], metric["description"], dict(metric["labels"]),
+            metric_name = self.context.agent_name + "_" + metric["name"]
+            self.context.logger.info("Adding Prometheus metric: " + metric_name)
+            self.add_prometheus_metric(metric_name, metric["type"], metric["description"], dict(metric["labels"]))
 ```
 
 Then call the `update_prometheus_metric` function from the appropriate places.
 For example, the following code in `handlers.py` for the `coin_price` skill updates the number of http requests served:
 ```python
 if self.context.prometheus_dialogues.enabled:
+    metric_name = self.context.agent_name + "_" + "num_requests"
     self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-        "num_requests", "inc", 1.0, {}
+        metric_name, "inc", 1.0, {}
     )
 ```
 

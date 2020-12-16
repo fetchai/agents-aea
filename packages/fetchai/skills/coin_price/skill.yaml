@@ -8,10 +8,10 @@ aea_version: '>=0.7.0, <0.8.0'
 fingerprint:
   README.md: QmcNJBNktp8Hhic4LXpWWyMbiaYVx2FXAimoFPywfuhbyV
   __init__.py: QmX5WhZZrXfasUVaWY8fUGUELNiEF7mBjRhHt6KB8vEknM
-  behaviours.py: QmY3XmZYKz6G9NGYChT5tKpChATrGxPvLYooNQHiJPi3DY
+  behaviours.py: QmXBTjEAEbguNdc9Wq92PefvA2V2CaJ1ZTfijrwULGThFC
   coin_api_spec.yaml: QmP9pN1roizqYWbhiQstntAQFBQdBuVq5mj9CYcA9nD3Q6
   dialogues.py: QmRJgfoHqCbxJhf6bF86sRZ1JwFR1vDe4hH7gbKyWy31BP
-  handlers.py: QmQ9hj459gkrsXHaYM5xcsc9X2UW2CPQrbgQwPS7jfu8qQ
+  handlers.py: QmbZA2VoV3yyVHjfN9HDVghqvkfymYBUirEsMgvcoCWLSt
   models.py: QmP878qJZGF4tJTrbxZez3puAZ8epECtmrhTB8RYKQUkri
 fingerprint_ignore_patterns: []
 contracts: []
