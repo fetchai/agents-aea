@@ -841,6 +841,7 @@ def _make_libp2p_connection(
     delegate_host: str = "127.0.0.1",
     node_key_file: Optional[str] = None,
     agent_address: Optional[Address] = None,
+    build_directory: Optional[str] = None,
 ) -> P2PLibp2pConnection:
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
@@ -860,6 +861,9 @@ def _make_libp2p_connection(
     if key_file is None:
         key_file = shared_key_path
 
+    if not build_directory:
+        build_directory = os.getcwd()
+
     if relay and delegate:
         configuration = ConnectionConfig(
             node_key_file=key_file,
@@ -869,6 +873,7 @@ def _make_libp2p_connection(
             log_file=log_file,
             delegate_uri="{}:{}".format(delegate_host, delegate_port),
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=build_directory,
         )
     elif relay and not delegate:
         configuration = ConnectionConfig(
@@ -878,6 +883,7 @@ def _make_libp2p_connection(
             entry_peers=entry_peers,
             log_file=log_file,
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=build_directory,
         )
     else:
         configuration = ConnectionConfig(
@@ -886,7 +892,10 @@ def _make_libp2p_connection(
             entry_peers=entry_peers,
             log_file=log_file,
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=build_directory,
         )
+    if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
+        build_node(build_directory)
     return P2PLibp2pConnection(configuration=configuration, identity=identity)
 
 
