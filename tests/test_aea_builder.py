@@ -838,11 +838,12 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
             self.builder.call_all_build_entrypoints()
 
     @mock.patch(
-        "aea.aea_builder.check_call", side_effect=Exception("some error."),
+        "aea.aea_builder.AEABuilder._run_in_subprocess",
+        return_value=("", "some error.", 1),
     )
     def test_build_negative_subprocess(self, *_mocks):
         """Test build, negative due to script error at runtime."""
-        match = "An error occurred while running command '.*script.py .+': some error."
+        match = "An error occurred while running command '.*script.py .+':\nsome error."
         with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
             self.script_path.write_text("")
             self.builder.call_all_build_entrypoints()

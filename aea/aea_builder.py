@@ -963,6 +963,24 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         command_str = " ".join(command)
         if logger:
             logger.info(f"Running command '{command_str}'...")
+        stdout, stderr, code = cls._run_in_subprocess(command, source_directory)
+        if code == 0:
+            if logger:
+                logger.info(f"Command '{command_str}' succeded with output:\n{stdout}")
+        else:
+            raise AEAException(
+                f"An error occurred while running command '{command_str}':\n{stderr}"
+            )
+
+    @classmethod
+    def _run_in_subprocess(
+        cls, command: List[str], source_directory: str
+    ) -> Tuple[str, str, int]:
+        """
+        Run in subprocess.
+
+        :return: stdout, stderr, code
+        """
         res = subprocess.run(  # nosec
             command,
             cwd=source_directory,
@@ -970,14 +988,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             timeout=cls.BUILD_TIMEOUT,
             capture_output=True,
         )
-        if res.returncode == 0:
-            if logger:
-                logger.info(f"Command '{command_str}' succeded!")
-        else:
-            e = res.stderr.decode("utf-8")
-            raise AEAException(
-                f"An error occurred while running command '{command_str}':\n{e}"
-            )
+        code = res.returncode
+        stdout = res.stdout.decode("utf-8")
+        stderr = res.stderr.decode("utf-8")
+        return stdout, stderr, code
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """
