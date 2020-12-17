@@ -24,15 +24,21 @@ import logging
 import random
 import struct
 from asyncio import CancelledError
-from random import randint
 from typing import List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
+from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
+from aea.helpers.acn.agent_record import AgentRecord
+from aea.helpers.acn.uri import Uri
 from aea.mail.base import Envelope
+
+from .acn_message_pb2 import AcnMessage
+from .acn_message_pb2 import AgentRecord as AgentRecordPb
+from .acn_message_pb2 import Register, Status
 
 
 _default_logger = logging.getLogger(
@@ -43,45 +49,17 @@ PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.10.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
+POR_DEFAULT_SERVICE_ID = ""
 
-class Uri:
-    """Holds a node address in format "host:port"."""
+ACN_CURRENT_VERSION = "0.1.0"
 
-    def __init__(
-        self,
-        uri: Optional[str] = None,
-        host: Optional[str] = None,
-        port: Optional[int] = None,
-    ):
-        """Initialise Uri."""
-        if uri is not None:
-            split = uri.split(":", 1)
-            self._host = split[0]
-            self._port = int(split[1])
-        elif host is not None and port is not None:
-            self._host = host
-            self._port = port
-        else:
-            self._host = "127.0.0.1"
-            self._port = randint(5000, 10000)  # nosec
 
-    def __str__(self):
-        """Get string representation."""
-        return "{}:{}".format(self._host, self._port)
-
-    def __repr__(self):  # pragma: no cover
-        """Get object representation."""
-        return self.__str__()
-
-    @property
-    def host(self) -> str:
-        """Get host."""
-        return self._host
-
-    @property
-    def port(self) -> int:
-        """Get port."""
-        return self._port
+def _get_pors_from_connection_config(key: Crypto, count: int) -> List[AgentRecord]:
+    signature = key.sign_message(key.public_key.encode("utf-8"))
+    record = AgentRecord(
+        key.address, key.public_key, key.public_key, signature, POR_DEFAULT_SERVICE_ID
+    )
+    return [record for i in range(count)]
 
 
 class P2PLibp2pClientConnection(Connection):
@@ -119,6 +97,14 @@ class P2PLibp2pClientConnection(Connection):
             "Delegate Uri should be provided for each node",
         )
 
+        nodes_certs = [node["cert"] for node in nodes]
+        enforce(
+            len(nodes_certs) == len(nodes),
+            "Delegate Cert should be provided for each node",
+        )
+
+        # verify keys are correct
+
         if (
             self.has_crypto_store
             and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
@@ -136,13 +122,19 @@ class P2PLibp2pClientConnection(Connection):
         # delegate uris
         self.delegate_uris = [Uri(node_uri) for node_uri in nodes_uris]
 
-        # delegates certificates
-        # TOFIX(LR) will be mandatory
-        self.delegate_certs = []
+        # delegates PoRs
+        self.delegate_pors = _get_pors_from_connection_config(key, len(nodes))
+        for i in range(len(self.delegate_pors)):
+            record = self.delegate_pors[i]
+            enforce(
+                True or record.is_valid_for(self.address, key.public_key),
+                f"Invalid Proof-of-Representation for node {self.delegate_uris[i]}",
+            )
 
         # select a delegate
         index = random.randint(0, len(self.delegate_uris) - 1)  # nosec
         self.node_uri = self.delegate_uris[index]
+        self.node_por = self.delegate_pors[index]
         self.logger.debug("Node to use as delegate: {}".format(self.node_uri))
 
         # tcp connection
@@ -191,8 +183,36 @@ class P2PLibp2pClientConnection(Connection):
             raise e
 
     async def _setup_connection(self):
-        await self._send(bytes(self.address, "utf-8"))
-        await self._receive()
+        record = AgentRecordPb()
+        record.address = self.node_por.address
+        record.public_key = self.node_por.public_key
+        record.peer_public_key = self.node_por.peer_public_key
+        record.signature = self.node_por.signature
+        record.service_id = self.node_por.service_id  # pylint: disable=no-member
+
+        registration = Register()
+        registration.record.CopyFrom(record)  # pylint: disable=no-member
+        msg = AcnMessage()
+        msg.version = ACN_CURRENT_VERSION
+        msg.register.CopyFrom(registration)  # pylint: disable=no-member
+
+        buf = msg.SerializeToString()
+        await self._send(buf)
+
+        buf = await self._receive()
+        msg = AcnMessage()
+        msg.ParseFromString(buf)
+        payload = msg.WhichOneof("payload")
+        if payload != "status":
+            raise Exception(f"Wrong response message from peer: {payload}")
+        response = msg.status  # pylint: disable=no-member
+
+        if response.code != Status.SUCCESS:  # pylint: disable=no-member
+            raise Exception(
+                "Registration to peer failed: {}".format(
+                    Status.ErrCode.Name(response.code)  # pylint: disable=no-member
+                )
+            )
 
     async def disconnect(self) -> None:
         """

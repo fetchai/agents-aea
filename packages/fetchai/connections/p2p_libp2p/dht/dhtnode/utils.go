@@ -34,14 +34,14 @@ func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, repr
 	// check agent address matches
 	if record.Address != agentAddress {
 		err := errors.New("Wrong agent address, expected " + agentAddress)
-		response := &Status{Code: Status_ERROR_INVALID_AGENT_ADDRESS, Msgs: []string{err.Error()}}
+		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
 	// check public key matches
 	if record.PeerPublicKey != representativePeerPubKey {
 		err := errors.New("Wrong peer public key, expected " + representativePeerPubKey)
-		response := &Status{Code: Status_ERROR_INVALID_PUBLIC_KEY, Msgs: []string{err.Error()}}
+		response := &Status{Code: Status_ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
@@ -51,7 +51,7 @@ func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, repr
 		if err == nil {
 			err = errors.New("Agent address and public key don't match")
 		}
-		response := &Status{Code: Status_ERROR_INVALID_AGENT_ADDRESS}
+		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS}
 		return response, err
 	}
 

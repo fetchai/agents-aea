@@ -53,6 +53,7 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.contracts.base import Contract, contract_registry
+from aea.crypto.base import Crypto
 from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import _COSMOS
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
@@ -899,7 +900,7 @@ def _make_libp2p_connection(
     return P2PLibp2pConnection(configuration=configuration, identity=identity)
 
 
-def _make_libp2p_client_connection(
+def _make_libp2p_client_connection_to_restore(
     node_port: int = 11234, node_host: str = "127.0.0.1", uri: Optional[str] = None,
 ) -> P2PLibp2pClientConnection:
     crypto = make_crypto(COSMOS)
@@ -911,7 +912,37 @@ def _make_libp2p_client_connection(
                 "uri": str(uri)
                 if uri is not None
                 else "{}:{}".format(node_host, node_port)
-            }
+            },
+        ],
+        connection_id=P2PLibp2pClientConnection.connection_id,
+    )
+    return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
+
+
+def _make_libp2p_client_connection(
+    node_port: int = 11234,
+    node_host: str = "127.0.0.1",
+    uri: Optional[str] = None,
+    cert: Optional[str] = None,
+    key: Optional[Crypto] = None,
+) -> P2PLibp2pClientConnection:
+    crypto = key
+    if crypto is None:
+        crypto = make_crypto(COSMOS)
+        identity = Identity("", address=crypto.address)
+    key_file = f"./{crypto.public_key}.txt"
+    with open(key_file, "wb") as f:
+        crypto.dump(f)
+
+    configuration = ConnectionConfig(
+        client_key_file=key_file,
+        nodes=[
+            {
+                "uri": str(uri)
+                if uri is not None
+                else "{}:{}".format(node_host, node_port),
+                "cert": cert if cert is not None else crypto.public_key,
+            },
         ],
         connection_id=P2PLibp2pClientConnection.connection_id,
     )
