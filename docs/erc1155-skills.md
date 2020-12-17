@@ -191,7 +191,7 @@ First, run the deployer AEA.
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address.
 
 It will perform the following steps:
 - deploy the smart contract

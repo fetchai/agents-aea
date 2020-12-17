@@ -2,6 +2,7 @@
 aea fetch fetchai/erc1155_deployer:0.20.0
 cd erc1155_deployer
 aea install
+aea build
 ```
 ``` bash
 aea create erc1155_deployer
@@ -11,6 +12,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/erc1155_deploy:0.19.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash
@@ -28,6 +30,7 @@ aea add-key fetchai fetchai_private_key.txt --connection
 aea fetch fetchai/erc1155_client:0.20.0
 cd erc1155_client
 aea install
+aea build
 ```
 ``` bash
 aea create erc1155_client
@@ -37,6 +40,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/erc1155_client:0.18.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash

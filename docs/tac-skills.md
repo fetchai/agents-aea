@@ -226,7 +226,7 @@ Briefly run the controller AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.)
 
 Then, update the configuration of the weather client AEA's p2p connection (in `aea-config.yaml`) add the following:
 

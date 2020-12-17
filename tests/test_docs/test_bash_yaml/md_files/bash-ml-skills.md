@@ -2,6 +2,7 @@
 aea fetch fetchai/ml_data_provider:0.19.0
 cd ml_data_provider
 aea install
+aea build
 ``` 
 ``` bash
 aea create ml_data_provider
@@ -12,11 +13,13 @@ aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/ml_data_provider:0.17.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea install
+aea build
 ```
 ``` bash
 aea fetch fetchai/ml_model_trainer:0.20.0
 cd ml_model_trainer
 aea install
+aea build
 ```
 ``` bash
 aea create ml_model_trainer
@@ -27,6 +30,7 @@ aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/ml_train:0.18.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea install
+aea build
 ```
 ``` bash
 aea generate-key fetchai

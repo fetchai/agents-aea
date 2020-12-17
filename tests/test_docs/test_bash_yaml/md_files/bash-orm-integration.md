@@ -2,6 +2,7 @@
 aea fetch fetchai/thermometer_aea:0.17.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
+aea build
 ```
 ``` bash
 aea create my_thermometer_aea
@@ -11,12 +12,14 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/thermometer:0.17.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash
 aea fetch fetchai/thermometer_client:0.18.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
+aea build
 ```
 ``` bash
 aea create my_thermometer_client
@@ -26,6 +29,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/thermometer_client:0.17.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash
@@ -43,6 +47,7 @@ aea generate-wealth fetchai
 ```
 ``` bash
 aea install
+aea build
 ```
 ``` bash
 aea eject skill fetchai/thermometer:0.17.0
