@@ -773,7 +773,7 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
     return connection
 
 
-def _make_libp2p_connection(
+def _make_libp2p_connection_to_restore(
     port: int = 10234,
     host: str = "127.0.0.1",
     relay: bool = True,
@@ -813,6 +813,65 @@ def _make_libp2p_connection(
     else:
         configuration = ConnectionConfig(
             node_key_file=node_key_file,
+            local_uri="{}:{}".format(host, port),
+            entry_peers=entry_peers,
+            log_file=log_file,
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    return P2PLibp2pConnection(configuration=configuration, identity=identity)
+
+
+def _make_libp2p_connection(
+    port: int = 10234,
+    host: str = "127.0.0.1",
+    relay: bool = True,
+    delegate: bool = False,
+    entry_peers: Optional[Sequence[MultiAddr]] = None,
+    delegate_port: int = 11234,
+    delegate_host: str = "127.0.0.1",
+    node_key_file: Optional[str] = None,
+    agent_address: Optional[Address] = None,
+) -> P2PLibp2pConnection:
+    log_file = "libp2p_node_{}.log".format(port)
+    if os.path.exists(log_file):
+        os.remove(log_file)
+
+    shared_key = make_crypto(DEFAULT_LEDGER)
+    shared_key_path = f"./{shared_key.public_key}.txt"
+    with open(shared_key_path, "wb") as f:
+        shared_key.dump(f)
+
+    address = agent_address
+    if address is None:
+        address = shared_key.address
+    identity = Identity("", address=address)
+
+    key_file = node_key_file
+    if key_file is None:
+        key_file = shared_key_path
+
+    if relay and delegate:
+        configuration = ConnectionConfig(
+            node_key_file=key_file,
+            local_uri="{}:{}".format(host, port),
+            public_uri="{}:{}".format(host, port),
+            entry_peers=entry_peers,
+            log_file=log_file,
+            delegate_uri="{}:{}".format(delegate_host, delegate_port),
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    elif relay and not delegate:
+        configuration = ConnectionConfig(
+            node_key_file=key_file,
+            local_uri="{}:{}".format(host, port),
+            public_uri="{}:{}".format(host, port),
+            entry_peers=entry_peers,
+            log_file=log_file,
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    else:
+        configuration = ConnectionConfig(
+            node_key_file=key_file,
             local_uri="{}:{}".format(host, port),
             entry_peers=entry_peers,
             log_file=log_file,

@@ -70,6 +70,8 @@ SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
 LIBP2P_SUCCESS_MESSAGE = "Peer running in "
 
+POR_DEFAULT_SERVICE_ID = ""
+
 
 def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
     if len(addrs) == 0:
@@ -203,12 +205,69 @@ class Uri:
         return self._port
 
 
+class AgentRecord:
+    """Agent Proof-of-Representation to peer"""
+
+    def __init__(
+        self, address: str, public_key: str, peer_public_key: str, signature: str,
+    ):
+        """Initialize the AgentRecord"""
+        self._service_id = POR_DEFAULT_SERVICE_ID
+        self._address = address
+        self._public_key = public_key
+        self._peer_public_key = peer_public_key
+        self._signature = signature
+
+    @property
+    def address(self) -> str:
+        """Get agent address"""
+        return self._address
+
+    @property
+    def public_key(self) -> str:
+        """Get agent public key"""
+        return self._public_key
+
+    @property
+    def peer_public_key(self) -> str:
+        """Get agent's representative peer public key"""
+        return self._peer_public_key
+
+    @property
+    def signature(self) -> str:
+        """Get record signature"""
+        return self._signature
+
+    @property
+    def service_id(self) -> str:
+        """Get record service id"""
+        return self._service_id
+
+    def __str__(self):
+        """Get string representation."""
+        return f"(address={self.address}, pubkey={self.public_key}, peer_pubkey={self.peer_public_key}, signature={self.signature})"
+
+    def is_valid_for(self, addr: str, public_key: str):
+        """
+        Check if the agent record is valid
+
+        """
+
+        if self._address != addr:
+            return False
+        if self._peer_public_key != public_key:
+            return False
+        # TODO(LR) check if agent address and public key match
+        # TODO(LR) check if signature is valid
+        return True
+
+
 class Libp2pNode:
     """Libp2p p2p node as a subprocess with named pipes interface."""
 
     def __init__(
         self,
-        agent_addr: Address,
+        agent_record: AgentRecord,
         key: Crypto,
         module_path: str,
         clargs: Optional[List[str]] = None,
@@ -225,7 +284,7 @@ class Libp2pNode:
         """
         Initialize a p2p libp2p node.
 
-        :param agent_addr: the agent address.
+        :param agent_record: the agent proof-of-representation for peer.
         :param key: secp256k1 curve private key.
         :param module_path: the module path.
         :param clargs: the command line arguments for the libp2p node
@@ -240,7 +299,8 @@ class Libp2pNode:
         :param peer_registration_delay: add artificial delay to agent registration in seconds
         """
 
-        self.address = agent_addr
+        self.record = agent_record
+        self.address = self.record.address
 
         # node id in the p2p network
         self.key = key.private_key
@@ -349,6 +409,13 @@ class Libp2pNode:
             self._config += "AEA_P2P_URI_MONITORING={}\n".format(
                 str(self.monitoring_uri) if self.monitoring_uri is not None else ""
             )
+            self._config += "AEA_P2P_POR_ADDRESS={}\n".format(self.record.address)
+            self._config += "AEA_P2P_POR_PUBKEY={}\n".format(self.record.public_key)
+            self._config += "AEA_P2P_POR_PEER_PUBKEY={}\n".format(
+                self.record.peer_public_key
+            )
+            self._config += "AEA_P2P_POR_SIGNATURE={}\n".format(self.record.signature)
+            self._config += "AEA_P2P_POR_SERVICE_ID={}\n".format(self.record.service_id)
             self._config += "AEA_P2P_CFG_REGISTRATION_DELAY={}\n".format(
                 str(self.peer_registration_delay)
                 if self.peer_registration_delay is not None
@@ -511,6 +578,12 @@ class Libp2pNode:
             os.remove(LIBP2P_NODE_ENV_FILE)
 
 
+def _get_por_from_configuration(key: Crypto) -> AgentRecord:
+    signature = key.sign_message(key.public_key.encode("utf-8"))
+    record = AgentRecord(key.address, key.public_key, key.public_key, signature)
+    return record
+
+
 class P2PLibp2pConnection(Connection):
     """A libp2p p2p node connection."""
 
@@ -616,6 +689,10 @@ class P2PLibp2pConnection(Connection):
                     "Node's public ip and entry peers ip addresses are not in the same ip address space (private/public)"
                 )
 
+        record = _get_por_from_configuration(key)
+        if not record.is_valid_for(self.address, key.public_key):
+            raise ValueError("Invalid Proof-of-Representation {}".format(str(record)))
+
         # libp2p local node
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         temp_dir = tempfile.mkdtemp()
@@ -623,7 +700,7 @@ class P2PLibp2pConnection(Connection):
         shutil.copytree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
 
         self.node = Libp2pNode(
-            self.address,
+            record,
             key,
             self.libp2p_workdir,
             LIBP2P_NODE_CLARGS,
