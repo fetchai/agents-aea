@@ -250,7 +250,7 @@ def _scaffold_non_package_item(
     try:
         # copy the item package into the agent project.
         src = Path(os.path.join(AEA_DIR, aea_dir, "scaffold.py"))
-        logger.debug(f"Copying error handler. src={src} dst={dest}")
+        logger.debug(f"Copying {type_name}. src={src} dst={dest}")
         shutil.copyfile(src, dest)
 
         # add the item to the configurations.

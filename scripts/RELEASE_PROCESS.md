@@ -13,7 +13,7 @@
 
 6. Check the docs are up-to-date by running `python scripts/generate_api_docs.py` and `python scripts/check_doc_links.py`. Ensure all links are configured `mkdocs serve`. Commit if satisfied.
 
-7. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. Commit if satisfied.
+7. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
 
 8. Open PRs and merge into master.
 
@@ -28,6 +28,6 @@
 
 13. Release packages into registry: `python scripts/deploy_to_registry.py`.
 
-14. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
+14. Create and push Docker images `user-image` and `deploy-image`.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
