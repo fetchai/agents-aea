@@ -25,6 +25,7 @@ import re
 import shutil
 import subprocess  # nosec
 import sys
+import tempfile
 from distutils.dir_util import copy_tree
 from itertools import islice
 from subprocess import Popen, TimeoutExpired  # nosec
@@ -182,7 +183,6 @@ def main():  # pragma: nocover
     if len(sys.argv) < 2:
         raise ValueError("Please provide build directory path as an argument!")
     build_dir = sys.argv[1]
-    ensure_dir(build_dir)
     check_versions()
     build_node(build_dir)
 
@@ -217,12 +217,17 @@ def _golang_module_build(
 
 def build_node(build_dir: str) -> None:
     """Build node placed inside build_dir."""
-    copy_tree(LIBP2P_NODE_MODULE, build_dir)
-
-    err_str = _golang_module_build(build_dir)
-    if err_str:  # pragma: nocover
-        raise Exception(f"Node build failed: {err_str}")
-    print("libp2p_node built successfully!")
+    with tempfile.TemporaryDirectory() as dirname:
+        copy_tree(LIBP2P_NODE_MODULE, dirname)
+        err_str = _golang_module_build(dirname)
+        if err_str:  # pragma: nocover
+            raise Exception(f"Node build failed: {err_str}")
+        ensure_dir(build_dir)
+        shutil.copy(
+            os.path.join(dirname, LIBP2P_NODE_MODULE_NAME),
+            os.path.join(build_dir, LIBP2P_NODE_MODULE_NAME),
+        )
+    print(f"{LIBP2P_NODE_MODULE_NAME} built successfully!")
 
 
 if __name__ == "__main__":
