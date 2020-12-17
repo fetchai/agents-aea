@@ -842,7 +842,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
     )
     def test_build_negative_subprocess(self, *_mocks):
         """Test build, negative due to script error at runtime."""
-        match = f"An error occurred while running command '.*script.py .+': some error."
+        match = "An error occurred while running command '.*script.py .+': some error."
         with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
             self.script_path.write_text("")
             self.builder.call_all_build_entrypoints()

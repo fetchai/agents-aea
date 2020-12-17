@@ -22,11 +22,11 @@ import logging
 import logging.config
 import os
 import pprint
+import subprocess  # nosec
 import sys
 from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
-from subprocess import check_call  # nosec
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
@@ -962,15 +962,22 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         command = [sys.executable, build_entrypoint, target_directory]
         command_str = " ".join(command)
         if logger:
-            logger.info(f"Running command '{command_str}'")
-        try:
-            check_call(
-                command, cwd=source_directory, timeout=cls.BUILD_TIMEOUT
-            )  # nosec
-        except Exception as e:
+            logger.info(f"Running command '{command_str}'...")
+        res = subprocess.run(  # nosec
+            command,
+            cwd=source_directory,
+            check=False,
+            timeout=cls.BUILD_TIMEOUT,
+            capture_output=True,
+        )
+        if res.returncode == 0:
+            if logger:
+                logger.info(f"Command '{command_str}' succeded!")
+        else:
+            e = res.stderr.decode("utf-8")
             raise AEAException(
-                f"An error occurred while running command '{command_str}': {str(e)}"
-            ) from e
+                f"An error occurred while running command '{command_str}':\n{e}"
+            )
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """
