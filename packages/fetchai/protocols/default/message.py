@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
-    protocol_id = PublicId.from_str("fetchai/default:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/default:0.10.0")
 
     ErrorCode = CustomErrorCode
 
@@ -45,13 +45,14 @@ class DefaultMessage(Message):
         """Performatives for the default protocol."""
 
         BYTES = "bytes"
+        END = "end"
         ERROR = "error"
 
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
 
-    _performatives = {"bytes", "error"}
+    _performatives = {"bytes", "end", "error"}
     __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
@@ -230,6 +231,8 @@ class DefaultMessage(Message):
                             type(value_of_error_data)
                         ),
                     )
+            elif self.performative == DefaultMessage.Performative.END:
+                expected_nb_of_contents = 0
 
             # Check correct content count
             enforce(

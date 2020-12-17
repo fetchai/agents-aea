@@ -39,7 +39,7 @@ from aea.cli.utils.config import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import _validate_config_consistency, clean_after
 from aea.cli.utils.formatting import format_items
-from aea.cli.utils.generic import is_readme_present, run_cli_command_subprocess
+from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.package_utils import (
     _override_ledger_configurations,
     find_item_in_distribution,
@@ -298,7 +298,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.12.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -312,7 +312,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.12.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -331,7 +331,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.12.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -340,7 +340,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.12.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -354,7 +354,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.11.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.12.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -542,22 +542,3 @@ def test_set_cli_author_positive(*_mocks):
     context_mock = MagicMock()
     set_cli_author(context_mock)
     context_mock.obj.set_config.assert_called_with("cli_author", "some_author")
-
-
-@mock.patch("subprocess.Popen", return_value=MagicMock(returncode=0))
-def test_run_cli_command_subprocess(_mock_popen):
-    """Test run cli command subprocess util."""
-    mock_command = ["some", "command"]
-    result = run_cli_command_subprocess(mock_command)
-    assert result == 0
-
-
-@mock.patch("subprocess.Popen")
-def test_run_cli_command_subprocess_negative(mock_popen):
-    """Test run cli command subprocess util."""
-    mock_process = MagicMock()
-    mock_process.wait = MagicMock(side_effect=Exception("some error"))
-    mock_popen.return_value = mock_process
-    mock_command = ["some", "command"]
-    with pytest.raises(Exception, match="some error"):
-        run_cli_command_subprocess(mock_command)

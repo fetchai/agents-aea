@@ -10,10 +10,10 @@ This is a protocol for interacting with ledger APIs.
 ---
 name: ledger_api
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 speech_acts:
   get_balance:
     ledger_id: pt:str
@@ -76,7 +76,7 @@ reply:
   get_transaction_receipt: [transaction_receipt, error]
   transaction_receipt: []
   error: []
-termination: [balance, state, transaction_receipt]
+termination: [balance, state, transaction_receipt, error]
 roles: {agent, ledger}
 end_states: [successful]
 keep_terminal_state_dialogues: false

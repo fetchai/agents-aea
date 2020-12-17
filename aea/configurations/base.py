@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
-
 import functools
 import pprint
 import re
@@ -1110,6 +1109,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
     ):
         """Set component configuration."""
@@ -1124,6 +1124,17 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             build_entrypoint,
         )
         self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
+        self._build_directory = build_directory
+
+    @property
+    def build_directory(self) -> Optional[str]:
+        """Get the component type."""
+        return self._build_directory
+
+    @build_directory.setter
+    def build_directory(self, value: Optional[str]) -> None:
+        """Get the component type."""
+        self._build_directory = value
 
     @property
     def component_type(self) -> ComponentType:
@@ -1206,6 +1217,7 @@ class ConnectionConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
         connections: Optional[Set[PublicId]] = None,
@@ -1247,6 +1259,7 @@ class ConnectionConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.class_name = class_name
@@ -1309,6 +1322,8 @@ class ConnectionConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1334,6 +1349,7 @@ class ConnectionConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
             connections=cast(Set[PublicId], connections),
@@ -1376,6 +1392,7 @@ class ProtocolConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
@@ -1390,6 +1407,7 @@ class ProtocolConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -1414,6 +1432,8 @@ class ProtocolConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1431,6 +1451,7 @@ class ProtocolConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
@@ -1486,6 +1507,7 @@ class SkillConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         connections: Optional[Set[PublicId]] = None,
         protocols: Optional[Set[PublicId]] = None,
         contracts: Optional[Set[PublicId]] = None,
@@ -1504,6 +1526,7 @@ class SkillConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.connections = connections if connections is not None else set()
@@ -1575,6 +1598,8 @@ class SkillConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -1612,6 +1637,7 @@ class SkillConfig(ComponentConfiguration):
             dependencies=dependencies,
             description=description,
             is_abstract=obj.get("is_abstract", False),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
         )
 
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():
@@ -2045,20 +2071,6 @@ class SpeechActContentConfig(Configuration):
         """Initialize a speech_act content configuration."""
         super().__init__()
         self.args = args  # type: Dict[str, str]
-        self._check_consistency()
-
-    def _check_consistency(self):
-        """Check consistency of the args."""
-        for content_name, content_type in self.args.items():
-            if not isinstance(content_name, str) or not isinstance(content_type, str):
-                raise ProtocolSpecificationParseError(
-                    "Contents' names and types must be string."
-                )
-            # Check each content definition key/value (i.e. content name/type) is not empty
-            if content_name == "" or content_type == "":
-                raise ProtocolSpecificationParseError(
-                    "Contents' names and types cannot be empty."
-                )
 
     @property
     def json(self) -> Dict:
@@ -2153,34 +2165,7 @@ class ProtocolSpecification(ProtocolConfig):
             protocol_specification.speech_acts.create(
                 speech_act, speech_act_content_config
             )
-        protocol_specification._check_consistency()  # pylint: disable=protected-access
         return protocol_specification
-
-    def _check_consistency(self):
-        """Validate the correctness of the speech_acts."""
-        if len(self.speech_acts.read_all()) == 0:
-            raise ProtocolSpecificationParseError(
-                "There should be at least one performative defined in the speech_acts."
-            )
-        content_dict = {}
-        for performative, speech_act_content_config in self.speech_acts.read_all():
-            if not isinstance(performative, str):
-                raise ProtocolSpecificationParseError(
-                    "A 'performative' is not specified as a string."
-                )
-            if performative == "":
-                raise ProtocolSpecificationParseError(
-                    "A 'performative' cannot be an empty string."
-                )
-            for content_name, content_type in speech_act_content_config.args.items():
-                if content_name in content_dict.keys():
-                    if content_type != content_dict[content_name]:  # pragma: no cover
-                        raise ProtocolSpecificationParseError(
-                            "The content '{}' appears more than once with different types in speech_acts.".format(
-                                content_name
-                            )
-                        )
-                content_dict[content_name] = content_type
 
 
 class ContractConfig(ComponentConfiguration):
@@ -2201,6 +2186,7 @@ class ContractConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
+        build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
@@ -2216,6 +2202,7 @@ class ContractConfig(ComponentConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
+            build_directory,
             dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
@@ -2246,6 +2233,8 @@ class ContractConfig(ComponentConfiguration):
         )
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
+        if self.build_directory:
+            result["build_directory"] = self.build_directory
         return result
 
     @classmethod
@@ -2265,6 +2254,7 @@ class ContractConfig(ComponentConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
+            build_directory=cast(Optional[str], obj.get("build_directory")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
             contract_interface_paths=cast(

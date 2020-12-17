@@ -37,19 +37,20 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = PublicId.from_str("fetchai/state_update:0.7.0")
+    protocol_id = PublicId.from_str("fetchai/state_update:0.8.0")
 
     class Performative(Message.Performative):
         """Performatives for the state_update protocol."""
 
         APPLY = "apply"
+        END = "end"
         INITIALIZE = "initialize"
 
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
 
-    _performatives = {"apply", "initialize"}
+    _performatives = {"apply", "end", "initialize"}
     __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
@@ -335,6 +336,8 @@ class StateUpdateMessage(Message):
                             type(value_of_quantities_by_good_id)
                         ),
                     )
+            elif self.performative == StateUpdateMessage.Performative.END:
+                expected_nb_of_contents = 0
 
             # Check correct content count
             enforce(

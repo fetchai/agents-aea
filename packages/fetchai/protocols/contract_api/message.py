@@ -46,7 +46,7 @@ DEFAULT_BODY_SIZE = 4
 class ContractApiMessage(Message):
     """A protocol for contract APIs requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/contract_api:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/contract_api:0.9.0")
 
     Kwargs = CustomKwargs
 

@@ -1,18 +1,18 @@
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
-aea run --connections fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/p2p_libp2p:0.13.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea run --connections fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/p2p_libp2p:0.13.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.12.0
+aea run --connections fetchai/p2p_libp2p:0.13.0
 ```
   ``` bash
   svn export https://github.com/fetchai/agents-aea.git/trunk/packages/fetchai/connections/p2p_libp2p
@@ -54,8 +54,8 @@ config:
 ```
 ``` yaml
 default_routing:
-  ? "fetchai/oef_search:0.10.0"
-  : "fetchai/oef:0.13.0"
+  ? "fetchai/oef_search:0.11.0"
+  : "fetchai/oef:0.14.0"
 ```
 ``` yaml
 config:
@@ -70,10 +70,12 @@ config:
 /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ```
 ``` yaml
+---
+public_id: fetchai/p2p_libp2p:0.13.0
+type: connection
 config:
-  delegate_uri: 127.0.0.1:11001
+  delegate_uri: null
   entry_peers: [/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx,/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW]
+  public_uri: null
   local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
 ```

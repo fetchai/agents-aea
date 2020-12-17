@@ -66,8 +66,8 @@ class TestMLSkills(AEATestCaseMany):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
+            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+            "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0",
         }
 
         # generate random location
@@ -78,12 +78,12 @@ class TestMLSkills(AEATestCaseMany):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.16.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/soef:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/ledger:0.11.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.17.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -114,12 +114,12 @@ class TestMLSkills(AEATestCaseMany):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("skill", "fetchai/ml_train:0.17.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/soef:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/ledger:0.11.0")
+        self.add_item("skill", "fetchai/ml_train:0.18.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -145,11 +145,10 @@ class TestMLSkills(AEATestCaseMany):
         self.nested_set_config(setting_path, location)
 
         self.set_agent_context(data_provider_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         data_provider_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -165,11 +164,10 @@ class TestMLSkills(AEATestCaseMany):
         )
 
         self.set_agent_context(model_trainer_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         model_trainer_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -243,8 +241,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
+            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+            "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0",
         }
 
         # generate random location
@@ -255,18 +253,18 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.16.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/soef:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/ledger:0.11.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.17.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_data_provider:0.18.0", data_provider_aea_name
+            "fetchai/ml_data_provider:0.19.0", data_provider_aea_name
         )
         assert (
             diff == []
@@ -294,18 +292,18 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("skill", "fetchai/ml_train:0.17.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/soef:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/ledger:0.11.0")
+        self.add_item("skill", "fetchai/ml_train:0.18.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.19.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.20.0", model_trainer_aea_name
         )
         assert (
             diff == []
@@ -331,11 +329,10 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.nested_set_config(setting_path, location)
 
         self.set_agent_context(data_provider_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         data_provider_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -351,11 +348,10 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         )
 
         self.set_agent_context(model_trainer_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         model_trainer_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

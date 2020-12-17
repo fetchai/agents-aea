@@ -4,10 +4,10 @@ version: 0.1.0
 type: protocol
 description: A protocol for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   __init__.py: QmaaZ7Je2PRTkcnqy8oLR58yBDVpcRQ4BcaRe3sd3fug3Z
-  dialogues.py: QmXtHWWrysdd3s25kb1ypV1WJL64bnX4j63LhMdMmX7rLv
+  dialogues.py: QmXCaVN6cAjHk7cMjRbD2GHxEosKvCp7nFGKMqXf8FThQQ
   message.py: QmXB1CxBaQtNqtYRcJFRruFuvytxA4KQtBXpo3jTsdwPrA
   serialization.py: QmPX4KzaEfK9JwbbHAmmB1rZp1guJTW5PgPan7ZGAp36DH
   t_protocol_no_ct.proto: Qmc8KkKnWZ9utBxrbEyWhVDRdut87DkFvmHP3SYUg4J3EU

@@ -1,0 +1,18 @@
+name: prometheus
+author: fetchai
+version: 0.1.0
+type: protocol
+description: A protocol for adding and updating metrics to a prometheus server.
+license: Apache-2.0
+aea_version: '>=0.8.0, <0.9.0'
+fingerprint:
+  README.md: QmZb4NVBU8G417AcXM4Lj427MZR2D6guCvBeMiB7uhQp2m
+  __init__.py: QmYcCsWNz4qmSUBorY9N4XgyXvdYrrzNGr6oP3iQP9wUM5
+  dialogues.py: QmSg5DmxpnvN9g2ThzmB4N6fJ2SeQ63iGa2ByGrLQD6BKF
+  message.py: QmXKpTPb7HLUdL2D5ycwGSLFchBSwj4Qc4mSc2Jrawhzjg
+  prometheus.proto: QmUmvB2uvp8gdWzvUoxDJyc4Lvi4bFuaSdqMTMyk6hBhgF
+  prometheus_pb2.py: QmXwmam9ZPyR3yf6UTmgMNVuvxTAZzgx6hPohzVPmKq452
+  serialization.py: QmUgeNdHPqtCTyRM5K42a8rtzr1RYP94YiV7qycGDxdYzg
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

@@ -515,6 +515,8 @@ class TestAddSkillWithLatestVersion(AEATestCaseEmpty):
 class TestAddSkillMixedModeFallsBack(AEATestCaseEmpty):
     """Test add skill in mixed mode that fails with local falls back to remote registry."""
 
+    IS_EMPTY = True
+
     @mock.patch(
         "aea.cli.add.find_item_locally_or_distributed",
         side_effect=click.ClickException(""),
@@ -533,6 +535,8 @@ class TestAddSkillMixedModeFallsBack(AEATestCaseEmpty):
 
 class TestAddSkillRemoteMode(AEATestCaseEmpty):
     """Test case for add skill, --remote mode."""
+
+    IS_EMPTY = True
 
     def test_add_skill_remote_mode(self):
         """Test add skill mixed mode."""

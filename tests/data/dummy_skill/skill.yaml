@@ -4,7 +4,7 @@ version: 0.1.0
 type: skill
 description: a dummy_skill for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   __init__.py: QmPSmhjCsXFdGcZtfyBEkqP6rCX1mWLuDST51YfkYCb4c5
   behaviours.py: QmWKg1GfJpuJSoCkEKW1zUskkNo4Rsoan1AD2cXpe2E93C
@@ -14,10 +14,9 @@ fingerprint:
   handlers.py: QmYchfGvDXD5CxDHt6kChNsNbRxTcqViQTn65R7p8VJ4fu
   tasks.py: Qmegg4QsYSqSZN3q2zuRiBAToQ2LEiWrAPtUo7rCMrxjGJ
 fingerprint_ignore_patterns: []
-build_entrypoint: path/to/script.py
 contracts: []
 protocols:
-- fetchai/default:0.9.0
+- fetchai/default:0.10.0
 skills: []
 behaviours:
   dummy:

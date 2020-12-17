@@ -49,24 +49,26 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-            "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
-            "fetchai/http:latest": "fetchai/http_client:latest",
+            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+            "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
+            "fetchai/http:0.10.0": "fetchai/http_client:0.15.0",
+            "fetchai/prometheus:0.1.0": "fetchai/prometheus:0.1.0",
         }
 
         # add packages for oracle agent
         self.set_agent_context(oracle_agent_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("connection", "fetchai/http_client:latest")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/ledger:0.11.0")
+        self.add_item("connection", "fetchai/http_client:0.15.0")
+        self.add_item("connection", "fetchai/prometheus:0.1.0")
+        self.remove_item("connection", "fetchai/stub:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/coin_price:0.1.0")
-        self.add_item("contract", "fetchai/oracle:0.1.0")
-        self.add_item("skill", "fetchai/simple_oracle:0.1.0")
+        self.add_item("skill", "fetchai/coin_price:0.2.0")
+        self.add_item("contract", "fetchai/oracle:0.2.0")
+        self.add_item("skill", "fetchai/simple_oracle:0.2.0")
 
         # set erc20 address
         _, erc20_address = erc20_contract
@@ -91,14 +93,14 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
 
         # add packages for agent two
         self.set_agent_context(client_agent_name)
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/ledger:0.10.0")
+        self.add_item("connection", "fetchai/ledger:0.11.0")
+        self.remove_item("connection", "fetchai/stub:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/ledger:0.11.0")
         self.set_config("agent.default_ledger", ETHEREUM)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-            "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
+            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+            "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
@@ -119,11 +121,10 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
 
         # run oracle agent
         self.set_agent_context(oracle_agent_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         oracle_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

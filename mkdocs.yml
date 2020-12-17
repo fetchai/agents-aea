@@ -57,12 +57,14 @@ nav:
       - Create decision-maker transaction: 'decision-maker-transaction.md'
       - Testing Skills: 'skill-testing.md'
       - Deployment: 'deployment.md'
+      - Prometheus monitoring: 'prometheus.md'
       - Known limitations: 'known-limits.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
       - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
       - AEAs vs agents: 'agent-vs-aea.md'
       - Upgrading versions: 'upgrading.md'
       - Modes of running an AEA: 'modes.md'
+      - Generic Storage: 'generic-storage.md'
       - Multi agent manager: 'multi-agent-manager.md'
       - Debugging: 'debug.md'
       - Profiling: 'runtime-cost.md'
@@ -143,12 +145,13 @@ nav:
       - Decision Maker:
         - Base: 'api/decision_maker/base.md'
         - Default: 'api/decision_maker/default.md'
+      - Error Handler:
+        - Base: 'api/error_handler/base.md'
+        - Default: 'api/error_handler/default.md'
       - Helpers:
         - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
         - Async Utils: 'api/helpers/async_utils.md'
         - Base: 'api/helpers/base.md'
-        - Dialogue:
-          - Base: 'api/helpers/dialogue/base.md'
         - Exception Policy: 'api/helpers/exception_policy.md'
         - Exec Timeout: 'api/helpers/exec_timeout.md'
         - File IO: 'api/helpers/file_io.md'
@@ -167,8 +170,13 @@ nav:
         - Search:
           - Generic: 'api/helpers/search/generic.md'
           - Models: 'api/helpers/search/models.md'
+        - Serializers: 'api/helpers/serializers.md'
+        - Storage:
+          - GenericStorage: 'api/helpers/storage/generic_storage.md'
+          - Backends:
+            - Base: 'api/helpers/storage/backends/base.md'
+            - Sqlite: 'api/helpers/storage/backends/sqlite.md'
         - Sym Link: 'api/helpers/sym_link.md'
-        - Temp Error Handler: 'api/helpers/temp_error_handler.md'
         - Transaction:
           - Base: 'api/helpers/transaction/base.md'
         - Win32: 'api/helpers/win32.md'
@@ -177,6 +185,8 @@ nav:
       - Mail: 'api/mail/base.md'
       - Protocols:
         - Base: 'api/protocols/base.md'
+        - Dialogue:
+          - Base: 'api/protocols/dialogue/base.md'
         - Generator:
           - Base: 'api/protocols/generator/base.md'
           - Common: 'api/protocols/generator/common.md'
@@ -206,6 +216,8 @@ nav:
         - Behaviors: 'api/skills/behaviours.md'
         - Task: 'api/skills/tasks.md'
       - Test Tools:
+        - Constants: 'api/test_tools/constants.md'
+        - Exceptions: 'api/test_tools/exceptions.md'
         - Generic: 'api/test_tools/generic.md'
         - Test Cases: 'api/test_tools/test_cases.md'
         - Test Skill: 'api/test_tools/test_skill.md'

@@ -17,13 +17,38 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Check that the dependencies 'gcc' and 'go' are installed in the system."""
+import asyncio
+import os
+import platform
 import re
 import shutil
 import subprocess  # nosec
+import sys
+from distutils.dir_util import copy_tree
 from itertools import islice
-from typing import Any, Iterable, List, Pattern, Tuple
+from subprocess import Popen, TimeoutExpired  # nosec
+from typing import Any, Iterable, List, Optional, Pattern, Tuple
+
+from aea.helpers.base import ensure_dir
+
+
+try:
+    # flake8: noqa
+    # pylint: disable=unused-import,ungrouped-imports
+    from .connection import (  # type: ignore
+        LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
+        LIBP2P_NODE_MODULE,
+        LIBP2P_NODE_MODULE_NAME,
+    )
+except ImportError:  # pragma: nocover
+    # flake8: noqa
+    # pylint: disable=unused-import,ungrouped-imports
+    from connection import (  # type: ignore
+        LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
+        LIBP2P_NODE_MODULE,
+        LIBP2P_NODE_MODULE_NAME,
+    )
 
 from aea.exceptions import AEAException
 
@@ -112,7 +137,7 @@ def check_binary(
     version_match = version_regex.search(stdout)
     if version_match is None:
         print(
-            f"Warning: cannot parse '{binary_name}' version from command: {version_getter_command}."
+            f"Warning: cannot parse '{binary_name}' version from command: {version_getter_command}. stdout: {stdout}"
         )
         return
     actual_version: VERSION = get_version(*map(int, version_match.groups(default="0")))
@@ -128,20 +153,76 @@ def check_binary(
     print_ok_message(binary_name, actual_version, version_lower_bound)
 
 
-def main():
-    """The main entrypoint of the script."""
+def check_versions():
+    """Check versions."""
     check_binary(
         "go",
         ["version"],
         re.compile(r"go version go([0-9]+)\.([0-9]+)"),
         MINIMUM_GO_VERSION,
     )
-    check_binary(
-        "gcc",
-        ["--version"],
-        re.compile(r"gcc.*([0-9]+)\.([0-9]+)\.([0-9]+)"),
-        MINIMUM_GCC_VERSION,
+    if platform.system() == "Darwin":
+        check_binary(  # pragma: nocover
+            "gcc",
+            ["--version"],
+            re.compile(r"clang version.* ([0-9]+)\.([0-9]+)\.([0-9]+) "),
+            MINIMUM_GCC_VERSION,
+        )
+    else:
+        check_binary(
+            "gcc",
+            ["--version"],
+            re.compile(r"gcc.* ([0-9]+)\.([0-9]+)\.([0-9]+)"),
+            MINIMUM_GCC_VERSION,
+        )
+
+
+def main():  # pragma: nocover
+    """The main entrypoint of the script."""
+    if len(sys.argv) < 2:
+        raise ValueError("Please provide build directory path as an argument!")
+    build_dir = sys.argv[1]
+    ensure_dir(build_dir)
+    check_versions()
+    build_node(build_dir)
+
+
+def _golang_module_build(
+    path: str, timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
+) -> Optional[str]:
+    """
+    Builds go module located at `path`, downloads necessary dependencies
+
+    :return: str with logs or error description if happens
+    """
+    proc = Popen(  # nosec
+        ["go", "build"],
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+        cwd=path,
+        env=os.environ,
     )
+
+    try:
+        stdout, _ = proc.communicate(timeout=timeout)  # type: ignore
+    except TimeoutExpired:  # pragma: nocover
+        proc.terminate()
+        proc.wait(timeout=timeout)
+        return "terminated by timeout"
+
+    if proc.returncode != 0:  # pragma: nocover
+        return stdout.decode()  # type: ignore
+    return None
+
+
+def build_node(build_dir: str) -> None:
+    """Build node placed inside build_dir."""
+    copy_tree(LIBP2P_NODE_MODULE, build_dir)
+
+    err_str = _golang_module_build(build_dir)
+    if err_str:  # pragma: nocover
+        raise Exception(f"Node build failed: {err_str}")
+    print("libp2p_node built successfully!")
 
 
 if __name__ == "__main__":

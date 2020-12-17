@@ -1,18 +1,18 @@
 name: contract_api
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 type: protocol
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmZtxYcFEF1PhJSeFpbSwKo3hZL4Vt6ZeGbDP3q8qEh5F6
+  README.md: QmXmHpD7cKDzuvSu7dWXuNZhXp9weNhghauDopSPexSgif
   __init__.py: QmcZFuqoBkEx1fYytpLr7142vtXf9qh8cpeRYVZcaWdmrD
   contract_api.proto: QmSZpXyFMf2MNgVud8iPinaaerx1CManffgHNMx8FcD8jY
   contract_api_pb2.py: QmYEVg28AVRiLDkbddDto51bumh38gRuouagn6wspDtZVN
   custom_types.py: QmT51f1pdiAMCnBkLJiYA2aKfreRqkyohq32RiM7vGfjVu
-  dialogues.py: QmWgSmS9NaDHHPQReqktCX9ELJMyJNvgRjVr4DDJ3nKx8q
-  message.py: QmcR98Wii6C9EbHh2QJSrkp9uq7dXNaCYB1wxdDbV5bEvM
+  dialogues.py: QmaSSvNewnT3LrR7GgrAwnH4ifpceSAuRMopxu1pNL9x8c
+  message.py: QmSZZ7jcXHpjQpTSwhafgUTCab7g4gowaj9SvxeuHQDQqL
   serialization.py: QmPNTw6vXbdw9GMUwCCGyoHNxopVE1ipcp5DriSn3kGiB8
 fingerprint_ignore_patterns: []
 dependencies:

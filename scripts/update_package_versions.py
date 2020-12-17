@@ -30,6 +30,7 @@ import argparse
 import operator
 import os
 import re
+import shutil
 import subprocess  # nosec
 import sys
 from collections import Counter
@@ -670,12 +671,21 @@ def run_once() -> bool:
     return True
 
 
+def check_if_svn_installed() -> None:
+    """Check if svn is installed."""
+    res = shutil.which("svn")
+    if res is None:
+        print("Install svn first!")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     """
     First, check all hashes are up to date, exit if not.
     Then, run the bumping algo, re-hashing upon each bump.
     """
     arguments = parse_arguments()
+    check_if_svn_installed()
     run_hashing()
     check_if_running_allowed()
     while run_once():

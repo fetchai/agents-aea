@@ -16,7 +16,7 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, resources: Resources, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, **kwargs, ,) -> None
+ | __init__(identity: Identity, wallet: Wallet, resources: Resources, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, **kwargs, ,) -> None
 ```
 
 Instantiate the agent.
@@ -40,11 +40,22 @@ Instantiate the agent.
 - `default_routing`: dictionary for default routing.
 - `connection_ids`: active connection ids. Default: consider all the ones in the resources.
 - `search_service_address`: the address of the search service used.
+- `storage_uri`: optional uri to set generic storage
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
 **Returns**:
 
 None
+
+<a name="aea.aea.AEA.get_build_dir"></a>
+#### get`_`build`_`dir
+
+```python
+ | @classmethod
+ | get_build_dir(cls) -> str
+```
+
+Get agent build directory.
 
 <a name="aea.aea.AEA.context"></a>
 #### context

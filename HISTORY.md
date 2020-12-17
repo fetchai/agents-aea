@@ -1,5 +1,31 @@
 # Release History
 
+## 0.8.0 (2020-12-17)
+
+- Adds support for protocol dialogue rules validation
+- Fixes url forwarding in http server connection
+- Revises protocols to correctly define terminal states
+- Adds a build command
+- Adds build command support for libp2p connection
+- Adds multiple fixes to libp2p connection
+- Adds prometheus connection and protocol
+- Adds tests for confirmation AW1 skill
+- Adds oracle demo docs
+- Replaces pickle with protobuf in all protocols
+- Refactors oef models to account for semantic irregularities
+- Updates docs for demos relying on Ganache
+- Adds generic storage support
+- Adds configurable dialogue offloading
+- Fixes transaction generation on confirmation bugs
+- Fixes transaction processing order in all buyer skills
+- Extends ledger api protocol to query ledger state
+- Adds remove-key command in CLI
+- Multiple tac stability fixes
+- Adds support for configurable error handler
+- Multiple additional tests to improve stability
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.7.5 (2020-11-25)
 
 - Adds AW3 AEAs

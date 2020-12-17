@@ -16,12 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the p2p libp2p connection."""
-
 import asyncio
 import logging
 import os
+import platform
 import shutil
 import subprocess  # nosec
 import tempfile
@@ -38,8 +37,7 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
-from aea.exceptions import AEAException
-from aea.helpers.async_utils import AwaitableProc
+from aea.exceptions import enforce
 from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
@@ -50,6 +48,9 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
 
 LIBP2P_NODE_MODULE_NAME = "libp2p_node"
+
+if platform.system() == "Windows":  # pragma: nocover
+    LIBP2P_NODE_MODULE_NAME += ".exe"
 
 LIBP2P_NODE_LOG_FILE = "libp2p_node.log"
 
@@ -64,7 +65,7 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.13.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -86,42 +87,6 @@ def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
         if ip_address(gethostbyname(addr)).is_loopback != is_loopback:
             return False
     return True
-
-
-async def _golang_module_build_async(
-    path: str,
-    log_file_desc: IO[str],
-    timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
-    logger: logging.Logger = _default_logger,
-) -> int:
-    """
-    Builds go module located at `path`, downloads necessary dependencies
-
-    :return: build command returncode
-    """
-    cmd = ["go", "build"]
-
-    env = os.environ
-
-    proc = AwaitableProc(
-        cmd, env=env, cwd=path, stdout=log_file_desc, stderr=log_file_desc, shell=False,
-    )
-
-    golang_build = asyncio.ensure_future(proc.start())
-
-    try:
-        returncode = await asyncio.wait_for(golang_build, timeout)
-    except asyncio.TimeoutError:
-        e = Exception(
-            "Failed to download libp2p dependencies within timeout({})".format(
-                LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT
-            )
-        )
-        logger.error(e)
-        golang_build.cancel()
-        raise e
-
-    return returncode
 
 
 def _golang_module_run(
@@ -359,24 +324,9 @@ class Libp2pNode:
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
-        # open log file
         self._log_file_desc = open(self.log_file, "a", 1)
-
-        # build the node
-        self.logger.info("Downloading golang dependencies. This may take a while...")
-        returncode = await _golang_module_build_async(
-            self.source, self._log_file_desc, logger=self.logger
-        )
-        node_log = ""
-        with open(self.log_file, "r") as f:
-            node_log = f.read()
-        if returncode != 0:
-            raise Exception(
-                "Error while downloading golang dependencies and building it: {}\n{}".format(
-                    returncode, node_log
-                )
-            )
-        self.logger.info("Finished downloading golang dependencies.")
+        self._log_file_desc.write("test")
+        self._log_file_desc.flush()
 
         # setup fifos
         self.pipe = make_ipc_channel(logger=self.logger)
@@ -592,7 +542,6 @@ class P2PLibp2pConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize a p2p libp2p connection."""
 
-        self._check_go_installed()
         # we put it here so below we can access the address
         super().__init__(**kwargs)
         ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
@@ -697,12 +646,12 @@ class P2PLibp2pConnection(Connection):
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         temp_dir = tempfile.mkdtemp()
         self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
-        shutil.copytree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
 
+        self._check_node_built()
         self.node = Libp2pNode(
             record,
             key,
-            self.libp2p_workdir,
+            self.configuration.build_directory,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
@@ -717,6 +666,22 @@ class P2PLibp2pConnection(Connection):
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._receive_from_node_task = None  # type: Optional[asyncio.Future]
+
+    def _check_node_built(self) -> None:
+        """Check node built and move it to workdir."""
+        enforce(
+            bool(self.configuration.build_directory),
+            "Connection Configuration build directory is not set!",
+        )
+
+        libp2p_node_module_path = os.path.join(
+            cast(str, self.configuration.build_directory), LIBP2P_NODE_MODULE_NAME
+        )
+        enforce(
+            os.path.exists(libp2p_node_module_path),
+            f"Module {LIBP2P_NODE_MODULE_NAME} does not present in {self.configuration.build_directory}, please call `aea build` command",
+        )
+        shutil.copy(libp2p_node_module_path, self.libp2p_workdir)
 
     @property
     def libp2p_address(self) -> str:  # pragma: no cover
@@ -822,14 +787,3 @@ class P2PLibp2pConnection(Connection):
             self._in_queue.put_nowait(data)
             if data is None:
                 break
-
-    @staticmethod
-    def _check_go_installed() -> None:
-        """Checks if go is installed. Sys.exits if not"""
-        res = shutil.which("go")
-        if res is None:
-            raise AEAException(  # pragma: nocover
-                "Please install go before running the `{} connection. Go is available for download here: https://golang.org/doc/install".format(
-                    PUBLIC_ID
-                )
-            )
