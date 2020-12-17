@@ -980,7 +980,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             cwd=source_directory,
             check=False,
             timeout=cls.BUILD_TIMEOUT,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         code = res.returncode
         stdout = res.stdout.decode("utf-8")
