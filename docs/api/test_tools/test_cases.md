@@ -463,6 +463,27 @@ Run from agent's directory.
 
 Result
 
+<a name="aea.test_tools.test_cases.BaseAEATestCase.remove_private_key"></a>
+#### remove`_`private`_`key
+
+```python
+ | @classmethod
+ | remove_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, connection: bool = False) -> Result
+```
+
+Remove private key with CLI command.
+
+Run from agent's directory.
+
+**Arguments**:
+
+- `ledger_api_id`: ledger API ID.
+- `connection`: whether or not the private key filepath is for a connection.
+
+**Returns**:
+
+Result
+
 <a name="aea.test_tools.test_cases.BaseAEATestCase.replace_private_key_in_file"></a>
 #### replace`_`private`_`key`_`in`_`file
 

@@ -173,6 +173,16 @@ Get connection status.
 
 Get outbox.
 
+<a name="aea.skills.base.SkillContext.storage"></a>
+#### storage
+
+```python
+ | @property
+ | storage() -> Optional[Storage]
+```
+
+Get optional storage for agent.
+
 <a name="aea.skills.base.SkillContext.message_in_queue"></a>
 #### message`_`in`_`queue
 
@@ -562,6 +572,26 @@ class Model(SkillComponent,  ABC)
 ```
 
 This class implements an abstract model.
+
+<a name="aea.skills.base.Model.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, keep_terminal_state_dialogues: Optional[bool] = None, **kwargs, ,) -> None
+```
+
+Initialize a model.
+
+**Arguments**:
+
+- `name`: the name of the component.
+- `configuration`: the configuration for the component.
+- `skill_context`: the skill context.
+- `keep_terminal_state_dialogues`: specify do dialogues in terminal state should stay or not
+
+**Returns**:
+
+None
 
 <a name="aea.skills.base.Model.setup"></a>
 #### setup

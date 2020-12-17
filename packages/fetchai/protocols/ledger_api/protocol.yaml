@@ -1,18 +1,18 @@
 name: ledger_api
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: protocol
 description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmYQA2V5fKetSbZvdrdAmHkHHYgX9voQqcnrZLntTc3G7M
+  README.md: QmNqqzJepaeagpSLMztqFSLNurUdvo69SpS689RneNWJVn
   __init__.py: QmX6ta6j6ust7qhVk1kZygzZK3gTTg7hSCBbSMKUxJgWgG
   custom_types.py: QmSsjSb6NzKgqExpG26TfdEyJALFSosLYU5NcLxNVeDjWc
   dialogues.py: QmcuATXqitgySbLujTF2s6B79qaKVCMQgSb5iGDrDfiezQ
   ledger_api.proto: QmTZbaYwaY57uQyYEz6B5qNrCkAJMDnokAzfWBX8BrRBEi
   ledger_api_pb2.py: QmbSRQTh59Zjy1kT1Rhra5WhxqwVTe5Xv5E7n4QC6v9qcp
-  message.py: Qmb8up9gT1ywDttSr3rPojGqVyur9LVdCmPVPYXCPkV696
+  message.py: QmVHm2yrWf2YDuJgG3zp4W5NY9H99ktuFnz4diskgwgj8s
   serialization.py: Qmbkyy4aNmAGAM7PReTMv9HbpwDQJmHnMsf4L46gWavBTd
 fingerprint_ignore_patterns: []
 dependencies:

@@ -2,7 +2,7 @@ AEAs can create and update prometheus metrics for remote monitoring by sending m
 
 To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `coin_price_feed_num_retrievals` and `coin_price_feed_num_requests`:
 ```bash
-aea fetch fetchai/coin_price_feed:0.1.0
+aea fetch fetchai/coin_price_feed:0.2.0
 cd coin_price_feed
 aea install
 aea run

@@ -148,6 +148,16 @@ dict of kwargs
 
 Return list of connections.
 
+<a name="aea.abstract_agent.AbstractAgent.storage_uri"></a>
+#### storage`_`uri
+
+```python
+ | @abstractproperty
+ | storage_uri() -> Optional[str]
+```
+
+Return storage uri.
+
 <a name="aea.abstract_agent.AbstractAgent.exception_handler"></a>
 #### exception`_`handler
 

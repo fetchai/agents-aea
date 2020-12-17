@@ -162,7 +162,7 @@ def check_versions():
         MINIMUM_GO_VERSION,
     )
     if platform.system() == "Darwin":
-        check_binary(
+        check_binary(  # pragma: nocover
             "gcc",
             ["--version"],
             re.compile(r"clang version.* ([0-9]+)\.([0-9]+)\.([0-9]+) "),
