@@ -78,12 +78,7 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
 from aea.exceptions import AEAException, AEAValidationError, enforce
-from aea.helpers.base import (
-    ensure_dir,
-    find_topological_order,
-    load_env_file,
-    load_module,
-)
+from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
@@ -780,7 +775,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             configuration.author,
             configuration.name,
         )
-        ensure_dir(configuration.build_directory)
 
     def add_component_instance(self, component: Component) -> "AEABuilder":
         """

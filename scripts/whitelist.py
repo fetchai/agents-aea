@@ -236,3 +236,4 @@ _.unsupported_protocol_count
 _.unsupported_skill_count
 _.decoding_error_count
 _.ErrorHandler  # unused class (aea/error_handler/scaffold.py:27)
+ensure_dir  # unused function (aea/helpers/base.py:561)
