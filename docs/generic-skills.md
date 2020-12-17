@@ -62,6 +62,7 @@ First, fetch the seller AEA:
 aea fetch fetchai/generic_seller:0.16.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -76,6 +77,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/generic_seller:0.18.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
@@ -96,6 +98,7 @@ Then, fetch the buyer AEA:
 aea fetch fetchai/generic_buyer:0.17.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -110,6 +113,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/generic_buyer:0.18.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 

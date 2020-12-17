@@ -250,6 +250,7 @@ Now install all the dependencies:
 
 ``` bash
 aea install
+aea build
 ```
 
 Finally run **Alice_AEA**:
@@ -338,6 +339,7 @@ Now install all the dependencies:
 
 ``` bash
 aea install
+aea build
 ```
 
 Finally run **Faber_AEA**:
