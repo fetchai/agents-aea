@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Module with generic utils of the aea cli."""
-
 import os
 from typing import Dict, List
 

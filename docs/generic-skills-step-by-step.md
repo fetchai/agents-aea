@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.15.0
+aea fetch fetchai/generic_seller:0.16.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.17.0
+aea eject skill fetchai/generic_seller:0.18.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.16.0
+aea fetch fetchai/generic_buyer:0.17.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.17.0
+aea eject skill fetchai/generic_buyer:0.18.0
 cd ..
 ```
 
@@ -140,7 +140,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             )
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_agent()
-        self._register_service()
+        self._register_service_personality_classification()
 
     def act(self) -> None:
         """
@@ -178,23 +178,28 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
-    def _register_service(self) -> None:
+    def _register_service_personality_classification(self) -> None:
         """
-        Register the agent's service.
+        Register the agent's service, personality and classification.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_register_service_description()
+        descriptions = [
+            strategy.get_register_service_description(),
+            strategy.get_register_personality_description(),
+            strategy.get_register_classification_description(),
+        ]
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
+        for description in descriptions:
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+                service_description=description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
 
     def _unregister_service(self) -> None:
@@ -850,6 +855,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
     SIMPLE_SERVICE_MODEL,
@@ -866,6 +872,8 @@ DEFAULT_SERVICE_ID = "generic_service"
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
+DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
 
 DEFAULT_HAS_DATA_SOURCE = False
 DEFAULT_DATA_FOR_SALE = {
@@ -898,6 +906,22 @@ class GenericStrategy(Model):
                 latitude=location["latitude"], longitude=location["longitude"]
             )
         }
+        self._set_personality_data = kwargs.pop(
+            "personality_data", DEFAULT_PERSONALITY_DATA
+        )
+        enforce(
+            len(self._set_personality_data) == 2
+            and "piece" in self._set_personality_data
+            and "value" in self._set_personality_data,
+            "personality_data must contain keys `key` and `value`",
+        )
+        self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
+        enforce(
+            len(self._set_classification) == 2
+            and "piece" in self._set_classification
+            and "value" in self._set_classification,
+            "classification must contain keys `key` and `value`",
+        )
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         enforce(
             len(self._set_service_data) == 2
@@ -975,6 +999,28 @@ The following properties and methods deal with different aspects of the strategy
         """
         description = Description(
             self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_register_personality_description(self) -> Description:
+        """
+        Get the register personality description.
+
+        :return: a description of the personality
+        """
+        description = Description(
+            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+        )
+        return description
+
+    def get_register_classification_description(self) -> Description:
+        """
+        Get the register classification description.
+
+        :return: a description of the classification
+        """
+        description = Description(
+            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -1311,11 +1357,11 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 The `FipaDialogues` class stores dialogue with each `my_generic_buyer` (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to a dialogue, access previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
 
-The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
+The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue`, which itself derives from the base <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
 
 ### Step 6: Update the YAML files
 
-Since we made so many changes to our AEA we have to update the `skill.yaml` (at `my_generic_seller/skills/generic_seller/skill.yaml`). Make sure that your `skill.yaml` matches with the following code
+Since we made so many changes to our AEA we have to update the `skill.yaml` (at `my_generic_seller/skills/generic_seller/skill.yaml`). Make sure you update your `skill.yaml` with the following configuration:
 
 ``` yaml
 name: generic_seller
@@ -1325,20 +1371,23 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmcFahpL4DZ1rsTNEK1BT3e5T8TEJJg2hP4ytkzdqKuJnZ
-  dialogues.py: QmRmoFp9xi1p1THVBYym9xEwW88KgkBHgz45LgrYbBecQw
-  handlers.py: QmT4nvKikWXfGAEdRS8Qn8w89Gbh5zPb4EDB6EwPVP2YDJ
-  strategy.py: QmP69kCtcovLD2Z7quESuNxVEyNuiZgqqbwozp6wAbvBCd
+  README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
+  __init__.py: QmTSEedzQySy2nzRCY3F66CBSX52f8s3pWHZTejX4hKC9h
+  behaviours.py: QmS9sPCv2yBnhWsmHeaCptpApMtYZipbR39TXixeGK64Ks
+  dialogues.py: QmdTW8q1xQ7ajFVsWmuV62ypoT5J2b6Hkyz52LFaWuMEtd
+  handlers.py: QmQnQhSaHPUYaJut8bMe2LHEqiZqokMSVfCthVaqrvPbdi
+  strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.11.0
 contracts: []
 protocols:
-- fetchai/default:0.9.0
-- fetchai/fipa:0.10.0
-- fetchai/ledger_api:0.7.0
-- fetchai/oef_search:0.10.0
+- fetchai/default:0.10.0
+- fetchai/fipa:0.11.0
+- fetchai/ledger_api:0.8.0
+- fetchai/oef_search:0.11.0
 skills: []
 behaviours:
   service_registration:
@@ -1370,12 +1419,10 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
-      currency_id: FET
       data_for_sale:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127
@@ -1431,8 +1478,9 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
-from typing import cast
+from typing import List, Optional, Set, cast
 
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -1441,12 +1489,16 @@ from packages.fetchai.connections.ledger.base import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
+    FipaDialogue,
+    LedgerApiDialogue,
     LedgerApiDialogues,
     OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
+DEFAULT_MAX_PROCESSING = 120
+DEFAULT_TX_INTERVAL = 2.0
 DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
@@ -1504,6 +1556,112 @@ class GenericSearchBehaviour(TickerBehaviour):
         :return: None
         """
         pass
+
+
+class GenericTransactionBehaviour(TickerBehaviour):
+    """A behaviour to sequentially submit transactions to the blockchain."""
+
+    def __init__(self, **kwargs):
+        """Initialize the transaction behaviour."""
+        tx_interval = cast(
+            float, kwargs.pop("transaction_interval", DEFAULT_TX_INTERVAL)
+        )
+        self.max_processing = cast(
+            float, kwargs.pop("max_processing", DEFAULT_MAX_PROCESSING)
+        )
+        self.processing_time = 0.0
+        self.waiting: List[FipaDialogue] = []
+        self.processing: Optional[LedgerApiDialogue] = None
+        self.timedout: Set[DialogueLabel] = set()
+        super().__init__(tick_interval=tx_interval, **kwargs)
+
+    def setup(self) -> None:
+        """Setup behaviour."""
+        pass
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        if self.processing is not None:
+            if self.processing_time <= self.max_processing:
+                # already processing
+                self.processing_time += self.tick_interval
+                return
+            self._timeout_processing()
+        if len(self.waiting) == 0:
+            # nothing to process
+            return
+        self._start_processing()
+
+    def _start_processing(self) -> None:
+        """Process the next transaction."""
+        fipa_dialogue = self.waiting.pop(0)
+        self.context.logger.info(
+            f"Processing transaction, {len(self.waiting)} transactions remaining"
+        )
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
+            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+            terms=fipa_dialogue.terms,
+        )
+        ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        self.processing_time = 0.0
+        self.processing = ledger_api_dialogue
+        self.context.logger.info(
+            f"requesting transfer transaction from ledger api for message={ledger_api_msg}..."
+        )
+        self.context.outbox.put_message(message=ledger_api_msg)
+
+    def teardown(self) -> None:
+        """Teardown behaviour."""
+        pass
+
+    def _timeout_processing(self) -> None:
+        """Timeout processing."""
+        if self.processing is None:
+            return
+        self.timedout.add(self.processing.dialogue_label)
+        self.waiting.append(self.processing.associated_fipa_dialogue)
+        self.processing_time = 0.0
+        self.processing = None
+
+    def finish_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
+        """
+        Finish processing.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        if self.processing == ledger_api_dialogue:
+            self.processing_time = 0.0
+            self.processing = None
+            return
+        if ledger_api_dialogue.dialogue_label not in self.timedout:
+            raise ValueError(
+                f"Non-matching dialogues in transaction behaviour: {self.processing} and {ledger_api_dialogue}"
+            )
+        self.timedout.remove(ledger_api_dialogue.dialogue_label)
+        self.context.logger.debug(
+            f"Timeout dialogue in transaction processing: {ledger_api_dialogue}"
+        )
+        # don't reset, as another might be processing
+
+    def failed_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
+        """
+        Failed processing.
+
+        Currently, we retry processing indefinitely.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.finish_processing(ledger_api_dialogue)
+        self.waiting.append(ledger_api_dialogue.associated_fipa_dialogue)
 ```
 
 This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> will search on  the <a href="../simple-oef">SOEF search node</a> with a specific query at regular tick intervals.
@@ -1519,6 +1677,7 @@ import pprint
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
+from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -1530,6 +1689,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.generic_buyer.behaviours import GenericTransactionBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -1716,21 +1876,11 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
                 fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
                     transfer_address
                 )
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
+
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
             )
-            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=fipa_dialogue.terms,
-            )
-            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-            ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-            fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-            self.context.outbox.put_message(message=ledger_api_msg)
-            self.context.logger.info(
-                "requesting transfer transaction from ledger api..."
-            )
+            tx_behaviour.waiting.append(fipa_dialogue)
         else:
             inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
@@ -2004,8 +2154,7 @@ class GenericSigningHandler(Handler):
         :return: None
         """
         self.context.logger.info("transaction signing was successful.")
-        fipa_dialogue = signing_dialogue.associated_fipa_dialogue
-        ledger_api_dialogue = fipa_dialogue.associated_ledger_api_dialogue
+        ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
         last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")
@@ -2032,6 +2181,19 @@ class GenericSigningHandler(Handler):
                 signing_msg.error_code, signing_dialogue
             )
         )
+        signing_msg_ = cast(
+            Optional[SigningMessage], signing_dialogue.last_outgoing_message
+        )
+        if (
+            signing_msg_ is not None
+            and signing_msg_.performative
+            == SigningMessage.Performative.SIGN_TRANSACTION
+        ):
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -2091,6 +2253,11 @@ class GenericLedgerApiHandler(Handler):
             == LedgerApiMessage.Performative.TRANSACTION_DIGEST
         ):
             self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+        elif (
+            ledger_api_msg.performative
+            == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
+        ):
+            self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -2155,9 +2322,7 @@ class GenericLedgerApiHandler(Handler):
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)
-        signing_dialogue.associated_fipa_dialogue = (
-            ledger_api_dialogue.associated_fipa_dialogue
-        )
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
             "proposing the transaction to the decision maker. Waiting for confirmation ..."
@@ -2172,26 +2337,65 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
         self.context.logger.info(
             "transaction was successfully submitted. Transaction digest={}".format(
                 ledger_api_msg.transaction_digest
             )
         )
-        fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
-        if fipa_msg is None:
-            raise ValueError("Could not retrieve fipa message")
-        inform_msg = fipa_dialogue.reply(
-            performative=FipaMessage.Performative.INFORM,
-            target_message=fipa_msg,
-            info={"transaction_digest": ledger_api_msg.transaction_digest.body},
+        ledger_api_msg_ = ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target_message=ledger_api_msg,
+            transaction_digest=ledger_api_msg.transaction_digest,
         )
-        self.context.outbox.put_message(message=inform_msg)
-        self.context.logger.info(
-            "informing counterparty={} of transaction digest.".format(
-                fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+        self.context.logger.info("checking transaction is settled.")
+        self.context.outbox.put_message(message=ledger_api_msg_)
+
+    def _handle_transaction_receipt(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of balance performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
+        is_settled = LedgerApis.is_transaction_settled(
+            fipa_dialogue.terms.ledger_id, ledger_api_msg.transaction_receipt.receipt
+        )
+        tx_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        if is_settled:
+            tx_behaviour.finish_processing(ledger_api_dialogue)
+            ledger_api_msg_ = cast(
+                Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
-        )
+            if ledger_api_msg_ is None:
+                raise ValueError(  # pragma: nocover
+                    "Could not retrieve last ledger_api message"
+                )
+            fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
+            if fipa_msg is None:
+                raise ValueError("Could not retrieve last fipa message")
+            inform_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.INFORM,
+                target_message=fipa_msg,
+                info={"transaction_digest": ledger_api_msg_.transaction_digest.body},
+            )
+            self.context.outbox.put_message(message=inform_msg)
+            self.context.logger.info(
+                "transaction confirmed, informing counterparty={} of transaction digest.".format(
+                    fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+                )
+            )
+        else:
+            tx_behaviour.failed_processing(ledger_api_dialogue)
+            self.context.logger.info(
+                "transaction_receipt={} not settled or not valid, aborting".format(
+                    ledger_api_msg.transaction_receipt
+                )
+            )
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -2207,6 +2411,18 @@ class GenericLedgerApiHandler(Handler):
                 ledger_api_msg, ledger_api_dialogue
             )
         )
+        ledger_api_msg_ = cast(
+            Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
+        )
+        if (
+            ledger_api_msg_ is not None
+            and ledger_api_msg_.performative
+            != LedgerApiMessage.Performative.GET_BALANCE
+        ):
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -2248,6 +2464,8 @@ DEFAULT_IS_LEDGER_TX = True
 DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
+DEFAULT_MIN_QUANTITY = 1
+DEFAULT_MAX_QUANTITY = 100
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
@@ -2274,6 +2492,8 @@ class GenericStrategy(Model):
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
 
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_UNIT_PRICE)
+        self._min_quantity = kwargs.pop("min_quantity", DEFAULT_MIN_QUANTITY)
+        self._max_quantity = kwargs.pop("max_quantity", DEFAULT_MAX_QUANTITY)
         self._max_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
@@ -2408,6 +2628,9 @@ The following code block checks if the proposal that we received is acceptable b
                 ]
             )
             and proposal.values["ledger_id"] == self.ledger_id
+            and proposal.values["price"] > 0
+            and proposal.values["quantity"] >= self._min_quantity
+            and proposal.values["quantity"] <= self._max_quantity
             and proposal.values["price"]
             <= proposal.values["quantity"] * self._max_unit_price
             and proposal.values["currency_id"] == self._currency_id
@@ -2592,7 +2815,6 @@ class FipaDialogue(BaseFipaDialogue):
             message_class=message_class,
         )
         self._terms = None  # type: Optional[Terms]
-        self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
 
     @property
     def terms(self) -> Terms:
@@ -2606,24 +2828,6 @@ class FipaDialogue(BaseFipaDialogue):
         """Set terms."""
         enforce(self._terms is None, "Terms already set!")
         self._terms = terms
-
-    @property
-    def associated_ledger_api_dialogue(self) -> "LedgerApiDialogue":
-        """Get associated_ledger_api_dialogue."""
-        if self._associated_ledger_api_dialogue is None:
-            raise AEAEnforceError("LedgerApiDialogue not set!")
-        return self._associated_ledger_api_dialogue
-
-    @associated_ledger_api_dialogue.setter
-    def associated_ledger_api_dialogue(
-        self, ledger_api_dialogue: "LedgerApiDialogue"
-    ) -> None:
-        """Set associated_ledger_api_dialogue"""
-        enforce(
-            self._associated_ledger_api_dialogue is None,
-            "LedgerApiDialogue already set!",
-        )
-        self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
 class FipaDialogues(Model, BaseFipaDialogues):
@@ -2787,20 +2991,25 @@ class SigningDialogue(BaseSigningDialogue):
             role=role,
             message_class=message_class,
         )
-        self._associated_fipa_dialogue = None  # type: Optional[FipaDialogue]
+        self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
 
     @property
-    def associated_fipa_dialogue(self) -> FipaDialogue:
-        """Get associated_fipa_dialogue."""
-        if self._associated_fipa_dialogue is None:
-            raise AEAEnforceError("FipaDialogue not set!")
-        return self._associated_fipa_dialogue
+    def associated_ledger_api_dialogue(self) -> LedgerApiDialogue:
+        """Get associated_ledger_api_dialogue."""
+        if self._associated_ledger_api_dialogue is None:
+            raise AEAEnforceError("LedgerApiDialogue not set!")
+        return self._associated_ledger_api_dialogue
 
-    @associated_fipa_dialogue.setter
-    def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
-        """Set associated_fipa_dialogue"""
-        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
-        self._associated_fipa_dialogue = fipa_dialogue
+    @associated_ledger_api_dialogue.setter
+    def associated_ledger_api_dialogue(
+        self, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """Set associated_ledger_api_dialogue"""
+        enforce(
+            self._associated_ledger_api_dialogue is None,
+            "LedgerApiDialogue already set!",
+        )
+        self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
 class SigningDialogues(Model, BaseSigningDialogues):
@@ -2840,7 +3049,7 @@ The dialogues class stores dialogue with each AEA and other AEA components so we
 
 Since we made so many changes to our AEA we have to update the `skill.yaml` to contain our newly created scripts and the details that will be used from the strategy.
 
-First, we update the `skill.yaml`. Make sure that your `skill.yaml` matches with the following code:
+First, we update the `skill.yaml`. Make sure you update your `skill.yaml` with the following configuration:
 
 ``` yaml
 name: generic_buyer
@@ -2849,27 +3058,35 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmUBQvZkoCcik71vqRZGP4JJBgFP2kj8o7C24dfkAphitP
-  dialogues.py: Qmf3McwyT5wMv3BzoN1L3ssqZzEq19LShEjQueiKqvADcX
-  handlers.py: QmQVmi3GnuYJ5VM4trYjUeJyFHVfrUeMGDsRmtNCuntKA8
-  strategy.py: QmQHQsjAsPiox5zMtMHhdhhhHt4rKq3cs3bqnwjgGSFp6n
+  README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
+  __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
+  behaviours.py: QmNwvSjEz4kzM3gWtnKbZVFJc2Z85Nb748CWAK4C4Sa4nT
+  dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU
+  handlers.py: QmZfudXXbdiREiViuwPZDXoQQyXT2ySQHdF7psQsohZXQy
+  strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.11.0
 contracts: []
 protocols:
-- fetchai/default:0.9.0
-- fetchai/fipa:0.10.0
-- fetchai/ledger_api:0.7.0
-- fetchai/oef_search:0.10.0
-- fetchai/signing:0.7.0
+- fetchai/default:0.10.0
+- fetchai/fipa:0.11.0
+- fetchai/ledger_api:0.8.0
+- fetchai/oef_search:0.11.0
+- fetchai/signing:0.8.0
 skills: []
 behaviours:
   search:
     args:
       search_interval: 5
     class_name: GenericSearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: GenericTransactionBehaviour
 handlers:
   fipa:
     args: {}
@@ -2901,21 +3118,21 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
-      currency_id: FET
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: seller_service
         search_value: generic_service
       search_radius: 5.0
       service_id: generic_service
+      stop_searching_on_result: true
     class_name: GenericStrategy
 dependencies: {}
 ```
@@ -2964,8 +3181,8 @@ aea add-key fetchai fetchai_private_key.txt --connection
 Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
 ``` yaml
 default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
+  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
 ```
 
 ### Fund the buyer AEA
@@ -2981,12 +3198,12 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add protocol fetchai/fipa:0.10.0
+aea add connection fetchai/p2p_libp2p:0.13.0
+aea add connection fetchai/soef:0.14.0
+aea add connection fetchai/ledger:0.11.0
+aea add protocol fetchai/fipa:0.11.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea run
 ```
 
@@ -2997,13 +3214,13 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add protocol fetchai/fipa:0.10.0
-aea add protocol fetchai/signing:0.7.0
+aea add connection fetchai/p2p_libp2p:0.13.0
+aea add connection fetchai/soef:0.14.0
+aea add connection fetchai/ledger:0.11.0
+aea add protocol fetchai/fipa:0.11.0
+aea add protocol fetchai/signing:0.8.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
 Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:

@@ -46,7 +46,7 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = PublicId.from_str("fetchai/oef_search:0.10.0")
+    protocol_id = PublicId.from_str("fetchai/oef_search:0.11.0")
 
     AgentsInfo = CustomAgentsInfo
 
@@ -78,6 +78,7 @@ class OefSearchMessage(Message):
         "success",
         "unregister_service",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

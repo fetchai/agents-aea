@@ -44,7 +44,6 @@ class TProtocolNoCtDialogue(Dialogue):
         {
             TProtocolNoCtMessage.Performative.PERFORMATIVE_MT,
             TProtocolNoCtMessage.Performative.PERFORMATIVE_O,
-            TProtocolNoCtMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS,
         }
     )
     VALID_REPLIES = {
@@ -121,6 +120,8 @@ class TProtocolNoCtDialogues(Dialogues, ABC):
             TProtocolNoCtDialogue.EndState.END_STATE_3,
         }
     )
+
+    _keep_terminal_state_dialogues = True
 
     def __init__(
         self,

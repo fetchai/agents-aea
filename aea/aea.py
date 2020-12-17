@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import datetime
 from asyncio import AbstractEventLoop
@@ -44,10 +43,11 @@ from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
+from aea.error_handler.base import AbstractErrorHandler
+from aea.error_handler.default import ErrorHandler as DefaultErrorHandler
 from aea.exceptions import AEAException, _StopRuntime
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
-from aea.helpers.temp_error_handler import ErrorHandler
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
@@ -65,6 +65,8 @@ class AEA(Agent):
     }
     DEFAULT_RUN_LOOP: str = "async"
 
+    DEFAULT_BUILD_DIR_NAME = ".build"
+
     def __init__(
         self,
         identity: Identity,
@@ -74,6 +76,7 @@ class AEA(Agent):
         period: float = 0.05,
         execution_timeout: float = 0,
         max_reactions: int = 20,
+        error_handler_class: Optional[Type[AbstractErrorHandler]] = None,
         decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
@@ -85,6 +88,7 @@ class AEA(Agent):
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
+        storage_uri: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
@@ -107,8 +111,8 @@ class AEA(Agent):
         :param default_routing: dictionary for default routing.
         :param connection_ids: active connection ids. Default: consider all the ones in the resources.
         :param search_service_address: the address of the search service used.
+        :param storage_uri: optional uri to set generic storage
         :param kwargs: keyword arguments to be attached in the agent context namespace.
-
         :return: None
         """
 
@@ -126,6 +130,7 @@ class AEA(Agent):
             period=period,
             loop_mode=loop_mode,
             runtime_mode=runtime_mode,
+            storage_uri=storage_uri,
             logger=cast(Logger, aea_logger),
         )
 
@@ -142,6 +147,9 @@ class AEA(Agent):
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 
+        if error_handler_class is None:
+            error_handler_class = DefaultErrorHandler
+        self._error_handler_class = error_handler_class
         default_ledger_id = (
             default_ledger
             if default_ledger is not None
@@ -165,6 +173,8 @@ class AEA(Agent):
             default_routing if default_routing is not None else {},
             search_service_address,
             decision_maker_handler.self_address,
+            storage_callable=lambda: self._runtime.storage,
+            build_dir=self.get_build_dir(),
             **kwargs,
         )
         self._execution_timeout = execution_timeout
@@ -175,6 +185,11 @@ class AEA(Agent):
         )
 
         self._setup_loggers()
+
+    @classmethod
+    def get_build_dir(cls) -> str:
+        """Get agent build directory."""
+        return cls.DEFAULT_BUILD_DIR_NAME
 
     @property
     def context(self) -> AgentContext:
@@ -246,11 +261,9 @@ class AEA(Agent):
             default_connection=self.context.default_connection,
         )
 
-    @staticmethod
-    def _get_error_handler() -> Type[ErrorHandler]:
+    def _get_error_handler(self) -> Type[AbstractErrorHandler]:
         """Get error handler."""
-        handler = ErrorHandler
-        return handler
+        return self._error_handler_class
 
     def _get_msg_and_handlers_for_envelope(
         self, envelope: Envelope

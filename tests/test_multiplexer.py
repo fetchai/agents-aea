@@ -761,6 +761,9 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
         assert result.exit_code == 0, result.stdout_bytes
 
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
+        assert result.exit_code == 0, result.stdout_bytes
+
         self.proc = PexpectWrapper(  # nosec
             [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
             env=os.environ,
@@ -770,7 +773,7 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Finished downloading golang dependencies"], timeout=50,
+            ["Starting libp2p node..."], timeout=50,
         )
         self.proc.control_c()
         self.proc.expect_all(

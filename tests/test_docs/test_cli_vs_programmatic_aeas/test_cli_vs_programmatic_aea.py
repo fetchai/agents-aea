@@ -65,7 +65,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.18.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.19.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -94,11 +94,10 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         )
         self.nested_set_config(setting_path, location)
 
+        self.run_cli_command("build", cwd=self._get_cwd())
         weather_station_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -118,8 +117,6 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         weather_client_process = self.start_subprocess(DEST, cwd=self.t)
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -175,7 +172,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 170  # line below: `strategy._is_ledger_tx = False`
+        line_insertion_position = 180  # line below: `strategy._is_ledger_tx = False`
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",

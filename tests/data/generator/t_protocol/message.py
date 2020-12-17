@@ -65,6 +65,7 @@ class TProtocolMessage(Message):
         "performative_pmt",
         "performative_pt",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

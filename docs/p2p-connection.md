@@ -1,4 +1,4 @@
-The `fetchai/p2p_libp2p:0.12.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
+The `fetchai/p2p_libp2p:0.13.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
 
 ## Local demo
 
@@ -9,9 +9,9 @@ Create one AEA as follows:
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
-aea run --connections fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/p2p_libp2p:0.13.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea run --connections fetchai/p2p_libp2p:0.13.0
 ```
 
 ### Create and run another AEA
@@ -21,8 +21,8 @@ Create a second AEA:
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/p2p_libp2p:0.13.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
 Provide the AEA with the information it needs to find the genesis by replacing the following block in `vendor/fetchai/connnections/p2p_libp2p/connection.yaml`:
@@ -40,7 +40,7 @@ Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses dis
 Run the AEA:
 
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.12.0
+aea run --connections fetchai/p2p_libp2p:0.13.0
 ```
 
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
@@ -61,23 +61,29 @@ Explore the <a href="../weather-skills">demo section</a> for further examples.
 You can connect to the deployed public test network by adding one or multiple of the following addresses as the `libp2p_entry_peers`:
 
 ```yaml
-/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx
-/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
+/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx
+/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ```
 
-In particular, by modifying the configuration such that:
+In particular, by modifying the configuration by specifying an override in `aea-config.yaml` such that:
 ``` yaml
+---
+public_id: fetchai/p2p_libp2p:0.13.0
+type: connection
 config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: [/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx,/dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW]
+  delegate_uri: null
+  entry_peers: [/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx,/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW]
+  public_uri: null
   local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
 ```
+
+Note, this configuration change must be made for all of the agents which are attempting to communicate via the Agent Communication Network, i.e. BOTH Agent_A and Agent_B will require the above modifications to their `aea-config.yaml` file, however different ports need to be specified in the `local_uri.` This will allow both of these agents to default to this communication network, without the added overhead of opening/specifying ports/hosts on the individual host machines running the agents.
+
 
 ## Configuring the `connection.yaml` entries:
 
 
-To learn more about how to configure your `fetchai/p2p_libp2p:0.12.0` connection consult the `README.md` supplied with the connection package.
+To learn more about how to configure your `fetchai/p2p_libp2p:0.13.0` connection consult the `README.md` supplied with the connection package.
 
 ## Running Go peer standalone
 

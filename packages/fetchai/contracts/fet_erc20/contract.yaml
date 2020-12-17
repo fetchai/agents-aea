@@ -1,0 +1,17 @@
+name: fet_erc20
+author: fetchai
+version: 0.1.0
+type: contract
+description: The fet_erc20 contract contains a mock Fetch ERC20 contract
+license: Apache-2.0
+aea_version: '>=0.8.0, <0.9.0'
+fingerprint:
+  README.md: QmdksAfBj3gVPH8zmzpHjjpXsf1gtAY6z6gjrfYfiicLrr
+  __init__.py: QmeJ8x6NiZjVLFbUTgpPPCMzQscqjHNBDExapiezpakksR
+  contract.py: QmXBwwreRLWRqqj62mCBx6naKcKM25h1odT9qdSxMmiBg7
+fingerprint_ignore_patterns:
+- build/*
+class_name: FetERC20
+contract_interface_paths:
+  ethereum: build/FetERC20Mock.json
+dependencies: {}

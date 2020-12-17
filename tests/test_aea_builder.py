@@ -25,7 +25,8 @@ from importlib import import_module
 from pathlib import Path
 from textwrap import dedent, indent
 from typing import Collection
-from unittest.mock import Mock, patch
+from unittest import mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import yaml
@@ -42,7 +43,11 @@ from aea.configurations.base import (
     ProtocolConfig,
     SkillConfig,
 )
-from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
+from aea.configurations.constants import (
+    DEFAULT_LEDGER,
+    DEFAULT_PRIVATE_KEY_FILE,
+    DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
+)
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
@@ -62,6 +67,7 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+from tests.common.mocks import RegexComparator
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,
@@ -106,7 +112,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.10.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.11.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -481,8 +487,12 @@ def test_set_from_config():
     agent_configuration = Mock()
     agent_configuration.default_connection = "test/test:0.1.0"
     agent_configuration.decision_maker_handler = {
-        "dotted_path": "aea.decision_maker.default:DecisionMakerHandler",
+        "dotted_path": f"aea.decision_maker.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}DecisionMakerHandler",
         "file_path": ROOT_DIR + "/aea/decision_maker/default.py",
+    }
+    agent_configuration.error_handler = {
+        "dotted_path": f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler",
+        "file_path": ROOT_DIR + "/aea/error_handler/default.py",
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
     agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
@@ -645,7 +655,9 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         self.new_model_args = {"model_arg_1": 42}
         self._add_dummy_skill_config()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+
         with cd(self._get_cwd()):
+            builder.call_all_build_entrypoints()
             aea = builder.build()
 
         dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
@@ -691,6 +703,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
         self._add_dummy_skill_config()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
+            builder.call_all_build_entrypoints()
             aea = builder.build()
 
         dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
@@ -773,3 +786,63 @@ class TestExtraDeps(AEATestCaseEmpty):
             raise Exception("should not be raised")
         except ModuleNotFoundError:
             pass
+
+
+class TestBuildEntrypoint(AEATestCaseEmpty):
+    """Test build entrypoint."""
+
+    def setup(self):
+        """Set up the test."""
+        self.builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        self.component_id = "component_id"
+        # add project-wide build entrypoint
+        self.script_path = Path("script.py")
+        self.builder._build_entrypoint = str(self.script_path)
+
+    def test_build_positive_aea(self):
+        """Test build project-wide entrypoint, positive."""
+        with cd(self._get_cwd()):
+            self.script_path.write_text("")
+            with patch.object(self.builder.logger, "info") as info_mock:
+                self.builder.call_all_build_entrypoints()
+
+        info_mock.assert_any_call("Building AEA package...")
+        info_mock.assert_any_call(RegexComparator("Running command '.*script.py .*'"))
+
+    def test_build_positive_package(self):
+        """Test build package entrypoint, positive."""
+        with cd(self._get_cwd()):
+            self.script_path.write_text("")
+            # add mock configuration build entrypoint
+            with patch.object(self.builder, "_package_dependency_manager") as _mock_mgr:
+                mock_config = MagicMock(
+                    component_id=self.component_id,
+                    build_entrypoint=str(self.script_path),
+                    directory=".",
+                    build_directory="test",
+                )
+                mock_values = MagicMock(return_value=[mock_config])
+                _mock_mgr._dependencies = MagicMock(values=mock_values)
+
+                with patch.object(self.builder.logger, "info") as info_mock:
+                    self.builder.call_all_build_entrypoints()
+
+        info_mock.assert_any_call(f"Building package {self.component_id}...")
+        info_mock.assert_any_call(RegexComparator("Running command '.*script.py .*'"))
+
+    def test_build_negative_syntax_error(self):
+        """Test build, negative due to a syntax error in the script."""
+        match = r"The Python script at 'script.py' has a syntax error: invalid syntax \(<unknown>, line 1\): syntax\+\.error\n"
+        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+            self.script_path.write_text("syntax+.error")
+            self.builder.call_all_build_entrypoints()
+
+    @mock.patch(
+        "aea.aea_builder.check_call", side_effect=Exception("some error."),
+    )
+    def test_build_negative_subprocess(self, *_mocks):
+        """Test build, negative due to script error at runtime."""
+        match = f"An error occurred while running command '.*script.py .+': some error."
+        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+            self.script_path.write_text("")
+            self.builder.call_all_build_entrypoints()

@@ -1,18 +1,18 @@
 name: state_update
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: protocol
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmSZw8KVNoM9DiG4M9G2TT2fmeW6B95bgsruHCDQdDWGWz
+  README.md: QmUKL4QkkPJCkKNiw8oF7dbKVAmSs9YkZc5RHaq8ziCYaD
   __init__.py: Qmd7GvLL2hzSbbk5JNcHyRDNH7yvhS3SaxitBbQcvA9i7U
-  dialogues.py: QmRksq9XHPcP5Nhib8PfhF1Yfp19dkETxwK3Z2xM5E2xA1
-  message.py: QmSpVPHWRju9X5XrvHjtFtkzF1oSPoSCnokENE2w2APkNt
-  serialization.py: QmVR4tLTXxAkd2HfMkxjwyBB2jk6FtKDNAzWw6VN2sdgkd
-  state_update.proto: QmX1YJaiCeEdURVzu8qx5w2gq5gs2V9cy8dJ7jg79poQLs
-  state_update_pb2.py: QmdcPXga9ai8p3f5t3tji3hd5WttRhbVj8qJ7vHeBcUJ3c
+  dialogues.py: QmTaHNZ5L4T8HoRNgQJ3nxUfKXCXLPAeAiopDy21ybs8o9
+  message.py: QmZkz31xtjHCywQaQHDNZXRkTMKtxqpYfdSePTeAdeSW41
+  serialization.py: QmPQuxNbWMemgAJ9Lwzzi8K95aTES2DVSVzhJzsN1Njo1E
+  state_update.proto: QmVZjMwsoSC5UYWDVCv2Sp8ELS9TG6sCR5gHqBWAKayRY7
+  state_update_pb2.py: QmdnTuC7FLetYMPWBk1Nv3TccghovZYddW6BGXcHUQ9nSh
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

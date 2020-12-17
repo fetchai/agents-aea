@@ -1,14 +1,14 @@
 name: ml_data_provider
 author: fetchai
-version: 0.16.0
+version: 0.17.0
 type: skill
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmakpsKWJrGRsoFaKR1Gf94KqcuPrkdXTYyciq5d4EhoFF
-  __init__.py: QmUDtusrZzQ3FjjpJGWJZ1nEDtJzjK7ZixpuUUwQ2CsK4Z
+  __init__.py: QmXWALCABSWjocW45wvcZ3e8pftqedmnrKtjpTtaLstxrQ
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmVwLCVudrwmJ33t5npXFDfRp8UYK7QFH4djanZgzziPTw
   handlers.py: QmWCVSnLMSLLPB9koJVc7g12YsfW3eCgkMET8TTpwDDW69
@@ -17,12 +17,12 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:0.9.0
-- fetchai/ledger_api:0.7.0
-- fetchai/ml_trade:0.9.0
-- fetchai/oef_search:0.10.0
+- fetchai/default:0.10.0
+- fetchai/ledger_api:0.8.0
+- fetchai/ml_trade:0.10.0
+- fetchai/oef_search:0.11.0
 skills:
-- fetchai/generic_seller:0.17.0
+- fetchai/generic_seller:0.18.0
 behaviours:
   service_registration:
     args:
@@ -55,10 +55,16 @@ models:
     args:
       batch_size: 2
       buyer_tx_fee: 10
+      classification:
+        piece: classification
+        value: seller
       is_ledger_tx: true
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       price_per_data_batch: 100
       seller_tx_fee: 0
       service_data:

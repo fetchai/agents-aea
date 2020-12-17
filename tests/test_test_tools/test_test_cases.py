@@ -278,6 +278,9 @@ class TestGenerateAndAddKey(AEATestCaseEmpty):
         result = self.add_private_key("cosmos", "cosmos_private_key.txt")
         assert result.exit_code == 0
 
+        result = self.remove_private_key("cosmos")
+        assert result.exit_code == 0
+
 
 class TestGetWealth(AEATestCaseEmpty):
     """Test get_wealth."""

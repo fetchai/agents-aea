@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package aea.helpers.search.models;
+
+message Query {
+    message Attribute {
+        enum Type {
+            DOUBLE  = 0;
+            INT    = 1;
+            BOOL   = 2;
+            STRING = 3;
+            LOCATION = 4;
+        }
+        string name = 1;
+        Type type = 2;
+        bool required = 3;
+        string description = 4;
+    }
+    message DataModel {
+        string name = 1;
+        repeated Attribute attributes = 2;
+        string description = 3;
+    }
+    message Location {
+         double lon = 1;
+         double lat = 2;
+    }
+    message Value {
+        oneof value {
+            string string = 1;
+            double double = 2;
+            bool boolean = 3;
+            int64 integer = 4;
+            Location location = 5;
+        }
+    }
+    message KeyValue {
+        string key = 1;
+        Value value = 2;
+    }
+    message Instance {
+        DataModel model = 1;
+        repeated KeyValue values = 2;
+    }
+    message StringPair {
+        string first = 1;
+        string second = 2;
+    }
+    message IntPair {
+        int64 first = 1;
+        int64 second = 2;
+    }
+    message DoublePair {
+        double first = 1;
+        double second = 2;
+    }
+    message LocationPair {
+        Location first = 1;
+        Location second = 2;
+    }
+    message Range {
+        oneof pair {
+            StringPair string_pair = 1;
+            IntPair integer_pair = 2;
+            DoublePair double_pair = 3;
+            LocationPair location_pair = 4;
+        }
+    }
+    message Distance {
+        Location center = 1;
+        double distance = 2;
+    }
+    message Relation {
+        enum Operator {
+            EQ    = 0; // =
+            LT    = 1; // <
+            LTEQ  = 2; // <=
+            GT    = 3; // >
+            GTEQ  = 4; // >=
+            NOTEQ = 5; // !=, <>
+        }
+        Operator operator = 1;
+        Value value = 2;
+    }
+    message Set {
+        message Values {
+            message Ints {
+                repeated int64 values = 1;
+            }
+            message Doubles {
+                repeated double values = 1;
+            }
+            message Strings {
+                repeated string values = 1;
+            }
+            message Bools {
+                repeated bool values = 1;
+            }
+            message Locations {
+                repeated Location values = 1;
+            }
+            oneof values {
+                Strings string = 1;
+                Doubles double = 2;
+                Bools boolean = 3;
+                Ints integer = 4;
+                Locations location = 5;
+            }
+        }
+        enum Operator {
+            IN    = 0;
+            NOTIN = 1;
+        }
+        Operator operator = 1;
+        Values values = 2;
+    }
+    message ConstraintExpr {
+        message Or {
+            repeated ConstraintExpr expression = 1;
+        }
+        message And {
+            repeated ConstraintExpr expression = 1;
+        }
+        message Not {
+            ConstraintExpr expression = 1;
+        }
+        message Constraint {
+            string attribute_name = 1;
+            oneof constraint {
+                Set set_ = 2;
+                Range range_ = 3;
+                Relation relation = 4;
+                Distance distance = 5;
+            }
+        }
+        oneof expression {
+            Or or_ = 1;
+            And and_ = 2;
+            Not not_ = 3;
+            Constraint constraint = 4;
+        }
+    }
+    message Model {
+        repeated ConstraintExpr constraints = 1;
+        DataModel model = 2;
+    }
+}
+
+// option optimize_for = LITE_RUNTIME;
+option optimize_for = SPEED;

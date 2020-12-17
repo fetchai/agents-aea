@@ -50,6 +50,7 @@ class ContractApiDialogue(Dialogue):
             ContractApiMessage.Performative.STATE,
             ContractApiMessage.Performative.RAW_TRANSACTION,
             ContractApiMessage.Performative.RAW_MESSAGE,
+            ContractApiMessage.Performative.ERROR,
         }
     )
     VALID_REPLIES = {
@@ -125,6 +126,8 @@ class ContractApiDialogues(Dialogues, ABC):
     END_STATES = frozenset(
         {ContractApiDialogue.EndState.SUCCESSFUL, ContractApiDialogue.EndState.FAILED}
     )
+
+    _keep_terminal_state_dialogues = False
 
     def __init__(
         self,

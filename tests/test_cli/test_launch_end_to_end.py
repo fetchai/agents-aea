@@ -82,6 +82,13 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             json.dumps({"key": self.key, "value": self.value}),
             cwd=registration_agent_name,
         )
+        self.run_cli_command(
+            "config",
+            "set",
+            "vendor.fetchai.connections.soef.config.token_storage_path",
+            os.path.join(self.t, registration_agent_name, "soef_key.txt"),
+            cwd=registration_agent_name,
+        )
 
         search_agent_name = "search_agent"
         self.fetch_agent(
@@ -121,6 +128,19 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             "int",
             "2",
             cwd=search_agent_name,
+        )
+        self.run_cli_command(
+            "config",
+            "set",
+            "vendor.fetchai.connections.soef.config.token_storage_path",
+            os.path.join(self.t, search_agent_name, "soef_key.txt"),
+            cwd=search_agent_name,
+        )
+        self.run_cli_command(
+            "build", cwd=registration_agent_name,
+        )
+        self.run_cli_command(
+            "build", cwd=search_agent_name,
         )
 
         proc = PexpectWrapper(  # nosec

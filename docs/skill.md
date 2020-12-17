@@ -1,6 +1,6 @@
 <a href="../api/skills/base#skill-objects">`Skills`</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
 
-<img src="../assets/skill-components.png" alt="Skill components of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+<img src="../assets/skill-components.jpg" alt="Skill components of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 A skill encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
@@ -262,7 +262,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.9.0
+- fetchai/default:0.10.0
 ```
 
 
@@ -275,7 +275,20 @@ All AEAs have a default `error` skill that contains error handling code for a nu
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
 
-The error skill relies on the `fetchai/default:0.9.0` protocol which provides error codes for the above.
+The error skill relies on the `fetchai/default:0.10.0` protocol which provides error codes for the above.
+
+
+## Custom Error handler
+
+The framework implements a default <a href="../api/error_handler/default#errorhandler-objects">`ErrorHandler`</a>. 
+You can implement your own and mount it. The easiest way to do this is to run the following command to scaffold a custom `ErrorHandler`:
+
+``` bash
+aea scaffold error-handler
+```
+
+Now you will see a file called `error_handler.py` in the AEA project root.
+You can then implement your own custom logic to process messages. 
 
 
 <br />

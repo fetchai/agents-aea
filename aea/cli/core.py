@@ -25,6 +25,7 @@ import click
 import aea
 from aea.cli.add import add
 from aea.cli.add_key import add_key
+from aea.cli.build import build
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.delete import delete
@@ -49,6 +50,7 @@ from aea.cli.publish import publish
 from aea.cli.push import push
 from aea.cli.register import register
 from aea.cli.remove import remove
+from aea.cli.remove_key import remove_key
 from aea.cli.reset_password import reset_password
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
@@ -72,7 +74,7 @@ from aea.helpers.win32 import enable_ctrl_c_support
     is_flag=True,
     required=False,
     default=False,
-    help="Skip consistency checks.",
+    help="Skip consistency checks of agent during command execution.",
 )
 @click.pass_context
 def cli(click_context, skip_consistency_check: bool) -> None:
@@ -118,6 +120,7 @@ def _init_gui() -> None:
 cli.add_command(_list)
 cli.add_command(add_key)
 cli.add_command(add)
+cli.add_command(build)
 cli.add_command(create)
 cli.add_command(config)
 cli.add_command(delete)
@@ -141,6 +144,7 @@ cli.add_command(publish)
 cli.add_command(push)
 cli.add_command(register)
 cli.add_command(remove)
+cli.add_command(remove_key)
 cli.add_command(reset_password)
 cli.add_command(run)
 cli.add_command(scaffold)

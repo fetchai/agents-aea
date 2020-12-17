@@ -28,7 +28,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.18.0
+aea fetch fetchai/weather_station:0.19.0
 cd weather_station
 ```
 
@@ -71,6 +71,7 @@ import sys
 from typing import cast
 
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
@@ -80,6 +81,7 @@ from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
+import packages.fetchai.connections.p2p_libp2p.connection
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
 from packages.fetchai.connections.soef.connection import SOEFConnection
@@ -184,7 +186,15 @@ def run():
         local_uri="127.0.0.1:9001",
         log_file="libp2p_node.log",
         public_uri="127.0.0.1:9001",
+        build_directory=os.getcwd(),
+        build_entrypoint="check_dependencies.py",
     )
+    configuration.directory = os.path.dirname(
+        packages.fetchai.connections.p2p_libp2p.connection.__file__
+    )
+
+    AEABuilder.run_build_for_component_configuration(configuration)
+
     p2p_connection = P2PLibp2pConnection(
         configuration=configuration,
         identity=identity,

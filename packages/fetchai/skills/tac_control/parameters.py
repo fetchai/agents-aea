@@ -38,6 +38,7 @@ DEFAULT_MONEY_ENDOWMENT = 200
 DEFAULT_NB_GOODS = 9  # ERC1155 vyper contract only accepts 10 tokens per mint/create
 DEFAULT_NB_CURRENCIES = 1
 DEFAULT_TX_FEE = 1
+DEFAULT_GAS = 5000000
 DEFAULT_BASE_GOOD_ENDOWMENT = 2
 DEFAULT_LOWER_BOUND_FACTOR = 1
 DEFAULT_UPPER_BOUND_FACTOR = 1
@@ -72,6 +73,7 @@ class Parameters(Model):
             "nb_currencies", DEFAULT_NB_CURRENCIES
         )  # type: int
         self._tx_fee = kwargs.pop("tx_fee", DEFAULT_TX_FEE)  # type: int
+        self._gas = kwargs.pop("gas", DEFAULT_GAS)  # type: int
         self._base_good_endowment = kwargs.pop(
             "base_good_endowment", DEFAULT_BASE_GOOD_ENDOWMENT
         )  # type: int
@@ -235,6 +237,11 @@ class Parameters(Model):
     def tx_fee(self) -> int:
         """Transaction fee for a TAC instance."""
         return self._tx_fee
+
+    @property
+    def gas(self) -> int:
+        """Gas for TAC contract operations."""
+        return self._gas
 
     @property
     def base_good_endowment(self) -> int:

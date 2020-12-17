@@ -4,15 +4,15 @@ version: 0.1.0
 type: protocol
 description: A protocol for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   __init__.py: QmQy21g5sVYfmy4vSYuEFyPnobM4SA1dEouz5deXNssPWx
   custom_types.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
-  dialogues.py: QmdpXJCUP6wV6StDxByraFGveMcTSjjFhDju74S4QVQpxf
-  message.py: QmShBfDmPzvQVE9eDvjBkmUY9vVjXP6bkfuFTgK7hbacsK
+  dialogues.py: Qmaq3wGigpyL2xZwCgqv1CN6tNy1uayzym9ybwjvZRYm5C
+  message.py: QmYGdkkon76MfdhgBvHrpuog3yCpgZhgDyKXBh4ZRUN7GS
   serialization.py: QmYJLfQ49vsqRSpC7GV1ukc3PnkVBuRMM3GBtGoCgDEv5z
   t_protocol.proto: QmWdNaAJ9Mkf2SHF1RSZrsk2a5jZyXZtCD7XU5PHLCph5z
-  t_protocol_pb2.py: QmRr3b2hjbN2UshSQTr1wWSCpqeNgMfDfnVyBk8BQGdFn4
+  t_protocol_pb2.py: QmamuU3UsGEFKWPSbt5Qeo31kXSCLpTD81TkuX44njkYgh
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

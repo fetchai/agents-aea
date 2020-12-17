@@ -39,12 +39,7 @@ class FipaDialogue(Dialogue):
 
     INITIAL_PERFORMATIVES = frozenset({FipaMessage.Performative.CFP})
     TERMINAL_PERFORMATIVES = frozenset(
-        {
-            FipaMessage.Performative.DECLINE,
-            FipaMessage.Performative.MATCH_ACCEPT,
-            FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            FipaMessage.Performative.INFORM,
-        }
+        {FipaMessage.Performative.DECLINE, FipaMessage.Performative.END}
     )
     VALID_REPLIES = {
         FipaMessage.Performative.ACCEPT: frozenset(
@@ -65,12 +60,15 @@ class FipaDialogue(Dialogue):
             {FipaMessage.Performative.PROPOSE, FipaMessage.Performative.DECLINE}
         ),
         FipaMessage.Performative.DECLINE: frozenset(),
-        FipaMessage.Performative.INFORM: frozenset({FipaMessage.Performative.INFORM}),
+        FipaMessage.Performative.END: frozenset(),
+        FipaMessage.Performative.INFORM: frozenset(
+            {FipaMessage.Performative.INFORM, FipaMessage.Performative.END}
+        ),
         FipaMessage.Performative.MATCH_ACCEPT: frozenset(
-            {FipaMessage.Performative.INFORM}
+            {FipaMessage.Performative.INFORM, FipaMessage.Performative.END}
         ),
         FipaMessage.Performative.MATCH_ACCEPT_W_INFORM: frozenset(
-            {FipaMessage.Performative.INFORM}
+            {FipaMessage.Performative.INFORM, FipaMessage.Performative.END}
         ),
         FipaMessage.Performative.PROPOSE: frozenset(
             {
@@ -131,6 +129,8 @@ class FipaDialogues(Dialogues, ABC):
             FipaDialogue.EndState.DECLINED_ACCEPT,
         }
     )
+
+    _keep_terminal_state_dialogues = True
 
     def __init__(
         self,

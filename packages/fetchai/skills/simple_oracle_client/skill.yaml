@@ -1,0 +1,65 @@
+name: simple_oracle_client
+author: fetchai
+version: 0.1.0
+type: skill
+description: This skill deploys a Fetch oracle client contract and calls this contract
+  to request an oracle value
+license: Apache-2.0
+aea_version: '>=0.8.0, <0.9.0'
+fingerprint:
+  README.md: QmcLpwV9ayjJgkBK8P5WEc4Z3r8Y6QLa5NHJd3XSHYzfof
+  __init__.py: Qmes1Qfp7HzkqRasYLCqoMYi5wrhPHvnCtoFeLSpqAeUGH
+  behaviours.py: QmeMQQb7YBMr2Rr3rFhnmxue7uXj6P4yxGfTeryAAQWoTx
+  dialogues.py: QmZjvjbQk2m4mB2ExDGgM5kGzMi58zk3QvWxmSzRL56i9o
+  handlers.py: QmZ7ZK8BPstj8jDRtKPgHUaYTTdNSGysSAjqJJLpFCdub9
+  strategy.py: QmVeeiJye8skheC1vv3WKjNrHTkM4HtKA56RQU6eHrTw7E
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/fet_erc20:0.1.0
+- fetchai/oracle_client:0.1.0
+protocols:
+- fetchai/contract_api:0.9.0
+- fetchai/default:0.10.0
+- fetchai/ledger_api:0.8.0
+- fetchai/signing:0.8.0
+skills: []
+behaviours:
+  simple_oracle_client_behaviour:
+    args:
+      query_interval: 15
+    class_name: SimpleOracleClientBehaviour
+handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      approve_amount: 1000000000000000000
+      client_contract_address: null
+      default_gas_approve: 200000
+      default_gas_deploy: 10000000
+      default_gas_query: 250000
+      erc20_address: null
+      ledger_id: ethereum
+      oracle_contract_address: null
+      query_function: queryOracleValue
+    class_name: Strategy
+dependencies: {}
+is_abstract: false
+connections: []

@@ -1,6 +1,6 @@
 AEAs are more than just agents.
 
-<img src="../assets/aea-vs-agent-vs-multiplexer.png" alt="AEA vs Agent vs Multiplexer" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
+<img src="../assets/aea-vs-agent-vs-multiplexer.jpg" alt="AEA vs Agent vs Multiplexer" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
 
 In this guide we show some of the differences in terms of code.
 
@@ -128,7 +128,7 @@ We run the agent from a different thread so that we can still use the main threa
 We use the input and output text files to send an envelope to our agent and receive a response
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = b"my_agent,other_agent,fetchai/default:0.9.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+        message_text = b"my_agent,other_agent,fetchai/default:0.10.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
 
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
@@ -256,7 +256,7 @@ def run():
         time.sleep(3)
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = b"my_agent,other_agent,fetchai/default:0.9.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+        message_text = b"my_agent,other_agent,fetchai/default:0.10.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
 
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)

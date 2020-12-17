@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the default skill."""
+"""This module contains the implementation of the simple oracle skill."""
 
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/simple_oracle:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/simple_oracle:0.2.0")

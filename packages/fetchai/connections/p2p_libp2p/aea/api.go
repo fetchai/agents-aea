@@ -71,12 +71,16 @@ type AeaApi struct {
 	port_delegate   uint16
 	host_monitoring string
 	port_monitoring uint16
-	pipe            Pipe
-	out_queue       chan *Envelope
-	closing         bool
-	connected       bool
-	sandbox         bool
-	standalone      bool
+
+	registrationDelay float64
+
+	pipe      Pipe
+	out_queue chan *Envelope
+
+	closing    bool
+	connected  bool
+	sandbox    bool
+	standalone bool
 }
 
 func (aea AeaApi) AeaAddress() string {
@@ -105,6 +109,10 @@ func (aea AeaApi) MonitoringAddress() (string, uint16) {
 
 func (aea AeaApi) EntryPeers() []string {
 	return aea.entry_peers
+}
+
+func (aea AeaApi) RegistrationDelayInSeconds() float64 {
+	return aea.registrationDelay
 }
 
 func (aea AeaApi) Put(envelope *Envelope) error {
@@ -168,6 +176,8 @@ func (aea *AeaApi) Init() error {
 	uri_public := os.Getenv("AEA_P2P_URI_PUBLIC")
 	uri_delegate := os.Getenv("AEA_P2P_DELEGATE_URI")
 	uri_monitoring := os.Getenv("AEA_P2P_URI_MONITORING")
+	registrationDelay := os.Getenv("AEA_P2P_CFG_REGISTRATION_DELAY")
+
 	logger.Debug().Msgf("msgin_path: %s", aea.msgin_path)
 	logger.Debug().Msgf("msgout_path: %s", aea.msgout_path)
 	logger.Debug().Msgf("id: %s", aea.id)
@@ -263,6 +273,18 @@ func (aea *AeaApi) Init() error {
 	// parse entry peers multiaddrs
 	if len(entry_peers) > 0 {
 		aea.entry_peers = strings.SplitN(entry_peers, ",", -1)
+	}
+
+	// parse registration delay
+	if registrationDelay == "" {
+		aea.registrationDelay = 0.0
+	} else {
+		delay, err := strconv.ParseFloat(registrationDelay, 32)
+		if err != nil {
+			logger.Error().Str("err", err.Error()).Msgf("malformed RegistrationDelay value")
+			return err
+		}
+		aea.registrationDelay = delay
 	}
 
 	// setup pipe

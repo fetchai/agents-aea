@@ -10,10 +10,10 @@ This is a protocol for two agents to negotiate over a fixed set of resources.
 ---
 name: fipa
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 description: A protocol for FIPA ACL.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 speech_acts:
   cfp:
     query: ct:Query
@@ -28,18 +28,13 @@ speech_acts:
   accept: {}
   decline: {}
   match_accept: {}
+  end: {}
 ...
 ---
 ct:Query: |
-  message Nothing {
-  }
-  oneof query{
-      bytes bytes = 1;
-      Nothing nothing = 2;
-      bytes query_bytes = 3;
-  }
+  bytes query_bytes = 1;
 ct:Description: |
-  bytes description = 1;
+  bytes description_bytes = 1;
 ...
 ---
 initiation: [cfp]
@@ -49,12 +44,14 @@ reply:
   accept: [decline, match_accept, match_accept_w_inform]
   accept_w_inform: [decline, match_accept, match_accept_w_inform]
   decline: []
-  match_accept: [inform]
-  match_accept_w_inform: [inform]
-  inform: [inform]
-termination: [decline, match_accept, match_accept_w_inform, inform]
+  match_accept: [inform, end]
+  match_accept_w_inform: [inform, end]
+  inform: [inform, end]
+  end: []
+termination: [decline, end]
 roles: {seller, buyer}
 end_states: [successful, declined_cfp, declined_propose, declined_accept]
+keep_terminal_state_dialogues: true
 ...
 ```
 

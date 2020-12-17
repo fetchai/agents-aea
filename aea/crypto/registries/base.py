@@ -24,6 +24,7 @@ import re
 from typing import Any, Dict, Generic, Optional, Set, Type, TypeVar, Union
 
 from aea.configurations.base import PublicId
+from aea.configurations.constants import DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
 from aea.exceptions import AEAException
 from aea.helpers.base import RegexConstrainedString
 
@@ -65,7 +66,11 @@ class EntryPoint(Generic[ItemType], RegexConstrainedString):
         path.to.module:className
     """
 
-    REGEX = re.compile(r"^({pyid}(?:\.{pyid})*):({pyid})$".format(pyid=PY_ID_REGEX))
+    REGEX = re.compile(
+        r"^({pyid}(?:\.{pyid})*){sep}({pyid})$".format(
+            pyid=PY_ID_REGEX, sep=DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
+        )
+    )
 
     def __init__(self, seq):
         """Initialize the entrypoint."""

@@ -93,7 +93,7 @@ def _validate_pkp(private_key_paths: CRUDCollection) -> None:
     """
     if private_key_paths.read_all() != []:
         raise click.ClickException(
-            "You are not allowed to publish agents with non-empty private_key_paths. Change to `private_key_paths: {}` in `aea-config.yaml`"
+            "You are not allowed to publish agents with non-empty private_key_paths. Use the `aea remove-key` command to remove key paths from `private_key_paths: {}` in `aea-config.yaml`."
         )
 
 

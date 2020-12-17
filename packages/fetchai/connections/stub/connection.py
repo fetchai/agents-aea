@@ -43,7 +43,7 @@ INPUT_FILE_KEY = "input_file"
 OUTPUT_FILE_KEY = "output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.13.0")
 
 
 class StubConnection(Connection):

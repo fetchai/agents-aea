@@ -110,21 +110,6 @@ class TestDialogues(BaseSkillTestCase):
             fipa_dialogue.terms = terms
         assert fipa_dialogue.terms == terms
 
-        # associated_ledger_api_dialogue
-        with pytest.raises(AEAEnforceError, match="LedgerApiDialogue not set!"):
-            assert fipa_dialogue.associated_ledger_api_dialogue
-        ledger_api_dialogue = LedgerApiDialogue(
-            DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
-            ),
-            self.skill.skill_context.agent_address,
-            role=LedgerApiDialogue.Role.AGENT,
-        )
-        fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-        with pytest.raises(AEAEnforceError, match="LedgerApiDialogue already set!"):
-            fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-        assert fipa_dialogue.associated_ledger_api_dialogue == ledger_api_dialogue
-
     def test_fipa_dialogues(self):
         """Test the FipaDialogues class."""
         _, dialogue = self.fipa_dialogues.create(
@@ -191,20 +176,20 @@ class TestDialogues(BaseSkillTestCase):
             role=SigningDialogue.Role.SKILL,
         )
 
-        # associated_fipa_dialogue
-        with pytest.raises(AEAEnforceError, match="FipaDialogue not set!"):
-            assert signing_dialogue.associated_fipa_dialogue
-        fipa_dialogue = FipaDialogue(
+        # associated_ledger_api_dialogue
+        with pytest.raises(AEAEnforceError, match="LedgerApiDialogue not set!"):
+            assert signing_dialogue.associated_ledger_api_dialogue
+        ledger_api_dialogue = LedgerApiDialogue(
             DialogueLabel(
                 ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
-            role=FipaDialogue.Role.BUYER,
+            role=LedgerApiDialogue.Role.AGENT,
         )
-        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
-        with pytest.raises(AEAEnforceError, match="FipaDialogue already set!"):
-            signing_dialogue.associated_fipa_dialogue = fipa_dialogue
-        assert signing_dialogue.associated_fipa_dialogue == fipa_dialogue
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+        with pytest.raises(AEAEnforceError, match="LedgerApiDialogue already set!"):
+            signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
+        assert signing_dialogue.associated_ledger_api_dialogue == ledger_api_dialogue
 
     def test_signing_dialogues(self):
         """Test the SigningDialogues class."""

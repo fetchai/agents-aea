@@ -70,6 +70,20 @@ def test_default_error_serialization():
     assert expected_msg == actual_msg
 
 
+def test_default_end_serialization():
+    """Test that the serialization for the 'simple' protocol works for the END message."""
+    msg = DefaultMessage(
+        dialogue_reference=("", ""),
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.END,
+    )
+    msg_bytes = DefaultMessage.serializer.encode(msg)
+    actual_msg = DefaultMessage.serializer.decode(msg_bytes)
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
 def test_default_message_str_values():
     """Tests the returned string values of default Message."""
     assert (

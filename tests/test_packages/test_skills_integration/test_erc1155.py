@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
-
 from random import uniform
 
 import pytest
@@ -38,12 +37,13 @@ from tests.conftest import (
     MAX_FLAKY_RERUNS_ETH,
     NON_FUNDED_COSMOS_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
+    UseGanache,
     wait_for_localhost_ports_to_close,
 )
 
 
 @pytest.mark.integration
-class TestERCSkillsEthereumLedger(AEATestCaseMany):
+class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
     """Test that erc1155 skills work."""
 
     @pytest.mark.integration
@@ -58,9 +58,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-            "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
+            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+            "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
+            "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0",
         }
 
         # generate random location
@@ -71,18 +71,18 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/ledger:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_deploy:0.18.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.19.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.19.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.20.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -116,18 +116,18 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # add packages for agent two
         self.set_agent_context(client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/ledger:0.11.0")
+        self.add_item("connection", "fetchai/soef:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.13.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.17.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.18.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.19.0", client_aea_name
+            "fetchai/erc1155_client:0.20.0", client_aea_name
         )
         assert (
             diff == []
@@ -158,11 +158,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
 
         # run agents
         self.set_agent_context(deploy_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         deploy_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -197,11 +196,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany):
         ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
 
         self.set_agent_context(client_aea_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
         client_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",

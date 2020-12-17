@@ -16,7 +16,7 @@ This class provides an abstract base class for a generic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, period: float = 1.0, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, logger: Logger = _default_logger) -> None
+ | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, period: float = 1.0, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, storage_uri: Optional[str] = None, logger: Logger = _default_logger) -> None
 ```
 
 Instantiate the agent.
@@ -29,6 +29,7 @@ Instantiate the agent.
 - `period`: period to call agent's act
 - `loop_mode`: loop_mode to choose agent run loop.
 - `runtime_mode`: runtime mode to up agent.
+- `storage_uri`: optional uri to set generic storage
 
 **Returns**:
 
@@ -43,6 +44,16 @@ None
 ```
 
 Return list of connections.
+
+<a name="aea.agent.Agent.storage_uri"></a>
+#### storage`_`uri
+
+```python
+ | @property
+ | storage_uri() -> Optional[str]
+```
+
+Return storage uri.
 
 <a name="aea.agent.Agent.active_connections"></a>
 #### active`_`connections

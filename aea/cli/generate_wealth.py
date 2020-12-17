@@ -19,7 +19,7 @@
 
 """Implementation of the 'aea generate_wealth' subcommand."""
 
-from typing import cast
+from typing import Optional, cast
 
 import click
 
@@ -37,23 +37,27 @@ from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
     type=click.Choice(list(faucet_apis_registry.supported_ids)),
     required=True,
 )
+@click.argument("url", metavar="URL", type=str, required=False, default=None)
 @click.option(
     "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
 )
 @click.pass_context
 @check_aea_project
-def generate_wealth(click_context, sync, type_):
+def generate_wealth(click_context, sync, url, type_):
     """Generate wealth for the agent on a test network."""
     ctx = cast(Context, click_context.obj)
-    _try_generate_wealth(ctx, type_, sync)
+    _try_generate_wealth(ctx, type_, url, sync)
 
 
-def _try_generate_wealth(ctx: Context, type_: str, sync: bool) -> None:
+def _try_generate_wealth(
+    ctx: Context, type_: str, url: Optional[str], sync: bool
+) -> None:
     """
     Try generate wealth for the provided network identifier.
 
-    :param click_context: the click context
+    :param ctx: the click context
     :param type_: the network type
+    :param url: the url
     :param sync: whether to sync or not
     :return: None
     """
@@ -67,7 +71,7 @@ def _try_generate_wealth(ctx: Context, type_: str, sync: bool) -> None:
                 address, testnet
             )
         )
-        try_generate_testnet_wealth(type_, address, sync)
+        try_generate_testnet_wealth(type_, address, url, sync)
 
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))

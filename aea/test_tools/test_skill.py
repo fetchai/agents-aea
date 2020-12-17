@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA skill testing."""
-
 import asyncio
 from pathlib import Path
 from queue import Queue
@@ -435,7 +434,6 @@ class BaseSkillTestCase:
         _skill_config_overrides = cast(
             Dict[str, Any], kwargs.pop("config_overrides", dict())
         )
-
         agent_context = AgentContext(
             identity=identity,
             connection_status=cls._multiplexer.connection_status,

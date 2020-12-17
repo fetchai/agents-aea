@@ -636,6 +636,8 @@ class ProtocolGenerator:
         )
 
         # slots
+        cls_str += self.indent + "__slots__: Tuple[str, ...] = tuple()\n"
+
         cls_str += self.indent + "class _SlotsCls():\n"
         self._change_indent(1)
         cls_str += self.indent + "__slots__ = (\n"
@@ -1113,6 +1115,11 @@ class ProtocolGenerator:
         cls_str += self.indent + "END_STATES = frozenset(\n"
         cls_str += self.indent + "{" + end_states_str + "}"
         cls_str += self.indent + ")\n\n"
+
+        cls_str += (
+            self.indent
+            + f"_keep_terminal_state_dialogues = {repr(self.spec.keep_terminal_state_dialogues)}\n\n"
+        )
 
         cls_str += self.indent + "def __init__(\n"
         self._change_indent(1)

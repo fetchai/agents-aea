@@ -61,7 +61,7 @@ connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.12.0
+default_connection: fetchai/stub:0.13.0
 default_ledger: cosmos
 private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
@@ -250,6 +250,18 @@ class TestSkillExceptionPolicyConfigVariable(BaseConfigTestVariable):
     REQUIRED = False
     AEA_ATTR_NAME = "_skills_exception_policy"
     AEA_DEFAULT_VALUE = ExceptionPolicyEnum.propagate
+
+
+class TestStorageUriConfigVariable(BaseConfigTestVariable):
+    """Test `storage_uri` aea config option."""
+
+    OPTION_NAME = "storage_uri"
+    CONFIG_ATTR_NAME = "storage_uri"
+    GOOD_VALUES = ["sqlite://test"]  # type: ignore
+    INCORRECT_VALUES = [None, -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_storage_uri"
+    AEA_DEFAULT_VALUE = None
 
 
 class TestConnectionExceptionPolicyConfigVariable(BaseConfigTestVariable):

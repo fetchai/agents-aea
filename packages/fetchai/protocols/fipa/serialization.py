@@ -87,6 +87,9 @@ class FipaSerializer(Serializer):
         elif performative_id == FipaMessage.Performative.MATCH_ACCEPT:
             performative = fipa_pb2.FipaMessage.Match_Accept_Performative()  # type: ignore
             fipa_msg.match_accept.CopyFrom(performative)
+        elif performative_id == FipaMessage.Performative.END:
+            performative = fipa_pb2.FipaMessage.End_Performative()  # type: ignore
+            fipa_msg.end.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -143,6 +146,8 @@ class FipaSerializer(Serializer):
         elif performative_id == FipaMessage.Performative.DECLINE:
             pass
         elif performative_id == FipaMessage.Performative.MATCH_ACCEPT:
+            pass
+        elif performative_id == FipaMessage.Performative.END:
             pass
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))

@@ -36,6 +36,7 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.ml_train.behaviours import TransactionBehaviour
 from packages.fetchai.skills.ml_train.dialogues import (
     DefaultDialogues,
     LedgerApiDialogue,
@@ -173,9 +174,11 @@ class MlTradeHandler(Handler):
             )
             ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_ml_trade_dialogue = ml_trade_dialogue
-            self.context.outbox.put_message(message=ledger_api_msg)
-            self.context.logger.info(
-                "requesting transfer transaction from ledger api..."
+            tx_behaviour = cast(
+                TransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.waiting.append(
+                (ledger_api_dialogue, cast(LedgerApiMessage, ledger_api_msg))  # type: ignore
             )
         else:
             # accept directly with a dummy transaction digest, no settlement
@@ -492,6 +495,8 @@ class LedgerApiHandler(Handler):
         ml_trade_msg = cast(
             Optional[MlTradeMessage], ml_trade_dialogue.last_incoming_message
         )
+        tx_behaviour = cast(TransactionBehaviour, self.context.behaviours.transaction)
+        tx_behaviour.finish_processing(ledger_api_dialogue)  # type: ignore
         if ml_trade_msg is None:
             raise ValueError("Could not retrieve ml_trade message")
         ml_accept = ml_trade_dialogue.reply(

@@ -177,7 +177,7 @@ the signature of the message
 #### sign`_`transaction
 
 ```python
- | sign_transaction(crypto_id: str, transaction: Any) -> Optional[Any]
+ | sign_transaction(crypto_id: str, transaction: Any) -> Optional[JSONLike]
 ```
 
 Sign a tx.

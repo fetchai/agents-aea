@@ -112,14 +112,14 @@ def _generate_item(ctx: Context, item_type: str, specification_path: str):
         ctx.agent_loader.dump(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
         )
-    except FileExistsError:  # pragma: no cover
-        raise click.ClickException(
+    except FileExistsError:
+        raise click.ClickException(  # pragma: no cover
             "A {} with this name already exists. Please choose a different name and try again.".format(
                 item_type
             )
         )
     except ProtocolSpecificationParseError as e:
-        raise click.ClickException(
+        raise click.ClickException(  # pragma: no cover
             "The following error happened while parsing the protocol specification: "
             + str(e)
         )

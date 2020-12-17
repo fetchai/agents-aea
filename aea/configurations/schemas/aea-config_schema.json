@@ -40,6 +40,9 @@
     "fingerprint_ignore_patterns": {
       "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
     },
+    "build_entrypoint": {
+      "$ref": "definitions.json#/definitions/build_entrypoint"
+    },
     "registry_path": {
       "type": "string"
     },
@@ -116,6 +119,9 @@
     "decision_maker_handler": {
       "type": "object"
     },
+    "error_handler": {
+      "type": "object"
+    },
     "skill_exception_policy": {
       "$ref": "definitions.json#/definitions/skill_exception_policy"
     },
@@ -136,6 +142,9 @@
     },
     "runtime_mode": {
       "$ref": "definitions.json#/definitions/runtime_mode"
+    },
+    "storage_uri": {
+      "$ref": "definitions.json#/definitions/storage_uri"
     }
   }
 }

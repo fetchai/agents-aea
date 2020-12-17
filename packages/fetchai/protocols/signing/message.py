@@ -50,7 +50,7 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = PublicId.from_str("fetchai/signing:0.7.0")
+    protocol_id = PublicId.from_str("fetchai/signing:0.8.0")
 
     ErrorCode = CustomErrorCode
 
@@ -84,6 +84,7 @@ class SigningMessage(Message):
         "signed_message",
         "signed_transaction",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

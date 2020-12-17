@@ -235,3 +235,4 @@ _.ganache  # unused variable (aea/test_tools/test_cases.py:876:)
 _.unsupported_protocol_count
 _.unsupported_skill_count
 _.decoding_error_count
+_.ErrorHandler  # unused class (aea/error_handler/scaffold.py:27)

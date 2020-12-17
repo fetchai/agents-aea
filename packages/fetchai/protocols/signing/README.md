@@ -10,10 +10,10 @@ This is a protocol for communication between a skill and a decision maker.
 ---
 name: signing
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 speech_acts:
   sign_transaction:
     terms: ct:Terms
@@ -57,6 +57,7 @@ reply:
 termination: [signed_transaction, signed_message, error]
 roles: {skill, decision_maker}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: false
 ...
 ```
 

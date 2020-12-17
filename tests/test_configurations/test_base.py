@@ -40,7 +40,6 @@ from aea.configurations.base import (
     PackageVersion,
     ProtocolConfig,
     ProtocolSpecification,
-    ProtocolSpecificationParseError,
     PublicId,
     SkillConfig,
     SpeechActContentConfig,
@@ -125,6 +124,15 @@ class TestCRUDCollection:
         keyvalue_pairs = collection.read_all()
         assert {("one", 1), ("two", 2)} == set(keyvalue_pairs)
 
+    def test_keys(self):
+        """Test the keys method."""
+        collection = CRUDCollection()
+        collection.create("one", 1)
+        collection.create("two", 2)
+
+        keyvalue_pairs = collection.keys()
+        assert {"one", "two"} == set(keyvalue_pairs)
+
 
 class TestContractConfig:
     """Test the contract configuration class."""
@@ -134,6 +142,7 @@ class TestContractConfig:
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(contract_path)
         original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
 
         expected_config = ContractConfig.from_json(original_json)
         assert isinstance(expected_config, ContractConfig)
@@ -151,6 +160,7 @@ class TestConnectionConfig:
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(connection_path)
         original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
 
         expected_config = ConnectionConfig.from_json(original_json)
         assert isinstance(expected_config, ConnectionConfig)
@@ -168,6 +178,7 @@ class TestProtocolConfig:
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(protocol_path)
         original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
 
         expected_config = ProtocolConfig.from_json(original_json)
         assert isinstance(expected_config, ProtocolConfig)
@@ -189,6 +200,7 @@ class TestSkillConfig:
         """Test the 'from_json' method and 'to_json' work correctly."""
         f = open(skill_path)
         original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
 
         expected_config = SkillConfig.from_json(original_json)
         assert isinstance(expected_config, SkillConfig)
@@ -248,7 +260,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match="The custom configuration for skill fetchai/error:0.9.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+            match="The custom configuration for skill fetchai/error:0.10.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
         ):
             skill_config.update(new_configurations)
 
@@ -272,7 +284,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.9.0' are not allowed to change: {'class_name'}.",
+            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.10.0' are not allowed to change: {'class_name'}.",
         ):
             skill_config.update(new_configurations)
 
@@ -288,6 +300,7 @@ class TestAgentConfig:
         components = original_jsons[1:]
         original_json = original_jsons[0]
         original_json["component_configurations"] = components
+        original_json["build_entrypoint"] = "some"
 
         expected_config = AgentConfig.from_json(original_json)
         assert isinstance(expected_config, AgentConfig)
@@ -456,18 +469,9 @@ class AgentConfigTestCase(TestCase):
 class SpeechActContentConfigTestCase(TestCase):
     """Test case for SpeechActContentConfig class."""
 
-    @mock.patch("aea.configurations.base.SpeechActContentConfig._check_consistency")
-    def test_speech_act_content_config_init_positive(self, arg):
+    def test_speech_act_content_config_init_positive(self):
         """Test case for __init__ method positive result."""
         SpeechActContentConfig()
-
-    def test__check_consistency_positive(self):
-        """Test case for _check_consistency method positive result."""
-        SpeechActContentConfig(arg1="arg1", arg2="arg2")
-        with self.assertRaises(ProtocolSpecificationParseError):
-            SpeechActContentConfig(arg1=None, arg2=1)
-        with self.assertRaises(ProtocolSpecificationParseError):
-            SpeechActContentConfig(arg1="", arg2="")
 
     def test_json_positive(self):
         """Test case for json property positive result."""
@@ -492,7 +496,6 @@ class ProtocolSpecificationTestCase(TestCase):
         obj.json
 
     @mock.patch("aea.configurations.base.SpeechActContentConfig.from_json")
-    @mock.patch("aea.configurations.base.ProtocolSpecification._check_consistency")
     def test_from_json_positive(self, *mocks):
         """Test case for from_json method positive result."""
         json_disc = {
@@ -504,29 +507,6 @@ class ProtocolSpecificationTestCase(TestCase):
             "speech_acts": {"arg1": "arg1", "arg2": "arg2"},
         }
         ProtocolSpecification.from_json(json_disc)
-
-    def test__check_consistency_positive(self):
-        """Test case for _check_consistency method positive result."""
-        obj = ProtocolSpecification(name="my_protocol", author="fetchai")
-        with self.assertRaises(ProtocolSpecificationParseError):
-            obj._check_consistency()
-
-        obj.speech_acts = mock.Mock()
-        read_all_mock = mock.Mock(return_value=[(1, 2)])
-        obj.speech_acts.read_all = read_all_mock
-        with self.assertRaises(ProtocolSpecificationParseError):
-            obj._check_consistency()
-
-        read_all_mock = mock.Mock(return_value=[["", 1]])
-        obj.speech_acts.read_all = read_all_mock
-        with self.assertRaises(ProtocolSpecificationParseError):
-            obj._check_consistency()
-
-        speech_act_content_config = mock.Mock()
-        speech_act_content_config.args = {1: 2}
-        read_all_mock = mock.Mock(return_value=[["1", speech_act_content_config]])
-        obj.speech_acts.read_all = read_all_mock
-        obj._check_consistency()
 
 
 def test_package_type_plural():
@@ -842,12 +822,14 @@ def test_agent_config_to_json_with_optional_configurations():
         execution_timeout=1.0,
         max_reactions=100,
         decision_maker_handler=dict(dotted_path="", file_path=""),
+        error_handler=dict(dotted_path="", file_path=""),
         skill_exception_policy="propagate",
         connection_exception_policy="propagate",
         default_routing={"author/name:0.1.0": "author/name:0.1.0"},
         currency_denominations={"fetchai": "fet"},
         loop_mode="sync",
         runtime_mode="async",
+        storage_uri="some_uri_to_storage",
     )
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER

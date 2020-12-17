@@ -1,16 +1,16 @@
 name: p2p_libp2p_client
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
   DHT.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmYo5C3vMjX46hmtcfTw3nLtAsuAmvG85vDGGJFzFMYkWu
+  README.md: QmP9mRtKmt8c1s9XcFeycewPbAQ9BDfkA1Zo4fNcjsTFra
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: QmcnEJAga8o1mbfZYJSTZFEnDb8LVixaqeHvdQspt5EqbP
+  connection.py: QmRSshSZ6EwUosAjTCXWXWmRefungEFkcTAezjcbHBgrc1
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []
@@ -18,9 +18,8 @@ class_name: P2PLibp2pClientConnection
 config:
   ledger_id: fetchai
   nodes:
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11000
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11001
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11002
+  - uri: acn.fetch.ai:11000
+  - uri: acn.fetch.ai:11001
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

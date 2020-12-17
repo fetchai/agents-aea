@@ -38,9 +38,7 @@ class TacDialogue(Dialogue):
     """The tac dialogue class maintains state of a dialogue and manages it."""
 
     INITIAL_PERFORMATIVES = frozenset({TacMessage.Performative.REGISTER})
-    TERMINAL_PERFORMATIVES = frozenset(
-        {TacMessage.Performative.CANCELLED, TacMessage.Performative.TAC_ERROR}
-    )
+    TERMINAL_PERFORMATIVES = frozenset({TacMessage.Performative.CANCELLED})
     VALID_REPLIES = {
         TacMessage.Performative.CANCELLED: frozenset(),
         TacMessage.Performative.GAME_DATA: frozenset(
@@ -127,6 +125,8 @@ class TacDialogues(Dialogues, ABC):
     END_STATES = frozenset(
         {TacDialogue.EndState.SUCCESSFUL, TacDialogue.EndState.FAILED}
     )
+
+    _keep_terminal_state_dialogues = True
 
     def __init__(
         self,

@@ -47,7 +47,6 @@ class TProtocolDialogue(Dialogue):
         {
             TProtocolMessage.Performative.PERFORMATIVE_MT,
             TProtocolMessage.Performative.PERFORMATIVE_O,
-            TProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS,
         }
     )
     VALID_REPLIES = {
@@ -126,6 +125,8 @@ class TProtocolDialogues(Dialogues, ABC):
             TProtocolDialogue.EndState.END_STATE_3,
         }
     )
+
+    _keep_terminal_state_dialogues = True
 
     def __init__(
         self,

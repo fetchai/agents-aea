@@ -40,6 +40,7 @@ class LedgerApiDialogue(Dialogue):
     INITIAL_PERFORMATIVES = frozenset(
         {
             LedgerApiMessage.Performative.GET_BALANCE,
+            LedgerApiMessage.Performative.GET_STATE,
             LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
             LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
@@ -48,7 +49,9 @@ class LedgerApiDialogue(Dialogue):
     TERMINAL_PERFORMATIVES = frozenset(
         {
             LedgerApiMessage.Performative.BALANCE,
+            LedgerApiMessage.Performative.STATE,
             LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+            LedgerApiMessage.Performative.ERROR,
         }
     )
     VALID_REPLIES = {
@@ -62,6 +65,9 @@ class LedgerApiDialogue(Dialogue):
                 LedgerApiMessage.Performative.RAW_TRANSACTION,
                 LedgerApiMessage.Performative.ERROR,
             }
+        ),
+        LedgerApiMessage.Performative.GET_STATE: frozenset(
+            {LedgerApiMessage.Performative.STATE, LedgerApiMessage.Performative.ERROR}
         ),
         LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT: frozenset(
             {
@@ -78,6 +84,7 @@ class LedgerApiDialogue(Dialogue):
                 LedgerApiMessage.Performative.ERROR,
             }
         ),
+        LedgerApiMessage.Performative.STATE: frozenset(),
         LedgerApiMessage.Performative.TRANSACTION_DIGEST: frozenset(
             {LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT}
         ),
@@ -123,6 +130,8 @@ class LedgerApiDialogues(Dialogues, ABC):
     """This class keeps track of all ledger_api dialogues."""
 
     END_STATES = frozenset({LedgerApiDialogue.EndState.SUCCESSFUL})
+
+    _keep_terminal_state_dialogues = False
 
     def __init__(
         self,

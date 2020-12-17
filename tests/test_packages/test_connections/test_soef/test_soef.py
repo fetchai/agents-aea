@@ -131,11 +131,8 @@ class TestSoefTokenStorage:
             print(e)
 
     def test_unique_page_address_default_no_file(self):
-        """Test unique page address is raises if file not found."""
-        with pytest.raises(
-            FileNotFoundError, match="No such file or directory: 'test.storage'"
-        ):
-            assert self.connection.channel.unique_page_address is None
+        """Test unique page address does not raise if file not found."""
+        assert self.connection.channel.unique_page_address is None
 
     def test_unique_page_address_default_file(self):
         """Test unique page address is None by default for new file."""

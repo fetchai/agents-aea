@@ -10,17 +10,17 @@ author: fetchai                                 # Author handle of the project's
 version: 0.1.0                                  # Version of the AEA project (a semantic version number, see https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string")
 description: A demo project                     # Description of the AEA project
 license: Apache-2.0                             # License of the AEA project
-aea_version: '>=0.7.0, <0.8.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
+aea_version: '>=0.8.0, <0.9.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
 fingerprint: {}                                 # Fingerprint of AEA project components.
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 connections:                                    # The list of connection public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX)
-- fetchai/stub:0.12.0
+- fetchai/stub:0.13.0
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/default:0.9.0
+- fetchai/default:0.10.0
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/error:0.9.0
-default_connection: fetchai/p2p_libp2p:0.12.0    # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
+- fetchai/error:0.10.0
+default_connection: fetchai/p2p_libp2p:0.13.0    # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 default_routing: {}                             # The default routing scheme applied to envelopes sent by the AEA, it maps from protocol public ids to connection public ids (both keys and values must satisfy PUBLIC_ID_REGEX)
 connection_private_key_paths:                   # The private key paths the AEA project uses for its connections (keys must satisfy LEDGER_ID_REGEX, values must be file paths)
@@ -41,6 +41,7 @@ skill_exception_policy: propagate               # The exception policy applied t
 connection_exception_policy: propagate          # The exception policy applied to connections (must be one of "propagate", "just_log", or "stop_and_exit")
 loop_mode: async                                # The agent loop mode (must be one of "sync" or "async")
 runtime_mode: threaded                          # The runtime mode (must be one of "threaded" or "async") and determines how agent loop and multiplexer are run
+error_handler: None                             # The error handler to be used.
 decision_maker_handler: None                    # The decision maker handler to be used.
 ```
 ``` yaml
@@ -50,7 +51,7 @@ version: 0.1.0                                  # Version of the package (a sema
 type: connection                                # The type of the package; for connections, it must be "connection"
 description: A scaffold connection              # Description of the package
 license: Apache-2.0                             # License of the package
-aea_version: '>=0.7.0, <0.8.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
+aea_version: '>=0.8.0, <0.9.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
 fingerprint:                                    # Fingerprint of package components.
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   connection.py: QmagwVgaPgfeXqVTgcpFESA4DYsteSbojz94SLtmnHNAze
@@ -72,7 +73,7 @@ version: 0.1.0                                  # Version of the package (a sema
 type: contract                                  # The type of the package; for contracts, it must be "contract"
 description: A scaffold contract                # Description of the package
 license: Apache-2.0                             # License of the package
-aea_version: '>=0.7.0, <0.8.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
+aea_version: '>=0.8.0, <0.9.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
 fingerprint:                                    # Fingerprint of package components.
   __init__.py: QmPBwWhEg3wcH1q9612srZYAYdANVdWLDFWKs7TviZmVj6
   contract.py: QmXvjkD7ZVEJDJspEz5YApe5bRUxvZHNi8vfyeVHPyQD5G
@@ -90,7 +91,7 @@ version: 0.1.0                                  # Version of the package (a sema
 type: protocol                                  # The type of the package; for protocols, it must be "protocol" 
 description: A scaffold protocol                # Description of the package
 license: Apache-2.0                             # License of the package
-aea_version: '>=0.7.0, <0.8.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
+aea_version: '>=0.8.0, <0.9.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
 fingerprint:                                    # Fingerprint of package components.
   __init__.py: Qmay9PmfeHqqVa3rdgiJYJnzZzTStboQEfpwXDpcgJMHTJ
   message.py: QmdvAdYSHNdZyUMrK3ue7quHAuSNwgZZSHqxYXyvh8Nie4
@@ -105,7 +106,7 @@ version: 0.1.0                                  # Version of the package (a sema
 type: skill                                     # The type of the package; for skills, it must be "skill"
 description: A scaffold skill                   # Description of the package
 license: Apache-2.0                             # License of the package
-aea_version: '>=0.7.0, <0.8.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
+aea_version: '>=0.8.0, <0.9.0'                  # AEA framework version(s) compatible with the AEA project (a version number that matches PEP 440 version schemes, or a comma-separated list of PEP 440 version specifiers, see https://www.python.org/dev/peps/pep-0440/#version-specifiers)
 fingerprint:                                    # Fingerprint of package components.
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmYa1rczhGTtMJBgCd1QR9uZhhkf45orm7TnGTE5Eizjpy

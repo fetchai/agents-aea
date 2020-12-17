@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of runtime for economic agent (AEA)."""
-
 import asyncio
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
@@ -33,6 +32,7 @@ from aea.exceptions import _StopRuntime
 from aea.helpers.async_utils import Runnable
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
+from aea.helpers.storage.generic_storage import Storage
 from aea.multiplexer import AsyncMultiplexer
 from aea.skills.tasks import TaskManager
 
@@ -81,9 +81,23 @@ class BaseRuntime(Runnable, WithLogger):
         self._multiplexer: AsyncMultiplexer = self._get_multiplexer_instance()
         self._task_manager = TaskManager()
         self._decision_maker: Optional[DecisionMaker] = None
+        self._storage: Optional[Storage] = self._get_storage(agent)
 
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
         self.main_loop: BaseAgentLoop = self._get_main_loop_instance(self._loop_mode)
+
+    @staticmethod
+    def _get_storage(agent) -> Optional[Storage]:
+        """Get storage instance if storage_uri provided."""
+        if agent.storage_uri:
+            # threaded has to be always True, cause syncrhonous operations are supported
+            return Storage(agent.storage_uri, threaded=True)
+        return None  # pragma: nocover
+
+    @property
+    def storage(self) -> Optional[Storage]:
+        """Get optional storage."""
+        return self._storage
 
     @property
     def loop_mode(self) -> str:  # pragma: nocover
@@ -270,6 +284,10 @@ class AsyncRuntime(BaseRuntime):
             await self.main_loop.wait_completed()
         self._teardown()
 
+        if self._storage is not None:
+            self._storage.stop()
+            await self._storage.wait_completed()
+
         self.multiplexer.stop()
         await self.multiplexer.wait_completed()
         self.logger.debug("Runtime loop stopped!")
@@ -277,7 +295,15 @@ class AsyncRuntime(BaseRuntime):
     async def run_runtime(self) -> None:
         """Run agent and starts multiplexer."""
         self._state.set(RuntimeStates.starting)
-        await asyncio.gather(self._start_multiplexer(), self._start_agent_loop())
+        await asyncio.gather(
+            self._start_multiplexer(), self._start_agent_loop(), self._start_storage()
+        )
+
+    async def _start_storage(self) -> None:
+        """Start storage component."""
+        if self._storage is not None:
+            self._storage.start()
+            await self._storage.wait_completed()
 
     async def _start_multiplexer(self) -> None:
         """Call multiplexer connect asynchronous way."""
@@ -292,17 +318,20 @@ class AsyncRuntime(BaseRuntime):
 
     async def _start_agent_loop(self) -> None:
         """Start agent main loop asynchronous way."""
-        self.logger.debug("[{}]: Runtime started".format(self._agent.name))
+        self.logger.debug("[{}] Runtime started".format(self._agent.name))
 
         await self.multiplexer.connection_status.wait(ConnectionStates.connected)
-        self.logger.debug("[{}]: Multiplexer connected.".format(self._agent.name))
+        self.logger.debug("[{}] Multiplexer connected.".format(self._agent.name))
+        if self.storage:
+            await self.storage.wait_connected()
+            self.logger.debug("[{}] Storage connected.".format(self._agent.name))
 
         self.task_manager.start()
         if self._decision_maker is not None:  # pragma: nocover
             self.decision_maker.start()
-        self.logger.debug("[{}]: Calling setup method...".format(self._agent.name))
+        self.logger.debug("[{}] Calling setup method...".format(self._agent.name))
         self._agent.setup()
-        self.logger.debug("[{}]: Run main loop...".format(self._agent.name))
+        self.logger.debug("[{}] Run main loop...".format(self._agent.name))
         self.main_loop.start()
         self._state.set(RuntimeStates.running)
         try:

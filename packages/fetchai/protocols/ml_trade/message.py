@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = PublicId.from_str("fetchai/ml_trade:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/ml_trade:0.10.0")
 
     Description = CustomDescription
 
@@ -59,6 +59,7 @@ class MlTradeMessage(Message):
             return str(self.value)
 
     _performatives = {"accept", "cfp", "data", "terms"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

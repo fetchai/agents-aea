@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
-    protocol_id = PublicId.from_str("fetchai/gym:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/gym:0.10.0")
 
     AnyObject = CustomAnyObject
 
@@ -55,6 +55,7 @@ class GymMessage(Message):
             return str(self.value)
 
     _performatives = {"act", "close", "percept", "reset", "status"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (

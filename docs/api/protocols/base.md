@@ -44,6 +44,25 @@ Initialize a Message object.
 - `body`: the dictionary of values to hold.
 - `kwargs`: any additional value to add to the body. It will overwrite the body values.
 
+<a name="aea.protocols.base.Message.json"></a>
+#### json
+
+```python
+ | json() -> dict
+```
+
+Get json friendly str representation of the message.
+
+<a name="aea.protocols.base.Message.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, data: dict) -> "Message"
+```
+
+Construct message instance from json data.
+
 <a name="aea.protocols.base.Message.valid_performatives"></a>
 #### valid`_`performatives
 
@@ -227,6 +246,16 @@ Get the string representation of the message. Abbreviated to prevent spamming of
 ```
 
 Encode the message.
+
+<a name="aea.protocols.base.Message.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, data: bytes) -> "Message"
+```
+
+Decode the message.
 
 <a name="aea.protocols.base.Message.has_dialogue_info"></a>
 #### has`_`dialogue`_`info

@@ -21,6 +21,7 @@
 
 from typing import Dict, List, Optional, Tuple, cast
 
+from aea.common import JSONLike
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
@@ -177,6 +178,8 @@ class Strategy(Model):
             "fetchai",
         ):
             return (False, 1, "ethereum address and signature do not match!")
+        if registration_info["developer_handle"] in ("", None):
+            return (False, 1, "missing developer_handle!")
         if sender in self._in_process_registrations:
             return (False, 1, "registration in process for this address!")
         registration_db = cast(RegistrationDB, self.context.registration_db)
@@ -227,7 +230,7 @@ class Strategy(Model):
         return terms
 
     @staticmethod
-    def get_kwargs(info: Dict[str, str]) -> Dict[str, str]:
+    def get_kwargs(info: Dict[str, str]) -> JSONLike:
         """
         Get the kwargs for the contract state call.
 
@@ -236,7 +239,7 @@ class Strategy(Model):
         counterparty = info["ethereum_address"]
         return {"address": counterparty}
 
-    def has_staked(self, state: Dict[str, str]) -> bool:
+    def has_staked(self, state: JSONLike) -> bool:
         """
         Check if the agent has staked.
 
@@ -244,5 +247,5 @@ class Strategy(Model):
         """
         if self._override_staking_check:
             return True
-        result = int(state.get("stake", "0")) > 0
+        result = int(cast(str, state.get("stake", "0"))) > 0
         return result

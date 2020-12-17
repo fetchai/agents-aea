@@ -49,6 +49,7 @@ class TestAsyncRuntime:
         builder.set_name(agent_name)
         builder.add_private_key(DEFAULT_LEDGER, private_key_path)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+        builder.set_storage_uri("sqlite://:memory:")
         self.agent = builder.build()
         self.runtime = self.RUNTIME(self.agent, threaded=True)
 
