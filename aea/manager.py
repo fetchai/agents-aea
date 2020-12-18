@@ -27,7 +27,7 @@ from asyncio.tasks import FIRST_COMPLETED
 from pathlib import Path
 from shutil import rmtree
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -158,6 +158,7 @@ class MultiAgentManager:
         self._was_working_dir_created = False
         self._is_running = False
         self._projects: Dict[PublicId, Project] = {}
+        self._projects_set: Set[PublicId] = set()
         self._keys_dir = os.path.abspath(os.path.join(self.working_dir, "keys"))
         self._agents: Dict[str, AgentAlias] = {}
         self._agents_tasks: Dict[str, AgentRunAsyncTask] = {}
@@ -310,8 +311,12 @@ class MultiAgentManager:
         :param local: whether or not to fetch from local registry.
         :param restore: bool flag for restoring already fetched agent.
         """
-        if public_id in self._projects:
-            raise ValueError(f"Project {public_id} was already added!")
+        if public_id.to_latest() in self._projects_set:
+            raise ValueError(
+                f"The project ({public_id.author}/{public_id.name}) was already added!"
+            )
+        self._projects_set.add(public_id.to_latest())
+
         self._projects[public_id] = Project.load(
             self.working_dir,
             public_id,
@@ -327,13 +332,13 @@ class MultiAgentManager:
         """Remove agent project."""
         if public_id not in self._projects:
             raise ValueError(f"Project {public_id} is not present!")
-
         if self._projects[public_id].agents:
             raise ValueError(
                 f"Can not remove projects with aliases exists: {self._projects[public_id].agents}"
             )
 
         project = self._projects.pop(public_id)
+        self._projects_set.remove(public_id.to_latest())
         if not keep_files:
             project.remove()
 
