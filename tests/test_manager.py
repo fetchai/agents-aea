@@ -362,6 +362,18 @@ class TestMultiAgentManagerAsyncMode:  # pylint: disable=unused-argument,protect
         ]
         assert result == expected_result
 
+    def test_add_same_project_versions(self):
+        """Test add the same project twice."""
+        self.manager.start_manager()
+
+        self.manager.add_project(self.project_public_id, local=True)
+        with pytest.raises(
+            ValueError, match=r"The project \(fetchai/my_first_aea\) was already added!"
+        ):
+            self.manager.add_project(
+                PublicId.from_str("fetchai/my_first_aea:0.15.0"), local=False
+            )
+
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""
