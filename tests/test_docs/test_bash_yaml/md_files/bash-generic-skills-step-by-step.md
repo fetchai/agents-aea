@@ -53,6 +53,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add protocol fetchai/fipa:0.11.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea run
 ```
@@ -63,6 +64,7 @@ aea add connection fetchai/ledger:0.11.0
 aea add protocol fetchai/fipa:0.11.0
 aea add protocol fetchai/signing:0.8.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash

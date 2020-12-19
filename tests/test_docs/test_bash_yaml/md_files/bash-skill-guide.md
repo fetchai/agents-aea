@@ -12,6 +12,7 @@ aea add protocol fetchai/oef_search:0.11.0
 aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/p2p_libp2p:0.13.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash

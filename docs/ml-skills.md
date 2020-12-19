@@ -65,6 +65,7 @@ First, fetch the data provider AEA:
 aea fetch fetchai/ml_data_provider:0.19.0
 cd ml_data_provider
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -80,6 +81,7 @@ aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/ml_data_provider:0.17.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea install
+aea build
 ```
 
 In `ml_data_provider/aea-config.yaml` add 
@@ -99,6 +101,7 @@ Then, fetch the model trainer AEA:
 aea fetch fetchai/ml_model_trainer:0.20.0
 cd ml_model_trainer
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -114,6 +117,7 @@ aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/ml_train:0.18.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea install
+aea build
 ```
 
 In `ml_model_trainer/aea-config.yaml` add 
@@ -161,7 +165,7 @@ First, run the data provider AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.)
 
 Then, update the configuration of the model trainer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
 

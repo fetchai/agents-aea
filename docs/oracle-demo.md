@@ -22,6 +22,7 @@ Fetch the AEA that will deploy and update the oracle contract.
 aea fetch fetchai/coin_price_oracle:0.2.0
 cd coin_price_oracle
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>

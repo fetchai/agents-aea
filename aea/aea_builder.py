@@ -22,11 +22,11 @@ import logging
 import logging.config
 import os
 import pprint
+import subprocess  # nosec
 import sys
 from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
-from subprocess import check_call  # nosec
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
@@ -956,15 +956,37 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         command = [sys.executable, build_entrypoint, target_directory]
         command_str = " ".join(command)
         if logger:
-            logger.info(f"Running command '{command_str}'")
-        try:
-            check_call(
-                command, cwd=source_directory, timeout=cls.BUILD_TIMEOUT
-            )  # nosec
-        except Exception as e:
+            logger.info(f"Running command '{command_str}'...")
+        stdout, stderr, code = cls._run_in_subprocess(command, source_directory)
+        if code == 0:
+            if logger:
+                logger.info(f"Command '{command_str}' succeded with output:\n{stdout}")
+        else:
             raise AEAException(
-                f"An error occurred while running command '{command_str}': {str(e)}"
-            ) from e
+                f"An error occurred while running command '{command_str}':\n{stderr}"
+            )
+
+    @classmethod
+    def _run_in_subprocess(
+        cls, command: List[str], source_directory: str
+    ) -> Tuple[str, str, int]:
+        """
+        Run in subprocess.
+
+        :return: stdout, stderr, code
+        """
+        res = subprocess.run(  # nosec
+            command,
+            cwd=source_directory,
+            check=False,
+            timeout=cls.BUILD_TIMEOUT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        code = res.returncode
+        stdout = res.stdout.decode("utf-8")
+        stderr = res.stderr.decode("utf-8")
+        return stdout, stderr, code
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """

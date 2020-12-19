@@ -250,6 +250,7 @@ Now install all the dependencies:
 
 ``` bash
 aea install
+aea build
 ```
 
 Finally run **Alice_AEA**:
@@ -258,7 +259,7 @@ Finally run **Alice_AEA**:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. We will refer to this as **Alice_AEA's p2p address**.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.) We will refer to this as **Alice_AEA's p2p address**.
 
 ### Faber_AEA
 
@@ -338,6 +339,7 @@ Now install all the dependencies:
 
 ``` bash
 aea install
+aea build
 ```
 
 Finally run **Faber_AEA**:
