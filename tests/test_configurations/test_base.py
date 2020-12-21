@@ -1046,13 +1046,17 @@ class TestCertRequestInconsistentDates(BaseTestCertRequestError):
     ERROR_MESSAGE_PATTERN = r"Inconsistent certificate validity period: 'not_before' field '1954-06-07T00:00:00\+00:00' is not before than 'not_after' field '1900-01-01T00:00:01\+00:00'"
 
 
-class TestCertRequestInstantiation:
+class BaseTestCertRequestInstantiation:
     """Test (successful) instantiation of CertRequest class."""
+
+    PUBLIC_KEY = ""
+    EXPECTED_PUBLIC_KEY = ""
+    EXPECTED_KEY_IDENTIFIER = ""
 
     @classmethod
     def setup_class(cls):
         """Set up class."""
-        cls.expected_public_key = "public_key"
+        cls.expected_public_key = cls.PUBLIC_KEY
         cls.expected_identifier = "identifier"
         cls.not_before = "2020-01-01T00:00:00+00:00"
         cls.not_after = "2020-01-02T00:00:00+00:00"
@@ -1067,8 +1071,8 @@ class TestCertRequestInstantiation:
 
     def test_instantiation(self):
         """Test instantiation."""
-        assert self.cert_request.public_key is None
-        assert self.cert_request.key_identifier == self.expected_public_key
+        assert self.cert_request.public_key == self.EXPECTED_PUBLIC_KEY
+        assert self.cert_request.key_identifier == self.EXPECTED_KEY_IDENTIFIER
         assert self.cert_request.identifier == self.expected_identifier
 
         expected_not_before = datetime.datetime(
@@ -1086,3 +1090,19 @@ class TestCertRequestInstantiation:
     def test_from_to_json(self):
         """Test from-to json methods."""
         assert self.cert_request == self.cert_request.from_json(self.cert_request.json)
+
+
+class TestCertRequestInstantiationWithKeyIdentifier(BaseTestCertRequestInstantiation):
+    """Test (successful) instantiation of CertRequest class."""
+
+    PUBLIC_KEY = "public_key"
+    EXPECTED_PUBLIC_KEY = None
+    EXPECTED_KEY_IDENTIFIER = PUBLIC_KEY
+
+
+class TestCertRequestInstantiationWithKeyHex(BaseTestCertRequestInstantiation):
+    """Test (successful) instantiation of CertRequest class."""
+
+    PUBLIC_KEY = "0xABCDE12345"
+    EXPECTED_PUBLIC_KEY = "0xABCDE12345"
+    EXPECTED_KEY_IDENTIFIER = None
