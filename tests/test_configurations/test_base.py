@@ -1104,6 +1104,6 @@ class TestCertRequestInstantiationWithKeyIdentifier(BaseTestCertRequestInstantia
 class TestCertRequestInstantiationWithKeyHex(BaseTestCertRequestInstantiation):
     """Test (successful) instantiation of CertRequest class."""
 
-    PUBLIC_KEY = "0xABCDE12345"
-    EXPECTED_PUBLIC_KEY = "0xABCDE12345"
+    PUBLIC_KEY = "0xABCDEF12345"
+    EXPECTED_PUBLIC_KEY = "0xABCDEF12345"
     EXPECTED_KEY_IDENTIFIER = None

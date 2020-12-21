@@ -27,3 +27,14 @@ dependencies:
   dep4:
     version: <=1.11.12b2
 is_abstract: false
+cert_requests:
+- identifier: cert_id
+  not_after: '2020-01-02T00:00:00'
+  not_before: '2020-01-01T00:00:00'
+  path: some/path_1
+  public_key: key_id
+- identifier: cert_id
+  not_after: '2020-01-02T00:00:00'
+  not_before: '2020-01-01T00:00:00'
+  path: some/path_2
+  public_key: '0xABCDEF123456'

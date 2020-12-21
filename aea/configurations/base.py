@@ -299,8 +299,8 @@ class CertRequest:
         self,
         public_key: str,
         identifier: SimpleIdOrStr,
-        not_before: str,
-        not_after: str,
+        not_before: Union[str, datetime.datetime],
+        not_after: Union[str, datetime.datetime],
         path: str,
     ):
         """
@@ -309,9 +309,9 @@ class CertRequest:
         :param public_key: the public key, or the key id.
         :param identifier: certificate identifier.
         :param not_before: specify the lower bound for certificate vailidity.
-          Must follow the format: 'YYYY-MM-DDTHH:MM:SS'
+          If it is a string, it must follow the format: 'YYYY-MM-DDTHH:MM:SS'
         :param not_before: specify the lower bound for certificate vailidity.
-          Must follow the format: 'YYYY-MM-DDTHH:MM:SS'
+          if it is a string, it must follow the format: 'YYYY-MM-DDTHH:MM:SS'
         :param path: the path to the certificate.
         """
         self._key_identifier: Optional[str] = None
@@ -327,19 +327,22 @@ class CertRequest:
         self._check_validation_boundaries()
 
     @staticmethod
-    def _parse_datetime(datetime_str: str) -> datetime.datetime:
+    def _parse_datetime(obj: Union[str, datetime.datetime]) -> datetime.datetime:
         """
         Parse datetime string.
 
         It is expected to follow ISO 8601.
-        The result is interpreted with UTC timezone.
 
-        :param datetime_str: the input to parse.
+        :param obj: the input to parse.
         :return: a datetime.datetime instance.
         """
-        result = datetime.datetime.fromisoformat(datetime_str)
+        result = (
+            obj
+            if isinstance(obj, datetime.datetime)
+            else datetime.datetime.fromisoformat(obj)
+        )
         enforce(result.microsecond == 0, "Microsecond field not allowed.")
-        return result.astimezone(tz=datetime.timezone.utc)
+        return result
 
     def _check_validation_boundaries(self):
         """
@@ -414,7 +417,7 @@ class CertRequest:
             identifier=self.identifier,
             not_before=self._not_before_string,
             not_after=self._not_after_string,
-            path=self.path,
+            path=str(self.path),
         )
         if self.public_key is not None:
             result["public_key"] = self.public_key
@@ -1427,7 +1430,7 @@ class ConnectionConfig(ComponentConfiguration):
         self.description = description
         self.config = config if len(config) > 0 else {}
         self.is_abstract = is_abstract
-        self.cert_requests = cert_requests or []
+        self.cert_requests = cert_requests
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1496,6 +1499,7 @@ class ConnectionConfig(ComponentConfiguration):
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
         cert_requests = (
             [
+                # notice: yaml.load resolves datetimes strings to datetime.datetime objects
                 CertRequest.from_json(cert_request_json)
                 for cert_request_json in obj["cert_requests"]
             ]
