@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
+import datetime
 import functools
 import pprint
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from contextlib import suppress
 from copy import copy, deepcopy
 from enum import Enum
 from pathlib import Path
@@ -287,6 +289,120 @@ def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict]:
         )
         result[key] = dep_to_json[key]
     return result
+
+
+class CertRequest:
+    """Certificate request for proof of representation."""
+
+    def __init__(
+        self,
+        public_key: str,
+        identifier: SimpleIdOrStr,
+        not_before: str,
+        not_after: str,
+        path: str,
+    ):
+        """
+        Initialize the certificate request.
+
+        :param public_key: the public key, or the key id.
+        :param identifier: certificate identifier.
+        :param not_before: specify the lower bound for certificate vailidity.
+          Must follow the format: 'YYYY-MM-DDTHH:MM:SS'
+        :param not_before: specify the lower bound for certificate vailidity.
+          Must follow the format: 'YYYY-MM-DDTHH:MM:SS'
+        :param path: the path to the certificate.
+        """
+        self._key_identifier: Optional[str] = None
+        self._public_key: Optional[str] = None
+        self._identifier = SimpleId(identifier)
+        self._not_before = self._parse_datetime(not_before)
+        self._not_after = self._parse_datetime(not_after)
+        self._path = Path(path)
+
+        self._parse_public_key(public_key)
+        self._check_validation_boundaries()
+
+    @staticmethod
+    def _parse_datetime(datetime_str: str) -> datetime.datetime:
+        """
+        Parse datetime string.
+
+        It is expected to follow ISO 8601.
+        The result is interpreted with UTC timezone.
+
+        :param datetime_str: the input to parse.
+        :return: a datetime.datetime instance.
+        """
+        result = datetime.datetime.fromisoformat(datetime_str)
+        enforce(result.microsecond == 0, "Microsecond field not allowed.")
+        return result.astimezone(tz=datetime.timezone.utc)
+
+    def _check_validation_boundaries(self):
+        """
+        Check the validation boundaries are consistent.
+
+        Namely, that not_before < not_after.
+        """
+        enforce(
+            self._not_before < self._not_after,
+            f"Inconsistent certificate validity period: 'not_before' field '{self._not_before.isoformat()}' is not before than 'not_after' field '{self._not_after.isoformat()}'",
+            ValueError,
+        )
+
+    def _parse_public_key(self, public_key_str: str) -> None:
+        """
+        Parse public key from string.
+
+        It first tries to parse it as an identifier,
+        and in case of failure as a sequence of hexadecimals, starting with "0x".
+        """
+        with suppress(ValueError):
+            # if this raises ValueError, we don't return
+            self._key_identifier = SimpleId(public_key_str)
+            return
+
+        with suppress(ValueError):
+            # this raises ValueError if the input is not a valid hexadecimal string.
+            int(public_key_str, 16)
+            self._public_key = public_key_str
+            return
+
+        enforce(
+            False,
+            f"Public key field '{public_key_str}' is neither a valid identifier nor an address.",
+            exception_class=ValueError,
+        )
+
+    @property
+    def public_key(self) -> Optional[str]:
+        """Get the public key."""
+        return self._public_key
+
+    @property
+    def key_identifier(self) -> Optional[str]:
+        """Get the key identifier."""
+        return self._key_identifier
+
+    @property
+    def identifier(self) -> str:
+        """Get the identifier."""
+        return self._identifier
+
+    @property
+    def not_before(self) -> datetime.datetime:
+        """Get the not_before field."""
+        return self._not_before
+
+    @property
+    def not_after(self) -> datetime.datetime:
+        """Get the not_after field."""
+        return self._not_after
+
+    @property
+    def path(self) -> Path:
+        """Get the path"""
+        return self._path
 
 
 VersionInfoClass = semver.VersionInfo
@@ -1227,6 +1343,7 @@ class ConnectionConfig(ComponentConfiguration):
         description: str = "",
         connection_id: Optional[PublicId] = None,
         is_abstract: bool = False,
+        cert_requests: Optional[List[CertRequest]] = None,
         **config,
     ):
         """Initialize a connection configuration object."""
@@ -1275,6 +1392,7 @@ class ConnectionConfig(ComponentConfiguration):
         self.description = description
         self.config = config if len(config) > 0 else {}
         self.is_abstract = is_abstract
+        self.cert_requests = cert_requests or []
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1338,6 +1456,7 @@ class ConnectionConfig(ComponentConfiguration):
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
+        cert_requests = obj.get("cert_requests", [])
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1358,6 +1477,7 @@ class ConnectionConfig(ComponentConfiguration):
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
             is_abstract=obj.get("is_abstract", False),
+            cert_requests=cert_requests,
             **cast(dict, obj.get("config", {})),
         )
 
