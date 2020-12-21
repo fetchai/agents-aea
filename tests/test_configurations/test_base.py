@@ -22,6 +22,7 @@ import datetime
 import re
 from copy import copy
 from pathlib import Path
+from typing import Optional
 from unittest import TestCase, mock
 
 import pytest
@@ -1049,9 +1050,9 @@ class TestCertRequestInconsistentDates(BaseTestCertRequestError):
 class BaseTestCertRequestInstantiation:
     """Test (successful) instantiation of CertRequest class."""
 
-    PUBLIC_KEY = ""
-    EXPECTED_PUBLIC_KEY = ""
-    EXPECTED_KEY_IDENTIFIER = ""
+    PUBLIC_KEY: Optional[str] = ""
+    EXPECTED_PUBLIC_KEY: Optional[str] = ""
+    EXPECTED_KEY_IDENTIFIER: Optional[str] = ""
 
     @classmethod
     def setup_class(cls):
