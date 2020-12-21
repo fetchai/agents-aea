@@ -991,8 +991,8 @@ class BaseTestCertRequestError:
 
     PUBLIC_KEY = "a_public_key"
     IDENTIFIER = "an_identifier"
-    NOT_BEFORE = datetime.datetime.now().isoformat()
-    NOT_AFTER = datetime.datetime.now().isoformat()
+    NOT_BEFORE = "2020-01-01T00:00:00+00:00"
+    NOT_AFTER = "2020-01-02T00:00:00+00:00"
     PATH = "some/path"
     ERROR_MESSAGE_PATTERN = ""
 
@@ -1044,3 +1044,45 @@ class TestCertRequestInconsistentDates(BaseTestCertRequestError):
     NOT_BEFORE = "1954-06-07T00:00:00+00:00"
     NOT_AFTER = "1900-01-01T00:00:01+00:00"
     ERROR_MESSAGE_PATTERN = r"Inconsistent certificate validity period: 'not_before' field '1954-06-07T00:00:00\+00:00' is not before than 'not_after' field '1900-01-01T00:00:01\+00:00'"
+
+
+class TestCertRequestInstantiation:
+    """Test (successful) instantiation of CertRequest class."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up class."""
+        cls.expected_public_key = "public_key"
+        cls.expected_identifier = "identifier"
+        cls.not_before = "2020-01-01T00:00:00+00:00"
+        cls.not_after = "2020-01-02T00:00:00+00:00"
+        cls.expected_path = "some/path"
+        cls.cert_request = CertRequest(
+            cls.expected_public_key,
+            cls.expected_identifier,
+            cls.not_before,
+            cls.not_after,
+            cls.expected_path,
+        )
+
+    def test_instantiation(self):
+        """Test instantiation."""
+        assert self.cert_request.public_key is None
+        assert self.cert_request.key_identifier == self.expected_public_key
+        assert self.cert_request.identifier == self.expected_identifier
+
+        expected_not_before = datetime.datetime(
+            2020, 1, 1, 0, 0, 0, 0, datetime.timezone.utc
+        )
+        assert self.cert_request.not_before == expected_not_before
+
+        expected_not_after = datetime.datetime(
+            2020, 1, 2, 0, 0, 0, 0, datetime.timezone.utc
+        )
+        assert self.cert_request.not_after == expected_not_after
+
+        assert self.cert_request.path == Path(self.expected_path)
+
+    def test_from_to_json(self):
+        """Test from-to json methods."""
+        assert self.cert_request == self.cert_request.from_json(self.cert_request.json)

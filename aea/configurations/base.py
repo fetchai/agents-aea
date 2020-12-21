@@ -27,6 +27,7 @@ from collections import OrderedDict
 from contextlib import suppress
 from copy import copy, deepcopy
 from enum import Enum
+from operator import attrgetter
 from pathlib import Path
 from typing import (
     Any,
@@ -315,7 +316,9 @@ class CertRequest:
         """
         self._key_identifier: Optional[str] = None
         self._public_key: Optional[str] = None
-        self._identifier = SimpleId(identifier)
+        self._identifier = str(SimpleId(identifier))
+        self._not_before_string = not_before
+        self._not_after_string = not_after
         self._not_before = self._parse_datetime(not_before)
         self._not_after = self._parse_datetime(not_after)
         self._path = Path(path)
@@ -359,7 +362,7 @@ class CertRequest:
         """
         with suppress(ValueError):
             # if this raises ValueError, we don't return
-            self._key_identifier = SimpleId(public_key_str)
+            self._key_identifier = str(SimpleId(public_key_str))
             return
 
         with suppress(ValueError):
@@ -403,6 +406,38 @@ class CertRequest:
     def path(self) -> Path:
         """Get the path"""
         return self._path
+
+    @property
+    def json(self) -> Dict:
+        """Compute the JSON representation."""
+        result = dict(
+            identifier=self.identifier,
+            not_before=self._not_before_string,
+            not_after=self._not_after_string,
+            path=self.path,
+        )
+        if self.public_key is not None:
+            result["public_key"] = self.public_key
+        elif self.key_identifier is not None:
+            result["public_key"] = self.key_identifier
+        return result
+
+    @classmethod
+    def from_json(cls, obj: Dict) -> "CertRequest":
+        """Compute the JSON representation."""
+        return cls(**obj)
+
+    def __eq__(self, other):
+        """Check equality."""
+        return (
+            isinstance(other, CertRequest)
+            and self.identifier == other.identifier
+            and self.public_key == other.public_key
+            and self.key_identifier == other.key_identifier
+            and self.not_after == other.not_after
+            and self.not_before == other.not_before
+            and self.path == other.path
+        )
 
 
 VersionInfoClass = semver.VersionInfo
@@ -1438,6 +1473,9 @@ class ConnectionConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
+
+        if self.cert_requests is not None:
+            result["cert_requests"] = list(map(attrgetter("json"), self.cert_requests))
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
         if self.build_directory:
@@ -1456,7 +1494,14 @@ class ConnectionConfig(ComponentConfiguration):
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
-        cert_requests = obj.get("cert_requests", [])
+        cert_requests = (
+            [
+                CertRequest.from_json(cert_request_json)
+                for cert_request_json in obj["cert_requests"]
+            ]
+            if "cert_requests" in obj
+            else None
+        )
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
