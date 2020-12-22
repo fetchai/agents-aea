@@ -583,8 +583,8 @@ class CertRequest:
         public_key: str,
         identifier: SimpleIdOrStr,
         ledger_id: SimpleIdOrStr,
-        not_before: Union[str, datetime.datetime],
-        not_after: Union[str, datetime.datetime],
+        not_before: str,
+        not_after: str,
         path: str,
     ):
         """
@@ -639,7 +639,7 @@ class CertRequest:
         """
         enforce(
             self._not_before < self._not_after,
-            f"Inconsistent certificate validity period: 'not_before' field '{self._not_before.isoformat()}' is not before than 'not_after' field '{self._not_after.isoformat()}'",
+            f"Inconsistent certificate validity period: 'not_before' field '{self._not_before_string}' is not before than 'not_after' field '{self._not_after_string}'",
             ValueError,
         )
 
@@ -686,6 +686,16 @@ class CertRequest:
     def identifier(self) -> str:
         """Get the identifier."""
         return self._identifier
+
+    @property
+    def not_before_string(self) -> str:
+        """Get the not_before field as string."""
+        return self._not_before_string
+
+    @property
+    def not_after_string(self) -> str:
+        """Get the not_after field as string."""
+        return self._not_after_string
 
     @property
     def not_before(self) -> datetime.datetime:

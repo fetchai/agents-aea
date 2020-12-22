@@ -453,14 +453,18 @@ class TestCertRequestBadNotBefore(BaseTestCertRequestError):
     """Test instantiation of CertRequest class with bad not_before date."""
 
     NOT_BEFORE = "bad-formatted-date"
-    ERROR_MESSAGE_PATTERN = "Invalid isoformat string: 'bad-formatted-date'"
+    ERROR_MESSAGE_PATTERN = (
+        "time data 'bad-formatted-date' does not match format '%Y-%m-%d'"
+    )
 
 
 class TestCertRequestBadNotAfter(BaseTestCertRequestError):
     """Test instantiation of CertRequest class with bad not_after date."""
 
     NOT_AFTER = "bad-formatted-date"
-    ERROR_MESSAGE_PATTERN = "Invalid isoformat string: 'bad-formatted-date'"
+    ERROR_MESSAGE_PATTERN = (
+        "time data 'bad-formatted-date' does not match format '%Y-%m-%d'"
+    )
 
 
 class TestCertRequestInconsistentDates(BaseTestCertRequestError):
@@ -468,7 +472,7 @@ class TestCertRequestInconsistentDates(BaseTestCertRequestError):
 
     NOT_BEFORE = "1954-06-07"
     NOT_AFTER = "1900-01-01"
-    ERROR_MESSAGE_PATTERN = r"Inconsistent certificate validity period: 'not_before' field '1954-06-07T00:00:00\+00:00' is not before than 'not_after' field '1900-01-01T00:00:01\+00:00'"
+    ERROR_MESSAGE_PATTERN = r"Inconsistent certificate validity period: 'not_before' field '1954-06-07' is not before than 'not_after' field '1900-01-01'"
 
 
 class BaseTestCertRequestInstantiation:
