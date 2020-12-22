@@ -27,6 +27,7 @@ from click import ClickException
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import get_package_path_unified
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import CONNECTION
@@ -45,14 +46,14 @@ def issue_certificates(click_context):
     for connection_id in ctx.agent_config.connections:
         _process_connection(ctx, connection_id)
 
-    click.echo("Done!")
+    click.echo("All certificates have been issued.")
 
 
 def _process_certificate(ctx: Context, cert_request: CertRequest):
     """Process a single certificate request."""
     click.echo(f"Issuing certificate '{cert_request.identifier}'...")
     ledger_id = cert_request.ledger_id
-    output_path = cert_request.path
+    output_path = cert_request.save_path
     if cert_request.key_identifier is not None:
         key_identifier = cert_request.key_identifier
         connection_private_key_path = ctx.agent_config.connection_private_key_paths.read(
@@ -76,28 +77,28 @@ def _process_certificate(ctx: Context, cert_request: CertRequest):
     identifier = cert_request.identifier.encode("ascii")
     not_before = cert_request.not_before_string.encode("ascii")
     not_after = cert_request.not_after_string.encode("ascii")
-    crytpo_private_key_path = ctx.agent_config.connection_private_key_paths.read(
-        ledger_id
-    )
-    if crytpo_private_key_path is None:
+    crypto_private_key_path = ctx.agent_config.private_key_paths.read(ledger_id)
+    if crypto_private_key_path is None:
         raise ClickException(f"Cannot find private key with id '{ledger_id}'")
-    crypto = crypto_registry.make(ledger_id, private_key_path=crytpo_private_key_path)
+    crypto = crypto_registry.make(ledger_id, private_key_path=crypto_private_key_path)
     message = public_key_bytes + identifier + not_before + not_after
     signature = crypto.sign_message(message).encode("ascii")
     Path(output_path).write_bytes(signature)
-    click.echo(f"Dumped certificate in '{output_path}'.")
 
 
 def _process_connection(ctx: Context, connection_id: PublicId):
-    click.echo(f"Processing connection '{connection_id}'...")
     path = get_package_path_unified(ctx, CONNECTION, connection_id)
     connection_config = cast(ConnectionConfig, load_item_config(CONNECTION, Path(path)))
     if (
         connection_config.cert_requests is None
         or len(connection_config.cert_requests) == 0
     ):
-        click.echo("No certificates to process.")
+        logger.debug("No certificates to process.")
         return
 
+    logger.debug(f"Processing connection '{connection_id}'...")
     for cert_request in connection_config.cert_requests:
         _process_certificate(ctx, cert_request)
+        click.echo(
+            f"Dumped certificate '{cert_request.identifier}' in '{cert_request.save_path}' for connection {connection_id}."
+        )
