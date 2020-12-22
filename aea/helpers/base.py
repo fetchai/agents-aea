@@ -59,7 +59,7 @@ def _get_module(spec):
 
 
 def locate(path: str) -> Any:
-    """Locate an object by name or dotted path, importing as necessary."""
+    """Locate an object by name or dotted save_path, importing as necessary."""
     parts = [part for part in path.split(".") if part]
     module, n = None, 0
     while n < len(parts):
@@ -95,7 +95,7 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     """
     Load a module.
 
-    :param dotted_path: the dotted path of the package/module.
+    :param dotted_path: the dotted save_path of the package/module.
     :param filepath: the file to the package/module.
     :return: None
     :raises ValueError: if the filepath provided is not a module.
@@ -111,7 +111,7 @@ def load_env_file(env_file: str):
     """
     Load the content of the environment file into the process environment.
 
-    :param env_file: path to the env file.
+    :param env_file: save_path to the env file.
     :return: None.
     """
     load_dotenv(dotenv_path=Path(env_file), override=False)
@@ -404,13 +404,13 @@ def _get_aea_logger_name_prefix(module_name: str, agent_name: str) -> str:
     """
     Get the logger name prefix.
 
-    It consists of a dotted path with:
+    It consists of a dotted save_path with:
     - the name of the package, 'aea';
     - the agent name;
-    - the rest of the dotted path.
+    - the rest of the dotted save_path.
 
-    >>> _get_aea_logger_name_prefix("aea.path.to.package", "myagent")
-    'aea.myagent.path.to.package'
+    >>> _get_aea_logger_name_prefix("aea.save_path.to.package", "myagent")
+    'aea.myagent.save_path.to.package'
 
     :param module_name: the module name.
     :param agent_name: the agent name.
@@ -585,7 +585,7 @@ class CertRequest:
         ledger_id: SimpleIdOrStr,
         not_before: str,
         not_after: str,
-        path: str,
+        save_path: str,
     ):
         """
         Initialize the certificate request.
@@ -598,7 +598,7 @@ class CertRequest:
         :param not_before: specify the lower bound for certificate vailidity.
           if it is a string, it must follow the format: 'YYYY-MM-DD' It
           will be interpreted as timezone UTC-0.
-        :param path: the path to the certificate.
+        :param save_path: the save_path where to save the certificate.
         """
         self._key_identifier: Optional[str] = None
         self._public_key: Optional[str] = None
@@ -608,7 +608,7 @@ class CertRequest:
         self._not_after_string = not_after
         self._not_before = self._parse_datetime(not_before)
         self._not_after = self._parse_datetime(not_after)
-        self._path = Path(path)
+        self._save_path = Path(save_path)
 
         self._parse_public_key(public_key)
         self._check_validation_boundaries()
@@ -708,9 +708,9 @@ class CertRequest:
         return self._not_after
 
     @property
-    def path(self) -> Path:
-        """Get the path"""
-        return self._path
+    def save_path(self) -> Path:
+        """Get the save_path"""
+        return self._save_path
 
     @property
     def json(self) -> Dict:
@@ -720,7 +720,7 @@ class CertRequest:
             ledger_id=self.ledger_id,
             not_before=self._not_before_string,
             not_after=self._not_after_string,
-            path=str(self.path),
+            save_path=str(self.save_path),
         )
         if self.public_key is not None:
             result["public_key"] = self.public_key
@@ -743,5 +743,5 @@ class CertRequest:
             and self.key_identifier == other.key_identifier
             and self.not_after == other.not_after
             and self.not_before == other.not_before
-            and self.path == other.path
+            and self.save_path == other.save_path
         )
