@@ -51,7 +51,6 @@ def issue_certificates(click_context):
 
 def _process_certificate(ctx: Context, cert_request: CertRequest):
     """Process a single certificate request."""
-    click.echo(f"Issuing certificate '{cert_request.identifier}'...")
     ledger_id = cert_request.ledger_id
     output_path = cert_request.save_path
     if cert_request.key_identifier is not None:
@@ -98,6 +97,9 @@ def _process_connection(ctx: Context, connection_id: PublicId):
 
     logger.debug(f"Processing connection '{connection_id}'...")
     for cert_request in connection_config.cert_requests:
+        click.echo(
+            f"Issuing certificate '{cert_request.identifier}' for connection {connection_config.public_id}..."
+        )
         _process_certificate(ctx, cert_request)
         click.echo(
             f"Dumped certificate '{cert_request.identifier}' in '{cert_request.save_path}' for connection {connection_id}."
