@@ -82,6 +82,7 @@ from aea.helpers.base import (
     SimpleId,
     SimpleIdOrStr,
     load_module,
+    parse_datetime_from_str,
     recursive_update,
 )
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -299,6 +300,7 @@ class CertRequest:
         self,
         public_key: str,
         identifier: SimpleIdOrStr,
+        ledger_id: SimpleIdOrStr,
         not_before: Union[str, datetime.datetime],
         not_after: Union[str, datetime.datetime],
         path: str,
@@ -317,6 +319,7 @@ class CertRequest:
         self._key_identifier: Optional[str] = None
         self._public_key: Optional[str] = None
         self._identifier = str(SimpleId(identifier))
+        self._ledger_id = str(SimpleId(ledger_id))
         self._not_before_string = not_before
         self._not_after_string = not_after
         self._not_before = self._parse_datetime(not_before)
@@ -326,8 +329,8 @@ class CertRequest:
         self._parse_public_key(public_key)
         self._check_validation_boundaries()
 
-    @staticmethod
-    def _parse_datetime(obj: Union[str, datetime.datetime]) -> datetime.datetime:
+    @classmethod
+    def _parse_datetime(cls, obj: Union[str, datetime.datetime]) -> datetime.datetime:
         """
         Parse datetime string.
 
@@ -337,9 +340,9 @@ class CertRequest:
         :return: a datetime.datetime instance.
         """
         result = (
-            obj
-            if isinstance(obj, datetime.datetime)
-            else datetime.datetime.fromisoformat(obj)
+            parse_datetime_from_str(obj)  # type: ignore
+            if isinstance(obj, str)
+            else obj
         )
         enforce(result.microsecond == 0, "Microsecond field not allowed.")
         return result
@@ -386,6 +389,11 @@ class CertRequest:
         return self._public_key
 
     @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
+
+    @property
     def key_identifier(self) -> Optional[str]:
         """Get the key identifier."""
         return self._key_identifier
@@ -415,6 +423,7 @@ class CertRequest:
         """Compute the JSON representation."""
         result = dict(
             identifier=self.identifier,
+            ledger_id=self.ledger_id,
             not_before=self._not_before_string,
             not_after=self._not_after_string,
             path=str(self.path),
@@ -435,6 +444,7 @@ class CertRequest:
         return (
             isinstance(other, CertRequest)
             and self.identifier == other.identifier
+            and self.ledger_id == other.ledger_id
             and self.public_key == other.public_key
             and self.key_identifier == other.key_identifier
             and self.not_after == other.not_after

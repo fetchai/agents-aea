@@ -161,12 +161,23 @@
     "cert_request": {
       "type": "object",
       "additionalProperties": false,
+      "required": [
+        "public_key",
+        "identifier",
+        "ledger_id",
+        "not_before",
+        "not_after",
+        "path"
+      ],
       "properties": {
         "public_key": {
           "type": "string"
         },
         "identifier": {
           "$ref": "definitions.json#/definitions/resource_name"
+        },
+        "ledger_id": {
+          "$ref": "definitions.json#/definitions/ledger_id"
         },
         "not_before": {
           "type": "string"

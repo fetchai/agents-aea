@@ -992,6 +992,7 @@ class BaseTestCertRequestError:
 
     PUBLIC_KEY = "a_public_key"
     IDENTIFIER = "an_identifier"
+    LEDGER_ID = "a_ledger_id"
     NOT_BEFORE = "2020-01-01T00:00:00+00:00"
     NOT_AFTER = "2020-01-02T00:00:00+00:00"
     PATH = "some/path"
@@ -1003,6 +1004,7 @@ class BaseTestCertRequestError:
             CertRequest(
                 self.PUBLIC_KEY,
                 self.IDENTIFIER,
+                self.LEDGER_ID,
                 self.NOT_BEFORE,
                 self.NOT_AFTER,
                 self.PATH,
@@ -1020,6 +1022,15 @@ class TestCertRequestBadIdentifier(BaseTestCertRequestError):
     """Test instantiation of CertRequest class with bad identifier."""
 
     IDENTIFIER = "0bad_identifier"
+    ERROR_MESSAGE_PATTERN = (
+        "Value 0bad_identifier does not match the regular expression.*"
+    )
+
+
+class TestCertRequestBadLedgerId(BaseTestCertRequestError):
+    """Test instantiation of CertRequest class with bad ledger id."""
+
+    LEDGER_ID = "0bad_identifier"
     ERROR_MESSAGE_PATTERN = (
         "Value 0bad_identifier does not match the regular expression.*"
     )
@@ -1059,12 +1070,14 @@ class BaseTestCertRequestInstantiation:
         """Set up class."""
         cls.expected_public_key = cls.PUBLIC_KEY
         cls.expected_identifier = "identifier"
+        cls.expected_ledger_id = "ledger_id"
         cls.not_before = "2020-01-01T00:00:00+00:00"
         cls.not_after = "2020-01-02T00:00:00+00:00"
         cls.expected_path = "some/path"
         cls.cert_request = CertRequest(
             cls.expected_public_key,
             cls.expected_identifier,
+            cls.expected_ledger_id,
             cls.not_before,
             cls.not_after,
             cls.expected_path,
@@ -1075,6 +1088,7 @@ class BaseTestCertRequestInstantiation:
         assert self.cert_request.public_key == self.EXPECTED_PUBLIC_KEY
         assert self.cert_request.key_identifier == self.EXPECTED_KEY_IDENTIFIER
         assert self.cert_request.identifier == self.expected_identifier
+        assert self.cert_request.ledger_id == self.expected_ledger_id
 
         expected_not_before = datetime.datetime(
             2020, 1, 1, 0, 0, 0, 0, datetime.timezone.utc

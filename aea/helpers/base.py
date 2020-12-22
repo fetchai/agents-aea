@@ -19,6 +19,7 @@
 """Miscellaneous helpers."""
 import builtins
 import contextlib
+import datetime
 import importlib.util
 import logging
 import os
@@ -42,6 +43,7 @@ from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
+ISO_8601_FORMAT = "%G-%m-%dT%H-%M-%S%z"
 
 _default_logger = logging.getLogger(__name__)
 
@@ -564,3 +566,13 @@ def ensure_dir(dir_path: str) -> None:
         os.makedirs(dir_path)
     else:
         enforce(os.path.isdir(dir_path), f"{dir_path} is not a directory!")
+
+
+def parse_datetime_from_str(date_string: str) -> datetime.datetime:
+    """Parse datetime from string."""
+    version = sys.version_info
+    major = version.major
+    minor = version.minor
+    if (major, minor) > (3, 6):
+        return datetime.datetime.fromisoformat(date_string)
+    return datetime.datetime.strptime(date_string, ISO_8601_FORMAT)
