@@ -18,13 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
-import datetime
 import functools
 import pprint
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from contextlib import suppress
 from copy import copy, deepcopy
 from enum import Enum
 from operator import attrgetter
@@ -77,12 +75,12 @@ from aea.configurations.constants import (
 )
 from aea.exceptions import enforce
 from aea.helpers.base import (
+    CertRequest,
     RegexConstrainedString,
     STRING_LENGTH_LIMIT,
     SimpleId,
     SimpleIdOrStr,
     load_module,
-    parse_datetime_from_str,
     recursive_update,
 )
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -291,166 +289,6 @@ def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict]:
         )
         result[key] = dep_to_json[key]
     return result
-
-
-class CertRequest:
-    """Certificate request for proof of representation."""
-
-    def __init__(
-        self,
-        public_key: str,
-        identifier: SimpleIdOrStr,
-        ledger_id: SimpleIdOrStr,
-        not_before: Union[str, datetime.datetime],
-        not_after: Union[str, datetime.datetime],
-        path: str,
-    ):
-        """
-        Initialize the certificate request.
-
-        :param public_key: the public key, or the key id.
-        :param identifier: certificate identifier.
-        :param not_before: specify the lower bound for certificate vailidity.
-          If it is a string, it must follow the format: 'YYYY-MM-DDTHH:MM:SS'
-        :param not_before: specify the lower bound for certificate vailidity.
-          if it is a string, it must follow the format: 'YYYY-MM-DDTHH:MM:SS'
-        :param path: the path to the certificate.
-        """
-        self._key_identifier: Optional[str] = None
-        self._public_key: Optional[str] = None
-        self._identifier = str(SimpleId(identifier))
-        self._ledger_id = str(SimpleId(ledger_id))
-        self._not_before_string = not_before
-        self._not_after_string = not_after
-        self._not_before = self._parse_datetime(not_before)
-        self._not_after = self._parse_datetime(not_after)
-        self._path = Path(path)
-
-        self._parse_public_key(public_key)
-        self._check_validation_boundaries()
-
-    @classmethod
-    def _parse_datetime(cls, obj: Union[str, datetime.datetime]) -> datetime.datetime:
-        """
-        Parse datetime string.
-
-        It is expected to follow ISO 8601.
-
-        :param obj: the input to parse.
-        :return: a datetime.datetime instance.
-        """
-        result = (
-            parse_datetime_from_str(obj)  # type: ignore
-            if isinstance(obj, str)
-            else obj
-        )
-        enforce(result.microsecond == 0, "Microsecond field not allowed.")
-        return result
-
-    def _check_validation_boundaries(self):
-        """
-        Check the validation boundaries are consistent.
-
-        Namely, that not_before < not_after.
-        """
-        enforce(
-            self._not_before < self._not_after,
-            f"Inconsistent certificate validity period: 'not_before' field '{self._not_before.isoformat()}' is not before than 'not_after' field '{self._not_after.isoformat()}'",
-            ValueError,
-        )
-
-    def _parse_public_key(self, public_key_str: str) -> None:
-        """
-        Parse public key from string.
-
-        It first tries to parse it as an identifier,
-        and in case of failure as a sequence of hexadecimals, starting with "0x".
-        """
-        with suppress(ValueError):
-            # if this raises ValueError, we don't return
-            self._key_identifier = str(SimpleId(public_key_str))
-            return
-
-        with suppress(ValueError):
-            # this raises ValueError if the input is not a valid hexadecimal string.
-            int(public_key_str, 16)
-            self._public_key = public_key_str
-            return
-
-        enforce(
-            False,
-            f"Public key field '{public_key_str}' is neither a valid identifier nor an address.",
-            exception_class=ValueError,
-        )
-
-    @property
-    def public_key(self) -> Optional[str]:
-        """Get the public key."""
-        return self._public_key
-
-    @property
-    def ledger_id(self) -> str:
-        """Get the ledger id."""
-        return self._ledger_id
-
-    @property
-    def key_identifier(self) -> Optional[str]:
-        """Get the key identifier."""
-        return self._key_identifier
-
-    @property
-    def identifier(self) -> str:
-        """Get the identifier."""
-        return self._identifier
-
-    @property
-    def not_before(self) -> datetime.datetime:
-        """Get the not_before field."""
-        return self._not_before
-
-    @property
-    def not_after(self) -> datetime.datetime:
-        """Get the not_after field."""
-        return self._not_after
-
-    @property
-    def path(self) -> Path:
-        """Get the path"""
-        return self._path
-
-    @property
-    def json(self) -> Dict:
-        """Compute the JSON representation."""
-        result = dict(
-            identifier=self.identifier,
-            ledger_id=self.ledger_id,
-            not_before=self._not_before_string,
-            not_after=self._not_after_string,
-            path=str(self.path),
-        )
-        if self.public_key is not None:
-            result["public_key"] = self.public_key
-        elif self.key_identifier is not None:
-            result["public_key"] = self.key_identifier
-        return result
-
-    @classmethod
-    def from_json(cls, obj: Dict) -> "CertRequest":
-        """Compute the JSON representation."""
-        return cls(**obj)
-
-    def __eq__(self, other):
-        """Check equality."""
-        return (
-            isinstance(other, CertRequest)
-            and self.identifier == other.identifier
-            and self.ledger_id == other.ledger_id
-            and self.public_key == other.public_key
-            and self.key_identifier == other.key_identifier
-            and self.not_after == other.not_after
-            and self.not_before == other.not_before
-            and self.path == other.path
-        )
 
 
 VersionInfoClass = semver.VersionInfo

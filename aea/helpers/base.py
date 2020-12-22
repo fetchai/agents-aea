@@ -35,7 +35,7 @@ from copy import copy
 from functools import wraps
 from pathlib import Path
 from threading import RLock
-from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
+from typing import Any, Callable, Deque, Dict, List, Optional, Set, TypeVar, Union
 
 from dotenv import load_dotenv
 
@@ -43,7 +43,7 @@ from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
-ISO_8601_FORMAT = "%G-%m-%dT%H-%M-%S%z"
+ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 _default_logger = logging.getLogger(__name__)
 
@@ -570,9 +570,168 @@ def ensure_dir(dir_path: str) -> None:
 
 def parse_datetime_from_str(date_string: str) -> datetime.datetime:
     """Parse datetime from string."""
-    version = sys.version_info
-    major = version.major
-    minor = version.minor
-    if (major, minor) > (3, 6):
-        return datetime.datetime.fromisoformat(date_string)
-    return datetime.datetime.strptime(date_string, ISO_8601_FORMAT)
+    result = datetime.datetime.strptime(date_string, ISO_8601_DATE_FORMAT)
+    result = result.replace(tzinfo=datetime.timezone.utc)
+    return result
+
+
+class CertRequest:
+    """Certificate request for proof of representation."""
+
+    def __init__(
+        self,
+        public_key: str,
+        identifier: SimpleIdOrStr,
+        ledger_id: SimpleIdOrStr,
+        not_before: Union[str, datetime.datetime],
+        not_after: Union[str, datetime.datetime],
+        path: str,
+    ):
+        """
+        Initialize the certificate request.
+
+        :param public_key: the public key, or the key id.
+        :param identifier: certificate identifier.
+        :param not_before: specify the lower bound for certificate vailidity.
+          If it is a string, it must follow the format: 'YYYY-MM-DD'. It
+          will be interpreted as timezone UTC.
+        :param not_before: specify the lower bound for certificate vailidity.
+          if it is a string, it must follow the format: 'YYYY-MM-DD' It
+          will be interpreted as timezone UTC-0.
+        :param path: the path to the certificate.
+        """
+        self._key_identifier: Optional[str] = None
+        self._public_key: Optional[str] = None
+        self._identifier = str(SimpleId(identifier))
+        self._ledger_id = str(SimpleId(ledger_id))
+        self._not_before_string = not_before
+        self._not_after_string = not_after
+        self._not_before = self._parse_datetime(not_before)
+        self._not_after = self._parse_datetime(not_after)
+        self._path = Path(path)
+
+        self._parse_public_key(public_key)
+        self._check_validation_boundaries()
+
+    @classmethod
+    def _parse_datetime(cls, obj: Union[str, datetime.datetime]) -> datetime.datetime:
+        """
+        Parse datetime string.
+
+        It is expected to follow ISO 8601.
+
+        :param obj: the input to parse.
+        :return: a datetime.datetime instance.
+        """
+        result = (
+            parse_datetime_from_str(obj)  # type: ignore
+            if isinstance(obj, str)
+            else obj
+        )
+        enforce(result.microsecond == 0, "Microsecond field not allowed.")
+        return result
+
+    def _check_validation_boundaries(self):
+        """
+        Check the validation boundaries are consistent.
+
+        Namely, that not_before < not_after.
+        """
+        enforce(
+            self._not_before < self._not_after,
+            f"Inconsistent certificate validity period: 'not_before' field '{self._not_before.isoformat()}' is not before than 'not_after' field '{self._not_after.isoformat()}'",
+            ValueError,
+        )
+
+    def _parse_public_key(self, public_key_str: str) -> None:
+        """
+        Parse public key from string.
+
+        It first tries to parse it as an identifier,
+        and in case of failure as a sequence of hexadecimals, starting with "0x".
+        """
+        with contextlib.suppress(ValueError):
+            # if this raises ValueError, we don't return
+            self._key_identifier = str(SimpleId(public_key_str))
+            return
+
+        with contextlib.suppress(ValueError):
+            # this raises ValueError if the input is not a valid hexadecimal string.
+            int(public_key_str, 16)
+            self._public_key = public_key_str
+            return
+
+        enforce(
+            False,
+            f"Public key field '{public_key_str}' is neither a valid identifier nor an address.",
+            exception_class=ValueError,
+        )
+
+    @property
+    def public_key(self) -> Optional[str]:
+        """Get the public key."""
+        return self._public_key
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
+
+    @property
+    def key_identifier(self) -> Optional[str]:
+        """Get the key identifier."""
+        return self._key_identifier
+
+    @property
+    def identifier(self) -> str:
+        """Get the identifier."""
+        return self._identifier
+
+    @property
+    def not_before(self) -> datetime.datetime:
+        """Get the not_before field."""
+        return self._not_before
+
+    @property
+    def not_after(self) -> datetime.datetime:
+        """Get the not_after field."""
+        return self._not_after
+
+    @property
+    def path(self) -> Path:
+        """Get the path"""
+        return self._path
+
+    @property
+    def json(self) -> Dict:
+        """Compute the JSON representation."""
+        result = dict(
+            identifier=self.identifier,
+            ledger_id=self.ledger_id,
+            not_before=self._not_before_string,
+            not_after=self._not_after_string,
+            path=str(self.path),
+        )
+        if self.public_key is not None:
+            result["public_key"] = self.public_key
+        elif self.key_identifier is not None:
+            result["public_key"] = self.key_identifier
+        return result
+
+    @classmethod
+    def from_json(cls, obj: Dict) -> "CertRequest":
+        """Compute the JSON representation."""
+        return cls(**obj)
+
+    def __eq__(self, other):
+        """Check equality."""
+        return (
+            isinstance(other, CertRequest)
+            and self.identifier == other.identifier
+            and self.ledger_id == other.ledger_id
+            and self.public_key == other.public_key
+            and self.key_identifier == other.key_identifier
+            and self.not_after == other.not_after
+            and self.not_before == other.not_before
+            and self.path == other.path
+        )

@@ -18,11 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the aea.configurations.base module."""
-import datetime
 import re
 from copy import copy
 from pathlib import Path
-from typing import Optional
 from unittest import TestCase, mock
 
 import pytest
@@ -32,7 +30,6 @@ import yaml
 from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
-    CertRequest,
     ComponentId,
     ComponentType,
     ConnectionConfig,
@@ -985,139 +982,3 @@ def test_check_public_id_consistency_negative():
     with pytest.raises(ValueError, match=f"Directory {random_dir_name} is not valid."):
         component_configuration = ProtocolConfig("name", "author")
         component_configuration.check_public_id_consistency(Path(random_dir_name))
-
-
-class BaseTestCertRequestError:
-    """Test errors when instantiating a CertRequest object."""
-
-    PUBLIC_KEY = "a_public_key"
-    IDENTIFIER = "an_identifier"
-    LEDGER_ID = "a_ledger_id"
-    NOT_BEFORE = "2020-01-01T00:00:00+00:00"
-    NOT_AFTER = "2020-01-02T00:00:00+00:00"
-    PATH = "some/path"
-    ERROR_MESSAGE_PATTERN = ""
-
-    def test_error(self):
-        """Test error during instantiation.."""
-        with pytest.raises(ValueError, match=self.ERROR_MESSAGE_PATTERN):
-            CertRequest(
-                self.PUBLIC_KEY,
-                self.IDENTIFIER,
-                self.LEDGER_ID,
-                self.NOT_BEFORE,
-                self.NOT_AFTER,
-                self.PATH,
-            )
-
-
-class TestCertRequestBadPublicKey(BaseTestCertRequestError):
-    """Test instantiation of CertRequest class with bad public key."""
-
-    PUBLIC_KEY = "0a_bad_identifier"
-    ERROR_MESSAGE_PATTERN = "Public key field '0a_bad_identifier' is neither a valid identifier nor an address."
-
-
-class TestCertRequestBadIdentifier(BaseTestCertRequestError):
-    """Test instantiation of CertRequest class with bad identifier."""
-
-    IDENTIFIER = "0bad_identifier"
-    ERROR_MESSAGE_PATTERN = (
-        "Value 0bad_identifier does not match the regular expression.*"
-    )
-
-
-class TestCertRequestBadLedgerId(BaseTestCertRequestError):
-    """Test instantiation of CertRequest class with bad ledger id."""
-
-    LEDGER_ID = "0bad_identifier"
-    ERROR_MESSAGE_PATTERN = (
-        "Value 0bad_identifier does not match the regular expression.*"
-    )
-
-
-class TestCertRequestBadNotBefore(BaseTestCertRequestError):
-    """Test instantiation of CertRequest class with bad not_before date."""
-
-    NOT_BEFORE = "bad-formatted-date"
-    ERROR_MESSAGE_PATTERN = "Invalid isoformat string: 'bad-formatted-date'"
-
-
-class TestCertRequestBadNotAfter(BaseTestCertRequestError):
-    """Test instantiation of CertRequest class with bad not_after date."""
-
-    NOT_AFTER = "bad-formatted-date"
-    ERROR_MESSAGE_PATTERN = "Invalid isoformat string: 'bad-formatted-date'"
-
-
-class TestCertRequestInconsistentDates(BaseTestCertRequestError):
-    """Test instantiation of CertRequest class when not_before >= not_after"""
-
-    NOT_BEFORE = "1954-06-07T00:00:00+00:00"
-    NOT_AFTER = "1900-01-01T00:00:01+00:00"
-    ERROR_MESSAGE_PATTERN = r"Inconsistent certificate validity period: 'not_before' field '1954-06-07T00:00:00\+00:00' is not before than 'not_after' field '1900-01-01T00:00:01\+00:00'"
-
-
-class BaseTestCertRequestInstantiation:
-    """Test (successful) instantiation of CertRequest class."""
-
-    PUBLIC_KEY: Optional[str] = ""
-    EXPECTED_PUBLIC_KEY: Optional[str] = ""
-    EXPECTED_KEY_IDENTIFIER: Optional[str] = ""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up class."""
-        cls.expected_public_key = cls.PUBLIC_KEY
-        cls.expected_identifier = "identifier"
-        cls.expected_ledger_id = "ledger_id"
-        cls.not_before = "2020-01-01T00:00:00+00:00"
-        cls.not_after = "2020-01-02T00:00:00+00:00"
-        cls.expected_path = "some/path"
-        cls.cert_request = CertRequest(
-            cls.expected_public_key,
-            cls.expected_identifier,
-            cls.expected_ledger_id,
-            cls.not_before,
-            cls.not_after,
-            cls.expected_path,
-        )
-
-    def test_instantiation(self):
-        """Test instantiation."""
-        assert self.cert_request.public_key == self.EXPECTED_PUBLIC_KEY
-        assert self.cert_request.key_identifier == self.EXPECTED_KEY_IDENTIFIER
-        assert self.cert_request.identifier == self.expected_identifier
-        assert self.cert_request.ledger_id == self.expected_ledger_id
-
-        expected_not_before = datetime.datetime(
-            2020, 1, 1, 0, 0, 0, 0, datetime.timezone.utc
-        )
-        assert self.cert_request.not_before == expected_not_before
-
-        expected_not_after = datetime.datetime(
-            2020, 1, 2, 0, 0, 0, 0, datetime.timezone.utc
-        )
-        assert self.cert_request.not_after == expected_not_after
-
-        assert self.cert_request.path == Path(self.expected_path)
-
-    def test_from_to_json(self):
-        """Test from-to json methods."""
-        assert self.cert_request == self.cert_request.from_json(self.cert_request.json)
-
-
-class TestCertRequestInstantiationWithKeyIdentifier(BaseTestCertRequestInstantiation):
-    """Test (successful) instantiation of CertRequest class."""
-
-    PUBLIC_KEY = "public_key"
-    EXPECTED_PUBLIC_KEY = None
-    EXPECTED_KEY_IDENTIFIER = PUBLIC_KEY
-
-
-class TestCertRequestInstantiationWithKeyHex(BaseTestCertRequestInstantiation):
-    """Test (successful) instantiation of CertRequest class."""
-
-    PUBLIC_KEY = "0xABCDEF12345"
-    EXPECTED_PUBLIC_KEY = "0xABCDEF12345"
-    EXPECTED_KEY_IDENTIFIER = None
