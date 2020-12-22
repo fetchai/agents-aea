@@ -81,8 +81,9 @@ def _process_certificate(ctx: Context, cert_request: CertRequest):
         raise ClickException(f"Cannot find private key with id '{ledger_id}'")
     crypto = crypto_registry.make(ledger_id, private_key_path=crypto_private_key_path)
     message = public_key_bytes + identifier + not_before + not_after
-    signature = crypto.sign_message(message).encode("ascii")
-    Path(output_path).write_bytes(signature)
+    signature = crypto.sign_message(message).encode("ascii").hex()
+    click.echo(f"Generated signature: '{signature}'")
+    Path(output_path).write_bytes(signature.encode("ascii"))
 
 
 def _process_connection(ctx: Context, connection_id: PublicId):

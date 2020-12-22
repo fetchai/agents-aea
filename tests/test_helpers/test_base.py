@@ -517,7 +517,7 @@ class BaseTestCertRequestInstantiation:
         )
         assert self.cert_request.not_after == expected_not_after
 
-        assert self.cert_request.path == Path(self.expected_path)
+        assert self.cert_request.save_path == Path(self.expected_path)
 
     def test_from_to_json(self):
         """Test from-to json methods."""
