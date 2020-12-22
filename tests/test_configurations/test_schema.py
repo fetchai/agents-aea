@@ -29,7 +29,7 @@ import pytest
 import yaml
 from jsonschema import Draft4Validator  # type: ignore
 
-from aea.configurations.loader import make_jsonschema_base_uri
+from aea.configurations.validation import make_jsonschema_base_uri
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,

@@ -40,6 +40,7 @@ from aea.configurations.base import (
     AgentConfig,
     ComponentId,
     DEFAULT_AEA_CONFIG_FILE,
+    PACKAGE_TYPE_TO_CONFIG_CLASS,
     PackageType,
     SkillConfig,
 )
@@ -220,7 +221,7 @@ class ConfigGetSet:
         top_level_key = self.json_path[0]
 
         if self.component_id:
-            config_class = self.component_id.package_type.configuration_class()
+            config_class = PACKAGE_TYPE_TO_CONFIG_CLASS[self.component_id.package_type]
         else:
             config_class = type(self.agent_config)
 
@@ -351,7 +352,7 @@ class ConfigGetSet:
             configuration_obj = self.agent_config_loader.configuration_class.from_json(
                 agent_configuration_object
             )
-            self.agent_config_loader.validate(configuration_obj.json)
+            configuration_obj.validate_config_data(configuration_obj.json)
             with open(self.agent_config_file_path, "w") as file_pointer:
                 self.agent_config_loader.dump(configuration_obj, file_pointer)
         except Exception as e:  # pragma: nocover

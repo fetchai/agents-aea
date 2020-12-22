@@ -30,11 +30,24 @@ import sys
 import time
 import types
 from collections import OrderedDict, UserString, defaultdict, deque
+from collections.abc import Mapping
 from copy import copy
 from functools import wraps
 from pathlib import Path
 from threading import RLock
-from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Deque,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from dotenv import load_dotenv
 
@@ -564,3 +577,18 @@ def ensure_dir(dir_path: str) -> None:
         os.makedirs(dir_path)
     else:
         enforce(os.path.isdir(dir_path), f"{dir_path} is not a directory!")
+
+
+def dict_to_path_value(
+    data: Mapping, path: Optional[List] = None
+) -> Iterable[Tuple[List[str], Any]]:
+    """Convert dict to sequence of terminal path build of  keys and value."""
+    path = path or []
+    for key, value in data.items():
+        path.append(key)
+        if not isinstance(value, Mapping):
+            # terminal value
+            yield path, value
+        else:
+            for p, v in dict_to_path_value(value, path):
+                yield p, v

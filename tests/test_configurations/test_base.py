@@ -411,7 +411,7 @@ class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
 class PublicIdTestCase(TestCase):
     """Test case for PublicId class."""
 
-    @mock.patch("aea.configurations.base.re.match", return_value=None)
+    @mock.patch("aea.configurations.data_types.re.match", return_value=None)
     def test_public_id_from_str_not_matching(self, *mocks):
         """Test case for from_str method regex not matching."""
         with self.assertRaises(ValueError):
@@ -870,15 +870,6 @@ def test_package_version_lt():
     v2 = PackageVersion("0.2.0")
     v3 = PackageVersion("latest")
     assert v1 < v2 < v3
-
-
-def test_configuration_class():
-    """Test the attribute 'configuration class' of PackageType."""
-    assert PackageType.PROTOCOL.configuration_class() == ProtocolConfig
-    assert PackageType.CONNECTION.configuration_class() == ConnectionConfig
-    assert PackageType.CONTRACT.configuration_class() == ContractConfig
-    assert PackageType.SKILL.configuration_class() == SkillConfig
-    assert PackageType.AGENT.configuration_class() == AgentConfig
 
 
 class TestDependencyGetPipInstallArgs:
