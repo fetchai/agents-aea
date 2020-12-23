@@ -1679,6 +1679,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             new_configuration.component_id, {}
         )
         new_configuration.update(custom_config)
+
         return new_configuration
 
     def _add_components_of_type(

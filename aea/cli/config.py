@@ -17,35 +17,50 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea config' subcommand."""
+import contextlib
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, NewType, Optional, Tuple, Union, cast
 
 import click
+from click.exceptions import ClickException
 
+from aea.aea_builder import AEABuilder
 from aea.cli.utils.config import (
+    _try_get_component_id_from_prefix,
     _try_get_configuration_object_from_aea_config,
     handle_dotted_path,
 )
 from aea.cli.utils.constants import (
     CONFIG_SUPPORTED_KEY_TYPES,
-    CONFIG_SUPPORTED_VALUE_TYPES,
     FALSE_EQUIVALENTS,
     FROM_STRING_TO_TYPE,
 )
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
-from aea.cli.utils.generic import get_parent_object, load_yaml
 from aea.configurations.base import (
     AgentConfig,
+    ComponentConfiguration,
     ComponentId,
     DEFAULT_AEA_CONFIG_FILE,
-    PACKAGE_TYPE_TO_CONFIG_CLASS,
     PackageType,
-    SkillConfig,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, load_component_configuration
+from aea.configurations.validation import ExtraPropertiesError
 from aea.exceptions import AEAException
+from aea.helpers.storage.backends.base import JSON_TYPES
+
+
+class VariableDoesNotExists(ValueError):
+    """Variable does not exiss in a config exception."""
+
+
+JsonPath = List[str]
+VariablePath = Union[str, JsonPath]
+
+
+NotExistsType = NewType("NotExistsType", object)
+NotExists = NotExistsType(None)
 
 
 @click.group()
@@ -60,300 +75,270 @@ def config(click_context):  # pylint: disable=unused-argument
 @pass_ctx
 def get(ctx: Context, json_path: str):
     """Get a field."""
-    value = ConfigGetSet(ctx, json_path).get()
+    try:
+        value = AgentConfigManager(ctx.agent_config, ctx.cwd).get_variable(json_path)
+    except (ValueError, AEAException) as e:
+        raise ClickException(*e.args)
+
+    if isinstance(value, dict):
+        # turn it to json compatible string, not dict str representation
+        value = json.dumps(value, sort_keys=True)
     click.echo(value)
 
 
 @config.command(name="set")
 @click.option(
     "--type",
-    default="str",
-    type=click.Choice(CONFIG_SUPPORTED_KEY_TYPES),
+    "type_",
+    default=None,
+    type=click.Choice(CONFIG_SUPPORTED_KEY_TYPES + [None]),  # type: ignore
     help="Specify the type of the value.",
 )
 @click.argument("JSON_PATH", required=True)
 @click.argument("VALUE", required=True, type=str)
 @pass_ctx
 def set_command(
-    ctx: Context,
-    json_path: str,
-    value: str,
-    type: str,  # pylint: disable=redefined-builtin
+    ctx: Context, json_path: str, value: str, type_: Optional[str],
 ):
     """Set a field."""
-    ConfigGetSet(ctx, json_path).set(value, type)
+    try:
+        agent_config_manager = AgentConfigManager(ctx.agent_config, ctx.cwd)
 
+        current_value = None
+        with contextlib.suppress(VariableDoesNotExists):
+            current_value = agent_config_manager.get_variable(json_path)
 
-class ConfigGetSet:
-    """Tool to get/set value in agent config."""
-
-    def __init__(self, ctx: Context, dotted_path: str) -> None:
-        """Init tool.
-
-        :param ctx: click context
-        :param dotted_path: str with attribute path to get/set
-        """
-        self.dotted_path = dotted_path
-        self.ctx = ctx
-
-        (
-            self.json_path,
-            self.path_to_resource_configuration,
-            self.config_loader,
-            self.component_id,
-        ) = self._handle_dotted_path()
-
-    def _handle_dotted_path(
-        self,
-    ) -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]:
-        """Handle dotted path."""
-        try:
-            return handle_dotted_path(self.dotted_path, self.agent_config.author)
-        except AEAException as e:
-            raise click.ClickException(*e.args)
-
-    @property
-    def parent_obj_path(self) -> List[str]:
-        """Get the parent object (dotted) path."""
-        return self.json_path[:-1]
-
-    @property
-    def attr_name(self) -> str:
-        """Attribute name."""
-        return self.json_path[-1]
-
-    def get(self) -> Union[str, int]:
-        """Get config value."""
-        if self.component_id:
-            return self._get_component_value()
-
-        return self._get_agent_value()
-
-    def _get_agent_value(self) -> Union[str, int]:
-        """Get config value for agent config."""
-        configuration_object = self._load_configuration_object()
-        return self._get_value_from_configuration_object(configuration_object)
-
-    def _get_component_value(self) -> Union[str, int]:
-        """Get config value for component section in agent config or component package."""
-        configuration_object_from_agent = self._get_configuration_object_from_agent()
-        try:
-            if not configuration_object_from_agent:
-                raise click.ClickException("")
-            return self._get_value_from_configuration_object(
-                configuration_object_from_agent
-            )
-        except click.ClickException:
-            configuration_object = self._load_configuration_object()
-            return self._get_value_from_configuration_object(configuration_object)
-
-    @property
-    def is_target_agent(self) -> bool:
-        """Is target of get/update is agent config."""
-        return self.component_id is None
-
-    def _load_configuration_object(self) -> Dict:
-        """Load configuration object for component/agent."""
-        if self.is_target_agent:
-            configuration_object = self.agent_config.json
+        # type was not specified, tried to auto determine
+        if type_ is None:
+            # apply str as default type
+            converted_value = AgentConfigManager.convert_value_str_to_type(value, "str")
+            if current_value is not None:
+                # try to convert to original value's type
+                with contextlib.suppress(Exception):
+                    converted_value = AgentConfigManager.convert_value_str_to_type(
+                        value, type(current_value).__name__
+                    )
         else:
-            configuration_object = load_yaml(str(self.path_to_resource_configuration))
+            # convert to type specified by user
+            converted_value = AgentConfigManager.convert_value_str_to_type(
+                value, cast(str, type_)
+            )
 
-        self.config_loader.validate(configuration_object)
-        return configuration_object
+        agent_config_manager.set_variable(json_path, converted_value)
+        agent_config_manager.dump_config()
+    except ExtraPropertiesError as e:
+        raise ClickException(f"Attribute `{e.args[0][0]}` is not allowed to change!")
+    except (ValueError, AEAException) as e:
+        raise ClickException(*e.args)
 
-    def _get_configuration_object_from_agent(
-        self,
-    ) -> Optional[Dict[str, Union[str, int]]]:
-        """Get component configuration object from agent component configurations."""
-        if not self.component_id:  # pragma: nocover
-            raise ValueError("component in not set")
 
-        return _try_get_configuration_object_from_aea_config(
-            self.ctx, self.component_id
+class AgentConfigManager:
+    """AeaConfig manager."""
+
+    component_configurations = "component_configurations"
+
+    def __init__(
+        self, agent_config: AgentConfig, aea_project_directory: Union[str, Path]
+    ) -> None:
+        """
+        Init manager.
+
+        :param agent_config: AgentConfig to manage.
+        :param aea_project_directory: directory where project for agent_config placed.
+        """
+        self.agent_config = agent_config
+        self.aea_project_directory = aea_project_directory
+
+    def load_component_configuration(
+        self, component_id: ComponentId, skip_consistency_check: bool = True,
+    ) -> ComponentConfiguration:
+        """
+        Load component configuration from the project directory.
+
+        :param component_id: Id of the component to load config for.
+        :param skip_consistency_check: bool.
+
+        :return: ComponentConfiguration
+        """
+        path = AEABuilder.find_component_directory_from_component_id(
+            aea_project_directory=Path(self.aea_project_directory),
+            component_id=component_id,
         )
-
-    def _get_value_from_configuration_object(
-        self, conf_obj: Dict[str, Union[str, int]]
-    ) -> Any:
-        """Get value from configuration object."""
-        return self._get_parent_object(conf_obj).get(self.attr_name)
-
-    def _get_parent_object(
-        self, conf_obj: Dict[str, Union[str, int]]
-    ) -> Dict[str, Union[str, int]]:
-        """
-        Get and validate parent object.
-
-        :param conf_obj: configuration object.
-
-        :return: parent object.
-        :raises: ClickException if attribute is not valid.
-        """
-        parent_obj_path = self.parent_obj_path
-        attr_name = self.attr_name
-        try:
-            parent_obj = get_parent_object(conf_obj, parent_obj_path)
-        except ValueError as e:
-            raise click.ClickException(str(e))
-
-        if attr_name not in parent_obj:
-            raise click.ClickException("Attribute '{}' not found.".format(attr_name))
-        if not isinstance(parent_obj.get(attr_name), CONFIG_SUPPORTED_VALUE_TYPES):
-            raise click.ClickException(  # pragma: nocover
-                "Attribute '{}' is not of primitive type.".format(attr_name)
-            )
-        return parent_obj
-
-    @property
-    def agent_config(self) -> AgentConfig:
-        """Return current context AgentConfig."""
-        return self.ctx.agent_config
-
-    def _check_set_field_name(self) -> None:
-        """
-        Check field names on set operation.
-
-        :return: None
-
-        :raises: click.ClickException is field is not allowed to be changeed.
-        """
-        top_level_key = self.json_path[0]
-
-        if self.component_id:
-            config_class = PACKAGE_TYPE_TO_CONFIG_CLASS[self.component_id.package_type]
-        else:
-            config_class = type(self.agent_config)
-
-        if top_level_key not in config_class.FIELDS_ALLOWED_TO_UPDATE:
-            raise click.ClickException(
-                f"Field `{top_level_key}` is not allowed to change!"
-            )
-        if config_class == SkillConfig:
-            if top_level_key not in SkillConfig.FIELDS_WITH_NESTED_FIELDS:
-                return  # pragma: nocover
-            if len(self.json_path) < 3:
-                path = ".".join(self.json_path)
-                raise click.ClickException(f"Path '{path}' not valid for skill.")
-            second_level_key = self.json_path[1]
-            third_level_key = self.json_path[2]
-            if third_level_key not in SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
-                raise click.ClickException(  # pragma: nocover
-                    f"Field `{top_level_key}.{second_level_key}.{third_level_key}` is not allowed to change!"
-                )
-
-    def _fix_component_id_version(self) -> None:
-        """Update self.component_id with actual version defined in agent instead of latest."""
-        if not self.component_id:  # pragma: nocover: check for mypy
-            raise ValueError("Component id is not set")
-
-        component_id = None
-
-        for component_id in self.agent_config.package_dependencies:
-            if (
-                component_id.author == self.component_id.author
-                and component_id.package_type == self.component_id.package_type
-                and component_id.name == self.component_id.name
-            ):
-                break
-        else:  # pragma: nocover  # should be always ok, cause component has to be alrady registered
-            raise ValueError("component is not registered?")
-
-        self.component_id = component_id
-
-    def _parent_object_for_agent_component_configuration(
-        self,
-    ) -> Dict[str, Union[str, int]]:
-        if not self.component_id:  # pragma: nocover: check for mypy
-            raise ValueError("no component specified")
-        configuration_object = self.agent_config.component_configurations.get(
-            self.component_id, {}
+        return load_component_configuration(
+            component_type=component_id.component_type,
+            directory=path,
+            skip_consistency_check=skip_consistency_check,
         )
-        self.agent_config.component_configurations[
-            self.component_id
-        ] = configuration_object
-        parent_object = configuration_object
-        # get or create parent object in component configuration
-        for i in self.parent_obj_path:
-            if i not in parent_object:
-                parent_object[i] = {}
-            parent_object = parent_object[i]
-        return parent_object
-
-    def set(self, value: str, type_str: str) -> None:
-        """
-        Set config value.
-
-        :param value: value to set
-        :param  type_str: name of the value type.
-
-        :return None
-        """
-        # do a check across real configuration
-        self._check_set_field_name()
-
-        configuration_object = self._load_configuration_object()
-        parent_configuration_object = self._get_parent_object(configuration_object)
-
-        if self.component_id:
-            # component. parent is component config in agent config
-            self._fix_component_id_version()
-            parent_configuration_object = (
-                self._parent_object_for_agent_component_configuration()
-            )
-            self._update_object(parent_configuration_object, type_str, value)
-            agent_configuration_object = self.agent_config.json
-        else:
-            # already agent
-            self._update_object(parent_configuration_object, type_str, value)
-            agent_configuration_object = configuration_object
-        self._dump_agent_configuration(agent_configuration_object)
-
-    def _update_object(self, parent_object: Dict, type_str: str, value: str) -> None:
-        """
-        Update dict with value converted to type.
-
-        :param parent_object: dict where value should be updated,
-        :param: type_str: type name to convert value on update.
-        :param value: str of the value to set.
-
-        :return: None
-        """
-        type_ = FROM_STRING_TO_TYPE[type_str]
-        try:
-            if type_ == bool:
-                parent_object[self.attr_name] = value not in FALSE_EQUIVALENTS
-            elif type_ is None:
-                parent_object[self.attr_name] = None
-            elif type_ in (dict, list):
-                parent_object[self.attr_name] = json.loads(value)
-            else:
-                parent_object[self.attr_name] = type_(value)
-        except (ValueError, json.decoder.JSONDecodeError):  # pragma: no cover
-            raise click.ClickException(
-                "Cannot convert {} to type {}".format(value, type_)
-            )
-
-    @property
-    def agent_config_loader(self) -> ConfigLoader:
-        """Return agent config loader."""
-        return ConfigLoader.from_configuration_type(PackageType.AGENT)
 
     @property
     def agent_config_file_path(self) -> Path:
         """Return agent config file path."""
-        return Path(".") / DEFAULT_AEA_CONFIG_FILE
+        return Path(self.aea_project_directory) / DEFAULT_AEA_CONFIG_FILE
 
-    def _dump_agent_configuration(
-        self, agent_configuration_object: Dict[str, Union[str, int]]
-    ) -> None:
-        """Save agent configuration."""
-        try:
-            configuration_obj = self.agent_config_loader.configuration_class.from_json(
-                agent_configuration_object
+    @classmethod
+    def load(cls, aea_project_path: str) -> "AgentConfigManager":
+        """Create AgentConfigManager instance from agent project path."""
+        raise NotImplementedError
+
+    def set_variable(self, path: VariablePath, value: JSON_TYPES) -> None:
+        """
+        Set config variable.
+
+        :param path: str dotted path  or List[Union[ComponentId, str]]
+        :param value: one of the json friendly objects.
+
+        :return: None
+        """
+        component_id, json_path = self._parse_path(path)
+        data = self._make_dict_for_path_and_value(json_path, value)
+        overrides = {}
+        if component_id:
+            overrides[self.component_configurations] = {component_id: data}
+        else:
+            # agent
+            overrides.update(data)
+
+        self.update_config(overrides)
+
+    @staticmethod
+    def _make_dict_for_path_and_value(json_path: JsonPath, value: JSON_TYPES) -> Dict:
+        """
+        Turn json_path and value into overrides dict.
+
+        :param json_path: List[str] represents config variable path:
+        :param value: json friendly value
+
+        :return: dict of overrides
+        """
+        data: Dict = {}
+        nested = data
+        for key in json_path[:-1]:
+            nested[key] = {}
+            nested = nested[key]
+        nested[json_path[-1]] = value
+        return data
+
+    def get_variable(self, path: VariablePath) -> JSON_TYPES:
+        """
+        Set config variable.
+
+        :param path: str dotted path or List[Union[ComponentId, str]]
+
+        :return: json friendly value.
+        """
+        component_id, json_path = self._parse_path(path)
+
+        if component_id:
+            configrations_data = [
+                _try_get_configuration_object_from_aea_config(
+                    self.agent_config, component_id
+                )
+                or {},
+                self.load_component_configuration(component_id).json,
+            ]
+        else:
+            configrations_data = [self.agent_config.json]
+
+        for data in configrations_data:
+            value = self._get_value_for_json_path(data, json_path)
+            if value is not NotExists:
+                return cast(JSON_TYPES, value)
+
+        raise VariableDoesNotExists(
+            f"Attribute `{'.'.join(json_path)}` for {'{}({}) config'.format(component_id.component_type,component_id.public_id) if component_id else 'AgentConfig'} does not exist"
+        )
+
+    @staticmethod
+    def _get_value_for_json_path(
+        data: Dict, json_path: JsonPath
+    ) -> Union[NotExistsType, JSON_TYPES]:
+        """
+        Get value by json path from the dict object.
+
+        :param data: dict to get value from
+        :param json_path: List[str]
+
+        :return: one of the json values of NotExists if value not presents in data dict.
+        """
+        value = json.loads(json.dumps(data))  # in case or ordered dict
+        prev_key = ""
+        for key in json_path:
+            if not isinstance(value, dict):
+                raise ValueError(f"Attribute '{prev_key}' is not a dictionary.")
+
+            if key not in value:
+                return NotExists
+            value = value[key]
+            prev_key = key
+        return value
+
+    def _parse_path(self, path: VariablePath) -> Tuple[Optional[ComponentId], JsonPath]:
+        """
+        Get component_id and json path from dotted path or list of str with first optional component id.
+
+        :param path: dotted path str, list of str with first optional component id
+
+        :return: Tuple of optonal component id if path related to component and List[str]
+        """
+        if isinstance(path, str):
+            json_path, *_, component_id = handle_dotted_path(
+                path, self.agent_config.author
             )
-            configuration_obj.validate_config_data(configuration_obj.json)
-            with open(self.agent_config_file_path, "w") as file_pointer:
-                self.agent_config_loader.dump(configuration_obj, file_pointer)
-        except Exception as e:  # pragma: nocover
-            raise click.ClickException(f"Attribute or value not valid. {e}")
+        else:
+            if isinstance(path[0], ComponentId):
+                json_path = path[1:]
+                component_id = path[0]
+            else:
+                component_id = None
+                json_path = path
+        if component_id:
+            component_id = _try_get_component_id_from_prefix(
+                set(self.agent_config.all_components_id), component_id.component_prefix
+            )
+        return component_id, json_path
+
+    def update_config(self, overrides: Dict) -> None:
+        """
+        Apply overrides for agent config.
+
+        Validates and applies agent config and component overrides.
+        Does not save it on the disc!
+
+        :param overrides: overrided values dictionary
+
+        :return: None
+        """
+        for component_id, obj in overrides.get("component_configurations", {}).items():
+            component_configuration = self.load_component_configuration(component_id)
+            component_configuration.check_overrides_valid(obj)
+
+        self.agent_config.update(overrides)
+
+    @property
+    def json(self) -> Dict:
+        """Return current agent config json representation."""
+        return self.agent_config.json
+
+    def dump_config(self) -> None:
+        """Save agent config on the disc."""
+        config_data = self.json
+        self.agent_config.validate_config_data(config_data)
+        with open(self.agent_config_file_path, "w") as file_pointer:
+            ConfigLoader.from_configuration_type(PackageType.AGENT).dump(
+                self.agent_config, file_pointer
+            )
+
+    @staticmethod
+    def convert_value_str_to_type(value: str, type_str: str) -> JSON_TYPES:
+        """Convert value by type name to native python type."""
+        try:
+            type_ = FROM_STRING_TO_TYPE[type_str]
+            if type_ == bool:
+                return value not in FALSE_EQUIVALENTS
+            if type_ is None:
+                return None
+            if type_ in (dict, list):
+                return json.loads(value)
+            return type_(value)
+        except (ValueError, json.decoder.JSONDecodeError):  # pragma: no cover
+            raise ValueError("Cannot convert {} to type {}".format(value, type_))
