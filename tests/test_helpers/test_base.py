@@ -31,12 +31,14 @@ from typing import Dict, Optional, Set
 from unittest.mock import patch
 
 import pytest
+from packaging.version import Version
 
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import (
     CertRequest,
     MaxRetriesError,
     RegexConstrainedString,
+    compute_specifier_from_version,
     ensure_dir,
     exception_log_and_reraise,
     find_topological_order,
@@ -538,3 +540,15 @@ class TestCertRequestInstantiationWithKeyHex(BaseTestCertRequestInstantiation):
     PUBLIC_KEY = "0xABCDEF12345"
     EXPECTED_PUBLIC_KEY = "0xABCDEF12345"
     EXPECTED_KEY_IDENTIFIER = None
+
+
+def test_compute_specifier_from_version():
+    """Test function 'compute_specifier_from_version'."""
+
+    version = "0.1.5"
+    expected_range = ">=0.1.0, <0.2.0"
+    assert expected_range == compute_specifier_from_version(Version(version))
+
+    version = "1.1.5"
+    expected_range = ">=1.1.0, <1.2.0"
+    assert expected_range == compute_specifier_from_version(Version(version))
