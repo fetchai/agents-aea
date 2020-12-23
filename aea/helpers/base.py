@@ -38,6 +38,7 @@ from threading import RLock
 from typing import Any, Callable, Deque, Dict, List, Optional, Set, TypeVar, Union
 
 from dotenv import load_dotenv
+from packaging.version import Version
 
 from aea.exceptions import enforce
 
@@ -755,3 +756,23 @@ class CertRequest:
             and self.not_before == other.not_before
             and self.save_path == other.save_path
         )
+
+
+def compute_specifier_from_version(version: Version) -> str:
+    """
+    Compute the specifier set from a version, by varying only on the patch number.
+
+    I.e. from "{major}.{minor}.{patch}", return
+
+    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
+
+    :param version: the version
+    :return: the specifier set
+    """
+    new_major = version.major
+    new_minor_low = version.minor
+    new_minor_high = new_minor_low + 1
+    lower_bound = Version(f"{new_major}.{new_minor_low}.0")
+    upper_bound = Version(f"{new_major}.{new_minor_high}.0")
+    specifier_set = f">={lower_bound}, <{upper_bound}"
+    return specifier_set
