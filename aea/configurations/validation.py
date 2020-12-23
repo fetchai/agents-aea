@@ -75,13 +75,13 @@ def _get_path_to_custom_config_schema_from_type(component_type: ComponentType) -
 class ExtraPropertiesError(ValueError):
     """Extra properties exception."""
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: nocover
         """Get string representation of the object."""
         return (
             f"ExtraPropertiesError: properties not expected: {', '.join(self.args[0])}"
         )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: nocover
         """Get string representation of the object."""
         return str(self)
 

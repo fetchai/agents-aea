@@ -347,7 +347,7 @@ class TestConfigSet:
                 *CLI_LOG_OPTION,
                 "config",
                 "set",
-                "agent.logging_config.disable_existing_loggers",
+                "agent.logging_config.some_value",
                 "",
                 "--type=none",
             ],

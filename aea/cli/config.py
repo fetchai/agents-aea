@@ -126,7 +126,7 @@ def set_command(
 
         agent_config_manager.set_variable(json_path, converted_value)
         agent_config_manager.dump_config()
-    except ExtraPropertiesError as e:
+    except ExtraPropertiesError as e:  # pragma: nocover
         raise ClickException(f"Attribute `{e.args[0][0]}` is not allowed to change!")
     except (ValueError, AEAException) as e:
         raise ClickException(*e.args)
@@ -178,7 +178,7 @@ class AgentConfigManager:
     @classmethod
     def load(cls, aea_project_path: str) -> "AgentConfigManager":
         """Create AgentConfigManager instance from agent project path."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     def set_variable(self, path: VariablePath, value: JSON_TYPES) -> None:
         """
@@ -284,7 +284,7 @@ class AgentConfigManager:
             json_path, *_, component_id = handle_dotted_path(
                 path, self.agent_config.author
             )
-        else:
+        else:  # pragma: nocover
             if isinstance(path[0], ComponentId):
                 json_path = path[1:]
                 component_id = path[0]

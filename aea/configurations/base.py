@@ -342,7 +342,7 @@ class PackageConfiguration(Configuration, ABC):
         cls, obj: Dict, instance=None
     ) -> "PackageConfiguration":
         """Create new config object or updates existing one from json data."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @staticmethod
     def _compare_data_to_pattern(
@@ -359,7 +359,7 @@ class PackageConfiguration(Configuration, ABC):
 
         def check_excludes(path):
             for exclude in excludes:
-                if len(exclude) > len(path):
+                if len(exclude) > len(path):  # pragma: nocover
                     continue
 
                 if path[: len(exclude)] == exclude:
@@ -369,22 +369,23 @@ class PackageConfiguration(Configuration, ABC):
         for path, new_value in data_path_value.items():
             if check_excludes(path):
                 continue
+
             if path not in pattern_path_value:
                 errors.append(
                     f"Attribute `{'.'.join(path)}` is not allowed to be updated!"
                 )
                 continue
 
-            current_value = data_path_value[path]
+            pattern_value = pattern_path_value[path]
 
-            if current_value is None:
+            if pattern_value is None:
                 # not possible to determine data type for optional value not set
                 # it will be checked with jsonschema later
-                continue
+                continue  # pragma: nocover
 
-            if not issubclass(type(new_value), type(current_value)):
+            if not issubclass(type(new_value), type(pattern_value)):
                 errors.append(
-                    f"For {'.'.join(path)} `{type(current_value)}` data type is expected, but `{type(new_value)}` was provided!"
+                    f"For attribute `{'.'.join(path)}` `{type(pattern_value).__name__}` data type is expected, but `{type(new_value).__name__}` was provided!"
                 )
         return errors
 
@@ -879,7 +880,7 @@ class SkillComponentConfiguration:
         """Constructs or update instance with params provided."""
         if instance is None:
             instance = cls(**params)
-        else:
+        else:  # pragma: nocover
             instance.__init__(**params)  # type: ignore
         return instance
 
@@ -1115,6 +1116,7 @@ class AgentConfig(PackageConfiguration):
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("default_routing",),
+        ("logging_config",),
     ]
 
     def __init__(
