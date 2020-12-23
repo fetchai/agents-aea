@@ -90,6 +90,9 @@
     },
     "is_abstract": {
       "$ref": "skill-config_schema.json#/properties/is_abstract"
+    },
+    "cert_requests": {
+      "$ref": "definitions.json#/definitions/cert_requests"
     }
   }
 }
