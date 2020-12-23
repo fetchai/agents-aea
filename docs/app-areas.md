@@ -1,4 +1,4 @@
-An AEA is an intelligent agent whose goal is generating economic value for its owner. It can represent machines, humans, or data. 
+An AEA is an intelligent agent whose goal is generating economic value for its owner. It can represent machines, humans (individuals or organisations), or data. 
 
 ## General application areas
 

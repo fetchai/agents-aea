@@ -1,5 +1,5 @@
 <details><summary>What is the Open Economic Framework (OEF)?</summary>
-The 'Open Economic Framework' (OEF) is a node that enables search, discovery and communicate with possible clients or services.
+The <i>Open Economic Framework' (OEF)</i> consists of protocols, languages and market mechanisms agents use to search and find each other, communicate with as well as trade with each other. As such the OEF defines the decentralised virtual environment that supplies and supports APIs for autonomous third-party software agents, also known as Autonomous Economic Agents (AEAs).
 <br><br>
 You can read more about the ledgers and the OEF <a href="../oef-ledger/"> here </a>
 </details>
@@ -21,15 +21,14 @@ You can read more about the Search and Discovery <a href="../oef-ledger/">here</
 
 <details><summary>How does an AEA use blockchain?</summary>
 The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports
-two different networks natively: the `Fetch.ai` network and the `Ethereum` network.
+two different networks natively: the <i>Fetch.ai</i> network and the <i>Ethereum</i> network.
 <br><br>
 You can read more about the intergration of ledger <a href="../ledger-integration/">here</a>
 
 </details>
 
 <details><summary>How does one install third party libraries?</summary>
-The framework supports the use of third-party libraries hosted on PyPI we can directly reference the external dependencies.
-The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file.
+The framework supports the use of third-party libraries hosted on PyPI. We can directly reference the external dependencies in an AEA package's configuration file. The <code>aea install</code> command will install each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
 </details>
 
 <details><summary>How does one connect to a database?</summary>
