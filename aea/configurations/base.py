@@ -31,6 +31,7 @@ from typing import (
     Optional,
     Sequence,
     Set,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -72,7 +73,13 @@ from aea.configurations.data_types import (
 )
 from aea.configurations.validation import ConfigValidator
 from aea.exceptions import enforce
-from aea.helpers.base import SimpleId, SimpleIdOrStr, load_module, recursive_update
+from aea.helpers.base import (
+    SimpleId,
+    SimpleIdOrStr,
+    dict_to_path_value,
+    load_module,
+    recursive_update,
+)
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -200,6 +207,7 @@ class PackageConfiguration(Configuration, ABC):
     package_type: PackageType
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
     schema: str
+    CHECK_EXCLUDES: List[Tuple[str]] = []
 
     def __init__(
         self,
@@ -309,6 +317,13 @@ class PackageConfiguration(Configuration, ABC):
         :param data: the data to replace.
         :return: None
         """
+        if not data:  # do nothing if nothing to update
+            return
+
+        self.check_overrides_valid(data)
+        self._create_or_update_from_json(
+            obj=self.make_resulting_config_data(data), instance=self
+        )
 
     @classmethod
     def validate_config_data(cls, json_data: Dict) -> None:
@@ -326,6 +341,75 @@ class PackageConfiguration(Configuration, ABC):
     ) -> "PackageConfiguration":
         """Create new config object or updates existing one from json data."""
         raise NotImplementedError
+
+    @staticmethod
+    def _compare_data_to_pattern(
+        data: dict, pattern: dict, excludes: Optional[List[Tuple[str]]] = None
+    ) -> List[str]:
+        excludes = excludes or []
+        pattern_path_value = {
+            tuple(path): value for path, value in dict_to_path_value(pattern)
+        }
+        data_path_value = {
+            tuple(path): value for path, value in dict_to_path_value(data)
+        }
+        errors = []
+
+        def check_excludes(path):
+            for exclude in excludes:
+                if len(exclude) > len(path):
+                    continue
+
+                if path[: len(exclude)] == exclude:
+                    return True
+            return False
+
+        for path, new_value in data_path_value.items():
+            if check_excludes(path):
+                continue
+            if path not in pattern_path_value:
+                errors.append(f"Field `{'.'.join(path)}` is not allowed to be updated!")
+                continue
+
+            current_value = data_path_value[path]
+
+            if current_value is None:
+                # not possible to determine data type for optional value not set
+                # it will be checked with jsonschema later
+                continue
+
+            if not issubclass(type(new_value), type(current_value)):
+                errors.append(
+                    f"For {'.'.join(path)} `{type(current_value)}` data type is expected, but `{type(new_value)}` was provided!"
+                )
+        return errors
+
+    def make_resulting_config_data(self, overrides: Dict) -> Dict:
+        """Make config data with overrides applied."""
+        current_config = self.json
+        recursive_update(current_config, overrides, allow_new_values=True)
+        return current_config
+
+    def check_overrides_valid(self, overrides: Dict) -> None:
+        """Check overrides is correct, return list of errors if present."""
+        # check for permited overrides
+        self._check_overrides_corresponds_to_overridable(overrides)
+        # check resulting config with applied overrides passes validation
+
+        result_config = self.make_resulting_config_data(overrides)
+        self.validate_config_data(result_config)
+
+    def _check_overrides_corresponds_to_overridable(self, overrides: Dict) -> None:
+        """Check overrides is correct, return list of errors if present."""
+        errors_list = self._compare_data_to_pattern(
+            overrides, self.get_overridable(), excludes=self.CHECK_EXCLUDES
+        )
+        if errors_list:
+            raise ValueError(errors_list[0])
+
+    def get_overridable(self) -> dict:
+        """Get dictionary of values that can be updated for this config."""
+        return {k: self.json.get(k) for k in self.FIELDS_ALLOWED_TO_UPDATE}
 
 
 class ComponentConfiguration(PackageConfiguration, ABC):
@@ -566,6 +650,7 @@ class ConnectionConfig(ComponentConfiguration):
         cls, obj: Dict, instance: Optional["ConnectionConfig"] = None
     ) -> "ConnectionConfig":
         """Create new config object or updates existing one from json data."""
+        obj = {**(instance.json if instance else {}), **copy(obj)}
         restricted_to_protocols = obj.get("restricted_to_protocols", set())
         restricted_to_protocols = {
             PublicId.from_str(id_) for id_ in restricted_to_protocols
@@ -575,6 +660,7 @@ class ConnectionConfig(ComponentConfiguration):
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
+
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -597,10 +683,16 @@ class ConnectionConfig(ComponentConfiguration):
             is_abstract=obj.get("is_abstract", False),
             **cast(dict, obj.get("config", {})),
         )
+        directory = instance.directory if instance else None
+
         if instance is None:
             instance = cls(**params)  # type: ignore
         else:
             instance.__init__(**params)  # type: ignore
+
+        if not instance.directory:
+            instance.directory = directory
+
         return instance
 
     def update(self, data: Dict) -> None:
@@ -613,7 +705,7 @@ class ConnectionConfig(ComponentConfiguration):
         :return: None
         """
         new_config = data.get("config", {})
-        recursive_update(self.config, new_config)
+        recursive_update(self.config, new_config, allow_new_values=True)
         self.is_abstract = data.get("is_abstract", self.is_abstract)
 
 
@@ -683,6 +775,7 @@ class ProtocolConfig(ComponentConfiguration):
         cls, obj: Dict, instance: "ProtocolConfig" = Optional[None]
     ) -> "ProtocolConfig":
         """Initialize from a JSON object."""
+        obj = {**(instance.json if instance else {}), **copy(obj)}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         params = dict(
             name=cast(str, obj.get("name")),
@@ -699,10 +792,16 @@ class ProtocolConfig(ComponentConfiguration):
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
+        directory = instance.directory if instance else None
+
         if instance is None:
             instance = cls(**params)  # type: ignore
         else:
             instance.__init__(**params)  # type: ignore
+
+        if not instance.directory:
+            instance.directory = directory
+
         return instance
 
 
@@ -735,6 +834,7 @@ class SkillComponentConfiguration:
         cls, obj: Dict, instance: Optional["SkillComponentConfiguration"] = None
     ) -> "SkillComponentConfiguration":
         """Initialize from a JSON object."""
+        obj = {**(instance.json if instance else {}), **copy(obj)}
         class_name = cast(str, obj.get("class_name"))
         params = dict(class_name=class_name, **obj.get("args", {}))
 
@@ -871,6 +971,7 @@ class SkillConfig(ComponentConfiguration):
         cls, obj: Dict, instance: "SkillConfig" = Optional[None]
     ) -> "SkillConfig":
         """Initialize from a JSON object."""
+        obj = {**(instance.json if instance else {}), **copy(obj)}
         name = cast(str, obj.get("name"))
         author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
@@ -903,13 +1004,18 @@ class SkillConfig(ComponentConfiguration):
             dependencies=dependencies,
             description=description,
             is_abstract=obj.get("is_abstract", False),
-            build_directory=cast(Optional[str], obj.get("build_directory")),
+            build_directory=obj.get("build_directory"),
         )
+
+        directory = instance.directory if instance else None
 
         if instance is None:
             instance = cls(**params)  # type: ignore
         else:
             instance.__init__(**params)  # type: ignore
+
+        if not instance.directory:
+            instance.directory = directory
 
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():
             behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
@@ -925,7 +1031,14 @@ class SkillConfig(ComponentConfiguration):
 
         return instance
 
-    def update(self, data: Dict) -> None:
+    def make_resulting_config_data(self, overrides: Dict) -> Dict:
+        """Make config data with overrides applied."""
+        self._update(overrides)
+        current_config = self.json
+        recursive_update(current_config, overrides, allow_new_values=True)
+        return current_config
+
+    def _update(self, data: Dict) -> None:
         """
         Update configuration with other data.
 
@@ -944,6 +1057,9 @@ class SkillConfig(ComponentConfiguration):
             )
             new_component_config = data.get(type_plural, {})
             all_component_names = dict(registry.read_all())
+
+            if not isinstance(new_component_config, dict):
+                raise ValueError(f"Path '{type_plural}' not valid for skill.")
 
             new_skill_component_names = set(new_component_config.keys()).difference(
                 set(all_component_names.keys())
@@ -965,12 +1081,33 @@ class SkillConfig(ComponentConfiguration):
                     raise ValueError(
                         f"These fields of skill component configuration '{component_name}' of skill '{self.public_id}' are not allowed to change: {unallowed_keys}."
                     )
-                recursive_update(component_config.args, component_data.get("args", {}))
+                recursive_update(
+                    component_config.args,
+                    component_data.get("args", {}),
+                    check_data_type=False,
+                )
 
         _update_skill_component_config("behaviours", data)
         _update_skill_component_config("handlers", data)
         _update_skill_component_config("models", data)
         self.is_abstract = data.get("is_abstract", self.is_abstract)
+
+    def get_overridable(self) -> dict:
+        """Get overrideable confg data."""
+        result = {}
+        current_config_data = self.json
+        if "is_abstract" in current_config_data:
+            result["is_abstract"] = current_config_data["is_abstract"]
+
+        for field in self.FIELDS_WITH_NESTED_FIELDS:
+            result[field] = {}
+            for name in current_config_data[field].keys():
+                result[field][name] = {}
+                for nested_field in self.NESTED_FIELDS_ALLOWED_TO_UPDATE:
+                    result[field][name][nested_field] = current_config_data[field][
+                        name
+                    ][nested_field]
+        return result
 
 
 class AgentConfig(PackageConfiguration):
@@ -1001,6 +1138,10 @@ class AgentConfig(PackageConfiguration):
             "storage_uri",
         ]
     )
+    CHECK_EXCLUDES = [
+        ("private_key_paths",),
+        ("default_routing",),
+    ]
 
     def __init__(
         self,
@@ -1234,6 +1375,7 @@ class AgentConfig(PackageConfiguration):
     @classmethod
     def _create_or_update_from_json(cls, obj: Dict, instance=None) -> "AgentConfig":
         """Create new config object or updates existing one from json data."""
+        obj = {**(instance.json if instance else {}), **copy(obj)}
         params = dict(
             agent_name=cast(str, obj.get("agent_name")),
             author=cast(str, obj.get("author")),
@@ -1266,12 +1408,17 @@ class AgentConfig(PackageConfiguration):
             storage_uri=cast(str, obj.get("storage_uri")),
             component_configurations=None,
         )
+        directory = instance.directory if instance else None
+
         if instance is None:
-            # create
-            agent_config = AgentConfig(**params)  # type: ignore
+            instance = cls(**params)  # type: ignore
         else:
-            agent_config = instance
-            agent_config.__init__(**params)  # type: ignore
+            instance.__init__(**params)  # type: ignore
+
+        if not instance.directory:
+            instance.directory = directory
+
+        agent_config = instance
 
         #  parse private keys
         for crypto_id, path in obj.get("private_key_paths", {}).items():
@@ -1306,6 +1453,22 @@ class AgentConfig(PackageConfiguration):
 
         return agent_config
 
+    @property
+    def all_components_id(self) -> List[ComponentId]:
+        """Get list of the all components for this agent config."""
+        component_type_to_set = {
+            ComponentType.PROTOCOL: self.protocols,
+            ComponentType.CONNECTION: self.connections,
+            ComponentType.CONTRACT: self.contracts,
+            ComponentType.SKILL: self.skills,
+        }
+        result = []
+        for component_type, public_ids in component_type_to_set.items():
+            for public_id in public_ids:
+                result.append(ComponentId(component_type, public_id))
+
+        return result
+
     def update(self, data: Dict) -> None:
         """
         Update configuration with other data.
@@ -1319,26 +1482,23 @@ class AgentConfig(PackageConfiguration):
         data = copy(data)
         # update component parts
         new_component_configurations: Dict = data.pop("component_configurations", {})
-        updated_component_configuration: Dict[ComponentId, Dict] = copy(
+        updated_component_configurations: Dict[ComponentId, Dict] = copy(
             self.component_configurations
         )
         for component_id, obj in new_component_configurations.items():
-            if component_id not in updated_component_configuration:
-                updated_component_configuration[component_id] = obj
+            if component_id not in updated_component_configurations:
+                updated_component_configurations[component_id] = obj
             else:
-                recursive_update(updated_component_configuration[component_id], obj)
+                recursive_update(
+                    updated_component_configurations[component_id],
+                    obj,
+                    allow_new_values=True,
+                )
 
-        self.component_configurations = updated_component_configuration
-
-        # update other fields
-        for item_id, value in data.get("private_key_paths", {}).items():
-            self.private_key_paths.update(item_id, value)
-
-        for item_id, value in data.get("connection_private_key_paths", {}).items():
-            self.connection_private_key_paths.update(item_id, value)
-
-        self.logging_config = data.get("logging_config", self.logging_config)
-        self.registry_path = data.get("registry_path", self.registry_path)
+        self.check_overrides_valid(data)
+        super().update(data)
+        self.validate_config_data(self.json)
+        self.component_configurations = updated_component_configurations
 
 
 class SpeechActContentConfig(Configuration):
@@ -1429,6 +1589,7 @@ class ProtocolSpecification(ProtocolConfig):
         cls, obj: Dict, instance: Optional["ProtocolSpecification"] = None
     ) -> "ProtocolSpecification":
         """Initialize from a JSON object."""
+        obj = {**(instance.json if instance else {}), **copy(obj)}
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1438,12 +1599,17 @@ class ProtocolSpecification(ProtocolConfig):
             description=cast(str, obj.get("description", "")),
         )
 
-        if instance is None:
-            protocol_specification = cls(**params)  # type: ignore
-        else:
-            protocol_specification = instance
-            protocol_specification.__init__(**params)  # type: ignore
+        directory = instance.directory if instance else None
 
+        if instance is None:
+            instance = cls(**params)  # type: ignore
+        else:
+            instance.__init__(**params)  # type: ignore
+
+        if not instance.directory:
+            instance.directory = directory
+
+        protocol_specification = instance
         for speech_act, speech_act_content in obj.get("speech_acts", {}).items():
             speech_act_content_config = SpeechActContentConfig.from_json(
                 speech_act_content
@@ -1529,6 +1695,7 @@ class ContractConfig(ComponentConfiguration):
         cls, obj: Dict, instance: "ContractConfig" = Optional[None]
     ) -> "ContractConfig":
         """Initialize from a JSON object."""
+        obj = {**(instance.json if instance else {}), **copy(obj)}
         dependencies = cast(
             Dependencies, dependencies_from_json(obj.get("dependencies", {}))
         )
@@ -1551,10 +1718,16 @@ class ContractConfig(ComponentConfiguration):
             ),
             class_name=obj.get("class_name", ""),
         )
+        directory = instance.directory if instance else None
+
         if instance is None:
             instance = cls(**params)  # type: ignore
         else:
             instance.__init__(**params)  # type: ignore
+
+        if not instance.directory:
+            instance.directory = directory
+
         return instance
 
 

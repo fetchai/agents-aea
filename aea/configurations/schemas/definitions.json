@@ -109,6 +109,9 @@
     "build_entrypoint": {
       "type": "string"
     },
+    "build_directory": {
+      "type": "string"
+    },
     "ledger_id": {
       "type": "string",
       "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"
@@ -150,6 +153,21 @@
     },
     "keep_terminal_state_dialogues": {
       "type": "boolean"
+    },
+    "logging_config": {
+    	"type": "object",
+    	"additionalProperties": false,
+        "properties": {
+        	"disable_existing_loggers": {
+              "type": ["boolean", "null"]
+            },
+            "version": {
+              "type": "number"
+            },
+            "handlers": {"type": "object"},
+            "formatters": {"type": "object"},
+            "loggers": {"type": "object"}
+        }
     }
   }
 }

@@ -26,6 +26,10 @@ from typing import Dict, List
 
 import jsonschema
 from jsonschema import Draft4Validator
+from jsonschema._utils import find_additional_properties
+from jsonschema._validators import additionalProperties
+from jsonschema.exceptions import ValidationError
+from jsonschema.validators import extend
 
 from aea.configurations.constants import AGENT
 from aea.configurations.data_types import ComponentId, ComponentType, PublicId
@@ -69,6 +73,33 @@ def _get_path_to_custom_config_schema_from_type(component_type: ComponentType) -
     return str(full_path)
 
 
+class ExtraPropertiesError(ValueError):
+    """Extra properties exception."""
+
+    def __str__(self) -> str:
+        """Get string representation of the object."""
+        return (
+            f"ExtraPropertiesError: properties not expected: {', '.join(self.args[0])}"
+        )
+
+    def __repr__(self) -> str:
+        """Get string representation of the object."""
+        return str(self)
+
+
+def ownAdditionalProperties(validator, aP, instance, schema):
+    """Additioinal properties validator."""
+    for _ in additionalProperties(validator, aP, instance, schema):
+        raise ExtraPropertiesError(list(find_additional_properties(instance, schema)))
+    return iter(())
+
+
+OwnDraft4Validator = extend(
+    validator=Draft4Validator,
+    validators={"additionalProperties": ownAdditionalProperties},
+)
+
+
 class ConfigValidator:
     """Configuration validator implementation."""
 
@@ -82,7 +113,7 @@ class ConfigValidator:
         self._schema = json.load((base_uri / schema_filename).open())
         root_path = make_jsonschema_base_uri(base_uri)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)
-        self._validator = Draft4Validator(self._schema, resolver=self._resolver)
+        self._validator = OwnDraft4Validator(self._schema, resolver=self._resolver)
 
     @staticmethod
     def split_component_id_and_config(
@@ -135,7 +166,7 @@ class ConfigValidator:
                     **configuration,
                 )
             )
-        except jsonschema.ValidationError as e:
+        except (ExtraPropertiesError, jsonschema.ValidationError) as e:
             raise ValueError(
                 f"Configuration of component {component_id} is not valid. {e}"
             ) from e
@@ -165,9 +196,19 @@ class ConfigValidator:
                 )
 
             # validate agent config
-            self._validator.validate(instance=json_data_copy)
+            self._validate_data(json_data_copy)
         else:
-            self._validator.validate(instance=json_data)
+            self._validate_data(json_data)
+
+    def _validate_data(self, data):
+        try:
+            self._validator.validate(instance=data)
+        except ValidationError as e:
+            if e.validator == "additionalProperties":
+                extras = list(find_additional_properties(data, self._schema))
+                if extras:
+                    raise ExtraPropertiesError(extras)
+            raise
 
     @property
     def required_fields(self) -> List[str]:

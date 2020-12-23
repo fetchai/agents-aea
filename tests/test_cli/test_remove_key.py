@@ -16,11 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea remove-key` sub-command."""
 import pytest
+from click.exceptions import ClickException
 
-from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import FETCHAI_PRIVATE_KEY_PATH
@@ -66,11 +65,8 @@ class BaseTestRemovePrivateKeyNegative(AEATestCaseEmpty):
 
     def test_remove(self):
         """Test remove."""
-        with pytest.raises(AEATestingException):
+        with pytest.raises(ClickException, match=self.EXPECTED_ERROR_MSG):
             self.remove_private_key(connection=self.WITH_CONNECTION)
-        assert self.last_cli_runner_result.exit_code == 1
-        error_msg = str(self.last_cli_runner_result.exception)
-        assert error_msg == self.EXPECTED_ERROR_MSG
 
 
 class TestRemoveCryptoPrivateKeyNegative(BaseTestRemovePrivateKeyNegative):

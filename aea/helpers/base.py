@@ -369,7 +369,12 @@ def _is_dict_like(obj: Any) -> bool:
     return type(obj) in {dict, OrderedDict}
 
 
-def recursive_update(to_update: Dict, new_values: Dict) -> None:
+def recursive_update(
+    to_update: Dict,
+    new_values: Dict,
+    allow_new_values: bool = False,
+    check_data_type: bool = True,
+) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.
 
@@ -386,10 +391,14 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
     :return: None
     """
     for key, value in new_values.items():
-        if key not in to_update:
+        if (not allow_new_values) and key not in to_update:
             raise ValueError(
                 f"Key '{key}' is not contained in the dictionary to update."
             )
+
+        if key not in to_update and allow_new_values:
+            to_update[key] = value
+            continue
 
         value_to_update = to_update[key]
         value_type = type(value)
@@ -400,13 +409,14 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             and value_type != value_to_update_type
             and value is not None
             and value_to_update is not None
+            and check_data_type
         ):
             raise ValueError(
                 f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."
             )
 
         if both_are_dict:
-            recursive_update(value_to_update, value)
+            recursive_update(value_to_update, value, allow_new_values)
         else:
             to_update[key] = value
 
@@ -585,10 +595,9 @@ def dict_to_path_value(
     """Convert dict to sequence of terminal path build of  keys and value."""
     path = path or []
     for key, value in data.items():
-        path.append(key)
         if not isinstance(value, Mapping):
             # terminal value
-            yield path, value
+            yield path + [key], value
         else:
-            for p, v in dict_to_path_value(value, path):
+            for p, v in dict_to_path_value(value, path + [key]):
                 yield p, v

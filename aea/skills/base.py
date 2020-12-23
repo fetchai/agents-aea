@@ -835,6 +835,7 @@ class Skill(Component):
         :param agent_context: the agent context.
         :return: the skill.
         """
+
         if configuration.directory is None:  # pragma: nocover
             raise ValueError("Configuration must be associated with a directory.")
 
