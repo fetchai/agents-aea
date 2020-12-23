@@ -27,3 +27,16 @@ dependencies:
   dep4:
     version: <=1.11.12b2
 is_abstract: false
+cert_requests:
+- identifier: cert_id_1
+  ledger_id: some_ledger_id
+  not_after: '2020-01-02'
+  not_before: '2020-01-01'
+  public_key: key_id
+  save_path: some/path_1
+- identifier: cert_id_2
+  ledger_id: some_ledger_id
+  not_after: '2020-01-02'
+  not_before: '2020-01-01'
+  public_key: '0xABCDEF123456'
+  save_path: some/path_2
