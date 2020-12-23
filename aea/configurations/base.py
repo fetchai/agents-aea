@@ -25,6 +25,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from copy import copy, deepcopy
 from enum import Enum
+from operator import attrgetter
 from pathlib import Path
 from typing import (
     Any,
@@ -74,6 +75,7 @@ from aea.configurations.constants import (
 )
 from aea.exceptions import enforce
 from aea.helpers.base import (
+    CertRequest,
     RegexConstrainedString,
     STRING_LENGTH_LIMIT,
     SimpleId,
@@ -1227,6 +1229,7 @@ class ConnectionConfig(ComponentConfiguration):
         description: str = "",
         connection_id: Optional[PublicId] = None,
         is_abstract: bool = False,
+        cert_requests: Optional[List[CertRequest]] = None,
         **config,
     ):
         """Initialize a connection configuration object."""
@@ -1275,6 +1278,7 @@ class ConnectionConfig(ComponentConfiguration):
         self.description = description
         self.config = config if len(config) > 0 else {}
         self.is_abstract = is_abstract
+        self.cert_requests = cert_requests
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1320,6 +1324,9 @@ class ConnectionConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
+
+        if self.cert_requests is not None:
+            result["cert_requests"] = list(map(attrgetter("json"), self.cert_requests))
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
         if self.build_directory:
@@ -1338,6 +1345,15 @@ class ConnectionConfig(ComponentConfiguration):
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
+        cert_requests = (
+            [
+                # notice: yaml.load resolves datetimes strings to datetime.datetime objects
+                CertRequest.from_json(cert_request_json)
+                for cert_request_json in obj["cert_requests"]
+            ]
+            if "cert_requests" in obj
+            else None
+        )
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1358,6 +1374,7 @@ class ConnectionConfig(ComponentConfiguration):
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
             is_abstract=obj.get("is_abstract", False),
+            cert_requests=cert_requests,
             **cast(dict, obj.get("config", {})),
         )
 

@@ -150,6 +150,45 @@
     },
     "keep_terminal_state_dialogues": {
       "type": "boolean"
+    },
+    "cert_requests": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/cert_request"
+      }
+    },
+    "cert_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "public_key",
+        "identifier",
+        "ledger_id",
+        "not_before",
+        "not_after",
+        "save_path"
+      ],
+      "properties": {
+        "public_key": {
+          "type": "string"
+        },
+        "identifier": {
+          "$ref": "definitions.json#/definitions/resource_name"
+        },
+        "ledger_id": {
+          "$ref": "definitions.json#/definitions/ledger_id"
+        },
+        "not_before": {
+          "type": "string"
+        },
+        "not_after": {
+          "type": "string"
+        },
+        "save_path": {
+          "type": "string"
+        }
+      }
     }
   }
 }
