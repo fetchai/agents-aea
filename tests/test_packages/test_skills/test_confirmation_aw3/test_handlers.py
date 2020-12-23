@@ -29,8 +29,15 @@ from aea.protocols.dialogue.base import DialogueMessage
 from packages.fetchai.protocols.default.dialogues import DefaultDialogue
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.confirmation_aw3.dialogues import HttpDialogue, HttpDialogues, DefaultDialogues
-from packages.fetchai.skills.confirmation_aw3.handlers import DefaultHandler, HttpHandler
+from packages.fetchai.skills.confirmation_aw3.dialogues import (
+    DefaultDialogues,
+    HttpDialogue,
+    HttpDialogues,
+)
+from packages.fetchai.skills.confirmation_aw3.handlers import (
+    DefaultHandler,
+    HttpHandler,
+)
 from packages.fetchai.skills.confirmation_aw3.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
@@ -271,11 +278,11 @@ class TestHttpHandler(ConfirmationAW3TestCase):
             HttpDialogues, cls._skill.skill_context.http_dialogues
         )
 
-        cls.method= "some_method",
-        cls.url= "some_url",
-        cls.version= "some_version",
-        cls.headers= "some_headers",
-        cls.body= b'some_body',
+        cls.method = "some_method"
+        cls.url = "some_url"
+        cls.version = "some_version"
+        cls.headers = "some_headers"
+        cls.body = b"some_body"
 
         cls.list_of_http_messages = (
             DialogueMessage(
@@ -286,8 +293,7 @@ class TestHttpHandler(ConfirmationAW3TestCase):
                     "version": cls.version,
                     "headers": cls.headers,
                     "body": cls.body,
-
-                }
+                },
             ),
         )
 
@@ -333,8 +339,7 @@ class TestHttpHandler(ConfirmationAW3TestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues,
-                messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -384,7 +389,9 @@ class TestHttpHandler(ConfirmationAW3TestCase):
             self.http_handler.handle(incoming_message)
 
         # after
-        http_dialogue = cast(HttpDialogue, self.http_dialogues.get_dialogue(incoming_message))
+        http_dialogue = cast(
+            HttpDialogue, self.http_dialogues.get_dialogue(incoming_message)
+        )
         mock_logger.assert_any_call(
             logging.WARNING,
             f"cannot handle http message of performative={incoming_message.performative} in dialogue={http_dialogue}.",

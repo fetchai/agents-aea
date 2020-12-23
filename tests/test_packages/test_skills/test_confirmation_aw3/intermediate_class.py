@@ -27,9 +27,7 @@ from tests.conftest import ROOT_DIR
 class ConfirmationAW3TestCase(BaseSkillTestCase):
     """Sets the confirmation_aw3 class up for testing (overrides the necessary config values so tests can be done on confirmation_aw3 skill)."""
 
-    path_to_skill = Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw3"
-    )
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw3")
 
     @classmethod
     def setup(cls):
@@ -37,10 +35,16 @@ class ConfirmationAW3TestCase(BaseSkillTestCase):
         cls.aw1_aea = "some_aw1_aea"
         cls.leaderboard_url = "some_leaderboard_url"
         cls.leaderboard_token = "some_leaderboard_token"
-        config_overrides = {"models": {"strategy": {"args": {
-            "aw1_aea": cls.aw1_aea,
-            "leaderboard_url": cls.leaderboard_url,
-            "leaderboard_token": cls.leaderboard_token,
-        }}}}
+        config_overrides = {
+            "models": {
+                "strategy": {
+                    "args": {
+                        "aw1_aea": cls.aw1_aea,
+                        "leaderboard_url": cls.leaderboard_url,
+                        "leaderboard_token": cls.leaderboard_token,
+                    }
+                }
+            }
+        }
 
         super().setup(config_overrides=config_overrides)

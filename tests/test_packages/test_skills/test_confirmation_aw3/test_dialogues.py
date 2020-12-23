@@ -24,7 +24,10 @@ from typing import cast
 from aea.test_tools.test_skill import COUNTERPARTY_ADDRESS
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.confirmation_aw3.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.skills.confirmation_aw3.dialogues import (
+    HttpDialogue,
+    HttpDialogues,
+)
 
 from tests.conftest import ROOT_DIR
 from tests.test_packages.test_skills.test_confirmation_aw3.intermediate_class import (

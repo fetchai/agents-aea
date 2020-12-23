@@ -27,7 +27,10 @@ from unittest.mock import Mock, patch
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.confirmation_aw3.registration_db import RegistrationDB
-from packages.fetchai.skills.confirmation_aw3.strategy import Strategy, HTTP_CLIENT_PUBLIC_ID
+from packages.fetchai.skills.confirmation_aw3.strategy import (
+    HTTP_CLIENT_PUBLIC_ID,
+    Strategy,
+)
 
 from tests.conftest import ROOT_DIR
 from tests.test_packages.test_skills.test_confirmation_aw3.intermediate_class import (
@@ -47,10 +50,7 @@ class TestStrategy(ConfirmationAW3TestCase):
 
         cls.location_name = "berlin"
         cls.locations = {
-            cls.location_name: {
-                "latitude": 52.52,
-                "longitude": 13.405
-            },
+            cls.location_name: {"latitude": 52.52, "longitude": 13.405},
         }
         cls.search_query_type = "weather"
         cls.search_queries = {
@@ -114,7 +114,9 @@ class TestStrategy(ConfirmationAW3TestCase):
     def test_is_valid_counterparty_i(self):
         """Test the is_valid_counterparty method of the Strategy class where is_registered is False."""
         # operation
-        with patch.object(self.db, "is_registered", return_value=False) as mock_is_regostered:
+        with patch.object(
+            self.db, "is_registered", return_value=False
+        ) as mock_is_regostered:
             with patch.object(self.logger, "log") as mock_logger:
                 is_valid = self.strategy.is_valid_counterparty(self.counterparty)
 
@@ -128,7 +130,9 @@ class TestStrategy(ConfirmationAW3TestCase):
     def test_is_valid_counterparty_ii(self):
         """Test the is_valid_counterparty method of the Strategy class where is_registered is True."""
         # operation
-        with patch.object(self.db, "is_registered", return_value=True) as mock_is_regostered:
+        with patch.object(
+            self.db, "is_registered", return_value=True
+        ) as mock_is_regostered:
             is_valid = self.strategy.is_valid_counterparty(self.counterparty)
 
         # after
@@ -151,7 +155,11 @@ class TestStrategy(ConfirmationAW3TestCase):
         with patch.object(self.db, "set_trade") as mock_set_trade:
             with patch("datetime.datetime", new=datetime_mock):
                 with patch.object(self.logger, "log") as mock_logger:
-                    with patch.object(self.db, "get_handle_and_trades", return_value=(developer_handle, nb_trades)) as mock_handle:
+                    with patch.object(
+                        self.db,
+                        "get_handle_and_trades",
+                        return_value=(developer_handle, nb_trades),
+                    ) as mock_handle:
                         self.strategy.successful_trade_with_counterparty(
                             self.counterparty, data
                         )
@@ -183,7 +191,7 @@ class TestStrategy(ConfirmationAW3TestCase):
                     "points": nb_trades,
                     "token": self.leaderboard_token,
                 }
-            ).encode("utf-8")
+            ).encode("utf-8"),
         )
         assert has_attributes, error_str
 
@@ -215,8 +223,3 @@ class TestStrategy(ConfirmationAW3TestCase):
             logging.INFO,
             f"New search_type={self.search_query_type} and location={self.location_name}.",
         )
-
-
-
-
-

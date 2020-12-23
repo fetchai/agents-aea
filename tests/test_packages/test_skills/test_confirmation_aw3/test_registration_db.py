@@ -73,15 +73,14 @@ class TestStrategy(ConfirmationAW3TestCase):
         result = [["1", "2"], ["3", "4"]]
 
         # operation
-        with patch.object(self.db, "_execute_single_sql", return_value=result) as mock_exe:
-            actual_result = self.db.get_trade_count(
-                self.address,
-            )
+        with patch.object(
+            self.db, "_execute_single_sql", return_value=result
+        ) as mock_exe:
+            actual_result = self.db.get_trade_count(self.address,)
 
         # after
         mock_exe.assert_any_call(
-            "SELECT COUNT(*) FROM trades_table where address=?",
-            (self.address,),
+            "SELECT COUNT(*) FROM trades_table where address=?", (self.address,),
         )
         assert actual_result == 1
 
@@ -91,10 +90,10 @@ class TestStrategy(ConfirmationAW3TestCase):
         result = [["developer_handle"], ["something_1", "something_2"]]
 
         # operation
-        with patch.object(self.db, "_execute_single_sql", return_value=result) as mock_exe:
-            actual_result = self.db.get_developer_handle(
-                self.address,
-            )
+        with patch.object(
+            self.db, "_execute_single_sql", return_value=result
+        ) as mock_exe:
+            actual_result = self.db.get_developer_handle(self.address,)
 
         # after
         mock_exe.assert_any_call(
@@ -109,8 +108,13 @@ class TestStrategy(ConfirmationAW3TestCase):
         result = [["developer_handle", "something_1"], ["something_2", "something_3"]]
 
         # operation
-        with patch.object(self.db, "_execute_single_sql", return_value=result) as mock_exe:
-            with pytest.raises(ValueError, match=f"More than one developer_handle found for address={self.address}."):
+        with patch.object(
+            self.db, "_execute_single_sql", return_value=result
+        ) as mock_exe:
+            with pytest.raises(
+                ValueError,
+                match=f"More than one developer_handle found for address={self.address}.",
+            ):
                 self.db.get_developer_handle(self.address)
 
         # after
@@ -125,10 +129,10 @@ class TestStrategy(ConfirmationAW3TestCase):
         result = [["address_1", "something_1"], ["address_2", "something_2"]]
 
         # operation
-        with patch.object(self.db, "_execute_single_sql", return_value=result) as mock_exe:
-            actual_addresses = self.db.get_addresses(
-                self.developer_handle,
-            )
+        with patch.object(
+            self.db, "_execute_single_sql", return_value=result
+        ) as mock_exe:
+            actual_addresses = self.db.get_addresses(self.developer_handle,)
 
         # after
         mock_exe.assert_any_call(
@@ -143,8 +147,13 @@ class TestStrategy(ConfirmationAW3TestCase):
         result = []
 
         # operation
-        with patch.object(self.db, "_execute_single_sql", return_value=result) as mock_exe:
-            with pytest.raises(ValueError, match=f"Should find at least one address for developer_handle={self.developer_handle}."):
+        with patch.object(
+            self.db, "_execute_single_sql", return_value=result
+        ) as mock_exe:
+            with pytest.raises(
+                ValueError,
+                match=f"Should find at least one address for developer_handle={self.developer_handle}.",
+            ):
                 self.db.get_addresses(self.developer_handle,)
 
         # after
@@ -160,12 +169,16 @@ class TestStrategy(ConfirmationAW3TestCase):
         trade_counts = [2, 5]
 
         # operation
-        with patch.object(self.db, "get_developer_handle", return_value=self.developer_handle) as mock_developer_handle:
-            with patch.object(self.db, "get_addresses", return_value=result) as mock_addresses:
-                with patch.object(self.db, "get_trade_count", side_effect=trade_counts) as mock_trade_counts:
-                    actual_addresses = self.db.get_handle_and_trades(
-                        self.address,
-                    )
+        with patch.object(
+            self.db, "get_developer_handle", return_value=self.developer_handle
+        ) as mock_developer_handle:
+            with patch.object(
+                self.db, "get_addresses", return_value=result
+            ) as mock_addresses:
+                with patch.object(
+                    self.db, "get_trade_count", side_effect=trade_counts
+                ) as mock_trade_counts:
+                    actual_addresses = self.db.get_handle_and_trades(self.address,)
 
         # after
         mock_developer_handle.assert_any_call(self.address)
@@ -180,24 +193,37 @@ class TestStrategy(ConfirmationAW3TestCase):
         result = [("address_1", "something_1"), ("address_2", "something_2")]
 
         # operation
-        with patch.object(self.db, "_execute_single_sql", return_value=result) as mock_exe:
+        with patch.object(
+            self.db, "_execute_single_sql", return_value=result
+        ) as mock_exe:
             actual_result = self.db.get_all_addresses_and_handles()
 
         # after
-        mock_exe.assert_any_call("SELECT address, developer_handle FROM registered_table", ())
+        mock_exe.assert_any_call(
+            "SELECT address, developer_handle FROM registered_table", ()
+        )
         assert actual_result == result
 
     def test_get_leaderboard(self):
         """Test the get_leaderboard method of the RegistrationDB class."""
         # setup
-        addresses_and_handlers = [("address_1", "handler_1"), ("address_2", "handler_2")]
+        addresses_and_handlers = [
+            ("address_1", "handler_1"),
+            ("address_2", "handler_2"),
+        ]
         trade_counts = [2, 5]
 
         expected_result = [("address_2", "handler_2", 5), ("address_1", "handler_1", 2)]
 
         # operation
-        with patch.object(self.db, "get_all_addresses_and_handles", return_value=addresses_and_handlers) as mock_get_addresses:
-            with patch.object(self.db, "get_trade_count", side_effect=trade_counts) as mock_trade_counts:
+        with patch.object(
+            self.db,
+            "get_all_addresses_and_handles",
+            return_value=addresses_and_handlers,
+        ) as mock_get_addresses:
+            with patch.object(
+                self.db, "get_trade_count", side_effect=trade_counts
+            ) as mock_trade_counts:
                 actual_result = self.db.get_leaderboard()
 
         # after
@@ -209,7 +235,9 @@ class TestStrategy(ConfirmationAW3TestCase):
     def test_set_registered_i(self):
         """Test the set_registered method of the RegistrationDB class where is_registered is False."""
         # operation
-        with patch.object(self.db, "is_registered", return_value=False) as mock_registered:
+        with patch.object(
+            self.db, "is_registered", return_value=False
+        ) as mock_registered:
             with patch.object(self.db, "_execute_single_sql") as mock_exe:
                 self.db.set_registered(self.address, self.developer_handle)
 
@@ -223,7 +251,9 @@ class TestStrategy(ConfirmationAW3TestCase):
     def test_set_registered_ii(self):
         """Test the set_registered method of the RegistrationDB class where is_registered is True."""
         # operation
-        with patch.object(self.db, "is_registered", return_value=True) as mock_registered:
+        with patch.object(
+            self.db, "is_registered", return_value=True
+        ) as mock_registered:
             with patch.object(self.db, "_execute_single_sql") as mock_exe:
                 self.db.set_registered(self.address, self.developer_handle)
 
@@ -237,13 +267,14 @@ class TestStrategy(ConfirmationAW3TestCase):
         result = [("address_1", "something_1"), ("address_2", "something_2")]
 
         # operation
-        with patch.object(self.db, "_execute_single_sql", return_value=result) as mock_exe:
+        with patch.object(
+            self.db, "_execute_single_sql", return_value=result
+        ) as mock_exe:
             is_registered = self.db.is_registered(self.address)
 
         # after
         mock_exe.assert_any_call(
-            "SELECT * FROM registered_table WHERE address=?",
-            (self.address,),
+            "SELECT * FROM registered_table WHERE address=?", (self.address,),
         )
         assert is_registered is True
 
@@ -253,12 +284,13 @@ class TestStrategy(ConfirmationAW3TestCase):
         result = []
 
         # operation
-        with patch.object(self.db, "_execute_single_sql", return_value=result) as mock_exe:
+        with patch.object(
+            self.db, "_execute_single_sql", return_value=result
+        ) as mock_exe:
             is_registered = self.db.is_registered(self.address)
 
         # after
         mock_exe.assert_any_call(
-            "SELECT * FROM registered_table WHERE address=?",
-            (self.address,),
+            "SELECT * FROM registered_table WHERE address=?", (self.address,),
         )
         assert is_registered is False

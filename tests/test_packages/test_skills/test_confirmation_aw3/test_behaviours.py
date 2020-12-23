@@ -22,7 +22,13 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
-from aea.helpers.search.models import Query, Constraint, ConstraintType, Attribute, DataModel
+from aea.helpers.search.models import (
+    Attribute,
+    Constraint,
+    ConstraintType,
+    DataModel,
+    Query,
+)
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.confirmation_aw3.behaviours import SearchBehaviour
@@ -68,7 +74,9 @@ class TestSearchBehaviour(ConfirmationAW3TestCase):
 
         # operation
         with patch.object(self.strategy, "update_search_query_params") as mock_update:
-            with patch.object(self.strategy, "get_location_and_service_query", return_value=mock_query):
+            with patch.object(
+                self.strategy, "get_location_and_service_query", return_value=mock_query
+            ):
                 self.search_behaviour.act()
 
         # after
