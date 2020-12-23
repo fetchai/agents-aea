@@ -39,7 +39,7 @@ class Strategy(GenericStrategy):
         if aw1_aea is None:
             raise ValueError("aw1_aea must be provided!")
         self.aw1_aea = aw1_aea
-        self.mininum_hours_between_txs = kwargs.pop("mininum_hours_between_txs", 4)
+        self.minimum_hours_between_txs = kwargs.pop("mininum_hours_between_txs", 4)
         self.minimum_minutes_since_last_attempt = kwargs.pop(
             "minimum_minutes_since_last_attempt", 2
         )
@@ -93,7 +93,7 @@ class Strategy(GenericStrategy):
             return False
         self.last_attempt[counterparty] = datetime.datetime.now()
         if not registration_db.is_allowed_to_trade(
-            counterparty, self.mininum_hours_between_txs
+            counterparty, self.minimum_hours_between_txs
         ):
             return False
         return True
@@ -120,7 +120,6 @@ class Strategy(GenericStrategy):
 
         :param counterparty: the counterparty address
         :param developer_handle: the developer handle
-        :param data: the data
         :return: False
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)

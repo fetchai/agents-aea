@@ -11,9 +11,9 @@ fingerprint:
   __init__.py: QmdNXiy1gZ6GQvnesh9ZJBeS2T8aiGk1DsbdKLvRrRDiCz
   behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
-  handlers.py: QmYKoLkvxdpD1NFn5DUKrjQwPRUtm4jQxiywDhxPGqo7ff
-  registration_db.py: Qmf4oT8r3ZZ26TREt7VStZmAyXMKaoCWwSLBBshGHYhLdW
-  strategy.py: QmayZEjxiCcg1Vu18vKwsVvXxGSeKR1ySej5bMjshGXHVS
+  handlers.py: QmVeJuN78rMn3kWFbntfBUk6v88DYBW88ZQZ129KZo84wp
+  registration_db.py: QmbdtzWvWvWizrzLcvNWphVF7LVkDq3VSWC3MkaK4RU6H5
+  strategy.py: QmafVgQyrcetTPmURWWzqqFgkU2yY2DJp2G9FWwvxcZTmW
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.11.0
@@ -83,8 +83,8 @@ models:
       max_quantity: 100
       max_tx_fee: 1
       max_unit_price: 20
+      minimum_hours_between_txs: 4
       minimum_minutes_since_last_attempt: 2
-      mininum_hours_between_txs: 4
       search_query:
         constraint_type: ==
         search_key: seller_service
