@@ -114,7 +114,12 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
         path = Path(self.current_agent_context, filename)
         assert path.exists()
         signature = path.read_text()
-        assert signature.isascii()
+
+        def is_ascii(s):
+            """Check isascii method for all Python 3 versions"""
+            return all(ord(c) < 128 for c in s)
+
+        assert is_ascii(signature)
         int(signature, 16)  # this will fail if not hexadecimal
 
         cert_msg_1 = (

@@ -72,15 +72,11 @@ def _process_certificate(ctx: Context, cert_request: CertRequest):
             public_key is not None,
             "Internal error - one of key_identifier or public_key must be not None.",
         )
-    public_key_bytes = public_key.encode("ascii")
-    identifier = cert_request.identifier.encode("ascii")
-    not_before = cert_request.not_before_string.encode("ascii")
-    not_after = cert_request.not_after_string.encode("ascii")
     crypto_private_key_path = ctx.agent_config.private_key_paths.read(ledger_id)
     if crypto_private_key_path is None:
         raise ClickException(f"Cannot find private key with id '{ledger_id}'")
     crypto = crypto_registry.make(ledger_id, private_key_path=crypto_private_key_path)
-    message = public_key_bytes + identifier + not_before + not_after
+    message = cert_request.get_message(public_key)
     signature = crypto.sign_message(message).encode("ascii").hex()
     click.echo(f"Generated signature: '{signature}'")
     Path(output_path).write_bytes(signature.encode("ascii"))

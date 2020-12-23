@@ -712,6 +712,16 @@ class CertRequest:
         """Get the save_path"""
         return self._save_path
 
+    def get_message(self, public_key: str) -> bytes:
+        """Get the message to sign."""
+        message = (
+            public_key.encode("ascii")
+            + self.identifier.encode("ascii")
+            + self.not_before_string.encode("ascii")
+            + self.not_after_string.encode("ascii")
+        )
+        return message
+
     @property
     def json(self) -> Dict:
         """Compute the JSON representation."""

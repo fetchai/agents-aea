@@ -79,14 +79,14 @@ Commands:
   gui                 Run the CLI GUI.
   init                Initialize your AEA configurations.
   install             Install the dependencies of the agent.
-  interact            Interact with the running agent via the stub...
+  interact            Interact with the running agent via the stub connection.
   issue-certificates  Issue certificates for connections that require them.
   launch              Launch many agents at the same time.
   list                List the installed packages of the agent.
   login               Login to the registry account.
   logout              Logout from the registry account.
   publish             Publish the agent to the registry.
-  push                Push a non-vendor package of the agent to the...
+  push                Push a non-vendor package of the agent to the registry.
   register            Create a new registry account.
   remove              Remove a package from the agent.
   remove-key          Remove a private key from the wallet of the agent.
