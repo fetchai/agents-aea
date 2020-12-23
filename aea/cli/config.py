@@ -108,21 +108,18 @@ def set_command(
         with contextlib.suppress(VariableDoesNotExists):
             current_value = agent_config_manager.get_variable(json_path)
 
+        # type was not specified, tried to auto determine
         if type_ is None:
+            # apply str as default type
+            converted_value = AgentConfigManager.convert_value_str_to_type(value, "str")
             if current_value is not None:
-                try:
+                # try to convert to original value's type
+                with contextlib.suppress(Exception):
                     converted_value = AgentConfigManager.convert_value_str_to_type(
                         value, type(current_value).__name__
                     )
-                except ValueError:
-                    converted_value = AgentConfigManager.convert_value_str_to_type(
-                        value, "str"
-                    )
-            else:
-                converted_value = AgentConfigManager.convert_value_str_to_type(
-                    value, "str"
-                )
         else:
+            # convert to type specified by user
             converted_value = AgentConfigManager.convert_value_str_to_type(
                 value, cast(str, type_)
             )
@@ -130,7 +127,7 @@ def set_command(
         agent_config_manager.set_variable(json_path, converted_value)
         agent_config_manager.dump_config()
     except ExtraPropertiesError as e:
-        raise ClickException(f"Field `{e.args[0][0]}` is not allowed to change!")
+        raise ClickException(f"Attribute `{e.args[0][0]}` is not allowed to change!")
     except (ValueError, AEAException) as e:
         raise ClickException(*e.args)
 
@@ -248,7 +245,7 @@ class AgentConfigManager:
                 return cast(JSON_TYPES, value)
 
         raise VariableDoesNotExists(
-            f"Variable `{'.'.join(json_path)}` for {'{}({}) config'.format(component_id.component_type,component_id.public_id) if component_id else 'AgentConfig'} does not exist"
+            f"Attribute `{'.'.join(json_path)}` for {'{}({}) config'.format(component_id.component_type,component_id.public_id) if component_id else 'AgentConfig'} does not exist"
         )
 
     @staticmethod

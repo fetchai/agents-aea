@@ -370,10 +370,7 @@ def _is_dict_like(obj: Any) -> bool:
 
 
 def recursive_update(
-    to_update: Dict,
-    new_values: Dict,
-    allow_new_values: bool = False,
-    check_data_type: bool = True,
+    to_update: Dict, new_values: Dict, allow_new_values: bool = False,
 ) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.
@@ -409,7 +406,6 @@ def recursive_update(
             and value_type != value_to_update_type
             and value is not None
             and value_to_update is not None
-            and check_data_type
         ):
             raise ValueError(
                 f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."
@@ -595,9 +591,9 @@ def dict_to_path_value(
     """Convert dict to sequence of terminal path build of  keys and value."""
     path = path or []
     for key, value in data.items():
-        if not isinstance(value, Mapping):
+        if isinstance(value, Mapping) and value:
             # terminal value
-            yield path + [key], value
-        else:
             for p, v in dict_to_path_value(value, path + [key]):
                 yield p, v
+        else:
+            yield path + [key], value

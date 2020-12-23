@@ -156,7 +156,7 @@ class TestConfigGet:
     def test_attribute_not_found(self):
         """Test that the 'get' fails because the attribute is not found."""
         with pytest.raises(
-            ClickException, match=r"Variable `.* for .* config does not exist"
+            ClickException, match=r"Attribute `.* for .* config does not exist"
         ):
             self.runner.invoke(
                 cli,
@@ -201,7 +201,7 @@ class TestConfigGet:
     def test_get_fails_when_getting_nested_object(self):
         """Test that getting a nested object in 'dummy' skill fails because path is not valid."""
         with pytest.raises(
-            ClickException, match=r"Variable `.* for .* config does not exist"
+            ClickException, match=r"Attribute `.* for .* config does not exist"
         ):
             self.runner.invoke(
                 cli,
@@ -312,7 +312,8 @@ class TestConfigSet:
     def test_set_agent_incorrect_value(self):
         """Test setting the agent name."""
         with pytest.raises(
-            ClickException, match="Field `not_agent_name` is not allowed to be updated!"
+            ClickException,
+            match="Attribute `not_agent_name` is not allowed to be updated!",
         ):
             self.runner.invoke(
                 cli,
@@ -417,7 +418,7 @@ class TestConfigSet:
     def test_set_nested_attribute(self):
         """Test setting a nested attribute."""
         path = "skills.dummy.behaviours.dummy.args.behaviour_arg_1"
-        new_value = "new_dummy_name"
+        new_value = "10"  # cause old value is int
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "config", "set", path, new_value],
@@ -446,7 +447,7 @@ class TestConfigSet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "Field `behaviours.dummy.config.behaviour_arg_1` is not allowed to be updated!"
+            == "Attribute `behaviours.dummy.config.behaviour_arg_1` is not allowed to be updated!"
         )
 
     def test_no_recognized_root(self):
@@ -511,7 +512,7 @@ class TestConfigSet:
         """Test that the 'set' fails because the attribute is not found."""
         with pytest.raises(
             ClickException,
-            match="Field `non_existing_attribute` is not allowed to be updated!",
+            match="Attribute `non_existing_attribute` is not allowed to be updated!",
         ):
             self.runner.invoke(
                 cli,
@@ -529,7 +530,7 @@ class TestConfigSet:
     def test_set_fails_when_setting_non_primitive_type(self):
         """Test that setting the 'dummy' skill behaviours fails because not a primitive type."""
         with pytest.raises(
-            ClickException, match="Field `behaviours` is not allowed to be updated!"
+            ClickException, match="Attribute `behaviours` is not allowed to be updated!"
         ):
             self.runner.invoke(
                 cli,
@@ -542,7 +543,7 @@ class TestConfigSet:
         """Test that setting a nested object in 'dummy' skill fails because path is not valid."""
         with pytest.raises(
             ClickException,
-            match=r"Field `non_existing_attribute.dummy` is not allowed to be updated!",
+            match=r"Attribute `non_existing_attribute.dummy` is not allowed to be updated!",
         ):
             self.runner.invoke(
                 cli,
@@ -611,7 +612,7 @@ class TestConfigNestedGetSet:
     def test_set_get_incorrect_path(self):
         """Fail on incorrect attribute tryed to be updated."""
         with pytest.raises(
-            ClickException, match="Variable `.*` for .* config does not exist"
+            ClickException, match="Attribute `.*` for .* config does not exist"
         ):
             self.runner.invoke(
                 cli,
@@ -622,7 +623,7 @@ class TestConfigNestedGetSet:
 
         with pytest.raises(
             ClickException,
-            match="Field `behaviours.dummy.args.behaviour_arg_100500` is not allowed to be updated!",
+            match="Attribute `behaviours.dummy.args.behaviour_arg_100500` is not allowed to be updated!",
         ):
             self.runner.invoke(
                 cli,

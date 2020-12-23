@@ -755,8 +755,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._check_can_add(configuration)
         # update dependency graph
         self._package_dependency_manager.add_component(configuration)
-        if not configuration.directory:
-            configuration.directory = directory
+        configuration.directory = directory
 
         return self
 
@@ -1680,8 +1679,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             new_configuration.component_id, {}
         )
         new_configuration.update(custom_config)
-        if new_configuration.directory != configuration.directory:
-            raise Exception(configuration)
 
         return new_configuration
 

@@ -368,7 +368,9 @@ class PackageConfiguration(Configuration, ABC):
             if check_excludes(path):
                 continue
             if path not in pattern_path_value:
-                errors.append(f"Field `{'.'.join(path)}` is not allowed to be updated!")
+                errors.append(
+                    f"Attribute `{'.'.join(path)}` is not allowed to be updated!"
+                )
                 continue
 
             current_value = data_path_value[path]
@@ -385,7 +387,10 @@ class PackageConfiguration(Configuration, ABC):
         return errors
 
     def make_resulting_config_data(self, overrides: Dict) -> Dict:
-        """Make config data with overrides applied."""
+        """Make config data with overrides applied.
+
+        Does not update config, just creates json representation
+        """
         current_config = self.json
         recursive_update(current_config, overrides, allow_new_values=True)
         return current_config
@@ -410,6 +415,25 @@ class PackageConfiguration(Configuration, ABC):
     def get_overridable(self) -> dict:
         """Get dictionary of values that can be updated for this config."""
         return {k: self.json.get(k) for k in self.FIELDS_ALLOWED_TO_UPDATE}
+
+    @classmethod
+    def _apply_params_to_instance(
+        cls, params: dict, instance: Optional["PackageConfiguration"]
+    ) -> "PackageConfiguration":
+        """Constructs or update instance with params provided."""
+        directory = (
+            instance.directory if instance and hasattr(instance, "directory") else None
+        )
+
+        if instance is None:
+            instance = cls(**params)  # type: ignore
+        else:
+            instance.__init__(**params)  # type: ignore
+
+        if directory and not instance.directory:
+            instance.directory = directory
+
+        return instance
 
 
 class ComponentConfiguration(PackageConfiguration, ABC):
@@ -683,15 +707,10 @@ class ConnectionConfig(ComponentConfiguration):
             is_abstract=obj.get("is_abstract", False),
             **cast(dict, obj.get("config", {})),
         )
-        directory = instance.directory if instance else None
 
-        if instance is None:
-            instance = cls(**params)  # type: ignore
-        else:
-            instance.__init__(**params)  # type: ignore
-
-        if not instance.directory:
-            instance.directory = directory
+        instance = cast(
+            ConnectionConfig, cls._apply_params_to_instance(params, instance)
+        )
 
         return instance
 
@@ -792,15 +811,7 @@ class ProtocolConfig(ComponentConfiguration):
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
-        directory = instance.directory if instance else None
-
-        if instance is None:
-            instance = cls(**params)  # type: ignore
-        else:
-            instance.__init__(**params)  # type: ignore
-
-        if not instance.directory:
-            instance.directory = directory
+        instance = cast(ProtocolConfig, cls._apply_params_to_instance(params, instance))
 
         return instance
 
@@ -838,11 +849,21 @@ class SkillComponentConfiguration:
         class_name = cast(str, obj.get("class_name"))
         params = dict(class_name=class_name, **obj.get("args", {}))
 
+        instance = cast(
+            SkillComponentConfiguration, cls._apply_params_to_instance(params, instance)
+        )
+
+        return instance
+
+    @classmethod
+    def _apply_params_to_instance(
+        cls, params: dict, instance: Optional["SkillComponentConfiguration"]
+    ) -> "SkillComponentConfiguration":
+        """Constructs or update instance with params provided."""
         if instance is None:
             instance = cls(**params)  # type: ignore
         else:
             instance.__init__(**params)  # type: ignore
-
         return instance
 
 
@@ -852,6 +873,7 @@ class SkillConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
     schema = "skill-config_schema.json"
+    abstract_field_name = "is_abstract"
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["behaviours", "handlers", "models", "is_abstract"]
@@ -1007,15 +1029,7 @@ class SkillConfig(ComponentConfiguration):
             build_directory=obj.get("build_directory"),
         )
 
-        directory = instance.directory if instance else None
-
-        if instance is None:
-            instance = cls(**params)  # type: ignore
-        else:
-            instance.__init__(**params)  # type: ignore
-
-        if not instance.directory:
-            instance.directory = directory
+        instance = cast(SkillConfig, cls._apply_params_to_instance(params, instance))
 
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():
             behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
@@ -1031,75 +1045,18 @@ class SkillConfig(ComponentConfiguration):
 
         return instance
 
-    def make_resulting_config_data(self, overrides: Dict) -> Dict:
-        """Make config data with overrides applied."""
-        self._update(overrides)
-        current_config = self.json
-        recursive_update(current_config, overrides, allow_new_values=True)
-        return current_config
-
-    def _update(self, data: Dict) -> None:
-        """
-        Update configuration with other data.
-
-        :param data: the data to replace.
-        :return: None
-        """
-
-        def _update_skill_component_config(type_plural: str, data: Dict):
-            """
-            Update skill component configurations with new data.
-
-            Also check that there are not undeclared components.
-            """
-            registry: CRUDCollection[SkillComponentConfiguration] = getattr(
-                self, type_plural
-            )
-            new_component_config = data.get(type_plural, {})
-            all_component_names = dict(registry.read_all())
-
-            if not isinstance(new_component_config, dict):
-                raise ValueError(f"Path '{type_plural}' not valid for skill.")
-
-            new_skill_component_names = set(new_component_config.keys()).difference(
-                set(all_component_names.keys())
-            )
-            if len(new_skill_component_names) > 0:
-                raise ValueError(
-                    f"The custom configuration for skill {self.public_id} includes new {type_plural}: {new_skill_component_names}. This is not allowed."
-                )
-
-            for component_name, component_data in data.get(type_plural, {}).items():
-                component_config = cast(
-                    SkillComponentConfiguration, registry.read(component_name)
-                )
-                component_data_keys = set(component_data.keys())
-                unallowed_keys = component_data_keys.difference(
-                    SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE
-                )
-                if len(unallowed_keys) > 0:
-                    raise ValueError(
-                        f"These fields of skill component configuration '{component_name}' of skill '{self.public_id}' are not allowed to change: {unallowed_keys}."
-                    )
-                recursive_update(
-                    component_config.args,
-                    component_data.get("args", {}),
-                    check_data_type=False,
-                )
-
-        _update_skill_component_config("behaviours", data)
-        _update_skill_component_config("handlers", data)
-        _update_skill_component_config("models", data)
-        self.is_abstract = data.get("is_abstract", self.is_abstract)
-
     def get_overridable(self) -> dict:
         """Get overrideable confg data."""
         result = {}
         current_config_data = self.json
-        if "is_abstract" in current_config_data:
-            result["is_abstract"] = current_config_data["is_abstract"]
+        if self.abstract_field_name in current_config_data:
+            result[self.abstract_field_name] = current_config_data[
+                self.abstract_field_name
+            ]
 
         for field in self.FIELDS_WITH_NESTED_FIELDS:
+            if not current_config_data.get(field, {}):
+                continue
             result[field] = {}
             for name in current_config_data[field].keys():
                 result[field][name] = {}
@@ -1408,15 +1365,7 @@ class AgentConfig(PackageConfiguration):
             storage_uri=cast(str, obj.get("storage_uri")),
             component_configurations=None,
         )
-        directory = instance.directory if instance else None
-
-        if instance is None:
-            instance = cls(**params)  # type: ignore
-        else:
-            instance.__init__(**params)  # type: ignore
-
-        if not instance.directory:
-            instance.directory = directory
+        instance = cast(AgentConfig, cls._apply_params_to_instance(params, instance))
 
         agent_config = instance
 
@@ -1599,15 +1548,9 @@ class ProtocolSpecification(ProtocolConfig):
             description=cast(str, obj.get("description", "")),
         )
 
-        directory = instance.directory if instance else None
-
-        if instance is None:
-            instance = cls(**params)  # type: ignore
-        else:
-            instance.__init__(**params)  # type: ignore
-
-        if not instance.directory:
-            instance.directory = directory
+        instance = cast(
+            ProtocolSpecification, cls._apply_params_to_instance(params, instance)
+        )
 
         protocol_specification = instance
         for speech_act, speech_act_content in obj.get("speech_acts", {}).items():
@@ -1718,15 +1661,7 @@ class ContractConfig(ComponentConfiguration):
             ),
             class_name=obj.get("class_name", ""),
         )
-        directory = instance.directory if instance else None
-
-        if instance is None:
-            instance = cls(**params)  # type: ignore
-        else:
-            instance.__init__(**params)  # type: ignore
-
-        if not instance.directory:
-            instance.directory = directory
+        instance = cast(ContractConfig, cls._apply_params_to_instance(params, instance))
 
         return instance
 

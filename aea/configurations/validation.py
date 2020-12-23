@@ -28,7 +28,6 @@ import jsonschema
 from jsonschema import Draft4Validator
 from jsonschema._utils import find_additional_properties
 from jsonschema._validators import additionalProperties
-from jsonschema.exceptions import ValidationError
 from jsonschema.validators import extend
 
 from aea.configurations.constants import AGENT
@@ -196,19 +195,9 @@ class ConfigValidator:
                 )
 
             # validate agent config
-            self._validate_data(json_data_copy)
+            self._validator.validate(instance=json_data_copy)
         else:
-            self._validate_data(json_data)
-
-    def _validate_data(self, data):
-        try:
-            self._validator.validate(instance=data)
-        except ValidationError as e:
-            if e.validator == "additionalProperties":
-                extras = list(find_additional_properties(data, self._schema))
-                if extras:
-                    raise ExtraPropertiesError(extras)
-            raise
+            self._validator.validate(instance=json_data)
 
     @property
     def required_fields(self) -> List[str]:
