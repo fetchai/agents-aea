@@ -181,23 +181,32 @@ class ConfigValidator:
             json_data_copy = deepcopy(json_data)
 
             # validate component_configurations
-            component_configurations = json_data_copy.pop(
-                "component_configurations", {}
+            self.validate_agent_components_configuration(
+                json_data_copy.pop("component_configurations", [])
             )
-            for idx, component_configuration_json in enumerate(
-                component_configurations
-            ):
-                component_id = self.split_component_id_and_config(
-                    idx, component_configuration_json
-                )
-                self.validate_component_configuration(
-                    component_id, component_configuration_json
-                )
 
             # validate agent config
             self._validator.validate(instance=json_data_copy)
         else:
             self._validator.validate(instance=json_data)
+
+    def validate_agent_components_configuration(
+        self, component_configurations: Dict
+    ) -> None:
+        """
+        Validate agent component configurations overrides.
+
+        :param component_configurations:
+
+        :return: None
+        """
+        for idx, component_configuration_json in enumerate(component_configurations):
+            component_id = self.split_component_id_and_config(
+                idx, component_configuration_json
+            )
+            self.validate_component_configuration(
+                component_id, component_configuration_json
+            )
 
     @property
     def required_fields(self) -> List[str]:

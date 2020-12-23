@@ -51,8 +51,8 @@ from aea.exceptions import AEAException
 from aea.helpers.storage.backends.base import JSON_TYPES
 
 
-class VariableDoesNotExists(ValueError):
-    """Variable does not exiss in a config exception."""
+class VariableDoesNotExist(ValueError):
+    """Variable does not exist in a config exception."""
 
 
 JsonPath = List[str]
@@ -105,7 +105,7 @@ def set_command(
         agent_config_manager = AgentConfigManager(ctx.agent_config, ctx.cwd)
 
         current_value = None
-        with contextlib.suppress(VariableDoesNotExists):
+        with contextlib.suppress(VariableDoesNotExist):
             current_value = agent_config_manager.get_variable(json_path)
 
         # type was not specified, tried to auto determine
@@ -244,7 +244,7 @@ class AgentConfigManager:
             if value is not NotExists:
                 return cast(JSON_TYPES, value)
 
-        raise VariableDoesNotExists(
+        raise VariableDoesNotExist(
             f"Attribute `{'.'.join(json_path)}` for {'{}({}) config'.format(component_id.component_type,component_id.public_id) if component_id else 'AgentConfig'} does not exist"
         )
 

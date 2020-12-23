@@ -426,7 +426,7 @@ class PackageConfiguration(Configuration, ABC):
         )
 
         if instance is None:
-            instance = cls(**params)  # type: ignore
+            instance = cls(**params)
         else:
             instance.__init__(**params)  # type: ignore
 
@@ -861,7 +861,7 @@ class SkillComponentConfiguration:
     ) -> "SkillComponentConfiguration":
         """Constructs or update instance with params provided."""
         if instance is None:
-            instance = cls(**params)  # type: ignore
+            instance = cls(**params)
         else:
             instance.__init__(**params)  # type: ignore
         return instance
