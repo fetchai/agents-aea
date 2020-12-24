@@ -271,19 +271,19 @@ class BaseTestFetchAgentError(BaseAEATestCase, ABC):
 class TestFetchAgentNonMixedErrorLocal(BaseTestFetchAgentError):
     """Test 'aea fetch' in local mode when it fails."""
 
-    EXPECTED_ERROR_MESSAGE = f".*Exception: {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    EXPECTED_ERROR_MESSAGE = f".*{BaseTestFetchAgentError.ERROR_MESSAGE}"
     MODE = "--local"
 
 
 class TestFetchAgentMixedModeError(BaseTestFetchAgentError):
     """Test 'aea fetch' in mixed mode when it fails."""
 
-    EXPECTED_ERROR_MESSAGE = f".*Exception: {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    EXPECTED_ERROR_MESSAGE = f".*{BaseTestFetchAgentError.ERROR_MESSAGE}"
     MODE = ""
 
 
 class TestFetchAgentRemoteModeError(BaseTestFetchAgentError):
     """Test 'aea fetch' in remote mode when it fails."""
 
-    EXPECTED_ERROR_MESSAGE = rf".*Exception: {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    EXPECTED_ERROR_MESSAGE = rf".*{BaseTestFetchAgentError.ERROR_MESSAGE}"
     MODE = "--remote"

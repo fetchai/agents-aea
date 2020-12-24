@@ -31,11 +31,24 @@ import sys
 import time
 import types
 from collections import OrderedDict, UserString, defaultdict, deque
+from collections.abc import Mapping
 from copy import copy
 from functools import wraps
 from pathlib import Path
 from threading import RLock
-from typing import Any, Callable, Deque, Dict, List, Optional, Set, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Deque,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from dotenv import load_dotenv
 from packaging.version import Version
@@ -359,7 +372,9 @@ def _is_dict_like(obj: Any) -> bool:
     return type(obj) in {dict, OrderedDict}
 
 
-def recursive_update(to_update: Dict, new_values: Dict) -> None:
+def recursive_update(
+    to_update: Dict, new_values: Dict, allow_new_values: bool = False,
+) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.
 
@@ -376,10 +391,14 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
     :return: None
     """
     for key, value in new_values.items():
-        if key not in to_update:
+        if (not allow_new_values) and key not in to_update:
             raise ValueError(
                 f"Key '{key}' is not contained in the dictionary to update."
             )
+
+        if key not in to_update and allow_new_values:
+            to_update[key] = value
+            continue
 
         value_to_update = to_update[key]
         value_type = type(value)
@@ -396,7 +415,7 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             )
 
         if both_are_dict:
-            recursive_update(value_to_update, value)
+            recursive_update(value_to_update, value, allow_new_values)
         else:
             to_update[key] = value
 
@@ -567,6 +586,20 @@ def ensure_dir(dir_path: str) -> None:
         os.makedirs(dir_path)
     else:
         enforce(os.path.isdir(dir_path), f"{dir_path} is not a directory!")
+
+
+def dict_to_path_value(
+    data: Mapping, path: Optional[List] = None
+) -> Iterable[Tuple[List[str], Any]]:
+    """Convert dict to sequence of terminal path build of  keys and value."""
+    path = path or []
+    for key, value in data.items():
+        if isinstance(value, Mapping) and value:
+            # terminal value
+            for p, v in dict_to_path_value(value, path + [key]):
+                yield p, v
+        else:
+            yield path + [key], value
 
 
 def parse_datetime_from_str(date_string: str) -> datetime.datetime:

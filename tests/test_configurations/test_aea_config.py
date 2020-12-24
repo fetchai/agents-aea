@@ -440,6 +440,7 @@ def test_agent_configuration_dump_multipage_fails_bad_component_configuration():
     ] = "not in specs!"
     fp = io.StringIO()
     with pytest.raises(
-        ValueError, match="Configuration of component .* is not valid..*'BAD FIELD'"
+        ValueError,
+        match="Configuration of component .* is not valid. ExtraPropertiesError: properties not expected: BAD FIELD",
     ):
         loader.dump(agent_config, fp)

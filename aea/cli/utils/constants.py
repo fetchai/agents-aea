@@ -64,7 +64,6 @@ FROM_STRING_TO_TYPE = dict(
     str=str, int=int, bool=bool, float=float, dict=dict, list=list, none=None,
 )
 CONFIG_SUPPORTED_KEY_TYPES = list(FROM_STRING_TO_TYPE.keys())
-CONFIG_SUPPORTED_VALUE_TYPES = (str, int, bool, float, dict, list, type(None))
 
 ALLOWED_PATH_ROOTS = [
     AGENT,
@@ -80,6 +79,6 @@ RESOURCE_TYPE_TO_CONFIG_FILE = {
     CONNECTIONS: DEFAULT_CONNECTION_CONFIG_FILE,
     CONTRACTS: DEFAULT_CONTRACT_CONFIG_FILE,
 }  # type: Dict[str, str]
-FALSE_EQUIVALENTS = ["f", "false", "False"]
+FALSE_EQUIVALENTS = ["f", "false", "False", "0"]
 
 REQUIREMENTS = "requirements.txt"

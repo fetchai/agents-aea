@@ -154,7 +154,7 @@ class TestIssueCertificatesWrongConnectionKey(BaseTestIssueCertificates):
         """Run the test."""
         with pytest.raises(
             Exception,
-            match="Exception: Cannot find connection private key with id 'bad_ledger_id'",
+            match="Cannot find connection private key with id 'bad_ledger_id'",
         ):
             self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
@@ -184,7 +184,6 @@ class TestIssueCertificatesWrongCryptoKey(BaseTestIssueCertificates):
     def test_run(self):
         """Run the test."""
         with pytest.raises(
-            Exception,
-            match="Exception: Cannot find private key with id 'bad_ledger_id'",
+            Exception, match="Cannot find private key with id 'bad_ledger_id'",
         ):
             self.run_cli_command("issue-certificates", cwd=self._get_cwd())

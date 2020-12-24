@@ -39,6 +39,7 @@ from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
     compute_specifier_from_version,
+    dict_to_path_value,
     ensure_dir,
     exception_log_and_reraise,
     find_topological_order,
@@ -261,6 +262,23 @@ def test_recursive_update_negative_different_type():
         match="Trying to replace value '1' with value 'False' which is of different type.",
     ):
         recursive_update(to_update, new_values)
+
+
+def test_recursive_update_new_fields():
+    """Test the 'recursive update' utility, with new fields."""
+    # here we try to update an integer with a boolean - it raises error.
+    to_update = dict(subdict=dict(to_update=1))
+    new_values = dict(subdict=dict(to_update2=False))
+
+    with pytest.raises(
+        ValueError,
+        match="Key 'to_update2' is not contained in the dictionary to update.",
+    ):
+        recursive_update(to_update, new_values)
+    assert "to_update2" not in to_update["subdict"]
+
+    recursive_update(to_update, new_values, allow_new_values=True)
+    assert "to_update2" in to_update["subdict"]
 
 
 def test_recursive_update_negative_unknown_field():
@@ -552,3 +570,13 @@ def test_compute_specifier_from_version():
     version = "1.1.5"
     expected_range = ">=1.1.0, <1.2.0"
     assert expected_range == compute_specifier_from_version(Version(version))
+
+
+def test_dict_to_path_value():
+    """Test dict_to_path_value."""
+    path_values = {
+        tuple(path): value
+        for path, value in dict_to_path_value({"a": 12, "b": {"c": 1}})
+    }
+    assert path_values.get(("a",)) == 12
+    assert path_values.get(("b", "c")) == 1

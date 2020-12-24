@@ -898,7 +898,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
         )
         assert (
             result.stdout
-            == f"{{'{DefaultMessage.protocol_id}': '{StubConnection.connection_id}'}}\n"
+            == f'{{"{DefaultMessage.protocol_id}": "{StubConnection.connection_id}"}}\n'
         )
 
     def test_default_connection_updated_correctly(self):
