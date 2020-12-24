@@ -1005,13 +1005,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
-                default_address_key=self._get_default_ledger(),
+                default_address_key=self.get_default_ledger(),
             )
         else:
             identity = Identity(
                 self._name,
-                address=wallet.addresses[self._get_default_ledger()],
-                default_address_key=self._get_default_ledger(),
+                address=wallet.addresses[self.get_default_ledger()],
+                default_address_key=self.get_default_ledger(),
             )
         return identity
 
@@ -1133,7 +1133,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._build_called = True
         return aea
 
-    def _get_default_ledger(self) -> str:
+    def get_default_ledger(self) -> str:
         """
         Return default ledger.
 
@@ -1373,15 +1373,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         raise ValueError("Package {} not found.".format(component_id))
 
-    @staticmethod
-    def _try_to_load_agent_configuration_file(aea_project_path: Path) -> None:
+    @classmethod
+    def try_to_load_agent_configuration_file(
+        cls, aea_project_path: Union[Path, str]
+    ) -> AgentConfig:
         """Try to load the agent configuration file.."""
         try:
-            configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
+            aea_project_path = Path(aea_project_path)
+            configuration_file_path = cls.get_configuration_file_path(aea_project_path)
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
-                logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
+                return agent_configuration
         except FileNotFoundError:  # pragma: nocover
             raise ValueError(
                 "Agent configuration file '{}' not found in the current directory.".format(
@@ -1570,45 +1573,20 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
-        cls._try_to_load_agent_configuration_file(aea_project_path)
+        load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
+
+        # load to verify
+        agent_configuration = cls.try_to_load_agent_configuration_file(aea_project_path)
+        logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
+
         verify_or_create_private_keys(
             aea_project_path=aea_project_path, exit_on_error=False
         )
-        builder = AEABuilder(with_default_packages=False)
-
-        load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # load agent configuration file
-        configuration_file = cls.get_configuration_file_path(aea_project_path)
-        agent_configuration = cls.loader.load(configuration_file.open())
+        agent_configuration = cls.try_to_load_agent_configuration_file(aea_project_path)
 
-        builder.set_from_configuration(
-            agent_configuration, aea_project_path, skip_consistency_check
-        )
-        return builder
-
-    @classmethod
-    def from_config_json(
-        cls,
-        json_data: List[Dict],
-        aea_project_path: PathLike,
-        skip_consistency_check: bool = False,
-    ) -> "AEABuilder":
-        """
-        Load agent configuration for alreaady provided json data.
-
-        :param json_data: list of dicts with agent configuration
-        :param aea_project_path: path to project root
-        :param skip_consistency_check: skip consistency check on configs load.
-
-        :return: AEABuilder instance
-        """
-        aea_project_path = Path(aea_project_path)
         builder = AEABuilder(with_default_packages=False)
-
-        # load agent configuration file
-        agent_configuration = cls.loader.load_agent_config_from_json(json_data)
-
         builder.set_from_configuration(
             agent_configuration, aea_project_path, skip_consistency_check
         )
