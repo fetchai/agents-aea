@@ -25,6 +25,8 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, patch
 
+import pytest
+
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.confirmation_aw3.registration_db import RegistrationDB
 from packages.fetchai.skills.confirmation_aw3.strategy import (
@@ -86,13 +88,80 @@ class TestStrategy(ConfirmationAW3TestCase):
 
         cls.counterparty = "couterparty_1"
 
-    def test__init__(self):
+    def test__init__i(self):
         """Test the __init__ of Strategy class."""
         assert self.strategy.aw1_aea == self.aw1_aea
         assert self.strategy._locations == self.locations
         assert self.strategy._search_queries == self.search_queries
         assert self.strategy.leaderboard_url == f"{self.leaderboard_url}/insert"
         assert self.strategy.leaderboard_token == self.leaderboard_token
+
+    def test__init__ii(self):
+        """Test the __init__ of Strategy class where aw1_aea is None."""
+        with pytest.raises(ValueError, match="aw1_aea must be provided!"):
+            Strategy(
+                aw1_aea=None,
+                locations=self.locations,
+                search_queries=self.search_queries,
+                leaderboard_url=self.leaderboard_url,
+                leaderboard_token=self.leaderboard_token,
+                name="strategy",
+                skill_context=self.skill.skill_context,
+            )
+
+    def test__init__iii(self):
+        """Test the __init__ of Strategy class where length of locations is 0."""
+        with pytest.raises(ValueError, match="locations must have at least one entry"):
+            Strategy(
+                aw1_aea="some_aw1_aea",
+                locations={},
+                search_queries=self.search_queries,
+                leaderboard_url=self.leaderboard_url,
+                leaderboard_token=self.leaderboard_token,
+                name="strategy",
+                skill_context=self.skill.skill_context,
+            )
+
+    def test__init__iv(self):
+        """Test the __init__ of Strategy class where length of search_queries is 0."""
+        with pytest.raises(
+            ValueError, match="search_queries must have at least one entry"
+        ):
+            Strategy(
+                aw1_aea="some_aw1_aea",
+                locations=self.locations,
+                search_queries={},
+                leaderboard_url=self.leaderboard_url,
+                leaderboard_token=self.leaderboard_token,
+                name="strategy",
+                skill_context=self.skill.skill_context,
+            )
+
+    def test__init__v(self):
+        """Test the __init__ of Strategy class where leaderboard_url is None."""
+        with pytest.raises(ValueError, match="No leader board url provided!"):
+            Strategy(
+                aw1_aea="some_aw1_aea",
+                locations=self.locations,
+                search_queries=self.search_queries,
+                leaderboard_url=None,
+                leaderboard_token=self.leaderboard_token,
+                name="strategy",
+                skill_context=self.skill.skill_context,
+            )
+
+    def test__init__vi(self):
+        """Test the __init__ of Strategy class where leaderboard_token is None."""
+        with pytest.raises(ValueError, match="No leader board token provided!"):
+            Strategy(
+                aw1_aea="some_aw1_aea",
+                locations=self.locations,
+                search_queries=self.search_queries,
+                leaderboard_url=self.leaderboard_url,
+                leaderboard_token=None,
+                name="strategy",
+                skill_context=self.skill.skill_context,
+            )
 
     def test_get_acceptable_counterparties(self):
         """Test the get_acceptable_counterparties method of the Strategy class."""

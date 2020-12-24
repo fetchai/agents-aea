@@ -25,7 +25,6 @@ from unittest.mock import patch
 
 from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.default.dialogues import DefaultDialogue
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -35,9 +34,12 @@ from packages.fetchai.skills.confirmation_aw2.handlers import DefaultHandler
 from packages.fetchai.skills.confirmation_aw2.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
+from tests.test_packages.test_skills.test_confirmation_aw2.intermediate_class import (
+    ConfirmationAW2TestCase,
+)
 
 
-class TestDefaultHandler(BaseSkillTestCase):
+class TestDefaultHandler(ConfirmationAW2TestCase):
     """Test default handler of confirmation aw2."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw2")
@@ -45,10 +47,7 @@ class TestDefaultHandler(BaseSkillTestCase):
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        cls.aw1_aea = "some_aw1_aea"
-        config_overrides = {"models": {"strategy": {"args": {"aw1_aea": cls.aw1_aea}}}}
-
-        super().setup(config_overrides=config_overrides)
+        super().setup()
         cls.default_handler = cast(
             DefaultHandler, cls._skill.skill_context.handlers.default_handler
         )

@@ -24,15 +24,18 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, patch
 
-from aea.test_tools.test_skill import BaseSkillTestCase
+import pytest
 
 from packages.fetchai.skills.confirmation_aw2.registration_db import RegistrationDB
 from packages.fetchai.skills.confirmation_aw2.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
+from tests.test_packages.test_skills.test_confirmation_aw2.intermediate_class import (
+    ConfirmationAW2TestCase,
+)
 
 
-class TestStrategy(BaseSkillTestCase):
+class TestStrategy(ConfirmationAW2TestCase):
     """Test Strategy of confirmation aw2."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw2")
@@ -40,9 +43,7 @@ class TestStrategy(BaseSkillTestCase):
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        cls.aw1_aea = "some_aw1_aea"
-        config_overrides = {"models": {"strategy": {"args": {"aw1_aea": cls.aw1_aea}}}}
-        super().setup(config_overrides=config_overrides)
+        super().setup()
 
         cls.minimum_hours_between_txs = 4
         cls.minimum_minutes_since_last_attempt = 2
@@ -67,7 +68,7 @@ class TestStrategy(BaseSkillTestCase):
 
         cls.counterparty = "couterparty_1"
 
-    def test__init__(self):
+    def test__init__i(self):
         """Test the __init__ of Strategy class."""
         assert self.strategy.aw1_aea == self.aw1_aea
         assert self.strategy.minimum_hours_between_txs == self.minimum_hours_between_txs
@@ -75,6 +76,17 @@ class TestStrategy(BaseSkillTestCase):
             self.strategy.minimum_minutes_since_last_attempt
             == self.minimum_minutes_since_last_attempt
         )
+
+    def test__init__ii(self):
+        """Test the __init__ of Strategy class where aw1_aea is None."""
+        with pytest.raises(ValueError, match="aw1_aea must be provided!"):
+            Strategy(
+                aw1_aea=None,
+                mininum_hours_between_txs=self.minimum_hours_between_txs,
+                minimum_minutes_since_last_attempt=self.minimum_minutes_since_last_attempt,
+                name="strategy",
+                skill_context=self.skill.skill_context,
+            )
 
     def test_get_acceptable_counterparties(self):
         """Test the get_acceptable_counterparties method of the Strategy class."""

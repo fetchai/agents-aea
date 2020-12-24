@@ -204,8 +204,8 @@ class TestStrategy(ConfirmationAW3TestCase):
         )
         assert actual_result == result
 
-    def test_get_leaderboard(self):
-        """Test the get_leaderboard method of the RegistrationDB class."""
+    def test_get_leaderboard_i(self):
+        """Test the get_leaderboard method of the RegistrationDB class where none of the number of trades are 0."""
         # setup
         addresses_and_handlers = [
             ("address_1", "handler_1"),
@@ -214,6 +214,34 @@ class TestStrategy(ConfirmationAW3TestCase):
         trade_counts = [2, 5]
 
         expected_result = [("address_2", "handler_2", 5), ("address_1", "handler_1", 2)]
+
+        # operation
+        with patch.object(
+            self.db,
+            "get_all_addresses_and_handles",
+            return_value=addresses_and_handlers,
+        ) as mock_get_addresses:
+            with patch.object(
+                self.db, "get_trade_count", side_effect=trade_counts
+            ) as mock_trade_counts:
+                actual_result = self.db.get_leaderboard()
+
+        # after
+        mock_get_addresses.assert_called_once()
+        mock_trade_counts.assert_called()
+
+        assert actual_result == expected_result
+
+    def test_get_leaderboard_ii(self):
+        """Test the get_leaderboard method of the RegistrationDB class where some number of trades are 0."""
+        # setup
+        addresses_and_handlers = [
+            ("address_1", "handler_1"),
+            ("address_2", "handler_2"),
+        ]
+        trade_counts = [2, 0]
+
+        expected_result = [("address_1", "handler_1", 2)]
 
         # operation
         with patch.object(
