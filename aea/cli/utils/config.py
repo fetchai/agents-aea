@@ -55,6 +55,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.generic import load_yaml
 from aea.configurations.base import (
+    AgentConfig,
     ComponentId,
     ComponentType,
     PackageConfiguration,
@@ -64,6 +65,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import AGENT, AGENTS, DEFAULT_AEA_CONFIG_FILE, VENDOR
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
+from aea.configurations.validation import ExtraPropertiesError
 from aea.exceptions import AEAEnforceError, AEAException, enforce
 
 
@@ -95,7 +97,7 @@ def try_to_load_agent_config(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-    except jsonschema.exceptions.ValidationError:
+    except (jsonschema.exceptions.ValidationError, ExtraPropertiesError):
         if is_exit_on_except:
             raise click.ClickException(
                 "Agent configuration file '{}' is invalid. Please check the documentation.".format(
@@ -363,7 +365,7 @@ def validate_item_config(item_type: str, package_path: Path) -> None:
 
 
 def _try_get_configuration_object_from_aea_config(
-    ctx: Context, component_id: ComponentId
+    agent_config: AgentConfig, component_id: ComponentId
 ) -> Optional[Dict]:
     """
     Try to get the configuration object in the AEA config.
@@ -383,12 +385,12 @@ def _try_get_configuration_object_from_aea_config(
         component_id.author,
         component_id.name,
     )
-    component_ids = set(ctx.agent_config.component_configurations.keys())
+    component_ids = set(agent_config.component_configurations.keys())
     true_component_id = _try_get_component_id_from_prefix(
         component_ids, (type_, author, name)
     )
     if true_component_id is not None:
-        return ctx.agent_config.component_configurations.get(true_component_id)
+        return agent_config.component_configurations.get(true_component_id)
     return None
 
 

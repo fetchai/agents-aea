@@ -17,14 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.generate_wealth module."""
-
 from unittest import TestCase, mock
 
 import pytest
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth
-from aea.test_tools.exceptions import AEATestingException
+from aea.exceptions import AEAException
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
@@ -108,7 +107,7 @@ class TestWealthCommandsNegative(AEATestCaseMany):
 
         settings = {"unsupported_crypto": "path"}
         self.nested_set_config("agent.private_key_paths", settings)
-        with pytest.raises(AEATestingException) as excinfo:
+        with pytest.raises(
+            AEAException, match="Item not registered with id 'unsupported_crypto'."
+        ):
             self.generate_wealth()
-
-        assert "Item not registered with id 'unsupported_crypto'." in str(excinfo.value)

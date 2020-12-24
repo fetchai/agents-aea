@@ -42,6 +42,9 @@
     "build_entrypoint": {
       "$ref": "definitions.json#/definitions/build_entrypoint"
     },
+    "build_directory": {
+      "$ref": "definitions.json#/definitions/build_directory"
+    },
     "connections": {
       "type": "array",
       "additionalProperties": false,

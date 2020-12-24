@@ -115,15 +115,15 @@ class TestConfigCases(AEATestCaseEmpty):
 
     def test_agent_set(self):
         """Test agent test set from path."""
-        value = "testvalue"
+        value = True
         key_name = "agent.logging_config.disable_existing_loggers"
         self.set_config(key_name, value)
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
-        assert value in str(result.stdout_bytes)
+        assert str(value) in str(result.stdout_bytes)
 
     def test_agent_get_exception(self):
         """Test agent test get non exists key."""
-        with pytest.raises(AEATestingException, match=".*bad_key.*"):
+        with pytest.raises(Exception, match=".*bad_key.*"):
             self.run_cli_command("config", "get", "agent.bad_key", cwd=self._get_cwd())
 
 
