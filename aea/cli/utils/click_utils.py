@@ -108,8 +108,8 @@ class AgentDirectory(click.Path):
         try:
             # check that the target folder is an AEA project.
             os.chdir(path)
-            fp = open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8")
-            ctx.obj.agent_config = ctx.obj.agent_loader.load(fp)
+            with open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8") as fp:
+                ctx.obj.agent_config = ctx.obj.agent_loader.load(fp)
             try_to_load_agent_config(ctx.obj)
             # everything ok - return the parameter to the command
             return value

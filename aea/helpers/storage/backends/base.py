@@ -17,14 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains storage abstract backend class."""
-
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
+
+from aea.helpers.constants import JSON_TYPES
 
 
 EQUALS_TYPE = Union[int, float, str, bool]
-JSON_TYPES = Union[Dict, str, List, None, int, float]
 OBJECT_ID_AND_BODY = Tuple[str, JSON_TYPES]
 
 

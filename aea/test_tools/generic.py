@@ -193,8 +193,8 @@ def nested_set_config(
     if config.package_type == PackageType.AGENT:
         json_data = config.ordered_json
         component_configurations = json_data.pop("component_configurations")
-        yaml_dump_all(
-            [json_data] + component_configurations, config_file_path.open("w")
-        )
+        with config_file_path.open("w") as fp:
+            yaml_dump_all([json_data] + component_configurations, fp)
     else:
-        yaml_dump(config.ordered_json, config_file_path.open("w"))
+        with config_file_path.open("w") as fp:
+            yaml_dump(config.ordered_json, fp)

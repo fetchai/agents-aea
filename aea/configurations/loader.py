@@ -192,7 +192,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         return configuration_obj
 
     def load_agent_config_from_json(
-        self, configuration_json: List[Dict]
+        self, configuration_json: List[Dict], validate: bool = True
     ) -> AgentConfig:
         """
         Load agent configuration from configuration json data.
@@ -204,7 +204,8 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         if len(configuration_json) == 0:
             raise ValueError("Agent configuration file was empty.")
         agent_config_json = configuration_json[0]
-        self.validate(agent_config_json)
+        if validate:
+            self.validate(agent_config_json)
         key_order = list(agent_config_json.keys())
         agent_configuration_obj = cast(
             AgentConfig, self.configuration_class.from_json(agent_config_json)
@@ -346,8 +347,8 @@ def _load_configuration_object(
     )
     configuration_filepath = directory / configuration_filename
     try:
-        fp = open(configuration_filepath)
-        configuration_object = configuration_loader.load(fp)
+        with open(configuration_filepath) as fp:
+            configuration_object = configuration_loader.load(fp)
     except FileNotFoundError:
         raise FileNotFoundError(
             "{} configuration not found: {}".format(

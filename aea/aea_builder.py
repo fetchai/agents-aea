@@ -68,11 +68,13 @@ from aea.configurations.constants import (
     SIGNING_PROTOCOL,
     SKILLS,
     STATE_UPDATE_PROTOCOL,
-    VENDOR,
 )
 from aea.configurations.loader import ConfigLoader, load_component_configuration
+from aea.configurations.manager import (
+    AgentConfigManager,
+    find_component_directory_from_component_id,
+)
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
-from aea.crypto.helpers import verify_or_create_private_keys
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
@@ -1349,36 +1351,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                     f"Conflict on package {pkg_name}: specifier set '{dep_info.version}' not satisfiable."
                 )
 
-    @staticmethod
-    def find_component_directory_from_component_id(
-        aea_project_directory: Path, component_id: ComponentId
-    ) -> Path:
-        """Find a component directory from component id."""
-        # search in vendor first
-        vendor_package_path = (
-            aea_project_directory
-            / VENDOR
-            / component_id.public_id.author
-            / component_id.component_type.to_plural()
-            / component_id.public_id.name
-        )
-        if vendor_package_path.exists() and vendor_package_path.is_dir():
-            return vendor_package_path
-
-        # search in custom packages.
-        custom_package_path = (
-            aea_project_directory
-            / component_id.component_type.to_plural()
-            / component_id.public_id.name
-        )
-        if custom_package_path.exists() and custom_package_path.is_dir():
-            return custom_package_path
-
-        raise ValueError("Package {} not found.".format(component_id))
-
     @classmethod
     def try_to_load_agent_configuration_file(
-        cls, aea_project_path: Union[Path, str]
+        cls, aea_project_path: Union[str, Path]
     ) -> AgentConfig:
         """Try to load the agent configuration file.."""
         try:
@@ -1508,8 +1483,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             agent_configuration.component_configurations
         )
 
+    @staticmethod
     def _find_import_order(
-        self,
         component_ids: List[ComponentId],
         aea_project_path: Path,
         skip_consistency_check: bool,
@@ -1528,7 +1503,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             ComponentId, Set[ComponentId]
         ] = defaultdict(set)
         for component_id in component_ids:
-            component_path = self.find_component_directory_from_component_id(
+            component_path = find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
             configuration = load_component_configuration(
@@ -1576,18 +1551,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
+        cls.try_to_load_agent_configuration_file(aea_project_path)
+
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
+        # check and create missing, do not replace env variables. updates config
+        AgentConfigManager.verify_or_create_private_keys(
+            aea_project_path, substitude_env_vars=False
+        ).dump_config()
 
-        # load to verify
-        agent_configuration = cls.try_to_load_agent_configuration_file(aea_project_path)
-        logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
-
-        verify_or_create_private_keys(
-            aea_project_path=aea_project_path, exit_on_error=False
-        )
-
-        # load agent configuration file
-        agent_configuration = cls.try_to_load_agent_configuration_file(aea_project_path)
+        # just validate
+        agent_configuration = AgentConfigManager.verify_or_create_private_keys(
+            aea_project_path, substitude_env_vars=True
+        ).agent_config
 
         builder = AEABuilder(with_default_packages=False)
         builder.set_from_configuration(
@@ -1691,7 +1666,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 component_ids, aea_project_path, skip_consistency_check
             )
         for component_id in import_order:
-            component_path = self.find_component_directory_from_component_id(
+            component_path = find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
             self.add_component(

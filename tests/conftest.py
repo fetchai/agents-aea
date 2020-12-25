@@ -49,7 +49,7 @@ from aea.configurations.base import DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAM
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.constants import DEFAULT_LEDGER, PRIVATE_KEY_PATH_SCHEMA
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.contracts.base import Contract, contract_registry
@@ -63,7 +63,6 @@ from aea.crypto.ethereum import (
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto, _ETHEREUM
 from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 from aea.crypto.fetchai import _FETCHAI
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore

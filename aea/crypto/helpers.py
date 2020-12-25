@@ -18,82 +18,17 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping the helpers of public and private key cryptography."""
-
 import logging
-import os
 import sys
-from pathlib import Path
 from typing import Optional
 
-from aea.configurations.base import AgentConfig, PackageType
-from aea.configurations.constants import (
-    DEFAULT_AEA_CONFIG_FILE,
-    PRIVATE_KEY_PATH_SCHEMA,
-)
-from aea.configurations.loader import ConfigLoaders
-from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
+from aea.crypto.registries import make_crypto, make_faucet_api
 
 
 _default_logger = logging.getLogger(__name__)
 
-
-def verify_or_create_private_keys(
-    aea_project_path: Path, exit_on_error: bool = True,
-) -> AgentConfig:
-    """
-    Verify or create private keys.
-
-    :param aea_project_path: path to an AEA project.
-    :param exit_on_error: whether we should exit the program on error.
-    :return: the agent configuration.
-    """
-    path_to_aea_config = aea_project_path / DEFAULT_AEA_CONFIG_FILE
-    agent_loader = ConfigLoaders.from_package_type(PackageType.AGENT)
-    fp = path_to_aea_config.open(mode="r", encoding="utf-8")
-    aea_conf = agent_loader.load(fp)
-
-    for identifier, _ in aea_conf.private_key_paths.read_all():
-        if identifier not in crypto_registry.supported_ids:  # pragma: nocover
-            raise ValueError(
-                "Unsupported identifier `{}` in private key paths. Supported identifiers: {}.".format(
-                    identifier, sorted(crypto_registry.supported_ids)
-                )
-            )
-
-    for identifier in crypto_registry.supported_ids:
-        config_private_key_path = aea_conf.private_key_paths.read(identifier)
-        if config_private_key_path is None:
-            private_key_path = PRIVATE_KEY_PATH_SCHEMA.format(identifier)
-            if identifier == aea_conf.default_ledger:  # pragma: nocover
-                if os.path.exists(private_key_path):
-                    raise ValueError(
-                        "File {} for private key {} already exists. Add to aea-config.yaml.".format(
-                            repr(config_private_key_path), identifier
-                        )
-                    )
-                create_private_key(
-                    identifier,
-                    private_key_file=str(aea_project_path / private_key_path),
-                )
-                aea_conf.private_key_paths.update(identifier, private_key_path)
-        else:
-            try:
-                try_validate_private_key_path(
-                    identifier,
-                    str(aea_project_path / config_private_key_path),
-                    exit_on_error=exit_on_error,
-                )
-            except FileNotFoundError:  # pragma: no cover
-                raise ValueError(
-                    "File {} for private key {} not found.".format(
-                        repr(config_private_key_path), identifier,
-                    )
-                )
-
-    # update aea config
-    fp = path_to_aea_config.open(mode="w", encoding="utf-8")
-    agent_loader.dump(aea_conf, fp)
-    return aea_conf
+_ = PRIVATE_KEY_PATH_SCHEMA  # some modules expect this here
 
 
 def try_validate_private_key_path(
@@ -133,7 +68,8 @@ def create_private_key(ledger_id: str, private_key_file: str) -> None:
     :raises: ValueError if the identifier is invalid.
     """
     crypto = make_crypto(ledger_id)
-    crypto.dump(open(private_key_file, "wb"))
+    with open(private_key_file, "wb") as fp:
+        crypto.dump(fp)
 
 
 def try_generate_testnet_wealth(

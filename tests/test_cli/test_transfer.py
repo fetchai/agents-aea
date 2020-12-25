@@ -27,9 +27,9 @@ from click.exceptions import ClickException
 
 from aea.cli.transfer import wait_tx_settled
 from aea.cli.utils.package_utils import get_wallet_from_agent_config, try_get_balance
+from aea.configurations.manager import AgentConfigManager
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import verify_or_create_private_keys
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -75,7 +75,9 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
     def get_balance(self) -> int:
         """Get balance for current agent."""
         with cd(self._get_cwd()):
-            agent_config = verify_or_create_private_keys(Path("."), False)
+            agent_config = AgentConfigManager.verify_or_create_private_keys(
+                Path("."), False, substitude_env_vars=False
+            ).agent_config
             wallet = get_wallet_from_agent_config(agent_config)
             return int(try_get_balance(agent_config, wallet, self.LEDGER_ID))
 
