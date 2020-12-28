@@ -516,10 +516,15 @@ class MultiAgentManager:
         if self._is_agent_running(agent_name):
             raise ValueError(f"{agent_name} is already started!")
 
+        aea = agent_alias.get_aea_instance()
+        # override build dir to project's one
+        aea.DEFAULT_BUILD_DIR_NAME = os.path.join(
+            agent_alias.project.path, aea.DEFAULT_BUILD_DIR_NAME
+        )
         if self._mode == "async":
-            task = AgentRunAsyncTask(agent_alias.get_aea_instance(), self._loop)
+            task = AgentRunAsyncTask(aea, self._loop)
         elif self._mode == "threaded":
-            task = AgentRunThreadTask(agent_alias.get_aea_instance(), self._loop)
+            task = AgentRunThreadTask(aea, self._loop)
 
         task.start()
         self._agents_tasks[agent_name] = task

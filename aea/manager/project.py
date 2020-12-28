@@ -66,10 +66,6 @@ class _Base:
         """Install python dependencies for the project."""
         self.builder.install_pypi_dependencies()
 
-    def build(self) -> None:
-        """Call all build entry points."""
-        self.builder.call_all_build_entrypoints()
-
 
 class Project(_Base):
     """Agent project representation."""
@@ -79,6 +75,10 @@ class Project(_Base):
         self.public_id: PublicId = public_id
         self.path: str = path
         self.agents: Set[str] = set()
+
+    def build(self) -> None:
+        """Call all build entry points."""
+        self.builder.call_all_build_entrypoints(self.path)
 
     @classmethod
     def load(

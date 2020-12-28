@@ -897,15 +897,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
 
-    def call_all_build_entrypoints(self):
+    def call_all_build_entrypoints(self, root_dir: str = "."):
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
             self.run_build_for_component_configuration(config, logger=self.logger)
 
+        target_directory = os.path.abspath(
+            os.path.join(root_dir, self.AEA_CLASS.get_build_dir())
+        )
+
         if self._build_entrypoint:
             self.logger.info("Building AEA package...")
             source_directory = "."
-            target_directory = os.path.abspath(self.AEA_CLASS.get_build_dir())
             build_entrypoint = cast(str, self._build_entrypoint)
             self._run_build_entrypoint(
                 build_entrypoint, source_directory, target_directory, logger=self.logger
