@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea config` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -26,7 +25,9 @@ from pathlib import Path
 import pytest
 from click.exceptions import ClickException
 
+from aea.aea_builder import AEABuilder
 from aea.cli import cli
+from aea.cli.config import AgentConfigManager
 from aea.cli.utils.constants import ALLOWED_PATH_ROOTS
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.loader import ConfigLoader
@@ -697,3 +698,13 @@ class TestConfigNestedGetSet:
 
         agent_config = self.load_agent_config()
         assert agent_config.component_configurations
+
+
+def test_AgentConfigManager_get_overridables():
+    """Test agent config manager get_overridables."""
+    path = Path(CUR_PATH, "data", "dummy_aea")
+    agent_config = AEABuilder.try_to_load_agent_configuration_file(path)
+    config_manager = AgentConfigManager(agent_config, path)
+    agent_overridables, component_overridables = config_manager.get_overridables()
+    assert "description" in agent_overridables
+    assert "is_abstract" in list(component_overridables.values())[0]

@@ -19,6 +19,7 @@
 """Implementation of the 'aea config' subcommand."""
 import contextlib
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Dict, List, NewType, Optional, Tuple, Union, cast
 
@@ -342,3 +343,23 @@ class AgentConfigManager:
             return type_(value)
         except (ValueError, json.decoder.JSONDecodeError):  # pragma: no cover
             raise ValueError("Cannot convert {} to type {}".format(value, type_))
+
+    def get_overridables(self) -> Tuple[Dict, Dict[ComponentId, Dict]]:
+        """Get config overridables."""
+        agent_overridable = self.agent_config.get_overridable()
+
+        components_overridables: Dict[ComponentId, Dict] = {}
+        for component_id in self.agent_config.all_components_id:
+            obj = {}
+            component_config = self.load_component_configuration(
+                component_id, skip_consistency_check=True
+            )
+            obj.update(component_config.get_overridable())
+            obj.update(
+                deepcopy(
+                    self.agent_config.component_configurations.get(component_id, {})
+                )
+            )
+            if obj:
+                components_overridables[component_id] = obj
+        return agent_overridable, components_overridables

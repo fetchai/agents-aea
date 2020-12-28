@@ -598,6 +598,13 @@ class ComponentId(PackageId):
         """Get the JSON representation."""
         return dict(**self.public_id.json, type=str(self.component_type))
 
+    @classmethod
+    def from_json(cls, json_data: Dict) -> "ComponentId":
+        """Create  component id from json data."""
+        return cls(
+            component_type=json_data["type"], public_id=PublicId.from_json(json_data)
+        )
+
 
 class PyPIPackageName(RegexConstrainedString):
     """A PyPI Package name."""
