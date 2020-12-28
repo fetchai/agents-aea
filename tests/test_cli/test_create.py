@@ -33,6 +33,7 @@ import jsonschema
 import pytest
 import yaml
 from jsonschema import Draft4Validator
+from packaging.version import Version
 
 import aea
 from aea.cli import cli
@@ -134,7 +135,15 @@ class TestCreate:
 
     def test_aea_version_is_correct(self):
         """Check that the aea version in the configuration file is correct, i.e. the same of the installed package."""
-        assert self.agent_config["aea_version"] == aea.__version__
+        expected_aea_version = Version(aea.__version__)
+        version_no_micro = Version(
+            f"{expected_aea_version.major}.{expected_aea_version.minor}.0"
+        )
+        version_next_minor = Version(
+            f"{expected_aea_version.major}.{expected_aea_version.minor + 1}.0"
+        )
+        version_range = f">={version_no_micro}, <{version_next_minor}"
+        assert self.agent_config["aea_version"] == version_range
 
     def test_agent_name_is_correct(self):
         """Check that the agent name in the configuration file is correct."""

@@ -34,6 +34,7 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
 )
+from aea.helpers.base import compute_specifier_from_version
 from scripts.generate_ipfs_hashes import update_hashes
 
 
@@ -101,26 +102,6 @@ def update_version_for_aea(new_version: str) -> str:
         raise ValueError("No version found!")
     update_version_for_file(path, current_version, new_version)
     return current_version
-
-
-def compute_specifier_from_version(version: Version) -> str:
-    """
-    Compute the specifier set from a version, by varying only on the patch number.
-
-    I.e. from "{major}.{minor}.{patch}", return
-
-    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
-
-    :param version: the version
-    :return: the specifier set
-    """
-    new_major = version.major
-    new_minor_low = version.minor
-    new_minor_high = new_minor_low + 1
-    lower_bound = Version(f"{new_major}.{new_minor_low}.0")
-    upper_bound = Version(f"{new_major}.{new_minor_high}.0")
-    specifier_set = f">={lower_bound}, <{upper_bound}"
-    return specifier_set
 
 
 def update_version_for_file(path: Path, current_version: str, new_version: str) -> None:
