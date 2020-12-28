@@ -91,9 +91,9 @@ class TransactionBehaviour(TickerBehaviour):
             f"Processing transaction, {len(self.waiting)} transactions remaining"
         )
         strategy = cast(Strategy, self.context.strategy)
-        proposal = ml_trade_dialogue.last_message.terms
+        proposal = ml_trade_dialogue.last_message.terms  # type: ignore
         terms = strategy.terms_from_proposal(
-            proposal, ml_trade_dialogue.last_message.sender
+            proposal, ml_trade_dialogue.last_message.sender  # type: ignore
         )
 
         ledger_api_dialogues = cast(
