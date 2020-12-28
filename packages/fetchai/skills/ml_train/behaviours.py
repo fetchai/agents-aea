@@ -23,10 +23,6 @@ from typing import List, Optional, Set, cast
 
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
-from ml_model_trainer.vendor.fetchai.skills.ml_train.dialogues import (
-    LedgerApiDialogue,
-    LedgerApiDialogues,
-)
 
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
@@ -34,6 +30,10 @@ from packages.fetchai.connections.ledger.base import (
 from packages.fetchai.protocols.ledger_api import LedgerApiMessage
 from packages.fetchai.protocols.ml_trade.dialogues import MlTradeDialogue
 from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
+from packages.fetchai.skills.ml_train.dialogues import (
+    LedgerApiDialogue,
+    LedgerApiDialogues,
+)
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
 
