@@ -25,9 +25,11 @@ This module contains the classes required for ml_trade dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, FrozenSet, Optional, Type, cast
 
 from aea.common import Address
+from aea.exceptions import AEAEnforceError, enforce
+from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
@@ -83,6 +85,20 @@ class MlTradeDialogue(Dialogue):
             self_address=self_address,
             role=role,
         )
+        self._terms = None  # type: Optional[Terms]
+
+    @property
+    def terms(self) -> Terms:
+        """Get terms."""
+        if self._terms is None:
+            raise AEAEnforceError("Terms not set!")
+        return self._terms
+
+    @terms.setter
+    def terms(self, terms: Terms) -> None:
+        """Set terms."""
+        enforce(self._terms is None, "Terms already set!")
+        self._terms = terms
 
 
 class MlTradeDialogues(Dialogues, ABC):

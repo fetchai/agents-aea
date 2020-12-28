@@ -177,9 +177,7 @@ class MlTradeHandler(Handler):
             tx_behaviour = cast(
                 TransactionBehaviour, self.context.behaviours.transaction
             )
-            tx_behaviour.waiting.append(
-                (ledger_api_dialogue, cast(LedgerApiMessage, ledger_api_msg))  # type: ignore
-            )
+            tx_behaviour.waiting.append(ml_trade_dialogue)
         else:
             # accept directly with a dummy transaction digest, no settlement
             ml_accept = ml_trade_dialogue.reply(
