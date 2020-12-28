@@ -48,7 +48,9 @@ def build_aea(skip_consistency_check: bool) -> None:
     """
     try:
         builder = AEABuilder.from_aea_project(
-            Path("."), skip_consistency_check=skip_consistency_check
+            Path("."),
+            skip_consistency_check=skip_consistency_check,
+            verify_or_create_keys=False,
         )
         builder.call_all_build_entrypoints()
     except Exception as e:
