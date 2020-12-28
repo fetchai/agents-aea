@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the weather skills."""
-
+import importlib
 import sys
 from random import uniform
 
@@ -41,12 +41,8 @@ from tests.conftest import (
 
 
 def _is_not_tensorflow_installed():
-    try:
-        import tensorflow  # noqa
-
-        return False
-    except ImportError:
-        return True
+    tf_spec = importlib.util.find_spec("tensorflow")
+    return tf_spec is None
 
 
 @pytest.mark.integration

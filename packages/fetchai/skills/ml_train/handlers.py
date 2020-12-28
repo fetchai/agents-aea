@@ -154,7 +154,7 @@ class MlTradeHandler(Handler):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
-            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            _ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
                 counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
                 terms=Terms(
