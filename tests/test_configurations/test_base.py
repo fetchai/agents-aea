@@ -981,3 +981,14 @@ def test_check_public_id_consistency_negative():
     with pytest.raises(ValueError, match=f"Directory {random_dir_name} is not valid."):
         component_configuration = ProtocolConfig("name", "author")
         component_configuration.check_public_id_consistency(Path(random_dir_name))
+
+
+def test_component_id_from_json():
+    """Test ComponentId.from_json."""
+    json_data = {
+        "type": "connection",
+        "author": "author",
+        "name": "name",
+        "version": "1.0.0",
+    }
+    assert ComponentId.from_json(json_data).json == json_data

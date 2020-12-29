@@ -76,7 +76,7 @@ ROOT = Path(".")
 
 
 def verify_or_create_private_keys_ctx(
-    ctx: Context, aea_project_path: Path = ROOT, exit_on_error: bool = True,
+    ctx: Context, aea_project_path: Path = ROOT, exit_on_error: bool = False,
 ) -> None:
     """
     Verify or create private keys with ctx provided.
@@ -97,7 +97,7 @@ def verify_or_create_private_keys_ctx(
     except ValueError as e:  # pragma: nocover
         if exit_on_error:
             sys.exit(1)
-        click.ClickException(str(e))
+        raise click.ClickException(str(e))
 
 
 def validate_package_name(package_name: str):

@@ -138,7 +138,7 @@ def _try_get_component_id_from_prefix(
 
 
 def handle_dotted_path(
-    value: str, author: str
+    value: str, author: str, aea_project_path: Union[str, Path] = ".",
 ) -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]:
     """Separate the path between path to resource and json path to attribute.
 
@@ -157,10 +157,12 @@ def handle_dotted_path(
 
     :param value: dotted path.
     :param author: the author string.
+    :param aea_project_path: project path
 
     :return: Tuple[list of settings dict keys, filepath, config loader, component id].
     """
     parts = value.split(".")
+    aea_project_path = Path(aea_project_path)
 
     root = parts[0]
     if root not in ALLOWED_PATH_ROOTS:
@@ -207,7 +209,11 @@ def handle_dotted_path(
 
         # find path to the resource directory
         path_to_resource_directory = (
-            Path(".") / VENDOR / resource_author / resource_type_plural / resource_name
+            aea_project_path
+            / VENDOR
+            / resource_author
+            / resource_type_plural
+            / resource_name
         )
         path_to_resource_configuration = (
             path_to_resource_directory
@@ -432,11 +438,13 @@ class AgentConfigManager:
 
         :return: one of the json values of NotExists if value not presents in data dict.
         """
-        value = json.loads(json.dumps(data))  # in case or ordered dict
+        value = json.loads(json.dumps(data))  # in case of ordered dict doing copy
         prev_key = ""
         for key in json_path:
             if not isinstance(value, dict):
-                raise ValueError(f"Attribute '{prev_key}' is not a dictionary.")
+                raise ValueError(
+                    f"Attribute '{prev_key}' is not a dictionary."
+                )  # pragma: nocover
 
             if key not in value:
                 return NotExists
@@ -454,7 +462,9 @@ class AgentConfigManager:
         """
         if isinstance(path, str):
             json_path, *_, component_id = handle_dotted_path(
-                path, self.agent_config.author
+                path,
+                self.agent_config.author,
+                aea_project_path=self.aea_project_directory,
             )
         else:  # pragma: nocover
             if isinstance(path[0], ComponentId):

@@ -23,7 +23,6 @@ import pytest
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth
-from aea.exceptions import AEAException
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import (
@@ -108,6 +107,6 @@ class TestWealthCommandsNegative(AEATestCaseMany):
         settings = {"unsupported_crypto": "path"}
         self.nested_set_config("agent.private_key_paths", settings)
         with pytest.raises(
-            AEAException, match="Item not registered with id 'unsupported_crypto'."
+            Exception, match="Unsupported identifier `unsupported_crypto`"
         ):
             self.generate_wealth()

@@ -44,6 +44,7 @@ def replace_with_env_var(
 ) -> JSON_TYPES:
     """Replace env var with value."""
     result = ENV_VARIABLE_RE.match(value)
+
     if not result:
         return value
 
@@ -59,7 +60,7 @@ def replace_with_env_var(
         var_value = default_value
     else:
         raise ValueError(
-            f"Var name {var_name} not found in env variables and no default value set!"
+            f"Var name `{var_name}` not found in env variables and no default value set!"
         )
 
     if type_str is not None:

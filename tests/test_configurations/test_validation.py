@@ -32,6 +32,13 @@ def test_compare_data_pattern():
         == "For attribute `a` `str` data type is expected, but `int` was provided!"
     )
 
+    assert not validate_data_with_pattern(
+        {"a": 12}, {"a": "${var}"}, skip_env_vars=True
+    )
+    assert not validate_data_with_pattern(
+        {"a": "${var}"}, {"a": "string"}, skip_env_vars=True
+    )
+
     errors = validate_data_with_pattern({"a": 12}, {"b": 12})
     assert errors
     assert errors[0] == "Attribute `a` is not allowed to be updated!"

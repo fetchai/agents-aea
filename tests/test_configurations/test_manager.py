@@ -17,16 +17,27 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the configurations manager module."""
-
 import os
 from copy import deepcopy
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import mock_open, patch
 
 import pytest
 import yaml
 
-from aea.configurations.manager import AgentConfigManager
+from aea.configurations.constants import CONNECTION
+from aea.configurations.data_types import ComponentId, PublicId
+from aea.configurations.manager import (
+    AgentConfigManager,
+    find_component_directory_from_component_id,
+    handle_dotted_path,
+)
+from aea.exceptions import AEAException
 
+from tests.conftest import ROOT_DIR
+
+
+DUMMY_AEA = Path(ROOT_DIR) / "tests" / "data" / "dummy_aea"
 
 agent_config_data = yaml.safe_load(
     """
@@ -45,6 +56,7 @@ protocols:
 - fetchai/default:0.10.0
 skills:
 - dummy_author/dummy:0.1.0
+- fetchai/error:0.10.0
 default_connection: fetchai/local:0.13.0
 default_ledger: cosmos
 logging_config:
@@ -83,7 +95,7 @@ def test_envvars_applied():
     os.environ.pop("DISABLE_LOGS")
     with pytest.raises(
         ValueError,
-        match="Var name DISABLE_LOGS not found in env variables and no default value set!",
+        match="Var name `DISABLE_LOGS` not found in env variables and no default value set!",
     ):
         with patch.object(AgentConfigManager, "_load_config_data", return_value=[dct]):
             agent_config_manager = AgentConfigManager.load(
@@ -158,3 +170,116 @@ def test_envvars_preserved():
     assert (
         agent_config_manager.json["private_key_paths"]["cosmos"] == new_cosmos_key_value
     )
+
+
+def test_agent_attribute_get_set():
+    """Test agent config manager  get set variables."""
+    dct = deepcopy(agent_config_data)
+    with patch.object(AgentConfigManager, "_load_config_data", return_value=[dct]):
+        os.environ["DISABLE_LOGS"] = "true"
+        agent_config_manager = AgentConfigManager.load(
+            DUMMY_AEA, substitude_env_vars=False
+        )
+        assert (
+            agent_config_manager.get_variable("agent.default_ledger")
+            == dct["default_ledger"]
+        )
+        assert (
+            agent_config_manager.get_variable("vendor.fetchai.skills.error.name")
+            == "error"
+        )
+
+        assert (
+            agent_config_manager.get_variable(
+                "vendor.fetchai.connections.local.is_abstract"
+            )
+            is False
+        )
+        agent_config_manager.set_variable(
+            "vendor.fetchai.connections.local.is_abstract", True
+        )
+        assert (
+            agent_config_manager.get_variable(
+                "vendor.fetchai.connections.local.is_abstract"
+            )
+            is True
+        )
+
+        agent_config_manager.set_variable("agent.default_ledger", "fetchai")
+        assert agent_config_manager.get_variable("agent.default_ledger") == "fetchai"
+
+        assert (
+            agent_config_manager.json["component_configurations"][0]["is_abstract"]
+            is True
+        )
+
+    agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=False)
+    agent_config_manager.set_variable(
+        "vendor.fetchai.connections.p2p_libp2p.config.delegate_uri", "some_url"
+    )
+    assert (
+        agent_config_manager.get_variable(
+            "vendor.fetchai.connections.p2p_libp2p.config.delegate_uri"
+        )
+        == "some_url"
+    )
+
+    with pytest.raises(
+        ValueError, match="Attribute `does_not_exist` for AgentConfig does not exist"
+    ):
+        agent_config_manager.get_variable("agent.does_not_exist")
+
+    agent_config_manager.validate_current_config()
+    agent_config_manager.verify_or_create_private_keys(DUMMY_AEA, lambda x, y: None)
+
+
+def test_agent_attribute_get_overridables():
+    """Test AgentConfigManager.get_overridables."""
+    agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=False)
+    agent_overrides, component_overrides = agent_config_manager.get_overridables()
+    assert "default_ledger" in agent_overrides
+    assert "is_abstract" in list(component_overrides.values())[0]
+
+
+def test_dump_config():
+    """Test AgentConfigManager.dump_config."""
+    agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=False)
+    with patch("aea.configurations.manager.open", mock_open()), patch(
+        "aea.configurations.loader.ConfigLoader.dump"
+    ) as dump_mock:
+        agent_config_manager.dump_config()
+
+    dump_mock.assert_called_once()
+
+
+def test_handle_dotted_path():
+    """Test handle_dotted_path."""
+    with pytest.raises(
+        AEAException, match=r"The root of the dotted path must be one of:"
+    ):
+        handle_dotted_path("something", author="fetchai")
+
+    with pytest.raises(
+        AEAException,
+        match=r"The path is too short. Please specify a path up to an attribute name.",
+    ):
+        handle_dotted_path("skills", author="fetchai")
+
+    with pytest.raises(
+        AEAException, match=r"is not a valid component type. Please use one of"
+    ):
+        handle_dotted_path("vendor.fetchai.notskills.dummy.name", author="fetchai")
+
+    with pytest.raises(AEAException, match=r"Resource .* does not exist."):
+        handle_dotted_path("skills.notdummy.name", author="fetchai")
+
+
+def test_find_component_directory_from_component_id():
+    """Test find_component_directory_from_component_id."""
+    with pytest.raises(ValueError, match=r"Package .* not found."):
+        find_component_directory_from_component_id(
+            Path("."),
+            ComponentId(
+                component_type=CONNECTION, public_id=PublicId("test", "test", "1.0.1")
+            ),
+        )

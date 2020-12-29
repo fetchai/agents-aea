@@ -16,11 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the crypto/helpers module."""
-
 import logging
 import os
+from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -31,6 +30,7 @@ from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     create_private_key,
+    private_key_verify_or_create,
     try_generate_testnet_wealth,
     try_validate_private_key_path,
 )
@@ -42,6 +42,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_PRIVATE_KEY_PATH,
 )
+from tests.test_cli.tools_for_testing import AgentConfigMock
 
 
 logger = logging.getLogger(__name__)
@@ -147,3 +148,23 @@ class TestHelperFile:
     def test__create_cosmos_private_key_positive(self, *mocks):
         """Test _create_cosmos_private_key positive result."""
         create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
+
+
+def test_private_key_verify_or_create():
+    """Test private_key_verify_or_create."""
+    agent_conf = AgentConfigMock()
+    with patch("aea.crypto.helpers.create_private_key") as mock_create:
+        private_key_verify_or_create(agent_conf, Path("."))
+    mock_create.assert_called()
+
+    agent_conf = AgentConfigMock(private_key_paths=[("fetchai", "test")])
+    with patch("aea.crypto.helpers.try_validate_private_key_path") as mock_validate:
+        private_key_verify_or_create(agent_conf, Path("."))
+    mock_validate.assert_called()
+
+    agent_conf = AgentConfigMock(private_key_paths=[("fetchai", "${var}")])
+    with patch("aea.crypto.helpers.try_validate_private_key_path") as mock_validate:
+        with patch("aea.crypto.helpers.create_private_key") as mock_create:
+            private_key_verify_or_create(agent_conf, Path("."))
+    mock_validate.assert_not_called()
+    mock_create.assert_not_called()
