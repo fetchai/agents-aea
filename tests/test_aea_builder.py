@@ -54,7 +54,6 @@ from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import run_install_subprocess
-from aea.helpers.yaml_utils import yaml_load_all
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
@@ -558,10 +557,10 @@ def test__build_identity_from_wallet():
     with pytest.raises(ValueError):
         builder._build_identity_from_wallet(wallet)
 
-    wallet.addresses = {builder._get_default_ledger(): "addr1"}
+    wallet.addresses = {builder.get_default_ledger(): "addr1"}
     builder._build_identity_from_wallet(wallet)
 
-    wallet.addresses = {builder._get_default_ledger(): "addr1", "fetchai": "addr2"}
+    wallet.addresses = {builder.get_default_ledger(): "addr1", "fetchai": "addr2"}
     builder._build_identity_from_wallet(wallet)
 
 
@@ -667,13 +666,6 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         assert dummy_handler.config == {"handler_arg_1": 42, "handler_arg_2": "2"}
         dummy_model = dummy_skill.models["dummy"]
         assert dummy_model.config == {"model_arg_1": 42, "model_arg_2": "2"}
-
-    def test_from_json(self):
-        """Test load project from json file with path specified."""
-        with open(Path(self._get_cwd(), DEFAULT_AEA_CONFIG_FILE), "r") as fp:
-            json_config = yaml_load_all(fp)
-
-        AEABuilder.from_config_json(json_config, Path(self._get_cwd()))
 
 
 class TestFromAEAProjectMakeSkillAbstract(AEATestCase):

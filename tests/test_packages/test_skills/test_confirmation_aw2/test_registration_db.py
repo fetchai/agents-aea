@@ -23,14 +23,15 @@ import logging
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from aea.test_tools.test_skill import BaseSkillTestCase
-
 from packages.fetchai.skills.confirmation_aw2.registration_db import RegistrationDB
 
 from tests.conftest import ROOT_DIR
+from tests.test_packages.test_skills.test_confirmation_aw2.intermediate_class import (
+    ConfirmationAW2TestCase,
+)
 
 
-class TestStrategy(BaseSkillTestCase):
+class TestStrategy(ConfirmationAW2TestCase):
     """Test RegistrationDB of confirmation aw2."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw2")
@@ -38,9 +39,7 @@ class TestStrategy(BaseSkillTestCase):
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        cls.aw1_aea = "some_aw1_aea"
-        config_overrides = {"models": {"strategy": {"args": {"aw1_aea": cls.aw1_aea}}}}
-        super().setup(config_overrides=config_overrides)
+        super().setup()
         cls.custom_path = None
         cls.db = RegistrationDB(
             custom_path=cls.custom_path,
@@ -59,6 +58,23 @@ class TestStrategy(BaseSkillTestCase):
         cls.second_trade = "second_trade"
         cls.first_info = "first_info"
         cls.second_info = "second_info"
+
+    def test__initialise_backend(self):
+        """Test the _initialise_backend method of the RegistrationDB class."""
+        # operation
+        with patch.object(self.db, "_execute_single_sql") as mock_exe:
+            self.db._initialise_backend()
+
+        # after
+        mock_exe.assert_any_call(
+            "CREATE TABLE IF NOT EXISTS registered_table (address TEXT, ethereum_address TEXT, "
+            "ethereum_signature TEXT, fetchai_signature TEXT, "
+            "developer_handle TEXT, tweet TEXT)"
+        )
+        mock_exe.assert_any_call(
+            "CREATE TABLE IF NOT EXISTS trade_table (address TEXT PRIMARY KEY, first_trade timestamp, "
+            "second_trade timestamp, first_info TEXT, second_info TEXT)"
+        )
 
     def test_set_trade_i(self):
         """Test the set_trade method of the RegistrationDB class where record IS None."""
@@ -111,6 +127,31 @@ class TestStrategy(BaseSkillTestCase):
                 json.dumps(self.data),
             ),
         )
+
+    def test_set_trade_iii(self):
+        """Test the set_trade method of the RegistrationDB class where record is NOT None and first_trade is None."""
+        # setup
+        record = (
+            self.address,
+            None,
+            None,
+            self.first_info,
+            self.second_info,
+        )
+
+        # operation
+        with patch.object(
+            self.db, "get_trade_table", return_value=record
+        ) as mock_get_trade_table:
+            with patch.object(self.db, "_execute_single_sql") as mock_exe:
+                self.db.set_trade(
+                    self.address, self.timestamp, self.data,
+                )
+
+        # after
+        mock_get_trade_table.assert_called_once()
+
+        mock_exe.assert_not_called()
 
     def test_get_trade_table(self):
         """Test the get_trade_table method of the RegistrationDB class."""
