@@ -19,15 +19,12 @@
 
 """This test module contains the integration test for the weather skills."""
 import importlib
-import sys
 from random import uniform
 
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany
-
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
-
 from tests.conftest import (
     COSMOS,
     COSMOS_PRIVATE_KEY_FILE_CONNECTION,
@@ -227,8 +224,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
     @pytest.mark.skipif(
-        sys.version_info >= (3, 8),
-        reason="cannot run on 3.8 as tensorflow not installable",
+        _is_not_tensorflow_installed(), reason="This test requires Tensorflow.",
     )
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
