@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmSLQf6neRYG27KKWVYQET497LxcDAAS9Wpu9Wo64qbtcF
   dialogues.py: QmZCXn2do9uUjSD58zkhQh2pAJikoDHGhHHV2ert9fCPcb
   handlers.py: QmaWisdbWNSRjsUCk3jUoVddq8W2hdJeWNEimHwroRUxvM
-  ml_model.py: QmTfshn6dFnz9gKXZt7aJJczRH14bN7nk6TybwFpzkEPnk
+  ml_model.py: QmYDhwerUrJBMXxTkkZcG1fD1tcZvraPueJNNnNiVdBYEJ
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
   strategy.py: QmUtEbBfKqNoHrNMHvQ9j6mCiEcn8cNCtkTTBpyx74mF5L
   tasks.py: QmahJRCf6V61FsqrKgMMUyJ8F7PRd6C2bjunZg2XtM9fpF
@@ -90,5 +90,5 @@ models:
 dependencies:
   numpy: {}
   tensorflow:
-    version: ==1.14.0
+    version: ~=2.4.0
 is_abstract: false
