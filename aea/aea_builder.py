@@ -1580,23 +1580,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
-
-        cls._try_to_load_agent_configuration_file(aea_project_path)
-        if verify_or_create_keys:
-            verify_or_create_private_keys(
-                aea_project_path=aea_project_path, exit_on_error=False
-            )
-        builder = AEABuilder(with_default_packages=False)
-
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # load to verify
         agent_configuration = cls.try_to_load_agent_configuration_file(aea_project_path)
         logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
 
-        verify_or_create_private_keys(
-            aea_project_path=aea_project_path, exit_on_error=False
-        )
+        if verify_or_create_keys:
+            verify_or_create_private_keys(
+                aea_project_path=aea_project_path, exit_on_error=False
+            )
 
         # load agent configuration file
         agent_configuration = cls.try_to_load_agent_configuration_file(aea_project_path)
