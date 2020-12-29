@@ -11,10 +11,14 @@ aea add connection fetchai/p2p_libp2p:0.13.0
 aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_control:0.13.0
-aea install
-aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger fetchai
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
+aea install
+aea build
 ```
 ``` bash
 aea fetch fetchai/tac_participant:0.18.0 --alias tac_participant_one
@@ -37,10 +41,15 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_participation:0.14.0
 aea add skill fetchai/tac_negotiation:0.16.0
-aea install
-aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger fetchai
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
+aea install
+aea build
 ```
 ``` bash
 cd tac_participant_two
@@ -49,10 +58,15 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_participation:0.14.0
 aea add skill fetchai/tac_negotiation:0.16.0
-aea install
-aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger fetchai
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
+aea install
+aea build
 ```
 ``` bash
 aea generate-key fetchai
@@ -64,7 +78,30 @@ aea config get vendor.fetchai.skills.tac_control.models.parameters.args.registra
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
 ``` bash
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$(date -d "2 minutes" +'%d %m %Y %H:%M')"
+```
+``` bash
 aea run
+```
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
+```
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11002",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9002",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9002"
+}'
 ```
 ``` bash
 aea launch tac_controller tac_participant_one tac_participant_two
@@ -73,20 +110,6 @@ aea launch tac_controller tac_participant_one tac_participant_two
 aea delete tac_controller
 aea delete tac_participant_one
 aea delete tac_participant_two
-```
-``` yaml
-default_routing:
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
-```
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
-```
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
 ```
 ``` yaml
 ---
