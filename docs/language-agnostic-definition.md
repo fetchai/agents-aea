@@ -32,6 +32,7 @@ The format for the above fields, except <code>message</code>, is specified below
 ``` proto
 import "google/protobuf/struct.proto";
 
+
 message DialogueMessage {
     int32 message_id = 1;
     string dialogue_starter_reference = 2;
