@@ -74,5 +74,5 @@ models:
 dependencies:
   numpy: {}
   tensorflow:
-    version: ==1.14.0
+    version: ~=2.4.0
 is_abstract: false
