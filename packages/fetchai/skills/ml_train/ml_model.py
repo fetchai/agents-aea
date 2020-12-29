@@ -107,20 +107,18 @@ class MLModel(Model):
     def predict(self, *args, **kwargs):
         """Predict."""
         with self._lock:
-            with self.graph.as_default():
-                model = self._make_model()
-                weights = self._get_weights()
-                model.set_weights(weights)
-                return model.predict(*args, **kwargs)
+            model = self._make_model()
+            weights = self._get_weights()
+            model.set_weights(weights)
+            return model.predict(*args, **kwargs)
 
     def evaluate(self, *args, **kwargs):
         """Predict."""
         with self._lock:
-            with self.graph.as_default():
-                model = self._make_model()
-                weights = self._get_weights()
-                model.set_weights(weights)
-                return model.evaluate(*args, **kwargs)
+            model = self._make_model()
+            weights = self._get_weights()
+            model.set_weights(weights)
+            return model.evaluate(*args, **kwargs)
 
     def save(self):
         """Save the model weights."""
