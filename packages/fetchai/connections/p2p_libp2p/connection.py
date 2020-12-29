@@ -584,7 +584,7 @@ class P2PLibp2pConnection(Connection):
         )
         enforce(
             os.path.exists(libp2p_node_module_path),
-            f"Module {LIBP2P_NODE_MODULE_NAME} does not present in {self.configuration.build_directory}, please call `aea build` command",
+            f"Module {LIBP2P_NODE_MODULE_NAME} is not present in {self.configuration.build_directory}, please call the `aea build` command first!",
         )
         shutil.copy(libp2p_node_module_path, self.libp2p_workdir)
 

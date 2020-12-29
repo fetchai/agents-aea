@@ -58,6 +58,7 @@ First, fetch the car detector AEA:
 aea fetch fetchai/car_detector:0.19.0
 cd car_detector
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -72,6 +73,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/carpark_detection:0.17.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
@@ -92,6 +94,7 @@ Then, fetch the car data client AEA:
 aea fetch fetchai/car_data_buyer:0.20.0
 cd car_data_buyer
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -106,6 +109,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/carpark_client:0.18.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
@@ -154,7 +158,7 @@ First, run the car data seller AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.)
 
 Then, update the configuration of the car data buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
 

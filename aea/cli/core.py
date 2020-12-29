@@ -42,6 +42,7 @@ from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.interact import interact
+from aea.cli.issue_certificates import issue_certificates
 from aea.cli.launch import launch
 from aea.cli.list import list_command as _list
 from aea.cli.login import login
@@ -137,6 +138,7 @@ cli.add_command(get_wealth)
 cli.add_command(init)
 cli.add_command(install)
 cli.add_command(interact)
+cli.add_command(issue_certificates)
 cli.add_command(launch)
 cli.add_command(login)
 cli.add_command(logout)

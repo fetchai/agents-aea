@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea config` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -26,7 +25,9 @@ from pathlib import Path
 import pytest
 from click.exceptions import ClickException
 
+from aea.aea_builder import AEABuilder
 from aea.cli import cli
+from aea.cli.config import AgentConfigManager
 from aea.cli.utils.constants import ALLOWED_PATH_ROOTS
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.loader import ConfigLoader
@@ -155,14 +156,20 @@ class TestConfigGet:
 
     def test_attribute_not_found(self):
         """Test that the 'get' fails because the attribute is not found."""
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "config", "get", "skills.dummy.non_existing_attribute"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 1
-        s = "Attribute 'non_existing_attribute' not found."
-        assert result.exception.message == s
+        with pytest.raises(
+            ClickException, match=r"Attribute `.* for .* config does not exist"
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    *CLI_LOG_OPTION,
+                    "config",
+                    "get",
+                    "skills.dummy.non_existing_attribute",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_get_whole_dict(self):
         """Test that getting the 'dummy' skill behaviours works."""
@@ -174,7 +181,7 @@ class TestConfigGet:
         assert result.exit_code == 0
         assert (
             result.output
-            == "{'dummy': {'args': {'behaviour_arg_1': 1, 'behaviour_arg_2': '2'}, 'class_name': 'DummyBehaviour'}}\n"
+            == '{"dummy": {"args": {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}, "class_name": "DummyBehaviour"}}\n'
         )
 
     def test_get_list(self):
@@ -194,19 +201,20 @@ class TestConfigGet:
 
     def test_get_fails_when_getting_nested_object(self):
         """Test that getting a nested object in 'dummy' skill fails because path is not valid."""
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "get",
-                "skills.dummy.non_existing_attribute.dummy",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 1
-        s = "Cannot get attribute 'non_existing_attribute'."
-        assert result.exception.message == s
+        with pytest.raises(
+            ClickException, match=r"Attribute `.* for .* config does not exist"
+        ):
+            self.runner.invoke(
+                cli,
+                [
+                    *CLI_LOG_OPTION,
+                    "config",
+                    "get",
+                    "skills.dummy.non_existing_attribute.dummy",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_get_fails_when_getting_non_dict_attribute(self):
         """Test that the get fails because the path point to a non-dict object."""
@@ -283,6 +291,7 @@ class TestConfigSet:
                 "set",
                 "agent.logging_config.disable_existing_loggers",
                 "True",
+                "--type=bool",
             ],
             standalone_mode=False,
             catch_exceptions=False,
@@ -304,7 +313,8 @@ class TestConfigSet:
     def test_set_agent_incorrect_value(self):
         """Test setting the agent name."""
         with pytest.raises(
-            ClickException, match="Field `not_agent_name` is not allowed to change!"
+            ClickException,
+            match="Attribute `not_agent_name` is not allowed to be updated!",
         ):
             self.runner.invoke(
                 cli,
@@ -326,6 +336,7 @@ class TestConfigSet:
                 "--type=bool",
             ],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
 
@@ -337,11 +348,12 @@ class TestConfigSet:
                 *CLI_LOG_OPTION,
                 "config",
                 "set",
-                "agent.logging_config.disable_existing_loggers",
+                "agent.logging_config.some_value",
                 "",
                 "--type=none",
             ],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
 
@@ -358,6 +370,7 @@ class TestConfigSet:
                 "--type=dict",
             ],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
 
@@ -374,6 +387,7 @@ class TestConfigSet:
                 "--type=list",
             ],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
 
@@ -405,7 +419,7 @@ class TestConfigSet:
     def test_set_nested_attribute(self):
         """Test setting a nested attribute."""
         path = "skills.dummy.behaviours.dummy.args.behaviour_arg_1"
-        new_value = "new_dummy_name"
+        new_value = "10"  # cause old value is int
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "config", "set", path, new_value],
@@ -434,7 +448,7 @@ class TestConfigSet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "Field `behaviours.dummy.config` is not allowed to change!"
+            == "Attribute `behaviours.dummy.config.behaviour_arg_1` is not allowed to be updated!"
         )
 
     def test_no_recognized_root(self):
@@ -498,7 +512,8 @@ class TestConfigSet:
     def test_attribute_not_found(self):
         """Test that the 'set' fails because the attribute is not found."""
         with pytest.raises(
-            ClickException, match="Field `.*` is not allowed to change!"
+            ClickException,
+            match="Attribute `non_existing_attribute` is not allowed to be updated!",
         ):
             self.runner.invoke(
                 cli,
@@ -515,19 +530,21 @@ class TestConfigSet:
 
     def test_set_fails_when_setting_non_primitive_type(self):
         """Test that setting the 'dummy' skill behaviours fails because not a primitive type."""
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "config", "set", "skills.dummy.behaviours", "value"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 1
-        s = "Path 'behaviours' not valid for skill."
-        assert result.exception.message == s
+        with pytest.raises(
+            ClickException, match="Attribute `behaviours` is not allowed to be updated!"
+        ):
+            self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "config", "set", "skills.dummy.behaviours", "value"],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_get_fails_when_setting_nested_object(self):
         """Test that setting a nested object in 'dummy' skill fails because path is not valid."""
         with pytest.raises(
-            ClickException, match=r"Field `.*` is not allowed to change!"
+            ClickException,
+            match=r"Attribute `non_existing_attribute.dummy` is not allowed to be updated!",
         ):
             self.runner.invoke(
                 cli,
@@ -595,7 +612,9 @@ class TestConfigNestedGetSet:
 
     def test_set_get_incorrect_path(self):
         """Fail on incorrect attribute tryed to be updated."""
-        with pytest.raises(ClickException, match="Attribute .* not found."):
+        with pytest.raises(
+            ClickException, match="Attribute `.*` for .* config does not exist"
+        ):
             self.runner.invoke(
                 cli,
                 [*CLI_LOG_OPTION, "config", "get", self.INCORRECT_PATH],
@@ -603,7 +622,10 @@ class TestConfigNestedGetSet:
                 catch_exceptions=False,
             )
 
-        with pytest.raises(ClickException, match="Attribute '.*' not found."):
+        with pytest.raises(
+            ClickException,
+            match="Attribute `behaviours.dummy.args.behaviour_arg_100500` is not allowed to be updated!",
+        ):
             self.runner.invoke(
                 cli,
                 [
@@ -676,3 +698,13 @@ class TestConfigNestedGetSet:
 
         agent_config = self.load_agent_config()
         assert agent_config.component_configurations
+
+
+def test_AgentConfigManager_get_overridables():
+    """Test agent config manager get_overridables."""
+    path = Path(CUR_PATH, "data", "dummy_aea")
+    agent_config = AEABuilder.try_to_load_agent_configuration_file(path)
+    config_manager = AgentConfigManager(agent_config, path)
+    agent_overridables, component_overridables = config_manager.get_overridables()
+    assert "description" in agent_overridables
+    assert "is_abstract" in list(component_overridables.values())[0]

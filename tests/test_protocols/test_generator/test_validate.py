@@ -1157,7 +1157,7 @@ class TestValidate(TestCase):
         assert invalid_result_6 is False
         assert (
             invalid_msg_6
-            == f"Content 'content_name_1' with type 'pt:float' under performative 'perm_2' is already defined under performative 'perm_1' with a different type ('pt:int')."
+            == "Content 'content_name_1' with type 'pt:float' under performative 'perm_2' is already defined under performative 'perm_1' with a different type ('pt:int')."
         )
         assert invalid_all_per_6 is None
         assert invalid_all_content_6 is None
@@ -1449,7 +1449,7 @@ class TestValidate(TestCase):
         assert invalid_result_5 is False
         assert (
             invalid_msg_5
-            == f"Performative 'perm_5' specified in \"reply\" is not defined in the protocol's speech-acts."
+            == "Performative 'perm_5' specified in \"reply\" is not defined in the protocol's speech-acts."
         )
         assert invalid_terminal_performatives_from_reply_5 is None
 
@@ -1529,7 +1529,7 @@ class TestValidate(TestCase):
         assert invalid_result_5 is False
         assert (
             invalid_msg_5
-            == f'The terminal performative \'perm_3\' specified in "termination" is assigned replies in "reply".'
+            == 'The terminal performative \'perm_3\' specified in "termination" is assigned replies in "reply".'
         )
 
         invalid_termination_6 = ["perm_4"]
@@ -1542,7 +1542,7 @@ class TestValidate(TestCase):
         assert invalid_result_6 is False
         assert (
             invalid_msg_6
-            == f"The performative 'perm_3' has no replies but is not listed as a terminal performative in \"termination\"."
+            == "The performative 'perm_3' has no replies but is not listed as a terminal performative in \"termination\"."
         )
 
     def test_validate_roles(self):
@@ -1796,7 +1796,7 @@ class TestValidate(TestCase):
         assert invalid_result_6 is False
         assert (
             invalid_msg_6
-            == f"Missing required field 'termination' in the dialogue section of the protocol specification."
+            == "Missing required field 'termination' in the dialogue section of the protocol specification."
         )
 
         invalid_value = 521

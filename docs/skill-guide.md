@@ -415,6 +415,7 @@ We also need to add the soef and p2p connections and install the AEA's dependenc
 aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/p2p_libp2p:0.13.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 

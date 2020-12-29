@@ -22,11 +22,11 @@ import logging
 import logging.config
 import os
 import pprint
+import subprocess  # nosec
 import sys
 from collections import defaultdict
 from copy import copy, deepcopy
 from pathlib import Path
-from subprocess import check_call  # nosec
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
@@ -897,15 +897,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
 
-    def call_all_build_entrypoints(self):
+    def call_all_build_entrypoints(self, root_dir: str = "."):
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
             self.run_build_for_component_configuration(config, logger=self.logger)
 
+        target_directory = os.path.abspath(
+            os.path.join(root_dir, self.AEA_CLASS.get_build_dir())
+        )
+
         if self._build_entrypoint:
             self.logger.info("Building AEA package...")
             source_directory = "."
-            target_directory = os.path.abspath(self.AEA_CLASS.get_build_dir())
             build_entrypoint = cast(str, self._build_entrypoint)
             self._run_build_entrypoint(
                 build_entrypoint, source_directory, target_directory, logger=self.logger
@@ -956,15 +959,37 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         command = [sys.executable, build_entrypoint, target_directory]
         command_str = " ".join(command)
         if logger:
-            logger.info(f"Running command '{command_str}'")
-        try:
-            check_call(
-                command, cwd=source_directory, timeout=cls.BUILD_TIMEOUT
-            )  # nosec
-        except Exception as e:
+            logger.info(f"Running command '{command_str}'...")
+        stdout, stderr, code = cls._run_in_subprocess(command, source_directory)
+        if code == 0:
+            if logger:
+                logger.info(f"Command '{command_str}' succeded with output:\n{stdout}")
+        else:
             raise AEAException(
-                f"An error occurred while running command '{command_str}': {str(e)}"
-            ) from e
+                f"An error occurred while running command '{command_str}':\n{stderr}"
+            )
+
+    @classmethod
+    def _run_in_subprocess(
+        cls, command: List[str], source_directory: str
+    ) -> Tuple[str, str, int]:
+        """
+        Run in subprocess.
+
+        :return: stdout, stderr, code
+        """
+        res = subprocess.run(  # nosec
+            command,
+            cwd=source_directory,
+            check=False,
+            timeout=cls.BUILD_TIMEOUT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        code = res.returncode
+        stdout = res.stdout.decode("utf-8")
+        stderr = res.stderr.decode("utf-8")
+        return stdout, stderr, code
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """
@@ -983,13 +1008,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
-                default_address_key=self._get_default_ledger(),
+                default_address_key=self.get_default_ledger(),
             )
         else:
             identity = Identity(
                 self._name,
-                address=wallet.addresses[self._get_default_ledger()],
-                default_address_key=self._get_default_ledger(),
+                address=wallet.addresses[self.get_default_ledger()],
+                default_address_key=self.get_default_ledger(),
             )
         return identity
 
@@ -1111,7 +1136,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._build_called = True
         return aea
 
-    def _get_default_ledger(self) -> str:
+    def get_default_ledger(self) -> str:
         """
         Return default ledger.
 
@@ -1351,15 +1376,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         raise ValueError("Package {} not found.".format(component_id))
 
-    @staticmethod
-    def _try_to_load_agent_configuration_file(aea_project_path: Path) -> None:
+    @classmethod
+    def try_to_load_agent_configuration_file(
+        cls, aea_project_path: Union[Path, str]
+    ) -> AgentConfig:
         """Try to load the agent configuration file.."""
         try:
-            configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
+            aea_project_path = Path(aea_project_path)
+            configuration_file_path = cls.get_configuration_file_path(aea_project_path)
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
-                logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
+                return agent_configuration
         except FileNotFoundError:  # pragma: nocover
             raise ValueError(
                 "Agent configuration file '{}' not found in the current directory.".format(
@@ -1548,45 +1576,20 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
-        cls._try_to_load_agent_configuration_file(aea_project_path)
+        load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
+
+        # load to verify
+        agent_configuration = cls.try_to_load_agent_configuration_file(aea_project_path)
+        logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
+
         verify_or_create_private_keys(
             aea_project_path=aea_project_path, exit_on_error=False
         )
-        builder = AEABuilder(with_default_packages=False)
-
-        load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # load agent configuration file
-        configuration_file = cls.get_configuration_file_path(aea_project_path)
-        agent_configuration = cls.loader.load(configuration_file.open())
+        agent_configuration = cls.try_to_load_agent_configuration_file(aea_project_path)
 
-        builder.set_from_configuration(
-            agent_configuration, aea_project_path, skip_consistency_check
-        )
-        return builder
-
-    @classmethod
-    def from_config_json(
-        cls,
-        json_data: List[Dict],
-        aea_project_path: PathLike,
-        skip_consistency_check: bool = False,
-    ) -> "AEABuilder":
-        """
-        Load agent configuration for alreaady provided json data.
-
-        :param json_data: list of dicts with agent configuration
-        :param aea_project_path: path to project root
-        :param skip_consistency_check: skip consistency check on configs load.
-
-        :return: AEABuilder instance
-        """
-        aea_project_path = Path(aea_project_path)
         builder = AEABuilder(with_default_packages=False)
-
-        # load agent configuration file
-        agent_configuration = cls.loader.load_agent_config_from_json(json_data)
-
         builder.set_from_configuration(
             agent_configuration, aea_project_path, skip_consistency_check
         )
@@ -1657,6 +1660,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             new_configuration.component_id, {}
         )
         new_configuration.update(custom_config)
+
         return new_configuration
 
     def _add_components_of_type(

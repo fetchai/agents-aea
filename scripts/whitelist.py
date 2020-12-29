@@ -237,6 +237,8 @@ _.unsupported_skill_count
 _.decoding_error_count
 _.ErrorHandler  # unused class (aea/error_handler/scaffold.py:27)
 ensure_dir  # unused function (aea/helpers/base.py:561)
+_.get_agent_overridables  # unused method (aea/manager/manager.py:419)
+_.set_agent_overrides  # unused method (aea/manager/manager.py:432)
 AgentRecord  # unused class (aea/helpers/acn/agent_record.py:49)
 is_valid_for  # unused method (aea/helpers/acn/agent_record.py:96)
 Uri  # unused class (aea/helpers/acn/uri.py:26)

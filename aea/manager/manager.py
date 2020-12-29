@@ -16,33 +16,20 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of AEA agents manager."""
 import asyncio
-import copy
 import json
 import os
 import threading
 from asyncio.tasks import FIRST_COMPLETED
-from pathlib import Path
 from shutil import rmtree
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from aea.aea import AEA
-from aea.aea_builder import AEABuilder
-from aea.configurations.base import AgentConfig, ComponentId, PackageType, PublicId
-from aea.configurations.constants import (
-    CONNECTIONS,
-    CONTRACTS,
-    DEFAULT_LEDGER,
-    DEFAULT_REGISTRY_NAME,
-    PROTOCOLS,
-    SKILLS,
-)
-from aea.configurations.loader import ConfigLoaders
-from aea.configurations.project import AgentAlias, Project
-from aea.crypto.helpers import create_private_key
+from aea.configurations.constants import DEFAULT_REGISTRY_NAME
+from aea.configurations.data_types import PublicId
+from aea.manager.project import AgentAlias, Project
 
 
 class AgentRunAsyncTask:
@@ -135,7 +122,6 @@ class AgentRunThreadTask(AgentRunAsyncTask):
 class MultiAgentManager:
     """Multi agents manager."""
 
-    AGENT_DO_NOT_OVERRIDE_VALUES = [CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS]
     MODES = ["async", "threaded"]
     DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
     SAVE_FILENAME = "save.json"
@@ -158,6 +144,7 @@ class MultiAgentManager:
         self._was_working_dir_created = False
         self._is_running = False
         self._projects: Dict[PublicId, Project] = {}
+        self._versionless_projects_set: Set[PublicId] = set()
         self._keys_dir = os.path.abspath(os.path.join(self.working_dir, "keys"))
         self._agents: Dict[str, AgentAlias] = {}
         self._agents_tasks: Dict[str, AgentRunAsyncTask] = {}
@@ -196,7 +183,7 @@ class MultiAgentManager:
 
     async def _manager_loop(self) -> None:
         """Await and control running manager."""
-        if not self._event:
+        if not self._event:  # pragma: nocover
             raise ValueError("Do not use this method directly, use start_manager.")
 
         self._started_event.set()
@@ -310,15 +297,26 @@ class MultiAgentManager:
         :param local: whether or not to fetch from local registry.
         :param restore: bool flag for restoring already fetched agent.
         """
-        if public_id in self._projects:
-            raise ValueError(f"Project {public_id} was already added!")
-        self._projects[public_id] = Project.load(
+        if public_id.to_any() in self._versionless_projects_set:
+            raise ValueError(
+                f"The project ({public_id.author}/{public_id.name}) was already added!"
+            )
+
+        self._versionless_projects_set.add(public_id.to_any())
+
+        project = Project.load(
             self.working_dir,
             public_id,
             local,
             registry_path=self.registry_path,
             is_restore=restore,
         )
+
+        if not restore:
+            project.install_pypi_dependencies()
+            project.build()
+
+        self._projects[public_id] = project
         return self
 
     def remove_project(
@@ -334,6 +332,7 @@ class MultiAgentManager:
             )
 
         project = self._projects.pop(public_id)
+        self._versionless_projects_set.remove(public_id.to_any())
         if not keep_files:
             project.remove()
 
@@ -343,7 +342,7 @@ class MultiAgentManager:
         """
         List all agents projects added.
 
-        :return: lit of public ids of projects
+        :return: list of public ids of projects
         """
         return list(self._projects.keys())
 
@@ -353,7 +352,6 @@ class MultiAgentManager:
         agent_name: Optional[str] = None,
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
-        config: Optional[List[dict]] = None,
     ) -> "MultiAgentManager":
         """
         Create new agent configuration based on project with config overrides applied.
@@ -368,12 +366,6 @@ class MultiAgentManager:
 
         :return: manager
         """
-        if any((agent_overrides, component_overrides)) and config is not None:
-            raise ValueError(  # pragma: nocover
-                "Can not add agent with overrides and full config."
-                "One of those must be used."
-            )
-
         agent_name = agent_name or public_id.name
 
         if agent_name in self._agents:
@@ -384,15 +376,81 @@ class MultiAgentManager:
 
         project = self._projects[public_id]
 
-        agent_alias = self._build_agent_alias(
-            project=project,
-            agent_name=agent_name,
-            agent_overrides=agent_overrides,
-            component_overrides=component_overrides,
-            config=config,
+        agent_alias = AgentAlias(
+            project=project, agent_name=agent_name, keys_dir=self._keys_dir,
         )
+        agent_alias.set_overrides(agent_overrides, component_overrides)
+        project.agents.add(agent_name)
         self._agents[agent_name] = agent_alias
         return self
+
+    def add_agent_with_config(
+        self, public_id: PublicId, config: List[dict], agent_name: Optional[str] = None,
+    ) -> "MultiAgentManager":
+        """
+        Create new agent configuration based on project with config provided.
+
+        Alias is stored in memory only!
+
+        :param public_id: base agent project public id
+        :param agent_name: unique name for the agent
+        :param config: agent config (used for agent re-creation).
+
+        :return: manager
+        """
+        agent_name = agent_name or public_id.name
+
+        if agent_name in self._agents:  # pragma: nocover
+            raise ValueError(f"Agent with name {agent_name} already exists!")
+
+        if public_id not in self._projects:  # pragma: nocover
+            raise ValueError(f"{public_id} project is not added!")
+
+        project = self._projects[public_id]
+
+        agent_alias = AgentAlias(
+            project=project, agent_name=agent_name, keys_dir=self._keys_dir,
+        )
+        agent_alias.set_agent_config_from_data(config)
+        project.agents.add(agent_name)
+        self._agents[agent_name] = agent_alias
+        return self
+
+    def get_agent_overridables(self, agent_name: str) -> Tuple[Dict, List[Dict]]:
+        """
+        Get agent config  overridables.
+
+        :param agent_name: str
+
+        :return: Tuple of agent overridables dict and  and list of component overridables dict.
+        """
+        if agent_name not in self._agents:  # pragma: nocover
+            raise ValueError(f"Agent with name {agent_name} does not exist!")
+
+        return self._agents[agent_name].get_overridables()
+
+    def set_agent_overrides(
+        self,
+        agent_name: str,
+        agent_overides: Optional[Dict],
+        components_overrides: Optional[List[Dict]],
+    ) -> None:
+        """
+        Set agent overrides.
+
+        :param agent_name: str
+        :param agent_overides: optional dict of agent config overrides
+        :param components_overrides: optional list of dict of components overrides
+
+        :return: None
+        """
+        if agent_name not in self._agents:  # pragma: nocover
+            raise ValueError(f"Agent with name {agent_name} does not exist!")
+
+        if self._is_agent_running(agent_name):  # pragma: nocover
+            raise ValueError("Agent is running. stop it first!")
+
+        self._agents[agent_name].set_overrides(agent_overides, components_overrides)
 
     def list_agents_info(self) -> List[Dict[str, Any]]:
         """
@@ -458,10 +516,15 @@ class MultiAgentManager:
         if self._is_agent_running(agent_name):
             raise ValueError(f"{agent_name} is already started!")
 
+        aea = agent_alias.get_aea_instance()
+        # override build dir to project's one
+        aea.DEFAULT_BUILD_DIR_NAME = os.path.join(
+            agent_alias.project.path, aea.DEFAULT_BUILD_DIR_NAME
+        )
         if self._mode == "async":
-            task = AgentRunAsyncTask(agent_alias.agent, self._loop)
+            task = AgentRunAsyncTask(aea, self._loop)
         elif self._mode == "threaded":
-            task = AgentRunThreadTask(agent_alias.agent, self._loop)
+            task = AgentRunThreadTask(aea, self._loop)
 
         task.start()
         self._agents_tasks[agent_name] = task
@@ -587,98 +650,6 @@ class MultiAgentManager:
         if not os.path.exists(self._keys_dir):
             os.makedirs(self._keys_dir)
 
-    def _build_agent_alias(
-        self,
-        project: Project,
-        agent_name: str,
-        agent_overrides: Optional[dict] = None,
-        component_overrides: Optional[List[dict]] = None,
-        config: Optional[List[dict]] = None,
-    ) -> AgentAlias:
-        """Create agent alias for project, with given name and overrided values."""
-        if not config:
-            config = self._make_config(
-                project.path, agent_overrides, component_overrides
-            )
-
-        builder = AEABuilder.from_config_json(config, project.path)
-        builder.set_name(agent_name)
-        builder.set_runtime_mode("threaded")
-
-        if not builder.private_key_paths:
-            default_ledger = config[0].get("default_ledger", DEFAULT_LEDGER)
-            builder.add_private_key(
-                default_ledger, self._create_private_key(agent_name, default_ledger)
-            )
-        agent = builder.build()
-        return AgentAlias(project, agent_name, config, agent, builder)
-
-    def install_pypi_dependencies(self) -> None:
-        """Install dependencies for every project has at least one agent alias."""
-        for project in self._projects.values():
-            self._install_pypi_dependencies_for_project(project)
-
-    def _install_pypi_dependencies_for_project(self, project: Project) -> None:
-        """Install dependencies for project specified if has at least one agent alias."""
-        if not project.agents:
-            return
-        self._install_pypi_dependencies_for_agent(list(project.agents)[0])
-
-    def _install_pypi_dependencies_for_agent(self, agent_name: str) -> None:
-        """Install dependencies for the agent registered."""
-        self._agents[agent_name].builder.install_pypi_dependencies()
-
-    def _make_config(
-        self,
-        project_path: str,
-        agent_overrides: Optional[dict] = None,
-        component_overrides: Optional[List[dict]] = None,
-    ) -> List[dict]:
-        """Make new config based on project's config with overrides applied."""
-        agent_overrides = agent_overrides or {}
-        component_overrides = component_overrides or []
-
-        if any([key in agent_overrides for key in self.AGENT_DO_NOT_OVERRIDE_VALUES]):
-            raise ValueError(
-                'Do not override any of {" ".join(self.AGENT_DO_NOT_OVERRIDE_VALUES)}'
-            )
-
-        agent_configuration_file_path: Path = AEABuilder.get_configuration_file_path(
-            project_path
-        )
-        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
-        with agent_configuration_file_path.open() as fp:
-            agent_config: AgentConfig = loader.load(fp)
-
-        # prepare configuration overrides
-        # - agent part
-        agent_update_dictionary: Dict = dict(**agent_overrides)
-        # - components part
-        components_configs: Dict[ComponentId, Dict] = {}
-        for obj in component_overrides:
-            obj = copy.copy(obj)
-            author, name, version = (
-                obj.pop("author"),
-                obj.pop("name"),
-                obj.pop("version"),
-            )
-            component_id = ComponentId(obj.pop("type"), PublicId(author, name, version))
-            components_configs[component_id] = obj
-        agent_update_dictionary["component_configurations"] = components_configs
-        # do the override (and valiation)
-        agent_config.update(agent_update_dictionary)
-
-        # return the multi-paged JSON object.
-        json_data = agent_config.ordered_json
-        result: List[Dict] = [json_data] + json_data.pop("component_configurations")
-        return result
-
-    def _create_private_key(self, name, ledger) -> str:
-        """Create new key for agent alias in working dir keys dir."""
-        path = os.path.join(self._keys_dir, f"{name}_{ledger}_private.key")
-        create_private_key(ledger, path)
-        return path
-
     def _load_state(self, local: bool) -> None:
         """
         Load saved state from file.
@@ -705,7 +676,7 @@ class MultiAgentManager:
                 )
 
             for agent_settings in save_json["agents"]:
-                self.add_agent(
+                self.add_agent_with_config(
                     public_id=PublicId.from_str(agent_settings["public_id"]),
                     agent_name=agent_settings["agent_name"],
                     config=agent_settings["config"],

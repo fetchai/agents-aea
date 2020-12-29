@@ -107,7 +107,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls.current_agent_context = ""
 
     @classmethod
-    def set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> Result:
+    def set_config(
+        cls, dotted_path: str, value: Any, type_: Optional[str] = None
+    ) -> Result:
         """
         Set a config.
 
@@ -119,6 +121,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :return: Result
         """
+        if type_ is None:
+            type_ = type(value).__name__
+
         return cls.run_cli_command(
             "config",
             "set",
@@ -164,10 +169,13 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         """
         with cd(cwd):
             result = cls.runner.invoke(
-                cli, [*CLI_LOG_OPTION, *args], standalone_mode=False
+                cli,
+                [*CLI_LOG_OPTION, *args],
+                standalone_mode=False,
+                catch_exceptions=False,
             )
             cls.last_cli_runner_result = result
-            if result.exit_code != 0:
+            if result.exit_code != 0:  # pragma: nocover
                 raise AEATestingException(
                     "Failed to execute AEA CLI command with args {}.\n"
                     "Exit code: {}\nException: {}".format(

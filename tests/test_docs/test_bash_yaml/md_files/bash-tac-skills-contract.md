@@ -2,6 +2,7 @@
 aea fetch fetchai/tac_controller_contract:0.18.0
 cd tac_controller_contract
 aea install
+aea build
 ```
 ``` bash
 aea create tac_controller_contract
@@ -11,6 +12,7 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_control_contract:0.15.0
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger ethereum
 ```
@@ -23,6 +25,8 @@ aea fetch fetchai/tac_participant:0.18.0 --alias tac_participant_one
 cd tac_participant_one
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
+aea install
+aea build
 cd ..
 aea fetch fetchai/tac_participant:0.18.0 --alias tac_participant_two
 cd tac_participant_two
@@ -30,7 +34,7 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
-aea install
+aea build
 ```
 ``` bash
 aea create tac_participant_one
@@ -46,6 +50,7 @@ aea add skill fetchai/tac_negotiation:0.16.0
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
@@ -61,6 +66,7 @@ aea add skill fetchai/tac_negotiation:0.16.0
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 aea install
+aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool

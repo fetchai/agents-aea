@@ -49,6 +49,7 @@ config:
 ```
 ``` bash
 aea install
+aea build
 ```
 ``` bash
 aea run
@@ -88,6 +89,7 @@ config:
 ```
 ``` bash
 aea install
+aea build
 ```
 ``` bash
 aea run
