@@ -28,12 +28,14 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
+from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
 
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_MAX_NEGOTIATIONS = 1
+DEFAULT_SERVICE_ID = "service_data"
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
@@ -57,6 +59,7 @@ class Strategy(Model):
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
         )
+        self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
@@ -176,6 +179,7 @@ class Strategy(Model):
             and (terms.values["buyer_tx_fee"] <= self._max_buyer_tx_fee)
             and (terms.values["currency_id"] == self._currency_id)
             and (terms.values["ledger_id"] == self._ledger_id)
+            and (terms.values["service_id"] == self._service_id)
         )
         return result
 
@@ -196,3 +200,27 @@ class Strategy(Model):
         else:
             result = True
         return result
+
+    def terms_from_proposal(self, proposal: Description) -> Terms:
+        """
+        Get the terms from a proposal.
+
+        :param proposal: the proposal
+        :return: terms
+        """
+        buyer_address = self.context.agent_addresses[proposal.values["ledger_id"]]
+        terms = Terms(
+            ledger_id=proposal.values["ledger_id"],
+            sender_address=buyer_address,
+            counterparty_address=proposal.values["address"],
+            amount_by_currency_id={
+                proposal.values["currency_id"]: -proposal.values["price"]
+            },
+            quantities_by_good_id={
+                proposal.values["service_id"]: proposal.values["batch_size"]
+            },
+            is_sender_payable_tx_fee=True,
+            nonce=proposal.values["nonce"],
+            fee_by_currency_id={proposal.values["currency_id"]: self._max_buyer_tx_fee},
+        )
+        return terms
