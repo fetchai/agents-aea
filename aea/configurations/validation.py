@@ -183,6 +183,8 @@ class ConfigValidator:
 
         :param component_id: the component id.
         :param configuration: the configuration dictionary.
+        :param env_vars_friendly: bool, if set True, will not raise errors over the env variable definitions.
+
         :return: None
         :raises ValueError: if the configuration is not valid.
         """
@@ -256,7 +258,15 @@ def validate_data_with_pattern(
     excludes: Optional[List[Tuple[str]]] = None,
     skip_env_vars: bool = False,
 ) -> List[str]:
-    """Validate data dict with pattern dict for attributes present and type match."""
+    """
+    Validate data dict with pattern dict for attributes present and type match.
+
+    :param pattern: dict with pattern to check over
+    :param excludes: list of tuples of str of paths to be skipped during the check
+    :param skip_env_vars: is set True will not check data type over env variables.
+
+    :return: list of str with error descriptions
+    """
     excludes = excludes or []
     pattern_path_value = {
         tuple(path): value for path, value in dict_to_path_value(pattern)

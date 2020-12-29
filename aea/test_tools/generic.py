@@ -22,7 +22,6 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List, cast
 
-from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import (
     CRUDCollection,
     ComponentConfiguration,
@@ -32,6 +31,7 @@ from aea.configurations.base import (
     SkillConfig,
     dependencies_from_json,
 )
+from aea.configurations.manager import handle_dotted_path
 from aea.exceptions import enforce
 from aea.helpers.file_io import write_envelope
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all

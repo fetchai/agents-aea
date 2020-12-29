@@ -75,6 +75,7 @@ from aea.configurations.manager import (
     find_component_directory_from_component_id,
 )
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
+from aea.crypto.helpers import private_key_verify_or_create
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
@@ -1556,12 +1557,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
         # check and create missing, do not replace env variables. updates config
         AgentConfigManager.verify_or_create_private_keys(
-            aea_project_path, substitude_env_vars=False
+            aea_project_path,
+            substitude_env_vars=False,
+            private_key_helper=private_key_verify_or_create,
         ).dump_config()
 
         # just validate
         agent_configuration = AgentConfigManager.verify_or_create_private_keys(
-            aea_project_path, substitude_env_vars=True
+            aea_project_path,
+            substitude_env_vars=True,
+            private_key_helper=private_key_verify_or_create,
         ).agent_config
 
         builder = AEABuilder(with_default_packages=False)

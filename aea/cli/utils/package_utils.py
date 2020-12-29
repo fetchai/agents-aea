@@ -20,6 +20,7 @@
 import os
 import re
 import shutil
+import sys
 from pathlib import Path
 from typing import Dict, Optional, Set, Tuple
 
@@ -62,6 +63,7 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
+from aea.crypto.helpers import private_key_verify_or_create
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
@@ -83,14 +85,18 @@ def verify_or_create_private_keys_ctx(
     """
     try:
         AgentConfigManager.verify_or_create_private_keys(
-            aea_project_path, exit_on_error, substitude_env_vars=False
+            aea_project_path,
+            private_key_helper=private_key_verify_or_create,
+            substitude_env_vars=False,
         ).dump_config()
         agent_config = AgentConfigManager.verify_or_create_private_keys(
-            aea_project_path, exit_on_error
+            aea_project_path, private_key_helper=private_key_verify_or_create
         ).agent_config
         if ctx is not None:
             ctx.agent_config = agent_config
     except ValueError as e:  # pragma: nocover
+        if exit_on_error:
+            sys.exit(1)
         click.ClickException(str(e))
 
 

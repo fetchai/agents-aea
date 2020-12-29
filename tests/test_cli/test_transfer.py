@@ -30,6 +30,7 @@ from aea.cli.utils.package_utils import get_wallet_from_agent_config, try_get_ba
 from aea.configurations.manager import AgentConfigManager
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.helpers import private_key_verify_or_create
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -76,7 +77,9 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         """Get balance for current agent."""
         with cd(self._get_cwd()):
             agent_config = AgentConfigManager.verify_or_create_private_keys(
-                Path("."), False, substitude_env_vars=False
+                Path("."),
+                substitude_env_vars=False,
+                private_key_helper=private_key_verify_or_create,
             ).agent_config
             wallet = get_wallet_from_agent_config(agent_config)
             return int(try_get_balance(agent_config, wallet, self.LEDGER_ID))
