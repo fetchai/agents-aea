@@ -28,13 +28,12 @@ from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.ledger_api import LedgerApiMessage
-from packages.fetchai.protocols.ml_trade.dialogues import MlTradeDialogue
 from packages.fetchai.skills.generic_buyer.behaviours import GenericSearchBehaviour
 from packages.fetchai.skills.ml_train.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
+    MlTradeDialogue,
 )
-from packages.fetchai.skills.ml_train.strategy import Strategy
 
 
 DEFAULT_MAX_PROCESSING = 120
@@ -90,11 +89,6 @@ class TransactionBehaviour(TickerBehaviour):
         self.context.logger.info(
             f"Processing transaction, {len(self.waiting)} transactions remaining"
         )
-        strategy = cast(Strategy, self.context.strategy)
-        proposal = ml_trade_dialogue.last_message.terms  # type: ignore
-        terms = strategy.terms_from_proposal(
-            proposal, ml_trade_dialogue.last_message.sender  # type: ignore
-        )
 
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
@@ -102,7 +96,7 @@ class TransactionBehaviour(TickerBehaviour):
         ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
             counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-            terms=terms,
+            terms=ml_trade_dialogue.terms,
         )
         ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
         ledger_api_dialogue.associated_ml_trade_dialogue = ml_trade_dialogue

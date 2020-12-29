@@ -9,12 +9,12 @@ aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmeHcYRhDJi6gqAHpK29UJz3doiyaicoqeTrPddqM3gh64
   __init__.py: QmTurqhUDy13mCSrqmbd598Eqz7A5PAmDrL9UpeNg24dDr
-  behaviours.py: QmdzzpgZiE4gp9CzMUMnzPyhf7SQNUUM45MgsTywhZT6h5
-  dialogues.py: QmVLXHVwXXLnK4zJzPBVhxzgu7ZmohRZ7oj3yG1LPFrmhx
-  handlers.py: QmeY1m1d7XfX6zUCznjm8sRHpnPCLmo2RmNFfWRk1VsVzN
+  behaviours.py: QmSLQf6neRYG27KKWVYQET497LxcDAAS9Wpu9Wo64qbtcF
+  dialogues.py: QmZCXn2do9uUjSD58zkhQh2pAJikoDHGhHHV2ert9fCPcb
+  handlers.py: QmaWisdbWNSRjsUCk3jUoVddq8W2hdJeWNEimHwroRUxvM
   ml_model.py: QmTfshn6dFnz9gKXZt7aJJczRH14bN7nk6TybwFpzkEPnk
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
-  strategy.py: QmaeAuVjk4aj35qP5ypSf52rVK2uXfQqdMQFRZKH1LgufA
+  strategy.py: QmUtEbBfKqNoHrNMHvQ9j6mCiEcn8cNCtkTTBpyx74mF5L
   tasks.py: QmahJRCf6V61FsqrKgMMUyJ8F7PRd6C2bjunZg2XtM9fpF
 fingerprint_ignore_patterns: []
 connections:
@@ -78,15 +78,14 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_buyer_tx_fee: 20
-      max_negotiations: 1
-      max_quantity: 100
+      max_negotiations: 2
       max_unit_price: 70
-      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: dataset_id
         search_value: fmnist
       search_radius: 5.0
+      service_id: data_service
     class_name: Strategy
 dependencies:
   numpy: {}

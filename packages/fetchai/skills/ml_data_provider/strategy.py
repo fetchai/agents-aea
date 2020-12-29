@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+import uuid
+
 import numpy as np
 from tensorflow import keras
 
@@ -38,6 +40,7 @@ DEFAULT_PRICE_PER_DATA_BATCH = 10
 DEFAULT_BATCH_SIZE = 32
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_BUYER_TX_FEE = 0
+DEFAULT_SERVICE_ID = "data_service"
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
@@ -59,6 +62,7 @@ class Strategy(Model):
         currency_id = kwargs.pop("currency_id", None)
         ledger_id = kwargs.pop("ledger_id", None)
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", False)
+        self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
@@ -226,6 +230,8 @@ class Strategy(Model):
                 "currency_id": self._currency_id,
                 "ledger_id": self.ledger_id,
                 "address": address,
+                "service_id": self._service_id,
+                "nonce": uuid.uuid4().hex,
             }
         )
         return proposal
@@ -237,4 +243,19 @@ class Strategy(Model):
         :param terms: the terms
         :return: boolean
         """
-        return terms == self.generate_terms()
+        generated_terms = self.generate_terms()
+        return all(
+            [
+                terms.values[key] == generated_terms.values[key]
+                for key in [
+                    "batch_size",
+                    "price",
+                    "seller_tx_fee",
+                    "buyer_tx_fee",
+                    "currency_id",
+                    "ledger_id",
+                    "address",
+                    "service_id",
+                ]
+            ]
+        )

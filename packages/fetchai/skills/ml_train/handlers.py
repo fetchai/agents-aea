@@ -20,11 +20,10 @@
 """This module contains the handler for the 'ml_train' skill."""
 
 import pickle  # nosec
-import uuid
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
-from aea.helpers.transaction.base import Terms
+from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -154,23 +153,12 @@ class MlTradeHandler(Handler):
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
+            terms_ = strategy.terms_from_proposal(ml_trade_msg.terms)
+            ml_trade_dialogue.terms = terms_
             _ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
                 counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=Terms(
-                    ledger_id=terms.values["ledger_id"],
-                    sender_address=self.context.agent_addresses[
-                        terms.values["ledger_id"]
-                    ],
-                    counterparty_address=terms.values["address"],
-                    amount_by_currency_id={
-                        terms.values["currency_id"]: -terms.values["price"]
-                    },
-                    is_sender_payable_tx_fee=True,
-                    quantities_by_good_id={"ml_training_data": 1},
-                    nonce=uuid.uuid4().hex,
-                    fee_by_currency_id={terms.values["currency_id"]: 1},
-                ),
+                terms=terms_,
             )
             ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
             ledger_api_dialogue.associated_ml_trade_dialogue = ml_trade_dialogue
@@ -401,6 +389,11 @@ class LedgerApiHandler(Handler):
             == LedgerApiMessage.Performative.TRANSACTION_DIGEST
         ):
             self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+        elif (
+            ledger_api_msg.performative
+            == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
+        ):
+            self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -484,31 +477,67 @@ class LedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        ml_trade_dialogue = ledger_api_dialogue.associated_ml_trade_dialogue
         self.context.logger.info(
             "transaction was successfully submitted. Transaction digest={}".format(
                 ledger_api_msg.transaction_digest
             )
         )
-        ml_trade_msg = cast(
-            Optional[MlTradeMessage], ml_trade_dialogue.last_incoming_message
+        ledger_api_msg_ = ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target_message=ledger_api_msg,
+            transaction_digest=ledger_api_msg.transaction_digest,
+        )
+        self.context.logger.info("checking transaction is settled.")
+        self.context.outbox.put_message(message=ledger_api_msg_)
+
+    def _handle_transaction_receipt(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of balance performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        ml_trade_dialogue = ledger_api_dialogue.associated_ml_trade_dialogue
+        is_settled = LedgerApis.is_transaction_settled(
+            ml_trade_dialogue.terms.ledger_id,
+            ledger_api_msg.transaction_receipt.receipt,
         )
         tx_behaviour = cast(TransactionBehaviour, self.context.behaviours.transaction)
-        tx_behaviour.finish_processing(ledger_api_dialogue)  # type: ignore
-        if ml_trade_msg is None:
-            raise ValueError("Could not retrieve ml_trade message")
-        ml_accept = ml_trade_dialogue.reply(
-            performative=MlTradeMessage.Performative.ACCEPT,
-            target_message=ml_trade_msg,
-            tx_digest=ledger_api_msg.transaction_digest.body,
-            terms=ml_trade_msg.terms,
-        )
-        self.context.outbox.put_message(message=ml_accept)
-        self.context.logger.info(
-            "informing counterparty={} of transaction digest={}.".format(
-                ml_trade_msg.sender[-5:], ledger_api_msg.transaction_digest,
+        if is_settled:
+            tx_behaviour.finish_processing(ledger_api_dialogue)
+            ledger_api_msg_ = cast(
+                Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
-        )
+            if ledger_api_msg_ is None:
+                raise ValueError(  # pragma: nocover
+                    "Could not retrieve last ledger_api message"
+                )
+            ml_trade_msg = cast(
+                Optional[MlTradeMessage], ml_trade_dialogue.last_incoming_message
+            )
+            if ml_trade_msg is None:
+                raise ValueError("Could not retrieve last ml_trade message")
+            ml_accept = ml_trade_dialogue.reply(
+                performative=MlTradeMessage.Performative.ACCEPT,
+                target_message=ml_trade_msg,
+                tx_digest=ledger_api_msg_.transaction_digest.body,
+                terms=ml_trade_msg.terms,
+            )
+            self.context.outbox.put_message(message=ml_accept)
+            self.context.logger.info(
+                "informing counterparty={} of transaction digest={}.".format(
+                    ml_trade_msg.sender[-5:], ledger_api_msg_.transaction_digest,
+                )
+            )
+        else:
+            tx_behaviour.failed_processing(ledger_api_dialogue)
+            self.context.logger.info(
+                "transaction_receipt={} not settled or not valid, aborting".format(
+                    ledger_api_msg.transaction_receipt
+                )
+            )
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -524,6 +553,18 @@ class LedgerApiHandler(Handler):
                 ledger_api_msg, ledger_api_dialogue
             )
         )
+        ledger_api_msg_ = cast(
+            Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
+        )
+        if (
+            ledger_api_msg_ is not None
+            and ledger_api_msg_.performative
+            != LedgerApiMessage.Performative.GET_BALANCE
+        ):
+            tx_behaviour = cast(
+                TransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -636,6 +677,19 @@ class SigningHandler(Handler):
                 signing_msg.error_code, signing_dialogue
             )
         )
+        signing_msg_ = cast(
+            Optional[SigningMessage], signing_dialogue.last_outgoing_message
+        )
+        if (
+            signing_msg_ is not None
+            and signing_msg_.performative
+            == SigningMessage.Performative.SIGN_TRANSACTION
+        ):
+            tx_behaviour = cast(
+                TransactionBehaviour, self.context.behaviours.transaction
+            )
+            ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
