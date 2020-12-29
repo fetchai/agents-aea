@@ -285,13 +285,18 @@ This allows the TAC participants to connect to the same local agent communicatio
 
 ### Run the AEAs
 
+First, launch the `tac_controller`:
+``` bash
+aea run
+```
+
 The CLI tool supports the launch of several agents
 at once.
 
 For example, assuming you followed the tutorial, you
-can launch all the TAC agents as follows from the root directory:
+can launch both the TAC agents as follows from the root directory:
 ``` bash
-aea launch tac_controller tac_participant_one tac_participant_two
+aea launch tac_participant_one tac_participant_two
 ```
 
 You may want to try `--multithreaded`

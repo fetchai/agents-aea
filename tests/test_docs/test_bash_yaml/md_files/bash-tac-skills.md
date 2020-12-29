@@ -104,7 +104,10 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 }'
 ```
 ``` bash
-aea launch tac_controller tac_participant_one tac_participant_two
+aea run
+```
+``` bash
+aea launch tac_participant_one tac_participant_two
 ```
 ``` bash
 aea delete tac_controller
