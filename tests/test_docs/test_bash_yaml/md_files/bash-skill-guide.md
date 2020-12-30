@@ -14,9 +14,13 @@ aea add connection fetchai/p2p_libp2p:0.13.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.18.0 && cd simple_service_registration && aea install
+aea fetch fetchai/simple_service_registration:0.18.0 && cd simple_service_registration && aea install && aea build
 ```
 ``` bash
 aea generate-key fetchai
@@ -30,6 +34,16 @@ aea run
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
+```
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm1uJpFsqSgHStJdtTBPpDme1fo8uFEvvY182D2y89jQuj"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
 ``` bash
 aea run
@@ -70,10 +84,6 @@ models:
     args: {}
     class_name: OefSearchDialogues
 dependencies: {}
-```
-``` yaml
-default_routing:
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
 ```
 ``` yaml
 name: simple_service_registration
@@ -117,12 +127,4 @@ models:
         value: generic_service
     class_name: Strategy
 dependencies: {}
-```
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
 ```
