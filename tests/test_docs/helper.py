@@ -20,8 +20,10 @@
 """This module contains helper function to extract code from the .md files."""
 import re
 import traceback
+from pathlib import Path
 from typing import Dict
 
+import mistune
 import pytest
 
 
@@ -93,3 +95,17 @@ def compare_enum_classes(expected_enum_class, actual_enum_class):
                 expected_enum_class, actual_enum_class
             )
         )
+
+
+class BaseTestMarkdownDocs:
+    """Base test class for testing Markdown documents."""
+
+    DOC_PATH: Path
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
+        cls.doc_path = cls.DOC_PATH
+        cls.doc_content = cls.doc_path.read_text()
+        cls.blocks = markdown_parser(cls.doc_content)

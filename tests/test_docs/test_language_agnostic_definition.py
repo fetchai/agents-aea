@@ -21,12 +21,11 @@
 from pathlib import Path
 from typing import Dict
 
-import mistune
-
 from aea import AEA_DIR
 from aea.configurations.data_types import PublicId
 
 from tests.conftest import ROOT_DIR
+from tests.test_docs.helper import BaseTestMarkdownDocs
 
 
 MAIL_BASE_PROTO = Path(AEA_DIR) / "mail" / "base.proto"
@@ -35,8 +34,10 @@ DEFAULT_MESSAGE_PROTO = (
 )
 
 
-class TestLanguageAgnosticDocs:
+class TestLanguageAgnosticDocs(BaseTestMarkdownDocs):
     """Test the integrity of the language agnostic definitions in docs."""
+
+    DOC_PATH = Path(ROOT_DIR, "docs", "language-agnostic-definition.md")
 
     @classmethod
     def _proto_snippet_selector(cls, block: Dict) -> bool:
@@ -45,14 +46,8 @@ class TestLanguageAgnosticDocs:
     @classmethod
     def setup_class(cls):
         """Set up the test."""
-        markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
-
-        cls.spec_doc_file = Path(ROOT_DIR, "docs", "language-agnostic-definition.md")
-        cls.spec_doc_content = cls.spec_doc_file.read_text()
-        doc = markdown_parser(cls.spec_doc_content)
-        # get only code blocks
-        cls.code_blocks = list(filter(cls._proto_snippet_selector, doc))
-
+        super().setup_class()
+        cls.code_blocks = list(filter(cls._proto_snippet_selector, cls.blocks))
         cls.actual_mail_base_file_content = MAIL_BASE_PROTO.read_text()
         cls.actual_default_message_file_content = DEFAULT_MESSAGE_PROTO.read_text()
 
@@ -88,7 +83,7 @@ class TestLanguageAgnosticDocs:
     def test_public_id_regular_expression(self):
         """Test public id regular expression is the same."""
         expected_regex = PublicId.PUBLIC_ID_REGEX
-        assert expected_regex in self.spec_doc_content
+        assert expected_regex in self.doc_content
 
     def test_default_message_code_snippet(self):
         """Test DefaultMessage protobuf code snippet."""
