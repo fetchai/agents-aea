@@ -1552,7 +1552,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :param create_keys: if True, verify_or_create_keys
+        :param create_keys: if True, create keys, otherwise just verify
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
