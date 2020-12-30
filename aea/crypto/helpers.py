@@ -92,7 +92,9 @@ def try_generate_testnet_wealth(
         faucet_api.get_wealth(address, url)
 
 
-def private_key_verify_or_create(aea_conf: AgentConfig, aea_project_path: Path) -> None:
+def private_key_verify_or_create(
+    aea_conf: AgentConfig, aea_project_path: Path, create_keys: bool = True
+) -> None:
     """
     Check key or create if none present.
 
@@ -125,11 +127,12 @@ def private_key_verify_or_create(aea_conf: AgentConfig, aea_project_path: Path) 
                             repr(config_private_key_path), identifier
                         )
                     )
-                create_private_key(
-                    identifier,
-                    private_key_file=str(aea_project_path / private_key_path),
-                )
-                aea_conf.private_key_paths.update(identifier, private_key_path)
+                if create_keys:
+                    create_private_key(
+                        identifier,
+                        private_key_file=str(aea_project_path / private_key_path),
+                    )
+                    aea_conf.private_key_paths.update(identifier, private_key_path)
         else:
             try:
                 try_validate_private_key_path(

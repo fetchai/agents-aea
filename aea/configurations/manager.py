@@ -529,8 +529,9 @@ class AgentConfigManager:
     def verify_or_create_private_keys(
         cls,
         aea_project_path: Union[Path, str],
-        private_key_helper: Callable[[AgentConfig, Path], None],
+        private_key_helper: Callable[[AgentConfig, Path, bool], None],
         substitude_env_vars: bool = False,
+        create_keys: bool = True,
     ) -> "AgentConfigManager":
         """
         Verify or create private keys.
@@ -548,7 +549,7 @@ class AgentConfigManager:
             aea_project_path, substitude_env_vars=substitude_env_vars
         )
         aea_conf = agent_config_manager.agent_config
-        private_key_helper(aea_conf, Path(aea_project_path))
+        private_key_helper(aea_conf, Path(aea_project_path), create_keys)
         return agent_config_manager
 
     def get_overridables(self) -> Tuple[Dict, Dict[ComponentId, Dict]]:
