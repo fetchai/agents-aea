@@ -61,4 +61,4 @@ class TestGenericStorage(BaseTestMarkdownDocs):
         """Test that the 'TestBehaviour' code is compilable."""
         block_index = 1
         code = self.code_blocks[block_index]["text"]
-        exec(code, {}, dict(TickerBehaviour=TickerBehaviour))
+        exec(code, {}, dict(TickerBehaviour=TickerBehaviour))  # nosec
