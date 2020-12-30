@@ -56,7 +56,7 @@ def load_agent(agent_dir: Union[PathLike, str]) -> AEA:
     :return: AEA instance
     """
     with cd(agent_dir):
-        return AEABuilder.from_aea_project(".", verify_or_create_keys=False).build()
+        return AEABuilder.from_aea_project(".").build()
 
 
 def _set_logger(
