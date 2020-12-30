@@ -39,9 +39,9 @@ from aea.helpers.acn.agent_record import AgentRecord, recover_verify_keys_from_m
 from aea.helpers.acn.uri import Uri
 from aea.mail.base import Envelope
 
-from .acn_message_pb2 import AcnMessage
-from .acn_message_pb2 import AgentRecord as AgentRecordPb
-from .acn_message_pb2 import Register, Status
+from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import AcnMessage
+from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import AgentRecord as AgentRecordPb
+from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import Register, Status
 
 
 _default_logger = logging.getLogger(
