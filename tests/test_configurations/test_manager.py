@@ -230,7 +230,7 @@ def test_agent_attribute_get_set():
         agent_config_manager.get_variable("agent.does_not_exist")
 
     agent_config_manager.validate_current_config()
-    agent_config_manager.verify_or_create_private_keys(DUMMY_AEA, lambda x, y: None)
+    agent_config_manager.verify_or_create_private_keys(DUMMY_AEA, lambda x, y, z: None)
 
 
 def test_agent_attribute_get_overridables():
