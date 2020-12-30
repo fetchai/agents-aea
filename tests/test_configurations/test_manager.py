@@ -95,7 +95,7 @@ def test_envvars_applied():
     os.environ.pop("DISABLE_LOGS")
     with pytest.raises(
         ValueError,
-        match="Var name `DISABLE_LOGS` not found in env variables and no default value set!",
+        match="`DISABLE_LOGS` not found in env variables and no default value set!",
     ):
         with patch.object(AgentConfigManager, "_load_config_data", return_value=[dct]):
             agent_config_manager = AgentConfigManager.load(

@@ -60,7 +60,7 @@ def replace_with_env_var(
         var_value = default_value
     else:
         raise ValueError(
-            f"Var name `{var_name}` not found in env variables and no default value set!"
+            f"`{var_name}` not found in env variables and no default value set! Please ensure a .env file is provided."
         )
 
     if type_str is not None:
