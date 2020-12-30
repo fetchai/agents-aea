@@ -32,25 +32,14 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.constants import (  # noqa: F401 # pylint: disable=unused-import
+    CONFIG_FILE_TO_PACKAGE_TYPE,
     CONNECTION,
     CONTRACT,
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
     PROTOCOL,
     SKILL,
 )
 from aea.configurations.data_types import PackageType
 from aea.configurations.loader import ConfigLoader
-
-
-CONFIG_FILE_TO_PACKAGE_TYPE = {
-    DEFAULT_SKILL_CONFIG_FILE: PackageType.SKILL,
-    DEFAULT_PROTOCOL_CONFIG_FILE: PackageType.PROTOCOL,
-    DEFAULT_CONNECTION_CONFIG_FILE: PackageType.CONNECTION,
-    DEFAULT_CONTRACT_CONFIG_FILE: PackageType.CONTRACT,
-}  # type: Dict[str, PackageType]
 
 
 @click.group()
@@ -163,7 +152,7 @@ def determine_package_type_for_directory(package_dir: Path) -> PackageType:
         )
 
     config_file = config_files[0]
-    package_type = CONFIG_FILE_TO_PACKAGE_TYPE[config_file]
+    package_type = PackageType(CONFIG_FILE_TO_PACKAGE_TYPE[config_file])
 
     return package_type
 
