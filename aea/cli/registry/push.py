@@ -144,16 +144,20 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
         if deps_list:
             data.update({key: deps_list})
 
-    files = {"file": open(output_filepath, "rb")}
-    readme_path = os.path.join(item_path, DEFAULT_README_FILE)
-    if is_readme_present(readme_path):
-        files["readme"] = open(readme_path, "rb")
+    try:
+        files = {"file": open(output_filepath, "rb")}
+        readme_path = os.path.join(item_path, DEFAULT_README_FILE)
+        if is_readme_present(readme_path):
+            files["readme"] = open(readme_path, "rb")
 
-    path = "/{}/create".format(item_type_plural)
-    logger.debug("Pushing {} {} to Registry ...".format(item_id.name, item_type))
-    resp = request_api("POST", path, data=data, is_auth=True, files=files)
-    click.echo(
-        "Successfully pushed {} {} to the Registry. Public ID: {}".format(
-            item_type, item_id.name, resp["public_id"]
-        )
-    )
+        path = "/{}/create".format(item_type_plural)
+        logger.debug("Pushing {} {} to Registry ...".format(item_id.name, item_type))
+        resp = request_api("POST", path, data=data, is_auth=True, files=files)
+    finally:
+        for fd in files.values():
+            fd.close()
+            click.echo(
+                "Successfully pushed {} {} to the Registry. Public ID: {}".format(
+                    item_type, item_id.name, resp["public_id"]
+                )
+            )

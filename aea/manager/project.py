@@ -25,13 +25,13 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.cli.config import AgentConfigManager
 from aea.cli.fetch import fetch_agent_locally
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import AgentConfig, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import ComponentId
+from aea.configurations.manager import AgentConfigManager
 from aea.crypto.helpers import create_private_key
 
 

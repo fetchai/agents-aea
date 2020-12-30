@@ -72,13 +72,12 @@ from aea.configurations.data_types import (
     PackageVersion,
     PublicId,
 )
-from aea.configurations.validation import ConfigValidator
+from aea.configurations.validation import ConfigValidator, validate_data_with_pattern
 from aea.exceptions import enforce
 from aea.helpers.base import (
     CertRequest,
     SimpleId,
     SimpleIdOrStr,
-    dict_to_path_value,
     load_module,
     recursive_update,
 )
@@ -312,7 +311,7 @@ class PackageConfiguration(Configuration, ABC):
         """Get the package dependencies."""
         return set()
 
-    def update(self, data: Dict) -> None:
+    def update(self, data: Dict, env_vars_friendly: bool = False) -> None:
         """
         Update configuration with other data.
 
@@ -322,15 +321,19 @@ class PackageConfiguration(Configuration, ABC):
         if not data:  # do nothing if nothing to update
             return
 
-        self.check_overrides_valid(data)
+        self.check_overrides_valid(data, env_vars_friendly=env_vars_friendly)
         self._create_or_update_from_json(
             obj=self.make_resulting_config_data(data), instance=self
         )
 
     @classmethod
-    def validate_config_data(cls, json_data: Dict) -> None:
+    def validate_config_data(
+        cls, json_data: Dict, env_vars_friendly: bool = False
+    ) -> None:
         """Perform config validation."""
-        ConfigValidator(cls.schema).validate(json_data)
+        ConfigValidator(cls.schema, env_vars_friendly=env_vars_friendly).validate(
+            json_data
+        )
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -344,51 +347,6 @@ class PackageConfiguration(Configuration, ABC):
         """Create new config object or updates existing one from json data."""
         raise NotImplementedError  # pragma: nocover
 
-    @staticmethod
-    def _compare_data_to_pattern(
-        data: dict, pattern: dict, excludes: Optional[List[Tuple[str]]] = None
-    ) -> List[str]:
-        excludes = excludes or []
-        pattern_path_value = {
-            tuple(path): value for path, value in dict_to_path_value(pattern)
-        }
-        data_path_value = {
-            tuple(path): value for path, value in dict_to_path_value(data)
-        }
-        errors = []
-
-        def check_excludes(path):
-            for exclude in excludes:
-                if len(exclude) > len(path):  # pragma: nocover
-                    continue
-
-                if path[: len(exclude)] == exclude:
-                    return True
-            return False
-
-        for path, new_value in data_path_value.items():
-            if check_excludes(path):
-                continue
-
-            if path not in pattern_path_value:
-                errors.append(
-                    f"Attribute `{'.'.join(path)}` is not allowed to be updated!"
-                )
-                continue
-
-            pattern_value = pattern_path_value[path]
-
-            if pattern_value is None:
-                # not possible to determine data type for optional value not set
-                # it will be checked with jsonschema later
-                continue  # pragma: nocover
-
-            if not issubclass(type(new_value), type(pattern_value)):
-                errors.append(
-                    f"For attribute `{'.'.join(path)}` `{type(pattern_value).__name__}` data type is expected, but `{type(new_value).__name__}` was provided!"
-                )
-        return errors
-
     def make_resulting_config_data(self, overrides: Dict) -> Dict:
         """Make config data with overrides applied.
 
@@ -398,19 +356,28 @@ class PackageConfiguration(Configuration, ABC):
         recursive_update(current_config, overrides, allow_new_values=True)
         return current_config
 
-    def check_overrides_valid(self, overrides: Dict) -> None:
+    def check_overrides_valid(
+        self, overrides: Dict, env_vars_friendly: bool = False
+    ) -> None:
         """Check overrides is correct, return list of errors if present."""
         # check for permited overrides
-        self._check_overrides_corresponds_to_overridable(overrides)
+        self._check_overrides_corresponds_to_overridable(
+            overrides, env_vars_friendly=env_vars_friendly
+        )
         # check resulting config with applied overrides passes validation
 
         result_config = self.make_resulting_config_data(overrides)
-        self.validate_config_data(result_config)
+        self.validate_config_data(result_config, env_vars_friendly=env_vars_friendly)
 
-    def _check_overrides_corresponds_to_overridable(self, overrides: Dict) -> None:
+    def _check_overrides_corresponds_to_overridable(
+        self, overrides: Dict, env_vars_friendly: bool = False
+    ) -> None:
         """Check overrides is correct, return list of errors if present."""
-        errors_list = self._compare_data_to_pattern(
-            overrides, self.get_overridable(), excludes=self.CHECK_EXCLUDES
+        errors_list = validate_data_with_pattern(
+            overrides,
+            self.get_overridable(),
+            excludes=self.CHECK_EXCLUDES,
+            skip_env_vars=env_vars_friendly,
         )
         if errors_list:
             raise ValueError(errors_list[0])
@@ -731,19 +698,6 @@ class ConnectionConfig(ComponentConfiguration):
         )
 
         return instance
-
-    def update(self, data: Dict) -> None:
-        """
-        Update configuration with other data.
-
-        This method does side-effect on the configuration object.
-
-        :param data: the data to populate or replace.
-        :return: None
-        """
-        new_config = data.get("config", {})
-        recursive_update(self.config, new_config, allow_new_values=True)
-        self.is_abstract = data.get("is_abstract", self.is_abstract)
 
 
 class ProtocolConfig(ComponentConfiguration):
@@ -1437,7 +1391,7 @@ class AgentConfig(PackageConfiguration):
 
         return result
 
-    def update(self, data: Dict) -> None:
+    def update(self, data: Dict, env_vars_friendly: bool = False) -> None:
         """
         Update configuration with other data.
 
@@ -1463,9 +1417,9 @@ class AgentConfig(PackageConfiguration):
                     allow_new_values=True,
                 )
 
-        self.check_overrides_valid(data)
-        super().update(data)
-        self.validate_config_data(self.json)
+        self.check_overrides_valid(data, env_vars_friendly=env_vars_friendly)
+        super().update(data, env_vars_friendly=env_vars_friendly)
+        self.validate_config_data(self.json, env_vars_friendly=env_vars_friendly)
         self.component_configurations = updated_component_configurations
 
 

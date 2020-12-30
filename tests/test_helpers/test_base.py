@@ -537,6 +537,14 @@ class BaseTestCertRequestInstantiation:
         )
         assert self.cert_request.not_after == expected_not_after
 
+        assert self.cert_request.not_before_string == expected_not_before.strftime(
+            "%Y-%m-%d"
+        )
+        assert self.cert_request.not_after_string == expected_not_after.strftime(
+            "%Y-%m-%d"
+        )
+        assert self.cert_request.get_message("some_key")
+
         assert self.cert_request.save_path == Path(self.expected_path)
 
     def test_from_to_json(self):
