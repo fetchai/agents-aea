@@ -19,12 +19,15 @@
 
 """This module contains the libp2p client connection."""
 
+from aea.crypto.fetchai import FetchAIHelper
+from pathlib import Path
+from aea.helpers.base import CertRequest
 import asyncio
 import logging
 import random
 import struct
 from asyncio import CancelledError
-from typing import List, Optional, Union, cast
+from typing import List, Optional, Tuple, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -32,7 +35,7 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
-from aea.helpers.acn.agent_record import AgentRecord
+from aea.helpers.acn.agent_record import AgentRecord, recover_verify_keys_from_message
 from aea.helpers.acn.uri import Uri
 from aea.mail.base import Envelope
 
@@ -49,17 +52,33 @@ PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.10.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
-POR_DEFAULT_SERVICE_ID = ""
+POR_DEFAULT_SERVICE_ID = "acn"
 
 ACN_CURRENT_VERSION = "0.1.0"
 
 
-def _get_pors_from_connection_config(key: Crypto, count: int) -> List[AgentRecord]:
-    signature = key.sign_message(key.public_key.encode("utf-8"))
-    record = AgentRecord(
-        key.address, key.public_key, key.public_key, signature, POR_DEFAULT_SERVICE_ID
-    )
-    return [record for i in range(count)]
+def _get_signatures_from_cert_request(
+    certs: List[CertRequest], public_keys: List[str], agent_address: str
+) -> Tuple[List[str], str]:
+    signatures: List[str] = []
+    verify_key = ""
+    for i in range(len(certs)):
+        cert = certs[i]
+        public_key = public_keys[i]
+        signature = bytes.fromhex(
+            Path(cert.save_path).read_bytes().decode("ascii")
+        ).decode("ascii")
+        if verify_key == "":
+            public_keys = recover_verify_keys_from_message(
+                cert.get_message(public_key), signature
+            )
+            addresses = [
+                FetchAIHelper.get_address_from_public_key(public_key)
+                for public_key in public_keys
+            ]
+            verify_key = public_keys[addresses.index(agent_address)]
+        signatures.append(signature)
+    return signatures, verify_key
 
 
 class P2PLibp2pClientConnection(Connection):
@@ -91,26 +110,38 @@ class P2PLibp2pClientConnection(Connection):
             raise ValueError("At least one node should be provided")
         nodes = list(cast(List, nodes))
 
-        nodes_uris = [node["uri"] for node in nodes]
+        nodes_uris = [node.get("uri", None) for node in nodes]
         enforce(
-            len(nodes_uris) == len(nodes),
-            "Delegate Uri should be provided for each node",
+            len(nodes_uris) == len(nodes) and None not in nodes_uris,
+            "Delegate 'uri' should be provided for each node",
         )
 
-        nodes_certs = [node["cert"] for node in nodes]
+        nodes_public_keys = [node.get("public_key", None) for node in nodes]
         enforce(
-            len(nodes_certs) == len(nodes),
-            "Delegate Cert should be provided for each node",
+            len(nodes_public_keys) == len(nodes) and None not in nodes_public_keys,
+            "Delegate 'public_key' should be provided for each node",
         )
+
+        cert_requests = self.configuration.cert_requests
+        if cert_requests is None or len(cert_requests) != len(nodes):
+            raise ValueError("cert_requests field must be set")
+        for cert_request in cert_requests:
+            if not Path(cert_request.save_path).is_file():
+                raise Exception(
+                    "cert_request 'save_path' field is not a file.  Please ensure that 'issue-certificates' command is called beforehand"
+                )
 
         # verify keys are correct
 
-        if (
-            self.has_crypto_store
-            and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
-        ):  # pragma: no cover
-            key = self.crypto_store.crypto_objects[ledger_id]
-        elif key_file is not None:
+        # TOFIX(): we cannot use store as the key will be used for TLS tcp connection
+        #   also, as of now all the connections share the same key
+        # if (
+        #    self.has_crypto_store
+        #    and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
+        # ):  # pragma: no cover
+        #    key = self.crypto_store.crypto_objects[ledger_id]
+        # elif key_file is not None:
+        if key_file is not None:
             key = make_crypto(ledger_id, private_key_path=key_file)
         else:
             key = make_crypto(ledger_id)
@@ -123,13 +154,33 @@ class P2PLibp2pClientConnection(Connection):
         self.delegate_uris = [Uri(node_uri) for node_uri in nodes_uris]
 
         # delegates PoRs
-        self.delegate_pors = _get_pors_from_connection_config(key, len(nodes))
-        for i in range(len(self.delegate_pors)):
-            record = self.delegate_pors[i]
-            enforce(
-                True or record.is_valid_for(self.address, key.public_key),
-                f"Invalid Proof-of-Representation for node {self.delegate_uris[i]}",
+        self.delegate_pors = []
+        signatures, agent_public_key = _get_signatures_from_cert_request(
+            cert_requests, nodes_public_keys, self.address
+        )
+        records: List[AgentRecord] = []
+        for i in range(len(signatures)):
+            records.append(
+                AgentRecord(
+                    self.address,
+                    agent_public_key,
+                    nodes_public_keys[i],
+                    signatures[i],
+                    POR_DEFAULT_SERVICE_ID,
+                )
             )
+
+        for i in range(len(nodes_public_keys)):
+            public_key = nodes_public_keys[i]
+            uri = self.delegate_uris[i]
+            record = next(
+                record for record in records if record.peer_public_key == public_key
+            )
+            enforce(
+                True or record.is_valid_for(self.address, public_key),
+                f"Invalid Proof-of-Representation for node {uri}",
+            )
+            self.delegate_pors.append(record)
 
         # select a delegate
         index = random.randint(0, len(self.delegate_uris) - 1)  # nosec

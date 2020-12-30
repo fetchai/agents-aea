@@ -216,15 +216,15 @@ class TestLibp2pConnectionAgentMobility:
             cls.multiplexer1.connect()
             cls.multiplexers.append(cls.multiplexer1)
 
+            cls.connection_key = make_crypto(DEFAULT_LEDGER)
             cls.connection2 = _make_libp2p_connection(
-                DEFAULT_PORT + 2, entry_peers=[genesis_peer]
+                DEFAULT_PORT + 2, entry_peers=[genesis_peer], agent_key=cls.connection_key,
             )
             cls.multiplexer2 = Multiplexer([cls.connection2])
             cls.log_files.append(cls.connection2.node.log_file)
             cls.multiplexer2.connect()
             cls.multiplexers.append(cls.multiplexer2)
 
-            cls.connection_addr = cls.connection2.address
         except Exception as e:
             cls.teardown_class()
             raise e
@@ -267,7 +267,7 @@ class TestLibp2pConnectionAgentMobility:
         TestLibp2pConnectionAgentMobility.connection2 = _make_libp2p_connection(
             port=DEFAULT_PORT + 2,
             entry_peers=[self.genesis.node.multiaddrs[0]],
-            agent_address=self.connection_addr,
+            agent_key=self.connection_key,
         )
         TestLibp2pConnectionAgentMobility.multiplexer2 = Multiplexer([self.connection2])
         self.multiplexer2.connect()

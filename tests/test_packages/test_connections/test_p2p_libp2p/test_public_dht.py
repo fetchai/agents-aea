@@ -42,6 +42,8 @@ from tests.conftest import (
     PUBLIC_DHT_DELEGATE_URI_2,
     PUBLIC_DHT_P2P_MADDR_1,
     PUBLIC_DHT_P2P_MADDR_2,
+    PUBLIC_DHT_P2P_PUBLIC_KEY_1,
+    PUBLIC_DHT_P2P_PUBLIC_KEY_2,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     libp2p_log_on_failure,
@@ -52,6 +54,7 @@ from tests.conftest import (
 DEFAULT_PORT = 10234
 PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
 PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
+PUBLIC_DHT_PUBLIC_KEYS = [PUBLIC_DHT_P2P_PUBLIC_KEY_1, PUBLIC_DHT_P2P_PUBLIC_KEY_2]
 AEA_DEFAULT_LAUNCH_TIMEOUT = 15
 AEA_LIBP2P_LAUNCH_TIMEOUT = 660  # may download up to ~66Mb
 
@@ -227,8 +230,10 @@ class TestLibp2pConnectionPublicDHTDelegate:
 
     def test_connectivity(self):
         """Test connectivity."""
-        for uri in PUBLIC_DHT_DELEGATE_URIS:
-            connection = _make_libp2p_client_connection(uri=uri)
+        for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
+            uri = PUBLIC_DHT_DELEGATE_URIS[i]
+            peer_public_key = PUBLIC_DHT_PUBLIC_KEYS[i]
+            connection = _make_libp2p_client_connection(peer_public_key, uri=uri)
             multiplexer = Multiplexer([connection])
 
             try:
@@ -243,15 +248,17 @@ class TestLibp2pConnectionPublicDHTDelegate:
 
     def test_communication_direct(self):
         """Test communication direct."""
-        for uri in PUBLIC_DHT_DELEGATE_URIS:
+        for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
+            uri = PUBLIC_DHT_DELEGATE_URIS[i]
+            peer_public_key = PUBLIC_DHT_PUBLIC_KEYS[i]
             multiplexers = []
             try:
-                connection1 = _make_libp2p_client_connection(uri=uri)
+                connection1 = _make_libp2p_client_connection(peer_public_key, uri=uri)
                 multiplexer1 = Multiplexer([connection1])
                 multiplexer1.connect()
                 multiplexers.append(multiplexer1)
 
-                connection2 = _make_libp2p_client_connection(uri=uri)
+                connection2 = _make_libp2p_client_connection(peer_public_key, uri=uri)
                 multiplexer2 = Multiplexer([connection2])
                 multiplexer2.connect()
                 multiplexers.append(multiplexer2)
@@ -301,6 +308,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
             multiplexers = []
             try:
                 connection1 = _make_libp2p_client_connection(
+                    PUBLIC_DHT_PUBLIC_KEYS[i],
                     uri=PUBLIC_DHT_DELEGATE_URIS[i]
                 )
                 multiplexer1 = Multiplexer([connection1])
@@ -314,6 +322,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                         continue
 
                     connection2 = _make_libp2p_client_connection(
+                        PUBLIC_DHT_PUBLIC_KEYS[i],
                         uri=PUBLIC_DHT_DELEGATE_URIS[j]
                     )
                     multiplexer2 = Multiplexer([connection2])

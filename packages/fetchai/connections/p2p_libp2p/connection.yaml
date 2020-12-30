@@ -16,10 +16,10 @@ fingerprint:
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmcZATMqEThMQBdsud1AwJEYtKq86VfPSXhnfdE7TSWcsc
-  connection.py: Qmf3epj1Fdo51qGtKUjpesHDiwR1YZE39kZ6VZbUf4dQ7u
-  dht/dhtclient/dhtclient.go: QmeHnMoBdff59vSqRRsYUGGJPUMi5Euk8pKiKa5jTzHHQD
-  dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
-  dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
+  connection.py: QmeC7hDQr2Uo1DmFrS5MEneTvQZSc2bFkYXq4CRGv8WBXu
+  dht/dhtclient/dhtclient.go: QmZCgMowWw4ueCSsyYY12om3RMQA3Ydp98ti65Eqa5ccuz
+  dht/dhtclient/dhtclient_test.go: QmbTvSmNU1uqjLQo9LdD7zWmDcLuzEacDeg7AG4VXhmriV
+  dht/dhtclient/options.go: QmWs7fQqHRavjwe1PjihHFi85HeJu9qSEVyMdcRviZzaT2
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   dht/dhtnode/message.pb.go: QmbMVfoPm74uxHRdAtzhke7ftn8YUQQ7kBs3e7QAjfaEc2
   dht/dhtnode/message.proto: QmfFz18nn89kn7ReBwQri7cijbEh6D9TTd3j2euCkKVvDk
@@ -49,6 +49,13 @@ config:
   local_uri: 127.0.0.1:9000
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:9000
+cert_requests:
+- identifier: acn
+  ledger_id: fetchai
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: fetchai
+  save_path: /source/conn_cert.txt
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

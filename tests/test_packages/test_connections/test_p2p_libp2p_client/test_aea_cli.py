@@ -65,11 +65,27 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     def test_connection(self):
         """Test the connection can be used in an aea."""
         self.add_item("connection", str(PUBLIC_ID))
-        config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
+        conn_path = "vendor.fetchai.connections.p2p_libp2p_client"
         self.nested_set_config(
-            config_path,
-            {"nodes": [{"uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT)}]},
+            conn_path+".config",
+            {"nodes": [{
+                "uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT),
+                "public_key" : self.node_connection.node.pub,
+            }]},
         )
+
+        # generate certificates for connection
+        self.nested_set_config(
+            conn_path+".cert_requests",
+            [{
+                "identifier" : "acn",
+                "not_after": "2022-01-01",
+                "not_before": "2021-01-01",
+                "public_key": self.node_connection.node.pub,
+                "save_path": "./cli_test_cert.txt",
+            }],
+        )
+        #self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)

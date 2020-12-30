@@ -626,10 +626,10 @@ class CertRequest:
 
         :param public_key: the public key, or the key id.
         :param identifier: certificate identifier.
-        :param not_before: specify the lower bound for certificate vailidity.
+        :param not_before: specify the lower bound for certificate validity.
           If it is a string, it must follow the format: 'YYYY-MM-DD'. It
           will be interpreted as timezone UTC.
-        :param not_before: specify the lower bound for certificate vailidity.
+        :param not_before: specify the lower bound for certificate validity.
           if it is a string, it must follow the format: 'YYYY-MM-DD' It
           will be interpreted as timezone UTC-0.
         :param save_path: the save_path where to save the certificate.
@@ -642,7 +642,7 @@ class CertRequest:
         self._not_after_string = not_after
         self._not_before = self._parse_datetime(not_before)
         self._not_after = self._parse_datetime(not_after)
-        self._save_path = Path(save_path)
+        self._save_path = Path(os.path.abspath(save_path))
 
         self._parse_public_key(public_key)
         self._check_validation_boundaries()
@@ -750,9 +750,9 @@ class CertRequest:
         """Get the message to sign."""
         message = (
             public_key.encode("ascii")
-            + self.identifier.encode("ascii")
-            + self.not_before_string.encode("ascii")
-            + self.not_after_string.encode("ascii")
+            #+ self.identifier.encode("ascii")
+            #+ self.not_before_string.encode("ascii")
+            #+ self.not_after_string.encode("ascii")
         )
         return message
 

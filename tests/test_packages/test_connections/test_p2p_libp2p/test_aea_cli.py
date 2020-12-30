@@ -19,7 +19,10 @@
 
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.registries import make_crypto
 import os
+from pathlib import Path
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -34,7 +37,7 @@ DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_NET_SIZE = 4
 
-LIBP2P_LAUNCH_TIMEOUT = 660  # may downloads up to ~66Mb
+LIBP2P_LAUNCH_TIMEOUT = 110  # may downloads up to ~66Mb
 
 
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
@@ -44,6 +47,10 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     def setup_class(cls):
         """Set the test up"""
         super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).setup_class()
+        cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
+        with open(cls.conn_key_file, "wb") as f:
+            key = make_crypto(DEFAULT_LEDGER)
+            key.dump(f)
         cls.log_files = []
 
     @libp2p_log_on_failure
@@ -52,6 +59,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
+        self.nested_set_config("agent.connection_private_key_paths", {DEFAULT_LEDGER:self.conn_key_file})
 
         # for logging
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -59,6 +67,9 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
         TestP2PLibp2pConnectionAEARunningDefaultConfigNode.log_files.append(log_file)
+
+        # generate certificates for connection
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
         is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
@@ -90,6 +101,10 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     def setup_class(cls):
         """Set the test up"""
         super(TestP2PLibp2pConnectionAEARunningFullNode, cls).setup_class()
+        cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
+        with open(cls.conn_key_file, "wb") as f:
+            key = make_crypto(DEFAULT_LEDGER)
+            key.dump(f)
         cls.log_files = []
 
     @libp2p_log_on_failure
@@ -97,6 +112,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         """Test with aea."""
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.nested_set_config("agent.connection_private_key_paths", {DEFAULT_LEDGER:self.conn_key_file})
 
         # setup a full node: with public uri, relay service, and delegate service
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -116,6 +132,9 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
         TestP2PLibp2pConnectionAEARunningFullNode.log_files.append(log_file)
+
+        # generate certificates for connection
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
 
