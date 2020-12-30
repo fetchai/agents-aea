@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmVwLCVudrwmJ33t5npXFDfRp8UYK7QFH4djanZgzziPTw
   handlers.py: QmWCVSnLMSLLPB9koJVc7g12YsfW3eCgkMET8TTpwDDW69
-  strategy.py: QmXsAvSWe97U5Hv7ZfdTH7pfbYnx2AEyhfgAWP8qk1HnCh
+  strategy.py: QmYBoMmcmfkV1jvFsVwBaUNostXWouApgAL1GXhQAN5nAX
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
@@ -70,9 +70,10 @@ models:
       service_data:
         key: dataset_id
         value: fmnist
+      service_id: data_service
     class_name: Strategy
 dependencies:
   numpy: {}
   tensorflow:
-    version: ==1.14.0
+    version: ~=2.4.0
 is_abstract: false

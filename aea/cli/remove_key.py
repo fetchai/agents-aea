@@ -74,6 +74,7 @@ def _try_remove_key(ctx: Context, type_: str, connection: bool = False):
         raise click.ClickException(
             f"There is no {'connection ' if connection else ''}key registered with id {type_}."
         )
+    private_keys.delete(type_)
     ctx.agent_loader.dump(
         ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
     )

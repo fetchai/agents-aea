@@ -118,10 +118,18 @@ aea add connection fetchai/p2p_libp2p:0.13.0
 aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_control_contract:0.15.0
-aea install
-aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger ethereum
+aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
+aea config set --type bool vendor.fetchai.skills.tac_control.is_abstract true
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
+aea install
+aea build
 ```
 
 </p>
@@ -139,17 +147,16 @@ In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
 aea fetch fetchai/tac_participant:0.18.0 --alias tac_participant_one
 cd tac_participant_one
-aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
-aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 aea install
 aea build
 cd ..
 aea fetch fetchai/tac_participant:0.18.0 --alias tac_participant_two
 cd tac_participant_two
-aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
-aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
+aea install
 aea build
 ```
 
@@ -170,14 +177,21 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_participation:0.14.0
 aea add skill fetchai/tac_negotiation:0.16.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea config set agent.default_ledger ethereum
+aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
+aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
-aea config set agent.default_ledger ethereum
-aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
-aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 ```
 
 Then, build participant two:
@@ -188,22 +202,33 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_participation:0.14.0
 aea add skill fetchai/tac_negotiation:0.16.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea config set agent.default_ledger ethereum
+aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
+aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
-aea config set agent.default_ledger ethereum
-aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
-aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 ```
 
 </p>
 </details>
 
-### Fund both tac participants
+### Add keys for all AEAs
 
-Similar to how you funded the controller, fund both tac participants.
+Create the private key for the AEA for Fetch.ai `AgentLand`:
+``` bash
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt --connection
+```
 
 ### Update the game parameters in the controller
 
@@ -213,6 +238,50 @@ Navigate to the tac controller project, then use the command line to get and set
 aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time
 aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
+
+To set the registration time, you may find handy the following command:
+``` bash
+aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time "$(date -d "2 minutes" +'%d %m %Y %H:%M')"
+```
+
+
+### Update the connection params
+
+Briefly run the controller AEA:
+
+``` bash
+aea run
+```
+
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.)
+
+
+Then, in the participant one, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
+```
+
+Do the same in participant two (beware of the different port numbers):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11002",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9002",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9002"
+}'
+```
+
+This allows the TAC participants to connect to the same local agent communication network as the TAC controller.
+
 
 ## Run Ganache
 
@@ -231,13 +300,18 @@ You should get `1000000000000000000000`.
 
 ### Run the AEAs
 
+First, launch the `tac_contract_controller`:
+``` bash
+aea run tac_contract_controller
+```
+
 The CLI tool supports the launch of several agents
 at once.
 
 For example, assuming you followed the tutorial, you
-can launch all the TAC agents as follows from the root directory:
+can launch both the TAC agents as follows from the root directory:
 ``` bash
-aea launch tac_controller_contract tac_participant_one tac_participant_two
+aea launch tac_participant_one tac_participant_two
 ```
 
 You may want to try `--multithreaded`

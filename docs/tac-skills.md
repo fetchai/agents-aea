@@ -117,16 +117,14 @@ aea add connection fetchai/p2p_libp2p:0.13.0
 aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_control:0.13.0
-aea install
-aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger fetchai
-```
-
-In `tac_controller/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
+aea install
+aea build
 ```
 
 </p>
@@ -163,17 +161,15 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_participation:0.14.0
 aea add skill fetchai/tac_negotiation:0.16.0
-aea install
-aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger fetchai
-```
-
-In `tac_participant_one/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
+aea install
+aea build
 ```
 
 Then, build participant two:
@@ -184,17 +180,15 @@ aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/ledger:0.11.0
 aea add skill fetchai/tac_participation:0.14.0
 aea add skill fetchai/tac_negotiation:0.16.0
-aea install
-aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_ledger fetchai
-```
-
-In `tac_participant_two/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
+aea install
+aea build
 ```
 
 </p>
@@ -218,6 +212,11 @@ aea config get vendor.fetchai.skills.tac_control.models.parameters.args.registra
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
 
+To set the registration time, you may find handy the following command:
+``` bash
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$(date -d "2 minutes" +'%d %m %Y %H:%M')"
+```
+
 ### Update the connection params
 
 Briefly run the controller AEA:
@@ -228,7 +227,7 @@ aea run
 
 Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.)
 
-Then, update the configuration of the weather client AEA's p2p connection (in `aea-config.yaml`) add the following:
+<!-- Then, update the configuration of the participants AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml
 ---
@@ -254,17 +253,50 @@ config:
   public_uri: 127.0.0.1:9002
 ```
 
-where `SOME_ADDRESS` is replaced accordingly.
+where `SOME_ADDRESS` is replaced with the appropriate value.
+-->
+
+Then, in the participant one, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
+```
+
+Do the same in participant two (beware of the different port numbers):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11002",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9002",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9002"
+}'
+```
+
+This allows the TAC participants to connect to the same local agent communication network as the TAC controller.
+
 
 ### Run the AEAs
+
+First, launch the `tac_controller`:
+``` bash
+aea run
+```
 
 The CLI tool supports the launch of several agents
 at once.
 
 For example, assuming you followed the tutorial, you
-can launch all the TAC agents as follows from the root directory:
+can launch both the TAC agents as follows from the root directory:
 ``` bash
-aea launch tac_controller tac_participant_one tac_participant_two
+aea launch tac_participant_one tac_participant_two
 ```
 
 You may want to try `--multithreaded`

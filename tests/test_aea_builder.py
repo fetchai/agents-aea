@@ -466,20 +466,6 @@ def test_component_add_bad_dep():
         builder.add_component_instance(a_protocol)
 
 
-def test_find_component_failed():
-    """Test fail on compomnent not found."""
-    builder = AEABuilder()
-    builder.set_name("aea_1")
-    builder.add_private_key("fetchai")
-    a_protocol = Protocol(
-        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
-    )
-    with pytest.raises(ValueError, match=r"Package .* not found"):
-        builder.find_component_directory_from_component_id(
-            Path("/some_dir"), a_protocol.component_id
-        )
-
-
 def test_set_from_config():
     """Test set configuration from config loaded."""
     builder = AEABuilder()

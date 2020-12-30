@@ -410,28 +410,26 @@ aea add protocol fetchai/oef_search:0.11.0
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
-We also need to add the soef and p2p connections and install the AEA's dependencies:
+We also need to add the soef and p2p connections and install the AEA's dependencies as well as configure the AEA:
 ``` bash
 aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/p2p_libp2p:0.13.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
 ```
 
-Finally, in the `aea-config.yaml` add the following lines:
-``` yaml
-default_routing:
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
-```
-
-This will ensure that search requests are processed by the correct connection.
+The last command will ensure that search requests are processed by the correct connection.
 
 ## Step 8: Run a service provider AEA
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.18.0 && cd simple_service_registration && aea install
+aea fetch fetchai/simple_service_registration:0.18.0 && cd simple_service_registration && aea install && aea build
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -448,7 +446,7 @@ Then we run the aea:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the simple_service_registration AEA.
 
 <details><summary>Click here to see full code</summary>
 <p>
@@ -874,18 +872,18 @@ aea add-key fetchai fetchai_private_key.txt
 aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
-Then, update the configuration of the search AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
-
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
+Then, in the search AEA, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm1uJpFsqSgHStJdtTBPpDme1fo8uFEvvY182D2y89jQuj"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
-
-where `SOME_ADDRESS` is replaced accordingly.
+This allows the search AEA to connect to the same local agent communication network as the service registration AEA.
 
 We can then launch our AEA.
 

@@ -19,7 +19,7 @@
 
 """Module to declare constants."""
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 
 FETCHAI = "fetchai"
@@ -79,3 +79,10 @@ IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"
 DOTTED_PATH_MODULE_ELEMENT_SEPARATOR = ":"
 LIBPROTOC_VERSION = "libprotoc 3.11.4"
+
+CONFIG_FILE_TO_PACKAGE_TYPE = {
+    DEFAULT_SKILL_CONFIG_FILE: SKILL,
+    DEFAULT_PROTOCOL_CONFIG_FILE: PROTOCOL,
+    DEFAULT_CONNECTION_CONFIG_FILE: CONNECTION,
+    DEFAULT_CONTRACT_CONFIG_FILE: CONTRACT,
+}  # type: Dict[str, str]

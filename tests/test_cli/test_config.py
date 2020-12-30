@@ -28,9 +28,9 @@ from click.exceptions import ClickException
 from aea.aea_builder import AEABuilder
 from aea.cli import cli
 from aea.cli.config import AgentConfigManager
-from aea.cli.utils.constants import ALLOWED_PATH_ROOTS
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.loader import ConfigLoader
+from aea.configurations.manager import ALLOWED_PATH_ROOTS
 from aea.helpers.yaml_utils import yaml_load
 
 from tests.conftest import CLI_LOG_OPTION, CUR_PATH, CliRunner, ROOT_DIR
