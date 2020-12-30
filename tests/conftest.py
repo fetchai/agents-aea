@@ -784,6 +784,7 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
 
 def _process_cert(key: Crypto, cert: CertRequest):
     # must match aea/cli/issue_certificates.py:_process_certificate
+    assert cert.public_key is not None
     message = cert.get_message(cert.public_key)
     signature = key.sign_message(message).encode("ascii").hex()
     Path(cert.save_path).write_bytes(signature.encode("ascii"))
