@@ -20,6 +20,8 @@
 """This module contains helper function to extract code from the .md files."""
 import re
 import traceback
+from abc import abstractmethod
+from copy import copy
 from pathlib import Path
 from typing import Dict
 
@@ -109,3 +111,27 @@ class BaseTestMarkdownDocs:
         cls.doc_path = cls.DOC_PATH
         cls.doc_content = cls.doc_path.read_text()
         cls.blocks = markdown_parser(cls.doc_content)
+
+
+class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
+    """Test Markdown documentation by running Python snippets in sequence."""
+
+    @classmethod
+    def _python_selector(cls, block: Dict) -> bool:
+        return block["type"] == "block_code" and block["info"].strip() == "python"
+
+    @abstractmethod
+    def _assert(self, **locals_):
+        """Do assertions after Python code execution."""
+
+    def test_python_blocks(self):
+        """Run Python code block in sequence."""
+        python_blocks = list(filter(self._python_selector, self.blocks))
+
+        for python_block in python_blocks:
+            python_code = python_block["text"]
+            exec(python_code)
+
+        locals_ = copy(locals())
+        locals_.pop("self")
+        self._assert(**locals_)

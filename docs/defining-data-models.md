@@ -37,7 +37,7 @@ Finally, every attribute might have a _description_ that explains the purpose of
 For each of this fields, we can define an attribute by using `Attribute`:
 
 ``` python
-from aea.helpers.search import Attribute, Location
+from aea.helpers.search.models import Attribute, Location
 attr_title   = Attribute("title", str, True, "The title of the book.")
 attr_author  = Attribute("author", str, True, "The author of the book.")
 attr_genre   = Attribute("genre", str, True, "The genre of the book.")
@@ -64,7 +64,7 @@ A _data model_ is just a set of _attributes_. The class that implements the data
 in the same structure. We can do it in the following way:
 
 ``` python
-from aea.helpers.search import DataModel
+from aea.helpers.search.models import DataModel
 
 book_model = DataModel("book", [
     attr_title,
@@ -93,7 +93,7 @@ The class that implements the description is `Description`.
 **Example**: now we have all we need to create a little catalogue about our books:
 
 ``` python
-from oef.schema import Description
+from aea.helpers.search.models import Description
 
 It = Description({
     "title" :           "It",
