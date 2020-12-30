@@ -20,16 +20,21 @@
 
 from unittest import TestCase, mock
 
+import pytest
 from click import ClickException
 
 from aea.cli import cli
 from aea.cli.fingerprint import fingerprint_item
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ConfigLoaderMock, ContextMock, PublicIdMock
 
 
-@mock.patch("aea.cli.fingerprint.fingerprint_item")
+@mock.patch("aea.cli.fingerprint.fingerprint_package")
 class FingerprintCommandTestCase(TestCase):
     """Test case for CLI fingerprint command."""
 
@@ -67,6 +72,44 @@ class FingerprintCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+    def _run_fingerprint_by_path(self):
+        """Call fingerprint by-path cli command."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "fingerprint", "by-path", "some_dir"],
+            standalone_mode=False,
+            catch_exceptions=False,
+        )
+        self.assertEqual(result.exit_code, 0, result.exception)
+
+    def test_by_path_ok(self, fingerprint_mock):
+        """Test fingerprint by_path works ok."""
+        with mock.patch("os.listdir", return_value=[DEFAULT_CONNECTION_CONFIG_FILE]):
+            self._run_fingerprint_by_path()
+            fingerprint_mock.assert_called()
+
+    def test_by_path_exceptions(self, *mocks):
+        """Test fingerprint by_path works raises exceptions."""
+        with pytest.raises(
+            ClickException,
+            match=f"No package config file found in `.*`. Incorrect directory?",
+        ):
+            with mock.patch("os.listdir", return_value=[]):
+                self._run_fingerprint_by_path()
+
+        with pytest.raises(
+            ClickException,
+            match=f"Too many config files in the directory, only one has to present!",
+        ):
+            with mock.patch(
+                "os.listdir",
+                return_value=[
+                    DEFAULT_CONNECTION_CONFIG_FILE,
+                    DEFAULT_SKILL_CONFIG_FILE,
+                ],
+            ):
+                self._run_fingerprint_by_path()
 
 
 def _raise_exception(*args, **kwargs):

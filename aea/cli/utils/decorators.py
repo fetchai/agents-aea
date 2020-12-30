@@ -91,7 +91,8 @@ def _validate_config_consistency(ctx: Context):
 
         # load the configuration file.
         try:
-            package_configuration = loader.load(configuration_file_path.open("r"))
+            with configuration_file_path.open("r") as fp:
+                package_configuration = loader.load(fp)
         except ValidationError as e:
             raise ValueError(
                 "{} configuration file not valid: {}".format(

@@ -21,6 +21,7 @@
 import asyncio
 import copy
 import logging
+import os
 import re
 import urllib
 from asyncio import CancelledError
@@ -258,6 +259,7 @@ class SOEFChannel:
 
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
+            self._token_storage_path = os.path.abspath(self._token_storage_path)
             Path(self._token_storage_path).touch()
         self.declared_name = uuid4().hex
         self._unique_page_address = None  # type: Optional[str]

@@ -22,7 +22,6 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List, cast
 
-from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import (
     CRUDCollection,
     ComponentConfiguration,
@@ -32,6 +31,7 @@ from aea.configurations.base import (
     SkillConfig,
     dependencies_from_json,
 )
+from aea.configurations.manager import handle_dotted_path
 from aea.exceptions import enforce
 from aea.helpers.file_io import write_envelope
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
@@ -193,8 +193,8 @@ def nested_set_config(
     if config.package_type == PackageType.AGENT:
         json_data = config.ordered_json
         component_configurations = json_data.pop("component_configurations")
-        yaml_dump_all(
-            [json_data] + component_configurations, config_file_path.open("w")
-        )
+        with config_file_path.open("w") as fp:
+            yaml_dump_all([json_data] + component_configurations, fp)
     else:
-        yaml_dump(config.ordered_json, config_file_path.open("w"))
+        with config_file_path.open("w") as fp:
+            yaml_dump(config.ordered_json, fp)

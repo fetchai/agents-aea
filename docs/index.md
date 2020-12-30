@@ -18,7 +18,7 @@ AEAs act independently of constant input from their owner and autonomously execu
 
 AEAs are not:
 
-* just any agents: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents.
+* just any agents: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. The represent humans, organisations or things.
 * APIs or sensors which do not have agency.
 * smart contracts which do not display any proactiveness and are purely reactive to external requests (=contract calls). 
 * artificial general intelligence (AGI): AEAs can have a very narrow goal directed focus involving some economic gain and implemented via simple conditional logic.
@@ -36,7 +36,7 @@ AEAs achieve their goals with the help of the <a href="oef-ledger">Open Economic
 The AEA framework provides the developer with a number of features which cannot be found in this combination anywhere else:
 
 * the peer-to-peer <a href="acn">agent communication network</a> allows your AEAs to interact with all other AEAs over the public internet
-* the search and discovery system <a href="simple-oef">sOEF</a> allows your AEAs find other agents
+* the search and discovery system <a href="simple-oef">sOEF</a> allows your AEAs to find other agents
 * the <a href="https://aea-registry.fetch.ai/" target="_blank">AEA registry</a> enables code sharing and re-use
 * the framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains
 * reusability of code for interacting with blockchains is enabled via the <a href="contract">contract</a> packages

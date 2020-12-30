@@ -18,7 +18,7 @@ Note, this is not to say that facilitators and middlemen have no place in a mult
 
 ## Conflicting Environment
 
-As discussed above, the notion of decentralisation extends as far as ownership and control. Therefore, the different components that make up a decentralised system may each be owned by a different entity, designed according to very different principles and standards, with heterogeneous software and hardware, and each with internal objectives that may be fundamentally inconsistent, worst yet contradictory, with those of others. 
+As discussed above, the notion of decentralisation extends as far as ownership and control. Therefore, the different components that make up a decentralised system may each be owned by a different entity, designed according to very different principles and standards, with heterogeneous software and hardware, and each with internal objectives that may be fundamentally inconsistent, worse yet contradictory, with those of others. 
 
 As such, a distinctive characteristic of a multi-agent environment, is that it is inhabited by more than one agent (as the name suggests), where each agent may be owned potentially by a different stakeholder (individual, company, government). Since by design, each agent represents and looks after the interests of its owner(s), and because different stakeholders may have unaligned, conflicting, or contradictory interests, it is very common to have multi-agent systems in which the agents' objectives, values and preferences are unaligned, conflicting, or contradictory.
 
