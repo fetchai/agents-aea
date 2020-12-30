@@ -750,9 +750,9 @@ class CertRequest:
         """Get the message to sign."""
         message = (
             public_key.encode("ascii")
-            #+ self.identifier.encode("ascii")
-            #+ self.not_before_string.encode("ascii")
-            #+ self.not_after_string.encode("ascii")
+            # + self.identifier.encode("ascii")
+            # + self.not_before_string.encode("ascii")
+            # + self.not_after_string.encode("ascii")
         )
         return message
 

@@ -17,9 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the p2p libp2p connection."""
-from aea.crypto.fetchai import FetchAIHelper
-
-from aea.helpers.base import CertRequest
 import asyncio
 import logging
 import os
@@ -37,10 +34,12 @@ from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
+from aea.crypto.fetchai import FetchAIHelper
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
 from aea.helpers.acn.agent_record import AgentRecord, recover_verify_keys_from_message
 from aea.helpers.acn.uri import Uri
+from aea.helpers.base import CertRequest
 from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
@@ -433,15 +432,24 @@ class Libp2pNode:
         if os.path.exists(LIBP2P_NODE_ENV_FILE):
             os.remove(LIBP2P_NODE_ENV_FILE)
 
-def _get_signature_from_cert_request(cert: CertRequest, node_public_key: str, agent_address: str) -> Tuple[str, str]:
+
+def _get_signature_from_cert_request(
+    cert: CertRequest, node_public_key: str, agent_address: str
+) -> Tuple[str, str]:
     # must match aea/cli/issue_certificates.py:_process_certificate
-    signature = bytes.fromhex(Path(cert.save_path).read_bytes().decode("ascii")).decode("ascii")
-    public_keys = recover_verify_keys_from_message(cert.get_message(node_public_key), signature)
+    signature = bytes.fromhex(Path(cert.save_path).read_bytes().decode("ascii")).decode(
+        "ascii"
+    )
+    public_keys = recover_verify_keys_from_message(
+        cert.get_message(node_public_key), signature
+    )
     addresses = [
-        FetchAIHelper.get_address_from_public_key(public_key) for public_key in public_keys
+        FetchAIHelper.get_address_from_public_key(public_key)
+        for public_key in public_keys
     ]
     verify_key = public_keys[addresses.index(agent_address)]
     return signature, verify_key
+
 
 class P2PLibp2pConnection(Connection):
     """A libp2p p2p node connection."""
@@ -484,7 +492,9 @@ class P2PLibp2pConnection(Connection):
         ):  # pragma: no cover
             key = self.crypto_store.crypto_objects[ledger_id]
         else:
-            raise ValueError(f"Couldn't find connection key for {str(ledger_id)} in connections keys")
+            raise ValueError(
+                f"Couldn't find connection key for {str(ledger_id)} in connections keys"
+            )
 
         uri = None
         if libp2p_local_uri is not None:
@@ -546,10 +556,20 @@ class P2PLibp2pConnection(Connection):
         if cert_requests is None or len(cert_requests) != 1:
             raise ValueError("cert_requests field must be set")
         if not Path(cert_requests[0].save_path).is_file():
-            raise Exception("cert_request 'save_path' field is not file. Please ensure that 'issue-certificates' command is called beforehand")
+            raise Exception(
+                "cert_request 'save_path' field is not file. Please ensure that 'issue-certificates' command is called beforehand"
+            )
 
-        signature, agent_public_key = _get_signature_from_cert_request(cert_requests[0], key.public_key, self.address)
-        record = AgentRecord(self.address, agent_public_key, key.public_key, signature, POR_DEFAULT_SERVICE_ID)
+        signature, agent_public_key = _get_signature_from_cert_request(
+            cert_requests[0], key.public_key, self.address
+        )
+        record = AgentRecord(
+            self.address,
+            agent_public_key,
+            key.public_key,
+            signature,
+            POR_DEFAULT_SERVICE_ID,
+        )
         if not record.is_valid_for(self.address, key.public_key):
             raise ValueError("Invalid Proof-of-Representation {}".format(str(record)))
 

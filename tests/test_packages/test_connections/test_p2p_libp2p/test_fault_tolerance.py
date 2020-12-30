@@ -218,7 +218,9 @@ class TestLibp2pConnectionAgentMobility:
 
             cls.connection_key = make_crypto(DEFAULT_LEDGER)
             cls.connection2 = _make_libp2p_connection(
-                DEFAULT_PORT + 2, entry_peers=[genesis_peer], agent_key=cls.connection_key,
+                DEFAULT_PORT + 2,
+                entry_peers=[genesis_peer],
+                agent_key=cls.connection_key,
             )
             cls.multiplexer2 = Multiplexer([cls.connection2])
             cls.log_files.append(cls.connection2.node.log_file)

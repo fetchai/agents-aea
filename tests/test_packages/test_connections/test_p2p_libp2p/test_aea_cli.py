@@ -19,11 +19,11 @@
 
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
-from aea.configurations.constants import DEFAULT_LEDGER
-from aea.crypto.registries import make_crypto
 import os
 from pathlib import Path
 
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.registries import make_crypto
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
@@ -59,7 +59,9 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
-        self.nested_set_config("agent.connection_private_key_paths", {DEFAULT_LEDGER:self.conn_key_file})
+        self.nested_set_config(
+            "agent.connection_private_key_paths", {DEFAULT_LEDGER: self.conn_key_file}
+        )
 
         # for logging
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -112,7 +114,9 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         """Test with aea."""
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
-        self.nested_set_config("agent.connection_private_key_paths", {DEFAULT_LEDGER:self.conn_key_file})
+        self.nested_set_config(
+            "agent.connection_private_key_paths", {DEFAULT_LEDGER: self.conn_key_file}
+        )
 
         # setup a full node: with public uri, relay service, and delegate service
         config_path = "vendor.fetchai.connections.p2p_libp2p.config"

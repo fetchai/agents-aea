@@ -19,29 +19,34 @@
 
 """This module contains the libp2p client connection."""
 
-from aea.crypto.fetchai import FetchAIHelper
-from pathlib import Path
-from aea.helpers.base import CertRequest
 import asyncio
 import logging
 import random
 import struct
 from asyncio import CancelledError
+from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
+from aea.crypto.fetchai import FetchAIHelper
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
 from aea.helpers.acn.agent_record import AgentRecord, recover_verify_keys_from_message
 from aea.helpers.acn.uri import Uri
+from aea.helpers.base import CertRequest
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import AcnMessage
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import AgentRecord as AgentRecordPb
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import Register, Status
+from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
+    AgentRecord as AgentRecordPb,
+)
+from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
+    Register,
+    Status,
+)
 
 
 _default_logger = logging.getLogger(

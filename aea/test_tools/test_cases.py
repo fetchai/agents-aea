@@ -875,7 +875,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls.stdout = {}
         cls.stderr = {}
 
-        #with suppress(OSError, IOError):
+        # with suppress(OSError, IOError):
         #    shutil.rmtree(cls.t)
 
         cls._is_teardown_class_called = True

@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains Negative tests for Libp2p connection."""
-from aea.crypto.wallet import CryptoStore
 import os
 import shutil
 import tempfile
@@ -27,6 +26,7 @@ import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.registries import make_crypto
+from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
@@ -186,7 +186,7 @@ def test_libp2pconnection_node_config_registration_delay(mock):
     """Test node registration delay configuration"""
     host = "localhost"
     port = "10000"
-    
+
     _make_libp2p_connection(port, host)
     with pytest.raises(ValueError):
         _make_libp2p_connection(port, host, peer_registration_delay="must_be_float")

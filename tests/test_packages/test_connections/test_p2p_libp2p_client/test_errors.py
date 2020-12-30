@@ -19,8 +19,6 @@
 
 """This test module contains negative tests for Libp2p tcp client connection."""
 
-from aea.helpers.base import CertRequest
-from aea.configurations.constants import DEFAULT_LEDGER
 import os
 import shutil
 import tempfile
@@ -28,18 +26,22 @@ import tempfile
 import pytest
 
 from aea.configurations.base import ConnectionConfig
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
+from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
-    P2PLibp2pClientConnection, POR_DEFAULT_SERVICE_ID,
+    P2PLibp2pClientConnection,
+    POR_DEFAULT_SERVICE_ID,
 )
 
 from tests.conftest import (
     COSMOS,
     _make_libp2p_client_connection,
-    _make_libp2p_connection, _process_cert,
+    _make_libp2p_connection,
+    _process_cert,
     libp2p_log_on_failure,
 )
 
@@ -90,10 +92,12 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         """Test empty nodes."""
         configuration = ConnectionConfig(
             client_key_file=self.key_file,
-            nodes=[{
-                "uri": "{}:{}".format(self.node_host, self.node_port),
-                "public_key": self.peer_crypto.public_key,
-            }],
+            nodes=[
+                {
+                    "uri": "{}:{}".format(self.node_host, self.node_port),
+                    "public_key": self.peer_crypto.public_key,
+                }
+            ],
             connection_id=P2PLibp2pClientConnection.connection_id,
             cert_requests=[self.cert_request],
         )
@@ -140,7 +144,9 @@ class TestLibp2pClientConnectionNodeDisconnected:
             cls.multiplexer_node.connect()
             cls.multiplexers.append(cls.multiplexer_node)
 
-            cls.connection_client = _make_libp2p_client_connection(cls.connection_node.node.pub)
+            cls.connection_client = _make_libp2p_client_connection(
+                cls.connection_node.node.pub
+            )
             cls.multiplexer_client = Multiplexer([cls.connection_client])
             cls.multiplexer_client.connect()
             cls.multiplexers.append(cls.multiplexer_client)

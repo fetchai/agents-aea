@@ -70,25 +70,32 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         self.add_item("connection", str(PUBLIC_ID))
         conn_path = "vendor.fetchai.connections.p2p_libp2p_client"
         self.nested_set_config(
-            conn_path+".config",
-            {"nodes": [{
-                "uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT),
-                "public_key" : self.node_connection.node.pub,
-            }]},
+            conn_path + ".config",
+            {
+                "nodes": [
+                    {
+                        "uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT),
+                        "public_key": self.node_connection.node.pub,
+                    }
+                ]
+            },
         )
 
         # generate certificates for connection
         self.nested_set_config(
-            conn_path+".cert_requests",
-            [CertRequest(
-                identifier="acn",
-                ledger_id="fetchai",
-                not_after="2022-01-01",
-                not_before="2021-01-01",
-                public_key=self.node_connection.node.pub,
-                save_path="./cli_test_cert.txt")],
+            conn_path + ".cert_requests",
+            [
+                CertRequest(
+                    identifier="acn",
+                    ledger_id="fetchai",
+                    not_after="2022-01-01",
+                    not_before="2021-01-01",
+                    public_key=self.node_connection.node.pub,
+                    save_path="./cli_test_cert.txt",
+                )
+            ],
         )
-        
+
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()

@@ -8,6 +8,8 @@ message AgentRecord {
     string public_key = 3;
     string peer_public_key = 4;
     string signature = 5;
+    string not_before = 6;
+    string not_after = 7;
 }
 
 message Register {

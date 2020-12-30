@@ -106,11 +106,15 @@ class TestLibp2pClientConnectionEchoEnvelope:
         cls.multiplexer_node.connect()
 
         try:
-            cls.connection_client_1 = _make_libp2p_client_connection(cls.connection_node.node.pub)
+            cls.connection_client_1 = _make_libp2p_client_connection(
+                cls.connection_node.node.pub
+            )
             cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
             cls.multiplexer_client_1.connect()
 
-            cls.connection_client_2 = _make_libp2p_client_connection(cls.connection_node.node.pub)
+            cls.connection_client_2 = _make_libp2p_client_connection(
+                cls.connection_node.node.pub
+            )
             cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
             cls.multiplexer_client_2.connect()
         except Exception:
@@ -274,16 +278,14 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             cls.mutliplexers.append(cls.multiplexer_node_2)
 
             cls.connection_client_1 = _make_libp2p_client_connection(
-                cls.connection_node_1.node.pub,
-                DEFAULT_DELEGATE_PORT + 1
+                cls.connection_node_1.node.pub, DEFAULT_DELEGATE_PORT + 1
             )
             cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
             cls.multiplexer_client_1.connect()
             cls.mutliplexers.append(cls.multiplexer_client_1)
 
             cls.connection_client_2 = _make_libp2p_client_connection(
-               cls.connection_node_2.node.pub,
-               DEFAULT_DELEGATE_PORT + 2
+                cls.connection_node_2.node.pub, DEFAULT_DELEGATE_PORT + 2
             )
             cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
             cls.multiplexer_client_2.connect()
@@ -456,7 +458,10 @@ class TestLibp2pClientConnectionRouting:
 
             for _ in range(DEFAULT_CLIENTS_PER_NODE):
                 ports = [DEFAULT_DELEGATE_PORT + 1, DEFAULT_DELEGATE_PORT + 2]
-                peers_public_keys = [cls.connection_node_1.node.pub, cls.connection_node_2.node.pub]
+                peers_public_keys = [
+                    cls.connection_node_1.node.pub,
+                    cls.connection_node_2.node.pub,
+                ]
                 for i in range(len(ports)):
                     port = ports[i]
                     peer_public_key = peers_public_keys[i]

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="dhtnode",
     syntax="proto3",
     serialized_pb=_b(
-        '\n\x11\x61\x63n_message.proto\x12\x07\x64htnode"r\n\x0b\x41gentRecord\x12\x12\n\nservice_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x12\x12\n\npublic_key\x18\x03 \x01(\t\x12\x17\n\x0fpeer_public_key\x18\x04 \x01(\t\x12\x11\n\tsignature\x18\x05 \x01(\t"0\n\x08Register\x12$\n\x06record\x18\x01 \x01(\x0b\x32\x14.dhtnode.AgentRecord"&\n\rLookupRequest\x12\x15\n\ragent_address\x18\x01 \x01(\t"<\n\x0eLookupResponse\x12*\n\x0c\x61gent_record\x18\x01 \x01(\x0b\x32\x14.dhtnode.AgentRecord"B\n\x0b\x41\x65\x61\x45nvelope\x12\r\n\x05\x65nvel\x18\x01 \x01(\x0c\x12$\n\x06record\x18\x02 \x01(\x0b\x32\x14.dhtnode.AgentRecord"\xcf\x02\n\x06Status\x12%\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x17.dhtnode.Status.ErrCode\x12\x0c\n\x04msgs\x18\x02 \x03(\t"\x8f\x02\n\x07\x45rrCode\x12\x0b\n\x07SUCCESS\x10\x00\x12\x1d\n\x19\x45RROR_UNSUPPORTED_VERSION\x10\x01\x12\x1c\n\x18\x45RROR_UNEXPECTED_PAYLOAD\x10\x02\x12\x11\n\rERROR_GENERIC\x10\x03\x12\x17\n\x13\x45RROR_SERIALIZATION\x10\x04\x12\x1d\n\x19\x45RROR_WRONG_AGENT_ADDRESS\x10\n\x12\x1a\n\x16\x45RROR_WRONG_PUBLIC_KEY\x10\x0b\x12\x17\n\x13\x45RROR_INVALID_PROOF\x10\x0c\x12\x1f\n\x1b\x45RROR_UNKNOWN_AGENT_ADDRESS\x10\x14\x12\x19\n\x15\x45RROR_AGENT_NOT_READY\x10\x15"\x86\x02\n\nAcnMessage\x12\x0f\n\x07version\x18\x01 \x01(\t\x12!\n\x06status\x18\x02 \x01(\x0b\x32\x0f.dhtnode.StatusH\x00\x12%\n\x08register\x18\x03 \x01(\x0b\x32\x11.dhtnode.RegisterH\x00\x12\x30\n\x0elookup_request\x18\x04 \x01(\x0b\x32\x16.dhtnode.LookupRequestH\x00\x12\x32\n\x0flookup_response\x18\x05 \x01(\x0b\x32\x17.dhtnode.LookupResponseH\x00\x12,\n\x0c\x61\x65\x61_envelope\x18\x06 \x01(\x0b\x32\x14.dhtnode.AeaEnvelopeH\x00\x42\t\n\x07payloadb\x06proto3'
+        '\n\x11\x61\x63n_message.proto\x12\x07\x64htnode"\x99\x01\n\x0b\x41gentRecord\x12\x12\n\nservice_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x12\x12\n\npublic_key\x18\x03 \x01(\t\x12\x17\n\x0fpeer_public_key\x18\x04 \x01(\t\x12\x11\n\tsignature\x18\x05 \x01(\t\x12\x12\n\nnot_before\x18\x06 \x01(\t\x12\x11\n\tnot_after\x18\x07 \x01(\t"0\n\x08Register\x12$\n\x06record\x18\x01 \x01(\x0b\x32\x14.dhtnode.AgentRecord"&\n\rLookupRequest\x12\x15\n\ragent_address\x18\x01 \x01(\t"<\n\x0eLookupResponse\x12*\n\x0c\x61gent_record\x18\x01 \x01(\x0b\x32\x14.dhtnode.AgentRecord"B\n\x0b\x41\x65\x61\x45nvelope\x12\r\n\x05\x65nvel\x18\x01 \x01(\x0c\x12$\n\x06record\x18\x02 \x01(\x0b\x32\x14.dhtnode.AgentRecord"\xcf\x02\n\x06Status\x12%\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x17.dhtnode.Status.ErrCode\x12\x0c\n\x04msgs\x18\x02 \x03(\t"\x8f\x02\n\x07\x45rrCode\x12\x0b\n\x07SUCCESS\x10\x00\x12\x1d\n\x19\x45RROR_UNSUPPORTED_VERSION\x10\x01\x12\x1c\n\x18\x45RROR_UNEXPECTED_PAYLOAD\x10\x02\x12\x11\n\rERROR_GENERIC\x10\x03\x12\x17\n\x13\x45RROR_SERIALIZATION\x10\x04\x12\x1d\n\x19\x45RROR_WRONG_AGENT_ADDRESS\x10\n\x12\x1a\n\x16\x45RROR_WRONG_PUBLIC_KEY\x10\x0b\x12\x17\n\x13\x45RROR_INVALID_PROOF\x10\x0c\x12\x1f\n\x1b\x45RROR_UNKNOWN_AGENT_ADDRESS\x10\x14\x12\x19\n\x15\x45RROR_AGENT_NOT_READY\x10\x15"\x86\x02\n\nAcnMessage\x12\x0f\n\x07version\x18\x01 \x01(\t\x12!\n\x06status\x18\x02 \x01(\x0b\x32\x0f.dhtnode.StatusH\x00\x12%\n\x08register\x18\x03 \x01(\x0b\x32\x11.dhtnode.RegisterH\x00\x12\x30\n\x0elookup_request\x18\x04 \x01(\x0b\x32\x16.dhtnode.LookupRequestH\x00\x12\x32\n\x0flookup_response\x18\x05 \x01(\x0b\x32\x17.dhtnode.LookupResponseH\x00\x12,\n\x0c\x61\x65\x61_envelope\x18\x06 \x01(\x0b\x32\x14.dhtnode.AeaEnvelopeH\x00\x42\t\n\x07payloadb\x06proto3'
     ),
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -73,8 +73,8 @@ _STATUS_ERRCODE = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     options=None,
-    serialized_start=431,
-    serialized_end=702,
+    serialized_start=471,
+    serialized_end=742,
 )
 _sym_db.RegisterEnumDescriptor(_STATUS_ERRCODE)
 
@@ -171,6 +171,40 @@ _AGENTRECORD = _descriptor.Descriptor(
             extension_scope=None,
             options=None,
         ),
+        _descriptor.FieldDescriptor(
+            name="not_before",
+            full_name="dhtnode.AgentRecord.not_before",
+            index=5,
+            number=6,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+        ),
+        _descriptor.FieldDescriptor(
+            name="not_after",
+            full_name="dhtnode.AgentRecord.not_after",
+            index=6,
+            number=7,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None,
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -180,8 +214,8 @@ _AGENTRECORD = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=30,
-    serialized_end=144,
+    serialized_start=31,
+    serialized_end=184,
 )
 
 
@@ -218,8 +252,8 @@ _REGISTER = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=146,
-    serialized_end=194,
+    serialized_start=186,
+    serialized_end=234,
 )
 
 
@@ -256,8 +290,8 @@ _LOOKUPREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=196,
-    serialized_end=234,
+    serialized_start=236,
+    serialized_end=274,
 )
 
 
@@ -294,8 +328,8 @@ _LOOKUPRESPONSE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=236,
-    serialized_end=296,
+    serialized_start=276,
+    serialized_end=336,
 )
 
 
@@ -349,8 +383,8 @@ _AEAENVELOPE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=298,
-    serialized_end=364,
+    serialized_start=338,
+    serialized_end=404,
 )
 
 
@@ -404,8 +438,8 @@ _STATUS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=367,
-    serialized_end=702,
+    serialized_start=407,
+    serialized_end=742,
 )
 
 
@@ -535,8 +569,8 @@ _ACNMESSAGE = _descriptor.Descriptor(
             fields=[],
         ),
     ],
-    serialized_start=705,
-    serialized_end=967,
+    serialized_start=745,
+    serialized_end=1007,
 )
 
 _REGISTER.fields_by_name["record"].message_type = _AGENTRECORD

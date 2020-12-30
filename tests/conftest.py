@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
-from aea.helpers.base import CertRequest
 import difflib
 import inspect
 import logging
@@ -69,6 +68,7 @@ from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -210,8 +210,12 @@ PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5
 PUBLIC_DHT_P2P_MADDR_2 = "/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
 PUBLIC_DHT_DELEGATE_URI_1 = "acn.fetch.ai:11000"
 PUBLIC_DHT_DELEGATE_URI_2 = "acn.fetch.ai:11001"
-PUBLIC_DHT_P2P_PUBLIC_KEY_1 = "0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7"
-PUBLIC_DHT_P2P_PUBLIC_KEY_2 = "03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d"
+PUBLIC_DHT_P2P_PUBLIC_KEY_1 = (
+    "0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7"
+)
+PUBLIC_DHT_P2P_PUBLIC_KEY_2 = (
+    "03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d"
+)
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
@@ -778,11 +782,13 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
     connection = StubConnection(configuration=configuration)
     return connection
 
+
 def _process_cert(key: Crypto, cert: CertRequest):
     # must match aea/cli/issue_certificates.py:_process_certificate
     message = cert.get_message(cert.public_key)
     signature = key.sign_message(message).encode("ascii").hex()
     Path(cert.save_path).write_bytes(signature.encode("ascii"))
+
 
 def _make_libp2p_connection(
     port: int = 10234,
@@ -868,76 +874,11 @@ def _make_libp2p_connection(
     return connection
 
 
-def _make_libp2p_connection_delete_me(
-    port: int = 10234,
-    host: str = "127.0.0.1",
-    relay: bool = True,
-    delegate: bool = False,
-    entry_peers: Optional[Sequence[MultiAddr]] = None,
-    delegate_port: int = 11234,
-    delegate_host: str = "127.0.0.1",
-    node_key_file: Optional[str] = None,
-    agent_address: Optional[Address] = None,
-    build_directory: Optional[str] = None,
-) -> P2PLibp2pConnection:
-    log_file = "libp2p_node_{}.log".format(port)
-    if os.path.exists(log_file):
-        os.remove(log_file)
-
-    shared_key = make_crypto(DEFAULT_LEDGER)
-    shared_key_path = f"./{shared_key.public_key}.txt"
-    with open(shared_key_path, "wb") as f:
-        shared_key.dump(f)
-
-    address = agent_address
-    if address is None:
-        address = shared_key.address
-    identity = Identity("", address=address)
-
-    key_file = node_key_file
-    if key_file is None:
-        key_file = shared_key_path
-
-    if not build_directory:
-        build_directory = os.getcwd()
-
-    if relay and delegate:
-        configuration = ConnectionConfig(
-            node_key_file=key_file,
-            local_uri="{}:{}".format(host, port),
-            public_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            delegate_uri="{}:{}".format(delegate_host, delegate_port),
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-        )
-    elif relay and not delegate:
-        configuration = ConnectionConfig(
-            node_key_file=key_file,
-            local_uri="{}:{}".format(host, port),
-            public_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-        )
-    else:
-        configuration = ConnectionConfig(
-            node_key_file=key_file,
-            local_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-        )
-    if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
-        build_node(build_directory)
-    return P2PLibp2pConnection(configuration=configuration, identity=identity)
-
-
 def _make_libp2p_client_connection(
-    peer_public_key: str, node_port: int = 11234, node_host: str = "127.0.0.1", uri: Optional[str] = None,
+    peer_public_key: str,
+    node_port: int = 11234,
+    node_host: str = "127.0.0.1",
+    uri: Optional[str] = None,
 ) -> P2PLibp2pClientConnection:
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("", address=crypto.address)
@@ -962,36 +903,6 @@ def _make_libp2p_client_connection(
         ],
         connection_id=P2PLibp2pClientConnection.connection_id,
         cert_requests=[cert_request],
-    )
-    return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
-
-
-def _make_libp2p_client_connection_delete_me(
-    node_port: int = 11234,
-    node_host: str = "127.0.0.1",
-    uri: Optional[str] = None,
-    cert: Optional[str] = None,
-    key: Optional[Crypto] = None,
-) -> P2PLibp2pClientConnection:
-    crypto = key
-    if crypto is None:
-        crypto = make_crypto(COSMOS)
-        identity = Identity("", address=crypto.address)
-    key_file = f"./{crypto.public_key}.txt"
-    with open(key_file, "wb") as f:
-        crypto.dump(f)
-
-    configuration = ConnectionConfig(
-        client_key_file=key_file,
-        nodes=[
-            {
-                "uri": str(uri)
-                if uri is not None
-                else "{}:{}".format(node_host, node_port),
-                "cert": cert if cert is not None else crypto.public_key,
-            },
-        ],
-        connection_id=P2PLibp2pClientConnection.connection_id,
     )
     return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
 

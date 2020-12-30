@@ -27,6 +27,7 @@ from ecdsa import SECP256k1, VerifyingKey
 
 from aea.crypto.fetchai import FetchAIHelper
 
+
 def recover_verify_keys_from_message(message: bytes, signature: str) -> List[str]:
     """ get the public key used to produce the `signature` of the `message`"""
     signature_b64 = base64.b64decode(signature)
@@ -34,10 +35,10 @@ def recover_verify_keys_from_message(message: bytes, signature: str) -> List[str
         signature_b64, message, SECP256k1, hashfunc=sha256,
     )
     public_keys = [
-        verifying_key.to_string("compressed").hex()
-        for verifying_key in verifying_keys
+        verifying_key.to_string("compressed").hex() for verifying_key in verifying_keys
     ]
     return public_keys
+
 
 class AgentRecord:
     """Agent Proof-of-Representation to peer"""
@@ -50,7 +51,15 @@ class AgentRecord:
         signature: str,
         service_id: str,
     ):
-        """Initialize the AgentRecord"""
+        """
+        Initialize the AgentRecord
+        
+        :param address: agent address
+        :param public key: agent public key (associated to the address)
+        :param peer_public_key: representative peer public key
+        :param signature: proof-of-representation of this AgentRecord
+        :param service_id: type of service for which the record is used
+        """
         self._service_id = service_id
         self._address = address
         self._public_key = public_key
@@ -102,7 +111,9 @@ class AgentRecord:
             print("Wrong peer public key")
             return False
         if self._address != FetchAIHelper.get_address_from_public_key(self._public_key):
-            print(f"Wrong address '{self._address}' and public key '{FetchAIHelper.get_address_from_public_key(self._public_key)}'")
+            print(
+                f"Wrong address '{self._address}' and public key '{FetchAIHelper.get_address_from_public_key(self._public_key)}'"
+            )
             return False
         if self._address not in FetchAIHelper.recover_message(
             self._peer_public_key.encode("utf-8"), self._signature
