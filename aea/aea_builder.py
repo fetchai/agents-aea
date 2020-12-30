@@ -1535,7 +1535,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def from_aea_project(
-        cls, aea_project_path: PathLike, skip_consistency_check: bool = False
+        cls,
+        aea_project_path: PathLike,
+        skip_consistency_check: bool = False,
+        create_keys: bool = True,
     ) -> "AEABuilder":
         """
         Construct the builder from an AEA project.
@@ -1549,17 +1552,20 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
+        :param create_keys: if True, create keys, otherwise just verify
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
         cls.try_to_load_agent_configuration_file(aea_project_path)
 
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
+
         # check and create missing, do not replace env variables. updates config
         AgentConfigManager.verify_or_create_private_keys(
             aea_project_path,
             substitude_env_vars=False,
             private_key_helper=private_key_verify_or_create,
+            create_keys=create_keys,
         ).dump_config()
 
         # just validate
@@ -1567,6 +1573,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             aea_project_path,
             substitude_env_vars=True,
             private_key_helper=private_key_verify_or_create,
+            create_keys=create_keys,
         ).agent_config
 
         builder = AEABuilder(with_default_packages=False)

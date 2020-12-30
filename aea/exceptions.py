@@ -106,6 +106,8 @@ def parse_exception(exception: Exception, limit=-1) -> str:
     :param limit: the limit
     :return: exception as string
     """
+    if isinstance(exception, AEAEnforceError):
+        limit = -2
     msgs = traceback.format_exception(
         type(exception), exception, exception.__traceback__, limit=limit
     )
