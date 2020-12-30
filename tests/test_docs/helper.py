@@ -28,6 +28,9 @@ import mistune
 import pytest
 
 
+MISTUNE_BLOCK_CODE_ID = "block_code"
+
+
 def extract_code_blocks(filepath, filter=None):
     """Extract code blocks from .md files."""
     code_blocks = []
@@ -104,12 +107,18 @@ class BaseTestMarkdownDocs:
     DOC_PATH: Path
 
     @classmethod
+    def _block_code_filter(cls, b: Dict) -> bool:
+        """Check Mistune block is a code block."""
+        return b["type"] == MISTUNE_BLOCK_CODE_ID
+
+    @classmethod
     def setup_class(cls):
         """Set up the test."""
         markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
         cls.doc_path = cls.DOC_PATH
         cls.doc_content = cls.doc_path.read_text()
         cls.blocks = markdown_parser(cls.doc_content)
+        cls.code_blocks = list(filter(cls._block_code_filter, cls.blocks))
 
 
 class BasePythonMarkdownDocs(BaseTestMarkdownDocs):

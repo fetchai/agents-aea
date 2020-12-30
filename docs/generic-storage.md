@@ -63,52 +63,49 @@ To get/put specific object collection instance should be used.
 Collection instance provide set of methods to handle data objects.
 List of collection methods:
 ```
-def put(self, object_id: str, object_body: JSON_TYPES) -> None:
-    """
-    Put object into collection.
+    def put(self, object_id: str, object_body: JSON_TYPES) -> None:
+        """
+        Put object into collection.
 
-    :param object_id: str object id
-    :param object_body: python dict, json compatible.
-    :return: None
-    """
+        :param object_id: str object id
+        :param object_body: python dict, json compatible.
+        :return: None
+        """
 
-def get(self, object_id: str) -> Optional[JSON_TYPES]:
-    """
-    Get object from the collection.
+    def get(self, object_id: str) -> Optional[JSON_TYPES]:
+        """
+        Get object from the collection.
 
-    :param object_id: str object id
+        :param object_id: str object id
 
-    :return: dict if object exists in collection otherwise None
-    """
+        :return: dict if object exists in collection otherwise None
+        """
 
+    def remove(self, object_id: str) -> None:
+        """
+        Remove object from the collection.
 
-def remove(self, object_id: str) -> None:
-    """
-    Remove object from the collection.
+        :param object_id: str object id
 
-    :param object_id: str object id
+        :return: None
+        """
 
-    :return: None
-    """
+    def find(self, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]:
+        """
+        Get objects from the collection by filtering by field value.
 
+        :param field: field name to search: example "parent.field"
+        :param equals: value field should be equal to
 
-def find(self, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]:
-    """
-    Get objects from the collection by filtering by field value.
+        :return: List of object bodies
+        """
 
-    :param field: field name to search: example "parent.field"
-    :param equals: value field should be equal to
+    def list(self) -> List[OBJECT_ID_AND_BODY]:
+        """
+        List all objects with keys from the collection.
 
-    :return: List of object bodies
-    """
-
-
-def list(self) -> List[OBJECT_ID_AND_BODY]:
-    """
-    List all objects with keys from the collection.
-
-    :return: Tuple of objects keys, bodies.
-    """
+        :return: Tuple of objects keys, bodies.
+        """
 ```
 
 
@@ -130,8 +127,8 @@ class TestBehaviour(TickerBehaviour):
         collection = self.context.storage.get_sync_collection('my_collection')
         first_call_datetime = collection.get("first_call_ts")
         if not first_call_ts:
-        	# there is no object with "first_call_ts" id.
-        	first_call_datetime = str(datetime.datetime.now())
+            # there is no object with "first_call_ts" id.
+            first_call_datetime = str(datetime.datetime.now())
 	        col.put(first_call_ts, first_call_datetime)
 	    print("Act was called for the first time on:", first_call_datetime)
 ```
