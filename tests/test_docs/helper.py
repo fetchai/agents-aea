@@ -21,7 +21,6 @@
 import re
 import traceback
 from abc import abstractmethod
-from copy import copy
 from pathlib import Path
 from typing import Dict
 
@@ -128,10 +127,8 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
         """Run Python code block in sequence."""
         python_blocks = list(filter(self._python_selector, self.blocks))
 
+        globals_, locals_ = {}, {}
         for python_block in python_blocks:
             python_code = python_block["text"]
-            exec(python_code)
-
-        locals_ = copy(locals())
-        locals_.pop("self")
+            exec(python_code, globals_, locals_)  # nosec
         self._assert(**locals_)
