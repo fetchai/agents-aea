@@ -20,7 +20,6 @@
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
 import os
-from pathlib import Path
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto

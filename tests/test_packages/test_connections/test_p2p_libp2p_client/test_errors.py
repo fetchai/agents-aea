@@ -38,7 +38,6 @@ from packages.fetchai.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
-    COSMOS,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _process_cert,

@@ -242,3 +242,7 @@ _.set_agent_overrides  # unused method (aea/manager/manager.py:432)
 AgentRecord  # unused class (aea/helpers/acn/agent_record.py:49)
 is_valid_for  # unused method (aea/helpers/acn/agent_record.py:96)
 Uri  # unused class (aea/helpers/acn/uri.py:26)
+recover_verify_keys_from_message  # unused function (aea/helpers/acn/agent_record.py:49)
+not_before_string  # unused property (aea/helpers/base.py:724)
+not_after_string  # unused property (aea/helpers/base.py:729)
+

@@ -26,7 +26,6 @@ import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.registries import make_crypto
-from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 

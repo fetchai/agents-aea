@@ -29,7 +29,13 @@ from aea.crypto.fetchai import FetchAIHelper
 
 
 def recover_verify_keys_from_message(message: bytes, signature: str) -> List[str]:
-    """ get the public key used to produce the `signature` of the `message`"""
+    """
+    Get the public key used to produce the `signature` of the `message`
+
+    :param message: raw bytes used to produce signature
+    :param signature: signature of the message
+    """
+
     signature_b64 = base64.b64decode(signature)
     verifying_keys = VerifyingKey.from_public_key_recovery(
         signature_b64, message, SECP256k1, hashfunc=sha256,
@@ -53,7 +59,7 @@ class AgentRecord:
     ):
         """
         Initialize the AgentRecord
-        
+
         :param address: agent address
         :param public key: agent public key (associated to the address)
         :param peer_public_key: representative peer public key

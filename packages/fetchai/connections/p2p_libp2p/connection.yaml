@@ -16,13 +16,13 @@ fingerprint:
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmcZATMqEThMQBdsud1AwJEYtKq86VfPSXhnfdE7TSWcsc
-  connection.py: QmeC7hDQr2Uo1DmFrS5MEneTvQZSc2bFkYXq4CRGv8WBXu
+  connection.py: QmUBr2UXkN8RYWxKppM6zWAoqGGd5qYpuwY56VFqssohRc
   dht/dhtclient/dhtclient.go: QmZCgMowWw4ueCSsyYY12om3RMQA3Ydp98ti65Eqa5ccuz
   dht/dhtclient/dhtclient_test.go: QmbTvSmNU1uqjLQo9LdD7zWmDcLuzEacDeg7AG4VXhmriV
-  dht/dhtclient/options.go: QmWs7fQqHRavjwe1PjihHFi85HeJu9qSEVyMdcRviZzaT2
+  dht/dhtclient/options.go: QmW3UjASUP6zGwK8b61hHQhVoLqBxQ13vZ1gcHuTmdrsDf
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
-  dht/dhtnode/message.pb.go: QmbMVfoPm74uxHRdAtzhke7ftn8YUQQ7kBs3e7QAjfaEc2
-  dht/dhtnode/message.proto: QmfFz18nn89kn7ReBwQri7cijbEh6D9TTd3j2euCkKVvDk
+  dht/dhtnode/message.pb.go: QmdXBSaZxyb82k94N3RxzGwuLuw2ZchfUddyhdcHXxDJQZ
+  dht/dhtnode/message.proto: QmSwpCP72J94kt2MaLSPQdt8puqtLMVPp3Migwp4xRwadZ
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtnode/utils.go: QmRhtiX1aUy7APRteJyFtpsJjoz8VshYDY1UcJkD8zJX1o
   dht/dhtpeer/benchmarks_test.go: QmQcy8WN5DY8Nfp5nkDgRaS6NjQbMzc6DSMbdY8QDPx9ao

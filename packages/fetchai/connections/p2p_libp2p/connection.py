@@ -35,7 +35,6 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.crypto.fetchai import FetchAIHelper
-from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
 from aea.helpers.acn.agent_record import AgentRecord, recover_verify_keys_from_message
 from aea.helpers.acn.uri import Uri

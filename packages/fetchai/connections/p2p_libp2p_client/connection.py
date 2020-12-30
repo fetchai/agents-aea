@@ -30,7 +30,6 @@ from typing import List, Optional, Tuple, Union, cast
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
-from aea.crypto.base import Crypto
 from aea.crypto.fetchai import FetchAIHelper
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
@@ -67,7 +66,7 @@ def _get_signatures_from_cert_request(
 ) -> Tuple[List[str], str]:
     signatures: List[str] = []
     verify_key = ""
-    for i in range(len(certs)):
+    for i, cert in enumerate(certs):
         cert = certs[i]
         public_key = public_keys[i]
         signature = bytes.fromhex(
@@ -140,12 +139,6 @@ class P2PLibp2pClientConnection(Connection):
 
         # TOFIX(): we cannot use store as the key will be used for TLS tcp connection
         #   also, as of now all the connections share the same key
-        # if (
-        #    self.has_crypto_store
-        #    and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
-        # ):  # pragma: no cover
-        #    key = self.crypto_store.crypto_objects[ledger_id]
-        # elif key_file is not None:
         if key_file is not None:
             key = make_crypto(ledger_id, private_key_path=key_file)
         else:
@@ -164,19 +157,18 @@ class P2PLibp2pClientConnection(Connection):
             cert_requests, nodes_public_keys, self.address
         )
         records: List[AgentRecord] = []
-        for i in range(len(signatures)):
+        for i, signature in enumerate(signatures):
             records.append(
                 AgentRecord(
                     self.address,
                     agent_public_key,
                     nodes_public_keys[i],
-                    signatures[i],
+                    signature,
                     POR_DEFAULT_SERVICE_ID,
                 )
             )
 
-        for i in range(len(nodes_public_keys)):
-            public_key = nodes_public_keys[i]
+        for i, public_key in enumerate(nodes_public_keys):
             uri = self.delegate_uris[i]
             record = next(
                 record for record in records if record.peer_public_key == public_key

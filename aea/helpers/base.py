@@ -746,14 +746,9 @@ class CertRequest:
         """Get the save_path"""
         return self._save_path
 
-    def get_message(self, public_key: str) -> bytes:
+    def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
         """Get the message to sign."""
-        message = (
-            public_key.encode("ascii")
-            # + self.identifier.encode("ascii")
-            # + self.not_before_string.encode("ascii")
-            # + self.not_after_string.encode("ascii")
-        )
+        message = public_key.encode("ascii")
         return message
 
     @property
