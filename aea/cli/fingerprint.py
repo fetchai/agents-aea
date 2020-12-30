@@ -16,10 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea add' subcommand."""
+import os
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 import click
 
@@ -35,12 +35,22 @@ from aea.configurations.constants import (  # noqa: F401 # pylint: disable=unuse
     CONNECTION,
     CONTRACT,
     DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PROTOCOL,
     SKILL,
 )
+from aea.configurations.data_types import PackageType
 from aea.configurations.loader import ConfigLoader
+
+
+CONFIG_FILE_TO_PACKAGE_TYPE = {
+    DEFAULT_SKILL_CONFIG_FILE: PackageType.SKILL,
+    DEFAULT_PROTOCOL_CONFIG_FILE: PackageType.PROTOCOL,
+    DEFAULT_CONNECTION_CONFIG_FILE: PackageType.CONNECTION,
+    DEFAULT_CONTRACT_CONFIG_FILE: PackageType.CONTRACT,
+}  # type: Dict[str, PackageType]
 
 
 @click.group()
@@ -81,6 +91,19 @@ def skill(ctx: Context, skill_public_id: PublicId):
     fingerprint_item(ctx, SKILL, skill_public_id)
 
 
+@fingerprint.command()
+@click.argument("path", type=str, required=True)
+@pass_ctx
+def by_path(ctx: Context, path: str):
+    """Fingerprint a package by its path."""
+    try:
+        click.echo("Fingerprinting component in '{}' ...".format(path))
+        full_path = Path(ctx.cwd) / Path(path)
+        fingerprint_package_by_path(full_path)
+    except Exception as e:
+        raise click.ClickException(str(e))
+
+
 def fingerprint_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     """
     Fingerprint components of an item.
@@ -99,25 +122,78 @@ def fingerprint_item(ctx: Context, item_type: str, item_public_id: PublicId) -> 
     # create fingerprints
     package_dir = Path(ctx.cwd, item_type_plural, item_public_id.name)
     try:
-        default_config_file_name = _get_default_configuration_file_name_from_type(
-            item_type
-        )
-        config_loader = ConfigLoader.from_configuration_type(item_type)
-        config_file_path = Path(package_dir, default_config_file_name)
-        config = config_loader.load(config_file_path.open())
-
-        if not package_dir.exists():
-            # we only permit non-vendorized packages to be fingerprinted
-            raise click.ClickException(
-                "Package not found at path {}".format(package_dir)
-            )
-
-        fingerprints_dict = _compute_fingerprint(
-            package_dir, ignore_patterns=config.fingerprint_ignore_patterns
-        )  # type: Dict[str, str]
-
-        # Load item specification yaml file and add fingerprints
-        config.fingerprint = fingerprints_dict
-        config_loader.dump(config, open(config_file_path, "w"))
+        fingerprint_package(package_dir, item_type)
     except Exception as e:
         raise click.ClickException(str(e))
+
+
+def fingerprint_package_by_path(package_dir: Path) -> None:
+    """
+    Fingerprint package placed in package_dir.
+
+    :param package_dir: directory of the package
+
+    :return: None
+    """
+    package_type = determine_package_type_for_directory(package_dir)
+    fingerprint_package(package_dir, package_type)
+
+
+def determine_package_type_for_directory(package_dir: Path) -> PackageType:
+    """
+    Find package type for the package directory by checking config file names.
+
+    :param package_dir: package dir to determine pcakge type:
+
+    :return: PackageType
+    """
+    config_files = list(
+        set(os.listdir(str(package_dir))).intersection(
+            set(CONFIG_FILE_TO_PACKAGE_TYPE.keys())
+        )
+    )
+
+    if len(config_files) > 1:
+        raise ValueError(
+            f"Too many config files in the directory, only one has to present!: {', '.join(config_files)}"
+        )
+    if len(config_files) == 0:
+        raise ValueError(
+            f"No package config file found in `{str(package_dir)}`. Incorrect directory?"
+        )
+
+    config_file = config_files[0]
+    package_type = CONFIG_FILE_TO_PACKAGE_TYPE[config_file]
+
+    return package_type
+
+
+def fingerprint_package(
+    package_dir: Path, package_type: Union[str, PackageType]
+) -> None:
+    """
+    Fingerprint components of an item.
+
+    :param ctx: the context.
+    :param item_type: the item type.
+    :param item_public_id: the item public id.
+    :return: None
+    """
+    package_type = PackageType(package_type)
+    item_type = str(package_type)
+    default_config_file_name = _get_default_configuration_file_name_from_type(item_type)
+    config_loader = ConfigLoader.from_configuration_type(item_type)
+    config_file_path = Path(package_dir, default_config_file_name)
+    config = config_loader.load(config_file_path.open())
+
+    if not package_dir.exists():
+        # we only permit non-vendorized packages to be fingerprinted
+        raise ValueError("Package not found at path {}".format(package_dir))
+
+    fingerprints_dict = _compute_fingerprint(
+        package_dir, ignore_patterns=config.fingerprint_ignore_patterns
+    )  # type: Dict[str, str]
+
+    # Load item specification yaml file and add fingerprints
+    config.fingerprint = fingerprints_dict
+    config_loader.dump(config, open(config_file_path, "w"))
