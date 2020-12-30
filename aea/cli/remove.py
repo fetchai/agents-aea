@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea remove' subcommand."""
-
 import os
 import shutil
 from collections import defaultdict
@@ -27,7 +26,6 @@ from typing import Dict, Generator, Optional, Set, Tuple, cast
 
 import click
 
-from aea.aea_builder import AEABuilder
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import load_item_config, try_to_load_agent_config
 from aea.cli.utils.context import Context
@@ -52,6 +50,7 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
+from aea.configurations.manager import find_component_directory_from_component_id
 
 
 @click.group()
@@ -170,7 +169,7 @@ class ItemRemoveHelper:
     def get_component_directory(package_id: PackageId) -> Path:
         """Return path for package."""
         try:
-            return AEABuilder.find_component_directory_from_component_id(
+            return find_component_directory_from_component_id(
                 Path("."),
                 ComponentId(str(package_id.package_type), package_id.public_id),
             )

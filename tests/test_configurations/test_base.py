@@ -35,7 +35,6 @@ from aea.configurations.base import (
     ConnectionConfig,
     ContractConfig,
     Dependency,
-    PackageConfiguration,
     PackageId,
     PackageType,
     PackageVersion,
@@ -984,22 +983,12 @@ def test_check_public_id_consistency_negative():
         component_configuration.check_public_id_consistency(Path(random_dir_name))
 
 
-def test_compare_data_pattern():
-    """Test PackageConfiguration._compare_data_to_pattern."""
-    errors = PackageConfiguration._compare_data_to_pattern({"a": 12}, {"a": 13})
-    assert not errors
-
-    errors = PackageConfiguration._compare_data_to_pattern({"a": 12}, {"a": "string"})
-    assert errors
-    assert (
-        errors[0]
-        == "For attribute `a` `str` data type is expected, but `int` was provided!"
-    )
-
-    errors = PackageConfiguration._compare_data_to_pattern({"a": 12}, {"b": 12})
-    assert errors
-    assert errors[0] == "Attribute `a` is not allowed to be updated!"
-
-    errors = PackageConfiguration._compare_data_to_pattern({"a": {}}, {"a": {"b": 12}})
-    assert errors
-    assert errors[0] == "Attribute `a` is not allowed to be updated!"
+def test_component_id_from_json():
+    """Test ComponentId.from_json."""
+    json_data = {
+        "type": "connection",
+        "author": "author",
+        "name": "name",
+        "version": "1.0.0",
+    }
+    assert ComponentId.from_json(json_data).json == json_data

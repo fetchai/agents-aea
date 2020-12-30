@@ -20,6 +20,7 @@
 import os
 import re
 import shutil
+import sys
 from pathlib import Path
 from typing import Dict, Optional, Set, Tuple
 
@@ -60,8 +61,9 @@ from aea.configurations.constants import (
     VENDOR,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
-from aea.crypto.helpers import verify_or_create_private_keys
+from aea.crypto.helpers import private_key_verify_or_create
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
@@ -74,7 +76,7 @@ ROOT = Path(".")
 
 
 def verify_or_create_private_keys_ctx(
-    ctx: Context, aea_project_path: Path = ROOT, exit_on_error: bool = True,
+    ctx: Context, aea_project_path: Path = ROOT, exit_on_error: bool = False,
 ) -> None:
     """
     Verify or create private keys with ctx provided.
@@ -82,11 +84,20 @@ def verify_or_create_private_keys_ctx(
     :param ctx: Context
     """
     try:
-        agent_config = verify_or_create_private_keys(aea_project_path, exit_on_error)
+        AgentConfigManager.verify_or_create_private_keys(
+            aea_project_path,
+            private_key_helper=private_key_verify_or_create,
+            substitude_env_vars=False,
+        ).dump_config()
+        agent_config = AgentConfigManager.verify_or_create_private_keys(
+            aea_project_path, private_key_helper=private_key_verify_or_create
+        ).agent_config
         if ctx is not None:
             ctx.agent_config = agent_config
     except ValueError as e:  # pragma: nocover
-        click.ClickException(str(e))
+        if exit_on_error:
+            sys.exit(1)
+        raise click.ClickException(str(e))
 
 
 def validate_package_name(package_name: str):
@@ -279,9 +290,8 @@ def find_item_locally(
         item_configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        item_configuration = item_configuration_loader.load(
-            item_configuration_filepath.open()
-        )
+        with item_configuration_filepath.open() as fp:
+            item_configuration = item_configuration_loader.load(fp)
     except ValidationError as e:
         raise click.ClickException(
             "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
@@ -331,9 +341,8 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
         item_configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        item_configuration = item_configuration_loader.load(
-            item_configuration_filepath.open()
-        )
+        with item_configuration_filepath.open() as fp:
+            item_configuration = item_configuration_loader.load(fp)
     except ValidationError as e:
         raise click.ClickException(
             "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
@@ -425,9 +434,8 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
     )
     supported_items = get_items(ctx.agent_config, item_type)
     supported_items.add(item_public_id)
-    ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-    )
+    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+        ctx.agent_loader.dump(ctx.agent_config, fp)
 
 
 def is_item_present_unified(ctx: Context, item_type: str, item_public_id: PublicId):

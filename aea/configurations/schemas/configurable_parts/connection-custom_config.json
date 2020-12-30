@@ -15,6 +15,9 @@
     },
     "config": {
       "type": "object"
+    },
+    "is_abstract": {
+      "$ref": "skill-config_schema.json#/properties/is_abstract"
     }
   }
 }

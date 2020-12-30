@@ -167,6 +167,8 @@ def test_description():
     mock.description_bytes = None
     Description.encode(mock, description)
     assert mock.description_bytes is not None
+    description = Description.decode(mock)
+    assert "test" in description.values
 
 
 def test_constraint_type():
@@ -613,3 +615,10 @@ def test_query():
     query_pb = query._encode()
     actual_query = Query._decode(query_pb)
     assert actual_query == query
+
+    query_pb = MagicMock()
+    query_pb.query_bytes = None
+    Query.encode(query_pb, query)
+    assert query_pb.query_bytes is not None
+    query = Query.decode(query_pb)
+    assert "author" in query.model.attributes_by_name

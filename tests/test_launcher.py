@@ -85,7 +85,8 @@ class TestThreadLauncherMode:
             Path(cls.t, cls.failing_agent, "skills", "exception"),
         )
         config_path = Path(cls.t, cls.failing_agent, DEFAULT_AEA_CONFIG_FILE)
-        config = yaml.safe_load(open(config_path))
+        with open(config_path) as fp:
+            config = yaml.safe_load(fp)
         config.setdefault("skills", []).append("fetchai/exception:0.1.0")
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
@@ -98,9 +99,11 @@ class TestThreadLauncherMode:
         """Set runtime mode of the agent to async."""
         with cd(agent_name):
             config_path = Path(cls.t, agent_name, DEFAULT_AEA_CONFIG_FILE)
-            config = yaml.safe_load(open(config_path))
+            with open(config_path) as fp:
+                config = yaml.safe_load(fp)
             config.setdefault("runtime_mode", "async")
-            yaml.safe_dump(config, open(config_path, "w"))
+            with open(config_path, "w") as fp:
+                yaml.safe_dump(config, fp)
 
     @classmethod
     def teardown_class(cls):
