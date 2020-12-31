@@ -19,33 +19,11 @@
 
 """This module contains types and helpers for acn Proof-of-Representation."""
 
-import base64
-from hashlib import sha256
 from pathlib import Path
-from typing import List, Tuple
-
-from ecdsa import SECP256k1, VerifyingKey
+from typing import Tuple
 
 from aea.crypto.fetchai import FetchAIHelper
 from aea.helpers.base import CertRequest
-
-
-def recover_verify_keys_from_message(message: bytes, signature: str) -> List[str]:
-    """
-    Get the public key used to produce the `signature` of the `message`
-
-    :param message: raw bytes used to produce signature
-    :param signature: signature of the message
-    """
-
-    signature_b64 = base64.b64decode(signature)
-    verifying_keys = VerifyingKey.from_public_key_recovery(
-        signature_b64, message, SECP256k1, hashfunc=sha256,
-    )
-    public_keys = [
-        verifying_key.to_string("compressed").hex() for verifying_key in verifying_keys
-    ]
-    return public_keys
 
 
 def signature_from_cert_request(
@@ -65,7 +43,9 @@ def signature_from_cert_request(
     signature = bytes.fromhex(Path(cert.save_path).read_bytes().decode("ascii")).decode(
         "ascii"
     )
-    public_keys = recover_verify_keys_from_message(cert.get_message(message), signature)
+    public_keys = FetchAIHelper.recover_verifying_keys_from_message(
+        cert.get_message(message), signature
+    )
     if len(public_keys) == 0:
         raise Exception("Malformed signature")
     addresses = [
