@@ -764,6 +764,9 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
         assert result.exit_code == 0, result.stdout_bytes
 
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "issue-certificates"])
+        assert result.exit_code == 0, result.stdout_bytes
+
         self.proc = PexpectWrapper(  # nosec
             [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
             env=os.environ,

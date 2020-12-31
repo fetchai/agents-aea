@@ -21,11 +21,13 @@
 
 import base64
 from hashlib import sha256
-from typing import List
+from pathlib import Path
+from typing import List, Tuple
 
 from ecdsa import SECP256k1, VerifyingKey
 
 from aea.crypto.fetchai import FetchAIHelper
+from aea.helpers.base import CertRequest
 
 
 def recover_verify_keys_from_message(message: bytes, signature: str) -> List[str]:
@@ -44,6 +46,38 @@ def recover_verify_keys_from_message(message: bytes, signature: str) -> List[str
         verifying_key.to_string("compressed").hex() for verifying_key in verifying_keys
     ]
     return public_keys
+
+def signature_from_cert_request(
+    cert: CertRequest, message: str, signer_address: str
+) -> Tuple[str, str]:
+    """
+    Get signature and its verifying key from a CertRequest and its message.
+    Note: must match aea/cli/issue_certificates.py:_process_certificate
+
+    :param cert: cert request containing the signature
+    :param message: the message used to generate signature
+    :param signer_address: the address of the signer
+    :return: the signature and the verifying public key
+    """
+    
+    signature = bytes.fromhex(Path(cert.save_path).read_bytes().decode("ascii")).decode(
+        "ascii"
+    )
+    public_keys = recover_verify_keys_from_message(
+        cert.get_message(message), signature
+    )
+    if len(public_keys) == 0:
+        raise Exception("Malformed signature")
+    addresses = [
+        FetchAIHelper.get_address_from_public_key(public_key)
+        for public_key in public_keys
+    ]
+    try:
+        verify_key = public_keys[addresses.index(signer_address)]
+    except ValueError:
+        raise Exception("Not signed by agent")
+    return signature, verify_key
+
 
 
 class AgentRecord:
@@ -101,29 +135,26 @@ class AgentRecord:
         """Get string representation."""
         return f"(address={self.address}, public_key={self.public_key}, peer_public_key={self.peer_public_key}, signature={self.signature})"
 
-    def is_valid_for(self, address: str, peer_public_key: str) -> bool:
+    def check_validity(self, address: str, peer_public_key: str) -> None:
         """
-        Check if the agent record is valid for `address` and `peer_public_key`
+        Check if the agent record is valid for `address` and `peer_public_key`.
+        Raises an Exception if invalid.
 
         :param address: the expected agent address concerned by the record
         :param peer_public_key: the expected representative peer public key
-        :return: True if record is valid
         """
 
         if self._address != address:
-            print("Wrong address")
-            return False
-        if self._peer_public_key != peer_public_key:
-            print("Wrong peer public key")
-            return False
-        if self._address != FetchAIHelper.get_address_from_public_key(self._public_key):
-            print(
-                f"Wrong address '{self._address}' and public key '{FetchAIHelper.get_address_from_public_key(self._public_key)}'"
+            raise Exception(
+                "Proof-of-representation is not generated for the intended agent"
             )
-            return False
+        if self._peer_public_key != peer_public_key:
+            raise Exception(
+                "Proof-of-representation is not generated for intended peer"
+            )
+        if self._address != FetchAIHelper.get_address_from_public_key(self._public_key):
+            raise Exception("Agent address and public key doesn't match")
         if self._address not in FetchAIHelper.recover_message(
             self._peer_public_key.encode("utf-8"), self._signature
         ):
-            print("Wrong signature")
-            return False
-        return True
+            raise Exception("Invalid signature")

@@ -25,17 +25,15 @@ import random
 import struct
 from asyncio import CancelledError
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, cast
+from typing import List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
-from aea.crypto.fetchai import FetchAIHelper
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
-from aea.helpers.acn.agent_record import AgentRecord, recover_verify_keys_from_message
+from aea.helpers.acn.agent_record import AgentRecord, signature_from_cert_request
 from aea.helpers.acn.uri import Uri
-from aea.helpers.base import CertRequest
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import AcnMessage
@@ -59,30 +57,6 @@ SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 POR_DEFAULT_SERVICE_ID = "acn"
 
 ACN_CURRENT_VERSION = "0.1.0"
-
-
-def _get_signatures_from_cert_request(
-    certs: List[CertRequest], public_keys: List[str], agent_address: str
-) -> Tuple[List[str], str]:
-    signatures: List[str] = []
-    verify_key = ""
-    for i, cert in enumerate(certs):
-        cert = certs[i]
-        public_key = public_keys[i]
-        signature = bytes.fromhex(
-            Path(cert.save_path).read_bytes().decode("ascii")
-        ).decode("ascii")
-        if verify_key == "":
-            public_keys = recover_verify_keys_from_message(
-                cert.get_message(public_key), signature
-            )
-            addresses = [
-                FetchAIHelper.get_address_from_public_key(public_key)
-                for public_key in public_keys
-            ]
-            verify_key = public_keys[addresses.index(agent_address)]
-        signatures.append(signature)
-    return signatures, verify_key
 
 
 class P2PLibp2pClientConnection(Connection):
@@ -132,10 +106,9 @@ class P2PLibp2pClientConnection(Connection):
         for cert_request in cert_requests:
             if not Path(cert_request.save_path).is_file():
                 raise Exception(
-                    "cert_request 'save_path' field is not a file.  Please ensure that 'issue-certificates' command is called beforehand"
+                    "cert_request 'save_path' field is not a file. "
+                    "Please ensure that 'issue-certificates' command is called beforehand"
                 )
-
-        # verify keys are correct
 
         # TOFIX(): we cannot use store as the key will be used for TLS tcp connection
         #   also, as of now all the connections share the same key
@@ -153,9 +126,16 @@ class P2PLibp2pClientConnection(Connection):
 
         # delegates PoRs
         self.delegate_pors = []
-        signatures, agent_public_key = _get_signatures_from_cert_request(
-            cert_requests, nodes_public_keys, self.address
-        )
+        agent_public_key = ""
+        signatures: List[str] = []
+        for i, cert in enumerate(cert_requests):
+            try:
+                signature, agent_public_key = signature_from_cert_request(cert, nodes_public_keys[i], self.address)
+                signatures.append(signature)
+            except Exception as e:
+                raise ValueError(f"Incorrect certificate from file {cert.save_path} "
+                                 f"for node {nodes_uris[i]} : {str(e)}")
+
         records: List[AgentRecord] = []
         for i, signature in enumerate(signatures):
             records.append(
@@ -173,10 +153,15 @@ class P2PLibp2pClientConnection(Connection):
             record = next(
                 record for record in records if record.peer_public_key == public_key
             )
-            enforce(
-                True or record.is_valid_for(self.address, public_key),
-                f"Invalid Proof-of-Representation for node {uri}",
-            )
+            try:
+                record.check_validity(self.address, public_key)
+            except Exception as e:
+                raise ValueError(
+                    "Invalid Proof-of-Representation for node {}: {}".format(
+                        str(uri), str(e)
+                    )
+                )
+
             self.delegate_pors.append(record)
 
         # select a delegate
