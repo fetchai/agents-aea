@@ -390,7 +390,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
                 "not_after": "2022-01-01",
                 "not_before": "2021-01-01",
                 "public_key": "ethereum",
-                "save_path": ".source/conn_cert.txt",
+                "save_path": "conn_cert.txt",
             }
         ]
         self.set_config(setting_path, json.dumps(cert_requests), type_="list")
@@ -470,7 +470,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
                     "not_after": "2022-01-01",
                     "not_before": "2021-01-01",
                     "public_key": "ethereum",
-                    "save_path": ".source/conn_cert.txt",
+                    "save_path": "conn_cert.txt",
                 }
             ]
             self.set_config(setting_path, json.dumps(cert_requests), type_="list")

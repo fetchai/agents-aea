@@ -184,7 +184,7 @@ def run():
     resources.add_connection(ledger_api_connection)
 
     # Add the P2P connection
-    cert_path = ".source/conn_cert.txt"
+    cert_path = ".certs/conn_cert.txt"
     cert_request = CertRequest(
         **{
             "identifier": "acn",
