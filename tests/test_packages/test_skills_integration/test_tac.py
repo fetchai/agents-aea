@@ -19,6 +19,7 @@
 """This test module contains the integration test for the tac skills."""
 
 import datetime
+import json
 import uuid
 from random import uniform
 
@@ -381,6 +382,18 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         self.set_config(setting_path, ETHEREUM)
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        cert_requests = [
+            {
+                "identifier": "acn",
+                "ledger_id": "ethereum",
+                "not_after": "2022-01-01",
+                "not_before": "2021-01-01",
+                "public_key": "ethereum",
+                "save_path": ".source/conn_cert.txt",
+            }
+        ]
+        self.set_config(setting_path, json.dumps(cert_requests), type_="list")
 
         # replace location
         setting_path = (
@@ -449,8 +462,18 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             self.nested_set_config(setting_path, config)
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
             self.set_config(setting_path, FETCHAI)
-            setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
-            self.set_config(setting_path, ETHEREUM)
+            setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+            cert_requests = [
+                {
+                    "identifier": "acn",
+                    "ledger_id": "ethereum",
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": "ethereum",
+                    "save_path": ".source/conn_cert.txt",
+                }
+            ]
+            self.set_config(setting_path, json.dumps(cert_requests), type_="list")
 
             # replace location
             setting_path = (

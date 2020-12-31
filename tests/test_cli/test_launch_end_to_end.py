@@ -27,6 +27,7 @@ import pytest
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.common.pexpect_popen import PexpectWrapper
+from tests.conftest import FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
 
 
 class TestLaunchEndToEnd(AEATestCaseMany):
@@ -141,6 +142,28 @@ class TestLaunchEndToEnd(AEATestCaseMany):
         )
         self.run_cli_command(
             "build", cwd=search_agent_name,
+        )
+        self.set_agent_context(registration_agent_name)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.add_private_key(
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
+        self.generate_private_key()
+        self.add_private_key()
+        self.unset_agent_context()
+        self.run_cli_command(
+            "issue-certificates", cwd=registration_agent_name,
+        )
+        self.set_agent_context(search_agent_name)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.add_private_key(
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
+        self.generate_private_key()
+        self.add_private_key()
+        self.unset_agent_context()
+        self.run_cli_command(
+            "issue-certificates", cwd=search_agent_name,
         )
 
         proc = PexpectWrapper(  # nosec

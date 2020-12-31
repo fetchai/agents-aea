@@ -32,9 +32,10 @@ from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import get_package_path_unified
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import CONNECTION
+from aea.crypto.helpers import make_certificate
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
-from aea.helpers.base import CertRequest, ensure_dir
+from aea.helpers.base import CertRequest
 
 
 @click.command()
@@ -84,12 +85,11 @@ def _process_certificate(
         raise ClickException(
             f"Cannot find private key with id '{ledger_id}'. Please use `aea generate-key {key_identifier}` and `aea add-key {key_identifier}` to add a private key with id '{key_identifier}'."
         )
-    crypto = crypto_registry.make(ledger_id, private_key_path=crypto_private_key_path)
     message = cert_request.get_message(public_key)
-    signature = crypto.sign_message(message).encode("ascii").hex()
-    click.echo(f"Generated signature: '{signature}'")
-    ensure_dir(os.path.dirname(os.path.join(ctx.cwd, output_path)))
-    Path(output_path).write_bytes(signature.encode("ascii"))
+    cert = make_certificate(
+        ledger_id, crypto_private_key_path, message, os.path.join(ctx.cwd, output_path)
+    )
+    click.echo(f"Generated signature: '{cert}'")
 
 
 def _process_connection(ctx: Context, connection_id: PublicId):

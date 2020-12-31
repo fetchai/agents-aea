@@ -518,7 +518,9 @@ class ConnectionConfig(ComponentConfiguration):
     package_type = PackageType.CONNECTION
     schema = "connection-config_schema.json"
 
-    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["config", "is_abstract"])
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
+        ["config", "cert_requests", "is_abstract"]
+    )
 
     def __init__(
         self,
