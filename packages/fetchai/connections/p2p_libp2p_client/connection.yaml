@@ -30,13 +30,13 @@ cert_requests:
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: 0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7
-  save_path: .source/acn_fetch_ai_11000.txt
+  save_path: acn_fetch_ai_11000.txt
 - identifier: acn
   ledger_id: fetchai
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: 03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d
-  save_path: .source/acn_fetch_ai_11001.txt
+  save_path: acn_fetch_ai_11001.txt
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
