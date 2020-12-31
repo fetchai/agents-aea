@@ -749,6 +749,9 @@ class CertRequest:
     def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
         """Get the message to sign."""
         message = public_key.encode("ascii")
+        # + self.identifier.encode("ascii")  # noqa: E800
+        # + self.not_before_string.encode("ascii")  # noqa: E800
+        # + self.not_after_string.encode("ascii")  # noqa: E800
         return message
 
     @property

@@ -33,7 +33,7 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.fetchai import FetchAIHelper
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
-from aea.helpers.acn.agent_record import AgentRecord, recover_verify_keys_from_message
+from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.base import CertRequest
 from aea.mail.base import Envelope
@@ -62,7 +62,7 @@ ACN_CURRENT_VERSION = "0.1.0"
 
 
 def _get_signatures_from_cert_request(
-    certs: List[CertRequest], public_keys: List[str], agent_address: str
+    certs: List[CertRequest], public_keys: Tuple[str, ...], agent_address: str
 ) -> Tuple[List[str], str]:
     signatures: List[str] = []
     verify_key = ""
@@ -73,7 +73,7 @@ def _get_signatures_from_cert_request(
             Path(cert.save_path).read_bytes().decode("ascii")
         ).decode("ascii")
         if verify_key == "":
-            public_keys = recover_verify_keys_from_message(
+            public_keys = FetchAIHelper.recover_verifying_keys_from_message(
                 cert.get_message(public_key), signature
             )
             addresses = [
@@ -128,7 +128,9 @@ class P2PLibp2pClientConnection(Connection):
 
         cert_requests = self.configuration.cert_requests
         if cert_requests is None or len(cert_requests) != len(nodes):
-            raise ValueError("cert_requests field must be set")
+            raise ValueError(
+                "cert_requests field must be set and contain exactly as many entries as 'nodes'!"
+            )
         for cert_request in cert_requests:
             if not Path(cert_request.save_path).is_file():
                 raise Exception(

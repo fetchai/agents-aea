@@ -19,31 +19,7 @@
 
 """This module contains types and helpers for acn Proof-of-Representation."""
 
-import base64
-from hashlib import sha256
-from typing import List
-
-from ecdsa import SECP256k1, VerifyingKey
-
 from aea.crypto.fetchai import FetchAIHelper
-
-
-def recover_verify_keys_from_message(message: bytes, signature: str) -> List[str]:
-    """
-    Get the public key used to produce the `signature` of the `message`
-
-    :param message: raw bytes used to produce signature
-    :param signature: signature of the message
-    """
-
-    signature_b64 = base64.b64decode(signature)
-    verifying_keys = VerifyingKey.from_public_key_recovery(
-        signature_b64, message, SECP256k1, hashfunc=sha256,
-    )
-    public_keys = [
-        verifying_key.to_string("compressed").hex() for verifying_key in verifying_keys
-    ]
-    return public_keys
 
 
 class AgentRecord:
@@ -116,9 +92,10 @@ class AgentRecord:
         if self._peer_public_key != peer_public_key:
             print("Wrong peer public key")
             return False
-        if self._address != FetchAIHelper.get_address_from_public_key(self._public_key):
+        recovered_address = FetchAIHelper.get_address_from_public_key(self._public_key)
+        if self._address != recovered_address:
             print(
-                f"Wrong address '{self._address}' and public key '{FetchAIHelper.get_address_from_public_key(self._public_key)}'"
+                f"Wrong address '{self._address}' and public key '{recovered_address}'"
             )
             return False
         if self._address not in FetchAIHelper.recover_message(

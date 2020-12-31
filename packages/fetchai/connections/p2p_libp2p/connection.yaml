@@ -16,7 +16,7 @@ fingerprint:
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmcZATMqEThMQBdsud1AwJEYtKq86VfPSXhnfdE7TSWcsc
-  connection.py: QmUBr2UXkN8RYWxKppM6zWAoqGGd5qYpuwY56VFqssohRc
+  connection.py: QmQRxza9EKQwWD6Uaq4NXKo4DdZ8QatNNLTMv8mVe4daY4
   dht/dhtclient/dhtclient.go: QmZCgMowWw4ueCSsyYY12om3RMQA3Ydp98ti65Eqa5ccuz
   dht/dhtclient/dhtclient_test.go: QmbTvSmNU1uqjLQo9LdD7zWmDcLuzEacDeg7AG4VXhmriV
   dht/dhtclient/options.go: QmW3UjASUP6zGwK8b61hHQhVoLqBxQ13vZ1gcHuTmdrsDf
@@ -55,7 +55,7 @@ cert_requests:
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: fetchai
-  save_path: /source/conn_cert.txt
+  save_path: /Users/davidminarsch/work/agents-aea/source/conn_cert.txt
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

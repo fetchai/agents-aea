@@ -36,7 +36,7 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.crypto.fetchai import FetchAIHelper
 from aea.exceptions import enforce
-from aea.helpers.acn.agent_record import AgentRecord, recover_verify_keys_from_message
+from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.base import CertRequest
 from aea.helpers.multiaddr.base import MultiAddr
@@ -439,7 +439,7 @@ def _get_signature_from_cert_request(
     signature = bytes.fromhex(Path(cert.save_path).read_bytes().decode("ascii")).decode(
         "ascii"
     )
-    public_keys = recover_verify_keys_from_message(
+    public_keys = FetchAIHelper.recover_verifying_keys_from_message(
         cert.get_message(node_public_key), signature
     )
     addresses = [
@@ -553,7 +553,9 @@ class P2PLibp2pConnection(Connection):
 
         cert_requests = self.configuration.cert_requests
         if cert_requests is None or len(cert_requests) != 1:
-            raise ValueError("cert_requests field must be set")
+            raise ValueError(
+                "cert_requests field must be set and contain exactly one entry!"
+            )
         if not Path(cert_requests[0].save_path).is_file():
             raise Exception(
                 "cert_request 'save_path' field is not file. Please ensure that 'issue-certificates' command is called beforehand"

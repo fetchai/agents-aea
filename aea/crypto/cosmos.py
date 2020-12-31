@@ -150,6 +150,24 @@ class CosmosHelper(Helper):
         :param is_deprecated_mode: if the deprecated signing was used
         :return: the recovered addresses
         """
+        public_keys = cls.recover_verifying_keys_from_message(message, signature)
+        addresses = [
+            cls.get_address_from_public_key(public_key) for public_key in public_keys
+        ]
+        return tuple(addresses)
+
+    @classmethod
+    def recover_verifying_keys_from_message(
+        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[str, ...]:
+        """
+        Get the public key used to produce the `signature` of the `message`
+
+        :param message: raw bytes used to produce signature
+        :param signature: signature of the message
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered public keys
+        """
         signature_b64 = base64.b64decode(signature)
         verifying_keys = VerifyingKey.from_public_key_recovery(
             signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
@@ -158,10 +176,7 @@ class CosmosHelper(Helper):
             verifying_key.to_string("compressed").hex()
             for verifying_key in verifying_keys
         ]
-        addresses = [
-            cls.get_address_from_public_key(public_key) for public_key in public_keys
-        ]
-        return tuple(addresses)
+        return tuple(public_keys)
 
     @staticmethod
     def get_hash(message: bytes) -> str:

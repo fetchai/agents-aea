@@ -27,6 +27,7 @@ from aea import __version__
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder, DEFAULT_ENV_DOTFILE
 from aea.cli.install import do_install
+from aea.cli.issue_certificates import issue_certificates_
 from aea.cli.utils.click_utils import ConnectionsOption
 from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
@@ -84,6 +85,7 @@ def run(
 ):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
+    issue_certificates_(ctx)
     profiling = int(profiling)
     if profiling > 0:
         with _profiling_context(period=profiling):
