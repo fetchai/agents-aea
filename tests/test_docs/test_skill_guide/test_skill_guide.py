@@ -207,7 +207,7 @@ class TestBuildSkill(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            search_aea_process, check_strings, timeout=240, is_terminating=False
+            search_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []

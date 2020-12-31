@@ -144,7 +144,7 @@ class TestCarPark(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            carpark_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -160,7 +160,7 @@ class TestCarPark(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            carpark_client_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_client_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -325,7 +325,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            carpark_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -341,7 +341,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            carpark_client_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_client_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -361,7 +361,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            carpark_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=120, is_terminating=False
         )
         assert (
             missing_strings == []

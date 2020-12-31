@@ -88,6 +88,11 @@ aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
+```
+
 ### Create the client AEA
 
 In another terminal, fetch the AEA that will get some tokens from the deployer.
@@ -153,6 +158,11 @@ And one for the P2P connection:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ## Run Ganache

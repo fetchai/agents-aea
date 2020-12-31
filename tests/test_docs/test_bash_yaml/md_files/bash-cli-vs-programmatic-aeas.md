@@ -11,7 +11,13 @@ aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_led
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+``` bash
+aea issue-certificates
 ```
 ``` bash
 aea run

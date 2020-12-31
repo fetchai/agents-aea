@@ -134,7 +134,7 @@ aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
-Finally, create certificates to associate the keys:
+Finally, certify the key for use by the connections that request that:
 ``` bash
 aea issue-certificates
 ```
@@ -160,7 +160,7 @@ aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
-Finally, create certificates to associate the keys:
+Finally, certify the key for use by the connections that request that:
 ``` bash
 aea issue-certificates
 ```

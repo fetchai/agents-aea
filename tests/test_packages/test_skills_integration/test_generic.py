@@ -153,7 +153,7 @@ class TestGenericSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=240, is_terminating=False
+            seller_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -169,7 +169,7 @@ class TestGenericSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            buyer_aea_process, check_strings, timeout=240, is_terminating=False
+            buyer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -341,7 +341,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=240, is_terminating=False
+            seller_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -357,7 +357,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            buyer_aea_process, check_strings, timeout=10, is_terminating=False
+            buyer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -375,7 +375,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=240, is_terminating=False
+            seller_aea_process, check_strings, timeout=120, is_terminating=False
         )
         assert (
             missing_strings == []

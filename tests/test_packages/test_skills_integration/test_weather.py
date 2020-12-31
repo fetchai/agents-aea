@@ -145,7 +145,7 @@ class TestWeatherSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            weather_station_process, check_strings, timeout=240, is_terminating=False
+            weather_station_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -163,7 +163,7 @@ class TestWeatherSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            weather_client_process, check_strings, timeout=240, is_terminating=False,
+            weather_client_process, check_strings, timeout=30, is_terminating=False,
         )
         assert (
             missing_strings == []
@@ -323,7 +323,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            weather_station_process, check_strings, timeout=240, is_terminating=False
+            weather_station_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -341,7 +341,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            weather_client_process, check_strings, timeout=240, is_terminating=False,
+            weather_client_process, check_strings, timeout=30, is_terminating=False,
         )
         assert (
             missing_strings == []
@@ -359,7 +359,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            weather_station_process, check_strings, timeout=240, is_terminating=False
+            weather_station_process, check_strings, timeout=120, is_terminating=False
         )
         assert (
             missing_strings == []
