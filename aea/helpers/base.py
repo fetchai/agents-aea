@@ -642,7 +642,7 @@ class CertRequest:
         self._not_after_string = not_after
         self._not_before = self._parse_datetime(not_before)
         self._not_after = self._parse_datetime(not_after)
-        self._save_path = Path(os.path.abspath(save_path))
+        self._save_path = Path(save_path)
 
         self._parse_public_key(public_key)
         self._check_validation_boundaries()

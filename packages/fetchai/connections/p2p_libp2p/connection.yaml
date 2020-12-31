@@ -55,7 +55,7 @@ cert_requests:
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: fetchai
-  save_path: /Users/davidminarsch/work/agents-aea/.source/conn_cert.txt
+  save_path: .source/conn_cert.txt
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

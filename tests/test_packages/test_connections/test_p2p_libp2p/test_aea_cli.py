@@ -65,6 +65,8 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         self.set_config("{}.log_file".format(config_path), log_file)
         TestP2PLibp2pConnectionAEARunningDefaultConfigNode.log_files.append(log_file)
 
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+
         process = self.run_agent()
         is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
@@ -126,6 +128,8 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
         TestP2PLibp2pConnectionAEARunningFullNode.log_files.append(log_file)
+
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
 
