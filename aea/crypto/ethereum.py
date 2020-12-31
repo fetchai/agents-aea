@@ -377,7 +377,7 @@ class EthereumHelper(Helper):
         :param is_deprecated_mode: if the deprecated signing was used
         :return: the recovered public keys
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @staticmethod
     def get_hash(message: bytes) -> str:
