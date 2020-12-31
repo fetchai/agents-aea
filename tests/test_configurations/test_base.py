@@ -363,7 +363,9 @@ class TestAgentConfigUpdate:
         """Test the update method."""
         new_private_key_paths = dict(ethereum="foo")
         expected_private_key_paths = dict(
-            ethereum="foo", cosmos="cosmos_private_key.txt"
+            ethereum="foo",
+            cosmos="cosmos_private_key.txt",
+            fetchai="fetchai_private_key.txt",
         )
         self.aea_config.update(
             dict(

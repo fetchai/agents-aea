@@ -27,12 +27,11 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
 )
@@ -81,16 +80,16 @@ class TestWeatherSkills(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.set_config(setting_path, FETCHAI)
 
         # replace location
         setting_path = (
@@ -117,10 +116,10 @@ class TestWeatherSkills(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # set p2p configs
@@ -136,6 +135,7 @@ class TestWeatherSkills(AEATestCaseMany):
         # run agents
         self.set_agent_context(weather_station_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         weather_station_process = self.run_agent()
 
         check_strings = (
@@ -153,6 +153,7 @@ class TestWeatherSkills(AEATestCaseMany):
 
         self.set_agent_context(weather_client_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         weather_client_process = self.run_agent()
 
         check_strings = (
@@ -253,16 +254,16 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.set_config(setting_path, FETCHAI)
 
         # replace location
         setting_path = (
@@ -291,10 +292,10 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # fund key
@@ -312,6 +313,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
 
         self.set_agent_context(weather_station_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         weather_station_process = self.run_agent()
 
         check_strings = (
@@ -329,6 +331,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany):
 
         self.set_agent_context(weather_client_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         weather_client_process = self.run_agent()
 
         check_strings = (

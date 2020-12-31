@@ -27,12 +27,11 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
 )
@@ -82,17 +81,14 @@ class TestGenericSkills(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
-
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
 
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
@@ -104,6 +100,7 @@ class TestGenericSkills(AEATestCaseMany):
         )
         self.nested_set_config(setting_path, location)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -123,10 +120,10 @@ class TestGenericSkills(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # set p2p configs
@@ -143,6 +140,7 @@ class TestGenericSkills(AEATestCaseMany):
         )
         self.nested_set_config(setting_path, location)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
@@ -266,17 +264,14 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
-
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
 
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
@@ -288,6 +283,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         )
         self.nested_set_config(setting_path, location)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
@@ -313,10 +309,10 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # fund key
@@ -332,6 +328,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         )
         self.nested_set_config(setting_path, location)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # run AEAs
         self.set_agent_context(seller_aea_name)

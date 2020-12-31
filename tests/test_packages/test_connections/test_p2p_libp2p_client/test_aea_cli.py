@@ -95,6 +95,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
                 )
             ],
         )
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)

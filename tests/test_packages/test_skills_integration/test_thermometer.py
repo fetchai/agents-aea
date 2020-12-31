@@ -27,12 +27,11 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
 )
@@ -81,16 +80,16 @@ class TestThermometerSkill(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.set_config(setting_path, FETCHAI)
 
         # replace location
         setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
@@ -114,10 +113,10 @@ class TestThermometerSkill(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # set p2p configs
@@ -133,6 +132,7 @@ class TestThermometerSkill(AEATestCaseMany):
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         thermometer_aea_process = self.run_agent()
 
         check_strings = (
@@ -150,6 +150,7 @@ class TestThermometerSkill(AEATestCaseMany):
 
         self.set_agent_context(thermometer_client_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         thermometer_client_aea_process = self.run_agent()
 
         check_strings = (
@@ -258,16 +259,16 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.set_config(setting_path, FETCHAI)
 
         # replace location
         setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
@@ -294,10 +295,10 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # fund key
@@ -316,6 +317,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         # run AEAs
         self.set_agent_context(thermometer_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         thermometer_aea_process = self.run_agent()
 
         check_strings = (
@@ -333,6 +335,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
 
         self.set_agent_context(thermometer_client_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         thermometer_client_aea_process = self.run_agent()
 
         check_strings = (
