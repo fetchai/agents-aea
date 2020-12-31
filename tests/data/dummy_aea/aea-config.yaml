@@ -26,12 +26,12 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths:
-  fetchai: fetch_private_key.txt
   cosmos: cosmos_private_key.txt
   ethereum: ethereum_private_key.txt
+  fetchai: fetch_private_key.txt
 connection_private_key_paths:
-  fetchai: fetch_private_key.txt
   cosmos: cosmos_private_key.txt
   ethereum: ethereum_private_key.txt
+  fetchai: fetch_private_key.txt
 registry_path: ../../packages
 default_routing: {}
