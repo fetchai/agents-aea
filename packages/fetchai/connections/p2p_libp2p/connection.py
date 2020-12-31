@@ -509,7 +509,7 @@ class P2PLibp2pConnection(Connection):
             # node will be run as a ClientDHT
             # requires entry peers to use as relay
             if entry_peers is None or len(entry_peers) == 0:
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "At least one Entry Peer should be provided when node is run in relayed mode"
                 )
             if delegate_uri is not None:  # pragma: no cover
@@ -519,7 +519,7 @@ class P2PLibp2pConnection(Connection):
         else:
             # node will be run as a full NodeDHT
             if uri is None:
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "Local Uri must be set when Public Uri is provided. "
                     "Hint: they are the same for local host/network deployment"
                 )
@@ -534,11 +534,11 @@ class P2PLibp2pConnection(Connection):
 
         cert_requests = self.configuration.cert_requests
         if cert_requests is None or len(cert_requests) != 1:
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "cert_requests field must be set and contain exactly one entry!"
             )
         if not Path(cert_requests[0].save_path).is_file():
-            raise Exception(
+            raise Exception(  # pragma: no cover
                 f"cert_request 'save_path' field {cert_requests[0].save_path} is not a file. "
                 "Please ensure that 'issue-certificates' command is called beforehand"
             )
@@ -546,7 +546,7 @@ class P2PLibp2pConnection(Connection):
             signature, agent_public_key = signature_from_cert_request(
                 cert_requests[0], key.public_key, self.address
             )
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             raise ValueError(
                 f"Incorrect certificate from file {cert_requests[0].save_path} : {str(e)}"
             )
@@ -560,7 +560,7 @@ class P2PLibp2pConnection(Connection):
         )
         try:
             record.check_validity(self.address, key.public_key)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             raise ValueError("Invalid Proof-of-Representation: {}".format(str(e)))
 
         # libp2p local node

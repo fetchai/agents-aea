@@ -102,12 +102,12 @@ class P2PLibp2pClientConnection(Connection):
 
         cert_requests = self.configuration.cert_requests
         if cert_requests is None or len(cert_requests) != len(nodes):
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "cert_requests field must be set and contain exactly as many entries as 'nodes'!"
             )
         for cert_request in cert_requests:
             if not Path(cert_request.save_path).is_file():
-                raise Exception(
+                raise Exception(  # pragma: nocover
                     "cert_request 'save_path' field is not a file. "
                     "Please ensure that 'issue-certificates' command is called beforehand"
                 )
@@ -136,7 +136,7 @@ class P2PLibp2pClientConnection(Connection):
                     cert, nodes_public_keys[i], self.address
                 )
                 signatures.append(signature)
-            except Exception as e:
+            except Exception as e:  # pragma: nocover
                 raise ValueError(
                     f"Incorrect certificate from file {cert.save_path} "
                     f"for node {nodes_uris[i]} : {str(e)}"
@@ -161,7 +161,7 @@ class P2PLibp2pClientConnection(Connection):
             )
             try:
                 record.check_validity(self.address, public_key)
-            except Exception as e:
+            except Exception as e:  # pragma: nocover
                 raise ValueError(
                     "Invalid Proof-of-Representation for node {}: {}".format(
                         str(uri), str(e)
@@ -242,12 +242,12 @@ class P2PLibp2pClientConnection(Connection):
         msg = AcnMessage()
         msg.ParseFromString(buf)
         payload = msg.WhichOneof("payload")
-        if payload != "status":
+        if payload != "status":  # pragma: nocover
             raise Exception(f"Wrong response message from peer: {payload}")
         response = msg.status  # pylint: disable=no-member
 
         if response.code != Status.SUCCESS:  # pylint: disable=no-member
-            raise Exception(
+            raise Exception(  # pragma: nocover
                 "Registration to peer failed: {}".format(
                     Status.ErrCode.Name(response.code)  # pylint: disable=no-member
                 )
