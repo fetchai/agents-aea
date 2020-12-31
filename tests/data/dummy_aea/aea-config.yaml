@@ -21,14 +21,16 @@ skills:
 - dummy_author/dummy:0.1.0
 - fetchai/error:0.10.0
 default_connection: fetchai/local:0.13.0
-default_ledger: cosmos
+default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths:
+  fetchai: fetch_private_key.txt
   cosmos: cosmos_private_key.txt
   ethereum: ethereum_private_key.txt
 connection_private_key_paths:
+  fetchai: fetch_private_key.txt
   cosmos: cosmos_private_key.txt
   ethereum: ethereum_private_key.txt
 registry_path: ../../packages

@@ -510,7 +510,7 @@ class BaseTestCertRequestInstantiation:
         cls.expected_ledger_id = "ledger_id"
         cls.not_before = "2020-01-01"
         cls.not_after = "2020-01-02"
-        cls.expected_path = "some/path"
+        cls.expected_path = os.path.abspath("some/path")
         cls.cert_request = CertRequest(
             cls.expected_public_key,
             cls.expected_identifier,

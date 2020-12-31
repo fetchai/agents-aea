@@ -55,6 +55,8 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
@@ -111,6 +113,8 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.nested_set_config(
