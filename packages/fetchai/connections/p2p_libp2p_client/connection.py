@@ -132,11 +132,15 @@ class P2PLibp2pClientConnection(Connection):
         signatures: List[str] = []
         for i, cert in enumerate(cert_requests):
             try:
-                signature, agent_public_key = signature_from_cert_request(cert, nodes_public_keys[i], self.address)
+                signature, agent_public_key = signature_from_cert_request(
+                    cert, nodes_public_keys[i], self.address
+                )
                 signatures.append(signature)
             except Exception as e:
-                raise ValueError(f"Incorrect certificate from file {cert.save_path} "
-                                 f"for node {nodes_uris[i]} : {str(e)}")
+                raise ValueError(
+                    f"Incorrect certificate from file {cert.save_path} "
+                    f"for node {nodes_uris[i]} : {str(e)}"
+                )
 
         records: List[AgentRecord] = []
         for i, signature in enumerate(signatures):

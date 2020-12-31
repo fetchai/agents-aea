@@ -646,7 +646,6 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
             builder.call_all_build_entrypoints()
             aea = builder.build()
 
-
         dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
         dummy_behaviour = dummy_skill.behaviours["dummy"]
         assert dummy_behaviour.config == {"behaviour_arg_1": 42, "behaviour_arg_2": "2"}

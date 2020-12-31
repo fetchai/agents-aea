@@ -547,7 +547,9 @@ class P2PLibp2pConnection(Connection):
                 cert_requests[0], key.public_key, self.address
             )
         except Exception as e:
-            raise ValueError(f"Incorrect certificate from file {cert_requests[0].save_path} : {str(e)}")
+            raise ValueError(
+                f"Incorrect certificate from file {cert_requests[0].save_path} : {str(e)}"
+            )
 
         record = AgentRecord(
             self.address,

@@ -47,25 +47,25 @@ def recover_verify_keys_from_message(message: bytes, signature: str) -> List[str
     ]
     return public_keys
 
+
 def signature_from_cert_request(
     cert: CertRequest, message: str, signer_address: str
 ) -> Tuple[str, str]:
     """
     Get signature and its verifying key from a CertRequest and its message.
-    Note: must match aea/cli/issue_certificates.py:_process_certificate
+
+    Must match aea/cli/issue_certificates.py:_process_certificate
 
     :param cert: cert request containing the signature
     :param message: the message used to generate signature
     :param signer_address: the address of the signer
     :return: the signature and the verifying public key
     """
-    
+
     signature = bytes.fromhex(Path(cert.save_path).read_bytes().decode("ascii")).decode(
         "ascii"
     )
-    public_keys = recover_verify_keys_from_message(
-        cert.get_message(message), signature
-    )
+    public_keys = recover_verify_keys_from_message(cert.get_message(message), signature)
     if len(public_keys) == 0:
         raise Exception("Malformed signature")
     addresses = [
@@ -77,7 +77,6 @@ def signature_from_cert_request(
     except ValueError:
         raise Exception("Not signed by agent")
     return signature, verify_key
-
 
 
 class AgentRecord:
@@ -138,6 +137,7 @@ class AgentRecord:
     def check_validity(self, address: str, peer_public_key: str) -> None:
         """
         Check if the agent record is valid for `address` and `peer_public_key`.
+
         Raises an Exception if invalid.
 
         :param address: the expected agent address concerned by the record
@@ -154,7 +154,9 @@ class AgentRecord:
             )
         recovered_address = FetchAIHelper.get_address_from_public_key(self._public_key)
         if self._address != recovered_address:
-            raise Exception(f"Agent address {self._address} and public key doesn't match")
+            raise Exception(
+                f"Agent address {self._address} and public key doesn't match"
+            )
         if self._address not in FetchAIHelper.recover_message(
             self._peer_public_key.encode("utf-8"), self._signature
         ):
