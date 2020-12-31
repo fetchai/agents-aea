@@ -46,7 +46,7 @@ def signature_from_cert_request(
     public_keys = FetchAIHelper.recover_verifying_keys_from_message(
         cert.get_message(message), signature
     )
-    if len(public_keys) == 0:
+    if len(public_keys) == 0:  # pragma: no cover
         raise Exception("Malformed signature")
     addresses = [
         FetchAIHelper.get_address_from_public_key(public_key)
