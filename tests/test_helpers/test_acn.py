@@ -29,6 +29,7 @@ from tests.conftest import _process_cert
 
 
 def test_signature_from_cert_request_errors():
+    """Test signature and public key proper retrieval from a CertRequest"""
     agent_key_1 = make_crypto(DEFAULT_LEDGER)
     agent_key_2 = make_crypto(DEFAULT_LEDGER)
 
@@ -58,6 +59,7 @@ def test_signature_from_cert_request_errors():
 
 
 def test_agent_record_errors():
+    """Test AgentRecord check_validity"""
     agent_key_1 = make_crypto(DEFAULT_LEDGER)
     agent_key_2 = make_crypto(DEFAULT_LEDGER)
 

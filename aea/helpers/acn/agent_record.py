@@ -110,7 +110,7 @@ class AgentRecord:
         """Get record service id"""
         return self._service_id
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         """Get string representation."""
         return f"(address={self.address}, public_key={self.public_key}, peer_public_key={self.peer_public_key}, signature={self.signature})"
 
