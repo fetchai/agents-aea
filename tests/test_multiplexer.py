@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the Multiplexer."""
 
+from aea.configurations.constants import DEFAULT_LEDGER
 import asyncio
 import logging
 import os
@@ -741,6 +742,8 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         self.t = tempfile.mkdtemp()
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(self.t, "packages"))
         os.chdir(self.t)
+        self.key_path = os.path.join(self.t,"fetchai_private_key.txt")
+        self.conn_key_path = os.path.join(self.t,"conn_private_key.txt")
 
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
@@ -762,6 +765,18 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         assert result.exit_code == 0, result.stdout_bytes
 
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
+        assert result.exit_code == 0, result.stdout_bytes
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT_LEDGER, self.key_path])
+        assert result.exit_code == 0, result.stdout_bytes
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", DEFAULT_LEDGER, self.key_path])
+        assert result.exit_code == 0, result.stdout_bytes
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT_LEDGER, self.conn_key_path])
+        assert result.exit_code == 0, result.stdout_bytes
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", DEFAULT_LEDGER, self.conn_key_path, "--connection"])
         assert result.exit_code == 0, result.stdout_bytes
 
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "issue-certificates"])

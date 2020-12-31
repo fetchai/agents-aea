@@ -152,8 +152,9 @@ class AgentRecord:
             raise Exception(
                 "Proof-of-representation is not generated for intended peer"
             )
-        if self._address != FetchAIHelper.get_address_from_public_key(self._public_key):
-            raise Exception("Agent address and public key doesn't match")
+        recovered_address = FetchAIHelper.get_address_from_public_key(self._public_key)
+        if self._address != recovered_address:
+            raise Exception(f"Agent address {self._address} and public key doesn't match")
         if self._address not in FetchAIHelper.recover_message(
             self._peer_public_key.encode("utf-8"), self._signature
         ):

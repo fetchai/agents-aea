@@ -102,7 +102,9 @@ class P2PLibp2pClientConnection(Connection):
 
         cert_requests = self.configuration.cert_requests
         if cert_requests is None or len(cert_requests) != len(nodes):
-            raise ValueError("cert_requests field must be set")
+            raise ValueError(
+                "cert_requests field must be set and contain exactly as many entries as 'nodes'!"
+            )
         for cert_request in cert_requests:
             if not Path(cert_request.save_path).is_file():
                 raise Exception(
