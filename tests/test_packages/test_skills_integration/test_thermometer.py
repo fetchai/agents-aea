@@ -142,7 +142,7 @@ class TestThermometerSkill(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
+            thermometer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -327,7 +327,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            thermometer_aea_process, check_strings, timeout=240, is_terminating=False
+            thermometer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -347,7 +347,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         missing_strings = self.missing_from_output(
             thermometer_client_aea_process,
             check_strings,
-            timeout=240,
+            timeout=30,
             is_terminating=False,
         )
         assert (

@@ -207,7 +207,7 @@ class TestTacSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            tac_controller_process, check_strings, timeout=240, is_terminating=False
+            tac_controller_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -231,7 +231,7 @@ class TestTacSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            tac_aea_one_process, check_strings, timeout=240, is_terminating=False
+            tac_aea_one_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -244,7 +244,7 @@ class TestTacSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            tac_aea_two_process, check_strings, timeout=240, is_terminating=False
+            tac_aea_two_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -552,7 +552,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             "found the TAC controller. Registering...",
         )
         missing_strings = self.missing_from_output(
-            tac_aea_one_process, check_strings, timeout=240, is_terminating=False
+            tac_aea_one_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -568,7 +568,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             "found the TAC controller. Registering...",
         )
         missing_strings = self.missing_from_output(
-            tac_aea_two_process, check_strings, timeout=240, is_terminating=False
+            tac_aea_two_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []

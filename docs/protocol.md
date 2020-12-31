@@ -147,7 +147,7 @@ We show some example messages below:
 my_dialogue_reference = "a_unique_register_service_dialogue_reference"
 ```
 and a description of the service we would like to register, for instance
-```python
+``` python
 from aea.helpers.search.models import Description
 
 my_service_data = {"country": "UK", "city": "Cambridge"}
@@ -157,7 +157,7 @@ my_service_description = Description(
 )
 ```
 where we use, for instance
-```python
+``` python
 from aea.helpers.search.generic import GenericDataModel
 
 data_model_name = "location"

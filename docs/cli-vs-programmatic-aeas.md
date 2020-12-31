@@ -42,7 +42,7 @@ The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Add keys
 
-Add keys for the weather station.
+Add a private key for the weather station.
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt

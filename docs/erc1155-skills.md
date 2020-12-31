@@ -47,18 +47,6 @@ aea add skill fetchai/erc1155_deploy:0.19.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
-```
-
-Then update the agent config (`aea-config.yaml`) with the default routing:
-``` yaml
-default_routing:
-  fetchai/contract_api:0.9.0: fetchai/ledger:0.11.0
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
-```
-
-Or, run this command:
-``` bash
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
@@ -76,7 +64,6 @@ aea config set agent.default_ledger ethereum
 </details>
 
 Additionally, create the private key for the deployer AEA. Generate and add a key for Ethereum use:
-
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
@@ -84,8 +71,8 @@ aea add-key ethereum ethereum_private_key.txt
 
 And one for the P2P connection:
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt --connection
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:
@@ -119,18 +106,6 @@ aea add skill fetchai/erc1155_client:0.18.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
-```
-
-Then update the agent config (`aea-config.yaml`) with the default routing:
-``` yaml
-default_routing:
-  fetchai/contract_api:0.9.0: fetchai/ledger:0.11.0
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
-```
-
-Or, run this command:
-``` bash
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
@@ -148,7 +123,6 @@ aea config set agent.default_ledger ethereum
 </details>
 
 Additionally, create the private key for the client AEA. Generate and add a key for Ethereum use:
-
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
@@ -156,8 +130,8 @@ aea add-key ethereum ethereum_private_key.txt
 
 And one for the P2P connection:
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt --connection
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
 Finally, certify the key for use by the connections that request that:

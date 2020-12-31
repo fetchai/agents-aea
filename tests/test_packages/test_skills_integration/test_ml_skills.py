@@ -150,7 +150,7 @@ class TestMLSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
+            data_provider_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -170,7 +170,7 @@ class TestMLSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
+            model_trainer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -335,7 +335,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
+            data_provider_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -355,7 +355,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
+            model_trainer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []

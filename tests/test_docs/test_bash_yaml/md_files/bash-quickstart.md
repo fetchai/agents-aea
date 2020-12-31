@@ -1,10 +1,10 @@
-```bash
+``` bash
 docker pull fetchai/aea-user:latest
 ```
-  ```bash
+  ``` bash
   docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
   ```
-  ```bash
+  ``` bash
   docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
   ```
 ``` bash
