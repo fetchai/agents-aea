@@ -287,6 +287,11 @@ class PackageConfiguration(Configuration, ABC):
             raise ValueError("Directory already set")
         self._directory = directory
 
+    @property
+    def package_id(self) -> PackageId:
+        """Get package id."""
+        return PackageId(package_type=self.package_type, public_id=self.public_id)
+
     @staticmethod
     def _parse_aea_version_specifier(aea_version_specifiers: str) -> SpecifierSet:
         try:
