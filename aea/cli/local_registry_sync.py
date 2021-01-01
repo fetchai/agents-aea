@@ -60,7 +60,7 @@ def do_local_registry_update(base_dir: Union[str, Path]) -> None:
         ):
             click.echo(f"{package_id} is the latest version.")
             continue
-        click.echo(f"Updating to {latest_public_id}.")
+        click.echo(f"Updating {current_public_id} to {latest_public_id}.")
         replace_package(str(package_id.package_type), latest_public_id, package_dir)
 
 
