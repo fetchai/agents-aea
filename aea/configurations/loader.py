@@ -308,18 +308,20 @@ class ConfigLoaders:
 
 
 def load_component_configuration(
-    component_type: ComponentType,
+    component_type: Union[ComponentType, PackageType],
     directory: Path,
     skip_consistency_check: bool = False,
 ) -> "ComponentConfiguration":
     """
     Load configuration and check that it is consistent against the directory.
 
-    :param component_type: the component type.
+    :param component_type: the component or package type.
     :param directory: the root of the package
     :param skip_consistency_check: if True, the consistency check are skipped.
     :return: the configuration object.
     """
+    if isinstance(component_type, ComponentType):
+        component_type = component_type.to_configuration_type()
     configuration_object = _load_configuration_object(component_type, directory)
     if not skip_consistency_check:
         configuration_object._check_configuration_consistency(  # pylint: disable=protected-access
@@ -329,7 +331,7 @@ def load_component_configuration(
 
 
 def _load_configuration_object(
-    component_type: ComponentType, directory: Path
+    package_type: PackageType, directory: Path
 ) -> ComponentConfiguration:
     """
     Load the configuration object, without consistency checks.
@@ -339,9 +341,7 @@ def _load_configuration_object(
     :return: the configuration object.
     :raises FileNotFoundError: if the configuration file is not found.
     """
-    configuration_loader = ConfigLoader.from_configuration_type(
-        component_type.to_configuration_type()
-    )
+    configuration_loader = ConfigLoader.from_configuration_type(package_type)
     configuration_filename = (
         configuration_loader.configuration_class.default_configuration_filename
     )
@@ -352,7 +352,7 @@ def _load_configuration_object(
     except FileNotFoundError:
         raise FileNotFoundError(
             "{} configuration not found: {}".format(
-                component_type.value.capitalize(), configuration_filepath
+                package_type.value.capitalize(), configuration_filepath
             )
         )
     return configuration_object
