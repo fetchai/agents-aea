@@ -163,7 +163,7 @@ class ComponentType(Enum):
     SKILL = SKILL
     CONTRACT = CONTRACT
 
-    def to_configuration_type(self) -> PackageType:
+    def to_package_type(self) -> PackageType:
         """Get package type for component type."""
         return PackageType(self.value)
 
@@ -565,7 +565,7 @@ class ComponentId(PackageId):
         :param public_id: the public id.
         """
         component_type = ComponentType(component_type)
-        super().__init__(component_type.to_configuration_type(), public_id)
+        super().__init__(component_type.to_package_type(), public_id)
 
     @property
     def component_type(self) -> ComponentType:

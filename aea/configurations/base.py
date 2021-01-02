@@ -287,6 +287,11 @@ class PackageConfiguration(Configuration, ABC):
             raise ValueError("Directory already set")
         self._directory = directory
 
+    @property
+    def package_id(self) -> PackageId:
+        """Get package id."""
+        return PackageId(package_type=self.package_type, public_id=self.public_id)
+
     @staticmethod
     def _parse_aea_version_specifier(aea_version_specifiers: str) -> SpecifierSet:
         try:
@@ -487,7 +492,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         if not directory.exists() or not directory.is_dir():
             raise ValueError("Directory {} is not valid.".format(directory))
         _compare_fingerprints(
-            self, directory, False, self.component_type.to_configuration_type()
+            self, directory, False, self.component_type.to_package_type()
         )
 
     def check_aea_version(self):

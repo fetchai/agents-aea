@@ -5,10 +5,10 @@ The framework has two distinctive parts.
 
 Currently, the framework supports four types of packages which can be added to the core as modules:
 
-- Skills
-- Protocols
-- Connections
-- Contracts
+- <a href="../skill.md">Skills</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA.
+- <a href="../protocol.md">Protocols</a> define agent-to-agent as well as component-to-component interactions (messages and dialogues) within agents.
+- <a href="../connection.md">Connections</a> wrap SDKs or APIs and provide an interface to network, ledgers and other services.
+- <a href="../contract.md">Contracts</a> wrap smart contracts for Fetch.ai and third-party decentralized ledgers.
 
 The following figure illustrates the framework's architecture:
 
