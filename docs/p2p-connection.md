@@ -25,15 +25,17 @@ aea add connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
-Provide the AEA with the information it needs to find the genesis by replacing the following block in `vendor/fetchai/connnections/p2p_libp2p/connection.yaml`:
+Provide the AEA with the information it needs to find the genesis:
 
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: MULTI_ADDRESSES
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": MULTI_ADDRESSES,
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
 Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses displayed in the log output of the genesis AEA.
 
@@ -60,7 +62,7 @@ Explore the <a href="../weather-skills">demo section</a> for further examples.
 
 You can connect to the deployed public test network by adding one or multiple of the following addresses as the `libp2p_entry_peers`:
 
-```yaml
+``` yaml
 /dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx
 /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ```

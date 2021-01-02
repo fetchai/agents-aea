@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea issue_certificates' subcommand."""
+import os
 from pathlib import Path
 from typing import cast
 
@@ -31,6 +32,7 @@ from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import get_package_path_unified
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import CONNECTION
+from aea.crypto.helpers import make_certificate
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
 from aea.helpers.base import CertRequest
@@ -42,14 +44,20 @@ from aea.helpers.base import CertRequest
 def issue_certificates(click_context):
     """Issue certificates for connections that require them."""
     ctx = cast(Context, click_context.obj)
+    issue_certificates_(ctx)
 
+
+def issue_certificates_(ctx):
+    """Issue certificates for connections that require them."""
     for connection_id in ctx.agent_config.connections:
         _process_connection(ctx, connection_id)
 
     click.echo("All certificates have been issued.")
 
 
-def _process_certificate(ctx: Context, cert_request: CertRequest):
+def _process_certificate(
+    ctx: Context, cert_request: CertRequest, connection_id: PublicId
+):
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
     output_path = cert_request.save_path
@@ -60,7 +68,7 @@ def _process_certificate(ctx: Context, cert_request: CertRequest):
         )
         if connection_private_key_path is None:
             raise ClickException(
-                f"Cannot find connection private key with id '{key_identifier}'"
+                f"Cannot find connection private key with id '{key_identifier}'. Connection '{connection_id}' requires this. Please use `aea generate-key {key_identifier} connection_{key_identifier}_private_key.txt` and `aea add-key {key_identifier} connection_{key_identifier}_private_key.txt --connection` to add a connection private key with id '{key_identifier}'."
             )
         connection_crypto = crypto_registry.make(
             key_identifier, private_key_path=connection_private_key_path
@@ -74,12 +82,14 @@ def _process_certificate(ctx: Context, cert_request: CertRequest):
         )
     crypto_private_key_path = ctx.agent_config.private_key_paths.read(ledger_id)
     if crypto_private_key_path is None:
-        raise ClickException(f"Cannot find private key with id '{ledger_id}'")
-    crypto = crypto_registry.make(ledger_id, private_key_path=crypto_private_key_path)
+        raise ClickException(
+            f"Cannot find private key with id '{ledger_id}'. Please use `aea generate-key {key_identifier}` and `aea add-key {key_identifier}` to add a private key with id '{key_identifier}'."
+        )
     message = cert_request.get_message(public_key)
-    signature = crypto.sign_message(message).encode("ascii").hex()
-    click.echo(f"Generated signature: '{signature}'")
-    Path(output_path).write_bytes(signature.encode("ascii"))
+    cert = make_certificate(
+        ledger_id, crypto_private_key_path, message, os.path.join(ctx.cwd, output_path)
+    )
+    click.echo(f"Generated signature: '{cert}'")
 
 
 def _process_connection(ctx: Context, connection_id: PublicId):
@@ -97,7 +107,7 @@ def _process_connection(ctx: Context, connection_id: PublicId):
         click.echo(
             f"Issuing certificate '{cert_request.identifier}' for connection {connection_config.public_id}..."
         )
-        _process_certificate(ctx, cert_request)
+        _process_certificate(ctx, cert_request, connection_id)
         click.echo(
             f"Dumped certificate '{cert_request.identifier}' in '{cert_request.save_path}' for connection {connection_id}."
         )

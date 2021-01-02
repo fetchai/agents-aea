@@ -438,7 +438,17 @@ We first create the private key for the service provider AEA based on the networ
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 Then we run the aea:
@@ -869,7 +879,17 @@ First, create the private key for the search AEA based on the network you want t
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 Then, in the search AEA, run this command (replace `SOME_ADDRESS` with the correct value as described above):

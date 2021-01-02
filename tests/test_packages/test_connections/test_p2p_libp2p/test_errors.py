@@ -182,27 +182,10 @@ def test_libp2pconnection_mixed_ip_address():
 
 @patch.object(P2PLibp2pConnection, "_check_node_built")
 def test_libp2pconnection_node_config_registration_delay(mock):
-    """Test nod registration delay configuration"""
-    crypto = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("", address=crypto.address)
+    """Test node registration delay configuration"""
     host = "localhost"
     port = "10000"
 
-    configuration = ConnectionConfig(
-        local_uri="{}:{}".format(host, port),
-        public_uri="{}:{}".format(host, port),
-        peer_registration_delay="1.5",
-        connection_id=P2PLibp2pConnection.connection_id,
-        build_directory="some",
-    )
-    P2PLibp2pConnection(configuration=configuration, identity=identity)
-
-    configuration = ConnectionConfig(
-        local_uri="{}:{}".format(host, port),
-        public_uri="{}:{}".format(host, port),
-        peer_registration_delay="must_be_float",
-        connection_id=P2PLibp2pConnection.connection_id,
-        build_directory="some",
-    )
+    _make_libp2p_connection(port, host)
     with pytest.raises(ValueError):
-        P2PLibp2pConnection(configuration=configuration, identity=identity)
+        _make_libp2p_connection(port, host, peer_registration_delay="must_be_float")

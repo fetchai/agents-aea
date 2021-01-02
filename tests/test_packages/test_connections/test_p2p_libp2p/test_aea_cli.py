@@ -34,7 +34,7 @@ DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_NET_SIZE = 4
 
-LIBP2P_LAUNCH_TIMEOUT = 660  # may downloads up to ~66Mb
+LIBP2P_LAUNCH_TIMEOUT = 110  # may downloads up to ~66Mb
 
 
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
@@ -44,11 +44,16 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     def setup_class(cls):
         """Set the test up"""
         super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).setup_class()
+        cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
         cls.log_files = []
 
     @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
+        self.generate_private_key()
+        self.add_private_key()
+        self.generate_private_key(private_key_file=self.conn_key_file)
+        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
@@ -59,6 +64,8 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
         TestP2PLibp2pConnectionAEARunningDefaultConfigNode.log_files.append(log_file)
+
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
         is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
@@ -90,11 +97,16 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     def setup_class(cls):
         """Set the test up"""
         super(TestP2PLibp2pConnectionAEARunningFullNode, cls).setup_class()
+        cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
         cls.log_files = []
 
     @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
+        self.generate_private_key()
+        self.add_private_key()
+        self.generate_private_key(private_key_file=self.conn_key_file)
+        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
 
@@ -116,6 +128,8 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
         TestP2PLibp2pConnectionAEARunningFullNode.log_files.append(log_file)
+
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
 

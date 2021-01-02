@@ -10,30 +10,33 @@ aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
   README.md: QmWPeRpF66yhj4t2FTTwGLa9hFgRjYffJpe6DKcag5mpnE
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmThjcaiYGdPBniGAnrc66cEVtZaB4K1cgJb5iig6hTCK9
+  aea/api.go: QmTMrqwSJhManituQr23P4mwtbW5ssbcwtL46L5a6MDP6L
   aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
-  aea/envelope.proto: QmSC8EGCKiNFR2vf5bSWymSzYDFMipQW9aQVMwPzQoKb4n
+  aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmcZATMqEThMQBdsud1AwJEYtKq86VfPSXhnfdE7TSWcsc
-  connection.py: Qmf3epj1Fdo51qGtKUjpesHDiwR1YZE39kZ6VZbUf4dQ7u
-  dht/dhtclient/dhtclient.go: QmeHnMoBdff59vSqRRsYUGGJPUMi5Euk8pKiKa5jTzHHQD
-  dht/dhtclient/dhtclient_test.go: QmPfnHSHXtbaW5VYuq1QsKQWey64pUEvLEaKKkT9eAcmws
-  dht/dhtclient/options.go: QmPorj38wNrxGrzsbFe5wwLmiHzxbTJ2VsgvSd8tLDYS8s
+  connection.py: QmdpGLSTnxytiQ7P3Aiiipp4zsVkrTeL9B2GdQUsBh6XQy
+  dht/dhtclient/dhtclient.go: QmZCgMowWw4ueCSsyYY12om3RMQA3Ydp98ti65Eqa5ccuz
+  dht/dhtclient/dhtclient_test.go: QmbTvSmNU1uqjLQo9LdD7zWmDcLuzEacDeg7AG4VXhmriV
+  dht/dhtclient/options.go: QmW3UjASUP6zGwK8b61hHQhVoLqBxQ13vZ1gcHuTmdrsDf
   dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
+  dht/dhtnode/message.pb.go: QmdXBSaZxyb82k94N3RxzGwuLuw2ZchfUddyhdcHXxDJQZ
+  dht/dhtnode/message.proto: QmSwpCP72J94kt2MaLSPQdt8puqtLMVPp3Migwp4xRwadZ
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  dht/dhtpeer/benchmarks_test.go: QmXDDpoThiFPZ3DDb1L9rNaJANSYeZZgfu5EQ4vSARaG5f
-  dht/dhtpeer/dhtpeer.go: QmNhwnereuoWd2Dw2azYNYTrwydGDqprUZSALV7yCms9wv
-  dht/dhtpeer/dhtpeer_test.go: QmRdsFpDLNf1KwWyRKGkrX7nD1orFyPKweP9BtZkQx7SqL
-  dht/dhtpeer/options.go: QmfQMgMJyPeNXroH2faDuLCWhjh48eJnez3pevyatjMxPW
-  dht/dhttests/dhttests.go: QmZpYRCiVARGL1n4nDwqjhzHA95Y4ACNWoa3HSDnB6PitK
+  dht/dhtnode/utils.go: QmRhtiX1aUy7APRteJyFtpsJjoz8VshYDY1UcJkD8zJX1o
+  dht/dhtpeer/benchmarks_test.go: QmQcy8WN5DY8Nfp5nkDgRaS6NjQbMzc6DSMbdY8QDPx9ao
+  dht/dhtpeer/dhtpeer.go: QmRkKAj1uJhNQYwAdPH5eKPRykHyhutwwXJ2yZLbn4c7pb
+  dht/dhtpeer/dhtpeer_test.go: QmQvoVABqb3oDsH1uqF22d5Tjb2a8Hyf7U7q8jaYQfrjfa
+  dht/dhtpeer/options.go: Qme5L9bRBQZaR5fciPJ1feFwqaQpkdYfW8TaiY1TDXs91H
+  dht/dhttests/dhttests.go: QmQJxw2rJCGUFTXKxH3sf3Zaqta7H76EvaB7mWNNfikFkA
   dht/monitoring/file.go: QmZB8pNf7infMXWaC5A46rr3mghNfkuSd8UKH4Ceg8nDSM
   dht/monitoring/prometheus.go: QmQk143Qn3WcKnk7Taf4fkvxm2zcCz2VXGi249S1rmgCbv
   dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
-  go.mod: QmQEau8Bi7gBoKQhxsvTkLGWv1C6LzTBdgpzRzvsDrGXvV
-  go.sum: QmSYfnsHtt2ALbjnSSDbkYioDrEEzkUGeg47j9dF5Zssxg
-  libp2p_node.go: QmQXu6h9Q3T1Upjd8JdRggEHdXBQHvkfZoJCXG8YQT9Dq2
-  utils/utils.go: QmYuokyZ1zMHEhUzv172bKKzUY5G2U5uouBZBy3BhgFckW
+  go.mod: QmScMYT69B7HbQApxXmZFpSwsKBZVPAJimVFYpTVYTvzbe
+  go.sum: QmawFS81vDFYVZUZMKxQjNdKkLxDzfRRfqD1Tcpzze66yd
+  libp2p_node.go: QmSMPBU6GMJ7gAHWMsYGVDSUv5sw48x2rvNKydcxVv7MqL
+  utils/utils.go: QmeVAETLySSzRpkDh8FRGAKBuqeurLTpfufw4CRYL2dW49
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
@@ -46,6 +49,13 @@ config:
   local_uri: 127.0.0.1:9000
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:9000
+cert_requests:
+- identifier: acn
+  ledger_id: fetchai
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: fetchai
+  save_path: .certs/conn_cert.txt
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

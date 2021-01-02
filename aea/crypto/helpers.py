@@ -26,6 +26,7 @@ from typing import Optional
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
+from aea.helpers.base import ensure_dir
 from aea.helpers.env_vars import is_env_variable
 
 
@@ -146,3 +147,14 @@ def private_key_verify_or_create(
                         repr(config_private_key_path), identifier,
                     )
                 )
+
+
+def make_certificate(
+    ledger_id: str, crypto_private_key_path: str, message: bytes, output_path: str
+) -> str:
+    """Create certificate."""
+    crypto = crypto_registry.make(ledger_id, private_key_path=crypto_private_key_path)
+    signature = crypto.sign_message(message).encode("ascii").hex()
+    ensure_dir(os.path.dirname(output_path))
+    Path(output_path).write_bytes(signature.encode("ascii"))
+    return signature

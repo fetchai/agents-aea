@@ -30,12 +30,11 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     ROOT_DIR,
     wait_for_localhost_ports_to_close,
@@ -170,16 +169,16 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.set_config(setting_path, FETCHAI)
 
         # replace location
         setting_path = "skills.thermometer.models.strategy.args.location"
@@ -203,10 +202,10 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # fund key
@@ -225,6 +224,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
         # Fire the sub-processes and the threads.
         self.set_agent_context(seller_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         seller_aea_process = self.run_agent()
 
         check_strings = (
@@ -234,7 +234,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=240, is_terminating=False
+            seller_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -242,6 +242,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         self.set_agent_context(buyer_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         buyer_aea_process = self.run_agent()
 
         check_strings = (
@@ -251,7 +252,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            buyer_aea_process, check_strings, timeout=240, is_terminating=False,
+            buyer_aea_process, check_strings, timeout=30, is_terminating=False,
         )
         assert (
             missing_strings == []
@@ -271,7 +272,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=240, is_terminating=False
+            seller_aea_process, check_strings, timeout=120, is_terminating=False
         )
         assert (
             missing_strings == []

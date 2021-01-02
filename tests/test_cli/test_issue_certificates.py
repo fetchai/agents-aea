@@ -71,8 +71,8 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
         """Set up the class."""
         super().setup_class()
 
-        cls.expected_path_1 = "path_1"
-        cls.expected_path_2 = "path_2"
+        cls.expected_path_1 = os.path.abspath("path_1")
+        cls.expected_path_2 = os.path.abspath("path_2")
         cls.cert_id_1 = "cert_id_1"
         cls.cert_id_2 = "cert_id_2"
         cls.cert_request_1 = CertRequest(

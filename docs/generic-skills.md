@@ -79,13 +79,11 @@ aea add skill fetchai/generic_seller:0.18.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
-```
-
-In `my_seller_aea/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
 ```
 
 </p>
@@ -115,13 +113,11 @@ aea add skill fetchai/generic_buyer:0.18.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
-```
-
-In `my_buyer_aea/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
 ```
 
 </p>
@@ -134,7 +130,17 @@ First, create the private key for the seller AEA based on the network you want t
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ### Add keys and generate wealth for the buyer AEA
@@ -145,12 +151,22 @@ First, create the private key for the buyer AEA based on the network you want to
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, create some wealth for your buyer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
 ``` bash
 aea generate-wealth fetchai
+```
+
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ### Update the skill configs
@@ -231,19 +247,38 @@ aea run
 ```
 
 Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.)
+This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the seller.
 
-Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+<!-- Then, in the buyer, update the configuration of the buyer AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml
+---
+public_id: fetchai/p2p_libp2p:0.13.0
+type: connection
 config:
   delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
+  entry_peers:
+  - SOME_ADDRESS
   local_uri: 127.0.0.1:9001
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:9001
 ```
 
-where `SOME_ADDRESS` is replaced accordingly.
+where `SOME_ADDRESS` is replaced with the appropriate value.
+-->
+
+Then, in the buyer, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
+```
+This allows the buyer to connect to the same local agent communication network as the seller.
 
 Then run the buyer AEA:
 ``` bash

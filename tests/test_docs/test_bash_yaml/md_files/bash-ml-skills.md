@@ -45,7 +45,13 @@ aea build
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+``` bash
+aea issue-certificates
 ```
 ``` bash
 aea generate-key fetchai
@@ -54,6 +60,13 @@ aea add-key fetchai fetchai_private_key.txt --connection
 ```
 ``` bash
 aea generate-wealth fetchai
+```
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+``` bash
+aea issue-certificates
 ```
 ``` bash
 aea run

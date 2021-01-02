@@ -25,7 +25,13 @@ aea fetch fetchai/simple_service_registration:0.18.0 && cd simple_service_regist
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+``` bash
+aea issue-certificates
 ```
 ``` bash
 aea run
@@ -33,7 +39,13 @@ aea run
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+``` bash
+aea issue-certificates
 ```
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \

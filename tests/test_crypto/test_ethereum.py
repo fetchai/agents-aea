@@ -113,6 +113,21 @@ def test_sign_and_recover_message_deprecated():
     ), "Failed to recover the correct address."
 
 
+def test_sign_and_recover_message_public_key():
+    """Test the signing and the recovery function for the eth_crypto."""
+    account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    sign_bytes = account.sign_message(message=b"hello")
+    assert len(sign_bytes) > 0, "The len(signature) must not be 0"
+    recovered_public_keys = EthereumApi.recover_public_keys_from_message(
+        message=b"hello", signature=sign_bytes
+    )
+    assert len(recovered_public_keys) == 1, "Wrong number of public keys recovered."
+    assert (
+        EthereumApi.get_address_from_public_key(recovered_public_keys[0])
+        == account.address
+    ), "Failed to recover the correct address."
+
+
 def test_get_hash():
     """Test the get hash functionality."""
     expected_hash = "0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8"

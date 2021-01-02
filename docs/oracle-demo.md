@@ -67,6 +67,16 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
+```
 
 The oracle AEAs require either a locally runnning test node or a connection to a remote testnet.
 
@@ -80,12 +90,12 @@ docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 -
 ### Run the Oracle AEA
 
 Run the oracle agent. This will deploy a contract to the testnet, grant oracle permissions to the AEA's wallet address, and periodically update the contract with the latest price of FET (or whichever coin was specified).
-```bash
+``` bash
 aea run
 ```
 
 After a few moments, you should see the following notices in the logs:
-```bash
+``` bash
 info: [coin_price_oracle] Oracle contract successfully deployed!
 ...
 info: [coin_price_oracle] Oracle role successfully granted!
