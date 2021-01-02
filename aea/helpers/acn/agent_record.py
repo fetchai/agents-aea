@@ -28,8 +28,6 @@ from aea.helpers.base import CertRequest
 class AgentRecord:
     """Agent Proof-of-Representation to representative."""
 
-    VALID_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
-
     def __init__(
         self,
         address: str,
@@ -64,10 +62,6 @@ class AgentRecord:
         - if agent signed the message
         - if message is correctly formatted
         """
-        if self.ledger_id not in self.VALID_LEDGER_IDS:
-            raise ValueError(
-                f"Not a valid ledger_id. Found={self.ledger_id}, valid ids={self.VALID_LEDGER_IDS}."
-            )
         if self.message != self._get_message(self.representative_public_key):
             raise ValueError("Invalid message.")  # pragma: no cover
         ledger_api = make_ledger_api(self.ledger_id)
@@ -131,7 +125,7 @@ class AgentRecord:
 
     def __str__(self):  # pragma: no cover
         """Get string representation."""
-        return f"(address={self.address}, public_key={self.public_key}, peer_public_key={self.peer_public_key}, signature={self.signature}, ledger_id={self.ledger_id})"
+        return f"(address={self.address}, public_key={self.public_key}, representative_public_key={self.representative_public_key}, signature={self.signature}, ledger_id={self.ledger_id})"
 
     @classmethod
     def from_cert_request(

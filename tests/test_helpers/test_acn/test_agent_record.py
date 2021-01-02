@@ -76,18 +76,6 @@ def test_agent_record():
         and agent_record.message == cert.get_message(peer_public_key_1)
     )
 
-    # error: wrong ledger
-    with pytest.raises(
-        ValueError, match="Not a valid ledger_id. Found=wrong_ledger, valid ids="
-    ):
-        agent_record = AgentRecord(
-            agent_key_1.address,
-            peer_public_key_1,
-            cert.get_message(peer_public_key_1),
-            cert.get_signature(),
-            "wrong_ledger",
-        )
-
     # error: wrong signer
     with pytest.raises(
         ValueError,
