@@ -189,7 +189,7 @@ class P2PLibp2pClientConnection(Connection):
         record = AgentRecordPb()
         record.address = self.node_por.address
         record.public_key = self.node_por.public_key
-        record.peer_public_key = self.node_por.peer_public_key
+        record.peer_public_key = self.node_por.representative_public_key
         record.signature = self.node_por.signature
         record.service_id = POR_DEFAULT_SERVICE_ID
 
