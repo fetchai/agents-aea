@@ -129,10 +129,10 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
         return block["type"] == "block_code" and block["info"].strip() == "python"
 
     @abstractmethod
-    def _assert(self, **locals_):
+    def _assert(self, *mocks, **locals_):
         """Do assertions after Python code execution."""
 
-    def test_python_blocks(self):
+    def test_python_blocks(self, *mocks):
         """Run Python code block in sequence."""
         python_blocks = list(filter(self._python_selector, self.blocks))
 
@@ -140,4 +140,4 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
         for python_block in python_blocks:
             python_code = python_block["text"]
             exec(python_code, globals_, locals_)  # nosec
-        self._assert(**locals_)
+        self._assert(*mocks, **locals_)

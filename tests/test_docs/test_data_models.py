@@ -27,11 +27,11 @@ from tests.test_docs.helper import BasePythonMarkdownDocs
 
 
 class TestDataModel(BasePythonMarkdownDocs):
-    """Test the integrity of the language agnostic definitions in docs."""
+    """Test the data models code snippets."""
 
     DOC_PATH = Path(ROOT_DIR, "docs", "defining-data-models.md")
 
-    def _assert(self, **locals_):
+    def _assert(self, *_mocks, **locals_):
         attribute = locals_["attr_title"]
         assert isinstance(attribute, Attribute)
 
