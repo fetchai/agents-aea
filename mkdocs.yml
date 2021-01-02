@@ -23,7 +23,7 @@ nav:
     - Application areas: 'app-areas.md'
     - Relation to OEF and Ledger: 'oef-ledger.md'
     - Identity: 'identity.md'
-    # - Trust issues: 'trust.md'
+    - Trust issues: 'trust.md'
   - Demos:
     - Demos: 'demos.md'
     - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
@@ -37,14 +37,15 @@ nav:
     - TAC external app: 'tac.md'
     - Thermometer skills: 'thermometer-skills.md'
     - Weather skills: 'weather-skills.md'
-  - Development:
-    - Getting started:
-      - AEA quick start: 'quickstart.md'
-      - Core components - Part 1: 'core-components-1.md'
-      - AEA and web frameworks: 'aea-vs-mvc.md'
-      - Build a skill for an AEA: 'skill-guide.md'
-      - Core components - Part 2: 'core-components-2.md'
-      - Trade between two AEAs: 'generic-skills-step-by-step.md'
+  - Development - Beginner:
+    - AEA quick start: 'quickstart.md'
+    - Core components - Part 1: 'core-components-1.md'
+    - AEA and web frameworks: 'aea-vs-mvc.md'
+    - Build a skill for an AEA: 'skill-guide.md'
+    - Core components - Part 2: 'core-components-2.md'
+    - Interaction protocols: 'interaction-protocol.md'
+    - Trade between two AEAs: 'generic-skills-step-by-step.md'
+  - Development - Advanced:
     - Topic guides:
       - Ways to build an AEA: 'step-one.md'
       - Development setup: 'development-setup.md'
