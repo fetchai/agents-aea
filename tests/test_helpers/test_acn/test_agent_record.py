@@ -22,44 +22,14 @@ import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
-from aea.helpers.acn.agent_record import AgentRecord, signature_from_cert_request
+from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.base import CertRequest
 
 from tests.conftest import _process_cert
 
 
-def test_signature_from_cert_request_errors():
+def test_agent_record():
     """Test signature and public key proper retrieval from a CertRequest"""
-    agent_key_1 = make_crypto(DEFAULT_LEDGER)
-    agent_key_2 = make_crypto(DEFAULT_LEDGER)
-
-    peer_public_key = make_crypto(DEFAULT_LEDGER).public_key
-
-    cert_path = "test_acn_cert.txt"
-
-    cert = CertRequest(
-        peer_public_key,
-        "test_service",
-        DEFAULT_LEDGER,
-        "2021-01-01",
-        "2022-01-01",
-        cert_path,
-    )
-    _process_cert(agent_key_1, cert)
-
-    # success
-    _, signer_public_key = signature_from_cert_request(
-        cert, peer_public_key, agent_key_1.address
-    )
-    assert signer_public_key == agent_key_1.public_key
-
-    # error: wrong signer
-    with pytest.raises(Exception):
-        signature_from_cert_request(cert, peer_public_key, agent_key_2.address)
-
-
-def test_agent_record_errors():
-    """Test AgentRecord check_validity"""
     agent_key_1 = make_crypto(DEFAULT_LEDGER)
     agent_key_2 = make_crypto(DEFAULT_LEDGER)
 
@@ -67,7 +37,6 @@ def test_agent_record_errors():
     peer_public_key_2 = make_crypto(DEFAULT_LEDGER).public_key
 
     cert_path = "test_acn_cert.txt"
-    service_id = "test_acn_service"
 
     cert = CertRequest(
         peer_public_key_1,
@@ -78,57 +47,57 @@ def test_agent_record_errors():
         cert_path,
     )
     _process_cert(agent_key_1, cert)
-    signature, _ = signature_from_cert_request(
-        cert, peer_public_key_1, agent_key_1.address
+
+    # success
+    agent_record = AgentRecord.from_cert_request(
+        cert, agent_key_1.address, peer_public_key_1
+    )
+    assert (
+        agent_record.address == agent_key_1.address
+        and agent_record.public_key == agent_key_1.public_key
+        and agent_record.representative_public_key == peer_public_key_1
+        and agent_record.signature == cert.get_signature()
+        and agent_record.message == cert.get_message(peer_public_key_1)
     )
 
     # success
     agent_record = AgentRecord(
         agent_key_1.address,
-        agent_key_1.public_key,
         peer_public_key_1,
-        signature,
-        service_id,
+        cert.get_message(peer_public_key_1),
+        cert.get_signature(),
+        DEFAULT_LEDGER,
     )
-    agent_record.check_validity(agent_key_1.address, peer_public_key_1)
     assert (
         agent_record.address == agent_key_1.address
         and agent_record.public_key == agent_key_1.public_key
-        and agent_record.peer_public_key == peer_public_key_1
-        and agent_record.signature == signature
-        and agent_record.service_id == service_id
+        and agent_record.representative_public_key == peer_public_key_1
+        and agent_record.signature == cert.get_signature()
+        and agent_record.message == cert.get_message(peer_public_key_1)
     )
 
-    # error: wrong agent address
-    with pytest.raises(Exception):
-        agent_record.check_validity(agent_key_2.address, peer_public_key_1)
+    # error: wrong ledger
+    with pytest.raises(
+        ValueError, match="Not a valid ledger_id. Found=wrong_ledger, valid ids="
+    ):
+        agent_record = AgentRecord(
+            agent_key_1.address,
+            peer_public_key_1,
+            cert.get_message(peer_public_key_1),
+            cert.get_signature(),
+            "wrong_ledger",
+        )
 
-    # error: wrong peer
-    with pytest.raises(Exception):
-        agent_record.check_validity(agent_key_1.address, peer_public_key_2)
+    # error: wrong signer
+    with pytest.raises(
+        ValueError,
+        match="Invalid signature for provided representative_public_key and agent address!",
+    ):
+        AgentRecord.from_cert_request(cert, agent_key_2.address, peer_public_key_1)
 
-    # error: agent address and public key don't match
-    agent_record = AgentRecord(
-        agent_key_2.address,
-        agent_key_1.public_key,
-        peer_public_key_1,
-        signature,
-        service_id,
-    )
-    with pytest.raises(Exception):
-        agent_record.check_validity(agent_key_2.address, peer_public_key_1)
-
-    # error: invalid signature
-    _process_cert(agent_key_2, cert)
-    signature, _ = signature_from_cert_request(
-        cert, peer_public_key_1, agent_key_2.address
-    )
-    agent_record = AgentRecord(
-        agent_key_1.address,
-        agent_key_1.public_key,
-        peer_public_key_1,
-        signature,
-        service_id,
-    )
-    with pytest.raises(Exception):
-        agent_record.check_validity(agent_key_1.address, peer_public_key_1)
+    # error: wrong signer
+    with pytest.raises(
+        ValueError,
+        match="Invalid signature for provided representative_public_key and agent address!",
+    ):
+        AgentRecord.from_cert_request(cert, agent_key_1.address, peer_public_key_2)

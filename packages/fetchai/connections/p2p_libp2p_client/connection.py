@@ -32,7 +32,7 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
-from aea.helpers.acn.agent_record import AgentRecord, signature_from_cert_request
+from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.mail.base import Envelope
 
@@ -127,48 +127,12 @@ class P2PLibp2pClientConnection(Connection):
         self.delegate_uris = [Uri(node_uri) for node_uri in nodes_uris]
 
         # delegates PoRs
-        self.delegate_pors = []
-        agent_public_key = ""
-        signatures: List[str] = []
-        for i, cert in enumerate(cert_requests):
-            try:
-                signature, agent_public_key = signature_from_cert_request(
-                    cert, nodes_public_keys[i], self.address
-                )
-                signatures.append(signature)
-            except Exception as e:  # pragma: nocover
-                raise ValueError(
-                    f"Incorrect certificate from file {cert.save_path} "
-                    f"for node {nodes_uris[i]} : {str(e)}"
-                )
-
-        records: List[AgentRecord] = []
-        for i, signature in enumerate(signatures):
-            records.append(
-                AgentRecord(
-                    self.address,
-                    agent_public_key,
-                    nodes_public_keys[i],
-                    signature,
-                    POR_DEFAULT_SERVICE_ID,
-                )
+        self.delegate_pors: List[AgentRecord] = []
+        for i, cert_request in enumerate(cert_requests):
+            agent_record = AgentRecord.from_cert_request(
+                cert_request, self.address, nodes_public_keys[i]
             )
-
-        for i, public_key in enumerate(nodes_public_keys):
-            uri = self.delegate_uris[i]
-            record = next(
-                record for record in records if record.peer_public_key == public_key
-            )
-            try:
-                record.check_validity(self.address, public_key)
-            except Exception as e:  # pragma: nocover
-                raise ValueError(
-                    "Invalid Proof-of-Representation for node {}: {}".format(
-                        str(uri), str(e)
-                    )
-                )
-
-            self.delegate_pors.append(record)
+            self.delegate_pors.append(agent_record)
 
         # select a delegate
         index = random.randint(0, len(self.delegate_uris) - 1)  # nosec
@@ -227,7 +191,7 @@ class P2PLibp2pClientConnection(Connection):
         record.public_key = self.node_por.public_key
         record.peer_public_key = self.node_por.peer_public_key
         record.signature = self.node_por.signature
-        record.service_id = self.node_por.service_id  # pylint: disable=no-member
+        record.service_id = POR_DEFAULT_SERVICE_ID
 
         registration = Register()
         registration.record.CopyFrom(record)  # pylint: disable=no-member

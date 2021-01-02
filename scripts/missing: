@@ -1,0 +1,20 @@
+missing:
+- docs on PoR
+- docs on interaction protocols
+
+Mo:
+Documentation week & launch AW-4
+
+- Lokman focus on Ethereum support, deploy new public DHT nodes
+- Marco > doc tests; https://github.com/fetchai/agents-aea/issues/2078
+- Yuri > https://github.com/fetchai/agents-aea/issues/1923
+- Ali > TAC: feedback from BAI, IJCAI
+
+
+Big themes Jan:
+- messaging internal & external (protocols)
+- Yuri to finish config analysis
+- Yuri to review and fix: https://docs.google.com/document/d/1hY5N_-TtvSD3Z961xPjsbtw2oOKlIBJucr-jTzbl_1E/edit
+- Marco: crypto support in configs
+
+- updated benchmark for papers

@@ -754,6 +754,18 @@ class CertRequest:
         # + self.not_after_string.encode("ascii")  # noqa: E800
         return message
 
+    def get_signature(self) -> str:
+        """Get signature from save_path."""
+        if not Path(self.save_path).is_file():
+            raise Exception(  # pragma: no cover
+                f"cert_request 'save_path' field {self.save_path} is not a file. "
+                "Please ensure that 'issue-certificates' command is called beforehand."
+            )
+        signature = bytes.fromhex(
+            Path(self.save_path).read_bytes().decode("ascii")
+        ).decode("ascii")
+        return signature
+
     @property
     def json(self) -> Dict:
         """Compute the JSON representation."""

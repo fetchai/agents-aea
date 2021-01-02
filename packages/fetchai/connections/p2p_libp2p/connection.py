@@ -35,7 +35,7 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.exceptions import enforce
-from aea.helpers.acn.agent_record import AgentRecord, signature_from_cert_request
+from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
@@ -264,10 +264,10 @@ class Libp2pNode:
             self._config += "AEA_P2P_POR_ADDRESS={}\n".format(self.record.address)
             self._config += "AEA_P2P_POR_PUBKEY={}\n".format(self.record.public_key)
             self._config += "AEA_P2P_POR_PEER_PUBKEY={}\n".format(
-                self.record.peer_public_key
+                self.record.representative_public_key
             )
             self._config += "AEA_P2P_POR_SIGNATURE={}\n".format(self.record.signature)
-            self._config += "AEA_P2P_POR_SERVICE_ID={}\n".format(self.record.service_id)
+            self._config += "AEA_P2P_POR_SERVICE_ID={}\n".format(POR_DEFAULT_SERVICE_ID)
             self._config += "AEA_P2P_CFG_REGISTRATION_DELAY={}\n".format(
                 str(self.peer_registration_delay)
                 if self.peer_registration_delay is not None
@@ -537,31 +537,11 @@ class P2PLibp2pConnection(Connection):
             raise ValueError(  # pragma: no cover
                 "cert_requests field must be set and contain exactly one entry!"
             )
-        if not Path(cert_requests[0].save_path).is_file():
-            raise Exception(  # pragma: no cover
-                f"cert_request 'save_path' field {cert_requests[0].save_path} is not a file. "
-                "Please ensure that 'issue-certificates' command is called beforehand"
-            )
-        try:
-            signature, agent_public_key = signature_from_cert_request(
-                cert_requests[0], key.public_key, self.address
-            )
-        except Exception as e:  # pragma: no cover
-            raise ValueError(
-                f"Incorrect certificate from file {cert_requests[0].save_path} : {str(e)}"
-            )
+        cert_request = cert_requests[0]
 
-        record = AgentRecord(
-            self.address,
-            agent_public_key,
-            key.public_key,
-            signature,
-            POR_DEFAULT_SERVICE_ID,
+        agent_record = AgentRecord.from_cert_request(
+            cert_request, self.address, key.public_key
         )
-        try:
-            record.check_validity(self.address, key.public_key)
-        except Exception as e:  # pragma: no cover
-            raise ValueError("Invalid Proof-of-Representation: {}".format(str(e)))
 
         # libp2p local node
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
@@ -570,7 +550,7 @@ class P2PLibp2pConnection(Connection):
 
         self._check_node_built()
         self.node = Libp2pNode(
-            record,
+            agent_record,
             key,
             self.configuration.build_directory,
             LIBP2P_NODE_CLARGS,

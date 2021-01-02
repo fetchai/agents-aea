@@ -246,3 +246,4 @@ signature_from_cert_request  # unused function (aea/helpers/acn/agent_record.py:
 Uri  # unused class (aea/helpers/acn/uri.py:26)
 not_before_string  # unused property (aea/helpers/base.py:724)
 not_after_string  # unused property (aea/helpers/base.py:729)
+from_cert_request  # unused method (aea/helpers/acn/agent_record.py:136)

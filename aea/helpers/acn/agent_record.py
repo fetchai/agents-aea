@@ -19,71 +19,74 @@
 
 """This module contains types and helpers for acn Proof-of-Representation."""
 
-from pathlib import Path
-from typing import Tuple
+from typing import Optional
 
-from aea.crypto.fetchai import FetchAIHelper
+from aea.crypto.registries import make_ledger_api
 from aea.helpers.base import CertRequest
 
 
-def signature_from_cert_request(
-    cert: CertRequest, message: str, signer_address: str
-) -> Tuple[str, str]:
-    """
-    Get signature and its verifying key from a CertRequest and its message.
-
-    Must match aea/cli/issue_certificates.py:_process_certificate
-
-    :param cert: cert request containing the signature
-    :param message: the message used to generate signature
-    :param signer_address: the address of the signer
-    :return: the signature and the verifying public key
-    """
-
-    signature = bytes.fromhex(Path(cert.save_path).read_bytes().decode("ascii")).decode(
-        "ascii"
-    )
-    public_keys = FetchAIHelper.recover_public_keys_from_message(
-        cert.get_message(message), signature
-    )
-    if len(public_keys) == 0:  # pragma: no cover
-        raise Exception("Malformed signature")
-    addresses = [
-        FetchAIHelper.get_address_from_public_key(public_key)
-        for public_key in public_keys
-    ]
-    try:
-        verify_key = public_keys[addresses.index(signer_address)]
-    except ValueError:
-        raise Exception("Not signed by agent")
-    return signature, verify_key
-
-
 class AgentRecord:
-    """Agent Proof-of-Representation to peer"""
+    """Agent Proof-of-Representation to representative."""
+
+    VALID_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
     def __init__(
         self,
         address: str,
-        public_key: str,
-        peer_public_key: str,
+        representative_public_key: str,
+        message: bytes,
         signature: str,
-        service_id: str,
+        ledger_id: str,
     ):
         """
         Initialize the AgentRecord
 
         :param address: agent address
-        :param public key: agent public key (associated to the address)
-        :param peer_public_key: representative peer public key
+        :param representative_public_key: representative's public key
+        :param message: message to be signed as proof-of-represenation of this AgentRecord
         :param signature: proof-of-representation of this AgentRecord
-        :param service_id: type of service for which the record is used
+        :param ledger_id: ledger id
         """
-        self._service_id = service_id
         self._address = address
-        self._public_key = public_key
-        self._peer_public_key = peer_public_key
+        self._representative_public_key = representative_public_key
+        self._message = message
         self._signature = signature
+        self._ledger_id = ledger_id
+        self._public_key: Optional[str] = None
+        self._check_validity()
+
+    def _check_validity(self) -> None:
+        """
+        Checks validity of record.
+
+        Specificyally:
+        - if ledger_id is valid
+        - if agent signed the message
+        - if message is correctly formatted
+        """
+        if self.ledger_id not in self.VALID_LEDGER_IDS:
+            raise ValueError(
+                f"Not a valid ledger_id. Found={self.ledger_id}, valid ids={self.VALID_LEDGER_IDS}."
+            )
+        if self.message != self._get_message(self.representative_public_key):
+            raise ValueError("Invalid message.")  # pragma: no cover
+        ledger_api = make_ledger_api(self.ledger_id)
+        public_keys = ledger_api.recover_public_keys_from_message(
+            self.message, self.signature
+        )
+        if len(public_keys) == 0:
+            raise ValueError("Malformed signature!")  # pragma: no cover
+        public_key: Optional[str] = None
+        for public_key_ in public_keys:
+            address = ledger_api.get_address_from_public_key(public_key_)
+            if address == self.address:
+                public_key = public_key_
+                break
+        if public_key is None:
+            raise ValueError(
+                "Invalid signature for provided representative_public_key and agent address!"
+            )
+        self._public_key = public_key
 
     @property
     def address(self) -> str:
@@ -93,12 +96,14 @@ class AgentRecord:
     @property
     def public_key(self) -> str:
         """Get agent public key"""
+        if self._public_key is None:
+            raise ValueError("Inconsistent record!")  #  pragma: nocover
         return self._public_key
 
     @property
-    def peer_public_key(self) -> str:
-        """Get agent's representative peer public key"""
-        return self._peer_public_key
+    def representative_public_key(self) -> str:
+        """Get agent representative's public key"""
+        return self._representative_public_key
 
     @property
     def signature(self) -> str:
@@ -106,38 +111,40 @@ class AgentRecord:
         return self._signature
 
     @property
-    def service_id(self) -> str:
-        """Get record service id"""
-        return self._service_id
+    def message(self) -> bytes:
+        """Get the message."""
+        return self._message
+
+    @property
+    def ledger_id(self) -> str:
+        """Get ledger id."""
+        return self._ledger_id
+
+    def _get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
+        """Get the message."""
+        # Refactor, needs to match CertRequest!
+        message = public_key.encode("ascii")
+        # + self.identifier.encode("ascii")  # noqa: E800
+        # + self.not_before_string.encode("ascii")  # noqa: E800
+        # + self.not_after_string.encode("ascii")  # noqa: E800
+        return message
 
     def __str__(self):  # pragma: no cover
         """Get string representation."""
-        return f"(address={self.address}, public_key={self.public_key}, peer_public_key={self.peer_public_key}, signature={self.signature})"
+        return f"(address={self.address}, public_key={self.public_key}, peer_public_key={self.peer_public_key}, signature={self.signature}, ledger_id={self.ledger_id})"
 
-    def check_validity(self, address: str, peer_public_key: str) -> None:
-        """
-        Check if the agent record is valid for `address` and `peer_public_key`.
-
-        Raises an Exception if invalid.
-
-        :param address: the expected agent address concerned by the record
-        :param peer_public_key: the expected representative peer public key
-        """
-
-        if self._address != address:
-            raise Exception(
-                "Proof-of-representation is not generated for the intended agent"
-            )
-        if self._peer_public_key != peer_public_key:
-            raise Exception(
-                "Proof-of-representation is not generated for intended peer"
-            )
-        recovered_address = FetchAIHelper.get_address_from_public_key(self._public_key)
-        if self._address != recovered_address:
-            raise Exception(
-                f"Agent address {self._address} and public key doesn't match"
-            )
-        if self._address not in FetchAIHelper.recover_message(
-            self._peer_public_key.encode("utf-8"), self._signature
-        ):
-            raise Exception("Invalid signature")
+    @classmethod
+    def from_cert_request(
+        cls, cert_request: CertRequest, address: str, representative_public_key: str,
+    ) -> "AgentRecord":
+        """Get agent record from cert request."""
+        message = cert_request.get_message(representative_public_key)
+        signature = cert_request.get_signature()
+        record = cls(
+            address,
+            representative_public_key,
+            message,
+            signature,
+            cert_request.ledger_id,
+        )
+        return record
