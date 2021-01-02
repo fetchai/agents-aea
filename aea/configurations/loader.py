@@ -311,7 +311,7 @@ def load_component_configuration(
     component_type: ComponentType,
     directory: Path,
     skip_consistency_check: bool = False,
-) -> "ComponentConfiguration":
+) -> ComponentConfiguration:
     """
     Load configuration and check that it is consistent against the directory.
 
@@ -320,8 +320,29 @@ def load_component_configuration(
     :param skip_consistency_check: if True, the consistency check are skipped.
     :return: the configuration object.
     """
-    configuration_object = _load_configuration_object(component_type, directory)
-    if not skip_consistency_check:
+    package_type = component_type.to_package_type()
+    configuration_object = load_package_configuration(
+        package_type, directory, skip_consistency_check
+    )
+    configuration_object = cast(ComponentConfiguration, configuration_object)
+    return configuration_object
+
+
+def load_package_configuration(
+    package_type: PackageType, directory: Path, skip_consistency_check: bool = False,
+) -> PackageConfiguration:
+    """
+    Load configuration and check that it is consistent against the directory.
+
+    :param package_type: the package type.
+    :param directory: the root of the package
+    :param skip_consistency_check: if True, the consistency check are skipped.
+    :return: the configuration object.
+    """
+    configuration_object = _load_configuration_object(package_type, directory)
+    if not skip_consistency_check and isinstance(
+        configuration_object, ComponentConfiguration
+    ):
         configuration_object._check_configuration_consistency(  # pylint: disable=protected-access
             directory
         )
@@ -329,19 +350,17 @@ def load_component_configuration(
 
 
 def _load_configuration_object(
-    component_type: ComponentType, directory: Path
-) -> ComponentConfiguration:
+    package_type: PackageType, directory: Path
+) -> PackageConfiguration:
     """
     Load the configuration object, without consistency checks.
 
-    :param component_type: the component type.
+    :param package_type: the package type.
     :param directory: the directory of the configuration.
     :return: the configuration object.
     :raises FileNotFoundError: if the configuration file is not found.
     """
-    configuration_loader = ConfigLoader.from_configuration_type(
-        component_type.to_configuration_type()
-    )
+    configuration_loader = ConfigLoader.from_configuration_type(package_type)
     configuration_filename = (
         configuration_loader.configuration_class.default_configuration_filename
     )
@@ -352,7 +371,7 @@ def _load_configuration_object(
     except FileNotFoundError:
         raise FileNotFoundError(
             "{} configuration not found: {}".format(
-                component_type.value.capitalize(), configuration_filepath
+                package_type.value.capitalize(), configuration_filepath
             )
         )
     return configuration_object

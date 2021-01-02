@@ -93,14 +93,14 @@ class FingerprintCommandTestCase(TestCase):
         """Test fingerprint by_path works raises exceptions."""
         with pytest.raises(
             ClickException,
-            match=f"No package config file found in `.*`. Incorrect directory?",
+            match="No package config file found in `.*`. Incorrect directory?",
         ):
             with mock.patch("os.listdir", return_value=[]):
                 self._run_fingerprint_by_path()
 
         with pytest.raises(
             ClickException,
-            match=f"Too many config files in the directory, only one has to present!",
+            match="Too many config files in the directory, only one has to present!",
         ):
             with mock.patch(
                 "os.listdir",
