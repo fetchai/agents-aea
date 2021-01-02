@@ -19,12 +19,21 @@
 
 """This module contains the tests for the content of query-language.md file."""
 from pathlib import Path
+from unittest import mock
+from unittest.mock import MagicMock
 
 from tests.conftest import ROOT_DIR
 from tests.test_docs.helper import BasePythonMarkdownDocs
 
 
+@mock.patch("aea.helpers.search.models.Query.check_validity")
 class TestQueryLanguage(BasePythonMarkdownDocs):
     """Test the data models code snippets."""
 
     DOC_PATH = Path(ROOT_DIR, "docs", "query-language.md")
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        super().setup_class()
+        cls.locals["book_model"] = MagicMock()

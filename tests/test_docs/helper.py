@@ -124,6 +124,17 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
     """Test Markdown documentation by running Python snippets in sequence."""
 
     @classmethod
+    def setup_class(cls):
+        """
+        Set up class.
+
+        It sets the initial value of locals and globals.
+        """
+        super().setup_class()
+        cls.locals = {}
+        cls.globals = {}
+
+    @classmethod
     def _python_selector(cls, block: Dict) -> bool:
         return block["type"] == "block_code" and block["info"].strip() == "python"
 
@@ -134,7 +145,7 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
         """Run Python code block in sequence."""
         python_blocks = list(filter(self._python_selector, self.blocks))
 
-        globals_, locals_ = {}, {}
+        globals_, locals_ = self.globals, self.locals
         for python_block in python_blocks:
             python_code = python_block["text"]
             exec(python_code, globals_, locals_)  # nosec

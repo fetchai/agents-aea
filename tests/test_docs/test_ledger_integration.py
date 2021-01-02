@@ -24,7 +24,12 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 from aea.crypto import FetchAICrypto
-from aea.crypto.fetchai import FetchAIFaucetApi
+from aea.crypto.fetchai import FetchAIApi, FetchAIFaucetApi
+from aea.crypto.registries import (
+    crypto_registry,
+    faucet_apis_registry,
+    ledger_apis_registry,
+)
 
 from tests.conftest import ROOT_DIR
 from tests.test_docs.helper import BasePythonMarkdownDocs
@@ -58,6 +63,15 @@ class TestLedgerIntegration(BasePythonMarkdownDocs):
     def _assert(self, *mocks, **locals_):
         """Assert code outputs."""
         self._assert_isinstance("fetchai_crypto", FetchAICrypto, **locals_)
+        self._assert_isinstance("fetchai_ledger_api", FetchAIApi, **locals_)
         self._assert_isinstance("fetchai_faucet_api", FetchAIFaucetApi, **locals_)
+        self._assert_isinstance("my_ledger_crypto", MagicMock, **locals_)
         self._assert_isinstance("my_ledger_api", MagicMock, **locals_)
         self._assert_isinstance("my_faucet_api", MagicMock, **locals_)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test."""
+        crypto_registry.specs.pop("my_ledger_id")
+        ledger_apis_registry.specs.pop("my_ledger_id")
+        faucet_apis_registry.specs.pop("my_ledger_id")
