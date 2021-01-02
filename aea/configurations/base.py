@@ -492,7 +492,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         if not directory.exists() or not directory.is_dir():
             raise ValueError("Directory {} is not valid.".format(directory))
         _compare_fingerprints(
-            self, directory, False, self.component_type.to_configuration_type()
+            self, directory, False, self.component_type.to_package_type()
         )
 
     def check_aea_version(self):

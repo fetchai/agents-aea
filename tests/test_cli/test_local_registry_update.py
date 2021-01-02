@@ -60,13 +60,15 @@ def test_local_registry_update():
                 "aea.cli.local_registry_sync.replace_package"
             ) as replace_package_mock:
                 result = runner.invoke(
-                    cli, "local-registry-sync", catch_exceptions=False
+                    cli, ["-s", "local-registry-sync"], catch_exceptions=False
                 )
                 assert result.exit_code == 0, result.stdout
             assert replace_package_mock.call_count == len(PACKAGES)
 
             # do actual upgrade
-            result = runner.invoke(cli, "local-registry-sync", catch_exceptions=False)
+            result = runner.invoke(
+                cli, ["-s", "local-registry-sync"], catch_exceptions=False
+            )
             assert result.exit_code == 0, result.stdout
 
             # check next update will do nothing
@@ -74,7 +76,7 @@ def test_local_registry_update():
                 "aea.cli.local_registry_sync.replace_package"
             ) as replace_package_mock:
                 result = runner.invoke(
-                    cli, "local-registry-sync", catch_exceptions=False
+                    cli, ["-s", "local-registry-sync"], catch_exceptions=False
                 )
                 assert result.exit_code == 0, result.stdout
             assert replace_package_mock.call_count == 0
