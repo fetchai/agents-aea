@@ -20,7 +20,6 @@
 """This module contains helper function to extract code from the .md files."""
 import re
 import traceback
-from abc import abstractmethod
 from pathlib import Path
 from typing import Dict
 

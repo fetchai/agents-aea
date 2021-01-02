@@ -23,13 +23,9 @@ import shutil
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from unittest import mock
 from unittest.mock import MagicMock
 
-from aea.crypto import FetchAICrypto
-from aea.crypto.fetchai import FetchAIFaucetApi
-
-from tests.conftest import ROOT_DIR, PACKAGES_DIR
+from tests.conftest import PACKAGES_DIR, ROOT_DIR
 from tests.test_docs.helper import BasePythonMarkdownDocs
 
 
