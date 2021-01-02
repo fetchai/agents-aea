@@ -844,6 +844,7 @@ def test_agent_config_to_json_with_optional_configurations():
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER
     agent_config.json
+    assert agent_config.package_id == PackageId.from_uri_path("agent/author/name/0.1.0")
 
 
 def test_protocol_specification_attributes():

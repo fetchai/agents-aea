@@ -30,8 +30,9 @@ from aea.cli.registry.add import fetch_package
 from aea.cli.registry.utils import get_package_meta
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
+from aea.cli.utils.loggers import logger
 from aea.configurations.data_types import PackageId, PackageType, PublicId
-from aea.configurations.loader import load_component_configuration
+from aea.configurations.loader import load_package_configuration
 
 
 PACKAGES_DIRS = [i.to_plural() for i in PackageType]
@@ -41,10 +42,13 @@ PACKAGES_DIRS = [i.to_plural() for i in PackageType]
 @pass_ctx
 def local_registry_sync(ctx: Context):
     """Upgrade the local package registry."""
-    do_local_registry_update(ctx.cwd)
+    skip_consistency_check = ctx.config["skip_consistency_check"]
+    do_local_registry_update(ctx.cwd, skip_consistency_check)
 
 
-def do_local_registry_update(base_dir: Union[str, Path]) -> None:
+def do_local_registry_update(
+    base_dir: Union[str, Path], skip_consistency_check: bool = True
+) -> None:
     """
     Perform local registry update.
 
@@ -52,7 +56,7 @@ def do_local_registry_update(base_dir: Union[str, Path]) -> None:
 
     :return: None
     """
-    for package_id, package_dir in enlist_packages(base_dir):
+    for package_id, package_dir in enlist_packages(base_dir, skip_consistency_check):
         current_public_id = package_id.public_id
         latest_public_id = get_package_latest_public_id(package_id)
         if not (  # pylint: disable=superfluous-parens
@@ -101,7 +105,7 @@ def get_package_latest_public_id(package_id: PackageId) -> PublicId:
 
 
 def enlist_packages(
-    base_dir: Union[Path, str]
+    base_dir: Union[Path, str], skip_consistency_check: bool = True
 ) -> Generator[Tuple[PackageId, Union[Path, str]], None, None]:
     """
     Generate list of the packages in local repo directory.
@@ -131,10 +135,13 @@ def enlist_packages(
                     if package_type.to_plural() != package_type_plural:
                         # incorrect package placing
                         continue  # pragma: nocover
-                    config = load_component_configuration(
-                        package_type, Path(package_dir), skip_consistency_check=True
+                    config = load_package_configuration(
+                        package_type,
+                        Path(package_dir),
+                        skip_consistency_check=skip_consistency_check,
                     )
                     yield (config.package_id, package_dir)
-                except ValueError:  # pragma: nocover
-                    # can not determine package type, not a package? just skip
-                    pass  # pragma: nocover
+                except ValueError as e:  # pragma: nocover
+                    logger.error(  # pragma: nocover
+                        f"Error with package_dir={package_dir}: {e}"
+                    )
