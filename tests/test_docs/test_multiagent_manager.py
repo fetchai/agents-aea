@@ -17,7 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the content of ledger-integration.md file."""
+"""This module contains the tests for the content of multi-agent-manager.md file."""
+import os
+import shutil
+import tempfile
 from importlib import import_module
 from pathlib import Path
 from unittest import mock
@@ -26,7 +29,7 @@ from unittest.mock import MagicMock
 from aea.crypto import FetchAICrypto
 from aea.crypto.fetchai import FetchAIFaucetApi
 
-from tests.conftest import ROOT_DIR
+from tests.conftest import ROOT_DIR, PACKAGES_DIR
 from tests.test_docs.helper import BasePythonMarkdownDocs
 
 
@@ -42,22 +45,25 @@ def _import_module_mock(arg):
     return import_module(arg)
 
 
-# we mock only if the import is from dummy import path like "some.dotted.path".
-@mock.patch("importlib.import_module", side_effect=_import_module_mock)
-class TestLedgerIntegration(BasePythonMarkdownDocs):
+class TestMultiAgentManager(BasePythonMarkdownDocs):
     """Test the ledger integration code snippets."""
 
-    DOC_PATH = Path(ROOT_DIR, "docs", "ledger-integration.md")
+    DOC_PATH = Path(ROOT_DIR, "docs", "multi-agent-manager.md")
 
-    def _assert_isinstance(self, locals_key, cls, **locals_):
-        """Assert that the member of 'locals' is an instance of a class."""
-        assert locals_key in locals_
-        obj = locals_[locals_key]
-        assert isinstance(obj, cls)
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        super().setup_class()
+        cls.old_cwd = os.getcwd()
+        cls.temp_dir = tempfile.mkdtemp()
+        shutil.copytree(PACKAGES_DIR, Path(cls.temp_dir, "packages"))
+        os.chdir(cls.temp_dir)
 
     def _assert(self, *mocks, **locals_):
         """Assert code outputs."""
-        self._assert_isinstance("fetchai_crypto", FetchAICrypto, **locals_)
-        self._assert_isinstance("fetchai_faucet_api", FetchAIFaucetApi, **locals_)
-        self._assert_isinstance("my_ledger_api", MagicMock, **locals_)
-        self._assert_isinstance("my_faucet_api", MagicMock, **locals_)
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown class."""
+        os.chdir(cls.old_cwd)
+        shutil.rmtree(cls.temp_dir)

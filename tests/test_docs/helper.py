@@ -128,7 +128,6 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
     def _python_selector(cls, block: Dict) -> bool:
         return block["type"] == "block_code" and block["info"].strip() == "python"
 
-    @abstractmethod
     def _assert(self, *mocks, **locals_):
         """Do assertions after Python code execution."""
 

@@ -227,6 +227,7 @@ MAX_FLAKY_RERUNS = 3
 MAX_FLAKY_RERUNS_ETH = 1
 MAX_FLAKY_RERUNS_INTEGRATION = 1
 
+PACKAGES_DIR = os.path.join(ROOT_DIR, "packages")
 FETCHAI_PREF = os.path.join(ROOT_DIR, "packages", "fetchai")
 PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
 PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
