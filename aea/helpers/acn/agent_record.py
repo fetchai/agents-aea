@@ -43,7 +43,7 @@ def signature_from_cert_request(
     signature = bytes.fromhex(Path(cert.save_path).read_bytes().decode("ascii")).decode(
         "ascii"
     )
-    public_keys = FetchAIHelper.recover_verifying_keys_from_message(
+    public_keys = FetchAIHelper.recover_public_keys_from_message(
         cert.get_message(message), signature
     )
     if len(public_keys) == 0:  # pragma: no cover

@@ -20,6 +20,7 @@
 import logging
 import os
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -30,6 +31,7 @@ from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     create_private_key,
+    make_certificate,
     private_key_verify_or_create,
     try_generate_testnet_wealth,
     try_validate_private_key_path,
@@ -168,3 +170,14 @@ def test_private_key_verify_or_create():
             private_key_verify_or_create(agent_conf, Path("."))
     mock_validate.assert_not_called()
     mock_create.assert_not_called()
+
+
+def test_make_certificate():
+    """Test make_certificate."""
+    with TemporaryDirectory() as tmp_dir:
+        make_certificate(
+            "fetchai",
+            os.path.join(CUR_PATH, "data", "fetchai_private_key.txt"),
+            b"message",
+            os.path.join(tmp_dir, "test.txt"),
+        )

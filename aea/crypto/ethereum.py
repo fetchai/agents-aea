@@ -28,8 +28,9 @@ from typing import Any, BinaryIO, Callable, Dict, Optional, Tuple, Union, cast
 
 import requests
 from eth_account import Account
+from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
-from eth_account.messages import encode_defunct
+from eth_account.messages import _hash_eip191_message, encode_defunct
 from eth_keys import keys
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
@@ -366,7 +367,7 @@ class EthereumHelper(Helper):
         return (address,)
 
     @classmethod
-    def recover_verifying_keys_from_message(
+    def recover_public_keys_from_message(
         cls, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[str, ...]:
         """
@@ -377,7 +378,18 @@ class EthereumHelper(Helper):
         :param is_deprecated_mode: if the deprecated signing was used
         :return: the recovered public keys
         """
-        raise NotImplementedError  # pragma: no cover
+        if not is_deprecated_mode:
+            signable_message = encode_defunct(primitive=message)
+            message = _hash_eip191_message(signable_message)
+        hash_bytes = HexBytes(message)
+        # code taken from https://github.com/ethereum/eth-account/blob/master/eth_account/account.py#L428
+        if len(hash_bytes) != 32:  # pragma: nocover
+            raise ValueError("The message hash must be exactly 32-bytes")
+        signature_bytes = HexBytes(signature)
+        signature_bytes_standard = to_standard_signature_bytes(signature_bytes)
+        signature_obj = keys.Signature(signature_bytes=signature_bytes_standard)
+        pubkey = signature_obj.recover_public_key_from_msg_hash(hash_bytes)
+        return (str(pubkey),)
 
     @staticmethod
     def get_hash(message: bytes) -> str:

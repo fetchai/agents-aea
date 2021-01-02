@@ -205,7 +205,7 @@ class Helper(ABC):
 
     @classmethod
     @abstractmethod
-    def recover_verifying_keys_from_message(
+    def recover_public_keys_from_message(
         cls, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[str, ...]:
         """

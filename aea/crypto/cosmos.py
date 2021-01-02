@@ -150,14 +150,14 @@ class CosmosHelper(Helper):
         :param is_deprecated_mode: if the deprecated signing was used
         :return: the recovered addresses
         """
-        public_keys = cls.recover_verifying_keys_from_message(message, signature)
+        public_keys = cls.recover_public_keys_from_message(message, signature)
         addresses = [
             cls.get_address_from_public_key(public_key) for public_key in public_keys
         ]
         return tuple(addresses)
 
     @classmethod
-    def recover_verifying_keys_from_message(
+    def recover_public_keys_from_message(
         cls, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[str, ...]:
         """
