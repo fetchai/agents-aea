@@ -37,7 +37,7 @@ class TestDemoDocs:
 
     def _test_blocks(self, filename: str, filter_: str):
         """Test code blocks of a certain type determined by 'filter_' param."""
-        bash_file = Path(self.BASH_DIR_PATH, filename).read_text()
+        bash_file = Path(self.BASH_DIR_PATH, filename).read_text(encoding="utf-8")
         md_path = os.path.join(ROOT_DIR, "docs", filename.replace("bash-", ""))
 
         bash_code_blocks = extract_code_blocks(filepath=md_path, filter_=filter_)
