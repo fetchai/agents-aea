@@ -59,7 +59,7 @@ class TestBuildSkill(AEATestCaseMany):
         """Setup the test class."""
         AEATestCaseMany.setup_class()
         cls.doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=cls.doc_path, filter="python")
+        cls.code_blocks = extract_code_blocks(filepath=cls.doc_path, filter_="python")
 
     def test_read_md_file(self):
         """Teat that the md file is not empty."""
@@ -138,7 +138,7 @@ class TestBuildSkill(AEATestCaseMany):
         os.rename(path, path_new)
 
         path = Path(self.t, search_aea, "skills", skill_name, "skill.yaml")
-        yaml_code_block = extract_code_blocks(self.doc_path, filter="yaml")
+        yaml_code_block = extract_code_blocks(self.doc_path, filter_="yaml")
         with open(path, "w") as file:
             file.write(yaml_code_block[0])  # block one is yaml
 

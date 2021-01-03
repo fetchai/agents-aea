@@ -57,14 +57,14 @@ decision_maker_handler: None                    # The decision maker handler to 
 The `aea-config.yaml` can further be extended with component configuration overrides.
 
 For custom connection configurations:
-```
+``` yaml
 public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
 type: connection                                # for connections, this must be "connection".
 config: ...                                     # a dictionary to overwrite the `config` field (see below)
 ```
 
 For custom skill configurations:
-```
+``` yaml
 public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
 type: skill                                     # for skills, this must be "skill".
 behaviours:                                     # override configurations for behaviours

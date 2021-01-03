@@ -45,6 +45,27 @@ error_handler: None                             # The error handler to be used.
 decision_maker_handler: None                    # The decision maker handler to be used.
 ```
 ``` yaml
+public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
+type: connection                                # for connections, this must be "connection".
+config: ...                                     # a dictionary to overwrite the `config` field (see below)
+```
+``` yaml
+public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
+type: skill                                     # for skills, this must be "skill".
+behaviours:                                     # override configurations for behaviours
+  behaviour_1:                                  # override configurations for "behaviour_1"
+    args:                                       # arguments for a specific behaviour (see below)
+      foo: bar
+handlers:                                       # override configurations for handlers
+  handler_1:                                    # override configurations for "handler_1"
+    args:                                       # arguments for a specific handler (see below)
+      foo: bar
+models:                                         # override configurations for models
+  model_1:                                      # override configurations for "model_1"
+    args:                                       # arguments for a specific model (see below)
+      foo: bar
+```
+``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
 author: fetchai                                 # Author handle of the package's author (must satisfy AUTHOR_REGEX)
 version: 0.1.0                                  # Version of the package (a semantic version number, see https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string")

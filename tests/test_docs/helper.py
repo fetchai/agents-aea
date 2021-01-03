@@ -18,10 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains helper function to extract code from the .md files."""
-import re
 import traceback
+from functools import partial
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import mistune
 import pytest
@@ -30,25 +30,36 @@ import pytest
 MISTUNE_BLOCK_CODE_ID = "block_code"
 
 
+def block_code_filter(b: Dict) -> bool:
+    """Check Mistune block is a code block."""
+    return b["type"] == MISTUNE_BLOCK_CODE_ID
+
+
+def type_filter(type_: Optional[str], b: Dict) -> bool:
+    """
+    Check Mistune code block is of a certain type.
+
+    If the field "info" is None, return False.
+    If type_ is None, this function always return true.
+
+    :param type_: the expected type of block (optional)
+    :param b: the block dicionary.
+    :return: True if the block should be accepted, false otherwise.
+    """
+    if type_ is None:
+        return True
+    return b["info"].strip() == type_ if b["info"] is not None else False
+
+
 def extract_code_blocks(filepath, filter_=None):
     """Extract code blocks from .md files."""
-    code_blocks = []
-    with open(filepath, "r", encoding="utf-8") as f:
-        while True:
-            line = f.readline()
-            if not line:
-                # EOF
-                break
-
-            out = re.match("[^`]*```(.*)$", line)
-            if out:
-                if filter_ and filter_.strip() != out.group(1).strip():
-                    continue
-                code_block = [f.readline()]
-                while re.search("```", code_block[-1]) is None:
-                    code_block.append(f.readline())
-                code_blocks.append("".join(code_block[:-1]))
-    return code_blocks
+    content = Path(filepath).read_text(encoding="utf-8")
+    markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
+    blocks = markdown_parser(content)
+    actual_type_filter = partial(type_filter, filter_)
+    code_blocks = list(filter(block_code_filter, blocks))
+    bash_code_blocks = filter(actual_type_filter, code_blocks)
+    return list(b["text"] for b in bash_code_blocks)
 
 
 def extract_python_code(filepath):
@@ -106,18 +117,13 @@ class BaseTestMarkdownDocs:
     DOC_PATH: Path
 
     @classmethod
-    def _block_code_filter(cls, b: Dict) -> bool:
-        """Check Mistune block is a code block."""
-        return b["type"] == MISTUNE_BLOCK_CODE_ID
-
-    @classmethod
     def setup_class(cls):
         """Set up the test."""
         markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
         cls.doc_path = cls.DOC_PATH
         cls.doc_content = cls.doc_path.read_text()
         cls.blocks = markdown_parser(cls.doc_content)
-        cls.code_blocks = list(filter(cls._block_code_filter, cls.blocks))
+        cls.code_blocks = list(filter(block_code_filter, cls.blocks))
 
 
 class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
@@ -136,7 +142,9 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
 
     @classmethod
     def _python_selector(cls, block: Dict) -> bool:
-        return block["type"] == "block_code" and block["info"].strip() == "python"
+        return block["type"] == MISTUNE_BLOCK_CODE_ID and (
+            block["info"].strip() == "python" if block["info"] else False
+        )
 
     def _assert(self, locals_, *mocks):
         """Do assertions after Python code execution."""

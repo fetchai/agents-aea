@@ -1,12 +1,18 @@
+``` bash
+python3 --version
+```
+``` bash
+sudo apt-get install python3.7-dev
+```
 ```bash
 docker pull fetchai/aea-user:latest
 ```
-  ```bash
-  docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
-  ```
-  ```bash
-  docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
-  ```
+```bash
+docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
+```
+```bash
+docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
+```
 ``` bash
 mkdir my_aea_projects/
 cd my_aea_projects/
@@ -119,6 +125,9 @@ info: Echo Behaviour: teardown method called.
 ```
 ``` bash
 aea interact
+```
+``` bash
+pytest test.py
 ```
 ``` bash
 aea delete my_first_aea

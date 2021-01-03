@@ -45,7 +45,9 @@ class TestDemoDocs:
             assert blocks in bash_file, "[{}]: FAILED. Code must be identical".format(
                 filename
             )
-        logger.info("[{}]: PASSED".format(filename))
+        logger.info(
+            f"[{filename}]: PASSED. Tested {len(bash_code_blocks)} '{filter_}' blocks."
+        )
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
