@@ -120,7 +120,7 @@ The _distance_ is a constraint type that allows you to put a limit on a <a href=
 **Examples**:
 
 ``` python
-from aea.helpers.search.models import Constraint, ConstraintType, Description, Location, 
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Location
 
 # define a location of interest, e.g. the Tour Eiffel
 tour_eiffel = Location(48.8581064, 2.29447)

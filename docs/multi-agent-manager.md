@@ -6,6 +6,7 @@ The <a href="../api/manager">`MultiAgentManager`</a> allows managing multiple ag
 We intantiate the manager by providing it with the working directory in which to operate and starting it:
 
 ``` python
+from pathlib import Path
 from aea.manager import MultiAgentManager
 
 WORKING_DIR = "."
@@ -31,14 +32,21 @@ manager.add_project(weather_station_id)
 
 Save the following private keys in the respective files.
 ``` python
-# 72d3149f5689f0749eaec5ebf6dba5deeb1e89b93ae1c58c71fd43dfaa231e87
+FET_PRIVATE_KEY_1 = b"72d3149f5689f0749eaec5ebf6dba5deeb1e89b93ae1c58c71fd43dfaa231e87"
 FET_PRIVATE_KEY_PATH_1 = "fetchai_private_key_1.txt"
-# bf529acb2546e13615ef6004c48e393f0638a5dc0c4979631a9a4bc554079f6f
+Path(FET_PRIVATE_KEY_PATH_1).write_bytes(FET_PRIVATE_KEY_1)
+
+COSMOS_PRIVATE_KEY_1 = b"bf529acb2546e13615ef6004c48e393f0638a5dc0c4979631a9a4bc554079f6f"
 COSMOS_PRIVATE_KEY_PATH_1 = "cosmos_private_key_1.txt"
-# 589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a
+Path(COSMOS_PRIVATE_KEY_PATH_1).write_bytes(COSMOS_PRIVATE_KEY_1)
+
+FET_PRIVATE_KEY_2 = b"589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a"
 FET_PRIVATE_KEY_PATH_2 = "fetchai_private_key_2.txt"
-# c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4
+Path(FET_PRIVATE_KEY_PATH_2).write_bytes(FET_PRIVATE_KEY_2)
+
+COSMOS_PRIVATE_KEY_2 = b"c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4"
 COSMOS_PRIVATE_KEY_PATH_2 = "cosmos_private_key_2.txt"
+Path(COSMOS_PRIVATE_KEY_PATH_2).write_bytes(COSMOS_PRIVATE_KEY_2)
 ```
 
 Add the agent instances
@@ -52,7 +60,7 @@ manager.add_agent(weather_station_id, agent_overrides=agent_overrides)
 component_overrides = {
     "name": "p2p_libp2p",
     "author": "fetchai",
-    "version": "0.9.0",
+    "version": "0.13.0",
     "type": "connection",
     "config": {
         "delegate_uri": "127.0.0.1:11001",
@@ -73,7 +81,7 @@ manager.add_agent(weather_client_id, component_overrides=[component_overrides], 
 ``` python
 manager.start_agent(weather_station_id.name)
 # wait for ~10 seconds for peer node to go live
-manager.start_agent(weather_station_id.name)
+manager.start_agent(weather_client_id.name)
 ```
 
 ## Stopping the agents:

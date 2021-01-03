@@ -54,7 +54,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
     def test_read_md_file(self):
         """Compare the extracted code with the python file."""
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."

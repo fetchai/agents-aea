@@ -1076,6 +1076,7 @@ class AgentConfig(PackageConfiguration):
     )
     CHECK_EXCLUDES = [
         ("private_key_paths",),
+        ("connection_private_key_paths",),
         ("default_routing",),
         ("logging_config",),
     ]

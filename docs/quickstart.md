@@ -23,7 +23,7 @@ The following hints can help:
 - Python is already included by default on 
 many Linux distributions (e.g. Ubuntu), as well as MacOS.
 To check you have the right version, open a terminal and run: 
-```
+``` bash
 python3 --version
 ```
 
@@ -391,7 +391,7 @@ Place the above code into a file `test.py` in your AEA project directory (the sa
 
 To run, execute the following:
 
-``` python
+``` bash
 pytest test.py
 ```
 

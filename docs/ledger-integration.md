@@ -58,7 +58,7 @@ my_ledger_api = make_ledger_api("my_ledger_id")
 from aea.crypto.registries import faucet_apis_registry, make_faucet_api, register_faucet_api
 
 # by default we can use the native faucet apis
-CONFIG = {"network": "testnet"}
+CONFIG = dict(poll_interval=1.0)
 fetchai_faucet_api = make_faucet_api("fetchai", **CONFIG)
 
 # we can check what faucet apis are registered
