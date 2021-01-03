@@ -69,6 +69,7 @@ nav:
       - Multi agent manager: 'multi-agent-manager.md'
       - Debugging: 'debug.md'
       - Profiling: 'runtime-cost.md'
+      - Proof of Representation: 'por.md'
     - Use case components:
       - Generic skills: 'generic-skills.md'
       - Front-end intergration: 'connect-a-frontend.md'

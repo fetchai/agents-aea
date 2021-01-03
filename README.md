@@ -127,7 +127,34 @@ The following dependency is **only relevant if you intend to contribute** to the
 
 The following steps are **only relevant if you intend to contribute** to the repository. They are **not required** for agent development.
 
-- To install development dependencies (here optionally skipping `Pipfile.lock` creation):
+### Recommended
+
+- The simplest way to get setup for development on the framework is to run the following:
+
+      make new_env
+      pipenv shell
+      make install_env
+
+- For linting and static analysis use:
+
+      make lint
+      make static
+      make pylint
+      make security
+
+- For testing aea.SUBMODULE with tests/TESTMODULE use:
+
+      make dir=SUBMODULE tdir=TESTMODULE test-sub
+
+  e.g.
+
+      make dir=cli tdir=cli test-sub
+
+- To run demos against local packages use flag `--local` in `aea` CLI commands.
+
+### Alternative
+
+- To install development dependencies manually (here optionally skipping `Pipfile.lock` creation):
 
       pipenv install --dev --skip-lock
 
