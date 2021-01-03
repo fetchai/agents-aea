@@ -25,6 +25,8 @@ from importlib import import_module
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import pytest
+
 from tests.conftest import PACKAGES_DIR, ROOT_DIR
 from tests.test_docs.helper import BasePythonMarkdownDocs
 
@@ -41,6 +43,7 @@ def _import_module_mock(arg):
     return import_module(arg)
 
 
+@pytest.mark.skip
 class TestMultiAgentManager(BasePythonMarkdownDocs):
     """Test the ledger integration code snippets."""
 
