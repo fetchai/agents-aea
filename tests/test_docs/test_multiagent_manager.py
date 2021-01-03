@@ -55,9 +55,6 @@ class TestMultiAgentManager(BasePythonMarkdownDocs):
         shutil.copytree(PACKAGES_DIR, Path(cls.temp_dir, "packages"))
         os.chdir(cls.temp_dir)
 
-    def _assert(self, *mocks, **locals_):
-        """Assert code outputs."""
-
     @classmethod
     def teardown_class(cls):
         """Teardown class."""

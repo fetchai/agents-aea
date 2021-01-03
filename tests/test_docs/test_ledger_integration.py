@@ -54,20 +54,20 @@ class TestLedgerIntegration(BasePythonMarkdownDocs):
 
     DOC_PATH = Path(ROOT_DIR, "docs", "ledger-integration.md")
 
-    def _assert_isinstance(self, locals_key, cls, **locals_):
+    def _assert_isinstance(self, locals_key, cls, locals_):
         """Assert that the member of 'locals' is an instance of a class."""
         assert locals_key in locals_
         obj = locals_[locals_key]
         assert isinstance(obj, cls)
 
-    def _assert(self, *mocks, **locals_):
+    def _assert(self, locals_, *mocks):
         """Assert code outputs."""
-        self._assert_isinstance("fetchai_crypto", FetchAICrypto, **locals_)
-        self._assert_isinstance("fetchai_ledger_api", FetchAIApi, **locals_)
-        self._assert_isinstance("fetchai_faucet_api", FetchAIFaucetApi, **locals_)
-        self._assert_isinstance("my_ledger_crypto", MagicMock, **locals_)
-        self._assert_isinstance("my_ledger_api", MagicMock, **locals_)
-        self._assert_isinstance("my_faucet_api", MagicMock, **locals_)
+        self._assert_isinstance("fetchai_crypto", FetchAICrypto, locals_)
+        self._assert_isinstance("fetchai_ledger_api", FetchAIApi, locals_)
+        self._assert_isinstance("fetchai_faucet_api", FetchAIFaucetApi, locals_)
+        self._assert_isinstance("my_ledger_crypto", MagicMock, locals_)
+        self._assert_isinstance("my_ledger_api", MagicMock, locals_)
+        self._assert_isinstance("my_faucet_api", MagicMock, locals_)
 
     @classmethod
     def teardown_class(cls):

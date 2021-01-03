@@ -17,26 +17,27 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the content of data-models.md file."""
+"""This module contains the tests for the content of skill-testing.md file."""
 from pathlib import Path
-
-from aea.helpers.search.models import Attribute, DataModel, Description
+from unittest import mock
+from unittest.mock import MagicMock
 
 from tests.conftest import ROOT_DIR
 from tests.test_docs.helper import BasePythonMarkdownDocs
 
 
-class TestDataModel(BasePythonMarkdownDocs):
-    """Test the data models code snippets."""
+@mock.patch("unittest.mock.MagicMock.assert_any_call")
+class TestSkillTesting(BasePythonMarkdownDocs):
+    """Test the skill testing code snippets."""
 
-    DOC_PATH = Path(ROOT_DIR, "docs", "defining-data-models.md")
+    DOC_PATH = Path(ROOT_DIR, "docs", "skill-testing.md")
 
-    def _assert(self, locals_, *_mocks):
-        attribute = locals_["attr_title"]
-        assert isinstance(attribute, Attribute)
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        super().setup_class()
+        # without this, it fails at the first block
+        # with: "NameError: name 'Path' is not defined"
+        cls.globals.update(globals())
 
-        data_model = locals_["book_model"]
-        assert isinstance(data_model, DataModel)
-
-        description = locals_["It"]
-        assert isinstance(description, Description)
+        cls.locals.update(dict(cls=MagicMock(), self=MagicMock()))

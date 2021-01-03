@@ -21,17 +21,19 @@
 from pathlib import Path
 
 from aea.helpers.search.models import Description
+
 from packages.fetchai.protocols.oef_search import OefSearchMessage
+
 from tests.conftest import ROOT_DIR
 from tests.test_docs.helper import BasePythonMarkdownDocs
 
 
 class TestSimpleOefUsage(BasePythonMarkdownDocs):
-    """Test the data models code snippets."""
+    """Test the simple OEF usage code snippets."""
 
     DOC_PATH = Path(ROOT_DIR, "docs", "simple-oef-usage.md")
 
-    def _assert(self, *mocks, **locals_):
+    def _assert(self, locals_, *mocks):
         """Assert executed code."""
         assert isinstance(locals_["message"], OefSearchMessage)
         assert isinstance(locals_["service_description"], Description)

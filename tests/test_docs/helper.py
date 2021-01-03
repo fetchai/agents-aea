@@ -138,7 +138,7 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
     def _python_selector(cls, block: Dict) -> bool:
         return block["type"] == "block_code" and block["info"].strip() == "python"
 
-    def _assert(self, *mocks, **locals_):
+    def _assert(self, locals_, *mocks):
         """Do assertions after Python code execution."""
 
     def test_python_blocks(self, *mocks):
@@ -149,4 +149,4 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
         for python_block in python_blocks:
             python_code = python_block["text"]
             exec(python_code, globals_, locals_)  # nosec
-        self._assert(*mocks, **locals_)
+        self._assert(locals_, *mocks)
