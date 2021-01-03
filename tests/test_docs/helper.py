@@ -30,7 +30,7 @@ import pytest
 MISTUNE_BLOCK_CODE_ID = "block_code"
 
 
-def extract_code_blocks(filepath, filter=None):
+def extract_code_blocks(filepath, filter_=None):
     """Extract code blocks from .md files."""
     code_blocks = []
     with open(filepath, "r", encoding="utf-8") as f:
@@ -42,7 +42,7 @@ def extract_code_blocks(filepath, filter=None):
 
             out = re.match("[^`]*```(.*)$", line)
             if out:
-                if filter and filter.strip() != out.group(1).strip():
+                if filter_ and filter_.strip() != out.group(1).strip():
                     continue
                 code_block = [f.readline()]
                 while re.search("```", code_block[-1]) is None:

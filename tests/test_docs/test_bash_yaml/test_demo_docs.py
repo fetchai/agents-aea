@@ -40,7 +40,7 @@ class TestDemoDocs:
         bash_file = Path(self.BASH_DIR_PATH, filename).read_text()
         md_path = os.path.join(ROOT_DIR, "docs", filename.replace("bash-", ""))
 
-        bash_code_blocks = extract_code_blocks(filepath=md_path, filter=filter_)
+        bash_code_blocks = extract_code_blocks(filepath=md_path, filter_=filter_)
         for blocks in bash_code_blocks:
             assert blocks in bash_file, "[{}]: FAILED. Code must be identical".format(
                 filename
