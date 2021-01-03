@@ -231,17 +231,15 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 
 #### Configure the `p2p_libp2p` connection:
 
-(configuration file: `vendor/fetchai/connections/p2p_libp2p/connection.yaml`)
-
-Replace the `config` section with the following (note the changes in the URI ports):
-
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11000
-  entry_peers: []
-  local_uri: 127.0.0.1:7000
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:7000
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11000",
+  "entry_peers": [],
+  "local_uri": "127.0.0.1:7000",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:7000"
+}'
 ```
 
 ### Install the Dependencies and Run Alice_AEA:
@@ -318,17 +316,15 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 
 #### Configure the `p2p_libp2p` connection:
 
-(configuration file: `vendor/fetchai/connections/p2p_libp2p/connection.yaml`)
-
-Replace the `config` section with the following (note the changes in the URI ports):
-
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:7001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:7001
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:7001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:7001"
+}'
 ```
 
 where `SOME_ADDRESS` is **Alice_AEA's p2p address** as displayed in the third terminal.

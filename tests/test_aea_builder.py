@@ -639,6 +639,7 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         self.new_handler_args = {"handler_arg_1": 42}
         self.new_model_args = {"model_arg_1": 42}
         self._add_dummy_skill_config()
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
 
         with cd(self._get_cwd()):
@@ -679,6 +680,7 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
     def test_from_project(self):
         """Test builder set from project dir."""
         self._add_dummy_skill_config()
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
             builder.call_all_build_entrypoints()

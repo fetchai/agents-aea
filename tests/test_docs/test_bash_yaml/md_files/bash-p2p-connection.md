@@ -12,6 +12,16 @@ aea add connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": MULTI_ADDRESSES,
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
+```
+``` bash
 aea run --connections fetchai/p2p_libp2p:0.13.0
 ```
   ``` bash
@@ -45,27 +55,6 @@ aea run --connections fetchai/p2p_libp2p:0.13.0
     --entry-peers-maddrs <AEA_P2P_ENTRY_URI_1> <AEA_P2P_ENTRY_URI_2> ...
   ```
 ``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: MULTI_ADDRESSES
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
-```
-``` yaml
-default_routing:
-  ? "fetchai/oef_search:0.11.0"
-  : "fetchai/oef:0.14.0"
-```
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: MULTI_ADDRESSES
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
-```
-```yaml
 /dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx
 /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ```

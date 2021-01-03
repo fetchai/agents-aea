@@ -50,19 +50,19 @@ To use the image you will first have to pull it and than run it with your curren
 
 To pull:
 
-```bash
+``` bash
 docker pull fetchai/aea-user:latest
 ```
 
 To run the image on Linux and MacOs:
 
-```bash
+``` bash
 docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
 ```
 
 And on Windows:
 
-```bash
+``` bash
 docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
 ```
 

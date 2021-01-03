@@ -224,10 +224,15 @@ aea build
 
 ### Add keys for all AEAs
 
-Create the private key for the AEA for Fetch.ai `AgentLand`:
+Create a private key used to secure the AEA's communications:
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt --connection
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ### Update the game parameters in the controller

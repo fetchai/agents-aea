@@ -626,10 +626,10 @@ class CertRequest:
 
         :param public_key: the public key, or the key id.
         :param identifier: certificate identifier.
-        :param not_before: specify the lower bound for certificate vailidity.
+        :param not_before: specify the lower bound for certificate validity.
           If it is a string, it must follow the format: 'YYYY-MM-DD'. It
           will be interpreted as timezone UTC.
-        :param not_before: specify the lower bound for certificate vailidity.
+        :param not_before: specify the lower bound for certificate validity.
           if it is a string, it must follow the format: 'YYYY-MM-DD' It
           will be interpreted as timezone UTC-0.
         :param save_path: the save_path where to save the certificate.
@@ -746,15 +746,25 @@ class CertRequest:
         """Get the save_path"""
         return self._save_path
 
-    def get_message(self, public_key: str) -> bytes:
+    def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
         """Get the message to sign."""
-        message = (
-            public_key.encode("ascii")
-            + self.identifier.encode("ascii")
-            + self.not_before_string.encode("ascii")
-            + self.not_after_string.encode("ascii")
-        )
+        message = public_key.encode("ascii")
+        # + self.identifier.encode("ascii")  # noqa: E800
+        # + self.not_before_string.encode("ascii")  # noqa: E800
+        # + self.not_after_string.encode("ascii")  # noqa: E800
         return message
+
+    def get_signature(self) -> str:
+        """Get signature from save_path."""
+        if not Path(self.save_path).is_file():
+            raise Exception(  # pragma: no cover
+                f"cert_request 'save_path' field {self.save_path} is not a file. "
+                "Please ensure that 'issue-certificates' command is called beforehand."
+            )
+        signature = bytes.fromhex(
+            Path(self.save_path).read_bytes().decode("ascii")
+        ).decode("ascii")
+        return signature
 
     @property
     def json(self) -> Dict:

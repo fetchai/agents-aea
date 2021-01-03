@@ -42,7 +42,20 @@ aea fingerprint skill fetchai/generic_buyer:0.1.0
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+``` bash
+aea issue-certificates
+```
+``` bash
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
+  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+}'
 ```
 ``` bash
 aea generate-wealth fetchai --sync
@@ -66,6 +79,16 @@ aea add protocol fetchai/signing:0.8.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+```
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
 ``` bash
 aea run
@@ -230,14 +253,6 @@ models:
       stop_searching_on_result: true
     class_name: GenericStrategy
 dependencies: {}
-```
-``` yaml
-addr: ${OEF_ADDR: 127.0.0.1}
-```
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
 ```
 ``` yaml
 config:

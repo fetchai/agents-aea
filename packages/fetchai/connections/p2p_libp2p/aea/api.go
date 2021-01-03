@@ -51,6 +51,15 @@ type Pipe interface {
 	Close() error
 }
 
+// Needed to break import cycle
+type AgentRecord struct {
+	ServiceId     string
+	Address       string
+	PublicKey     string
+	PeerPublicKey string
+	Signature     string
+}
+
 /*
 
   AeaApi type
@@ -61,6 +70,7 @@ type AeaApi struct {
 	msgin_path      string
 	msgout_path     string
 	agent_addr      string
+	agent_record    *AgentRecord
 	id              string
 	entry_peers     []string
 	host            string
@@ -109,6 +119,10 @@ func (aea AeaApi) MonitoringAddress() (string, uint16) {
 
 func (aea AeaApi) EntryPeers() []string {
 	return aea.entry_peers
+}
+
+func (aea AeaApi) AgentRecord() *AgentRecord {
+	return aea.agent_record
 }
 
 func (aea AeaApi) RegistrationDelayInSeconds() float64 {
@@ -176,6 +190,17 @@ func (aea *AeaApi) Init() error {
 	uri_public := os.Getenv("AEA_P2P_URI_PUBLIC")
 	uri_delegate := os.Getenv("AEA_P2P_DELEGATE_URI")
 	uri_monitoring := os.Getenv("AEA_P2P_URI_MONITORING")
+
+	por_address := os.Getenv("AEA_P2P_POR_ADDRESS")
+	if por_address != "" {
+		record := &AgentRecord{Address: por_address}
+		record.PublicKey = os.Getenv("AEA_P2P_POR_PUBKEY")
+		record.PeerPublicKey = os.Getenv("AEA_P2P_POR_PEER_PUBKEY")
+		record.Signature = os.Getenv("AEA_P2P_POR_SIGNATURE")
+		record.ServiceId = os.Getenv("AEA_P2P_POR_SERVICE_ID")
+		aea.agent_record = record
+	}
+
 	registrationDelay := os.Getenv("AEA_P2P_CFG_REGISTRATION_DELAY")
 
 	logger.Debug().Msgf("msgin_path: %s", aea.msgin_path)
@@ -339,6 +364,13 @@ func (aea *AeaApi) listen_for_envelopes() {
 				aea.stop()
 			}
 			return
+		}
+		if envel.Sender != aea.agent_record.Address {
+			logger.Error().
+				Str("err", "Sender ("+envel.Sender+") must match registered address").
+				Msg("while processing envelope")
+			// TODO send error back to agent
+			continue
 		}
 		logger.Debug().Msgf("received envelope from agent")
 		aea.out_queue <- envel
