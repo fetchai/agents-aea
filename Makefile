@@ -118,11 +118,11 @@ release:
 		echo "Please change to master branch for release.";\
 	fi
 
-v := $(shell pip -V | grep -r virtualenvs)
+v := $(shell pip -V | grep virtualenvs)
 
 .PHONY: new_env
 new_env: clean
-	if [ "$v" == "" ];\
+	if [ -z "$v" ];\
 	then\
 		pipenv --rm;\
 		pipenv --python 3.7;\
