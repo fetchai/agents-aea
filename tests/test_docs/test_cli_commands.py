@@ -38,9 +38,9 @@ class TestCliCommands(BaseTestMarkdownDocs):
 
     def test_cli_commands(self):
         """Test CLI commands."""
-        commands_raw = re.compile(r"\\| `.*` +\\|").findall(self.doc_content)
+        commands_raw = re.compile(r"\| `.*` +\|").findall(self.doc_content)
         commands_raw = [
-            re.compile("`([A-Za-z0-9\\-]+) ?.*`").search(s) for s in commands_raw
+            re.compile(r"`([A-Za-z0-9\-_]+) ?.*`").search(s) for s in commands_raw
         ]
         commands_raw = list(
             filter(lambda x: x.group(0) not in IGNORE_MATCHES, commands_raw)
