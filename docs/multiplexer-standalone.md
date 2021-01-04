@@ -106,7 +106,7 @@ Finally stop our multiplexer and wait for it to finish
 
 ## Your turn
 
-Now it is your turn to develop a simple usecase which utilises the `Multiplexer` to send and receive Envelopes.
+Now it is your turn to develop a simple use case which utilises the `Multiplexer` to send and receive Envelopes.
 
 ## Entire code listing
 If you just want to copy and paste the entire script in you can find it here:

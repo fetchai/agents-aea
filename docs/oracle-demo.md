@@ -78,7 +78,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-The oracle AEAs require either a locally runnning test node or a connection to a remote testnet.
+The oracle AEAs require either a locally running test node or a connection to a remote testnet.
 
 ### Setting up with a local Ganache node
 

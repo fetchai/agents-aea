@@ -46,7 +46,7 @@ aea config set agent.default_connection fetchai/gym:0.10.0
 
 ### Install the skill dependencies
 
-To install the `gym` package, a dependency of the gym skill, from Pypi run
+To install the `gym` package, a dependency of the gym skill, from PyPI run
 ``` bash
 aea install
 ```

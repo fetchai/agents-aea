@@ -10,7 +10,7 @@ The scope of the specific demo is to demonstrate how to create an easy configura
 As a result, the AEA can provide data that are listed in the `skill.yaml` file. This demo does not utilize a smart contract. We interact with a ledger only to complete a transaction. This demo assumes the buyer
 trusts the seller AEA to send the data upon successful payment.
 
-Moreover, this example provides a way to customise the skill code and connect a database or sensor. You can modify the `has_data_source` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_from_data_source(self)` inside the strategy.py file.
+Moreover, this example provides a way to customise the skill code and connect a database or sensor. You can modify the `has_data_source` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_from_data_source(self)` inside the `strategy.py` file.
 
 ## Communication
 
@@ -169,9 +169,9 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-### Update the skill configs
+### Update the skill configurations
 
-The default skill configs assume that the transaction is settled against the fetchai ledger.
+The default skill configurations assume that the transaction is settled against the Fetch.ai ledger.
 
 In `my_seller_aea/vendor/fetchai/skills/generi_seller/skill.yaml` the `data_for_sale` is the data the seller AEA is offering for sale.
 ``` yaml
@@ -222,9 +222,9 @@ models:
     class_name: GenericStrategy
 ```
 
-### Update the skill configs
+### Update the skill configurations
 
-Both skills are abstract skills, make them instantiatable:
+Both skills are abstract skills, make them instantiable:
 
 ``` bash
 cd my_seller_aea

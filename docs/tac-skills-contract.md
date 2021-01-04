@@ -51,7 +51,7 @@ This diagram shows the communication between the various entities during the reg
 </div>
 
 ### Transaction communication
-This diagram shows the communication between the two AEAs and the controller. In this case, we have a Seller_Agent which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the Searching_Agent which is set up to search for sellers. 
+This diagram shows the communication between the two AEAs and the controller. In this case, we have a `Seller_Agent` which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the `Searching_Agent` which is set up to search for sellers. 
 
 <div class="mermaid">
     sequenceDiagram
@@ -250,7 +250,7 @@ aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args
 ```
 
 
-### Update the connection params
+### Update the connection parameters
 
 Briefly run the controller AEA:
 

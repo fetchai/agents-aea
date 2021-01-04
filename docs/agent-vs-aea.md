@@ -39,7 +39,7 @@ Such a lightweight agent can be used to implement simple logic.
 
 ## Code an `Agent`
 
-We define our `Agent` which simply receives envelopes, prints the sender address and protocol_id and returns it unopened.
+We define our `Agent` which simply receives envelopes, prints the sender address and `protocol_id` and returns it unopened.
 ``` python
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"

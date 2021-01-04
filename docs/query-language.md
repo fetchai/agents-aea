@@ -4,7 +4,7 @@ Along with the Data Model language, the AEA framework offers the possibility to 
 
 The `aea.helpers.search` module implements the API that allows you to build queries.
 
-In one sentence, a <a href="../api/helpers/search/models#query-objects">`Query`</a> is a set of _constraints_, defined over a _cata model_.
+In one sentence, a <a href="../api/helpers/search/models#query-objects">`Query`</a> is a set of _constraints_, defined over a _data model_.
 The outcome is a set of _description_ (that is, instances of <a href="../api/helpers/search/models#description-objects">`Description`</a>)
 _matching_ with the query. That is, all the description whose attributes satisfy the constraints in the query.
 
@@ -115,7 +115,7 @@ Constraint("genre", ConstraintType("within", (1960, 1970)))
 
 ### Distance
 
-The _distance_ is a constraint type that allows you to put a limit on a <a href="../api/helpers/search/models#location-objects">`Location`</a> attribute type. More specifically, you can set a maximum distance from a given location (the _center_), such that will be considered only the instances whose location attribute value is within a distance from the center.
+The _distance_ is a constraint type that allows you to put a limit on a <a href="../api/helpers/search/models#location-objects">`Location`</a> attribute type. More specifically, you can set a maximum distance from a given location (the _centre_), such that will be considered only the instances whose location attribute value is within a distance from the centre.
 
 **Examples**:
 
@@ -239,13 +239,13 @@ A `Query` object must satisfy some conditions in order to be instantiated.
 - The list of constraints expressions can't be empty; must have at least one constraint expression.
 - If the data model is specified:
 
-    - For every constraint expression that constitute the query, check if they are _valid wrt the data model_.
+    - For every constraint expression that constitute the query, check if they are _valid with respect to the data model_.
 
 
-A `ConstraintExpr` `c` (that is, one of `And`, `Or`, `Not`, `Constraint`) is _valid wrt a_ `DataModel` if:
+A `ConstraintExpr` `c` (that is, one of `And`, `Or`, `Not`, `Constraint`) is _valid with respect to a_ `DataModel` if:
 
 - If `c` is an instance of `And`, `Or` or `Not`, then
-  every subexpression of `c` must be valid (wrt to the data model);
+  every subexpression of `c` must be valid (with respect to to the data model);
 - If `c` is an instance of `Constraint`, then:
     - if the constraint type is one of `<`, `<=`, `>`,
       `>=`, the value in the constructor must be one of `str`, `int` or `float`.
@@ -255,7 +255,7 @@ A `ConstraintExpr` `c` (that is, one of `And`, `Or`, `Not`, `Constraint`) is _va
       `str`, `int`, `float`, `bool`, `Location`. Notice though that a set of ``bool`` is trivial, so you may find yourself more comfortable by using other alternatives.
     - for the other constraint types, i.e. `==` and `!=`, the value can be one of the allowed types for `Attribute`, that is `str`, `int`, `float`, `bool`, `Location`.
 
-- Moreover, when `c` is a `Constraint`, the attribute must have a consistent type wrt the data model.
+- Moreover, when `c` is a `Constraint`, the attribute must have a consistent type with respect to the data model.
   E.g. consider a `Constraint` like:
 
 ``` python

@@ -47,13 +47,13 @@ message = OefSearchMessage(
 )
 ```
 
-In case everything is registered ok, you will not receive any message back.
+In case everything is registered OK, you will not receive any message back.
 
 If something goes wrong you will receive an error message with performative `OefSearchMessage.Performative.OEF_ERROR`.
 
 ### Register personality pieces
 
-To register personality pieces, you have to use a specfic data model:
+To register personality pieces, you have to use a specific data model:
 ``` python
 from aea.helpers.search.models import Attribute, DataModel, Location
 

@@ -65,7 +65,7 @@ It maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a hr
 A `Skill` encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
 * <a href="../api/skills/base#handler-objects">`Handler`</a>: each `Skill` has none, one or more `Handler` objects, each responsible for the registered messaging `Protocol`. Handlers implement AEAs' **reactive** behaviour. If the AEA understands the `Protocol` referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding `Message`. Each `Handler` is responsible for only one `Protocol`.
-* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: none, one or more `Behaviours` encapsulate actions which futher the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
+* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: none, one or more `Behaviours` encapsulate actions which further the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
 * <a href="../api/skills/base#model-objects">`Model`</a>: none, one or more `Models` that inherit from the `Model` can be accessed via the `SkillContext`.
 * <a href="../api/skills/tasks#task-objects">`Task`</a>: none, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of `Skills`, but `Tasks` are declared in or from `Skills` if a packaging approach for AEA creation is used.
 
@@ -101,11 +101,11 @@ Understanding `Protocols` is core to developing your own agent. You can learn mo
 
 - <a href="../protocol">Protocols</a>
 
-Most of an AEA developer's time is spent on `Skill` development. `Skills` are the core business logic commponents of an AEA. Check out the following guide to learn more:
+Most of an AEA developer's time is spent on `Skill` development. `Skills` are the core business logic components of an AEA. Check out the following guide to learn more:
 
 - <a href="../skill">Skills</a>
 
-In most cases, one of the available `Connection` packages can be used. Occassionally, you might develop your own `Connection`:
+In most cases, one of the available `Connection` packages can be used. Occasionally, you might develop your own `Connection`:
 
 - <a href="../connection">Connections</a>
 

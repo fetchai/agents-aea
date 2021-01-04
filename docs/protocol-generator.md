@@ -140,7 +140,7 @@ All of the above fields are mandatory.
 
 `reply` specifies for every performative, what its valid replies are. If a performative `per_1` is a valid reply to another `per_2`, this means a message with performative `per_1` can target a message whose performative is `per_2`.      
 
-`reply` is a dictionary, where the keys are the performatives (yaml string) defined in `speech-acts`. For each performtaive key, its value is a list of performatives which are defined to be a valid reply. 
+`reply` is a dictionary, where the keys are the performatives (yaml string) defined in `speech-acts`. For each performative key, its value is a list of performatives which are defined to be a valid reply. 
 For example, valid replies to `cfp` are `propose` and `decline`.
 
 `roles` lists the roles are agents which participate in dialogues conforming with your protocol. 

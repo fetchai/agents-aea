@@ -8,7 +8,7 @@ You can add a debugger anywhere in your code:
 import pdb; pdb.set_trace()
 ```
 
-Then simply run you aea with the `--skip-consistency-check` mode:
+Then simply run you AEA with the `--skip-consistency-check` mode:
 
 ``` bash
 aea -s run

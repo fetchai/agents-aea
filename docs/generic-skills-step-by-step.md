@@ -506,7 +506,7 @@ Alternatively, we might receive an `ACCEPT` message. In order to handle this opt
         )
         self.context.outbox.put_message(message=match_accept_msg)
 ```
-When the `my_generic_buyer` accepts the `Proposal` we send it, and therefores sends us an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the buyer about the address we would like it to send the funds to.
+When the `my_generic_buyer` accepts the `Proposal` we send it, and therefore sends us an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the buyer about the address we would like it to send the funds to.
 
 Lastly, we handle the `INFORM` message, which the buyer uses to inform us that it has sent the funds to the provided address. Add the following code:
 
@@ -840,7 +840,7 @@ class GenericOefSearchHandler(Handler):
         )
 ```
 
-The `GenericLedgerApiHandler` deals with `LedgerApiMessages` from the ledger connection. The `GenericOefSearchHandler` handles `OefSearchMessages` from the soef connection.
+The `GenericLedgerApiHandler` deals with `LedgerApiMessages` from the ledger connection. The `GenericOefSearchHandler` handles `OefSearchMessages` from the SOEF connection.
 
 ### Step 4: Create the strategy
 
@@ -1892,7 +1892,7 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
                 "informing counterparty={} of payment.".format(fipa_msg.sender[-5:])
             )
 ```
-The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a `LedgerApiMessage` of performative `GET_RAW_TRANSACTION` and send it to the ledger connection. The ledger connection will construct a raw transaction for us, using the relevant ledger api.
+The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a `LedgerApiMessage` of performative `GET_RAW_TRANSACTION` and send it to the ledger connection. The ledger connection will construct a raw transaction for us, using the relevant ledger API.
 
 Lastly, we need to handle the `INFORM` message. This is the message that will have our data:
 
@@ -2524,7 +2524,7 @@ class GenericStrategy(Model):
         self._balance = 0
 ```
 
-We initialize the strategy class by trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two methods are related to the oef search service, add them under the initialization of the class:
+We initialize the strategy class by trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two methods are related to the OEF search service, add them under the initialization of the class:
 
 ``` python
     @property
@@ -3167,7 +3167,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-### Update the AEA configs
+### Update the AEA configurations
 
 In both AEAs run:
 ``` bash
@@ -3218,7 +3218,7 @@ aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
-Then, update the configuration of the buyer AEA's p2p connection:
+Then, update the configuration of the buyer AEA's P2P connection:
 
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
