@@ -142,9 +142,9 @@ The following steps are **only relevant if you intend to contribute** to the rep
       make pylint
       make security
 
-- For testing aea.SUBMODULE with tests/TESTMODULE use:
+- For testing aea.{SUBMODULE} with tests/test_{TESTMODULE} use:
 
-      make dir=SUBMODULE tdir=TESTMODULE test-sub
+      make dir={SUBMODULE} tdir={TESTMODULE} test-sub
 
   e.g.
 
