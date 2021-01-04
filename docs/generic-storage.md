@@ -58,11 +58,13 @@ Collection name is name consists of letters, numbers and _.
 
 
 To get/put specific object collection instance should be used.
-```my_collection = self.context.storage.get_sync_connection('my_collection')```
+``` python
+my_collection = self.context.storage.get_sync_connection('my_collection')
+```
 
 Collection instance provide set of methods to handle data objects.
 List of collection methods:
-```
+``` python
     def put(self, object_id: str, object_body: JSON_TYPES) -> None:
         """
         Put object into collection.
@@ -113,7 +115,7 @@ List of collection methods:
 Simple behaviour example:
 
 it saves the datetime string of the first act and print it to stdout.
-```
+``` python
 class TestBehaviour(TickerBehaviour):
     """Simple behaviour to count how many acts were called."""
 
