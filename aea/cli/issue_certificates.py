@@ -20,7 +20,7 @@
 """Implementation of the 'aea issue_certificates' subcommand."""
 import os
 from pathlib import Path
-from typing import Optional, cast
+from typing import cast
 
 import click
 from click import ClickException
@@ -47,17 +47,16 @@ def issue_certificates(click_context):
     issue_certificates_(ctx)
 
 
-def issue_certificates_(ctx: Context, key_dir: Optional[str] = None):
+def issue_certificates_(ctx):
     """Issue certificates for connections that require them."""
-    key_dir = key_dir or ctx.cwd
     for connection_id in ctx.agent_config.connections:
-        _process_connection(ctx, connection_id, key_dir)
+        _process_connection(ctx, connection_id)
 
     click.echo("All certificates have been issued.")
 
 
 def _process_certificate(
-    ctx: Context, cert_request: CertRequest, connection_id: PublicId, key_dir: str
+    ctx: Context, cert_request: CertRequest, connection_id: PublicId
 ):
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
@@ -71,7 +70,6 @@ def _process_certificate(
             raise ClickException(
                 f"Cannot find connection private key with id '{key_identifier}'. Connection '{connection_id}' requires this. Please use `aea generate-key {key_identifier} connection_{key_identifier}_private_key.txt` and `aea add-key {key_identifier} connection_{key_identifier}_private_key.txt --connection` to add a connection private key with id '{key_identifier}'."
             )
-        connection_private_key_path = os.path.join(key_dir, connection_private_key_path)
         connection_crypto = crypto_registry.make(
             key_identifier, private_key_path=connection_private_key_path
         )
@@ -87,7 +85,6 @@ def _process_certificate(
         raise ClickException(
             f"Cannot find private key with id '{ledger_id}'. Please use `aea generate-key {key_identifier}` and `aea add-key {key_identifier}` to add a private key with id '{key_identifier}'."
         )
-    crypto_private_key_path = os.path.join(key_dir, crypto_private_key_path)
     message = cert_request.get_message(public_key)
     cert = make_certificate(
         ledger_id, crypto_private_key_path, message, os.path.join(ctx.cwd, output_path)
@@ -95,7 +92,7 @@ def _process_certificate(
     click.echo(f"Generated signature: '{cert}'")
 
 
-def _process_connection(ctx: Context, connection_id: PublicId, key_dir: str):
+def _process_connection(ctx: Context, connection_id: PublicId):
     path = get_package_path_unified(ctx, CONNECTION, connection_id)
     connection_config = cast(ConnectionConfig, load_item_config(CONNECTION, Path(path)))
     if (
@@ -110,7 +107,7 @@ def _process_connection(ctx: Context, connection_id: PublicId, key_dir: str):
         click.echo(
             f"Issuing certificate '{cert_request.identifier}' for connection {connection_config.public_id}..."
         )
-        _process_certificate(ctx, cert_request, connection_id, key_dir)
+        _process_certificate(ctx, cert_request, connection_id)
         click.echo(
             f"Dumped certificate '{cert_request.identifier}' in '{cert_request.save_path}' for connection {connection_id}."
         )
