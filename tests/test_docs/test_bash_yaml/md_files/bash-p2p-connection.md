@@ -3,6 +3,16 @@ aea create my_genesis_aea
 cd my_genesis_aea
 aea add connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea build
+```
+``` bash
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+aea issue-certificates
+```
+``` bash
 aea run --connections fetchai/p2p_libp2p:0.13.0
 ```
 ``` bash
@@ -10,12 +20,20 @@ aea create my_other_aea
 cd my_other_aea
 aea add connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea build
+```
+``` bash
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+aea issue-certificates
 ```
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
   "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": MULTI_ADDRESSES,
+  "entry_peers": ["SOME_ADDRESS"],
   "local_uri": "127.0.0.1:9001",
   "log_file": "libp2p_node.log",
   "public_uri": "127.0.0.1:9001"
