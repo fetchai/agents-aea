@@ -7,7 +7,7 @@ description: The ml data provider skill implements a provider for Machine Learni
 license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmakpsKWJrGRsoFaKR1Gf94KqcuPrkdXTYyciq5d4EhoFF
+  README.md: QmfYYmeLTfCWMYyhm72aPX87RMTsL5Pe4VCdMEvUWmrHb8
   __init__.py: QmXWALCABSWjocW45wvcZ3e8pftqedmnrKtjpTtaLstxrQ
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmVwLCVudrwmJ33t5npXFDfRp8UYK7QFH4djanZgzziPTw

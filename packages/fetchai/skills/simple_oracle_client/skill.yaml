@@ -7,7 +7,7 @@ description: This skill deploys a Fetch oracle client contract and calls this co
 license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmcLpwV9ayjJgkBK8P5WEc4Z3r8Y6QLa5NHJd3XSHYzfof
+  README.md: QmTo2xbEt18SsSYdcTZBCFFzDua5Rc6SqqVVhXCjrZCKid
   __init__.py: Qmes1Qfp7HzkqRasYLCqoMYi5wrhPHvnCtoFeLSpqAeUGH
   behaviours.py: QmeMQQb7YBMr2Rr3rFhnmxue7uXj6P4yxGfTeryAAQWoTx
   dialogues.py: QmZjvjbQk2m4mB2ExDGgM5kGzMi58zk3QvWxmSzRL56i9o

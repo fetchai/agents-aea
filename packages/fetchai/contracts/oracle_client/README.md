@@ -6,4 +6,4 @@ This contract package is used to interface with a Fetch Oracle Client contract, 
 
 ## Functions
 
-* queryOracleValue(): call contract method that requests oracle value from associated oracle contract
+* `queryOracleValue()`: call contract method that requests oracle value from associated oracle contract

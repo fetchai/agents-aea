@@ -6,7 +6,7 @@ description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmX9bmacnqEvUbPbPYqL2BY4LWJLdnCYg2WR2JQCXCano3
+  README.md: QmPnLmb5QGWg9LE3B31Ft2x64i4qFZWebDNh8L8jWzUqcS
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   base.py: QmaxJxVzMJi4GxY9E18PwCPw1m3u1a7bZrXKHrRiFKZqTV
   connection.py: Qmc9XVMhHh3DDsWAWRt7TVgqRe1utQChMUWW8zZUehTKU7

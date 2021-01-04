@@ -12,11 +12,11 @@ This skill is part of the Fetch.ai TAC demo. It manages the smart contract (cont
 
 ## Handlers
 
-* contract_api: handles contract_api messages for interaction with contract
-* ledger_api: handles ledger_api messages for interaction with ledger
-* oef: handles oef_search messages if (un)registration on SOEF is unsuccessful
-* signing: handles signing messages for interaction with decision maker
-* tac: handles TAC messages for registering/unregistering agents in the TAC
+* `contract_api`: handles `contract_api` messages for interaction with contract
+* `ledger_api`: handles `ledger_api` messages for interaction with ledger
+* `oef`: handles `oef_search` messages if registration or unregistration on SOEF is unsuccessful
+* `signing`: handles `signing` messages for interaction with decision maker
+* `tac`: handles `tac` messages for registering/unregistering agents in the TAC
 
 ## Links
 

@@ -7,7 +7,7 @@ description: The simple_seller skill extends the generic_seller skill and sells 
 license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmNLnExXb3B4YgNWFGsDcEKMxJZQUfYrpPmTA6RY96r6fL
+  README.md: QmUT8fZTfrHRKYgsUnNaSXMadR8DX4NBGHVj7Ur2nPj4S3
   __init__.py: QmbgUHRD1Pe4B25FtmscK1xusCBX3LYYYNo4wFPvdyxmZQ
   behaviours.py: QmZR55xAQJ2WfCKyAL4GTFAXqbuR68W8Kw2nKdkdvx9mk4
   dialogues.py: Qmc1ASXsWSmnshtQzwokHavnnEKxW5NMyhEHYT4zrGTgRs

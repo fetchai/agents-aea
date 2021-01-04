@@ -7,7 +7,7 @@ description: The weather station skill implements the functionality to sell weat
 license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
+  README.md: QmdkSV4x23CbcrTs5CGFKQYrYdvYptVBnNzm6SdUJxCat1
   __init__.py: QmfUvUWo8AASAWUCAveR3oaScX72d6tvY7bdoxoGveyNXn
   behaviours.py: QmRqFnnBKmuv6tyeQqp39rRnavjpBARMQtcXSBxHE1cfWN
   dialogues.py: QmdTW8q1xQ7ajFVsWmuV62ypoT5J2b6Hkyz52LFaWuMEtd

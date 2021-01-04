@@ -4,7 +4,7 @@ The ledger connection wraps the APIs needed to interact with multiple ledgers, i
 
 The AEA communicates with the ledger connection via the `fetchai/ledger_api:0.8.0` and `fetchai/contract_api:0.9.0` protocols.
 
-The connection uses the ledger apis registered in the ledger api registry.
+The connection uses the ledger APIs registered in the ledger API registry.
 
 ## Usage
 

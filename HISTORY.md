@@ -86,7 +86,7 @@
 - Adds mixed registry mode to CLI and makes it default
 - Extends upgrade command to automatically update references of non-vendor packages
 - Adds deployment scripts for `kubernetes`
-- Extends config set/get support for lists and dictionaries
+- Extends configuration set/get support for lists and dictionaries
 - Fixes location specifiers throughout code base
 - Imposes limits on length of user defined strings like author and package name
 - Relaxes version specifiers for some dependencies
@@ -100,7 +100,7 @@
 ## 0.7.0 (2020-10-22)
 
 - Adds two AEAs for Agent World 1
-- Adds support to apply config overrides to CLI calls transfer and get-wealth
+- Adds support to apply configuration overrides to CLI calls transfer and get-wealth
 - Adds install scripts to install AEA and dependencies on all major OS (Windows, MacOs, Ubuntu)
 - Adds developer mailing list opt-in step to CLI `init`
 - Modifies custom configurations in `aea-config` to use public id
@@ -174,7 +174,7 @@
 
 ## 0.6.0 (2020-09-01)
 
-- Makes FetchAICrypto default again
+- Makes `FetchAICrypto` default again
 - Bumps `web3` dependencies
 - Introduces support for arbitrary protocol handling by DM
 - Removes custom fields in signing protocol
@@ -182,7 +182,7 @@
 - Moves dialogue module to protocols module
 - Introduces `MultiplexerStatus` to collect aggregate connection status
 - Moves Address types from mail to common
-- Updates FetchAICrypto to work with Agentland
+- Updates `FetchAICrypto` to work with Agentland
 - Fixes circular dependencies in helpers and configurations
 - Unifies contract loading with loading mechanism of other packages
 - Adds get-multiaddress command to CLI
@@ -342,7 +342,7 @@
 - Implements end-to-end tests for all skills
 - Adds missing agent projects to registry
 - Improves `AEABuilder` class for programmatic usage
-- Exposes missing AEA configurations on agent config file
+- Exposes missing AEA configurations on agent configuration file
 - Extends Aries demo
 - Adds method to check stdout for test cases
 - Adds code of conduct and security guidelines to repo
@@ -410,7 +410,7 @@
 - Adds support for URI based routing of envelopes
 - Improves skill guide by adding a service provider agent
 - Protocol generator bug fixes
-- Add `aea_version` field to package yaml files for version management
+- Add `aea_version` field to package YAML files for version management
 - Multiple docs updates and restructuring
 - Multiple additional minor fixes and changes
 
@@ -484,8 +484,8 @@
 ## 0.1.16 (2020-01-12)
 
 - Completes tac skills implementation
-- Adds default ledger field to agent config
-- Converts ledger APIs to dictionary fields in agent config
+- Adds default ledger field to agent configuration
+- Converts ledger APIs to dictionary fields in agent configuration
 - Introduces public ids to CLI and deprecate usage of package names only
 - Adds local push and public commands to CLI
 - Introduces ledger API abstract class
@@ -493,7 +493,7 @@
 - Disambiguates import paths by introducing pattern of `packages.author.package_type_pluralized.package_name`
 - Adds agent directory to packages with some samples
 - Adds protocol generator and exposes on CLI
-- Removes unused config fields
+- Removes unused configuration fields
 - Updates docs to align with recent changes
 - Adds additional tests on CLI
 - Multiple additional minor fixes and changes
@@ -506,7 +506,7 @@
 - Adds additional features to decision maker
 - Refactors most protocols and improves their API
 - Removes multiple unintended side-effects of the CLI
-- Improves dependency referencing in config files
+- Improves dependency referencing in configuration files
 - Adds push and publish functionality to CLI
 - Introduces simple and composite behaviours and applies them in skills
 - Adds URI to envelopes
@@ -607,7 +607,7 @@
 - Adds Jenkins for CI
 - Adds docker develop image
 - Parses dependencies of connections/protocols/skills on the fly
-- Adds validations of config files
+- Adds validations of configuration files
 - Adds first two working skills and fixes gym examples
 - Adds docs
 - Multiple additional minor fixes and changes
