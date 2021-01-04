@@ -22,6 +22,8 @@ package dhtpeer
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"net"
 	"strconv"
 	"testing"
@@ -32,6 +34,7 @@ import (
 	"libp2p_node/dht/dhtnode"
 	"libp2p_node/utils"
 
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 )
@@ -1380,6 +1383,49 @@ func TestFetchAICrypto(t *testing.T) {
 	if !valid {
 		t.Errorf("Signature using LPP don't match %s", err.Error())
 	}
+}
+
+func TestEthereumCrypto(t *testing.T) {
+	//privateKey := "0xb60fe8027fb82f1a1bd6b8e66d4400f858989a2c67428a4e7f589441700339b0"
+	publicKey := "0xf753e5a9e2368e97f4db869a0d956d3ffb64672d6392670572906c786b5712ada13b6bff882951b3ba3dd65bdacc915c2b532efc3f183aa44657205c6c337225"
+	address := "0xb8d8c62d4a1999b7aea0aebBD5020244a4a9bAD8"
+	publicKeySignature := "0x304c2ba4ae7fa71295bfc2920b9c1268d574d65531f1f4d2117fc1439a45310c37ab75085a9df2a4169a4d47982b330a4387b1ded0c8881b030629db30bbaf3a1c"
+
+	addFromPublicKey, err := utils.EthereumAddressFromPublicKey(publicKey)
+	if err != nil || addFromPublicKey != address {
+		t.Error("Error when computing address from public key or address and public key don't match")
+	}
+
+	verifyKey, err := utils.BTCPubKeyFromEthereumPublicKey(publicKey)
+	if err != nil {
+		t.Errorf("While building BTC public key from string: %s", err.Error())
+	}
+
+	sigBytes, err := hex.DecodeString(publicKeySignature[2:])
+	if err != nil {
+		t.Error(err.Error())
+	}
+	sigDER := utils.ConvertStrEncodedSignatureToDER(sigBytes[:len(sigBytes)-1])
+
+	// Parse
+	signatureBTC, err := btcec.ParseSignature(sigDER, btcec.S256())
+	if err != nil {
+		t.Error(err.Error())
+	}
+	// verify signature
+	messageHash := sha256.New()
+	_, err = messageHash.Write([]byte(publicKey))
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	ok, err := signatureBTC.Verify(messageHash.Sum(nil), verifyKey), nil
+	if err != nil {
+		t.Error(err.Error())
+	} else if !ok {
+		t.Error("Signature is not valid")
+	}
+
 }
 
 /*

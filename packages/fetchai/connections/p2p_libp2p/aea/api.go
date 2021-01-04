@@ -54,6 +54,7 @@ type Pipe interface {
 // Needed to break import cycle
 type AgentRecord struct {
 	ServiceId     string
+	LedgerId      string
 	Address       string
 	PublicKey     string
 	PeerPublicKey string
@@ -198,6 +199,7 @@ func (aea *AeaApi) Init() error {
 		record.PeerPublicKey = os.Getenv("AEA_P2P_POR_PEER_PUBKEY")
 		record.Signature = os.Getenv("AEA_P2P_POR_SIGNATURE")
 		record.ServiceId = os.Getenv("AEA_P2P_POR_SERVICE_ID")
+		record.LedgerId = os.Getenv("AEA_P2P_POR_LEDGER_ID")
 		aea.agent_record = record
 	}
 
