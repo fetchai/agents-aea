@@ -137,7 +137,6 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
       make new_env
       pipenv shell
-      make install_env
 
 - For linting and static analysis use:
 
