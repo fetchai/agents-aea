@@ -30,6 +30,8 @@ from aea.configurations.base import PublicId
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.skills.echo import PUBLIC_ID
+
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
@@ -66,6 +68,36 @@ class SaveItemLocallyTestCase(TestCase):
             "source", item_type, item_id
         )
         copy_tree_mock.assert_called_once_with("source", "target")
+
+
+@mock.patch("aea.cli.push.copytree")
+class TestPushLocally(AEATestCaseEmpty):
+    """Test case for clu push --local."""
+
+    ITEM_PUBLIC_ID = PUBLIC_ID
+    ITEM_TYPE = "skill"
+
+    @classmethod
+    def setup_class(cls):
+        """Set up test case."""
+        super(TestPushLocally, cls).setup_class()
+        cls.add_item(cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID), local=True)
+
+    def test_vendor_ok(
+        self, copy_tree_mock,
+    ):
+        """Test ok for vendor's item."""
+        self.invoke("push", "--local", "skill", "fetchai/echo")
+        copy_tree_mock.assert_called_once()
+
+    def test_fail_no_item(
+        self, *mocks,
+    ):
+        """Test fail, item_noit_exists ."""
+        with pytest.raises(
+            ClickException, match=f'Item "not_exists" not found in source folder.'
+        ):
+            self.invoke("push", "--local", "skill", "fetchai/not_exists")
 
 
 @mock.patch(
