@@ -31,15 +31,15 @@
 | `logout`                                    | Logout from registry account.                                                |
 | `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.`publish --local` to publish to local `packages` directory. |
 | `push [package_type] [public_id]`           | Push connection, protocol, or skill with `public_id` to registry.	`push --local` to push to local `packages` directory. |
-| `register ...`                              | Create a new registry account.
+| `register`                                  | Create a new registry account.
 | `remove [package_type] [name]`              | Remove connection, protocol, or skill, called `name`, from AEA.            |
 | `remove-key [ledger_id] [name]`             | Remove a private key registered with id `ledger_id`.	                             |
 | `reset_password EMAIL`                      | Reset the password of the registry account.	                                 |
 | `run {using [connections, ...]}`            | Run the AEA on the Fetch.ai network with default or specified connections.   |
 | `scaffold [package_type] [name]`            | Scaffold a new connection, protocol, or skill called `name`.               |
 | `search [package_type]`                     | Search for components in the registry. `search --local [package_type] [--query searching_query]` to search in local `packages` directory. |
-| `transfer ...`                              | Transfer wealth associated with a private key of the agent to another account. |
-| `upgrade ...`                               | Upgrade the packages of the agent.                               |
+| `transfer [type] [address] [amount]`        | Transfer wealth associated with a private key of the agent to another account. |
+| `upgrade [package_type] [public_id]`        | Upgrade the packages of the agent.                               |
 | `-v DEBUG run`                              | Run with debugging.                                                          |
 
 <!--
