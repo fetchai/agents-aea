@@ -61,11 +61,6 @@ static:
 
 .PHONY: package_checks
 package_checks:
-	# pip install '.[all]'
-	# python scripts/freeze_dependencies.py -o requirements.txt
-	# liccheck -s strategy.ini -r requirements.txt -l PARANOID
-	# rm -fr requirements.txt
-	# python scripts/check_copyright_notice.py
 	python scripts/generate_ipfs_hashes.py --check
 	python scripts/check_package_versions_in_docs.py
 	python scripts/check_package_dependencies.py
