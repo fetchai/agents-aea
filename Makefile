@@ -122,7 +122,7 @@ v := $(shell pip -V | grep virtualenvs)
 
 .PHONY: new_env
 new_env: clean
-	if [ -z $v ];\
+	if [ -z "$v" ];\
 	then\
 		pipenv --rm;\
 		pipenv --python 3.7;\
