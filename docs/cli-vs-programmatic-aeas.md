@@ -83,6 +83,7 @@ from typing import cast
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
+from aea.crypto.certificates import CertRequest
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     PRIVATE_KEY_PATH_SCHEMA,
@@ -90,7 +91,6 @@ from aea.crypto.helpers import (
     make_certificate,
 )
 from aea.crypto.wallet import Wallet
-from aea.crypto.certificates import CertRequest
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
@@ -196,14 +196,12 @@ def run():
     # Add the P2P connection
     cert_path = ".certs/conn_cert.txt"
     cert_request = CertRequest(
-        **{
-            "identifier": "acn",
-            "ledger_id": FetchAICrypto.identifier,
-            "not_after": "2022-01-01",
-            "not_before": "2021-01-01",
-            "public_key": "fetchai",
-            "save_path": cert_path,
-        },
+        identifier="acn",
+        ledger_id=FetchAICrypto.identifier,
+        not_after="2022-01-01",
+        not_before="2021-01-01",
+        public_key="fetchai",
+        save_path=cert_path,
     )
     public_key = wallet.connection_cryptos.public_keys.get(FetchAICrypto.identifier)
     message = cert_request.get_message(public_key)
