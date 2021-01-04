@@ -33,29 +33,43 @@ manager.add_project(weather_station_id)
 Save the following private keys in the respective files.
 ``` python
 FET_PRIVATE_KEY_1 = b"72d3149f5689f0749eaec5ebf6dba5deeb1e89b93ae1c58c71fd43dfaa231e87"
-FET_PRIVATE_KEY_PATH_1 = "fetchai_private_key_1.txt"
-Path(FET_PRIVATE_KEY_PATH_1).write_bytes(FET_PRIVATE_KEY_1)
+FET_PRIVATE_KEY_PATH_1 = Path("private.key")
+FET_PRIVATE_KEY_PATH_1.write_bytes(FET_PRIVATE_KEY_1)
 
-COSMOS_PRIVATE_KEY_1 = b"bf529acb2546e13615ef6004c48e393f0638a5dc0c4979631a9a4bc554079f6f"
-COSMOS_PRIVATE_KEY_PATH_1 = "cosmos_private_key_1.txt"
-Path(COSMOS_PRIVATE_KEY_PATH_1).write_bytes(COSMOS_PRIVATE_KEY_1)
+FET_CONNECTION_PRIVATE_KEY_1 = b"bf529acb2546e13615ef6004c48e393f0638a5dc0c4979631a9a4bc554079f6f"
+FET_CONNECTION_PRIVATE_KEY_PATH_1 = Path("connection_private.key")
+FET_CONNECTION_PRIVATE_KEY_PATH_1.write_bytes(FET_CONNECTION_PRIVATE_KEY_1)
 
 FET_PRIVATE_KEY_2 = b"589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a"
-FET_PRIVATE_KEY_PATH_2 = "fetchai_private_key_2.txt"
-Path(FET_PRIVATE_KEY_PATH_2).write_bytes(FET_PRIVATE_KEY_2)
+FET_PRIVATE_KEY_PATH_2 = Path("private.key")
+FET_PRIVATE_KEY_PATH_2.write_bytes(FET_PRIVATE_KEY_2)
 
-COSMOS_PRIVATE_KEY_2 = b"c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4"
-COSMOS_PRIVATE_KEY_PATH_2 = "cosmos_private_key_2.txt"
-Path(COSMOS_PRIVATE_KEY_PATH_2).write_bytes(COSMOS_PRIVATE_KEY_2)
+FET_CONNECTION_PRIVATE_KEY_2 = b"c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4"
+FET_CONNECTION_PRIVATE_KEY_PATH_2 = Path("connection_private.key")
+FET_CONNECTION_PRIVATE_KEY_PATH_2.write_bytes(FET_CONNECTION_PRIVATE_KEY_2)
 ```
 
 Add the agent instances
 ``` python
 agent_overrides = {
-    "private_key_paths": {"fetchai": FET_PRIVATE_KEY_PATH_1},
-    "connection_private_key_paths": {"cosmos": COSMOS_PRIVATE_KEY_PATH_1}
+    "private_key_paths": {"fetchai": str(FET_PRIVATE_KEY_PATH_1.absolute())},
+    "connection_private_key_paths": {"fetchai": str(FET_CONNECTION_PRIVATE_KEY_PATH_1.absolute())}
 }
-manager.add_agent(weather_station_id, agent_overrides=agent_overrides)
+component_overrides = {
+    "name": "p2p_libp2p",
+    "author": "fetchai",
+    "version": "0.13.0",
+    "type": "connection",
+    "cert_requests": [{
+      "identifier": "acn",
+      "ledger_id": "fetchai",
+      "not_after": '2022-01-01',
+      "not_before": '2021-01-01',
+      "public_key": "fetchai",
+      "save_path": "fetchai/weather_station/.certs/conn_cert.txt"
+    }]
+}
+manager.add_agent(weather_station_id, component_overrides=[component_overrides], agent_overrides=agent_overrides)
 
 component_overrides = {
     "name": "p2p_libp2p",
@@ -67,11 +81,19 @@ component_overrides = {
         "entry_peers": ['/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAkzgZYyk25XjAhmgXcdMbahrHYi18uuAzHuxPn1KkdmLRw'],
         "local_uri": "127.0.0.1:9001",
         "public_uri": "127.0.0.1:9001",
-    }
+    },
+    "cert_requests": [{
+      "identifier": "acn",
+      "ledger_id": "fetchai",
+      "not_after": '2022-01-01',
+      "not_before": '2021-01-01',
+      "public_key": "fetchai",
+      "save_path": "fetchai/weather_client/.certs/conn_cert.txt"
+    }]
 }
 agent_overrides = {
-    "private_key_paths": {"fetchai": FET_PRIVATE_KEY_PATH_2},
-    "connection_private_key_paths": {"cosmos": COSMOS_PRIVATE_KEY_PATH_2}
+    "private_key_paths": {"fetchai": str(FET_PRIVATE_KEY_PATH_2.absolute())},
+    "connection_private_key_paths": {"fetchai": str(FET_CONNECTION_PRIVATE_KEY_PATH_2.absolute())}
 }
 manager.add_agent(weather_client_id, component_overrides=[component_overrides], agent_overrides=agent_overrides)
 ```
