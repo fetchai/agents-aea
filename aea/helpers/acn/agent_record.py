@@ -21,8 +21,8 @@
 
 from typing import Optional
 
+from aea.crypto.certificates import CertRequest
 from aea.crypto.registries import make_ledger_api
-from aea.helpers.base import CertRequest
 
 
 class AgentRecord:

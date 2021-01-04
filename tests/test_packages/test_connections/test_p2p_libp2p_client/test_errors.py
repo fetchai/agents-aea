@@ -27,8 +27,8 @@ import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.certificates import CertRequest
 from aea.crypto.registries import make_crypto
-from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 

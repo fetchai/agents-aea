@@ -90,7 +90,7 @@ from aea.crypto.helpers import (
     make_certificate,
 )
 from aea.crypto.wallet import Wallet
-from aea.helpers.base import CertRequest
+from aea.crypto.certificates import CertRequest
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources

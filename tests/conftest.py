@@ -54,6 +54,7 @@ from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.contracts.base import Contract, contract_registry
 from aea.crypto.base import Crypto
+from aea.crypto.certificates import CertRequest
 from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
 from aea.crypto.cosmos import _COSMOS
 from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
@@ -67,7 +68,6 @@ from aea.crypto.fetchai import _FETCHAI
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
-from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR

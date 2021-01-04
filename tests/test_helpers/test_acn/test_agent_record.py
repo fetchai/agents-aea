@@ -21,9 +21,9 @@
 import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.certificates import CertRequest
 from aea.crypto.registries import make_crypto
 from aea.helpers.acn.agent_record import AgentRecord
-from aea.helpers.base import CertRequest
 
 from tests.conftest import _process_cert
 
