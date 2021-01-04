@@ -5,7 +5,7 @@ The AEA weather skills demonstrate an interaction between two AEAs.
 
 ## Discussion
 
-The scope of the specific demo is to demonstrate how to create a simple AEA with the usage of the AEA framework and a database. The `weather_statio` AEA
+The scope of the specific demo is to demonstrate how to create a simple AEA with the usage of the AEA framework and a database. The `weather_station` AEA
 will read data from the database, that is populated with readings from a weather station, based on the requested dates and will deliver the data to the client upon payment.
 This demo does not utilize a smart contract. As a result, we interact with a ledger only to complete a transaction.
 

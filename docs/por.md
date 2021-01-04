@@ -3,7 +3,7 @@ An AEA can use several key pairs. In particular, it can use different keys for s
 
 The proof of representation feature is used in the context of the `fetchai/p2p_libp2p` and `fetchai/p2p_libp2p_client` connection.
 
-In the former connection, the config yaml specifies a `cert_requests` field:
+In the former connection, the configuration YAML specifies a `cert_requests` field:
 
 ``` yaml
 cert_requests:

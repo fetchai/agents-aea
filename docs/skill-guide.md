@@ -313,9 +313,9 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 We add this code in the file `my_aea/skills/my_search/my_model.py`, replacing its original content. We then rename `my_aea/skills/my_search/my_model.py` to `my_aea/skills/my_search/dialogues.py`.
 
-## Step 5: Create the config file
+## Step 5: Create the configuration file
 
-Based on our skill components above, we create the following config file.
+Based on our skill components above, we create the following configuration file.
 
 ``` yaml
 name: my_search
@@ -451,7 +451,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-Then we run the aea:
+Then we run the AEA:
 ``` bash
 aea run
 ```

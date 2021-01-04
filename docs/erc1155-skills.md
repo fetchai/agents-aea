@@ -162,7 +162,7 @@ You should get `1000000000000000000000`.
 
 ## Update SOEF configurations for both AEAs
 
-To update the SOEF config, run in each AEA project:
+To update the SOEF configuration, run in each AEA project:
 ``` bash
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```

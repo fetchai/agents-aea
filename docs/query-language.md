@@ -178,7 +178,7 @@ And([Constraint("title", ConstraintType("within", ("I", "J"))), Constraint("titl
 
 ### Or
 
-The class `Or` is a constraint type that allows you to specify a disjunction of constraints. That is, the `Or` constraint is satisfied whenever at least one of the constraints that constitute the _or_ is satisfied.
+The class `Or` is a constraint type that allows you to specify a disjunction of constraints. That is, the `Or` constraint is satisfied whenever at least one of the constraints that constitute the `or` is satisfied.
 
 Notice: the number of subexpressions must be **at least** 2.
 
@@ -208,7 +208,7 @@ Query([
 ], book_model)
 ```
 
-Where _book_model_ is the `DataModel` object. However, the data model is
+Where `book_model` is the `DataModel` object. However, the data model is
 an optional parameter, but to avoid ambiguity is recommended to include it.
 
 ### The ``check`` method

@@ -1,6 +1,6 @@
 In this section, we explain how to define _data models_, an important component of the OEF Search & Discovery. It allows agents to describe themselves and to discover the services/resources they are interested in.
 
-In a sentence, a <a href="../api/helpers/search/models#datamodel-objects">`DataModel`</a> is a set of _attributes_, and a <a href="../api/helpers/search/models#description-objects">`Description`</a> of a service/resource is an assignment of those attributes.
+In a sentence, a <a href="../api/helpers/search/models#datamodel-objects">`DataModel`</a> is a set of `attributes`, and a <a href="../api/helpers/search/models#description-objects">`Description`</a> of a service/resource is an assignment of those attributes.
 
 All you need to specify data models and descriptions (that is, instances of the data model) can be found in the `aea.helpers.search` module.
 
@@ -10,9 +10,9 @@ All you need to specify data models and descriptions (that is, instances of the 
 At the lowest level of our data model language, we have the <a href="../api/helpers/search/models#attribute-objects">`Attribute`</a>.
 An attribute is an abstract definition of a property.
 
-It is identified by a _name_, that must be unique in a given data model (that is, we can't have two attributes that share the same name).
+It is identified by a `name`, that must be unique in a given data model (that is, we can't have two attributes that share the same name).
 
-Every attribute has a _type_, that specifies the domain of the property, that is, the possible values that the attribute can assume. At the moment, we support five types of attributes:
+Every attribute has a `type`, that specifies the domain of the property, that is, the possible values that the attribute can assume. At the moment, we support five types of attributes:
 
 * strings
 * integers
@@ -20,18 +20,18 @@ Every attribute has a _type_, that specifies the domain of the property, that is
 * floats
 * locations, i.e. instances of `Location` (pairs of (latitude, longitude))
 
-An attribute can be _optional_, in the sense that instantiation of the attribute is not mandatory by the instances of the data model.
+An attribute can be `optional`, in the sense that instantiation of the attribute is not mandatory by the instances of the data model.
 
-Finally, every attribute might have a _description_ that explains the purpose of the attribute.
+Finally, every attribute might have a `description` that explains the purpose of the attribute.
 
 **Example**: suppose we have a bookshop, and we want to describe the books we sell. Presumably, we would like to include: the following properties of our books:
 
-* The _title_
-* The _author_
-* The _genre_ (e.g. science fiction, horror)
-* The _year of publication_
-* The _average rating_ (average of the ratings between 0 and 5)
-* The _ISBN_ code
+* The `title`
+* The `author`
+* The `genre` (e.g. science fiction, horror)
+* The `year of publication`
+* The `average rating` (average of the ratings between 0 and 5)
+* The `ISBN` code
 * If it can be sold as an e-book.
 
 For each of this fields, we can define an attribute by using `Attribute`:
@@ -51,9 +51,9 @@ Let's focus on the parameters of the `Attribute` constructor:
 
 1. the first one is the name of the attribute. It is needed to instantiate a data model and to define queries over it.
 2. the second one is the type of the attribute. It specifies the domain of the possible values the attribute can assume.
-   E.g. the attribute _year_ can only be an integer, whereas the _average_rating_ can only be a floating-point number.
+   E.g. the attribute `year` can only be an integer, whereas the `average_rating` can only be a floating-point number.
    The supported types are: `str`, `int`, `bool`, `float` and `Location`.
-3. the third one is a boolean that specifies whether the attribute is _always required_ or it _can be omitted_. For example, we might not be able to specify the _ebook_available_ attribute, maybe because it's not applicable to some kind of books.
+3. the third one is a boolean that specifies whether the attribute is _always required_ or it _can be omitted_. For example, we might not be able to specify the `ebook_available` attribute, maybe because it's not applicable to some kind of books.
 4. the fourth parameter is the description, that is a short description of the purpose of the attribute.
 
 ## Data models
@@ -123,4 +123,4 @@ The attributes are instantiated with a dictionary that has:
 * as keys, the name of the attributes.
 * as values, the values associated with the attributes.
 
-Notice that in the latter book we omitted the _average_rating_ field. We are allowed to do that because of the _average_rating_ attribute is not mandatory.
+Notice that in the latter book we omitted the `average_rating` field. We are allowed to do that because of the `average_rating` attribute is not mandatory.

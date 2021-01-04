@@ -251,7 +251,7 @@ At setup we are sending a message to the ledger connection to check the account 
 
 So far, we have tasked the AEA with sending register/unregister requests to the <a href="../simple-oef">SOEF search node</a>. However, we have at present no way of handling the responses sent to the AEA by the <a href="../simple-oef">SOEF search node</a> or messages sent from any other AEA.
 
-We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow, up to the agreement between a seller_AEA and a buyer_AEA.
+We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow, up to the agreement between a `seller_AEA` and a `buyer_AEA`.
 
 <div class="mermaid">
     sequenceDiagram
@@ -958,7 +958,7 @@ class GenericStrategy(Model):
         self._data_for_sale = data_for_sale
 ```
 
-We initialise the strategy class. We are trying to read the strategy variables from the yaml file. If this is not possible we specified some default values.
+We initialise the strategy class. We are trying to read the strategy variables from the YAML file. If this is not possible we specified some default values.
 
 The following properties and methods deal with different aspects of the strategy. Add them under the initialization of the class:
 

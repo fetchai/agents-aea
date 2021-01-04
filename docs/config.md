@@ -1,6 +1,6 @@
 This document describes the configuration files of the different packages.
 
-## AEA config yaml
+## AEA configuration YAML
 
 The following provides a list of the relevant regex used:
 ``` yaml
@@ -82,7 +82,7 @@ models:                                         # override configurations for mo
 ```
 
 
-## Connection config yaml
+## Connection configuration YAML
 
 The `connection.yaml`, which is present in each connection package, has the following required fields:
 ``` yaml
@@ -108,7 +108,7 @@ dependencies: {}                                # The python dependencies the pa
 is_abstract: false                              # An optional boolean that if `true` makes the connection
 ```
 
-## Contract config yaml
+## Contract configuration YAML
 
 The `contract.yaml`, which is present in each contract package, has the following required fields:
 ``` yaml
@@ -130,7 +130,7 @@ config:                                         # A dictionary containing the kw
 dependencies: {}                                # The python dependencies the package relies on.
 ```
 
-## Protocol config yaml
+## Protocol configuration YAML
 
 The `protocol.yaml`, which is present in each protocol package, has the following required fields:
 ``` yaml
@@ -149,7 +149,7 @@ fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerp
 dependencies: {}                                # The python dependencies the package relies on.
 ```
 
-## Skill config yaml
+## Skill configuration YAML
 
 The `skill.yaml`, which is present in each protocol package, has the following required fields:
 ``` yaml

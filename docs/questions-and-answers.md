@@ -28,7 +28,7 @@ You can read more about the integration of ledger <a href="../ledger-integration
 </details>
 
 <details><summary>How does one install third party libraries?</summary>
-The framework supports the use of third-party libraries hosted on PyPI. We can directly reference the external dependencies in an AEA package's configuration file. The <code>aea install</code> command will install each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
+The framework supports the use of third-party libraries hosted on PyPI. We can directly reference the external dependencies in an AEA package's configuration file. The CLI <code>install</code> command will install each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
 </details>
 
 <details><summary>How does one connect to a database?</summary>

@@ -62,7 +62,7 @@ mkdir gyms
 cp -a ../examples/gym_ex/gyms/. gyms/
 ```
 
-#### Update the connection config
+#### Update the connection configuration
 ``` bash
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```

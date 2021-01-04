@@ -56,7 +56,7 @@ PUBLIC_ID = PublicId.from_str("author/name:0.1.0")
 ```
 - The `fetchai/http` protocol's `bodyy` field has been renamed to `body`.
 
-- Skills can now specify `connections` as dependencies in the config yaml.
+- Skills can now specify `connections` as dependencies in the configuration YAML.
 
 
 ## `v0.6.2` to `v0.6.3`
@@ -116,17 +116,17 @@ The method will raise if the provided arguments are inconsistent.
 
 The new methods significantly reduce the lines of code needed to maintain a dialogue. They also make it easier for the developer to construct valid dialogues and messages.
 
-### FetchAICrypto - default crypto
+### `FetchAICrypto` - default crypto
 
-The FetchAICrypto has been upgraded to the default crypto. Update your `default_ledger` to `fetchai`.
+The `FetchAICrypto` has been upgraded to the default crypto. Update your `default_ledger` to `fetchai`.
 
 ### Private key file naming
 
 The private key files are now consistently named with the `ledger_id` followed by `_private_key.txt` (e.g. `fetchai_private_key.txt`). Rename your existing files to match this pattern.
 
-### Type in package yaml
+### Type in package YAML
 
-The package yamls now contain a type field. This must be added for the loading mechanism to work properly.
+The package YAML files now contain a type field. This must be added for the loading mechanism to work properly.
 
 ### Moved address type
 
@@ -157,7 +157,7 @@ No public APIs have been changed.
 A number of breaking changes where introduced which make backwards compatibility of skills rare.
 
 - Ledger APIs <a href="../api/crypto/ledger_apis#ledger-apis-objects">`LedgerApis`</a> have been removed from the AEA constructor and skill context. `LedgerApis` are now exposed in the `LedgerConnection` (`fetchai/ledger`). To communicate with the `LedgerApis` use the `fetchai/ledger_api` protocol. This allows for more flexibility (anyone can add another `LedgerAPI` to the registry and execute it with the connection) and removes dependencies from the core framework.
-- Skills can now depend on other skills. As a result, skills have a new required config field in `skill.yaml` files, by default empty: `skills: []`.
+- Skills can now depend on other skills. As a result, skills have a new required configuration field in `skill.yaml` files, by default empty: `skills: []`.
 
 ## `v0.4.0` to `v0.4.1`
 

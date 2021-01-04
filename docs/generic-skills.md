@@ -10,7 +10,7 @@ The scope of the specific demo is to demonstrate how to create an easy configura
 As a result, the AEA can provide data that are listed in the `skill.yaml` file. This demo does not utilize a smart contract. We interact with a ledger only to complete a transaction. This demo assumes the buyer
 trusts the seller AEA to send the data upon successful payment.
 
-Moreover, this example provides a way to customise the skill code and connect a database or sensor. You can modify the `has_data_source` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_from_data_source(self)` inside the `strategy.py` file.
+Moreover, this example provides a way to customise the skill code and connect a database or sensor. You can modify the `has_data_source` variable in `skill.yaml` file of the `generic_seller` skill to `True`. Then you have to implement the method `collect_from_data_source(self)` inside the `strategy.py` file.
 
 ## Communication
 
@@ -197,7 +197,7 @@ models:
 ```
 The `data_model`, `data_model_name` and the `service_data` are used to register the service in the <a href="../simple-oef">SOEF search node</a> and make your agent discoverable. The name of each `data_model` attribute must be a key in the `service_data` dictionary.
 
-In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) defines the `search_query`, which has to match the `service_data` of the seller.
+In the generic buyer skill configuration (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) defines the `search_query`, which has to match the `service_data` of the seller.
 
 ``` yaml
 models:

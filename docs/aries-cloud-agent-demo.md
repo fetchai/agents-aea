@@ -8,7 +8,7 @@ Demonstrating an entire decentralised identity scenario involving AEAs and insta
 
 ## Discussion
 
-This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target="_blank">here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target="_blank"> aries cloud agent repository </a>.
+This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target="_blank">here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target="_blank"> Aries cloud agent repository </a>.
 
 The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining all of their capabilities, such as issuing and requesting verifiable credentials, selective disclosure and zero knowledge proofs.
 
@@ -107,7 +107,7 @@ Install Aries cloud-agents (for more info see <a href="https://github.com/hyperl
 pip install aries-cloudagent
 ```
 
-This demo has been successfully tested with aca-py version 0.4.5.
+This demo has been successfully tested with `aca-py` version `0.4.5`.
 
 This demo requires an instance of von network running in docker locally (for more info see <a href="https://github.com/bcgov/von-network#running-the-network-locally" target="_blank">here</a>)
 

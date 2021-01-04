@@ -5,7 +5,7 @@
 | `add [package_type] [public_id]`            | Add a `package_type` connection, contract, protocol, or skill, with `[public_id]`, to the AEA. `add --local` to add from local `packages` directory. |
 | `add-key [ledger_id] file [--connection]`   | Add a private key from a file for `ledger_id`.	                             |
 | `build`                                     | Build the agent and its components.                      |
-| `config get [path]`                         | Reads the config specified in `path` and prints its target.                |
+| `config get [path]`                         | Reads the configuration specified in `path` and prints its target.                |
 | `config set [path] [--type TYPE]`           | Sets a new value for the target of the `path`. Optionally cast to type.    |
 | `create [name]`                             | Create a new AEA project called `name`.                                    |
 | `delete [name]`                             | Delete an AEA project. See below for disabling a resource.                   |

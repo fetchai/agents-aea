@@ -224,7 +224,7 @@ models:
     class_name: Strategy
 ```
 
-After changing the skill config files you should run the following command for both agents to install each dependency:
+After changing the skill configuration files you should run the following command for both agents to install each dependency:
 ``` bash
 aea install
 ```

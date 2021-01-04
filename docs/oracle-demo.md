@@ -42,7 +42,7 @@ aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
-Then update the agent config with the default routing:
+Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{

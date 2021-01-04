@@ -238,7 +238,7 @@ Then, an instance of this class is available on the context level like so:
 some_model = self.context.some_model
 ``` 
 
-### Skill config
+### Skill configuration
 
 Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
 
