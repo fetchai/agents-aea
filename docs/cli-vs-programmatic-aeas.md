@@ -83,7 +83,6 @@ from typing import cast
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
-from aea.crypto.certificates import CertRequest
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     PRIVATE_KEY_PATH_SCHEMA,
@@ -91,6 +90,7 @@ from aea.crypto.helpers import (
     make_certificate,
 )
 from aea.crypto.wallet import Wallet
+from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources

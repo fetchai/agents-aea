@@ -25,7 +25,7 @@ from typing import List
 import pytest
 
 from aea.cli.utils.config import dump_item_config
-from aea.crypto.certificates import CertRequest
+from aea.helpers.base import CertRequest
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (

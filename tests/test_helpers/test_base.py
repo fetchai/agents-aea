@@ -33,9 +33,9 @@ from unittest.mock import patch
 import pytest
 from packaging.version import Version
 
-from aea.crypto.certificates import CertRequest
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import (
+    CertRequest,
     MaxRetriesError,
     RegexConstrainedString,
     compute_specifier_from_version,

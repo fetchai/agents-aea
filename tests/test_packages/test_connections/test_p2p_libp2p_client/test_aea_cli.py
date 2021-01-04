@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
-from aea.crypto.certificates import CertRequest
+from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 

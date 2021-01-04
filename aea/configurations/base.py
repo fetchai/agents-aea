@@ -73,9 +73,14 @@ from aea.configurations.data_types import (
     PublicId,
 )
 from aea.configurations.validation import ConfigValidator, validate_data_with_pattern
-from aea.crypto.certificates import CertRequest
 from aea.exceptions import enforce
-from aea.helpers.base import SimpleId, SimpleIdOrStr, load_module, recursive_update
+from aea.helpers.base import (
+    CertRequest,
+    SimpleId,
+    SimpleIdOrStr,
+    load_module,
+    recursive_update,
+)
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 

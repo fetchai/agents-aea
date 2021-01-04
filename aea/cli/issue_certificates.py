@@ -32,10 +32,10 @@ from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import get_package_path_unified
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.configurations.constants import CONNECTION
-from aea.crypto.certificates import CertRequest
 from aea.crypto.helpers import make_certificate
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
+from aea.helpers.base import CertRequest
 
 
 @click.command()
