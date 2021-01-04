@@ -11,8 +11,27 @@ aea create my_genesis_aea
 cd my_genesis_aea
 aea add connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea build
+```
+
+Establish the <a href="../por">proof of representation</a>:
+
+``` bash
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+aea issue-certificates
+```
+
+Run the AEA:
+
+``` bash
 aea run --connections fetchai/p2p_libp2p:0.13.0
 ```
+
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.)
+This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the genesis AEA.
 
 ### Create and run another AEA
 
@@ -23,6 +42,17 @@ aea create my_other_aea
 cd my_other_aea
 aea add connection fetchai/p2p_libp2p:0.13.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea build
+```
+
+Establish the <a href="../por">proof of representation</a>:
+
+``` bash
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+aea issue-certificates
 ```
 
 Provide the AEA with the information it needs to find the genesis:
@@ -31,13 +61,13 @@ Provide the AEA with the information it needs to find the genesis:
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
   "delegate_uri": "127.0.0.1:11001",
-  "entry_peers": MULTI_ADDRESSES,
+  "entry_peers": ["SOME_ADDRESS"],
   "local_uri": "127.0.0.1:9001",
   "log_file": "libp2p_node.log",
   "public_uri": "127.0.0.1:9001"
 }'
 ```
-Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses displayed in the log output of the genesis AEA.
+Here `SOME_ADDRESS` needs to be replaced with the list of multi addresses displayed in the log output of the genesis AEA.
 
 Run the AEA:
 

@@ -59,15 +59,11 @@ security:
 static:
 	mypy aea benchmark examples packages scripts tests
 
-.PHONY: misc_checks
-misc_checks:
-	# pip install '.[all]'
-	# python scripts/freeze_dependencies.py -o requirements.txt
-	# liccheck -s strategy.ini -r requirements.txt -l PARANOID
-	# rm -fr requirements.txt
-	python scripts/check_copyright_notice.py
+.PHONY: package_checks
+package_checks:
 	python scripts/generate_ipfs_hashes.py --check
 	python scripts/check_package_versions_in_docs.py
+	python scripts/check_package_dependencies.py
 
 .PHONY: docs
 docs:
@@ -118,21 +114,18 @@ release:
 		echo "Please change to master branch for release.";\
 	fi
 
-v := $(shell pip -V | grep -r virtualenvs)
+v := $(shell pip -V | grep virtualenvs)
 
 .PHONY: new_env
 new_env: clean
-	if [ "$v" == "" ];\
+	if [ -z "$v" ];\
 	then\
 		pipenv --rm;\
 		pipenv --python 3.7;\
-		echo "Enter clean virtual environment now: 'pipenv shell'.";\
+	    pipenv install --dev --skip-lock;\
+	    pipenv run pip uninstall typing -y;\
+	    pipenv run pip install -e .[all];\
+		echo "Enter virtual environment with all development dependencies now: 'pipenv shell'.";\
 	else\
 		echo "In a virtual environment! Exit first: 'exit'.";\
 	fi
-
-.PHONY: install_env
-install_env:
-	pipenv install --dev --skip-lock
-	pip uninstall typing -y
-	pip install -e .[all]
