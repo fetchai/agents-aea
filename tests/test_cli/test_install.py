@@ -129,7 +129,7 @@ class TestInstallFailsWhenDependencyDoesNotExist:
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "scaffold", "protocol", "my_protocol"],
+            [*CLI_LOG_OPTION, "scaffold", "protocol", "-y", "my_protocol"],
             standalone_mode=False,
         )
         assert result.exit_code == 0

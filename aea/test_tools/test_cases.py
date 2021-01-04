@@ -489,6 +489,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :return: Result
         """
+        if item_type == "protocol":
+            return cls.run_cli_command(
+                "scaffold", item_type, "-y", name, cwd=cls._get_cwd()
+            )
         return cls.run_cli_command("scaffold", item_type, name, cwd=cls._get_cwd())
 
     @classmethod
