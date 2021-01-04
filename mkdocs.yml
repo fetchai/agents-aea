@@ -45,10 +45,10 @@ nav:
     - Core components - Part 2: 'core-components-2.md'
     - Interaction protocols: 'interaction-protocol.md'
     - Trade between two AEAs: 'generic-skills-step-by-step.md'
+    - Development setup: 'development-setup.md'
   - Development - Advanced:
     - Topic guides:
       - Ways to build an AEA: 'step-one.md'
-      - Development setup: 'development-setup.md'
       - Build an AEA with the CLI: 'build-aea-step-by-step.md'
       - Scaffolding packages: 'scaffolding.md'
       - Generating protocols: 'protocol-generator.md'

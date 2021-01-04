@@ -95,6 +95,10 @@ This repository contains submodules. Clone with recursive strategy:
 
     git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
 
+- To fetch/update submodules (for existing local repo):
+
+      git submodule sync --recursive && git submodule update --init --recursive
+
 ### Dependencies
 
 All python specific framework dependencies are specified in `setup.py` and installed with the framework. All development dependencies are specified in `Pipfile` (and installed via the commands specified in [Preliminaries](#preliminaries)).
@@ -127,7 +131,7 @@ The following dependency is **only relevant if you intend to contribute** to the
 
 The following steps are **only relevant if you intend to contribute** to the repository. They are **not required** for agent development.
 
-### Recommended
+### Recommended commands
 
 - The simplest way to get setup for development on the framework is to run the following:
 
@@ -142,6 +146,10 @@ The following steps are **only relevant if you intend to contribute** to the rep
       make pylint
       make security
 
+- For checking packages integrity:
+
+      make package_checks
+
 - For testing aea.{SUBMODULE} with tests/test_{TESTMODULE} use:
 
       make dir={SUBMODULE} tdir={TESTMODULE} test-sub
@@ -150,9 +158,7 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
       make dir=cli tdir=cli test-sub
 
-- To run demos against local packages use flag `--local` in `aea` CLI commands.
-
-### Alternative
+### Alternative commands
 
 - To install development dependencies manually (here optionally skipping `Pipfile.lock` creation):
 
@@ -176,13 +182,11 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
 - To run security checks: `tox -e bandit` and `tox -e safety` or `make security`
 
-- To start a live-reloading docs server on localhost: `mkdocs serve`
+### Documentation
 
-- To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
+- To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
-- To fetch/update submodules:
-
-      git submodule sync --recursive && git submodule update --init --recursive
+- To run demos against local packages use flag `--local` in `aea` CLI commands.
 
 ## Cite
 
