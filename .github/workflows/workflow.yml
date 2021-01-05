@@ -80,6 +80,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
+          pip install --user --upgrade setuptools
           pip install tox
       - name: Pylint check
         run: |
@@ -170,6 +171,7 @@ jobs:
         sudo apt-get update --fix-missing
         sudo apt-get autoremove
         sudo apt-get autoclean
+        pip install --user --upgrade setuptools
         pip install tox
         # install Protobuf compiler
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
@@ -200,6 +202,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
+          pip install --user --upgrade setuptools
           pip install tox
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
@@ -231,6 +234,7 @@ jobs:
         sudo apt-get update --fix-missing
         sudo apt-get autoremove
         sudo apt-get autoclean
+        pip install --user --upgrade setuptools
         pip install tox
         # install Protobuf compiler
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
@@ -289,6 +293,7 @@ jobs:
         sudo apt-get update --fix-missing
         sudo apt-get autoremove
         sudo apt-get autoclean
+        pip install --user --upgrade setuptools
         pip install tox
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
@@ -345,6 +350,7 @@ jobs:
         sudo apt-get update --fix-missing
         sudo apt-get autoremove
         sudo apt-get autoclean
+        pip install --user --upgrade setuptools
         pip install tox
         # install Protobuf compiler
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
