@@ -526,7 +526,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         )
         missing_strings = self.missing_from_output(
             tac_controller_process, check_strings, timeout=240, is_terminating=False
-        )
+        )  # we need to wait sufficiently long (at least 3 minutes - see above for deployment)
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in tac_controller output.".format(missing_strings)
@@ -549,11 +549,16 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             LIBP2P_SUCCESS_MESSAGE,
             "Start processing messages...",
             "searching for TAC, search_id=",
-            "found the TAC controller. Registering...",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=30, is_terminating=False
         )
+        check_strings = (
+            "found the TAC controller. Registering...",
+        )
+        missing_strings = self.missing_from_output(
+            tac_aea_one_process, check_strings, timeout=240, is_terminating=False
+        )  # we need to wait sufficiently long (at least 3 minutes - see above for deployment)
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
