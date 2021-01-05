@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
+import asyncio
 import os
 from contextlib import suppress
 from shutil import rmtree
@@ -321,13 +322,13 @@ class TestMultiAgentManagerAsyncMode(
         self.manager.stop_manager()
         assert not self.manager.is_running
 
-    @pytest.mark.asyncio
-    async def test_run_loop_direct_call(self, *args):
+    def test_run_loop_direct_call(self, *args):
         """Test do not allow to run MultiAgentManager_loop directly."""
+        loop = asyncio.new_event_loop()
         with pytest.raises(
             ValueError, match="Do not use this method directly, use start_manager"
         ):
-            await self.manager._manager_loop()
+            loop.run_until_complete(self.manager._manager_loop())
 
     def test_remove_running_agent(self, *args):
         """Test fail on remove running agent."""
