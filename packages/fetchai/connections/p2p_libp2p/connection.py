@@ -268,6 +268,7 @@ class Libp2pNode:
             )
             self._config += "AEA_P2P_POR_SIGNATURE={}\n".format(self.record.signature)
             self._config += "AEA_P2P_POR_SERVICE_ID={}\n".format(POR_DEFAULT_SERVICE_ID)
+            self._config += "AEA_P2P_POR_LEDGER_ID={}\n".format(self.record.ledger_id)
             self._config += "AEA_P2P_CFG_REGISTRATION_DELAY={}\n".format(
                 str(self.peer_registration_delay)
                 if self.peer_registration_delay is not None

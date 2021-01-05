@@ -84,6 +84,12 @@ func SetLoggerLevel(lvl zerolog.Level) {
 	logger.Level(lvl)
 }
 
+func ignore(err error) {
+	if err != nil {
+		fmt.Println("IGNORED:", err)
+	}
+}
+
 /*
 	Logging
 */
@@ -375,6 +381,9 @@ func signHashETH(data []byte) []byte {
 }
 
 // RecoverAddressFromEthereumSignature verify the signature and returns the address of the signer
+// references:
+//  - https://github.com/ethereum/go-ethereum/blob/55599ee95d4151a2502465e0afc7c47bd1acba77/internal/ethapi/api.go#L452-L459
+//  - https://github.com/ethereum/go-ethereum/blob/55599ee95d4151a2502465e0afc7c47bd1acba77/internal/ethapi/api.go#L404
 func RecoverAddressFromEthereumSignature(message []byte, signature string) (string, error) {
 	// prepare signature
 	sigBytes, err := hexutil.Decode(signature)
@@ -396,7 +405,7 @@ func RecoverAddressFromEthereumSignature(message []byte, signature string) (stri
 	return ethCrypto.PubkeyToAddress(*recoveredPubKey).Hex(), nil
 }
 
-// VerifEthereumSignatureBTC verify the RFC6967 string-encoded signature of message using FetchAI public key
+// VerifyEthereumSignatureETH verify ethereum signature using ethereum public key
 func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string) (bool, error) {
 	// get expected signer address
 	expectedAddress, err := EthereumAddressFromPublicKey(pubkey)
@@ -482,8 +491,9 @@ func cosmosAddressFromPublicKeyWithPrefix(prefix string, publicKey string) (stri
 }
 
 // EthereumAddressFromPublicKey get wallet address from hex encoded secp256k1 public key
-// format from: https://github.com/fetchai/agents-aea/blob/master/aea/crypto/ethereum.py#L330
-// check also: https://github.com/ethereum/go-ethereum/blob/master/crypto/crypto.go#L263
+// references:
+//  - https://github.com/fetchai/agents-aea/blob/master/aea/crypto/ethereum.py#L330
+//  - https://github.com/ethereum/go-ethereum/blob/master/crypto/crypto.go#L263
 func EthereumAddressFromPublicKey(publicKey string) (string, error) {
 	var addr string
 	var err error
@@ -506,7 +516,8 @@ func EthereumAddressFromPublicKey(publicKey string) (string, error) {
 func encodeChecksumEIP55(address []byte) string {
 	unchecksummed := hex.EncodeToString(address[:])
 	sha := sha3.NewLegacyKeccak256()
-	sha.Write([]byte(unchecksummed))
+	_, err := sha.Write([]byte(unchecksummed))
+	ignore(err)
 	hash := sha.Sum(nil)
 
 	result := []byte(unchecksummed)

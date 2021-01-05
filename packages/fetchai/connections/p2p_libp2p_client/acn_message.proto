@@ -4,12 +4,13 @@ package dhtnode;
 
 message AgentRecord {
     string service_id = 1;
-    string address = 2;
-    string public_key = 3;
-    string peer_public_key = 4;
-    string signature = 5;
-    string not_before = 6;
-    string not_after = 7;
+    string ledger_id = 2;
+    string address = 3;
+    string public_key = 4;
+    string peer_public_key = 5;
+    string signature = 6;
+    string not_before = 7;
+    string not_after = 8;
 }
 
 message Register {
@@ -42,6 +43,7 @@ message Status {
         ERROR_WRONG_AGENT_ADDRESS = 10;
         ERROR_WRONG_PUBLIC_KEY = 11;
         ERROR_INVALID_PROOF = 12;
+        ERROR_UNSUPPORTED_LEGDER = 13;
         // lookup & delivery (2x) 
         ERROR_UNKNOWN_AGENT_ADDRESS = 20;
         ERROR_AGENT_NOT_READY = 21;

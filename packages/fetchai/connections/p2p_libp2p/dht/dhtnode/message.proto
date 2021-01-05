@@ -43,6 +43,7 @@ message Status {
         ERROR_WRONG_AGENT_ADDRESS = 10;
         ERROR_WRONG_PUBLIC_KEY = 11;
         ERROR_INVALID_PROOF = 12;
+        ERROR_UNSUPPORTED_LEDGER = 13;
         // lookup & delivery (2x) 
         ERROR_UNKNOWN_AGENT_ADDRESS = 20;
         ERROR_AGENT_NOT_READY = 21;

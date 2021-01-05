@@ -24,6 +24,7 @@ package dhtnode
 import (
 	"errors"
 	utils "libp2p_node/utils"
+	"strings"
 )
 
 const (
@@ -31,11 +32,27 @@ const (
 	CurrentVersion = "0.1.0"
 )
 
+var supportedLedgers = []string{"fetchai", "cosmos", "ethereum"}
+
 func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, representativePeerPubKey string) (*Status, error) {
 	// check agent address matches
 	if record.Address != agentAddress {
 		err := errors.New("Wrong agent address, expected " + agentAddress)
 		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
+		return response, err
+	}
+
+	// check if ledger is supported
+	var found = false
+	for _, supported := range supportedLedgers {
+		if record.LedgerId == supported {
+			found = true
+			break
+		}
+	}
+	if !found {
+		err := errors.New("Unsupported ledger " + record.LedgerId + ", expected " + strings.Join(supportedLedgers, ","))
+		response := &Status{Code: Status_ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
