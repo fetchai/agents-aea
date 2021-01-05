@@ -101,9 +101,16 @@ manager.add_agent(weather_client_id, component_overrides=[component_overrides], 
 ## Running the agents:
 
 ``` python
+import time
+
 manager.start_agent(weather_station_id.name)
+
 # wait for ~10 seconds for peer node to go live
+time.sleep(10.0)
+
 manager.start_agent(weather_client_id.name)
+
+time.sleep(5.0)
 ```
 
 ## Stopping the agents:
