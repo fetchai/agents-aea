@@ -17,6 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 
+"""Setup script for "my_crypto" package."""
+
 from setuptools import find_packages, setup
 
 

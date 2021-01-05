@@ -38,26 +38,26 @@ class MyCrypto(Crypto):
     @property
     def private_key(self) -> str:
         """To be implemented."""
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def public_key(self) -> str:
         """To be implemented."""
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def address(self) -> str:
         """To be implemented."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """To be implemented."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def sign_transaction(self, transaction: JSONLike) -> JSONLike:
         """To be implemented."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def dump(self, fp: BinaryIO) -> None:
         """To be implemented."""
-        raise NotImplemented
+        raise NotImplementedError

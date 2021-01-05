@@ -27,7 +27,7 @@ from aea.crypto.registries.base import EntryPoint as EntryPointString
 
 
 def get_plugins() -> Dict[str, EntryPoint]:
-    """Return a dict of all installed crypto plugins, by name. """
+    """Return a dict of all installed crypto plugins, by name."""
 
     plugins = iter_entry_points(group="aea.cryptos")
 

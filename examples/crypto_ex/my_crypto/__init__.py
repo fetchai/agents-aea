@@ -19,4 +19,4 @@
 
 """Custom crypto plug-in for the AEA framework."""
 
-from my_crypto.my_crypto import *
+from my_crypto.my_crypto import *  # noqa
