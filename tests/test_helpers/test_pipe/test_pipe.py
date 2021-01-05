@@ -19,7 +19,11 @@
 """Tests for the pipe module."""
 
 import asyncio
+import errno
+import os
+from copy import copy
 from threading import Thread
+from unittest import mock
 
 import pytest
 
@@ -171,3 +175,35 @@ class TestAEAHelperPosixNamedPipeChannel:
         finally:
             await pipe.close()
             client.join()
+
+    @pytest.mark.asyncio
+    async def test_connection_communication_with_one_failure(self):
+        """Test connection communication with one failure."""
+        true_os_open = copy(os.open)
+
+        calls = 0
+
+        def side_effect(*args, **kwargs):
+            """
+            Replace the behaviour of os.open.
+
+            This function mocks os.open only the second
+            call to os.open. This is due to the implementation
+            of 'PosixNamedPipeProtocol.connect'; the first time,
+            the input file descriptor is created, and the second time
+            the output one is created. This function triggers
+            one OSError only when the output descriptor
+            is created (i.e. the second call to os.open).
+            The second attempt to open the output descriptor
+            (i.e. the third call to os.open) will work.
+            """
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                e = OSError()
+                e.errno = errno.ENXIO
+                raise e
+            return true_os_open(*args, **kwargs)
+
+        with mock.patch("os.open", side_effect=side_effect):
+            await self.test_connection_communication()
