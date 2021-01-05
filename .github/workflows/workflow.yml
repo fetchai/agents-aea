@@ -129,7 +129,7 @@ jobs:
     continue-on-error: False
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name == 'pull_request' && github.head_ref == 'master'
+    if: github.event_name == 'pull_request' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
