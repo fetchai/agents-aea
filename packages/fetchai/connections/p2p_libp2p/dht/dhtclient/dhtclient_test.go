@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"libp2p_node/aea"
+	"libp2p_node/dht/dhtnode"
 	"libp2p_node/dht/dhttests"
 	utils "libp2p_node/utils"
 )
@@ -38,6 +39,8 @@ const (
 	DefaultAgentAddress     = "fetch1ver6u7xdvkjy4dq8xxrkc6ualu98k7ykumv08q"
 
 	EnvelopeDeliveryTimeout = 10 * time.Second
+
+	DefaultLedger = dhtnode.DefaultLedger
 )
 
 // TestNew dht client peer
@@ -55,7 +58,7 @@ func TestNew(t *testing.T) {
 		t.Fatal("Failed to initialize DHTClient:", err)
 	}
 
-	record := &aea.AgentRecord{}
+	record := &aea.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = DefaultAgentAddress
 	record.PublicKey = DefaultAgentPublicKey
 	record.PeerPublicKey = DefaultFetchAIPublicKey
@@ -98,7 +101,7 @@ func TestRouteEnvelopeToPeerAgent(t *testing.T) {
 		t.Fatal("Failed to initialize DHTClient:", err)
 	}
 
-	record := &aea.AgentRecord{}
+	record := &aea.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = DefaultAgentAddress
 	record.PublicKey = DefaultAgentPublicKey
 	record.PeerPublicKey = DefaultFetchAIPublicKey

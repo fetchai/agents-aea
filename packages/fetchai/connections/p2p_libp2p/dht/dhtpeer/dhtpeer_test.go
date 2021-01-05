@@ -22,8 +22,6 @@ package dhtpeer
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"net"
 	"strconv"
 	"testing"
@@ -34,7 +32,6 @@ import (
 	"libp2p_node/dht/dhtnode"
 	"libp2p_node/utils"
 
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 )
@@ -50,6 +47,8 @@ const (
 
 	EnvelopeDeliveryTimeout = 20 * time.Second
 	DHTPeerSetupTimeout     = 5 * time.Second
+
+	DefaultLedger = dhtnode.DefaultLedger
 )
 
 var (
@@ -130,7 +129,7 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 		t.Fatal("Failed at DHTPeer initialization:", err)
 	}
 
-	record := &aea.AgentRecord{}
+	record := &aea.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = AgentsTestAddresses[0]
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = FetchAITestPublicKeys[0]
@@ -1396,36 +1395,33 @@ func TestEthereumCrypto(t *testing.T) {
 		t.Error("Error when computing address from public key or address and public key don't match")
 	}
 
-	verifyKey, err := utils.BTCPubKeyFromEthereumPublicKey(publicKey)
+	_, err = utils.BTCPubKeyFromEthereumPublicKey(publicKey)
 	if err != nil {
 		t.Errorf("While building BTC public key from string: %s", err.Error())
 	}
 
-	sigBytes, err := hex.DecodeString(publicKeySignature[2:])
-	if err != nil {
-		t.Error(err.Error())
-	}
-	sigDER := utils.ConvertStrEncodedSignatureToDER(sigBytes[:len(sigBytes)-1])
+	/*
+		ethSig, err := secp256k1.Sign(hashedPublicKey, hexutil.MustDecode(privateKey))
+		if err != nil {
+			t.Error(err.Error())
+		}
+		println(hexutil.Encode(ethSig))
+		hash := sha3.NewLegacyKeccak256()
+		_, err = hash.Write([]byte(publicKey))
+		if err != nil {
+			t.Error(err.Error())
+		}
+		sha3KeccakHash := hash.Sum(nil)
+	*/
 
-	// Parse
-	signatureBTC, err := btcec.ParseSignature(sigDER, btcec.S256())
+	valid, err := utils.VerifyEthereumSignatureETH([]byte(publicKey), publicKeySignature, publicKey)
 	if err != nil {
 		t.Error(err.Error())
-	}
-	// verify signature
-	messageHash := sha256.New()
-	_, err = messageHash.Write([]byte(publicKey))
-	if err != nil {
-		t.Error(err.Error())
-	}
-
-	ok, err := signatureBTC.Verify(messageHash.Sum(nil), verifyKey), nil
-	if err != nil {
-		t.Error(err.Error())
-	} else if !ok {
-		t.Error("Signature is not valid")
 	}
 
+	if !valid {
+		t.Errorf("Signer address don't match %s", addFromPublicKey)
+	}
 }
 
 /*
@@ -1464,7 +1460,7 @@ func SetupLocalDHTPeer(key string, agentKey string, dhtPort uint16, delegatePort
 			return nil, nil, err
 		}
 
-		record := &aea.AgentRecord{}
+		record := &aea.AgentRecord{LedgerId: DefaultLedger}
 		record.Address = agentAddress
 		record.PublicKey = agentPubKey
 		record.PeerPublicKey = peerPubKey
@@ -1510,7 +1506,7 @@ func SetupDHTClient(key string, agentKey string, entry []string) (*dhtclient.DHT
 		return nil, nil, err
 	}
 
-	record := &aea.AgentRecord{}
+	record := &aea.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = agentAddress
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = peerPubKey
@@ -1585,7 +1581,7 @@ func SetupDelegateClient(key string, host string, port uint16, peerPubKey string
 		return nil, nil, err
 	}
 
-	record := &dhtnode.AgentRecord{}
+	record := &dhtnode.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = address
 	record.PublicKey = pubKey
 	record.PeerPublicKey = peerPubKey

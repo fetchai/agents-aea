@@ -28,6 +28,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"os"
@@ -50,6 +51,8 @@ import (
 
 	btcec "github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil/bech32"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	proto "google.golang.org/protobuf/proto"
 
 	"libp2p_node/aea"
@@ -68,7 +71,7 @@ var (
 	verifyLedgerSignatureTable = map[string]func([]byte, string, string) (bool, error){
 		"fetchai":  VerifyFetchAISignatureBTC,
 		"cosmos":   VerifyFetchAISignatureBTC,
-		"ethereum": VerifyEthereumSignatureBTC,
+		"ethereum": VerifyEthereumSignatureETH,
 	}
 )
 
@@ -297,20 +300,6 @@ func ParseFetchAISignature(signature string) (*btcec.Signature, error) {
 	return sigBTC, err
 }
 
-// ParseFetchAISignature create btcec Signature from base64 formated, string (not DER) encoded RFC6979 signature
-func ParseEthereumSignature(signature string) (*btcec.Signature, error) {
-	// First convert the signature into a DER one
-	sigBytes, err := base64.StdEncoding.DecodeString(signature)
-	if err != nil {
-		return nil, err
-	}
-	sigDER := ConvertStrEncodedSignatureToDER(sigBytes)
-
-	// Parse
-	sigBTC, err := btcec.ParseSignature(sigDER, btcec.S256())
-	return sigBTC, err
-}
-
 // VerifyLedgerSignature verify signature of message using public key for supported ledgers
 func VerifyLedgerSignature(ledgerId string, message []byte, signature string, pubkey string) (bool, error) {
 	verifySignature, found := verifyLedgerSignatureTable[ledgerId]
@@ -380,28 +369,52 @@ func SignFetchAI(message []byte, privKey string) (string, error) {
 	return encodedSignature, nil
 }
 
+func signHashETH(data []byte) []byte {
+	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
+	return ethCrypto.Keccak256([]byte(msg))
+}
+
+// RecoverAddressFromEthereumSignature verify the signature and returns the address of the signer
+func RecoverAddressFromEthereumSignature(message []byte, signature string) (string, error) {
+	// prepare signature
+	sigBytes, err := hexutil.Decode(signature)
+	if err != nil {
+		return "", err
+	}
+
+	if sigBytes[64] != 27 && sigBytes[64] != 28 {
+		return "", errors.New("invalid Ethereum signature (V is not 27 or 28)")
+	}
+	sigBytes[64] -= 27 // Transform yellow paper V from 27/28 to 0/1
+
+	// recover verify key
+	recoveredPubKey, err := ethCrypto.SigToPub(signHashETH(message), sigBytes)
+	if err != nil {
+		return "", err
+	}
+
+	return ethCrypto.PubkeyToAddress(*recoveredPubKey).Hex(), nil
+}
+
 // VerifEthereumSignatureBTC verify the RFC6967 string-encoded signature of message using FetchAI public key
-func VerifyEthereumSignatureBTC(message []byte, signature string, pubkey string) (bool, error) {
-	// construct verifying key
-	verifyKey, err := BTCPubKeyFromEthereumPublicKey(pubkey)
+func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string) (bool, error) {
+	// get expected signer address
+	expectedAddress, err := EthereumAddressFromPublicKey(pubkey)
 	if err != nil {
 		return false, err
 	}
 
-	// construct signature
-	signatureBTC, err := ParseEthereumSignature(signature)
+	// recover signer address
+	recoveredAddress, err := RecoverAddressFromEthereumSignature(message, signature)
 	if err != nil {
 		return false, err
 	}
 
-	// verify signature
-	messageHash := sha256.New()
-	_, err = messageHash.Write([]byte(message))
-	if err != nil {
-		return false, err
+	if recoveredAddress != expectedAddress {
+		return false, errors.New("Recovered and expected addresses don't match")
 	}
 
-	return signatureBTC.Verify(messageHash.Sum(nil), verifyKey), nil
+	return true, nil
 }
 
 // KeyPairFromFetchAIKey  key pair from hex encoded secp256k1 private key

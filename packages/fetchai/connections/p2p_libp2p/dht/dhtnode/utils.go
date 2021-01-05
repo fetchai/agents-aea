@@ -27,6 +27,7 @@ import (
 )
 
 const (
+	DefaultLedger  = "fetchai"
 	CurrentVersion = "0.1.0"
 )
 
@@ -46,7 +47,7 @@ func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, repr
 	}
 
 	// check that agent address and public key match
-	addrFromPubKey, err := utils.FetchAIAddressFromPublicKey(record.PublicKey)
+	addrFromPubKey, err := utils.AgentAddressFromPublicKey(record.LedgerId, record.PublicKey)
 	if err != nil || addrFromPubKey != record.Address {
 		if err == nil {
 			err = errors.New("Agent address and public key don't match")
@@ -56,7 +57,7 @@ func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, repr
 	}
 
 	// check that signature is valid
-	ok, err := utils.VerifyFetchAISignatureBTC([]byte(record.PeerPublicKey), record.Signature, record.PublicKey)
+	ok, err := utils.VerifyLedgerSignature(record.LedgerId, []byte(record.PeerPublicKey), record.Signature, record.PublicKey)
 	if !ok || err != nil {
 		if err == nil {
 			err = errors.New("Signature is not valid")
